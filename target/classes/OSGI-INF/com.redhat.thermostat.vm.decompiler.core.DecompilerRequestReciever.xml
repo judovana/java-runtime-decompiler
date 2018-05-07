@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="com.redhat.thermostat.vm.decompiler.core.DecompilerRequestReciever">
+    <implementation class="com.redhat.thermostat.vm.decompiler.core.DecompilerRequestReciever"/>
+    <service servicefactory="false">
+        <provide interface="com.redhat.thermostat.agent.command.RequestReceiver"/>
+    </service>
+    <property name="servicename" value="com.redhat.thermostat.vm.decompiler.core.DecompilerRequestReciever"/>
+    <property name="service.pid" value="com.redhat.thermostat.vm.decompiler.core.DecompilerRequestReciever"/>
+    <reference name="vmDecompilerDao" interface="com.redhat.thermostat.vm.decompiler.data.VmDecompilerDAO" cardinality="1..1" policy="static" bind="bindVmDecompilerDao" unbind="unbindVmDecompilerDao"/>
+    <reference name="writerId" interface="com.redhat.thermostat.storage.core.WriterID" cardinality="1..1" policy="static" bind="bindWriterId" unbind="unbindWriterId"/>
+    <reference name="agentIpcService" interface="com.redhat.thermostat.agent.ipc.server.AgentIPCService" cardinality="1..1" policy="static" bind="bindAgentIpcService" unbind="unbindAgentIpcService"/>
+    <reference name="userNameUtil" interface="com.redhat.thermostat.common.portability.UserNameUtil" cardinality="1..1" policy="static" bind="bindUserNameUtil" unbind="unbindUserNameUtil"/>
+</scr:component>

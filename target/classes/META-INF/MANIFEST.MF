@@ -1,0 +1,32 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: com.redhat.thermostat.vm.decompiler
+Built-By: pmikova
+Bundle-ManifestVersion: 2
+Bnd-LastModified: 1513571686996
+Bundle-Vendor: Red Hat, Inc.
+Import-Package: com.redhat.thermostat.agent.command,com.redhat.thermos
+ tat.agent.ipc.server,com.redhat.thermostat.client.command,com.redhat.
+ thermostat.client.core,com.redhat.thermostat.client.core.controllers,
+ com.redhat.thermostat.client.core.views,com.redhat.thermostat.client.
+ swing,com.redhat.thermostat.client.swing.components,com.redhat.thermo
+ stat.common,com.redhat.thermostat.common.command,com.redhat.thermosta
+ t.common.portability,com.redhat.thermostat.common.portability.linux,c
+ om.redhat.thermostat.common.utils,com.redhat.thermostat.shared.locale
+ ,com.redhat.thermostat.storage.core,com.redhat.thermostat.storage.cor
+ e.auth,com.redhat.thermostat.storage.dao,com.redhat.thermostat.storag
+ e.model,com.sun.tools.attach,javax.swing,javax.swing.border,org.jboss
+ .byteman.agent.install;version="3.0"
+Service-Component: OSGI-INF/com.redhat.thermostat.vm.decompiler.core.D
+ ecompilerRequestReciever.xml,OSGI-INF/com.redhat.thermostat.vm.decomp
+ iler.swing.VmDecompilerInformationService.xml,OSGI-INF/com.redhat.the
+ rmostat.vm.decompiler.data.VmDecompilerDAOImpl.xml
+Tool: Bnd-0.0.238
+Bundle-Version: 1.99.12.SNAPSHOT
+Bundle-Name: Java Runtime Decompiler Plugin
+Private-Package: com.redhat.thermostat.vm.decompiler.communication,com
+ .redhat.thermostat.vm.decompiler.core,com.redhat.thermostat.vm.decomp
+ iler.data,com.redhat.thermostat.vm.decompiler.swing,com.redhat.thermo
+ stat.vm.decompiler.swing.internal
+Created-By: Apache Maven Bundle Plugin
+Build-Jdk: 1.8.0_151
+
