@@ -21,7 +21,7 @@ public class VmRef {
         this.name = name;
     }
 
-    public VmRef(com.redhat.thermostat.storage.model.VmInfo vmInfo) {
+    public VmRef(VmInfo vmInfo) {
         this.id = vmInfo.getVmId();
         this.pid = vmInfo.getVmPid();
         this.name = vmInfo.getMainClass();

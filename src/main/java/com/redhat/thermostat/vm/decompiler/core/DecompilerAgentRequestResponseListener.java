@@ -1,20 +1,16 @@
 package com.redhat.thermostat.vm.decompiler.core;
 
-import com.redhat.thermostat.common.command.Request;
-import com.redhat.thermostat.common.command.Response;
-import com.redhat.thermostat.shared.locale.Translate;
-import java.util.concurrent.CountDownLatch;
 
 /**
  * Listener for response of requests. 
  * Expects only OK, ERROR or AUTH_FAILED in case Thermostat refuses the request.
- */
+ 
 public class DecompilerAgentRequestResponseListener implements com.redhat.thermostat.common.command.RequestResponseListener {
     
     private final CountDownLatch latch;
     private String errorMsg = "";
     private boolean isError = false;
-    private static final Translate<LocaleResources> translate = LocaleResources.createLocalizer();
+    //private static final Translate<LocaleResources> translate = LocaleResources.createLocalizer();
     
     
     public DecompilerAgentRequestResponseListener(CountDownLatch latch) {
@@ -25,7 +21,7 @@ public class DecompilerAgentRequestResponseListener implements com.redhat.thermo
      *  Is invoked once we received a response.
      * @param request request we put in queue
      * @param response we got from the agent
-     */
+     
     @Override
     public void fireComplete(Request request, Response response) {
         switch(response.getType()) {
@@ -54,4 +50,4 @@ public class DecompilerAgentRequestResponseListener implements com.redhat.thermo
         return isError;
     }
 
-}
+}*/

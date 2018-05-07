@@ -1,129 +1,42 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>com.redhat.thermostat</groupId>
-        <artifactId>thermostat</artifactId>
-        <version>1.99.12-SNAPSHOT</version>
-    </parent>
-    <artifactId>thermostat-vm-decompiler</artifactId>
-    <packaging>bundle</packaging>
+
+
+    <version>1.0.0-SNAPSHOT</version>
+    <groupId>java</groupId>
+    <artifactId>java-runtime-decompiler</artifactId>
+    <packaging>jar</packaging>
     <name>Java Runtime Decompiler Plugin</name>
+    
+    <properties>
+        <jdk.version>1.8</jdk.version>
+    </properties>
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Bundle-Vendor>Red Hat, Inc.</Bundle-Vendor>
-                        <Private-Package>
-                            com.redhat.thermostat.vm.decompiler.internal,
-                            com.redhat.thermostat.vm.decompiler.communication,
-                            com.redhat.thermostat.vm.decompiler.core,
-                            com.redhat.thermostat.vm.decompiler.data,
-                            com.redhat.thermostat.vm.decompiler.swing       
-                        </Private-Package>
-                        <Bundle-SymbolicName>com.redhat.thermostat.vm.decompiler</Bundle-SymbolicName>
-                        <_nouses>true</_nouses>
-                    </instructions>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>generate-scr-scrdescriptor</id>
-                        <goals>
-                            <goal>scr</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>2.3.2</version>
+            <configuration>
+                <source>${jdk.version}</source>
+                <target>${jdk.version}</target>
+            </configuration>
+        </plugin>
         </plugins>
     </build>
     <dependencies>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.redhat.thermostat</groupId>
-            <artifactId>thermostat-common-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.redhat.thermostat</groupId>
-            <artifactId>thermostat-client-swing</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.redhat.thermostat</groupId>
-            <artifactId>thermostat-client-command</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.redhat.thermostat</groupId>
-            <artifactId>thermostat-agent-command</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.redhat.thermostat</groupId>
-            <artifactId>thermostat-agent-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.redhat.thermostat</groupId>
-            <artifactId>thermostat-common-command</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.redhat.thermostat</groupId>
-            <artifactId>thermostat-storage-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.redhat.thermostat</groupId>
-            <artifactId>thermostat-common-test</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.redhat.thermostat</groupId>
-            <artifactId>thermostat-web-common</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.compendium</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.scr.annotations</artifactId>
+            <groupId>com.sun</groupId>
+            <artifactId>tools</artifactId>
+            <version>1.7.0</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.jboss.byteman</groupId>
             <artifactId>byteman-install</artifactId>
-            <version>${byteman.version}</version>
+            <version>3.0.10</version>
+            <type>jar</type>
         </dependency>
     </dependencies>
 </project>

@@ -12,7 +12,7 @@ import java.io.IOException;
 import com.redhat.thermostat.vm.decompiler.core.VmDecompilerStatus;
 import java.util.concurrent.TimeUnit;
 
-import com.redhat.thermostat.vm.decompiler.core.DecompilerAgentRequestResponseListener;
+//import com.redhat.thermostat.vm.decompiler.core.DecompilerAgentRequestResponseListener;
 import com.redhat.thermostat.vm.decompiler.core.DecompilerRequestReciever;
 import com.redhat.thermostat.vm.decompiler.data.VmManager;
 import java.awt.Component;
@@ -66,10 +66,11 @@ public class VmDecompilerInformationController {
 
     }
 
-    private DecompilerAgentRequestResponseListener loadClassNames() {
+    private void loadClassNames() {
         AgentRequestAction request = createRequest("", RequestAction.CLASSES);
-        DecompilerAgentRequestResponseListener listener = submitRequest(request);
-        boolean success = !listener.isError();
+        //DecompilerAgentRequestResponseListener listener = 
+        submitRequest(request);
+        boolean success = true;//!listener.isError();
         if (success) {
             VmId vmId = new VmId(vm.getVmId());
             VmDecompilerStatus vmStatus = vmManager.getVmDecompilerStatus(vmId);
@@ -82,14 +83,15 @@ public class VmDecompilerInformationController {
         } else {
             //view.handleError(new LocalizedString(listener.getErrorMessage()));
         }
-        return listener;
+        return;// listener;
     }
 
-    private DecompilerAgentRequestResponseListener loadClassBytecode(String name) {
+    private void loadClassBytecode(String name) {
         AgentRequestAction request = createRequest(name, RequestAction.BYTES);
-        DecompilerAgentRequestResponseListener listener = submitRequest(request);
+        //DecompilerAgentRequestResponseListener listener = 
+        submitRequest(request);
         String decompiledClass = "";
-        boolean success = !listener.isError();
+        boolean success = true;//!listener.isError();
         if (success) {
 
             VmId vmId = new VmId(vm.getVmId());
@@ -119,7 +121,7 @@ public class VmDecompilerInformationController {
             //view.handleError(new LocalizedString(listener.getErrorMessage()));
         }
 
-        return listener;
+        return; //listener;
     }
 
     private AgentRequestAction createRequest(String className, RequestAction action) {
@@ -150,9 +152,9 @@ public class VmDecompilerInformationController {
         return vmInfo;
     }
 
-    private DecompilerAgentRequestResponseListener submitRequest(AgentRequestAction request) {
+    private void submitRequest(AgentRequestAction request) {
         CountDownLatch latch = new CountDownLatch(1);
-        DecompilerAgentRequestResponseListener listener = new DecompilerAgentRequestResponseListener(latch);
+        //DecompilerAgentRequestResponseListener listener = new DecompilerAgentRequestResponseListener(latch);
         DecompilerRequestReciever receiver = new DecompilerRequestReciever(vmManager);
         receiver.processRequest(request);
         // wait for the request processing
@@ -161,7 +163,7 @@ public class VmDecompilerInformationController {
         } catch (InterruptedException e) {
             // ignore, is not relevant
         }
-        return listener;
+        return; //listener
     }
 
     private String bytesToFile(String name, byte[] bytes) throws IOException {

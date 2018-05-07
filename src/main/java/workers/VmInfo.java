@@ -9,7 +9,7 @@ package workers;
  *
  * @author pmikova
  */
-import com.redhat.thermostat.storage.model.AgentInformation;
+//import com.redhat.thermostat.storage.model.AgentInformation;
 import java.util.Map;
 import java.util.Set;
 
@@ -215,7 +215,7 @@ public class VmInfo {
     public boolean isAlive() {
         return getStartTimeStamp() > getStopTimeStamp();
     }
-
+/*
     public AliveStatus isAlive(AgentInformation agentInfo) {
         if (agentInfo.isAlive()) {
             return (isAlive() ? AliveStatus.RUNNING : AliveStatus.EXITED);
@@ -223,7 +223,7 @@ public class VmInfo {
             return (isAlive() ? AliveStatus.UNKNOWN : AliveStatus.EXITED);
         }
     }
-
+*/
     public Map<String, String> getProperties() {
         return properties;
     }

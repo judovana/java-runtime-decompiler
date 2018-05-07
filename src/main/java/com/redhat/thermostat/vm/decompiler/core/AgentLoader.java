@@ -1,8 +1,5 @@
 package com.redhat.thermostat.vm.decompiler.core;
 
-import com.redhat.thermostat.agent.ipc.server.AgentIPCService;
-import com.redhat.thermostat.common.portability.ProcessChecker;
-import com.redhat.thermostat.common.utils.LoggingUtils;
 import com.redhat.thermostat.vm.decompiler.communication.InstallDecompilerAgentImpl;
 
 import com.sun.tools.attach.*;
@@ -18,11 +15,11 @@ import java.util.logging.Logger;
  */
 public class AgentLoader {
 
-    private static final Logger logger = LoggingUtils.getLogger(AgentLoader.class);
+    //private static final Logger logger = LoggingUtils.getLogger(AgentLoader.class);
     private static final int PORT_MIN = 10101;
     private static final int MAX_PORT_SLOTS = 200;
     private static final int PORT_MAX = PORT_MIN + MAX_PORT_SLOTS;
-    private final ProcessChecker processChecker;
+    //private final ProcessChecker processChecker;
     static final String LOCALHOST = "localhost";
     static final int INVALID_PORT = -1;
 
@@ -33,12 +30,9 @@ public class AgentLoader {
     private static final String DECOMPILER_HOME_ENV_VARIABLE = "DECOMPILER_HOME";
     private static final String DECOMPILER_PREFIX = "com.redhat.decompiler.thermostat";
 
-    AgentLoader(ProcessChecker processChecker) {
-        this.processChecker = processChecker;
-    }
 
-    AgentLoader(AgentIPCService ipcProps) {
-        this(new ProcessChecker());
+    AgentLoader() {
+       
     }
 
     /**
@@ -49,14 +43,14 @@ public class AgentLoader {
      */
     public int attach(String vmId, int pid) {
         int port = findPort();
-        logger.finest("Attempting to attach decompiler agent for VM '" + pid + "' on port '" + port + "'");
+        //logger.finest("Attempting to attach decompiler agent for VM '" + pid + "' on port '" + port + "'");
         try {
             String[] installProps = createProperties(port);
             boolean agentJarToBootClassPath = true;
             try{  
             InstallDecompilerAgentImpl.install(Integer.toString(pid), false, "localhost", port, installProps);
                 } catch (IllegalArgumentException | IOException | AttachNotSupportedException | AgentLoadException | AgentInitializationException ex) {
-                    logger.log(Level.SEVERE, "Attach failed!! Cause: " + ex.getMessage());
+                    //logger.log(Level.SEVERE, "Attach failed!! Cause: " + ex.getMessage());
                     return INVALID_PORT;
                 }
 
@@ -66,7 +60,7 @@ public class AgentLoader {
                 return INVALID_PORT;
             }
         } catch (IllegalArgumentException | IOException e) {
-            logger.log(Level.WARNING, "Unable to attach decompiler agent to VM '" + pid + "' on port '" + port + "'");
+            //logger.log(Level.WARNING, "Unable to attach decompiler agent to VM '" + pid + "' on port '" + port + "'");
         return INVALID_PORT;
         }
     }
@@ -79,7 +73,7 @@ public class AgentLoader {
                     return i;
                 }
             } catch (IOException e) {
-                logger.log(Level.INFO, "Could not open socket on port " + i + ". Trying again.");
+                //logger.log(Level.INFO, "Could not open socket on port " + i + ". Trying again.");
             }
         }
         throw new IllegalStateException("No ports available in range [" + PORT_MIN + "," + PORT_MAX + "]");
