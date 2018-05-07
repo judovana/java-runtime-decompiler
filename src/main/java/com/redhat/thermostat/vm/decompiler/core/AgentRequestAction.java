@@ -35,7 +35,7 @@
  */
 package com.redhat.thermostat.vm.decompiler.core;
 
-import com.redhat.thermostat.storage.model.VmInfo;
+import workers.VmInfo;
 import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.TreeMap;
@@ -49,7 +49,6 @@ public class AgentRequestAction {
     
 
     private final Map<String, String> parameters;
-    private final InetSocketAddress target;
 
 
 
@@ -96,9 +95,8 @@ public class AgentRequestAction {
 
     }
     
-    public AgentRequestAction(InetSocketAddress target) {
+    public AgentRequestAction() {
         parameters = new TreeMap<>();
-        this.target = target;
     }
 
     public static final String VM_ID_PARAM_NAME = "vm-id";
@@ -120,8 +118,8 @@ public class AgentRequestAction {
      * @param name
      * @return
      */
-    public static AgentRequestAction create(InetSocketAddress address, VmInfo vmInfo, RequestAction action, int listenPort, String name) {
-        AgentRequestAction req = create(address, vmInfo, action, listenPort);
+    public static AgentRequestAction create(VmInfo vmInfo, RequestAction action, int listenPort, String name) {
+        AgentRequestAction req = create(vmInfo, action, listenPort);
         req.setParameter(CLASS_TO_DECOMPILE_NAME, name);
         return req;
     }
@@ -134,8 +132,8 @@ public class AgentRequestAction {
      * @param listenPort
      * @return
      */
-    public static AgentRequestAction create(InetSocketAddress address, VmInfo vmInfo, RequestAction action, int listenPort) {
-        AgentRequestAction req = new AgentRequestAction(address);
+    public static AgentRequestAction create(VmInfo vmInfo, RequestAction action, int listenPort) {
+        AgentRequestAction req = new AgentRequestAction();
         req.setParameter(VM_ID_PARAM_NAME, vmInfo.getVmId());
         req.setParameter(VM_PID_PARAM_NAME, Integer.toString(vmInfo.getVmPid()));
         req.setParameter(ACTION_PARAM_NAME, action.toIntString());

@@ -51,7 +51,7 @@ public class BytecodeDecompilerView {
                     @Override
                     protected Void doInBackground() throws Exception {
                         try {
-                            PassNameEvent event = new com.redhat.thermostat.vm.decompiler.swing.PassNameEvent(this, "bytes", name);
+                           ActionEvent event = new ActionEvent(this, 1, name);
 
                             classesActionListener.actionPerformed(event);
                             
@@ -72,7 +72,7 @@ public class BytecodeDecompilerView {
                     @Override
                     protected Void doInBackground() throws Exception {
                         try {
-                            PassNameEvent event = new com.redhat.thermostat.vm.decompiler.swing.PassNameEvent(this, "bytes", null);
+                            ActionEvent event = new ActionEvent(this, 2, null);
 
                             bytesActionListener.actionPerformed(event);
                             
