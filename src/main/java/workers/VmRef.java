@@ -27,6 +27,7 @@ public class VmRef {
         this.name = vmInfo.getMainClass();
     }
 
+
     @Override
     public String toString() {
         return name;

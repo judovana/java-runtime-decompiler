@@ -10,6 +10,7 @@ import com.sun.tools.attach.VirtualMachine;
 import com.sun.tools.attach.VirtualMachineDescriptor;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import workers.VmId;
 import workers.VmRef;
@@ -22,11 +23,15 @@ public class VmManager {
 
     ArrayList<VmRef> vmList;
     HashMap<VmId, VmDecompilerStatus> vmStatusMap;
-    List<VirtualMachineDescriptor> descriptors;
+    HashSet<VirtualMachineDescriptor> descriptors;
 
     //constructor
     public VmManager() {
+        this.vmList = new ArrayList<>();
+        this.vmStatusMap = new HashMap<>();
+        this.descriptors = new HashSet<>();      
           createVmList();
+          createReferences(vmList);
     }
     // get
 
@@ -69,21 +74,29 @@ public class VmManager {
     }
 
     private void createVmList() {
-        this.descriptors = VirtualMachine.list();
-         /*for (VirtualMachineDescriptor descriptor : descriptors) {
-            System.out.println("Found JVM: " + descriptor.displayName());
-            try {
-                VirtualMachine vm = VirtualMachine.attach(descriptor);
-                String version = vm.getSystemProperties().getProperty("java.runtime.version");
-                System.out.println("   Runtime Version: " + version);
-
-            } catch (Exception e) {
-                // ...
-            }
-        }*/
+        List<VirtualMachineDescriptor> descr = VirtualMachine.list();
+        this.descriptors = new HashSet(descr);
     }
     
-    private void createReferences(){
+    private void createReferences(List<VmRef> refList){
+        for ( VirtualMachineDescriptor descriptor : descriptors) {
+            String id =descriptor.id();
+            String processId = descriptor.id();
+            Integer pid =  Integer.parseInt(processId);
+            String name = descriptor.displayName();           
+            VmRef ref = new VmRef(id, pid, name);
+            refList.add(ref);
+            
+        }
         
     }
+    public void refreshReferences(){
+        ArrayList<VmRef> refList = new ArrayList<>();
+        createVmList();
+        createReferences(refList);
+        //part of the code where the old list is compared to the new list
+        
+    }
+    
+    
 }
