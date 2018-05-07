@@ -1,11 +1,5 @@
 package com.redhat.thermostat.vm.decompiler.swing;
 
-//import com.redhat.thermostat.client.core.views.BasicView;
-//import com.redhat.thermostat.client.core.views.UIComponent;
-//import com.redhat.thermostat.client.swing.SwingComponent;
-//import com.redhat.thermostat.client.swing.components.HeaderPanel;
-//import com.redhat.thermostat.shared.locale.LocalizedString;
-//import com.redhat.thermostat.shared.locale.Translate;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -173,7 +167,7 @@ public class BytecodeDecompilerView {
 
     /**
      * Creates a warning table in case of error.
-     * @param msg localized message
+     * @param msg message
      */
     public void handleError(final String msg) {
         SwingUtilities.invokeLater(new Runnable() {

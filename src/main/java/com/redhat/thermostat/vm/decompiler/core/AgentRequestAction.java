@@ -35,10 +35,11 @@
  */
 package com.redhat.thermostat.vm.decompiler.core;
 
+import com.redhat.thermostat.storage.model.VmInfo;
 import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.TreeMap;
-import workers.VmInfo;
+
 
 /**
  *

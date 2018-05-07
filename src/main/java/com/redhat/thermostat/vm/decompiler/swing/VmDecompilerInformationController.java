@@ -1,5 +1,6 @@
 package com.redhat.thermostat.vm.decompiler.swing;
 
+import com.redhat.thermostat.storage.core.VmRef;
 import workers.VmId;
 import workers.VmInfo;
 import java.net.InetSocketAddress;
