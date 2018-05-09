@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Base64;
 import java.util.stream.Collectors;
+import javax.activity.InvalidActivityException;
 
 /**
  * This class provides Action listeners and result processing for the GUI.
@@ -71,9 +72,8 @@ public class VmDecompilerInformationController {
     private void loadClassNames() {
         AgentRequestAction request = createRequest("", RequestAction.CLASSES);
         //DecompilerAgentRequestResponseListener listener = 
-        submitRequest(request);
-        boolean success = true;//!listener.isError();
-        if (success) {
+        String response = submitRequest(request);
+        if (response == "ok") {
             VmId vmId = new VmId(vm.getVmId());
             VmDecompilerStatus vmStatus = vmManager.getVmDecompilerStatus(vmId);
             String[] classes = vmStatus.getLoadedClassNames();
@@ -83,6 +83,7 @@ public class VmDecompilerInformationController {
             }
             view.reloadClassList(classes);
         } else {
+            System.err.println("Something went terribly wrong.");
             //view.handleError(new LocalizedString(listener.getErrorMessage()));
         }
         return;// listener;
@@ -154,18 +155,14 @@ public class VmDecompilerInformationController {
         return vmInfo;
     }
 
-    private void submitRequest(AgentRequestAction request) {
+    private String submitRequest(AgentRequestAction request) {
         CountDownLatch latch = new CountDownLatch(1);
         //DecompilerAgentRequestResponseListener listener = new DecompilerAgentRequestResponseListener(latch);
         DecompilerRequestReciever receiver = new DecompilerRequestReciever(vmManager);
-        receiver.processRequest(request);
+        String response = receiver.processRequest(request);
         // wait for the request processing
-        try {
-            latch.await(10, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            // ignore, is not relevant
-        }
-        return; //listener
+
+        return response; //listener
     }
 
     private String bytesToFile(String name, byte[] bytes) throws IOException {
