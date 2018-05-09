@@ -23,15 +23,26 @@
                 <target>${jdk.version}</target>
             </configuration>
         </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <configuration>
+                <archive>
+                    <manifest>
+                        <mainClass>com.redhat.thermostat.vm.decompiler.data.Main</mainClass>
+                    </manifest>
+                </archive>
+            </configuration>
+        </plugin>
         </plugins>
     </build>
     <dependencies>
-        <dependency>
-            <groupId>com.sun</groupId>
-            <artifactId>tools</artifactId>
-            <version>1.7.0</version>
-            <type>jar</type>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>com.sun</groupId>-->
+            <!--<artifactId>tools</artifactId>-->
+            <!--<version>1.7.0</version>-->
+            <!--<type>jar</type>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.jboss.byteman</groupId>
             <artifactId>byteman-install</artifactId>
