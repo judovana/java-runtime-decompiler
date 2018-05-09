@@ -16,8 +16,11 @@ public class Main {
     
     public static void main(String[] args){
         VmManager manager = new VmManager();
-        MainFrameView view = new MainFrameView(manager);
+        MainFrameView mainView = new MainFrameView(manager);
         
     }
 
+    
+    // possibly some triggers to periodicaly refresh items in vm
+    
 }

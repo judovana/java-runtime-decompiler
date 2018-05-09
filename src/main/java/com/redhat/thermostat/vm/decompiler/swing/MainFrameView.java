@@ -24,8 +24,9 @@ public class MainFrameView {
     // nejaky forcyklus ktery vypise do listu jmena (a pid) tech virtualek a vytvori ten list
     
     // listener na kazdy item listu Vmek, po kliknuti identifikuje vm a:
-    
-            //VmDecompilerInformationController controller  = new VmDecompilerInformationController(view, ref, manager); 
+            
+            BytecodeDecompilerView leftView = new BytecodeDecompilerView();
+            //VmDecompilerInformationController controller  = new VmDecompilerInformationController(leftView, ref, manager); 
             // tohle uz by melo vytvorit teoreticky i ten view a musi se zajistit, ze se ten view zobrazi az pak (fakt netusim jak se to dela)
     
     //
