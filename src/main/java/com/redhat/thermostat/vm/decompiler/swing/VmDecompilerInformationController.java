@@ -46,6 +46,8 @@ public class VmDecompilerInformationController {
         this.view = view;
         this.vmManager = vmManager;
 
+        loadClassNames();
+
         view.setClassesActionListener(new ActionListener() {
 
             @Override

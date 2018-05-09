@@ -30,7 +30,7 @@ public class VmRef {
 
     @Override
     public String toString() {
-        return name;
+        return this.pid + " - " + this.name;
     }
 
     

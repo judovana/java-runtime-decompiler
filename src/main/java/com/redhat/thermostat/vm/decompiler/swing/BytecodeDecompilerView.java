@@ -34,8 +34,14 @@ public class BytecodeDecompilerView {
     /**
      * Constructor creates the graphics and adds the action listeners.
      */
-    public BytecodeDecompilerView() {
-        
+
+    public JPanel getGuiMainFrame(){
+        return guiMainFrame;
+    }
+
+
+    public BytecodeDecompilerView(){
+
         guiMainFrame = new JPanel();
         guiMainFrame.setLayout(new BorderLayout());
 
