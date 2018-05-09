@@ -22,11 +22,12 @@ public class AgentAttachManager {
       
     public AgentAttachManager(VmManager vmManager){
         this.vmManager = vmManager;
+        this.loader = new AgentLoader();
         
     }
     
-     void setAttacher(AgentLoader attacher) {
-        this.loader = attacher;
+     void setAttacher(AgentLoader loader) {
+        this.loader = loader;
     }
 
     void setVmManager(VmManager vmManager) {
