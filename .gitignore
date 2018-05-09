@@ -10,6 +10,11 @@
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
+#IDEA
+.idea/
+java-runtime-decompiler.iml
+target/
+
 # Package Files #
 *.jar
 *.war
