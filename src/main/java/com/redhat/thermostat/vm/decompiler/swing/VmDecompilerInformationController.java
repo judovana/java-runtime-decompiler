@@ -47,7 +47,7 @@ public class VmDecompilerInformationController {
         this.view = view;
         this.vmManager = vmManager;
 
-        loadClassNames();
+        loadClassNames(); //FIXME
 
         view.setClassesActionListener(new ActionListener() {
 
@@ -73,7 +73,7 @@ public class VmDecompilerInformationController {
         AgentRequestAction request = createRequest("", RequestAction.CLASSES);
         //DecompilerAgentRequestResponseListener listener = 
         String response = submitRequest(request);
-        if (response == "ok") {
+        if (response.equals("ok")) {
             VmId vmId = new VmId(vm.getVmId());
             VmDecompilerStatus vmStatus = vmManager.getVmDecompilerStatus(vmId);
             String[] classes = vmStatus.getLoadedClassNames();
@@ -83,7 +83,7 @@ public class VmDecompilerInformationController {
             }
             view.reloadClassList(classes);
         } else {
-            System.err.println("Something went terribly wrong.");
+            System.err.println("Classes couldn't be loaded");
             //view.handleError(new LocalizedString(listener.getErrorMessage()));
         }
         return;// listener;

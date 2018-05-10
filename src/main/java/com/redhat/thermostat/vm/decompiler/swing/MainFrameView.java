@@ -8,7 +8,7 @@ package com.redhat.thermostat.vm.decompiler.swing;
 import com.redhat.thermostat.vm.decompiler.data.VmManager;
 
 import java.awt.*;
-import java.util.ArrayList;
+
 import workers.VmRef;
 
 import javax.swing.*;
@@ -18,18 +18,25 @@ import javax.swing.event.ListSelectionListener;
 
 /**
  *
- * @author pmikova
+ * @author rmanak,pmikova
  */
 public class MainFrameView {
 
 
     private JFrame mainFrame;
+
     private JPanel mainPanel;
+
     private JPanel eastPanel;
+    private JScrollPane vmlistScrollPane;
     private JList<VmRef> vmList;
 
+    private JPanel processlistLabelPanel;
+    private JPanel centerPanel;
+    private JLabel centerPanelLabel;
+
     private BytecodeDecompilerView bytecodeDecompilerView;
-    
+
     public MainFrameView(VmManager manager){
 
 
@@ -44,46 +51,42 @@ public class MainFrameView {
         mainFrame.add(mainPanel, BorderLayout.CENTER);
         mainPanel.setLayout(new BorderLayout());
 
-//        String[] vmListDefault = {"VMs haven't been", "initialized yet", "please wait..."};
         vmList = new JList<VmRef>();
         vmList.setFixedCellHeight(20);
         vmList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        vmlistScrollPane = new JScrollPane(vmList,
+                ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+                ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
 
+        processlistLabelPanel = new JPanel(new GridBagLayout());
+        processlistLabelPanel.add(new JLabel("Process List"));
         eastPanel = new JPanel(new BorderLayout());
-        eastPanel.add(vmList, BorderLayout.CENTER);
+        eastPanel.add(processlistLabelPanel, BorderLayout.NORTH);
+        eastPanel.add(vmlistScrollPane, BorderLayout.CENTER);
         eastPanel.setBorder(new EtchedBorder());
         eastPanel.setPreferredSize(new Dimension(400,720));
 
         mainPanel.add(eastPanel, BorderLayout.WEST);
 
 
-        mainFrame.setVisible(true);
+        // GUI END
 
-        //end
 
         vmList.setListData(manager.getAllVm().toArray(new VmRef[0]));
-        vmList.setSelectedIndex(0);
-        BytecodeDecompilerView leftView = new BytecodeDecompilerView();
-        VmDecompilerInformationController controller = new VmDecompilerInformationController(leftView, vmList.getSelectedValue(), manager);
 
         vmList.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent listSelectionEvent) {
                 if (vmList.getValueIsAdjusting()){
-
+                    BytecodeDecompilerView processView = new BytecodeDecompilerView();
+                    VmDecompilerInformationController controller = new VmDecompilerInformationController(processView, vmList.getSelectedValue(), manager);
+                    mainPanel.add(processView.getBytecodeDecompilerPanel(), BorderLayout.CENTER);
+                    mainFrame.revalidate();
                 }
             }
         });
 
-        mainPanel.add(leftView.getGuiMainFrame(), BorderLayout.CENTER);
-
-        // listener na kazdy item listu Vmek, po kliknuti identifikuje vm a:
-//        BytecodeDecompilerView leftView = new BytecodeDecompilerView();
-//        VmDecompilerInformationController controller  = new VmDecompilerInformationController(leftView, ref, manager);
-                // tohle uz by melo vytvorit teoreticky i ten view a musi se zajistit, ze se ten view zobrazi az pak (fakt netusim jak se to dela)
-
-        //
-    
+        mainFrame.setVisible(true);
     }
-    
+
 }

@@ -20,7 +20,7 @@ import javax.swing.border.EtchedBorder;
  */
 public class BytecodeDecompilerView {
 
-    private JPanel guiMainFrame;
+    private JPanel BytecodeDecompilerPanel;
 
     private JPanel leftMainPanel;
     private JPanel rightMainPanel;
@@ -35,15 +35,15 @@ public class BytecodeDecompilerView {
      * Constructor creates the graphics and adds the action listeners.
      */
 
-    public JPanel getGuiMainFrame(){
-        return guiMainFrame;
+    public JPanel getBytecodeDecompilerPanel(){
+        return BytecodeDecompilerPanel;
     }
 
 
     public BytecodeDecompilerView(){
 
-        guiMainFrame = new JPanel();
-        guiMainFrame.setLayout(new BorderLayout());
+        BytecodeDecompilerPanel = new JPanel();
+        BytecodeDecompilerPanel.setLayout(new BorderLayout());
 
         listOfClasses = new JList<>();
         listOfClasses.setFixedCellHeight(20);
@@ -115,10 +115,10 @@ public class BytecodeDecompilerView {
         JSplitPane pane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                 leftScrollPanel, rightScrollPanel);
 
-        guiMainFrame.add(topButtonPanel, BorderLayout.NORTH);
-        guiMainFrame.add(pane, BorderLayout.CENTER);
+        BytecodeDecompilerPanel.add(topButtonPanel, BorderLayout.NORTH);
+        BytecodeDecompilerPanel.add(pane, BorderLayout.CENTER);
 
-        guiMainFrame.setVisible(true);
+        BytecodeDecompilerPanel.setVisible(true);
 
     }
 
