@@ -1,5 +1,9 @@
 package com.redhat.thermostat.vm.decompiler.swing;
 
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.fife.ui.rtextarea.RTextScrollPane;
+
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -10,7 +14,6 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.border.EtchedBorder;
@@ -27,7 +30,8 @@ public class BytecodeDecompilerView {
     private JScrollPane rightScrollPanel;
     private JScrollPane leftScrollPanel;
     private JList<String> listOfClasses;
-    private JTextArea byteCodeArea;
+    private RTextScrollPane bytecodeScrollPane;
+    private RSyntaxTextArea bytecodeSyntaxTextArea;
     private ActionListener bytesActionListener;
     private ActionListener classesActionListener;
 
@@ -92,7 +96,10 @@ public class BytecodeDecompilerView {
         }
         );
 
-        byteCodeArea = new JTextArea();
+        bytecodeSyntaxTextArea = new RSyntaxTextArea();
+        bytecodeSyntaxTextArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
+        bytecodeSyntaxTextArea.setCodeFoldingEnabled(true);
+        bytecodeScrollPane = new RTextScrollPane(bytecodeSyntaxTextArea);
 
         leftMainPanel = new JPanel();
         leftMainPanel.setLayout(new BorderLayout());
@@ -111,7 +118,7 @@ public class BytecodeDecompilerView {
         leftScrollPanel = new JScrollPane(leftMainPanel);
 
         leftMainPanel.add(listOfClasses);
-        rightMainPanel.add(byteCodeArea);
+        rightMainPanel.add(bytecodeScrollPane);
         JSplitPane pane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                 leftScrollPanel, rightScrollPanel);
 
@@ -148,7 +155,7 @@ public class BytecodeDecompilerView {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                byteCodeArea.setText(data);
+                bytecodeSyntaxTextArea.setText(data);
             }
         });
     }
