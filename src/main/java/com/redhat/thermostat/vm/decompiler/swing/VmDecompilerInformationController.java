@@ -156,9 +156,9 @@ public class VmDecompilerInformationController {
     }
 
     private String submitRequest(AgentRequestAction request) {
-        CountDownLatch latch = new CountDownLatch(1);
         //DecompilerAgentRequestResponseListener listener = new DecompilerAgentRequestResponseListener(latch);
         DecompilerRequestReciever receiver = new DecompilerRequestReciever(vmManager);
+        System.out.println("Decompiler ok");
         String response = receiver.processRequest(request);
         // wait for the request processing
 

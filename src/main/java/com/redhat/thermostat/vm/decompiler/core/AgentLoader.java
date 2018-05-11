@@ -16,7 +16,7 @@ import java.util.logging.Logger;
 public class AgentLoader {
 
     //private static final Logger logger = LoggingUtils.getLogger(AgentLoader.class);
-    private static final int PORT_MIN = 10101;
+    private static final int PORT_MIN = 10900;
     private static final int MAX_PORT_SLOTS = 200;
     private static final int PORT_MAX = PORT_MIN + MAX_PORT_SLOTS;
     //private final ProcessChecker processChecker;

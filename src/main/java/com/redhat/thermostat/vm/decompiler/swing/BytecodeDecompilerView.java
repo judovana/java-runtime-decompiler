@@ -63,7 +63,7 @@ public class BytecodeDecompilerView {
                         try {
                            ActionEvent event = new ActionEvent(this, 1, name);
 
-                            classesActionListener.actionPerformed(event);
+                            bytesActionListener.actionPerformed(event);
                             
                         } catch (Throwable t) {
                             // log exception
@@ -84,8 +84,8 @@ public class BytecodeDecompilerView {
                         try {
                             ActionEvent event = new ActionEvent(this, 2, null);
 
-                            bytesActionListener.actionPerformed(event);
-                            
+
+                            classesActionListener.actionPerformed(event);
                         } catch (Throwable t) {
                             // log exception
                         }

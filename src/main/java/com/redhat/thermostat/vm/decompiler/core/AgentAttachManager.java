@@ -2,10 +2,6 @@ package com.redhat.thermostat.vm.decompiler.core;
 
 import com.redhat.thermostat.vm.decompiler.data.VmManager;
 import workers.VmId;
-import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.attribute.UserPrincipal;
-import java.nio.file.attribute.UserPrincipalLookupService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

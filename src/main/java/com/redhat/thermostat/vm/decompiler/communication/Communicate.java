@@ -38,17 +38,21 @@ public class Communicate {
         try {
             this.commSocket = new Socket(host, port);
         } catch (IOException ex) {
+            System.out.println("Error creating socket");
+            ex.printStackTrace();
             //Logger.getLogger(Communicate.class.getName()).log(Level.SEVERE, null, ex);
         }
         InputStream is;
         try {
             is = this.commSocket.getInputStream();
         } catch (IOException e) {
+            System.out.println("Error getting stream");
             //logger.log(Level.SEVERE, "Opening of input stream of a socket "
                    // + "failed: " + e.getMessage());
             try {
                 this.commSocket.close();
             } catch (IOException e1) {
+                System.out.println("Error when closing the stream");
                 //logger.log(Level.WARNING, "Error while closing the socket: "
                         //+ e1.getMessage());
 

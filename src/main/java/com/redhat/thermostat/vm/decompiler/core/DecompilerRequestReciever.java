@@ -28,8 +28,9 @@ public class DecompilerRequestReciever {
     private static final int NOT_ATTACHED = -1;
 
 
-    public DecompilerRequestReciever(VmManager vmManager) {
+    public DecompilerRequestReciever(VmManager vmManager) {       
         this(new AgentAttachManager(vmManager));
+        this.vmManager = vmManager;
     }
 
     public DecompilerRequestReciever(AgentAttachManager attachManager) {
@@ -99,7 +100,7 @@ public class DecompilerRequestReciever {
         try {
             System.out.println(className);
             String bytes = nativeAgent.submitRequest("BYTES\n" + className);
-            if (bytes == "ERROR") {
+            if ("ERROR".equals(bytes)) {
                 return ERROR_RESPONSE;
 
             }
@@ -136,7 +137,7 @@ public class DecompilerRequestReciever {
             CallDecompilerAgent nativeAgent = new CallDecompilerAgent(actualListenPort, null);
             String classes = nativeAgent.submitRequest("CLASSES");
 
-            if (classes == "ERROR") {
+            if ("ERROR".equals(classes)) {
                 return ERROR_RESPONSE;
             }
             String[] arrayOfClasses = parseClasses(classes);

@@ -29,9 +29,9 @@ public class VmManager {
     public VmManager() {
         this.vmList = new ArrayList<>();
         this.vmStatusMap = new HashMap<>();
-        this.descriptors = new HashSet<>();      
-          createVmList();
-          createReferences(vmList);
+        this.descriptors = new HashSet<>();
+        createVmList();
+        createReferences(vmList);
     }
     // get
 
@@ -48,7 +48,7 @@ public class VmManager {
     // set
     public void addVmDecompilerStatus(VmId vmId, VmDecompilerStatus status) {
         // we need to check if the status is correct
-        if (!vmId.equals(status.getVmId())) {
+        if (!vmId.get().equals(status.getVmId())) {
             throw new IllegalArgumentException("Given VM ID does not equal VM"
                     + " ID given in the VmDecompilerStatus class. This is not"
                     + " allowed state.");
@@ -62,41 +62,47 @@ public class VmManager {
 
     // trigger reload
     //must contain removing of old statuses, reload of vm's list, etc.
-    public void replaceVmDecompilerStatus(VmId vmId, VmDecompilerStatus status) {
-        if (!vmId.equals(status.getVmId())) {
-            throw new IllegalArgumentException("Given VM ID does not equal VM"
-                    + " ID given in the VmDecompilerStatus class. This is not"
-                    + " allowed state.");
-        } //log that the status was kept old
-        else {
-            vmStatusMap.replace(vmId, status);
+    public boolean replaceVmDecompilerStatus(VmId vmId, VmDecompilerStatus status) {
+        for (VmId id : vmStatusMap.keySet()) {
+            if (id.equals(vmId)) {
+                if (!vmId.get().equals(status.getVmId())) {
+                    return false;
+                } //log that the status was kept old
+                else {
+                    vmStatusMap.replace(vmId, status);
+                    return true;
+                }
+            }
         }
+
+        this.addVmDecompilerStatus(vmId, status);
+        return true;
     }
 
     private void createVmList() {
         List<VirtualMachineDescriptor> descr = VirtualMachine.list();
         this.descriptors = new HashSet(descr);
     }
-    
-    private void createReferences(List<VmRef> refList){
-        for ( VirtualMachineDescriptor descriptor : descriptors) {
-            String id =descriptor.id();
+
+    private void createReferences(List<VmRef> refList) {
+        for (VirtualMachineDescriptor descriptor : descriptors) {
+            String id = descriptor.id();
             String processId = descriptor.id();
-            Integer pid =  Integer.parseInt(processId);
-            String name = descriptor.displayName();           
+            Integer pid = Integer.parseInt(processId);
+            String name = descriptor.displayName();
             VmRef ref = new VmRef(id, pid, name);
             refList.add(ref);
-            
+
         }
-        
+
     }
-    public void refreshReferences(){
+
+    public void refreshReferences() {
         ArrayList<VmRef> refList = new ArrayList<>();
         createVmList();
         createReferences(refList);
         //part of the code where the old list is compared to the new list
-        
+
     }
-    
-    
+
 }
