@@ -33,7 +33,8 @@ public class MainFrameView {
 
     private JPanel processlistLabelPanel;
     private JPanel centerPanel;
-    private JLabel centerPanelLabel;
+    private JTextArea welcomeJTextArea;
+    private JPanel welcomePanel;
 
     private BytecodeDecompilerView bytecodeDecompilerView;
 
@@ -70,6 +71,23 @@ public class MainFrameView {
         centerPanel = new JPanel(new BorderLayout());
         mainPanel.add(centerPanel, BorderLayout.CENTER);
 
+        welcomePanel = new JPanel(new GridBagLayout());
+        welcomeJTextArea = new JTextArea(20,40);
+        welcomeJTextArea.setText("Welcome to Java-Runtime-Decompiler\n" +
+                "\n" +
+                "To start click on one of the VMs on the left panel.\n" +
+                "\n" +
+                "Make sure you have set \"THERMOSTAT_DECOMPILER_AGENT_JAR\" environment variable\n" +
+                "to absolute path of decompiler agent.");
+        welcomeJTextArea.setFont(new Font(welcomeJTextArea.getFont().getFontName(), welcomeJTextArea.getFont().getStyle(), 20));
+        welcomeJTextArea.setLineWrap(true);
+        welcomeJTextArea.setWrapStyleWord(true);
+        welcomeJTextArea.setEditable(false);
+        welcomeJTextArea.setBackground(welcomePanel.getBackground());
+        welcomePanel.add(welcomeJTextArea);
+        centerPanel.add(welcomePanel, BorderLayout.CENTER);
+
+
 
         // GUI END
 
@@ -86,8 +104,8 @@ public class MainFrameView {
                             try {
                                 if (vmList.getSelectedValue() == null){
                                     centerPanel.removeAll();
-                                    centerPanel.add(new JPanel(), BorderLayout.CENTER);
-                                    mainFrame.revalidate();
+                                    centerPanel.add(welcomePanel, BorderLayout.CENTER);
+                                    mainFrame.repaint();
                                 } else {
                                     BytecodeDecompilerView processView = new BytecodeDecompilerView();
                                     VmDecompilerInformationController controller = new VmDecompilerInformationController(processView, vmList.getSelectedValue(), manager);
