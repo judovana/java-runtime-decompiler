@@ -65,8 +65,10 @@ public class MainFrameView {
         eastPanel.add(vmlistScrollPane, BorderLayout.CENTER);
         eastPanel.setBorder(new EtchedBorder());
         eastPanel.setPreferredSize(new Dimension(400,720));
-
         mainPanel.add(eastPanel, BorderLayout.WEST);
+
+        centerPanel = new JPanel(new BorderLayout());
+        mainPanel.add(centerPanel, BorderLayout.CENTER);
 
 
         // GUI END
@@ -78,10 +80,27 @@ public class MainFrameView {
             @Override
             public void valueChanged(ListSelectionEvent listSelectionEvent) {
                 if (vmList.getValueIsAdjusting()){
-                    BytecodeDecompilerView processView = new BytecodeDecompilerView();
-                    VmDecompilerInformationController controller = new VmDecompilerInformationController(processView, vmList.getSelectedValue(), manager);
-                    mainPanel.add(processView.getBytecodeDecompilerPanel(), BorderLayout.CENTER);
-                    mainFrame.revalidate();
+                    new SwingWorker<Void, Void>() {
+                        @Override
+                        protected Void doInBackground() throws Exception {
+                            try {
+                                if (vmList.getSelectedValue() == null){
+                                    centerPanel.removeAll();
+                                    centerPanel.add(new JPanel(), BorderLayout.CENTER);
+                                    mainFrame.revalidate();
+                                } else {
+                                    BytecodeDecompilerView processView = new BytecodeDecompilerView();
+                                    VmDecompilerInformationController controller = new VmDecompilerInformationController(processView, vmList.getSelectedValue(), manager);
+                                    centerPanel.removeAll();
+                                    centerPanel.add(processView.getBytecodeDecompilerPanel(), BorderLayout.CENTER);
+                                    mainFrame.revalidate();
+                                }
+                            } catch (Throwable t) {
+                                // log exception
+                            }
+                            return null;
+                        }
+                    }.execute();
                 }
             }
         });
