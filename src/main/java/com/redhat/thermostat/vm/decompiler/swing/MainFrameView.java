@@ -8,6 +8,8 @@ package com.redhat.thermostat.vm.decompiler.swing;
 import com.redhat.thermostat.vm.decompiler.data.VmManager;
 
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import workers.VmRef;
 
@@ -102,15 +104,18 @@ public class MainFrameView {
                         @Override
                         protected Void doInBackground() throws Exception {
                             try {
+                                if (bytecodeDecompilerView != null){
+                                    bytecodeDecompilerView.haltServer();
+                                }
                                 if (vmList.getSelectedValue() == null){
                                     centerPanel.removeAll();
                                     centerPanel.add(welcomePanel, BorderLayout.CENTER);
                                     mainFrame.repaint();
                                 } else {
-                                    BytecodeDecompilerView processView = new BytecodeDecompilerView();
-                                    VmDecompilerInformationController controller = new VmDecompilerInformationController(processView, vmList.getSelectedValue(), manager);
+                                    bytecodeDecompilerView = new BytecodeDecompilerView();
+                                    VmDecompilerInformationController controller = new VmDecompilerInformationController(bytecodeDecompilerView, vmList.getSelectedValue(), manager);
                                     centerPanel.removeAll();
-                                    centerPanel.add(processView.getBytecodeDecompilerPanel(), BorderLayout.CENTER);
+                                    centerPanel.add(bytecodeDecompilerView.getBytecodeDecompilerPanel(), BorderLayout.CENTER);
                                     mainFrame.revalidate();
                                 }
                             } catch (Throwable t) {
@@ -119,6 +124,16 @@ public class MainFrameView {
                             return null;
                         }
                     }.execute();
+                }
+            }
+        });
+
+        // Tell server to shutdown before exiting
+        mainFrame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                if (bytecodeDecompilerView != null){
+                    bytecodeDecompilerView.haltServer();
                 }
             }
         });

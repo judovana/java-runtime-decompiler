@@ -34,6 +34,7 @@ public class BytecodeDecompilerView {
     private RSyntaxTextArea bytecodeSyntaxTextArea;
     private ActionListener bytesActionListener;
     private ActionListener classesActionListener;
+    private ActionListener agentActionListener;
 
     /**
      * Constructor creates the graphics and adds the action listeners.
@@ -160,15 +161,6 @@ public class BytecodeDecompilerView {
         });
     }
 
-    /**
-     * Returns the panel containing the view
-     * @return
-     
-    @Override
-    public Component getUiComponent() {
-        return mainContainer;
-    }
-*/
     public void setClassesActionListener(ActionListener listener) {
         classesActionListener = listener;
     }
@@ -176,6 +168,14 @@ public class BytecodeDecompilerView {
 
     public void setBytesActionListener(ActionListener listener) {
         bytesActionListener = listener;
+    }
+
+    public void setHaltActionListener(ActionListener listener) {
+        agentActionListener = listener;
+    }
+
+    public void haltServer(){
+        agentActionListener.actionPerformed(new ActionEvent(this, 3, null));
     }
 
     /**

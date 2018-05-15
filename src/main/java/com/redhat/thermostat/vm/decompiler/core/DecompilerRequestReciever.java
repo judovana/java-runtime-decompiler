@@ -67,6 +67,9 @@ public class DecompilerRequestReciever {
             case CLASSES:
                 response = getAllLoadedClassesAction(port, new VmId(vmId), vmPid);
                 break;
+            case HALT:
+                response = getHaltAction(port, new VmId(vmId), vmPid);
+                break;
             default:
                 //logger.warning("Unknown action given: " + action);
                 return ERROR_RESPONSE;
@@ -156,6 +159,33 @@ public class DecompilerRequestReciever {
 
     }
 
+    private String getHaltAction(int listenPort, VmId vmId, int vmPid) {
+        int actualListenPort;
+        try {
+            actualListenPort = checkIfAgentIsLoaded(listenPort, vmId, vmPid);
+        } catch (Exception e) {
+            System.out.println("This agent isn't loaded");
+            return ERROR_RESPONSE;
+        }
+
+        if (actualListenPort == NOT_ATTACHED) {
+            return ERROR_RESPONSE;
+        }
+
+        try {
+            CallDecompilerAgent nativeAgent = new CallDecompilerAgent(actualListenPort, null);
+            String halt = nativeAgent.submitRequest("HALT");
+
+            if (halt.equals("ERROR")) {
+                return ERROR_RESPONSE;
+            }
+            //TODO: remove server status
+        } catch (Exception e) {
+            //logger.log
+        }
+        return OK_RESPONSE;
+    }
+
     private int checkIfAgentIsLoaded(int port, VmId vmId, int vmPid) {
         if (port != NOT_ATTACHED) {
             return port;
@@ -173,7 +203,14 @@ public class DecompilerRequestReciever {
         String[] array = classes.split(";");
         List<String> list = new ArrayList<>(Arrays.asList(array));
         list.removeAll(Arrays.asList("", null));
-        return list.toArray(new String[]{});    
+        List<String> list1 = new ArrayList<>();
+        for (String s : list) {
+            if (!s.contains("Lambda")){
+                list1.add(s);
+                java.util.Collections.sort(list1);
+            }
+        }
+        return list1.toArray(new String[]{});
 
     }
 

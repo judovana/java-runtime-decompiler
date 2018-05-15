@@ -67,6 +67,13 @@ public class VmDecompilerInformationController {
             }
         });
 
+        view.setHaltActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                haltAgent();
+            }
+        });
+
     }
 
     private void loadClassNames() {
@@ -87,6 +94,14 @@ public class VmDecompilerInformationController {
             //view.handleError(new LocalizedString(listener.getErrorMessage()));
         }
         return;// listener;
+    }
+
+    private void haltAgent(){
+        AgentRequestAction request = createRequest("", RequestAction.HALT);
+        String response = submitRequest(request);
+        if (response.equals("ok")){
+            System.out.println("Agent closing socket and exiting");
+        }
     }
 
     private void loadClassBytecode(String name) {
@@ -141,6 +156,8 @@ public class VmDecompilerInformationController {
             request = AgentRequestAction.create(vmInfo, action, listenPort);
         } else if (action == RequestAction.BYTES) {
             request = AgentRequestAction.create(vmInfo, action, listenPort, className);
+        } else if (action == RequestAction.HALT) {
+            request = AgentRequestAction.create(vmInfo, action, listenPort);
         } else {
             throw new AssertionError("Unknown action: " + action);
         }

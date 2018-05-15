@@ -54,7 +54,8 @@ public class AgentRequestAction {
 
     public static enum RequestAction {
         CLASSES(0),
-        BYTES(1);
+        BYTES(1),
+        HALT(2);
 
         private int intVal;
 
@@ -80,6 +81,8 @@ public class AgentRequestAction {
                     return CLASSES;
                 case 1:
                     return BYTES;
+                case 2:
+                    return HALT;
                 default:
                     throw new IllegalArgumentException("Unknown request: " + action);
             }

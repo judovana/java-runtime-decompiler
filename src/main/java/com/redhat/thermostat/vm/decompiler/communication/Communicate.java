@@ -148,7 +148,17 @@ public class Communicate {
             }
             //logger.log(Level.FINE, "Agent returned class names.");
             return str.toString();
-        } 
+
+            // Agent shutdown response
+        } else if (initLine.equals("GOODBYE")) {
+            try {
+                String s = this.commInput.readLine();
+                s.trim();
+                return s;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         
         //logger.log(Level.SEVERE, "Unknow header of " + initLine);
         return "ERROR";
