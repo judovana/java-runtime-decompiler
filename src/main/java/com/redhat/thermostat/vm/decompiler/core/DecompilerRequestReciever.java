@@ -4,8 +4,8 @@ package com.redhat.thermostat.vm.decompiler.core;
 import com.redhat.thermostat.vm.decompiler.communication.CallDecompilerAgent;
 
 import com.redhat.thermostat.vm.decompiler.core.AgentRequestAction.RequestAction;
+import com.redhat.thermostat.vm.decompiler.data.VmInfo;
 import com.redhat.thermostat.vm.decompiler.data.VmManager;
-import workers.VmId;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,8 +36,6 @@ public class DecompilerRequestReciever {
     public DecompilerRequestReciever(AgentAttachManager attachManager) {
         this.attachManager = attachManager;
     }
-
-
     
     public String processRequest(AgentRequestAction request) {
         String vmId = request.getParameter(AgentRequestAction.VM_ID_PARAM_NAME);
@@ -62,13 +60,13 @@ public class DecompilerRequestReciever {
         switch (action) {
             case BYTES:
                 String className = request.getParameter(AgentRequestAction.CLASS_TO_DECOMPILE_NAME);
-                response = getByteCodeAction(port, new VmId(vmId), vmPid, className);
+                response = getByteCodeAction(port, vmId, vmPid, className);
                 break;
             case CLASSES:
-                response = getAllLoadedClassesAction(port, new VmId(vmId), vmPid);
+                response = getAllLoadedClassesAction(port, vmId, vmPid);
                 break;
             case HALT:
-                response = getHaltAction(port, new VmId(vmId), vmPid);
+                response = getHaltAction(port, vmId, vmPid);
                 break;
             default:
                 //logger.warning("Unknown action given: " + action);
@@ -87,7 +85,7 @@ public class DecompilerRequestReciever {
         }
     }
 
-    private String getByteCodeAction(int listenPort, VmId vmId, int vmPid, String className) {
+    private String getByteCodeAction(int listenPort, String vmId, int vmPid, String className) {
         int actualListenPort;
         try {
             actualListenPort = checkIfAgentIsLoaded(listenPort, vmId, vmPid);
@@ -110,10 +108,10 @@ public class DecompilerRequestReciever {
             VmDecompilerStatus status = new VmDecompilerStatus();
             status.setListenPort(actualListenPort);
             status.setTimeStamp(System.currentTimeMillis());
-            status.setVmId(vmId.get());
+            status.setVmId(vmId);
             status.setBytesClassName(className);
             status.setLoadedClassBytes(bytes);
-            vmManager.replaceVmDecompilerStatus(vmId, status);
+            vmManager.replaceVmDecompilerStatus(vmManager.getVmInfoByID(vmId), status);
 
         } catch (Exception ex) {
             return ERROR_RESPONSE;
@@ -123,7 +121,7 @@ public class DecompilerRequestReciever {
         return OK_RESPONSE;
     }
 
-    private String getAllLoadedClassesAction(int listenPort, VmId vmId, int vmPid) {
+    private String getAllLoadedClassesAction(int listenPort, String vmId, int vmPid) {
         int actualListenPort;
         try {
             actualListenPort = checkIfAgentIsLoaded(listenPort, vmId, vmPid);
@@ -147,9 +145,9 @@ public class DecompilerRequestReciever {
             VmDecompilerStatus status = new VmDecompilerStatus();
             status.setListenPort(actualListenPort);
             status.setTimeStamp(System.currentTimeMillis());
-            status.setVmId(vmId.get());
+            status.setVmId(vmId);
             status.setLoadedClassNames(arrayOfClasses);
-            vmManager.replaceVmDecompilerStatus(vmId, status);
+            vmManager.replaceVmDecompilerStatus(vmManager.getVmInfoByID(vmId), status);
 
         } catch (Exception ex) {
             //logger.log(Level.SEVERE, "Exception occured while processing request: " + ex.getMessage());
@@ -159,7 +157,7 @@ public class DecompilerRequestReciever {
 
     }
 
-    private String getHaltAction(int listenPort, VmId vmId, int vmPid) {
+    private String getHaltAction(int listenPort, String vmId, int vmPid) {
         int actualListenPort;
         try {
             actualListenPort = checkIfAgentIsLoaded(listenPort, vmId, vmPid);
@@ -186,7 +184,7 @@ public class DecompilerRequestReciever {
         return OK_RESPONSE;
     }
 
-    private int checkIfAgentIsLoaded(int port, VmId vmId, int vmPid) {
+    private int checkIfAgentIsLoaded(int port, String vmId, int vmPid) {
         if (port != NOT_ATTACHED) {
             return port;
         }

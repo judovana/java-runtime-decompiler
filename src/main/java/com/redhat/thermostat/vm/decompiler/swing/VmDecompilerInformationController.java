@@ -1,21 +1,16 @@
 package com.redhat.thermostat.vm.decompiler.swing;
 
-import workers.VmRef;
-import workers.VmId;
-import workers.VmInfo;
-import java.net.InetSocketAddress;
-import java.util.concurrent.CountDownLatch;
+import com.redhat.thermostat.vm.decompiler.data.VmInfo;
 import com.redhat.thermostat.vm.decompiler.core.AgentRequestAction;
 import com.redhat.thermostat.vm.decompiler.core.AgentRequestAction.RequestAction;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import com.redhat.thermostat.vm.decompiler.core.VmDecompilerStatus;
-import java.util.concurrent.TimeUnit;
 
-//import com.redhat.thermostat.vm.decompiler.core.DecompilerAgentRequestResponseListener;
+//import com.redhat.thermostat.vmInfo.decompiler.core.DecompilerAgentRequestResponseListener;
 import com.redhat.thermostat.vm.decompiler.core.DecompilerRequestReciever;
 import com.redhat.thermostat.vm.decompiler.data.VmManager;
-import java.awt.Component;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
@@ -23,14 +18,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Base64;
 import java.util.stream.Collectors;
-import javax.activity.InvalidActivityException;
 
 /**
  * This class provides Action listeners and result processing for the GUI.
  */
 public class VmDecompilerInformationController {
 
-    private final VmRef vm;
+    private final VmInfo vmInfo;
     //private final AgentInfoDAO agentInfoDao;
     //private final VmInfoDAO vmInfoDao;
     //private final RequestQueue requestQueue;
@@ -40,10 +34,8 @@ public class VmDecompilerInformationController {
     //private static final Translate<LocaleResources> translateResources = LocaleResources.createLocalizer();
     private static final String PATH_TO_DECOMPILER_ENV_VAR = "PATH_TO_GIVEN_DECOMPILER_JAR";
 
-    VmDecompilerInformationController(final BytecodeDecompilerView view, VmRef ref, VmManager vmManager) {
-        this.vm = ref;
-        //this.agentInfoDao = agentInfoDao;
-        //this.vmInfoDao = vmInfoDao;
+    VmDecompilerInformationController(final BytecodeDecompilerView view, VmInfo vmInfo, VmManager vmManager) {
+        this.vmInfo = vmInfo;
         this.view = view;
         this.vmManager = vmManager;
 
@@ -81,11 +73,10 @@ public class VmDecompilerInformationController {
         //DecompilerAgentRequestResponseListener listener = 
         String response = submitRequest(request);
         if (response.equals("ok")) {
-            VmId vmId = new VmId(vm.getVmId());
-            VmDecompilerStatus vmStatus = vmManager.getVmDecompilerStatus(vmId);
+            VmDecompilerStatus vmStatus = vmManager.getVmDecompilerStatus(vmInfo);
             String[] classes = vmStatus.getLoadedClassNames();
             while (classes.length == 0) {
-                vmStatus = vmManager.getVmDecompilerStatus(vmId);
+                vmStatus = vmManager.getVmDecompilerStatus(vmInfo);
                 classes = vmStatus.getLoadedClassNames();
             }
             view.reloadClassList(classes);
@@ -111,13 +102,10 @@ public class VmDecompilerInformationController {
         String decompiledClass = "";
         boolean success = true;//!listener.isError();
         if (success) {
-
-            VmId vmId = new VmId(vm.getVmId());
-
-            VmDecompilerStatus vmStatus = vmManager.getVmDecompilerStatus(vmId);
+            VmDecompilerStatus vmStatus = vmManager.getVmDecompilerStatus(vmInfo);
             String expectedClass = "";
             while (!expectedClass.equals(name)) {
-                vmStatus = vmManager.getVmDecompilerStatus(vmId);
+                vmStatus = vmManager.getVmDecompilerStatus(vmInfo);
                 expectedClass = vmStatus.getBytesClassName();
 
             }
@@ -143,9 +131,7 @@ public class VmDecompilerInformationController {
     }
 
     private AgentRequestAction createRequest(String className, RequestAction action) {
-        VmId vmId = new VmId(vm.getVmId());
-        VmInfo vmInfo = createVmInfo(vm);
-        VmDecompilerStatus status = vmManager.getVmDecompilerStatus(vmId);
+        VmDecompilerStatus status = vmManager.getVmDecompilerStatus(vmInfo);
         int listenPort = AgentRequestAction.NOT_ATTACHED_PORT;
         if (status != null) {
             listenPort = status.getListenPort();
@@ -165,12 +151,12 @@ public class VmDecompilerInformationController {
         return request;
     }
 
-    private VmInfo createVmInfo(VmRef vmRef) {
-        VmInfo vmInfo = new VmInfo();
-        vmInfo.setVmId(vm.getVmId());
-        vmInfo.setVmPid(vm.getPid());
-        return vmInfo;
-    }
+//    private VmInfo createVmInfo(VmRef vmRef) {
+//        VmInfo vmInfo = new VmInfo();
+//        vmInfo.setVmId(this.vmInfo.getVmId());
+//        vmInfo.setVmPid(this.vmInfo.getPid());
+//        return vmInfo;
+//    }
 
     private String submitRequest(AgentRequestAction request) {
         //DecompilerAgentRequestResponseListener listener = new DecompilerAgentRequestResponseListener(latch);

@@ -5,13 +5,12 @@
  */
 package com.redhat.thermostat.vm.decompiler.swing;
 
+import com.redhat.thermostat.vm.decompiler.data.VmInfo;
 import com.redhat.thermostat.vm.decompiler.data.VmManager;
 
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-
-import workers.VmRef;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
@@ -31,7 +30,7 @@ public class MainFrameView {
 
     private JPanel eastPanel;
     private JScrollPane vmlistScrollPane;
-    private JList<VmRef> vmList;
+    private JList<VmInfo> vmList;
 
     private JPanel processlistLabelPanel;
     private JPanel centerPanel;
@@ -54,7 +53,7 @@ public class MainFrameView {
         mainFrame.add(mainPanel, BorderLayout.CENTER);
         mainPanel.setLayout(new BorderLayout());
 
-        vmList = new JList<VmRef>();
+        vmList = new JList<VmInfo>();
         vmList.setFixedCellHeight(20);
         vmList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         vmlistScrollPane = new JScrollPane(vmList,
@@ -94,7 +93,7 @@ public class MainFrameView {
         // GUI END
 
 
-        vmList.setListData(manager.getAllVm().toArray(new VmRef[0]));
+        vmList.setListData(manager.getAllVm().toArray(new VmInfo[0]));
 
         vmList.addListSelectionListener(new ListSelectionListener() {
             @Override

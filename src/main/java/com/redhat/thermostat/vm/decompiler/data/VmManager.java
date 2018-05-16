@@ -1,31 +1,22 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.redhat.thermostat.vm.decompiler.data;
 
 import com.redhat.thermostat.vm.decompiler.core.VmDecompilerStatus;
 import com.sun.tools.attach.VirtualMachine;
 import com.sun.tools.attach.VirtualMachineDescriptor;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import workers.VmId;
-import workers.VmRef;
+
+import java.util.*;
 
 /**
- *
  * @author pmikova
  */
 public class VmManager {
 
-    ArrayList<VmRef> vmList;
-    HashMap<VmId, VmDecompilerStatus> vmStatusMap;
+    ArrayList<VmInfo> vmList;
+    HashMap<VmInfo, VmDecompilerStatus> vmStatusMap;
     HashSet<VirtualMachineDescriptor> descriptors;
 
-    //constructor
+
+
     public VmManager() {
         this.vmList = new ArrayList<>();
         this.vmStatusMap = new HashMap<>();
@@ -33,49 +24,58 @@ public class VmManager {
         createVmList();
         createReferences(vmList);
     }
-    // get
 
-    public ArrayList<VmRef> getAllVm() {
+
+    public VmInfo getVmInfoByID(String VmId){
+        for (VmInfo vmInfo : vmList) {
+            if (vmInfo.getVmId().equals(VmId)){
+                return vmInfo;
+            }
+        }
+        throw new NoSuchElementException("VmInfo with VmID" + VmId + "does no exist in VmList");
+    }
+
+
+    public ArrayList<VmInfo> getAllVm() {
         return this.vmList;
+    }
+
+    public VmDecompilerStatus getVmDecompilerStatus(VmInfo vmInfo) {
+        return vmStatusMap.get(vmInfo);
 
     }
 
-    public VmDecompilerStatus getVmDecompilerStatus(VmId vmId) {
-        return vmStatusMap.get(vmId);
-
-    }
-
-    // set
-    public void addVmDecompilerStatus(VmId vmId, VmDecompilerStatus status) {
+    public void addVmDecompilerStatus(VmInfo vmInfo, VmDecompilerStatus status) {
         // we need to check if the status is correct
-        if (!vmId.get().equals(status.getVmId())) {
+        if (!vmInfo.getVmId().equals(status.getVmId())) {
             throw new IllegalArgumentException("Given VM ID does not equal VM"
                     + " ID given in the VmDecompilerStatus class. This is not"
                     + " allowed state.");
         }
-        vmStatusMap.put(vmId, status);
+        vmStatusMap.put(vmInfo, status);
     }
 
-    public void removeVmDecompilerStatus(VmId vmId) {
-        vmStatusMap.remove(vmId);
+    public void removeVmDecompilerStatus(VmInfo vmInfo) {
+        vmStatusMap.remove(vmInfo);
     }
 
     // trigger reload
     //must contain removing of old statuses, reload of vm's list, etc.
-    public boolean replaceVmDecompilerStatus(VmId vmId, VmDecompilerStatus status) {
-        for (VmId id : vmStatusMap.keySet()) {
-            if (id.equals(vmId)) {
-                if (!vmId.get().equals(status.getVmId())) {
-                    return false;
-                } //log that the status was kept old
-                else {
-                    vmStatusMap.replace(vmId, status);
+    public boolean replaceVmDecompilerStatus(VmInfo vmInfo, VmDecompilerStatus status) {
+        for (VmInfo statusMapVmInfo : vmStatusMap.keySet()) {
+            if (statusMapVmInfo.equals(vmInfo)) {
+                if (vmInfo.getVmId().equals(status.getVmId())) {
+                    vmStatusMap.replace(vmInfo, status);
                     return true;
+                }
+                else {
+                    //log that the status was kept old
+                    return false;
                 }
             }
         }
 
-        this.addVmDecompilerStatus(vmId, status);
+        this.addVmDecompilerStatus(vmInfo, status);
         return true;
     }
 
@@ -84,21 +84,20 @@ public class VmManager {
         this.descriptors = new HashSet(descr);
     }
 
-    private void createReferences(List<VmRef> refList) {
+    private void createReferences(List<VmInfo> vmList) {
         for (VirtualMachineDescriptor descriptor : descriptors) {
-            String id = descriptor.id();
+            String vmId = descriptor.id();
             String processId = descriptor.id();
             Integer pid = Integer.parseInt(processId);
             String name = descriptor.displayName();
-            VmRef ref = new VmRef(id, pid, name);
-            refList.add(ref);
-
+            VmInfo vmInfo = new VmInfo(vmId, pid, name);
+            vmList.add(vmInfo);
         }
 
     }
 
     public void refreshReferences() {
-        ArrayList<VmRef> refList = new ArrayList<>();
+        ArrayList<VmInfo> refList = new ArrayList<>();
         createVmList();
         createReferences(refList);
         //part of the code where the old list is compared to the new list

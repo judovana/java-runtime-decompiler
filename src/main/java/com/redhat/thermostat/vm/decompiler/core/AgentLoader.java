@@ -2,6 +2,7 @@ package com.redhat.thermostat.vm.decompiler.core;
 
 import com.redhat.thermostat.vm.decompiler.communication.InstallDecompilerAgentImpl;
 
+import com.redhat.thermostat.vm.decompiler.data.VmInfo;
 import com.sun.tools.attach.*;
 import java.io.IOException;
 import java.net.ServerSocket;

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package workers;
+package com.redhat.thermostat.vm.decompiler.data;
 
 /**
  *
@@ -16,10 +16,6 @@ import java.util.Set;
 import java.util.HashMap;
 
 public class VmInfo {
-
-    public VmInfo() {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 
     public enum AliveStatus {
         RUNNING,
@@ -80,6 +76,12 @@ public class VmInfo {
     private String[] loadedNativeLibraries;
     private long uid;
     private String username;
+
+    public VmInfo(String VmId, int VmPid, String vmName){
+        this.vmId = VmId;
+        this.vmPid = VmPid;
+        this.vmName = vmName;
+    }
 
     public VmInfo(String vmId, int vmPid, long startTime, long stopTime,
             String javaVersion, String javaHome,
@@ -311,5 +313,10 @@ public class VmInfo {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    @Override
+    public String toString() {
+        return vmId + " --- " + vmName;
     }
 }

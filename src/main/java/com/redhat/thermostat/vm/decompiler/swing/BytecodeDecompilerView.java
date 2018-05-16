@@ -47,8 +47,7 @@ public class BytecodeDecompilerView {
 
     public BytecodeDecompilerView(){
 
-        BytecodeDecompilerPanel = new JPanel();
-        BytecodeDecompilerPanel.setLayout(new BorderLayout());
+        BytecodeDecompilerPanel = new JPanel(new BorderLayout());
 
         listOfClasses = new JList<>();
         listOfClasses.setFixedCellHeight(20);
@@ -115,13 +114,12 @@ public class BytecodeDecompilerView {
         topButtonPanel.setLayout(new BorderLayout());
         topButtonPanel.add(topButton, BorderLayout.WEST);
 
-        rightScrollPanel = new JScrollPane(rightMainPanel);
         leftScrollPanel = new JScrollPane(leftMainPanel);
 
         leftMainPanel.add(listOfClasses);
         rightMainPanel.add(bytecodeScrollPane);
         JSplitPane pane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-                leftScrollPanel, rightScrollPanel);
+                leftScrollPanel, rightMainPanel);
 
         BytecodeDecompilerPanel.add(topButtonPanel, BorderLayout.NORTH);
         BytecodeDecompilerPanel.add(pane, BorderLayout.CENTER);

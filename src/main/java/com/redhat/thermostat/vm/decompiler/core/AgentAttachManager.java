@@ -1,7 +1,6 @@
 package com.redhat.thermostat.vm.decompiler.core;
 
 import com.redhat.thermostat.vm.decompiler.data.VmManager;
-import workers.VmId;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,11 +30,11 @@ public class AgentAttachManager {
     }
   
 
-    VmDecompilerStatus attachAgentToVm(VmId vmId, int vmPid)  {
+    VmDecompilerStatus attachAgentToVm(String vmId, int vmPid)  {
         //logger.fine("Attaching agent to VM '" + vmPid + "'");
          int attachedPort = AgentLoader.INVALID_PORT;
         try {
-            attachedPort = loader.attach(vmId.get(), vmPid);
+            attachedPort = loader.attach(vmId, vmPid);
         } catch (Exception ex) {
             Logger.getLogger(AgentAttachManager.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -45,9 +44,9 @@ public class AgentAttachManager {
         }
         VmDecompilerStatus status = new VmDecompilerStatus();
         status.setListenPort(attachedPort);
-        status.setVmId(vmId.get());
+        status.setVmId(vmId);
         status.setTimeStamp(System.currentTimeMillis());
-        vmManager.replaceVmDecompilerStatus(vmId, status);
+        vmManager.replaceVmDecompilerStatus(vmManager.getVmInfoByID(vmId), status);
         return status;
     }
 }
