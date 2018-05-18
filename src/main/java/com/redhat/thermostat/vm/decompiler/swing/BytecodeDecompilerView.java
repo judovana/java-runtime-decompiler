@@ -115,6 +115,7 @@ public class BytecodeDecompilerView {
         topButtonPanel.add(topButton, BorderLayout.WEST);
 
         leftScrollPanel = new JScrollPane(leftMainPanel);
+        leftScrollPanel.getVerticalScrollBar().setUnitIncrement(20);
 
         leftMainPanel.add(listOfClasses);
         rightMainPanel.add(bytecodeScrollPane);
