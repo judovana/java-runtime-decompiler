@@ -27,8 +27,9 @@ public class MainFrameView {
                         private JList<VmInfo> localVmList;
                 private JPanel remoteVmPanel;
                     private JPanel remoteVmLabelPanel;
-                        private JScrollPane remoteVmScrollPane;
-                            private JList remoteVmList;
+                        private JButton remoteConnectionButton;
+                    private JScrollPane remoteVmScrollPane;
+                        private JList remoteVmList;
         private JPanel centerPanel;
             private JPanel welcomePanel;
                 private JTextArea welcomeJTextArea;
@@ -59,10 +60,15 @@ public class MainFrameView {
         localVmPanel.add(localVmScrollPane, BorderLayout.CENTER);
         // localVmPanel End
 
-        // remoteVmPanel, remoteVmScrollPane, remoteVmLabelPanel
-        remoteVmLabelPanel = new JPanel();
+        // remoteVmPanel, remoteVmScrollPane, remoteVmLabelPanel, remoteConnectionButton
+        remoteConnectionButton = new JButton("+");
+        remoteConnectionButton.setMargin( new Insets(5, 8, 5, 8) );
+        // remoteConnectionButton End
+
+        remoteVmLabelPanel = new JPanel(new BorderLayout());
         remoteVmLabelPanel.setBorder(new EtchedBorder());
-        remoteVmLabelPanel.add(new JLabel("Remote Processes", SwingConstants.CENTER));
+        remoteVmLabelPanel.add(new JLabel("    Remote Processes", SwingConstants.CENTER), BorderLayout.CENTER);
+        remoteVmLabelPanel.add(remoteConnectionButton, BorderLayout.EAST);
         // remoteVmLabelPanel end
 
         remoteVmList = new JList<VmInfo>();
@@ -128,6 +134,7 @@ public class MainFrameView {
         mainFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         mainFrame.setTitle("Runtime-Decompiler");
         mainFrame.setSize(1280,720);
+        mainFrame.setMinimumSize(new Dimension(700,340));
         mainFrame.setLayout(new BorderLayout());
         mainFrame.setLocationRelativeTo(null);
         mainFrame.add(mainPanel, BorderLayout.CENTER);
