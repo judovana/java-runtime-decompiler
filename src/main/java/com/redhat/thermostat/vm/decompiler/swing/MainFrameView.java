@@ -62,7 +62,7 @@ public class MainFrameView {
 
         // remoteVmPanel, remoteVmScrollPane, remoteVmLabelPanel, remoteConnectionButton
         remoteConnectionButton = new JButton("+");
-        remoteConnectionButton.setMargin( new Insets(5, 8, 5, 8) );
+        remoteConnectionButton.setMargin( new Insets(5, 9, 5, 9) );
         // remoteConnectionButton End
 
         remoteVmLabelPanel = new JPanel(new BorderLayout());

@@ -5,10 +5,7 @@ import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
 import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import javax.swing.JButton;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -25,6 +22,7 @@ public class BytecodeDecompilerView {
 
     private JPanel BytecodeDecompilerPanel;
 
+    JSplitPane splitPane;
     private JPanel leftMainPanel;
     private JPanel rightMainPanel;
     private JScrollPane rightScrollPanel;
@@ -35,6 +33,8 @@ public class BytecodeDecompilerView {
     private ActionListener bytesActionListener;
     private ActionListener classesActionListener;
     private ActionListener agentActionListener;
+
+    private boolean splitPaneFirstResize = true;
 
     /**
      * Constructor creates the graphics and adds the action listeners.
@@ -119,11 +119,21 @@ public class BytecodeDecompilerView {
 
         leftMainPanel.add(listOfClasses);
         rightMainPanel.add(bytecodeScrollPane);
-        JSplitPane pane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                 leftScrollPanel, rightMainPanel);
 
+        splitPane.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                if(splitPaneFirstResize){
+                    splitPane.setDividerLocation(0.5);
+                    splitPaneFirstResize = false;
+                }
+            }
+        });
+
         BytecodeDecompilerPanel.add(topButtonPanel, BorderLayout.NORTH);
-        BytecodeDecompilerPanel.add(pane, BorderLayout.CENTER);
+        BytecodeDecompilerPanel.add(splitPane, BorderLayout.CENTER);
 
         BytecodeDecompilerPanel.setVisible(true);
 
