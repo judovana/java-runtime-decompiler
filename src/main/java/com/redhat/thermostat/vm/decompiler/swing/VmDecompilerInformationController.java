@@ -1,21 +1,13 @@
 package com.redhat.thermostat.vm.decompiler.swing;
 
-import com.redhat.thermostat.vm.decompiler.data.VmInfo;
 import com.redhat.thermostat.vm.decompiler.core.AgentRequestAction;
 import com.redhat.thermostat.vm.decompiler.core.AgentRequestAction.RequestAction;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import com.redhat.thermostat.vm.decompiler.core.VmDecompilerStatus;
-
-//import com.redhat.thermostat.vmInfo.decompiler.core.DecompilerAgentRequestResponseListener;
 import com.redhat.thermostat.vm.decompiler.core.DecompilerRequestReciever;
+import com.redhat.thermostat.vm.decompiler.core.VmDecompilerStatus;
+import com.redhat.thermostat.vm.decompiler.data.VmInfo;
 import com.redhat.thermostat.vm.decompiler.data.VmManager;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.Base64;
 import java.util.stream.Collectors;
 
@@ -25,13 +17,8 @@ import java.util.stream.Collectors;
 public class VmDecompilerInformationController {
 
     private final VmInfo vmInfo;
-    //private final AgentInfoDAO agentInfoDao;
-    //private final VmInfoDAO vmInfoDao;
-    //private final RequestQueue requestQueue;
-    //private final VmDecompilerDAO vmDecompilerDao;
     private final BytecodeDecompilerView view;
     private VmManager vmManager;
-    //private static final Translate<LocaleResources> translateResources = LocaleResources.createLocalizer();
     private static final String PATH_TO_DECOMPILER_ENV_VAR = "PATH_TO_GIVEN_DECOMPILER_JAR";
 
     VmDecompilerInformationController(final BytecodeDecompilerView view, VmInfo vmInfo, VmManager vmManager) {
@@ -39,32 +26,13 @@ public class VmDecompilerInformationController {
         this.view = view;
         this.vmManager = vmManager;
 
-        loadClassNames(); //FIXME
+        loadClassNames();
 
-        view.setClassesActionListener(new ActionListener() {
+        view.setClassesActionListener(e -> loadClassNames());
 
-            @Override
-            public void actionPerformed(ActionEvent e) {
+        view.setBytesActionListener(e -> loadClassBytecode(e.getActionCommand()));
 
-                loadClassNames();
-
-            }
-
-        });
-
-        view.setBytesActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                loadClassBytecode(e.getActionCommand());
-            }
-        });
-
-        view.setHaltActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                haltAgent();
-            }
-        });
+        view.setHaltActionListener(e -> haltAgent());
 
     }
 
@@ -87,17 +55,9 @@ public class VmDecompilerInformationController {
         return;// listener;
     }
 
-    private void haltAgent(){
-        AgentRequestAction request = createRequest("", RequestAction.HALT);
-        String response = submitRequest(request);
-        if (response.equals("ok")){
-            System.out.println("Agent closing socket and exiting");
-        }
-    }
-
     private void loadClassBytecode(String name) {
         AgentRequestAction request = createRequest(name, RequestAction.BYTES);
-        //DecompilerAgentRequestResponseListener listener = 
+        //DecompilerAgentRequestResponseListener listener =
         submitRequest(request);
         String decompiledClass = "";
         boolean success = true;//!listener.isError();
@@ -111,7 +71,7 @@ public class VmDecompilerInformationController {
             }
             String bytesInString = vmStatus.getLoadedClassBytes();
 
-            byte[] bytes = parseBytes(bytesInString);
+            byte[] bytes =  Base64.getDecoder().decode(bytesInString);
             try {
                 String path = bytesToFile("temporary-byte-file", bytes);
                 Process proc = Runtime.getRuntime().exec("java -jar " + System.getenv(PATH_TO_DECOMPILER_ENV_VAR) + " " + path);
@@ -128,6 +88,14 @@ public class VmDecompilerInformationController {
         }
 
         return; //listener;
+    }
+
+    private void haltAgent(){
+        AgentRequestAction request = createRequest("", RequestAction.HALT);
+        String response = submitRequest(request);
+        if (response.equals("ok")){
+            System.out.println("Agent closing socket and exiting");
+        }
     }
 
     private AgentRequestAction createRequest(String className, RequestAction action) {
@@ -151,17 +119,9 @@ public class VmDecompilerInformationController {
         return request;
     }
 
-//    private VmInfo createVmInfo(VmRef vmRef) {
-//        VmInfo vmInfo = new VmInfo();
-//        vmInfo.setVmId(this.vmInfo.getVmId());
-//        vmInfo.setVmPid(this.vmInfo.getPid());
-//        return vmInfo;
-//    }
-
     private String submitRequest(AgentRequestAction request) {
         //DecompilerAgentRequestResponseListener listener = new DecompilerAgentRequestResponseListener(latch);
         DecompilerRequestReciever receiver = new DecompilerRequestReciever(vmManager);
-        System.out.println("Decompiler ok");
         String response = receiver.processRequest(request);
         // wait for the request processing
 
@@ -174,23 +134,6 @@ public class VmDecompilerInformationController {
         fos.write(bytes);
         fos.close();
         return path;
-    }
-
-    /**
-     * Returns instance of BytecodeDecompilerView for the GUI.
-     *
-     * @return instance of BytecodeDecompilerView
-     *
-     * @Override public UIComponent getView() { return view;
-     *
-     * }
-     *
-     * @Override public LocalizedString getLocalizedName() { return
-     * translateResources.localize(LocaleResources.VM_DECOMPILER_TAB_NAME); }
-     */
-    private byte[] parseBytes(String bytes) {
-        byte[] decoded = Base64.getDecoder().decode(bytes);
-        return decoded;
     }
 
 }
