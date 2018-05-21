@@ -32,7 +32,7 @@ public class BytecodeDecompilerView {
     private RSyntaxTextArea bytecodeSyntaxTextArea;
     private ActionListener bytesActionListener;
     private ActionListener classesActionListener;
-    private ActionListener agentActionListener;
+    private ActionListener haltActionListener;
 
     private boolean splitPaneFirstResize = true;
 
@@ -180,11 +180,11 @@ public class BytecodeDecompilerView {
     }
 
     public void setHaltActionListener(ActionListener listener) {
-        agentActionListener = listener;
+        haltActionListener = listener;
     }
 
     public void haltServer(){
-        agentActionListener.actionPerformed(new ActionEvent(this, 3, null));
+        haltActionListener.actionPerformed(new ActionEvent(this, 3, null));
     }
 
     /**

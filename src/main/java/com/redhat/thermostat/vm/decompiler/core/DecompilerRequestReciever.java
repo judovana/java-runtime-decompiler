@@ -177,9 +177,11 @@ public class DecompilerRequestReciever {
             if (halt.equals("ERROR")) {
                 return ERROR_RESPONSE;
             }
-            //TODO: remove server status
+
+            vmManager.removeVmDecompilerStatus(vmManager.getVmInfoByID(vmId));
         } catch (Exception e) {
-            //logger.log
+            System.out.println("Exception when calling halt action");
+            e.printStackTrace();
         }
         return OK_RESPONSE;
     }
@@ -203,7 +205,7 @@ public class DecompilerRequestReciever {
         list.removeAll(Arrays.asList("", null));
         List<String> list1 = new ArrayList<>();
         for (String s : list) {
-            if (!s.contains("Lambda")){
+            if (!(s.contains("Lambda") | s.startsWith("["))){
                 list1.add(s);
                 java.util.Collections.sort(list1);
             }
