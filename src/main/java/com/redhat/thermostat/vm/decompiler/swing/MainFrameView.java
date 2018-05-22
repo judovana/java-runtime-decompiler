@@ -35,6 +35,16 @@ public class MainFrameView {
                 private JTextArea welcomeJTextArea;
             private BytecodeDecompilerView bytecodeDecompilerView;
 
+    JMenuBar menuBar;
+    private JMenu jMenuConnect;
+    private JMenuItem jMenuItemNewConnection;
+    private JMenu jMenuConfig;
+    private JMenuItem jMenuItemConfigure;
+    private JMenu jMenuHelp;
+    private JMenuItem jMenuItemAbout;
+    private JMenuItem jMenuItemUsage;
+    private JMenuItem jMenuItemLicense;
+
     public MainFrameView(VmManager manager){
 
         // mainFrame, mainPanel, westPanel, localVmPanel. localVmList, localVmScrollPane, localVmLabelPanel
@@ -50,7 +60,6 @@ public class MainFrameView {
         // localVmScrollPane End
 
         localVmLabelPanel = new JPanel();
-        localVmLabelPanel.setBorder(new EtchedBorder());
         localVmLabelPanel.add(new JLabel("Local Processes", SwingConstants.CENTER));
         // localVmLabelPanel End
 
@@ -66,7 +75,6 @@ public class MainFrameView {
         // remoteConnectionButton End
 
         remoteVmLabelPanel = new JPanel(new BorderLayout());
-        remoteVmLabelPanel.setBorder(new EtchedBorder());
         remoteVmLabelPanel.add(new JLabel("    Remote Processes", SwingConstants.CENTER), BorderLayout.CENTER);
         remoteVmLabelPanel.add(remoteConnectionButton, BorderLayout.EAST);
         // remoteVmLabelPanel end
@@ -129,6 +137,32 @@ public class MainFrameView {
         mainPanel.add(centerPanel, BorderLayout.CENTER);
         // mainPanel end
 
+        //menuBar, jMenuConnect, jMenuConfig, jMenuHelp
+        jMenuConnect = new JMenu("Connect");
+        jMenuItemNewConnection = new JMenuItem("New Connection");
+        jMenuConnect.add(jMenuItemNewConnection);
+        // jMenuConnect end
+
+        jMenuConfig = new JMenu("Config");
+        jMenuItemConfigure = new JMenuItem("Configure");
+        jMenuConfig.add(jMenuItemConfigure);
+        // jMenuConfig end
+
+        jMenuHelp = new JMenu("Help");
+        jMenuItemAbout = new JMenuItem("About");
+        jMenuItemUsage = new JMenuItem("Usage");
+        jMenuItemLicense = new JMenuItem("License");
+        jMenuHelp.add(jMenuItemAbout);
+        jMenuHelp.add(jMenuItemUsage);
+        jMenuHelp.add(jMenuItemLicense);
+        // jMenuHelp end
+
+        menuBar = new JMenuBar();
+        menuBar.add(jMenuConnect);
+        menuBar.add(jMenuConfig);
+        menuBar.add(jMenuHelp);
+        // menuBar end
+
 
         mainFrame = new JFrame();
         mainFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -137,6 +171,7 @@ public class MainFrameView {
         mainFrame.setMinimumSize(new Dimension(700,340));
         mainFrame.setLayout(new BorderLayout());
         mainFrame.setLocationRelativeTo(null);
+        mainFrame.setJMenuBar(menuBar);
         mainFrame.add(mainPanel, BorderLayout.CENTER);
         mainFrame.setVisible(true);
         // mainFrame End
@@ -162,9 +197,11 @@ public class MainFrameView {
                                     mainFrame.repaint();
                                 } else {
                                     bytecodeDecompilerView = new BytecodeDecompilerView();
-                                    VmDecompilerInformationController controller = new VmDecompilerInformationController(bytecodeDecompilerView, localVmList.getSelectedValue(), manager);
                                     centerPanel.removeAll();
+                                    mainFrame.revalidate();
+                                    mainFrame.repaint();
                                     centerPanel.add(bytecodeDecompilerView.getBytecodeDecompilerPanel(), BorderLayout.CENTER);
+                                    VmDecompilerInformationController controller = new VmDecompilerInformationController(bytecodeDecompilerView, localVmList.getSelectedValue(), manager);
                                     mainFrame.revalidate();
                                 }
                             } catch (Throwable t) {
