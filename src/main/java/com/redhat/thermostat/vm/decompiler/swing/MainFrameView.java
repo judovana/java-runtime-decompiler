@@ -35,7 +35,7 @@ public class MainFrameView {
                 private JTextArea welcomeJTextArea;
             private BytecodeDecompilerView bytecodeDecompilerView;
 
-    JMenuBar menuBar;
+    private JMenuBar menuBar;
     private JMenu jMenuConnect;
     private JMenuItem jMenuItemNewConnection;
     private JMenu jMenuConfig;
@@ -44,6 +44,12 @@ public class MainFrameView {
     private JMenuItem jMenuItemAbout;
     private JMenuItem jMenuItemUsage;
     private JMenuItem jMenuItemLicense;
+
+    private JDialog configureFrame;
+
+    public JFrame getMainFrame() {
+        return mainFrame;
+    }
 
     public MainFrameView(VmManager manager){
 
@@ -145,6 +151,13 @@ public class MainFrameView {
 
         jMenuConfig = new JMenu("Config");
         jMenuItemConfigure = new JMenuItem("Configure");
+        jMenuItemConfigure.addActionListener(actionEvent -> {
+            if (configureFrame == null){
+                configureFrame = new ConfigureView(this);
+            } else {
+                configureFrame.setVisible(true);
+            }
+        });
         jMenuConfig.add(jMenuItemConfigure);
         // jMenuConfig end
 

@@ -1,0 +1,131 @@
+package com.redhat.thermostat.vm.decompiler.swing;
+
+import javax.swing.*;
+import javax.swing.border.EtchedBorder;
+import java.awt.*;
+
+public class ConfigureView extends JDialog{
+
+    private JPanel configureAgentPathPanel;
+    private JPanel configureDecompilerPathPanel;
+    private JPanel configureOKCancelPanel;
+    private JButton okButton;
+    private JButton cancelButton;
+    private JPanel okCancelPanel;
+
+
+    JPanel mainPanel;
+
+    public class confBrosePanel extends JPanel{
+
+        public JTextField textField;
+        public JLabel label;
+        public JButton browseButton;
+
+        confBrosePanel(String label){
+            this(label, "Browse");
+        }
+
+        confBrosePanel(String label, String ButtonLabel){
+
+            this.textField = new JTextField();
+            this.label = new JLabel(label);
+            this.browseButton = new JButton(ButtonLabel);
+
+            this.setLayout(new GridBagLayout());
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.anchor = GridBagConstraints.WEST;
+            gbc.fill = GridBagConstraints.BOTH;
+            gbc.gridx = 1;
+            this.add(this.label, gbc);
+            gbc.gridx = 0;
+            gbc.gridy = 1;
+            this.add(Box.createHorizontalStrut(20), gbc);
+            gbc.weightx = 1;
+            gbc.gridx = 1;
+            this.add(textField, gbc);
+            gbc.weightx = 0;
+            gbc.gridx = 2;
+            this.add(Box.createHorizontalStrut(20), gbc);
+            gbc.gridx = 3;
+            this.add(browseButton, gbc);
+            gbc.gridx = 4;
+            this.add(Box.createHorizontalStrut(20), gbc);
+            this.setPreferredSize(new Dimension(0,120));
+        }
+    }
+
+
+    ConfigureView(MainFrameView mainFrameView){
+
+        configureAgentPathPanel = new confBrosePanel("Path to agent");
+        configureDecompilerPathPanel = new confBrosePanel("Path to decompiler");
+
+        okButton = new JButton("OK");
+        okButton.setPreferredSize(new Dimension(90,30));
+
+        cancelButton = new JButton("Cancel");
+        cancelButton.setPreferredSize(new Dimension(90,30));
+
+        okCancelPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridy = 0;
+        gbc.weightx = 1;
+        okCancelPanel.add(Box.createHorizontalGlue(), gbc);
+        gbc.weightx = 0;
+        gbc.gridx = 1;
+        okCancelPanel.add(okButton, gbc);
+        gbc.gridx = 2;
+        okCancelPanel.add(Box.createHorizontalStrut(15), gbc);
+        gbc.gridx = 3;
+        okCancelPanel.add(cancelButton, gbc);
+        gbc.gridx = 4;
+        okCancelPanel.add(Box.createHorizontalStrut(20), gbc);
+
+        configureOKCancelPanel = new JPanel(new GridBagLayout());
+        configureOKCancelPanel.setBorder(new EtchedBorder());
+        gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        gbc.weightx = 1;
+        gbc.weighty = 1;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        configureOKCancelPanel.add(Box.createHorizontalGlue(), gbc);
+        gbc.gridx = 1;
+        configureOKCancelPanel.add(okCancelPanel, gbc);
+        configureOKCancelPanel.setPreferredSize(new Dimension(0,60));
+
+
+        mainPanel = new JPanel(new GridBagLayout());
+        gbc = new GridBagConstraints();
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weightx = 1;
+        gbc.weighty = 0;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        mainPanel.add(configureAgentPathPanel, gbc);
+        gbc.gridy = 1;
+        mainPanel.add(configureDecompilerPathPanel, gbc);
+        gbc.gridy = 2;
+        gbc.weighty = 1;
+        mainPanel.add(Box.createVerticalGlue(),gbc);
+        gbc.gridy = 3;
+        gbc.weighty = 0;
+        mainPanel.add(configureOKCancelPanel, gbc);
+
+
+        this.setTitle("Configuration");
+        this.setSize(new Dimension(800,400));
+        this.setMinimumSize(new Dimension(250,330));
+        this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        this.setLocationRelativeTo(mainFrameView.getMainFrame());
+        this.setModalityType(ModalityType.APPLICATION_MODAL);
+        this.add(mainPanel);
+        this.setVisible(true);
+    }
+
+}
