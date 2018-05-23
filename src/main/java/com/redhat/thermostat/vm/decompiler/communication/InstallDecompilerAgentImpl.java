@@ -1,5 +1,7 @@
 package com.redhat.thermostat.vm.decompiler.communication;
 
+import com.redhat.thermostat.vm.decompiler.data.Config;
+
 import com.sun.tools.attach.AgentInitializationException;
 import com.sun.tools.attach.AgentLoadException;
 import com.sun.tools.attach.AttachNotSupportedException;
@@ -92,6 +94,7 @@ public class InstallDecompilerAgentImpl {
     private boolean useModuleLoader;
     private String props;
     private VirtualMachine vm;
+    private Config config = Config.getConfig();
 
     public static String getSystemProperty(String id, String property) {
         return getProperty(id, property);
@@ -315,25 +318,7 @@ public class InstallDecompilerAgentImpl {
     
     private void locateAgent() throws IOException
     {
-        // use the current system property in preference to the environment setting
-
-        String bmJar = System.getenv(DECOMPILER_JAR_ENV_VARIABLE);
-        try {
-            JarFile jarFile = new JarFile(bmJar);
-            agentJar=System.getenv(DECOMPILER_JAR_ENV_VARIABLE);
-            return;
-        } catch (IOException e) {}
-    
-        String bmHome = System.getProperty(DECOMPILER_HOME_SYSTEM_PROP);
-        if (bmHome == null || bmHome.length() == 0) {
-            bmHome = System.getenv(DECOMPILER_HOME_ENV_VARIABLE);
-        }      
-        if (bmHome == null || bmHome.length() == 0 || bmHome.equals("null")) {
-            agentJar = locateJarFromClasspath(DECOMPILER_AGENT_NAME);
-        } else {
-            agentJar = locateJarFromHomeDir(bmHome, DECOMPILER_AGENT_BASE_DIR, DECOMPILER_AGENT_NAME);
-
-        }
+        agentJar = config.getAgentPath();
     }
 
     /**

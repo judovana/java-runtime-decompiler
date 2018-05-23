@@ -1,17 +1,23 @@
 package com.redhat.thermostat.vm.decompiler.swing;
 
+import com.redhat.thermostat.vm.decompiler.data.Config;
+
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
 
 public class ConfigureView extends JDialog{
 
-    private JPanel configureAgentPathPanel;
-    private JPanel configureDecompilerPathPanel;
+    private confBrosePanel configureAgentPathPanel;
+    private confBrosePanel configureDecompilerPathPanel;
     private JPanel configureOKCancelPanel;
     private JButton okButton;
     private JButton cancelButton;
     private JPanel okCancelPanel;
+    private Config config = Config.getConfig();
 
 
     JPanel mainPanel;
@@ -59,12 +65,48 @@ public class ConfigureView extends JDialog{
     ConfigureView(MainFrameView mainFrameView){
 
         configureAgentPathPanel = new confBrosePanel("Path to agent");
+        configureAgentPathPanel.textField.setText(config.getAgentPath());
+        configureAgentPathPanel.browseButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                JFileChooser chooser = new JFileChooser();
+                int returnVar = chooser.showOpenDialog(configureAgentPathPanel);
+                if (returnVar == JFileChooser.APPROVE_OPTION){
+                    configureAgentPathPanel.textField.setText(chooser.getSelectedFile().getPath());
+                }
+            }
+        });
+
         configureDecompilerPathPanel = new confBrosePanel("Path to decompiler");
+        configureDecompilerPathPanel.textField.setText(config.getDecompilerPath());
+        configureDecompilerPathPanel.browseButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                JFileChooser chooser = new JFileChooser();
+                int returnVar = chooser.showOpenDialog(configureDecompilerPathPanel);
+                if (returnVar == JFileChooser.APPROVE_OPTION){
+                    configureDecompilerPathPanel.textField.setText(chooser.getSelectedFile().getPath());
+                }
+            }
+        });
 
         okButton = new JButton("OK");
+        okButton.addActionListener(actionEvent -> {
+            config.setAgentPath(configureAgentPathPanel.textField.getText());
+            config.setDecompilerPath(configureDecompilerPathPanel.textField.getText());
+            try {
+                config.saveConfigFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            dispose();
+        });
         okButton.setPreferredSize(new Dimension(90,30));
 
         cancelButton = new JButton("Cancel");
+        cancelButton.addActionListener(actionEvent -> {
+            dispose();
+        });
         cancelButton.setPreferredSize(new Dimension(90,30));
 
         okCancelPanel = new JPanel(new GridBagLayout());

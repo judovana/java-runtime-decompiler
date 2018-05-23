@@ -120,10 +120,7 @@ public class MainFrameView {
         welcomeJTextArea = new JTextArea(20,40);
         welcomeJTextArea.setText("Welcome to Java-Runtime-Decompiler\n" +
                 "\n" +
-                "To start click on one of the VMs on the left panel.\n" +
-                "\n" +
-                "Make sure you have set \"THERMOSTAT_DECOMPILER_AGENT_JAR\" environment variable\n" +
-                "to absolute path of decompiler agent.");
+                "To start click on one of the VMs on the left panel.");
         welcomeJTextArea.setFont(new Font(welcomeJTextArea.getFont().getFontName(), welcomeJTextArea.getFont().getStyle(), 20));
         welcomeJTextArea.setLineWrap(true);
         welcomeJTextArea.setWrapStyleWord(true);
@@ -152,11 +149,7 @@ public class MainFrameView {
         jMenuConfig = new JMenu("Config");
         jMenuItemConfigure = new JMenuItem("Configure");
         jMenuItemConfigure.addActionListener(actionEvent -> {
-            if (configureFrame == null){
-                configureFrame = new ConfigureView(this);
-            } else {
-                configureFrame.setVisible(true);
-            }
+            configureFrame = new ConfigureView(this);
         });
         jMenuConfig.add(jMenuItemConfigure);
         // jMenuConfig end

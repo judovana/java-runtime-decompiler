@@ -4,6 +4,7 @@ import com.redhat.thermostat.vm.decompiler.core.AgentRequestAction;
 import com.redhat.thermostat.vm.decompiler.core.AgentRequestAction.RequestAction;
 import com.redhat.thermostat.vm.decompiler.core.DecompilerRequestReciever;
 import com.redhat.thermostat.vm.decompiler.core.VmDecompilerStatus;
+import com.redhat.thermostat.vm.decompiler.data.Config;
 import com.redhat.thermostat.vm.decompiler.data.VmInfo;
 import com.redhat.thermostat.vm.decompiler.data.VmManager;
 
@@ -74,7 +75,7 @@ public class VmDecompilerInformationController {
             byte[] bytes =  Base64.getDecoder().decode(bytesInString);
             try {
                 String path = bytesToFile("temporary-byte-file", bytes);
-                Process proc = Runtime.getRuntime().exec("java -jar " + System.getenv(PATH_TO_DECOMPILER_ENV_VAR) + " " + path);
+                Process proc = Runtime.getRuntime().exec("java -jar " + Config.getConfig().getDecompilerPath() + " " + path);
                 InputStream in = proc.getInputStream();
                 decompiledClass = new BufferedReader(new InputStreamReader(in))
                         .lines().collect(Collectors.joining("\n"));;

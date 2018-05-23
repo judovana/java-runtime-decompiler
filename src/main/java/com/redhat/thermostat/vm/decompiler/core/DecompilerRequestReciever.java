@@ -178,10 +178,11 @@ public class DecompilerRequestReciever {
                 return ERROR_RESPONSE;
             }
 
-            vmManager.removeVmDecompilerStatus(vmManager.getVmInfoByID(vmId));
         } catch (Exception e) {
             System.out.println("Exception when calling halt action");
             e.printStackTrace();
+        } finally {
+            vmManager.removeVmDecompilerStatus(vmManager.getVmInfoByID(vmId));
         }
         return OK_RESPONSE;
     }
