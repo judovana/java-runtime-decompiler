@@ -45,7 +45,8 @@ public class MainFrameView {
     private JMenuItem jMenuItemUsage;
     private JMenuItem jMenuItemLicense;
 
-    private JDialog configureFrame;
+    private JDialog configureDialog;
+    private JDialog licenseDialog;
 
     public JFrame getMainFrame() {
         return mainFrame;
@@ -149,7 +150,7 @@ public class MainFrameView {
         jMenuConfig = new JMenu("Config");
         jMenuItemConfigure = new JMenuItem("Configure");
         jMenuItemConfigure.addActionListener(actionEvent -> {
-            configureFrame = new ConfigureView(this);
+            configureDialog = new ConfigureView(this);
         });
         jMenuConfig.add(jMenuItemConfigure);
         // jMenuConfig end
@@ -158,6 +159,9 @@ public class MainFrameView {
         jMenuItemAbout = new JMenuItem("About");
         jMenuItemUsage = new JMenuItem("Usage");
         jMenuItemLicense = new JMenuItem("License");
+        jMenuItemLicense.addActionListener(actionEvent -> {
+            licenseDialog = new LicenseView(this);
+        });
         jMenuHelp.add(jMenuItemAbout);
         jMenuHelp.add(jMenuItemUsage);
         jMenuHelp.add(jMenuItemLicense);
