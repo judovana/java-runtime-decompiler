@@ -3,6 +3,8 @@ package com.redhat.thermostat.vm.decompiler.data;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -46,7 +48,13 @@ public class Config {
     }
 
     Config(){
-        configFilePath = System.getProperty("user.dir") + "/target/config.cfg";
+        String parentDir = null;
+        try {
+            parentDir = new File(Config.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        configFilePath = parentDir + "/config.cfg";
         try {
             loadConfigFile();
         } catch (IOException e) {
@@ -62,8 +70,6 @@ public class Config {
                 String[] kv = s.split("===");
                 configMap.put(kv[0], kv[1]);
             });
-        } else {
-            confFile.createNewFile();
         }
     }
 
