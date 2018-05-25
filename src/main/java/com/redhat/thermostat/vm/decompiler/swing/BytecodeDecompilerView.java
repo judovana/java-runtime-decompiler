@@ -16,7 +16,7 @@ import javax.swing.SwingWorker;
 import javax.swing.border.EtchedBorder;
 
 /**
- * Class that creates the view of tab for thermostat GUI
+ * Class that creates GUI for attached VM.
  */
 public class BytecodeDecompilerView {
 
@@ -25,14 +25,12 @@ public class BytecodeDecompilerView {
     JSplitPane splitPane;
     private JPanel leftMainPanel;
     private JPanel rightMainPanel;
-    private JScrollPane rightScrollPanel;
     private JScrollPane leftScrollPanel;
     private JList<String> listOfClasses;
     private RTextScrollPane bytecodeScrollPane;
     private RSyntaxTextArea bytecodeSyntaxTextArea;
     private ActionListener bytesActionListener;
     private ActionListener classesActionListener;
-    private ActionListener haltActionListener;
 
     private boolean splitPaneFirstResize = true;
 
@@ -51,7 +49,7 @@ public class BytecodeDecompilerView {
 
         listOfClasses = new JList<>();
         listOfClasses.setFixedCellHeight(20);
-        listOfClasses.setListData(new String[]{"Click button above marked", "refresh loaded class list", "in order to start."});
+        listOfClasses.setListData(new String[]{"Classes have not been loaded yet", "This can take up to", "few minutes on large applications."});
         listOfClasses.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -177,14 +175,6 @@ public class BytecodeDecompilerView {
 
     public void setBytesActionListener(ActionListener listener) {
         bytesActionListener = listener;
-    }
-
-    public void setHaltActionListener(ActionListener listener) {
-        haltActionListener = listener;
-    }
-
-    public void haltServer(){
-        haltActionListener.actionPerformed(new ActionEvent(this, 3, null));
     }
 
     /**

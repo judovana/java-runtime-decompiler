@@ -17,24 +17,30 @@ import java.util.stream.Collectors;
  */
 public class VmDecompilerInformationController {
 
-    private final VmInfo vmInfo;
-    private final BytecodeDecompilerView view;
+    private final MainFrameView mainFrameView;
+    private final BytecodeDecompilerView bytecodeDecompilerView;
     private VmManager vmManager;
-    private static final String PATH_TO_DECOMPILER_ENV_VAR = "PATH_TO_GIVEN_DECOMPILER_JAR";
+    private VmInfo vmInfo;
 
-    VmDecompilerInformationController(final BytecodeDecompilerView view, VmInfo vmInfo, VmManager vmManager) {
-        this.vmInfo = vmInfo;
-        this.view = view;
+    public VmDecompilerInformationController(MainFrameView mainFrameView, VmManager vmManager) {
+        this.mainFrameView = mainFrameView;
+        this.bytecodeDecompilerView = mainFrameView.getBytecodeDecompilerView();
         this.vmManager = vmManager;
 
+        mainFrameView.updateLocalVmList(vmManager.getAllVm());
+
+        bytecodeDecompilerView.setClassesActionListener(e -> loadClassNames());
+
+        bytecodeDecompilerView.setBytesActionListener(e -> loadClassBytecode(e.getActionCommand()));
+
+        mainFrameView.setVmChanging(e -> changeVm(e.getActionCommand()));
+
+        mainFrameView.setHaltAgentListener(e -> haltAgent());
+
+    }
+    private void changeVm(String vmId){
+        this.vmInfo = vmManager.getVmInfoByID(vmId);
         loadClassNames();
-
-        view.setClassesActionListener(e -> loadClassNames());
-
-        view.setBytesActionListener(e -> loadClassBytecode(e.getActionCommand()));
-
-        view.setHaltActionListener(e -> haltAgent());
-
     }
 
     private void loadClassNames() {
@@ -48,10 +54,10 @@ public class VmDecompilerInformationController {
                 vmStatus = vmManager.getVmDecompilerStatus(vmInfo);
                 classes = vmStatus.getLoadedClassNames();
             }
-            view.reloadClassList(classes);
+            bytecodeDecompilerView.reloadClassList(classes);
         } else {
             System.err.println("Classes couldn't be loaded");
-            //view.handleError(new LocalizedString(listener.getErrorMessage()));
+            //bytecodeDecompilerView.handleError(new LocalizedString(listener.getErrorMessage()));
         }
         return;// listener;
     }
@@ -81,21 +87,23 @@ public class VmDecompilerInformationController {
                         .lines().collect(Collectors.joining("\n"));;
 
             } catch (IOException e) {
-                //view.handleError(new LocalizedString(listener.getErrorMessage()));
+                //bytecodeDecompilerView.handleError(new LocalizedString(listener.getErrorMessage()));
             }
-            view.reloadTextField(decompiledClass);
+            bytecodeDecompilerView.reloadTextField(decompiledClass);
         } else {
-            //view.handleError(new LocalizedString(listener.getErrorMessage()));
+            //bytecodeDecompilerView.handleError(new LocalizedString(listener.getErrorMessage()));
         }
-
-        return; //listener;
     }
 
     private void haltAgent(){
-        AgentRequestAction request = createRequest("", RequestAction.HALT);
-        String response = submitRequest(request);
-        if (response.equals("ok")){
-            System.out.println("Agent closing socket and exiting");
+        try {
+            AgentRequestAction request = createRequest("", RequestAction.HALT);
+            String response = submitRequest(request);
+            if (response.equals("ok")){
+                System.out.println("Agent closing socket and exiting");
+            }
+        } catch (Exception e){
+            System.out.println("Error when sending request to halt agent");
         }
     }
 

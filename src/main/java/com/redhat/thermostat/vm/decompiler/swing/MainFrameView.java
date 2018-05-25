@@ -1,39 +1,34 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.redhat.thermostat.vm.decompiler.swing;
 
 import com.redhat.thermostat.vm.decompiler.data.VmInfo;
-import com.redhat.thermostat.vm.decompiler.data.VmManager;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.List;
 
 public class MainFrameView {
 
     private JFrame mainFrame;
-        private JPanel mainPanel;
-            private JPanel westPanel;
-                private JPanel localVmPanel;
-                    private JScrollPane localVmScrollPane;
-                        private JPanel localVmLabelPanel;
-                        private JList<VmInfo> localVmList;
-                private JPanel remoteVmPanel;
-                    private JPanel remoteVmLabelPanel;
-                        private JButton remoteConnectionButton;
-                    private JScrollPane remoteVmScrollPane;
-                        private JList remoteVmList;
-        private JPanel centerPanel;
-            private JPanel welcomePanel;
-                private JTextArea welcomeJTextArea;
-            private BytecodeDecompilerView bytecodeDecompilerView;
+    private JPanel mainPanel;
+    private JPanel westPanel;
+    private JPanel localVmPanel;
+    private JScrollPane localVmScrollPane;
+    private JPanel localVmLabelPanel;
+    private JList<VmInfo> localVmList;
+    private JPanel remoteVmPanel;
+    private JPanel remoteVmLabelPanel;
+    private JButton remoteConnectionButton;
+    private JScrollPane remoteVmScrollPane;
+    private JList remoteVmList;
+    private JPanel centerPanel;
+    private JPanel welcomePanel;
+    private JTextArea welcomeJTextArea;
+    private BytecodeDecompilerView bytecodeDecompilerView;
 
     private JMenuBar menuBar;
     private JMenu jMenuConnect;
@@ -48,11 +43,29 @@ public class MainFrameView {
     private JDialog configureDialog;
     private JDialog licenseDialog;
 
+    private ActionListener vmChangingListener;
+
+    private ActionListener haltAgentListener;
+
     public JFrame getMainFrame() {
         return mainFrame;
     }
 
-    public MainFrameView(VmManager manager){
+    public BytecodeDecompilerView getBytecodeDecompilerView() {
+        return bytecodeDecompilerView;
+    }
+
+    public void setHaltAgentListener(ActionListener listener) {
+        haltAgentListener = listener;
+    }
+
+    public void setVmChanging(ActionListener listener) {
+        vmChangingListener = listener;
+    }
+
+    public MainFrameView() {
+
+        bytecodeDecompilerView = new BytecodeDecompilerView();
 
         // mainFrame, mainPanel, westPanel, localVmPanel. localVmList, localVmScrollPane, localVmLabelPanel
         localVmList = new JList<VmInfo>();
@@ -78,7 +91,7 @@ public class MainFrameView {
 
         // remoteVmPanel, remoteVmScrollPane, remoteVmLabelPanel, remoteConnectionButton
         remoteConnectionButton = new JButton("+");
-        remoteConnectionButton.setMargin( new Insets(5, 9, 5, 9) );
+        remoteConnectionButton.setMargin(new Insets(5, 9, 5, 9));
         // remoteConnectionButton End
 
         remoteVmLabelPanel = new JPanel(new BorderLayout());
@@ -90,6 +103,9 @@ public class MainFrameView {
         remoteVmList.setFixedCellHeight(80);
         remoteVmList.setCellRenderer(new VmListRenderer());
         remoteVmList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        remoteVmList.addListSelectionListener(listSelectionEvent -> {
+            changeVm(remoteVmList);
+        });
         // remoteVmList
 
         remoteVmScrollPane = new JScrollPane(remoteVmList,
@@ -114,11 +130,11 @@ public class MainFrameView {
         gbc.weighty = 0.75;
         gbc.gridy = 1;
         westPanel.add(remoteVmPanel, gbc);
-        westPanel.setPreferredSize(new Dimension(400,0));
+        westPanel.setPreferredSize(new Dimension(400, 0));
         //westPanel End
 
         // centerPanel, welcomePanel
-        welcomeJTextArea = new JTextArea(20,40);
+        welcomeJTextArea = new JTextArea(20, 40);
         welcomeJTextArea.setText("Welcome to Java-Runtime-Decompiler\n" +
                 "\n" +
                 "To start click on one of the VMs on the left panel.");
@@ -177,8 +193,8 @@ public class MainFrameView {
         mainFrame = new JFrame();
         mainFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         mainFrame.setTitle("Runtime-Decompiler");
-        mainFrame.setSize(1280,720);
-        mainFrame.setMinimumSize(new Dimension(700,340));
+        mainFrame.setSize(1280, 720);
+        mainFrame.setMinimumSize(new Dimension(700, 340));
         mainFrame.setLayout(new BorderLayout());
         mainFrame.setLocationRelativeTo(null);
         mainFrame.setJMenuBar(menuBar);
@@ -186,41 +202,10 @@ public class MainFrameView {
         mainFrame.setVisible(true);
         // mainFrame End
 
-        //Fill list with vms
-        localVmList.setListData(manager.getAllVm().toArray(new VmInfo[0]));
-
         //localVmList Listener
-        localVmList.addListSelectionListener(new ListSelectionListener() {
-            @Override
-            public void valueChanged(ListSelectionEvent listSelectionEvent) {
-                if (localVmList.getValueIsAdjusting()){
-                    new SwingWorker<Void, Void>() {
-                        @Override
-                        protected Void doInBackground() throws Exception {
-                            try {
-                                if (bytecodeDecompilerView != null){
-                                    bytecodeDecompilerView.haltServer();
-                                }
-                                if (localVmList.getSelectedValue() == null){
-                                    centerPanel.removeAll();
-                                    centerPanel.add(welcomePanel, BorderLayout.CENTER);
-                                    mainFrame.repaint();
-                                } else {
-                                    bytecodeDecompilerView = new BytecodeDecompilerView();
-                                    centerPanel.removeAll();
-                                    mainFrame.revalidate();
-                                    mainFrame.repaint();
-                                    centerPanel.add(bytecodeDecompilerView.getBytecodeDecompilerPanel(), BorderLayout.CENTER);
-                                    VmDecompilerInformationController controller = new VmDecompilerInformationController(bytecodeDecompilerView, localVmList.getSelectedValue(), manager);
-                                    mainFrame.revalidate();
-                                }
-                            } catch (Throwable t) {
-                                // log exception
-                            }
-                            return null;
-                        }
-                    }.execute();
-                }
+        localVmList.addListSelectionListener(listSelectionEvent -> {
+            if (localVmList.getValueIsAdjusting()) {
+                changeVm(localVmList);
             }
         });
 
@@ -228,10 +213,53 @@ public class MainFrameView {
         mainFrame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                if (bytecodeDecompilerView != null){
-                    bytecodeDecompilerView.haltServer();
-                }
+                sendHaltRequest();
             }
         });
+    }
+
+    private void changeVm(JList vmList) {
+        if (vmList == localVmList) {
+            remoteVmList.clearSelection();
+            switchPanel(vmList);
+        } else {
+            localVmList.clearSelection();
+            switchPanel(vmList);
+        }
+    }
+
+    private void switchPanel(JList vmlist) {
+        SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                if (vmlist.getSelectedValue() == null) {
+                    centerPanel.removeAll();
+                    centerPanel.add(welcomePanel);
+                    centerPanel.repaint();
+                    centerPanel.revalidate();
+                    sendHaltRequest();
+                } else {
+                    centerPanel.removeAll();
+                    centerPanel.add(bytecodeDecompilerView.getBytecodeDecompilerPanel());
+                    centerPanel.repaint();
+                    centerPanel.revalidate();
+                    VmInfo vmInfo = (VmInfo) vmlist.getSelectedValue();
+                    ActionEvent event = new ActionEvent(this, 1, vmInfo.getVmId());
+                    vmChangingListener.actionPerformed(event);
+                }
+                return null;
+            }
+        };
+
+        worker.execute();
+    }
+
+    private void sendHaltRequest() {
+        ActionEvent event = new ActionEvent(this, 0, null);
+        haltAgentListener.actionPerformed(event);
+    }
+
+    public void updateLocalVmList(List<VmInfo> vmList) {
+        localVmList.setListData(vmList.toArray(new VmInfo[0]));
     }
 }

@@ -6,6 +6,7 @@
 package com.redhat.thermostat.vm.decompiler.data;
 
 import com.redhat.thermostat.vm.decompiler.swing.MainFrameView;
+import com.redhat.thermostat.vm.decompiler.swing.VmDecompilerInformationController;
 
 import javax.swing.*;
 
@@ -35,7 +36,8 @@ public class Main {
         }
 
         VmManager manager = new VmManager();
-        MainFrameView mainView = new MainFrameView(manager);
+        MainFrameView mainView = new MainFrameView();
+        VmDecompilerInformationController controller = new VmDecompilerInformationController(mainView, manager);
         
     }
 
