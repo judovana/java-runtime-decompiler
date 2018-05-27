@@ -41,6 +41,7 @@ public class MainFrameView {
     private JMenuItem jMenuItemLicense;
 
     private JDialog configureDialog;
+    private JDialog newConnectionDialog;
     private JDialog licenseDialog;
 
     private ActionListener vmChangingListener;
@@ -91,6 +92,9 @@ public class MainFrameView {
 
         // remoteVmPanel, remoteVmScrollPane, remoteVmLabelPanel, remoteConnectionButton
         remoteConnectionButton = new JButton("+");
+        remoteConnectionButton.addActionListener(actionEvent -> {
+            newConnectionDialog = new newConnectionView(this);
+        });
         remoteConnectionButton.setMargin(new Insets(5, 9, 5, 9));
         // remoteConnectionButton End
 
@@ -160,6 +164,9 @@ public class MainFrameView {
         //menuBar, jMenuConnect, jMenuConfig, jMenuHelp
         jMenuConnect = new JMenu("Connect");
         jMenuItemNewConnection = new JMenuItem("New Connection");
+        jMenuItemNewConnection.addActionListener(actionEvent -> {
+            newConnectionDialog = new newConnectionView(this);
+        });
         jMenuConnect.add(jMenuItemNewConnection);
         // jMenuConnect end
 
