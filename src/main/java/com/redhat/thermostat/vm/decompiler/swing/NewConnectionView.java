@@ -3,22 +3,26 @@ package com.redhat.thermostat.vm.decompiler.swing;
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import java.awt.*;
+import java.awt.event.ActionListener;
 
-public class newConnectionView extends JDialog{
+public class NewConnectionView extends JDialog{
 
     private JPanel mainPanel;
-    private JPanel hostnamePortInputPanel;
+    private HostnamePortInputPanel hostnamePortInputPanel;
     private JPanel okCancelPanel;
     private JPanel configureOKCancelPanel;
     private JButton okButton;
     private JButton cancelButton;
 
-    public class hostnamePortInputPanel extends JPanel{
+    private ActionListener addButtonListener;
+
+    public class HostnamePortInputPanel extends JPanel{
 
         public JTextField hostnameTextField;
         public JTextField portTextField;
 
-        hostnamePortInputPanel(){
+
+        HostnamePortInputPanel(){
 
             this.hostnameTextField = new JTextField();
             this.portTextField = new JTextField();
@@ -49,13 +53,14 @@ public class newConnectionView extends JDialog{
         }
     }
 
-    newConnectionView(MainFrameView mainFrameView){
+    NewConnectionView(MainFrameView mainFrameView){
 
-        hostnamePortInputPanel = new hostnamePortInputPanel();
+        hostnamePortInputPanel = new HostnamePortInputPanel();
 
         okButton = new JButton("Add");
         okButton.addActionListener(actionEvent -> {
-            dispose(); //TODO implement ok button action
+            addButtonListener.actionPerformed(actionEvent);
+            dispose();
         });
         okButton.setPreferredSize(new Dimension(90,30));
 
@@ -121,8 +126,18 @@ public class newConnectionView extends JDialog{
         this.setLocationRelativeTo(mainFrameView.getMainFrame());
         this.setModalityType(ModalityType.APPLICATION_MODAL);
         this.add(mainPanel);
-        this.setVisible(true);
 
     }
 
+    public String getHostname(){
+        return hostnamePortInputPanel.hostnameTextField.getText();
+    }
+
+    public int getPort(){
+            return Integer.valueOf(hostnamePortInputPanel.portTextField.getText());
+    }
+
+    public void setAddButtonListener(ActionListener addButtonListener) {
+        this.addButtonListener = addButtonListener;
+    }
 }

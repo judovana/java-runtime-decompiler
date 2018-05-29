@@ -9,7 +9,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.List;
 
 public class MainFrameView {
 
@@ -41,10 +40,10 @@ public class MainFrameView {
     private JMenuItem jMenuItemLicense;
 
     private JDialog configureDialog;
-    private JDialog newConnectionDialog;
     private JDialog licenseDialog;
 
     private ActionListener vmChangingListener;
+    private ActionListener newConnectionDialogListener;
 
     private ActionListener haltAgentListener;
 
@@ -93,7 +92,7 @@ public class MainFrameView {
         // remoteVmPanel, remoteVmScrollPane, remoteVmLabelPanel, remoteConnectionButton
         remoteConnectionButton = new JButton("+");
         remoteConnectionButton.addActionListener(actionEvent -> {
-            newConnectionDialog = new newConnectionView(this);
+            newConnectionDialogListener.actionPerformed(actionEvent);
         });
         remoteConnectionButton.setMargin(new Insets(5, 9, 5, 9));
         // remoteConnectionButton End
@@ -165,7 +164,7 @@ public class MainFrameView {
         jMenuConnect = new JMenu("Connect");
         jMenuItemNewConnection = new JMenuItem("New Connection");
         jMenuItemNewConnection.addActionListener(actionEvent -> {
-            newConnectionDialog = new newConnectionView(this);
+            newConnectionDialogListener.actionPerformed(actionEvent);
         });
         jMenuConnect.add(jMenuItemNewConnection);
         // jMenuConnect end
@@ -266,7 +265,15 @@ public class MainFrameView {
         haltAgentListener.actionPerformed(event);
     }
 
-    public void updateLocalVmList(List<VmInfo> vmList) {
-        localVmList.setListData(vmList.toArray(new VmInfo[0]));
+    public void setCreateNewConnectionDialogListener(ActionListener listener){
+        this.newConnectionDialogListener = listener;
+    }
+
+    public void setLocalVmList(VmInfo[] localVmList) {
+        this.localVmList.setListData(localVmList);
+    }
+
+    public void setRemoteVmList(VmInfo[] remoteVmList) {
+        this.remoteVmList.setListData(remoteVmList);
     }
 }

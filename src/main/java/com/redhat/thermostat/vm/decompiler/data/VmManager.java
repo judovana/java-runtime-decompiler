@@ -4,6 +4,8 @@ import com.redhat.thermostat.vm.decompiler.core.VmDecompilerStatus;
 import com.sun.tools.attach.VirtualMachine;
 import com.sun.tools.attach.VirtualMachineDescriptor;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.*;
 
 /**
@@ -15,7 +17,7 @@ public class VmManager {
     HashMap<VmInfo, VmDecompilerStatus> vmStatusMap;
     HashSet<VirtualMachineDescriptor> descriptors;
 
-
+    ActionListener updateVmListsListener;
 
     public VmManager() {
         this.vmList = new ArrayList<>();
@@ -23,6 +25,25 @@ public class VmManager {
         this.descriptors = new HashSet<>();
         createVmList();
         createReferences(vmList);
+    }
+
+    public void createRemoteVM(String hostname, int port){
+        String id = UUID.randomUUID().toString();
+        VmInfo vmInfo = new VmInfo(id, -1, hostname, false);
+        VmDecompilerStatus status = new VmDecompilerStatus();
+        status.setVmId(id);
+        status.setListenPort(port);
+        vmList.add(vmInfo);
+        addVmDecompilerStatus(vmInfo, status);
+        updateLists();
+    }
+
+    public void setUpdateVmListsListener(ActionListener listener){
+        updateVmListsListener = listener;
+    }
+
+    public void updateLists(){
+        updateVmListsListener.actionPerformed(new ActionEvent(this, 0, null));
     }
 
 

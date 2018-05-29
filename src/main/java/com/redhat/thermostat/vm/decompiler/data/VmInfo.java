@@ -5,11 +5,17 @@ public class VmInfo {
     private String vmId;
     private int vmPid;
     private String vmName;
+    private boolean local;
 
     public VmInfo(String VmId, int VmPid, String vmName) {
+        this(VmId, VmPid, vmName, true);
+    }
+
+    public VmInfo(String VmId, int VmPid, String vmName, boolean local) {
         this.vmId = VmId;
         this.vmPid = VmPid;
         this.vmName = vmName;
+        this.local = local;
     }
 
     public String getVmId() {
@@ -34,5 +40,13 @@ public class VmInfo {
 
     public void setVmName(String vmName) {
         this.vmName = vmName;
+    }
+
+    public boolean isLocal() {
+        return local;
+    }
+
+    public void setLocal(boolean local) {
+        this.local = local;
     }
 }

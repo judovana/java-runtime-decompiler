@@ -9,6 +9,7 @@ import com.redhat.thermostat.vm.decompiler.data.VmInfo;
 import com.redhat.thermostat.vm.decompiler.data.VmManager;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.stream.Collectors;
 
@@ -22,12 +23,19 @@ public class VmDecompilerInformationController {
     private VmManager vmManager;
     private VmInfo vmInfo;
 
+    NewConnectionView newConnectionDialog;
+    NewConnectionController newConnectionController;
+
     public VmDecompilerInformationController(MainFrameView mainFrameView, VmManager vmManager) {
         this.mainFrameView = mainFrameView;
         this.bytecodeDecompilerView = mainFrameView.getBytecodeDecompilerView();
         this.vmManager = vmManager;
 
-        mainFrameView.updateLocalVmList(vmManager.getAllVm());
+        updateVmLists();
+
+        vmManager.setUpdateVmListsListener(e -> updateVmLists());
+
+        mainFrameView.setCreateNewConnectionDialogListener(e -> createNewConnectionDialog());
 
         bytecodeDecompilerView.setClassesActionListener(e -> loadClassNames());
 
@@ -38,8 +46,31 @@ public class VmDecompilerInformationController {
         mainFrameView.setHaltAgentListener(e -> haltAgent());
 
     }
+
+    private void createNewConnectionDialog(){
+        newConnectionDialog = new NewConnectionView(mainFrameView);
+        newConnectionController = new NewConnectionController(newConnectionDialog, vmManager);
+        newConnectionDialog.setVisible(true);
+    }
+
+    private void updateVmLists(){
+        ArrayList<VmInfo> localVms = new ArrayList<>();
+        ArrayList<VmInfo> remoteVms = new ArrayList<>();
+        vmManager.getAllVm().forEach(info -> {
+            if (info.getVmPid() > 0){
+                localVms.add(info);
+            } else {
+                remoteVms.add(info);
+            }
+        });
+        mainFrameView.setLocalVmList(localVms.toArray(new VmInfo[0]));
+        mainFrameView.setRemoteVmList(remoteVms.toArray(new VmInfo[0]));
+    }
+
     private void changeVm(String vmId){
         this.vmInfo = vmManager.getVmInfoByID(vmId);
+        bytecodeDecompilerView.reloadClassList(new String[0]);
+        bytecodeDecompilerView.reloadTextField("");
         loadClassNames();
     }
 
