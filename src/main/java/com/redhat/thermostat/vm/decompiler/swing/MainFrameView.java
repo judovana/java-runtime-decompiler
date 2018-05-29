@@ -23,7 +23,7 @@ public class MainFrameView {
     private JPanel remoteVmLabelPanel;
     private JButton remoteConnectionButton;
     private JScrollPane remoteVmScrollPane;
-    private JList remoteVmList;
+    private JList<VmInfo> remoteVmList;
     private JPanel centerPanel;
     private JPanel welcomePanel;
     private JTextArea welcomeJTextArea;
@@ -270,10 +270,18 @@ public class MainFrameView {
     }
 
     public void setLocalVmList(VmInfo[] localVmList) {
+        VmInfo selectedValue = this.localVmList.getSelectedValue();
         this.localVmList.setListData(localVmList);
+        if (selectedValue != null){
+            this.localVmList.setSelectedValue(selectedValue, true);
+        }
     }
 
     public void setRemoteVmList(VmInfo[] remoteVmList) {
+        VmInfo selectedValue = this.remoteVmList.getSelectedValue();
         this.remoteVmList.setListData(remoteVmList);
+        if (selectedValue != null){
+            this.remoteVmList.setSelectedValue(selectedValue, true);
+        }
     }
 }
