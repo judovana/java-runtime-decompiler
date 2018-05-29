@@ -73,6 +73,7 @@ public class VmManager {
                     + " ID given in the VmDecompilerStatus class. This is not"
                     + " allowed state.");
         }
+        vmInfo.setVmDecompilerStatus(status);
         vmStatusMap.put(vmInfo, status);
     }
 

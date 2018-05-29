@@ -33,9 +33,15 @@ public class VmListRenderer extends JPanel implements ListCellRenderer {
     @Override
     public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         VmInfo vminfo = (VmInfo)value;
-        pid.setText("   PID: " + vminfo.getVmId());
-        name.setText("   " + vminfo.getVmName().split(" ")[0]);
-        this.setToolTipText("<html>NAME: " + vminfo.getVmName().split(" ")[0] + "<br>PID: " + vminfo.getVmId() + "</html>");
+        if (vminfo.isLocal()){
+            name.setText("   " + vminfo.getVmName().split(" ")[0]);
+            pid.setText("   PID: " + vminfo.getVmPid());
+            this.setToolTipText("<html>NAME: " + vminfo.getVmName().split(" ")[0] + "<br>PID: " + vminfo.getVmPid() + "</html>");
+        } else {
+            name.setText("   Hostname: " + vminfo.getVmName());
+            pid.setText("   Port: " + vminfo.getVmDecompilerStatus().getListenPort());
+            this.setToolTipText("<html>Hostname: " + vminfo.getVmName() + "<br>Port: " + vminfo.getVmDecompilerStatus().getListenPort() + "</html>");
+        }
 
         if (isSelected){
             setBackground(list.getSelectionBackground());

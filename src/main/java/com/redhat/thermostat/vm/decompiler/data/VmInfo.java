@@ -1,6 +1,18 @@
 package com.redhat.thermostat.vm.decompiler.data;
 
+import com.redhat.thermostat.vm.decompiler.core.VmDecompilerStatus;
+
 public class VmInfo {
+
+    public VmDecompilerStatus getVmDecompilerStatus() {
+        return vmDecompilerStatus;
+    }
+
+    public void setVmDecompilerStatus(VmDecompilerStatus vmDecompilerStatus) {
+        this.vmDecompilerStatus = vmDecompilerStatus;
+    }
+
+    private VmDecompilerStatus vmDecompilerStatus;
 
     private String vmId;
     private int vmPid;
