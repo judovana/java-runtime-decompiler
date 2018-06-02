@@ -140,7 +140,13 @@ public class MainFrameView {
         welcomeJTextArea = new JTextArea(20, 40);
         welcomeJTextArea.setText("Welcome to Java-Runtime-Decompiler\n" +
                 "\n" +
-                "To start click on one of the VMs on the left panel.");
+                "Before you start using the application you need to select Agent and Decompiler paths.\n" +
+                "Go to menubar -> config -> configure\n" +
+                "\n" +
+                "You can get the agent here:\n" +
+                "https://github.com/pmikova/thermostat-decompiler-agent\n" +
+                "And a java decompiler here:\n" +
+                "https://bitbucket.org/mstrobel/procyon/downloads/");
         welcomeJTextArea.setFont(new Font(welcomeJTextArea.getFont().getFontName(), welcomeJTextArea.getFont().getStyle(), 20));
         welcomeJTextArea.setLineWrap(true);
         welcomeJTextArea.setWrapStyleWord(true);
