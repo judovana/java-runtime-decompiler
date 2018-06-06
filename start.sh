@@ -4,13 +4,13 @@ path=`which java`
 # go through symlinks until we are at /usr/lib/jvm/...
 while [[ ${path} != /usr/lib/jvm/* ]]
 do
-path=`readlink {path}`
+path=`readlink $path`
 done
 while [[ $(dirname "$path") != /usr/lib/jvm ]]
 do
 path="$(dirname "$path")"
 done
-export JAVA_HOME={path}
+export JAVA_HOME=$path
 
 # launch application
 java -cp ${JAVA_HOME}/lib/tools.jar:$HOME/.m2/repository/com/fifesoft/rsyntaxtextarea/2.6.1/rsyntaxtextarea-2.6.1.jar:$HOME/.m2/repository/java/java-runtime-decompiler/1.0.0-SNAPSHOT/java-runtime-decompiler-1.0.0-SNAPSHOT.jar com.redhat.thermostat.vm.decompiler.data.Main
