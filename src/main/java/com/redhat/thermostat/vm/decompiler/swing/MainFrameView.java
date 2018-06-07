@@ -250,6 +250,8 @@ public class MainFrameView {
                     centerPanel.repaint();
                     centerPanel.revalidate();
                     sendHaltRequest();
+                    ActionEvent event = new ActionEvent(this, 1, null);
+                    vmChangingListener.actionPerformed(event);
                 } else {
                     centerPanel.removeAll();
                     centerPanel.add(bytecodeDecompilerView.getBytecodeDecompilerPanel());
