@@ -11,10 +11,12 @@ public class VmDecompilerStatus{
 
     private String vmId;
     private long timestamp;
+
+    private String hostname;
     private int listenPort;
-    String[] loadedClassNames;
-    String loadedClassBytes;
-    String bytesClassName;
+    private String[] loadedClassNames;
+    private String loadedClassBytes;
+    private String bytesClassName;
 
     public VmDecompilerStatus() {
         this.bytesClassName = "";
@@ -39,6 +41,14 @@ public class VmDecompilerStatus{
     
     public void setVmId(String vmId) {
         this.vmId = vmId;
+    }
+
+    public String getHostname() {
+        return hostname;
+    }
+
+    public void setHostname(String hostname) {
+        this.hostname = hostname;
     }
 
     

@@ -105,46 +105,28 @@ public class AgentRequestAction {
     public static final String VM_ID_PARAM_NAME = "vm-id";
     public static final String VM_PID_PARAM_NAME = "vm-pid";
     public static final String ACTION_PARAM_NAME = "action";
+    public static final String HOSTNAME_PARAM_NAME = "hostname:";
     public static final String LISTEN_PORT_PARAM_NAME = "listen-port";
     public static final int NOT_ATTACHED_PORT = -1;
     public static final String CLASS_TO_DECOMPILE_NAME = "class-to-decompile";
-    private static final String CMD_CHANN_ACTION_NAME = "vm-decompiler-get-bytecode";
 
-    private static final String RECEIVER = "com.redhat.thermostat.vm.decompiler.core.DecompilerRequestReciever";
-
-    /**
-     *
-     * @param address
-     * @param vmInfo
-     * @param action
-     * @param listenPort
-     * @param name
-     * @return
-     */
-    public static AgentRequestAction create(VmInfo vmInfo, RequestAction action, int listenPort, String name) {
-        AgentRequestAction req = create(vmInfo, action, listenPort);
+    public static AgentRequestAction create(VmInfo vmInfo, String hostname, int listenPort, RequestAction action, String name) {
+        AgentRequestAction req = create(vmInfo, hostname, listenPort, action);
         req.setParameter(CLASS_TO_DECOMPILE_NAME, name);
         return req;
     }
 
-    /**
-     *
-     * @param address
-     * @param vmInfo
-     * @param action
-     * @param listenPort
-     * @return
-     */
-    public static AgentRequestAction create(VmInfo vmInfo, RequestAction action, int listenPort) {
+    public static AgentRequestAction create(VmInfo vmInfo, String hostname, int listenPort, RequestAction action) {
         AgentRequestAction req = new AgentRequestAction();
         req.setParameter(VM_ID_PARAM_NAME, vmInfo.getVmId());
         req.setParameter(VM_PID_PARAM_NAME, Integer.toString(vmInfo.getVmPid()));
         req.setParameter(ACTION_PARAM_NAME, action.toIntString());
+        req.setParameter(HOSTNAME_PARAM_NAME, hostname);
         req.setParameter(LISTEN_PORT_PARAM_NAME, Integer.toString(listenPort));
         return req;
     }
-    
-       public void setParameter(String name, String value) {
+
+    public void setParameter(String name, String value) {
         parameters.put(name, value);
     }
 

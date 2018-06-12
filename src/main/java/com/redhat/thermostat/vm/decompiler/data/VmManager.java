@@ -32,6 +32,7 @@ public class VmManager {
         VmInfo vmInfo = new VmInfo(id, -1, hostname, false);
         VmDecompilerStatus status = new VmDecompilerStatus();
         status.setVmId(id);
+        status.setHostname(hostname);
         status.setListenPort(port);
         vmList.add(vmInfo);
         addVmDecompilerStatus(vmInfo, status);

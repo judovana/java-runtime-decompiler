@@ -4,19 +4,16 @@ package com.redhat.thermostat.vm.decompiler.core;
 import com.redhat.thermostat.vm.decompiler.communication.CallDecompilerAgent;
 
 import com.redhat.thermostat.vm.decompiler.core.AgentRequestAction.RequestAction;
-import com.redhat.thermostat.vm.decompiler.data.VmInfo;
 import com.redhat.thermostat.vm.decompiler.data.VmManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * This class manages the requests that are put in queue by the controller.
  */
-public class DecompilerRequestReciever {
+public class DecompilerRequestReceiver {
 
     //private static final Logger logger = LoggingUtils.getLogger(DecompilerRequestReciever.class);
 
@@ -28,20 +25,17 @@ public class DecompilerRequestReciever {
     private static final int NOT_ATTACHED = -1;
 
 
-    public DecompilerRequestReciever(VmManager vmManager) {       
-        this(new AgentAttachManager(vmManager));
+    public DecompilerRequestReceiver(VmManager vmManager) {
+        this.attachManager = new AgentAttachManager(vmManager);
         this.vmManager = vmManager;
     }
 
-    public DecompilerRequestReciever(AgentAttachManager attachManager) {
-        this.attachManager = attachManager;
-    }
-    
     public String processRequest(AgentRequestAction request) {
         String vmId = request.getParameter(AgentRequestAction.VM_ID_PARAM_NAME);
-        String actionStr = request.getParameter(AgentRequestAction.ACTION_PARAM_NAME);
-        String portStr = request.getParameter(AgentRequestAction.LISTEN_PORT_PARAM_NAME);
         String vmPidStr = request.getParameter(AgentRequestAction.VM_PID_PARAM_NAME);
+        String hostname = request.getParameter(AgentRequestAction.HOSTNAME_PARAM_NAME);
+        String portStr = request.getParameter(AgentRequestAction.LISTEN_PORT_PARAM_NAME);
+        String actionStr = request.getParameter(AgentRequestAction.ACTION_PARAM_NAME);
         RequestAction action;
         int vmPid;
         int port;
@@ -60,13 +54,13 @@ public class DecompilerRequestReciever {
         switch (action) {
             case BYTES:
                 String className = request.getParameter(AgentRequestAction.CLASS_TO_DECOMPILE_NAME);
-                response = getByteCodeAction(port, vmId, vmPid, className);
+                response = getByteCodeAction(hostname, port, vmId, vmPid, className);
                 break;
             case CLASSES:
-                response = getAllLoadedClassesAction(port, vmId, vmPid);
+                response = getAllLoadedClassesAction(hostname, port, vmId, vmPid);
                 break;
             case HALT:
-                response = getHaltAction(port, vmId, vmPid);
+                response = getHaltAction(hostname, port, vmId, vmPid);
                 break;
             default:
                 //logger.warning("Unknown action given: " + action);
@@ -85,19 +79,22 @@ public class DecompilerRequestReciever {
         }
     }
 
-    private String getByteCodeAction(int listenPort, String vmId, int vmPid, String className) {
+    private String getByteCodeAction(String hostname, int listenPort, String vmId, int vmPid, String className) {
         int actualListenPort;
-        try {
-            actualListenPort = checkIfAgentIsLoaded(listenPort, vmId, vmPid);
-        } catch (Exception ex) {
-            //logger.log(Level.WARNING, "Failed to attach agent.");
-            return ERROR_RESPONSE;
+        if ("localhost".equals(hostname)){
+            try {
+                actualListenPort = checkIfAgentIsLoaded(listenPort, vmId, vmPid);
+            } catch (Exception ex) {
+                return ERROR_RESPONSE;
+            }
+        } else {
+            actualListenPort = listenPort;
         }
         if (actualListenPort == NOT_ATTACHED) {
             //logger.log(Level.WARNING, "Failed to attach agent.");
             return ERROR_RESPONSE;
         }
-        CallDecompilerAgent nativeAgent = new CallDecompilerAgent(actualListenPort, null);
+        CallDecompilerAgent nativeAgent = new CallDecompilerAgent(actualListenPort, hostname);
         try {
             System.out.println(className);
             String bytes = nativeAgent.submitRequest("BYTES\n" + className);
@@ -106,6 +103,7 @@ public class DecompilerRequestReciever {
 
             }
             VmDecompilerStatus status = new VmDecompilerStatus();
+            status.setHostname(hostname);
             status.setListenPort(actualListenPort);
             status.setTimeStamp(System.currentTimeMillis());
             status.setVmId(vmId);
@@ -121,12 +119,16 @@ public class DecompilerRequestReciever {
         return OK_RESPONSE;
     }
 
-    private String getAllLoadedClassesAction(int listenPort, String vmId, int vmPid) {
+    private String getAllLoadedClassesAction(String hostname, int listenPort, String vmId, int vmPid) {
         int actualListenPort;
-        try {
-            actualListenPort = checkIfAgentIsLoaded(listenPort, vmId, vmPid);
-        } catch (Exception ex) {
-            return ERROR_RESPONSE;
+        if ("localhost".equals(hostname)){
+            try {
+                actualListenPort = checkIfAgentIsLoaded(listenPort, vmId, vmPid);
+            } catch (Exception ex) {
+                return ERROR_RESPONSE;
+            }
+        } else {
+            actualListenPort = listenPort;
         }
 
         if (actualListenPort == NOT_ATTACHED) {
@@ -135,7 +137,7 @@ public class DecompilerRequestReciever {
         }
 
         try {
-            CallDecompilerAgent nativeAgent = new CallDecompilerAgent(actualListenPort, null);
+            CallDecompilerAgent nativeAgent = new CallDecompilerAgent(actualListenPort, hostname);
             String classes = nativeAgent.submitRequest("CLASSES");
 
             if ("ERROR".equals(classes)) {
@@ -143,6 +145,7 @@ public class DecompilerRequestReciever {
             }
             String[] arrayOfClasses = parseClasses(classes);
             VmDecompilerStatus status = new VmDecompilerStatus();
+            status.setHostname(hostname);
             status.setListenPort(actualListenPort);
             status.setTimeStamp(System.currentTimeMillis());
             status.setVmId(vmId);
@@ -157,13 +160,16 @@ public class DecompilerRequestReciever {
 
     }
 
-    private String getHaltAction(int listenPort, String vmId, int vmPid) {
+    private String getHaltAction(String hostname, int listenPort, String vmId, int vmPid) {
         int actualListenPort;
-        try {
-            actualListenPort = checkIfAgentIsLoaded(listenPort, vmId, vmPid);
-        } catch (Exception e) {
-            System.out.println("This agent isn't loaded");
-            return ERROR_RESPONSE;
+        if ("localhost".equals(hostname)){
+            try {
+                actualListenPort = checkIfAgentIsLoaded(listenPort, vmId, vmPid);
+            } catch (Exception ex) {
+                return ERROR_RESPONSE;
+            }
+        } else {
+            actualListenPort = listenPort;
         }
 
         if (actualListenPort == NOT_ATTACHED) {
@@ -171,7 +177,7 @@ public class DecompilerRequestReciever {
         }
 
         try {
-            CallDecompilerAgent nativeAgent = new CallDecompilerAgent(actualListenPort, null);
+            CallDecompilerAgent nativeAgent = new CallDecompilerAgent(actualListenPort, hostname);
             String halt = nativeAgent.submitRequest("HALT");
 
             if (halt.equals("ERROR")) {

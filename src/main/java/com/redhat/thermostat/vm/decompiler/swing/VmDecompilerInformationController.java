@@ -2,7 +2,7 @@ package com.redhat.thermostat.vm.decompiler.swing;
 
 import com.redhat.thermostat.vm.decompiler.core.AgentRequestAction;
 import com.redhat.thermostat.vm.decompiler.core.AgentRequestAction.RequestAction;
-import com.redhat.thermostat.vm.decompiler.core.DecompilerRequestReciever;
+import com.redhat.thermostat.vm.decompiler.core.DecompilerRequestReceiver;
 import com.redhat.thermostat.vm.decompiler.core.VmDecompilerStatus;
 import com.redhat.thermostat.vm.decompiler.data.Config;
 import com.redhat.thermostat.vm.decompiler.data.VmInfo;
@@ -141,27 +141,28 @@ public class VmDecompilerInformationController {
     private AgentRequestAction createRequest(String className, RequestAction action) {
         VmDecompilerStatus status = vmManager.getVmDecompilerStatus(vmInfo);
         int listenPort = AgentRequestAction.NOT_ATTACHED_PORT;
+        String hostname = "localhost";
         if (status != null) {
             listenPort = status.getListenPort();
+            hostname = status.getHostname();
         }
 
         AgentRequestAction request;
         if (action == RequestAction.CLASSES) {
-            request = AgentRequestAction.create(vmInfo, action, listenPort);
+            request = AgentRequestAction.create(vmInfo, hostname, listenPort, action);
         } else if (action == RequestAction.BYTES) {
-            request = AgentRequestAction.create(vmInfo, action, listenPort, className);
+            request = AgentRequestAction.create(vmInfo, hostname, listenPort, action, className);
         } else if (action == RequestAction.HALT) {
-            request = AgentRequestAction.create(vmInfo, action, listenPort);
+            request = AgentRequestAction.create(vmInfo, hostname, listenPort, action);
         } else {
             throw new AssertionError("Unknown action: " + action);
         }
-
         return request;
     }
 
     private String submitRequest(AgentRequestAction request) {
         //DecompilerAgentRequestResponseListener listener = new DecompilerAgentRequestResponseListener(latch);
-        DecompilerRequestReciever receiver = new DecompilerRequestReciever(vmManager);
+        DecompilerRequestReceiver receiver = new DecompilerRequestReceiver(vmManager);
         String response = receiver.processRequest(request);
         // wait for the request processing
 

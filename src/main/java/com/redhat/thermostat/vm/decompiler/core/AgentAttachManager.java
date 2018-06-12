@@ -32,7 +32,7 @@ public class AgentAttachManager {
 
     VmDecompilerStatus attachAgentToVm(String vmId, int vmPid)  {
         //logger.fine("Attaching agent to VM '" + vmPid + "'");
-         int attachedPort = AgentLoader.INVALID_PORT;
+        int attachedPort = AgentLoader.INVALID_PORT;
         try {
             attachedPort = loader.attach(vmId, vmPid);
         } catch (Exception ex) {
@@ -43,6 +43,7 @@ public class AgentAttachManager {
             return null;
         }
         VmDecompilerStatus status = new VmDecompilerStatus();
+        status.setHostname("localhost");
         status.setListenPort(attachedPort);
         status.setVmId(vmId);
         status.setTimeStamp(System.currentTimeMillis());
