@@ -47,19 +47,19 @@ public class MainFrameView {
 
     private ActionListener haltAgentListener;
 
-    public JFrame getMainFrame() {
+    JFrame getMainFrame() {
         return mainFrame;
     }
 
-    public BytecodeDecompilerView getBytecodeDecompilerView() {
+    BytecodeDecompilerView getBytecodeDecompilerView() {
         return bytecodeDecompilerView;
     }
 
-    public void setHaltAgentListener(ActionListener listener) {
+    void setHaltAgentListener(ActionListener listener) {
         haltAgentListener = listener;
     }
 
-    public void setVmChanging(ActionListener listener) {
+    void setVmChanging(ActionListener listener) {
         vmChangingListener = listener;
     }
 
@@ -69,9 +69,17 @@ public class MainFrameView {
 
         // mainFrame, mainPanel, westPanel, localVmPanel. localVmList, localVmScrollPane, localVmLabelPanel
         localVmList = new JList<VmInfo>();
+        localVmList.setName("localVmList");
         localVmList.setFixedCellHeight(80);
         localVmList.setCellRenderer(new VmListRenderer());
         localVmList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        //localVmList Listener
+        localVmList.addListSelectionListener(listSelectionEvent -> {
+            if (listSelectionEvent.getValueIsAdjusting()) {
+                ActionEvent event = new ActionEvent(localVmList, 0, null);
+                vmChangingListener.actionPerformed(event);
+            }
+        });
         //localVmList End
 
         localVmScrollPane = new JScrollPane(localVmList,
@@ -103,11 +111,15 @@ public class MainFrameView {
         // remoteVmLabelPanel end
 
         remoteVmList = new JList<VmInfo>();
+        remoteVmList.setName("remoteVmList");
         remoteVmList.setFixedCellHeight(80);
         remoteVmList.setCellRenderer(new VmListRenderer());
         remoteVmList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         remoteVmList.addListSelectionListener(listSelectionEvent -> {
-            changeVm(remoteVmList);
+            if (listSelectionEvent.getValueIsAdjusting()) {
+                ActionEvent event = new ActionEvent(remoteVmList, 0, null);
+                vmChangingListener.actionPerformed(event);
+            }
         });
         // remoteVmList
 
@@ -214,12 +226,6 @@ public class MainFrameView {
         mainFrame.setVisible(true);
         // mainFrame End
 
-        //localVmList Listener
-        localVmList.addListSelectionListener(listSelectionEvent -> {
-            if (localVmList.getValueIsAdjusting()) {
-                changeVm(localVmList);
-            }
-        });
 
         // Tell server to shutdown before exiting
         mainFrame.addWindowListener(new WindowAdapter() {
@@ -230,42 +236,32 @@ public class MainFrameView {
         });
     }
 
-    private void changeVm(JList vmList) {
-        if (vmList == localVmList) {
-            remoteVmList.clearSelection();
-            switchPanel(vmList);
-        } else {
-            localVmList.clearSelection();
-            switchPanel(vmList);
-        }
+    void clearLocalListSelection() {
+        localVmList.clearSelection();
     }
 
-    private void switchPanel(JList vmlist) {
-        SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
-            @Override
-            protected Void doInBackground() throws Exception {
-                if (vmlist.getSelectedValue() == null) {
-                    centerPanel.removeAll();
-                    centerPanel.add(welcomePanel);
-                    centerPanel.repaint();
-                    centerPanel.revalidate();
-                    sendHaltRequest();
-                    ActionEvent event = new ActionEvent(this, 1, null);
-                    vmChangingListener.actionPerformed(event);
-                } else {
-                    centerPanel.removeAll();
-                    centerPanel.add(bytecodeDecompilerView.getBytecodeDecompilerPanel());
-                    centerPanel.repaint();
-                    centerPanel.revalidate();
-                    VmInfo vmInfo = (VmInfo) vmlist.getSelectedValue();
-                    ActionEvent event = new ActionEvent(this, 1, vmInfo.getVmId());
-                    vmChangingListener.actionPerformed(event);
-                }
-                return null;
-            }
-        };
+    void clearRemoteListSelection() {
+        remoteVmList.clearSelection();
+    }
 
-        worker.execute();
+    /**
+     * Switches centerPanel between decompiler view and welcome view.
+     *
+     * @param isVmSelected True - Decompiler view
+     *                     / False - Welcome view
+     */
+    void switchPanel(boolean isVmSelected) {
+        if (isVmSelected) {
+            centerPanel.removeAll();
+            centerPanel.add(bytecodeDecompilerView.getBytecodeDecompilerPanel());
+            centerPanel.repaint();
+            centerPanel.revalidate();
+        } else {
+            centerPanel.removeAll();
+            centerPanel.add(welcomePanel);
+            centerPanel.repaint();
+            centerPanel.revalidate();
+        }
     }
 
     private void sendHaltRequest() {
@@ -273,23 +269,23 @@ public class MainFrameView {
         haltAgentListener.actionPerformed(event);
     }
 
-    public void setCreateNewConnectionDialogListener(ActionListener listener){
+    void setCreateNewConnectionDialogListener(ActionListener listener) {
         this.newConnectionDialogListener = listener;
     }
 
-    public void setLocalVmList(VmInfo[] localVmList) {
-        VmInfo selectedValue = this.localVmList.getSelectedValue();
-        this.localVmList.setListData(localVmList);
-        if (selectedValue != null){
-            this.localVmList.setSelectedValue(selectedValue, true);
-        }
+    void setLocalVmList(VmInfo[] vmInfos) {
+        setVmList(localVmList, vmInfos);
     }
 
-    public void setRemoteVmList(VmInfo[] remoteVmList) {
-        VmInfo selectedValue = this.remoteVmList.getSelectedValue();
-        this.remoteVmList.setListData(remoteVmList);
-        if (selectedValue != null){
-            this.remoteVmList.setSelectedValue(selectedValue, true);
+    void setRemoteVmList(VmInfo[] vmInfos) {
+        setVmList(remoteVmList, vmInfos);
+    }
+
+    private void setVmList(JList<VmInfo> vmList, VmInfo[] vmInfos) {
+        VmInfo selectedValue = vmList.getSelectedValue();
+        vmList.setListData(vmInfos);
+        if (selectedValue != null) {
+            vmList.setSelectedValue(selectedValue, true);
         }
     }
 }
