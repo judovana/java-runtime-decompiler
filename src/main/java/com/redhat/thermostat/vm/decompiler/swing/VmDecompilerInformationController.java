@@ -22,14 +22,12 @@ public class VmDecompilerInformationController {
 
     private final MainFrameView mainFrameView;
     private final BytecodeDecompilerView bytecodeDecompilerView;
+    private NewConnectionView newConnectionDialog;
+    private LoadingDialog loadingDialog;
+    private NewConnectionController newConnectionController;
     private VmManager vmManager;
     private VmInfo vmInfo;
-
     private boolean listsUpdating = false;
-
-    NewConnectionView newConnectionDialog;
-    LoadingDialog loadingDialog;
-    NewConnectionController newConnectionController;
 
     public VmDecompilerInformationController(MainFrameView mainFrameView, VmManager vmManager) {
         this.mainFrameView = mainFrameView;
@@ -84,9 +82,7 @@ public class VmDecompilerInformationController {
             if (selectedVmInfo != null) {
                 new Thread(() -> {
                     this.vmInfo = selectedVmInfo;
-                    showDialog();
                     loadClassNames();
-                    hideDialog();
                 }).start();
             }
         }
@@ -111,7 +107,7 @@ public class VmDecompilerInformationController {
         listsUpdating = false;
     }
 
-    void showDialog() {
+    private void showLoadingDialog() {
         new Thread(() -> {
             loadingDialog = new LoadingDialog();
             loadingDialog.setAbortActionListener(e ->
@@ -120,11 +116,11 @@ public class VmDecompilerInformationController {
         }).start();
     }
 
-    void hideDialog() {
+    private void hideLoadingDialog() {
         loadingDialog.setVisible(false);
     }
 
-    void abortAndCleanup() {
+    private void abortAndCleanup() {
         mainFrameView.switchPanel(false);
         mainFrameView.getBytecodeDecompilerView().reloadClassList(new String[0]);
         mainFrameView.getBytecodeDecompilerView().reloadTextField("");
@@ -134,26 +130,29 @@ public class VmDecompilerInformationController {
         mainFrameView.clearLocalListSelection();
         mainFrameView.clearRemoteListSelection();
         listsUpdating = false;
-        hideDialog();
+        hideLoadingDialog();
     }
 
+    /**
+     * Sends request for classes. If "ok" response is received updates classes list.
+     * If "error" response is received shows an error dialog.
+     */
     private void loadClassNames() {
+        showLoadingDialog();
         AgentRequestAction request = createRequest("", RequestAction.CLASSES);
-        //DecompilerAgentRequestResponseListener listener = 
         String response = submitRequest(request);
         if (response.equals("ok")) {
             VmDecompilerStatus vmStatus = vmManager.getVmDecompilerStatus(vmInfo);
             String[] classes = vmStatus.getLoadedClassNames();
-            while (classes.length == 0) {
-                vmStatus = vmManager.getVmDecompilerStatus(vmInfo);
-                classes = vmStatus.getLoadedClassNames();
-            }
             bytecodeDecompilerView.reloadClassList(classes);
-        } else {
-            System.err.println("Classes couldn't be loaded");
-            //bytecodeDecompilerView.handleError(new LocalizedString(listener.getErrorMessage()));
         }
-        return;// listener;
+        hideLoadingDialog();
+        if (response.equals("error")) {
+            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(),
+                    "Classes couldn't be loaded.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void loadClassBytecode(String name) {
@@ -191,6 +190,9 @@ public class VmDecompilerInformationController {
     }
 
     private void haltAgent() {
+        if (vmInfo == null) {
+            return;
+        }
         try {
             AgentRequestAction request = createRequest("", RequestAction.HALT);
             String response = submitRequest(request);
@@ -200,6 +202,7 @@ public class VmDecompilerInformationController {
         } catch (Exception e) {
             System.out.println("Error when sending request to halt agent");
         }
+        vmInfo = null;
     }
 
     private AgentRequestAction createRequest(String className, RequestAction action) {
