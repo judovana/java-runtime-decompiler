@@ -1,10 +1,7 @@
 package com.redhat.thermostat.vm.decompiler.data;
 
-
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -12,23 +9,56 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * Singleton class for storing and retrieving configuration strings.
+ */
 public class Config {
 
-    private static Config config = new Config();
+    private static Config config;
+    private HashMap<String, String> configMap;
+    private String XDG_CONFIG_HOME;
+    private String configFilePath;
 
-    public static Config getConfig(){
-        return config;
+    private Config() {
+        XDG_CONFIG_HOME = System.getenv("XDG_CONFIG_HOME");
+        if (XDG_CONFIG_HOME == null || XDG_CONFIG_HOME.isEmpty()) {
+            XDG_CONFIG_HOME = System.getenv("HOME") + "/.config";
+        }
+        String parentDir = XDG_CONFIG_HOME + "/java-runtime-decompiler";
+        File parentDirectoryFile = new File(parentDir);
+        if (parentDirectoryFile.exists()) {
+            if (parentDirectoryFile.isFile()) {
+                System.err.println("Found a file where directory was expected");
+            }
+        } else {
+            if (!parentDirectoryFile.mkdir()) {
+                System.out.println(parentDirectoryFile.getPath());
+                System.out.println("Directory couldn't be created");
+            }
+        }
+
+        configFilePath = parentDir + "/config.cfg";
+
+        try {
+            loadConfigFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    public HashMap<String, String> configMap;
-    private String configFilePath;
+    public static synchronized Config getConfig() {
+        if (config == null) {
+            config = new Config();
+        }
+        return config;
+    }
 
     public String getAgentPath() {
         return configMap.get("AGENT_PATH");
     }
 
     public void setAgentPath(String agentPath) {
-        if (agentPath.endsWith(".jar")){
+        if (agentPath.endsWith(".jar")) {
             configMap.put("AGENT_PATH", agentPath);
         } else {
             System.err.println("Agent must be a .jar file");
@@ -40,29 +70,14 @@ public class Config {
     }
 
     public void setDecompilerPath(String decompilerPath) {
-        if (decompilerPath.endsWith(".jar")){
+        if (decompilerPath.endsWith(".jar")) {
             configMap.put("DECOMPILER_PATH", decompilerPath);
         } else {
-            System.err.println("Decomiler must be a .jar file");
+            System.err.println("Decompiler must be a .jar file");
         }
     }
 
-    Config(){
-        String parentDir = null;
-        try {
-            parentDir = new File(Config.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-        configFilePath = parentDir + "/config.cfg";
-        try {
-            loadConfigFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void loadConfigFile() throws IOException {
+    private void loadConfigFile() throws IOException {
         configMap = new HashMap<>();
         File confFile = new File(configFilePath);
         if (confFile.exists()) {
@@ -75,11 +90,11 @@ public class Config {
 
     public void saveConfigFile() throws IOException {
         File confFile = new File(configFilePath);
-        if (!confFile.exists()){
+        if (!confFile.exists()) {
             confFile.createNewFile();
         }
         List<String> lines = new ArrayList<>();
-        for (String key: configMap.keySet()){
+        for (String key : configMap.keySet()) {
             lines.add(key + "===" + configMap.get(key));
         }
         Files.write(Paths.get(configFilePath), lines, Charset.forName("UTF-8"));
