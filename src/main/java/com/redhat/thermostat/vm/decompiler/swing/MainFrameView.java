@@ -5,10 +5,7 @@ import com.redhat.thermostat.vm.decompiler.data.VmInfo;
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 
 public class MainFrameView {
 
@@ -67,8 +64,20 @@ public class MainFrameView {
 
         bytecodeDecompilerView = new BytecodeDecompilerView();
 
+        /**
+         * Custom JList that disables selection with mouse drag.
+         */
+        class UndragableJList extends JList{
+            @Override
+            protected void processMouseMotionEvent(MouseEvent e) {
+                if(MouseEvent.MOUSE_DRAGGED != e.getID()) {
+                    super.processMouseMotionEvent(e);
+                }
+            }
+        }
+
         // mainFrame, mainPanel, westPanel, localVmPanel. localVmList, localVmScrollPane, localVmLabelPanel
-        localVmList = new JList<VmInfo>();
+        localVmList = new UndragableJList();
         localVmList.setName("localVmList");
         localVmList.setFixedCellHeight(80);
         localVmList.setCellRenderer(new VmListRenderer());
@@ -110,7 +119,7 @@ public class MainFrameView {
         remoteVmLabelPanel.add(remoteConnectionButton, BorderLayout.EAST);
         // remoteVmLabelPanel end
 
-        remoteVmList = new JList<VmInfo>();
+        remoteVmList = new UndragableJList();
         remoteVmList.setName("remoteVmList");
         remoteVmList.setFixedCellHeight(80);
         remoteVmList.setCellRenderer(new VmListRenderer());
