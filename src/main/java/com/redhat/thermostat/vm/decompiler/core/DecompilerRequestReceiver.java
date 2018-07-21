@@ -206,7 +206,7 @@ public class DecompilerRequestReceiver {
         return actualListenPort;
     }
 
-    private String[] parseClasses(String classes) throws Exception {
+    private String[] parseClasses(String classes){
         String[] array = classes.split(";");
         List<String> list = new ArrayList<>(Arrays.asList(array));
         list.removeAll(Arrays.asList("", null));
@@ -214,9 +214,9 @@ public class DecompilerRequestReceiver {
         for (String s : list) {
             if (!(s.contains("Lambda") | s.startsWith("["))){
                 list1.add(s);
-                java.util.Collections.sort(list1);
             }
         }
+        java.util.Collections.sort(list1);
         return list1.toArray(new String[]{});
 
     }
