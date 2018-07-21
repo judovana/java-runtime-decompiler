@@ -117,6 +117,12 @@ public class VmDecompilerInformationController {
     }
 
     private void hideLoadingDialog() {
+        // Avoid race-conditions by keeping dialog open for 100ms.
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         loadingDialog.setVisible(false);
     }
 
