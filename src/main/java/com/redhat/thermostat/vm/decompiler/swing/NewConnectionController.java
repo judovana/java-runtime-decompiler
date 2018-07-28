@@ -2,6 +2,8 @@ package com.redhat.thermostat.vm.decompiler.swing;
 
 import com.redhat.thermostat.vm.decompiler.data.VmManager;
 
+import javax.swing.*;
+
 public class NewConnectionController {
 
     NewConnectionView newConnectionView;
@@ -14,11 +16,34 @@ public class NewConnectionController {
         newConnectionView.setAddButtonListener(e -> addRemoteVmInfo());
     }
 
-    public void addRemoteVmInfo(){
+    private void addRemoteVmInfo(){
         String hostname = newConnectionView.getHostname();
-        int port = newConnectionView.getPort();
+        String portString = newConnectionView.getPortString();
+        if (hostname.isEmpty()){
+            JOptionPane.showMessageDialog(newConnectionView, "Hostname is Empty.", " ", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if (isValidPort(portString)){
+            int port = Integer.parseInt(portString);
+            vmManager.createRemoteVM(hostname, port);
+            newConnectionView.dispose();
+        } else {
+            JOptionPane.showMessageDialog(newConnectionView, "VM port is invalid.", " ", JOptionPane.WARNING_MESSAGE);
+        }
+    }
 
-        vmManager.createRemoteVM(hostname, port);
+    /**
+     * Returns true if portString is an integer between 0 and 65535
+     * @param portString
+     * @return
+     */
+    boolean isValidPort(String portString) {
+        try {
+            int port = Integer.parseInt(portString);
+            return port > 0 && port <= 65535;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 
 }

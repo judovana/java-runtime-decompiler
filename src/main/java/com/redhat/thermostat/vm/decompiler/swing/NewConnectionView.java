@@ -18,8 +18,8 @@ public class NewConnectionView extends JDialog{
 
     public class HostnamePortInputPanel extends JPanel{
 
-        public JTextField hostnameTextField;
-        public JTextField portTextField;
+        JTextField hostnameTextField;
+        JTextField portTextField;
 
 
         HostnamePortInputPanel(){
@@ -60,14 +60,11 @@ public class NewConnectionView extends JDialog{
         okButton = new JButton("Add");
         okButton.addActionListener(actionEvent -> {
             addButtonListener.actionPerformed(actionEvent);
-            dispose();
         });
         okButton.setPreferredSize(new Dimension(90,30));
 
         cancelButton = new JButton("Cancel");
-        cancelButton.addActionListener(actionEvent -> {
-            dispose();
-        });
+        cancelButton.addActionListener(actionEvent -> dispose());
         cancelButton.setPreferredSize(new Dimension(90,30));
 
         okCancelPanel = new JPanel(new GridBagLayout());
@@ -129,15 +126,15 @@ public class NewConnectionView extends JDialog{
 
     }
 
-    public String getHostname(){
+    String getHostname(){
         return hostnamePortInputPanel.hostnameTextField.getText();
     }
 
-    public int getPort(){
-            return Integer.valueOf(hostnamePortInputPanel.portTextField.getText());
+    String getPortString() throws NumberFormatException{
+        return hostnamePortInputPanel.portTextField.getText();
     }
 
-    public void setAddButtonListener(ActionListener addButtonListener) {
+    void setAddButtonListener(ActionListener addButtonListener) {
         this.addButtonListener = addButtonListener;
     }
 }
