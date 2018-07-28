@@ -4,16 +4,13 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
-import java.awt.BorderLayout;
-import java.awt.event.*;
-import javax.swing.JButton;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
+import javax.swing.*;
 import javax.swing.border.EtchedBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.ArrayList;
 
 /**
  * Class that creates GUI for attached VM.
@@ -22,15 +19,18 @@ public class BytecodeDecompilerView {
 
     private JPanel BytecodeDecompilerPanel;
 
-    JSplitPane splitPane;
+    private JSplitPane splitPane;
     private JPanel leftMainPanel;
+    private JTextField classesSortField;
+    private JPanel classesPanel;
     private JPanel rightMainPanel;
     private JScrollPane leftScrollPanel;
-    private JList<String> listOfClasses;
+    private JList<String> filteredClassesJlist;
     private RTextScrollPane bytecodeScrollPane;
     private RSyntaxTextArea bytecodeSyntaxTextArea;
     private ActionListener bytesActionListener;
     private ActionListener classesActionListener;
+    private String[] classes;
 
     private boolean splitPaneFirstResize = true;
 
@@ -47,14 +47,34 @@ public class BytecodeDecompilerView {
 
         BytecodeDecompilerPanel = new JPanel(new BorderLayout());
 
-        listOfClasses = new JList<>();
-        listOfClasses.setFixedCellHeight(20);
-        listOfClasses.setListData(new String[]{"Classes have not been loaded yet", "This can take up to", "few minutes on large applications."});
-        listOfClasses.addMouseListener(new MouseAdapter() {
+        classesPanel = new JPanel(new BorderLayout());
+        classesSortField = new JTextField();
+        classesSortField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent documentEvent) {
+                updateClassList();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent documentEvent) {
+                updateClassList();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent documentEvent) {
+                updateClassList();
+            }
+        });
+
+
+        classesPanel.add(classesSortField, BorderLayout.NORTH);
+
+        filteredClassesJlist = new JList<>();
+        filteredClassesJlist.setFixedCellHeight(20);
+        filteredClassesJlist.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                final String name = listOfClasses.getSelectedValue();
-
+                final String name = filteredClassesJlist.getSelectedValue();
                 new SwingWorker<Void, Void>() {
                     @Override
                     protected Void doInBackground() throws Exception {
@@ -112,13 +132,14 @@ public class BytecodeDecompilerView {
         topButtonPanel.setLayout(new BorderLayout());
         topButtonPanel.add(topButton, BorderLayout.WEST);
 
-        leftScrollPanel = new JScrollPane(leftMainPanel);
+        leftScrollPanel = new JScrollPane(filteredClassesJlist);
         leftScrollPanel.getVerticalScrollBar().setUnitIncrement(20);
 
-        leftMainPanel.add(listOfClasses);
+        classesPanel.add(leftScrollPanel);
+        leftMainPanel.add(classesPanel);
         rightMainPanel.add(bytecodeScrollPane);
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-                leftScrollPanel, rightMainPanel);
+                leftMainPanel, rightMainPanel);
 
         splitPane.addComponentListener(new ComponentAdapter() {
             @Override
@@ -137,20 +158,25 @@ public class BytecodeDecompilerView {
 
     }
 
+    private void updateClassList(){
+        ArrayList<String> filtered = new ArrayList<>();
+        String filter = classesSortField.getText();
+        for (String classe: classes){
+            if (classe.contains(filter)){
+                filtered.add(classe);
+            }
+        }
+        filteredClassesJlist.setListData(filtered.toArray(new String[filtered.size()]));
+    }
+
     /**
-     * Sets the class list into the JList.
+     * Sets the unfiltered class list array and invokes an update.
      *
-     * @param classesToReload array of classes to give into JList
+     * @param classesToReload
      */
     public void reloadClassList(String[] classesToReload) {
-        final String[] data = classesToReload;
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                listOfClasses.setListData(data);
-            }
-        });
-
+        classes = classesToReload;
+        SwingUtilities.invokeLater(() -> updateClassList());
     }
 
     /**
