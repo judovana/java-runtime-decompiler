@@ -108,12 +108,12 @@ public class VmDecompilerInformationController {
     }
 
     private void showLoadingDialog() {
-        new Thread(() -> {
+        SwingUtilities.invokeLater(() -> {
             loadingDialog = new LoadingDialog();
             loadingDialog.setAbortActionListener(e ->
                     abortAndCleanup());
             loadingDialog.setVisible(true);
-        }).start();
+        });
     }
 
     private void hideLoadingDialog() {
