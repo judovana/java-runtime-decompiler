@@ -27,6 +27,11 @@
     </build>
     <dependencies>
         <dependency>
+            <groupId>io.github.soc</groupId>
+            <artifactId>directories</artifactId>
+            <version>10</version>
+        </dependency>
+        <dependency>
             <groupId>com.sun</groupId>
             <artifactId>tools</artifactId>
             <version>1.7.0</version>
