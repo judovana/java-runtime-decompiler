@@ -77,8 +77,8 @@ public class ConfigureView extends JDialog{
             }
         });
 
-        configureDecompilerPathPanel = new confBrosePanel("Path to decompiler");
-        configureDecompilerPathPanel.textField.setText(config.getDecompilerPath());
+        configureDecompilerPathPanel = new confBrosePanel("[WIP] Decompiler name");
+        configureDecompilerPathPanel.textField.setText(config.getDecompilerName());
         configureDecompilerPathPanel.browseButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -93,7 +93,7 @@ public class ConfigureView extends JDialog{
         okButton = new JButton("OK");
         okButton.addActionListener(actionEvent -> {
             config.setAgentPath(configureAgentPathPanel.textField.getText());
-            config.setDecompilerPath(configureDecompilerPathPanel.textField.getText());
+            config.setDecompilerName(configureDecompilerPathPanel.textField.getText());
             try {
                 config.saveConfigFile();
             } catch (IOException e) {

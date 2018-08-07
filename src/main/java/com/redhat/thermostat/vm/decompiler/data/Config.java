@@ -62,16 +62,12 @@ public class Config {
         }
     }
 
-    public String getDecompilerPath() {
-        return configMap.get("DECOMPILER_PATH");
+    public String getDecompilerName() {
+        return configMap.get("DECOMPILER_NAME");
     }
 
-    public void setDecompilerPath(String decompilerPath) {
-        if (decompilerPath.endsWith(".jar")) {
-            configMap.put("DECOMPILER_PATH", decompilerPath);
-        } else {
-            System.err.println("Decompiler must be a .jar file");
-        }
+    public void setDecompilerName(String decompilerPath) {
+        configMap.put("DECOMPILER_NAME", decompilerPath);
     }
 
     private void loadConfigFile() throws IOException {

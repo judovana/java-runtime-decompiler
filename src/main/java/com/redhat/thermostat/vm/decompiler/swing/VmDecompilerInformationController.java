@@ -7,13 +7,12 @@ import com.redhat.thermostat.vm.decompiler.core.VmDecompilerStatus;
 import com.redhat.thermostat.vm.decompiler.data.Config;
 import com.redhat.thermostat.vm.decompiler.data.VmInfo;
 import com.redhat.thermostat.vm.decompiler.data.VmManager;
+import com.redhat.thermostat.vm.decompiler.decompiling.PluginManager;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
-import java.io.*;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.stream.Collectors;
 
 /**
  * This class provides Action listeners and result processing for the GUI.
@@ -28,6 +27,7 @@ public class VmDecompilerInformationController {
     private VmManager vmManager;
     private VmInfo vmInfo;
     private boolean listsUpdating = false;
+    private PluginManager pluginManager = new PluginManager();
 
     public VmDecompilerInformationController(MainFrameView mainFrameView, VmManager vmManager) {
         this.mainFrameView = mainFrameView;
@@ -163,36 +163,24 @@ public class VmDecompilerInformationController {
 
     private void loadClassBytecode(String name) {
         AgentRequestAction request = createRequest(name, RequestAction.BYTES);
-        //DecompilerAgentRequestResponseListener listener =
-        submitRequest(request);
+        String response = submitRequest(request);
         String decompiledClass = "";
-        boolean success = true;//!listener.isError();
-        if (success) {
-            VmDecompilerStatus vmStatus = vmManager.getVmDecompilerStatus(vmInfo);
-            String expectedClass = "";
-            while (!expectedClass.equals(name)) {
-                vmStatus = vmManager.getVmDecompilerStatus(vmInfo);
-                expectedClass = vmStatus.getBytesClassName();
-
-            }
-            String bytesInString = vmStatus.getLoadedClassBytes();
-
-            byte[] bytes = Base64.getDecoder().decode(bytesInString);
-            try {
-                String path = bytesToFile("temporary-byte-file", bytes);
-                Process proc = Runtime.getRuntime().exec("java -jar " + Config.getConfig().getDecompilerPath() + " " + path);
-                InputStream in = proc.getInputStream();
-                decompiledClass = new BufferedReader(new InputStreamReader(in))
-                        .lines().collect(Collectors.joining("\n"));
-                ;
-
-            } catch (IOException e) {
-                //bytecodeDecompilerView.handleError(new LocalizedString(listener.getErrorMessage()));
-            }
-            bytecodeDecompilerView.reloadTextField(decompiledClass);
-        } else {
-            //bytecodeDecompilerView.handleError(new LocalizedString(listener.getErrorMessage()));
+        if (response.equals("error")) {
+            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(),
+                    "Bytecode couldn't be loaded.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
         }
+        VmDecompilerStatus vmStatus = vmManager.getVmDecompilerStatus(vmInfo);
+        String bytesInString = vmStatus.getLoadedClassBytes();
+        byte[] bytes = Base64.getDecoder().decode(bytesInString);
+        try {
+            decompiledClass = pluginManager.decompile(Config.getConfig().getDecompilerName(), bytes);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        bytecodeDecompilerView.reloadTextField(decompiledClass);
     }
 
     private void haltAgent() {
@@ -241,13 +229,4 @@ public class VmDecompilerInformationController {
 
         return response; //listener
     }
-
-    private String bytesToFile(String name, byte[] bytes) throws IOException {
-        String path = "/tmp/" + name + ".class";
-        FileOutputStream fos = new FileOutputStream(path);
-        fos.write(bytes);
-        fos.close();
-        return path;
-    }
-
 }
