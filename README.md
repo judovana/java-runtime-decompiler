@@ -8,7 +8,7 @@ mvn install
 ```
 run with:
 ```
-java -cp /usr/lib/jvm/default/lib/tools.jar:$HOME/.m2/repository/com/fifesoft/rsyntaxtextarea/2.6.1/rsyntaxtextarea-2.6.1.jar:$HOME/.m2/repository/java/java-runtime-decompiler/1.0.0-SNAPSHOT/java-runtime-decompiler-1.0.0-SNAPSHOT.jar com.redhat.thermostat.vm.decompiler.data.Main
+java -cp /usr/lib/jvm/default/lib/tools.jar:$HOME/.m2/repository/com/fifesoft/rsyntaxtextarea/2.6.1/rsyntaxtextarea-2.6.1.jar:$HOME/.m2/repository/io/github/soc/directories/10/directories-10.jar:$HOME/.m2/repository/java/java-runtime-decompiler/1.0.0-SNAPSHOT/java-runtime-decompiler-1.0.0-SNAPSHOT.jar com.redhat.thermostat.vm.decompiler.data.Main
 ```
 When the application opens go to menubar -> configure and select Agent and Decompiler paths.
 
