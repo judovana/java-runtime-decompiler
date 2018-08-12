@@ -3,35 +3,43 @@ package com.redhat.thermostat.vm.decompiler.decompiling;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 public class DecompilerWrapperInformation {
 
     /**
      * Class containing information about available Decompiler wrapper
-     * @param name - Decompiler name
-     * @param wrapperURL - location of wrapper.java file
-     * @param DecompilerURL location of decompiler
-     * @param source folder containing this .info file.
+     *
+     * @param name           - Decompiler name
+     * @param wrapperURL     - location of wrapper.java file
+     * @param dependencyURLs location of wrapper dependencies
      * @throws MalformedURLException
      */
-    DecompilerWrapperInformation(String name, String fullyQualifiedClassName, String wrapperURL, String DecompilerURL, String source) throws MalformedURLException{
-        setName(name);
-        setFullyQualifiedClassName(fullyQualifiedClassName);
-        setWrapperURL(wrapperURL);
-        setDecompilerURL(DecompilerURL);
-        setSource(source);
-    }
-
-    public String getSource() {
-        return source;
-    }
-
-    public void setSource(String source) {
-        this.source = source;
+    DecompilerWrapperInformation(String name, String fullyQualifiedClassName, String wrapperURL, List<String> dependencyURLs) {
+        try {
+            setName(name);
+            setFullyQualifiedClassName(fullyQualifiedClassName);
+            setWrapperURL(wrapperURL);
+            setDependencyURLs(dependencyURLs);
+        } catch (MalformedURLException e) {
+            malformedURL = true;
+        }
     }
 
     private String name;
+
+    private String fullyQualifiedClassName;
+    private URL wrapperURL;
+    private List<URL> DependencyURLs;
+    private Method decompileMethod;
+    private Object instance;
+    private boolean malformedURL = false;
+
+    public boolean isMalformedURL() {
+        return malformedURL;
+    }
 
     public String getFullyQualifiedClassName() {
         return fullyQualifiedClassName;
@@ -40,14 +48,6 @@ public class DecompilerWrapperInformation {
     public void setFullyQualifiedClassName(String fullyQualifiedClassName) {
         this.fullyQualifiedClassName = fullyQualifiedClassName;
     }
-
-    private String fullyQualifiedClassName;
-    private URL wrapperURL;
-    private URL decompilerURL;
-    private String source;
-    private Method decompileMethod;
-    private Object instance;
-
 
     public Object getInstance() {
         return instance;
@@ -84,18 +84,20 @@ public class DecompilerWrapperInformation {
         this.wrapperURL = new URL(wrapperURL);
     }
 
-    public URL getDecompilerURL() {
-        return decompilerURL;
+    public List<URL> getDependencyURLs() {
+        return DependencyURLs;
     }
 
-    private void setDecompilerURL(String decompilerURL) throws MalformedURLException{
-        decompilerURL = addFileProtocolIfNone(decompilerURL);
-        decompilerURL = expandEnvVars(decompilerURL);
-        this.decompilerURL = new URL(decompilerURL);
+    private void setDependencyURLs(List<String> dependencyURLs) throws MalformedURLException {
+        DependencyURLs = new LinkedList<>();
+        for (String s : dependencyURLs) {
+            s = addFileProtocolIfNone(s);
+            DependencyURLs.add(new URL(expandEnvVars(s)));
+        }
     }
 
-    private String addFileProtocolIfNone(String URL){
-        if (URL.contains("://")){
+    private String addFileProtocolIfNone(String URL) {
+        if (URL.contains("://")) {
             return URL;
         } else {
             return "file://" + URL;
