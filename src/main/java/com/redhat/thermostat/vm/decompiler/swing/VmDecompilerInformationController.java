@@ -4,7 +4,6 @@ import com.redhat.thermostat.vm.decompiler.core.AgentRequestAction;
 import com.redhat.thermostat.vm.decompiler.core.AgentRequestAction.RequestAction;
 import com.redhat.thermostat.vm.decompiler.core.DecompilerRequestReceiver;
 import com.redhat.thermostat.vm.decompiler.core.VmDecompilerStatus;
-import com.redhat.thermostat.vm.decompiler.data.Config;
 import com.redhat.thermostat.vm.decompiler.data.VmInfo;
 import com.redhat.thermostat.vm.decompiler.data.VmManager;
 import com.redhat.thermostat.vm.decompiler.decompiling.PluginManager;
@@ -32,6 +31,7 @@ public class VmDecompilerInformationController {
     public VmDecompilerInformationController(MainFrameView mainFrameView, VmManager vmManager) {
         this.mainFrameView = mainFrameView;
         this.bytecodeDecompilerView = mainFrameView.getBytecodeDecompilerView();
+        bytecodeDecompilerView.refreshComboBox(pluginManager.getWrappers());
         this.vmManager = vmManager;
 
         updateVmLists();
@@ -176,7 +176,7 @@ public class VmDecompilerInformationController {
         String bytesInString = vmStatus.getLoadedClassBytes();
         byte[] bytes = Base64.getDecoder().decode(bytesInString);
         try {
-            decompiledClass = pluginManager.decompile(Config.getConfig().getDecompilerName(), bytes);
+            decompiledClass = pluginManager.decompile(bytecodeDecompilerView.getSelecteddecompilerWrapperInformation(), bytes);
         } catch (Exception e) {
             e.printStackTrace();
         }

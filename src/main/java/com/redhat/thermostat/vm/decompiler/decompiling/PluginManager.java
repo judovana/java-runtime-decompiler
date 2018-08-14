@@ -21,6 +21,10 @@ public class PluginManager {
 
     private List<DecompilerWrapperInformation> wrappers;
 
+    public List<DecompilerWrapperInformation> getWrappers() {
+        return wrappers;
+    }
+
     public PluginManager() {
         loadConfigs();
     }
@@ -57,29 +61,13 @@ public class PluginManager {
     }
 
     /**
-     * Iterates over wrappers returning instance of DecompilerWrapperInformation when supplied decompilerName matches
-     *
-     * @param decompilerName
-     * @return
-     */
-    private DecompilerWrapperInformation getDecompilerWrapperInformation(String decompilerName) {
-        for (DecompilerWrapperInformation wrapperInformation : wrappers) {
-            if (decompilerName.equals(wrapperInformation.getName())) {
-                return wrapperInformation;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * @param decompilerName decompiler used for decompiling
-     * @param bytecode       bytecode to be decompiled
+     * @param wrapper  decompiler used for decompiling
+     * @param bytecode bytecode to be decompiled
      * @return Decompiled bytecode or exception String.
      */
-    public synchronized String decompile(String decompilerName, byte[] bytecode) throws Exception {
-        DecompilerWrapperInformation wrapper = getDecompilerWrapperInformation(decompilerName);
+    public synchronized String decompile(DecompilerWrapperInformation wrapper, byte[] bytecode) throws Exception {
         if (wrapper == null) {
-            throw new NullPointerException("Decompiler \"" + decompilerName + "\" not found in list of loaded Decompilers");
+            throw new NullPointerException("Decompiler \"" + wrapper + "\" not found in list of loaded Decompilers");
         }
         if (wrapper.getDecompileMethod() == null) {
             InitializeWrapper(wrapper);

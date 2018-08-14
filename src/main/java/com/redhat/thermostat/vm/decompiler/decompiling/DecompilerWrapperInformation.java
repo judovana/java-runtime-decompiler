@@ -114,4 +114,8 @@ public class DecompilerWrapperInformation {
         return text;
     }
 
+    @Override
+    public String toString() {
+        return getName();
+    }
 }

@@ -1,5 +1,6 @@
 package com.redhat.thermostat.vm.decompiler.swing;
 
+import com.redhat.thermostat.vm.decompiler.decompiling.DecompilerWrapperInformation;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
@@ -11,6 +12,7 @@ import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class that creates GUI for attached VM.
@@ -22,6 +24,7 @@ public class BytecodeDecompilerView {
     private JSplitPane splitPane;
     private JPanel leftMainPanel;
     private JTextField classesSortField;
+    private JComboBox topComboBox;
     private JPanel classesPanel;
     private JPanel rightMainPanel;
     private JScrollPane leftScrollPanel;
@@ -114,6 +117,8 @@ public class BytecodeDecompilerView {
         }
         );
 
+        topComboBox = new JComboBox<DecompilerWrapperInformation>();
+
         bytecodeSyntaxTextArea = new RSyntaxTextArea();
         bytecodeSyntaxTextArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
         bytecodeSyntaxTextArea.setCodeFoldingEnabled(true);
@@ -131,6 +136,7 @@ public class BytecodeDecompilerView {
 
         topButtonPanel.setLayout(new BorderLayout());
         topButtonPanel.add(topButton, BorderLayout.WEST);
+        topButtonPanel.add(topComboBox, BorderLayout.EAST);
 
         leftScrollPanel = new JScrollPane(filteredClassesJlist);
         leftScrollPanel.getVerticalScrollBar().setUnitIncrement(20);
@@ -216,6 +222,15 @@ public class BytecodeDecompilerView {
             }
 
         });
+    }
+
+    public void refreshComboBox(List<DecompilerWrapperInformation> wrappers){
+        topComboBox.removeAllItems();
+        wrappers.forEach(decompilerWrapperInformation -> topComboBox.addItem(decompilerWrapperInformation));
+    }
+
+    public DecompilerWrapperInformation getSelecteddecompilerWrapperInformation(){
+        return (DecompilerWrapperInformation) topComboBox.getSelectedItem();
     }
 
 }
