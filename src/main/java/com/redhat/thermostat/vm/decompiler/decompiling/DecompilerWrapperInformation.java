@@ -1,5 +1,6 @@
 package com.redhat.thermostat.vm.decompiler.decompiling;
 
+import java.io.File;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -14,18 +15,19 @@ public class DecompilerWrapperInformation {
      *
      * @param name           - Decompiler name
      * @param wrapperURL     - location of wrapper.java file
-     * @param dependencyURLs location of wrapper dependencies
+     * @param dependencyURLs - location of wrapper dependencies
      * @throws MalformedURLException
      */
     DecompilerWrapperInformation(String name, String fullyQualifiedClassName, String wrapperURL, List<String> dependencyURLs) {
-        try {
-            setName(name);
-            setFullyQualifiedClassName(fullyQualifiedClassName);
-            setWrapperURL(wrapperURL);
-            setDependencyURLs(dependencyURLs);
-        } catch (MalformedURLException e) {
-            malformedURL = true;
-        }
+        setName(name);
+        setFullyQualifiedClassName(fullyQualifiedClassName);
+        setWrapperURL(wrapperURL);
+        setDependencyURLs(dependencyURLs);
+    }
+    // Constructor for broken wrappers, so we can track them.
+    DecompilerWrapperInformation(String url) {
+        setName(url);
+        invalidWrapper = true;
     }
 
     private String name;
@@ -35,10 +37,10 @@ public class DecompilerWrapperInformation {
     private List<URL> DependencyURLs;
     private Method decompileMethod;
     private Object instance;
-    private boolean malformedURL = false;
+    private boolean invalidWrapper = false;
 
-    public boolean isMalformedURL() {
-        return malformedURL;
+    public boolean isInvalidWrapper() {
+        return invalidWrapper;
     }
 
     public String getFullyQualifiedClassName() {
@@ -78,21 +80,40 @@ public class DecompilerWrapperInformation {
         return wrapperURL;
     }
 
-    private void setWrapperURL(String wrapperURL) throws MalformedURLException {
+    private void setWrapperURL(String wrapperURL){
         wrapperURL = addFileProtocolIfNone(wrapperURL);
         wrapperURL = expandEnvVars(wrapperURL);
-        this.wrapperURL = new URL(wrapperURL);
+        try{
+            this.wrapperURL = new URL(wrapperURL);
+            File file = new File(this.wrapperURL.getFile());
+            if (!(file.exists() && file.canRead())){
+                invalidWrapper = true;
+            }
+        } catch (MalformedURLException e){
+            this.wrapperURL = null;
+            this.invalidWrapper = true;
+        }
     }
 
     public List<URL> getDependencyURLs() {
         return DependencyURLs;
     }
 
-    private void setDependencyURLs(List<String> dependencyURLs) throws MalformedURLException {
+    private void setDependencyURLs(List<String> dependencyURLs){
         DependencyURLs = new LinkedList<>();
         for (String s : dependencyURLs) {
             s = addFileProtocolIfNone(s);
-            DependencyURLs.add(new URL(expandEnvVars(s)));
+            try{
+                URL dependencyURL = new URL(expandEnvVars(s));
+                DependencyURLs.add(dependencyURL);
+                File file = new File(dependencyURL.getFile());
+                if (!(file.exists() && file.canRead())){
+                    invalidWrapper = true;
+                }
+            } catch (MalformedURLException e){
+                DependencyURLs.add(null);
+                this.invalidWrapper = true;
+            }
         }
     }
 

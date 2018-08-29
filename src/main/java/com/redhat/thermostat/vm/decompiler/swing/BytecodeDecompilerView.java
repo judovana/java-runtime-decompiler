@@ -226,7 +226,11 @@ public class BytecodeDecompilerView {
 
     public void refreshComboBox(List<DecompilerWrapperInformation> wrappers){
         topComboBox.removeAllItems();
-        wrappers.forEach(decompilerWrapperInformation -> topComboBox.addItem(decompilerWrapperInformation));
+        wrappers.forEach(decompilerWrapperInformation -> {
+            if (!decompilerWrapperInformation.isInvalidWrapper()){
+                topComboBox.addItem(decompilerWrapperInformation);
+            }
+        });
     }
 
     public DecompilerWrapperInformation getSelecteddecompilerWrapperInformation(){

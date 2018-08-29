@@ -47,14 +47,16 @@ public class PluginManager {
             }
             for (File file : files) {
                 if (file.getName().endsWith(".json")) {
-                    try {
-                        DecompilerWrapperInformation wrapper = gson.fromJson(new FileReader(file.getAbsolutePath()), DecompilerWrapperInformation.class);
-                        if (!wrapper.isMalformedURL()) {
-                            wrappers.add(wrapper);
-                        }
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
+                    DecompilerWrapperInformation wrapper;
+                    try{
+                        wrapper = gson.fromJson(new FileReader(file.getAbsolutePath()), DecompilerWrapperInformation.class);
+                    } catch (Exception e){
+                        wrapper = null;
                     }
+                    if (wrapper == null){
+                        wrapper = new DecompilerWrapperInformation(file.getName());
+                    }
+                    wrappers.add(wrapper);
                 }
             }
         }
@@ -67,7 +69,7 @@ public class PluginManager {
      */
     public synchronized String decompile(DecompilerWrapperInformation wrapper, byte[] bytecode) throws Exception {
         if (wrapper == null) {
-            throw new NullPointerException("Decompiler \"" + wrapper + "\" not found in list of loaded Decompilers");
+            return "No valid decompiler selected. Unable to decompile.";
         }
         if (wrapper.getDecompileMethod() == null) {
             InitializeWrapper(wrapper);
