@@ -48,6 +48,10 @@ public class VmDecompilerInformationController {
 
         mainFrameView.setHaltAgentListener(e -> haltAgent());
 
+        PluginConfigurationEditorView pluginConfigurationEditorView = new PluginConfigurationEditorView(mainFrameView);
+        pluginConfigurationEditorView.updateWrapperList(pluginManager.getWrappers());
+        pluginConfigurationEditorView.setVisible(true);
+
     }
 
     private void createNewConnectionDialog() {
