@@ -4,13 +4,13 @@ This application allows you to extract bytecode from running JVM and decompile i
 ```
 git clone https://github.com/pmikova/Java-Runtime-Decompiler.git
 cd Java-Runtime-Decompiler
-mvn install
+mvn clean install
 ```
 run with:
 ```
-java -cp /usr/lib/jvm/default/lib/tools.jar:$HOME/.m2/repository/com/fifesoft/rsyntaxtextarea/2.6.1/rsyntaxtextarea-2.6.1.jar:$HOME/.m2/repository/java/java-runtime-decompiler/1.0.0-SNAPSHOT/java-runtime-decompiler-1.0.0-SNAPSHOT.jar com.redhat.thermostat.vm.decompiler.data.Main
+start.sh script
 ```
-When the application opens go to menubar -> configure and select Agent and Decompiler paths.
+When the application opens go to menubar -> configure and select Agent path.
 
 You can get the agent here:  
 https://github.com/pmikova/thermostat-decompiler-agent  

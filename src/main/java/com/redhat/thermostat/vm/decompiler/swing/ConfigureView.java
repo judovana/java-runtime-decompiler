@@ -77,23 +77,9 @@ public class ConfigureView extends JDialog{
             }
         });
 
-        configureDecompilerPathPanel = new confBrosePanel("Path to decompiler");
-        configureDecompilerPathPanel.textField.setText(config.getDecompilerPath());
-        configureDecompilerPathPanel.browseButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                JFileChooser chooser = new JFileChooser();
-                int returnVar = chooser.showOpenDialog(configureDecompilerPathPanel);
-                if (returnVar == JFileChooser.APPROVE_OPTION){
-                    configureDecompilerPathPanel.textField.setText(chooser.getSelectedFile().getPath());
-                }
-            }
-        });
-
         okButton = new JButton("OK");
         okButton.addActionListener(actionEvent -> {
             config.setAgentPath(configureAgentPathPanel.textField.getText());
-            config.setDecompilerPath(configureDecompilerPathPanel.textField.getText());
             try {
                 config.saveConfigFile();
             } catch (IOException e) {
@@ -151,11 +137,9 @@ public class ConfigureView extends JDialog{
         gbc.gridy = 0;
         mainPanel.add(configureAgentPathPanel, gbc);
         gbc.gridy = 1;
-        mainPanel.add(configureDecompilerPathPanel, gbc);
-        gbc.gridy = 2;
         gbc.weighty = 1;
         mainPanel.add(Box.createVerticalGlue(),gbc);
-        gbc.gridy = 3;
+        gbc.gridy = 2;
         gbc.weighty = 0;
         mainPanel.add(configureOKCancelPanel, gbc);
 

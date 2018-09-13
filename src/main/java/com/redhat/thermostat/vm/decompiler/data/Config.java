@@ -1,5 +1,7 @@
 package com.redhat.thermostat.vm.decompiler.data;
 
+import io.github.soc.directories.BaseDirectories;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -16,15 +18,10 @@ public class Config {
 
     private static Config config;
     private HashMap<String, String> configMap;
-    private String XDG_CONFIG_HOME;
     private String configFilePath;
 
     private Config() {
-        XDG_CONFIG_HOME = System.getenv("XDG_CONFIG_HOME");
-        if (XDG_CONFIG_HOME == null || XDG_CONFIG_HOME.isEmpty()) {
-            XDG_CONFIG_HOME = System.getenv("HOME") + "/.config";
-        }
-        String parentDir = XDG_CONFIG_HOME + "/java-runtime-decompiler";
+        String parentDir = BaseDirectories.get().configDir + "/java-runtime-decompiler";
         File parentDirectoryFile = new File(parentDir);
         if (parentDirectoryFile.exists()) {
             if (parentDirectoryFile.isFile()) {
@@ -65,16 +62,12 @@ public class Config {
         }
     }
 
-    public String getDecompilerPath() {
-        return configMap.get("DECOMPILER_PATH");
+    public String getDecompilerName() {
+        return configMap.get("DECOMPILER_NAME");
     }
 
-    public void setDecompilerPath(String decompilerPath) {
-        if (decompilerPath.endsWith(".jar")) {
-            configMap.put("DECOMPILER_PATH", decompilerPath);
-        } else {
-            System.err.println("Decompiler must be a .jar file");
-        }
+    public void setDecompilerName(String decompilerPath) {
+        configMap.put("DECOMPILER_NAME", decompilerPath);
     }
 
     private void loadConfigFile() throws IOException {

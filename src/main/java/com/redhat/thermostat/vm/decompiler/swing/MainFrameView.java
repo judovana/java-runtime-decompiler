@@ -275,7 +275,12 @@ public class MainFrameView {
 
     private void sendHaltRequest() {
         ActionEvent event = new ActionEvent(this, 0, null);
-        haltAgentListener.actionPerformed(event);
+        if (null != haltAgentListener){
+            haltAgentListener.actionPerformed(event);
+        } else {
+            System.exit(0);
+        }
+
     }
 
     void setCreateNewConnectionDialogListener(ActionListener listener) {
