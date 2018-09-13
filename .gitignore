@@ -12,7 +12,7 @@
 
 #IDEA
 .idea/
-java-runtime-decompiler.iml
+*.iml
 target/
 
 # Package Files #
