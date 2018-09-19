@@ -17,5 +17,5 @@ java -cp ${JAVA_HOME}/lib/tools.jar:\
 $HOME/.m2/repository/com/fifesoft/rsyntaxtextarea/2.6.1/rsyntaxtextarea-2.6.1.jar:\
 $HOME/.m2/repository/io/github/soc/directories/10/directories-10.jar:\
 $HOME/.m2/repository/com/google/code/gson/gson/2.8.5/gson-2.8.5.jar:\
-$HOME/.m2/repository/java/java-runtime-decompiler/1.0.0-SNAPSHOT/java-runtime-decompiler-1.0.0-SNAPSHOT.jar\
+$HOME/.m2/repository/java/runtime-decompiler/1.0.0-SNAPSHOT/runtime-decompiler-1.0.0-SNAPSHOT.jar\
  com.redhat.thermostat.vm.decompiler.data.Main

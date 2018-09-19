@@ -4,6 +4,10 @@ public final class Directories {
 
     private final String xdgConfigSuffix = "/.config/java-runtime-decompiler/conf";
 
+    /**
+     * Locate configuration directory as per XDG base directory specification.
+     * @return
+     */
     public String getConfigDirectory(){
 
         String homeDir = System.getProperty("user.home");
@@ -15,7 +19,7 @@ public final class Directories {
         else{
             xdgConfigHome = res + this.xdgConfigSuffix;
         }
-        if (xdgConfigHome.equals("") || xdgConfigHome==null){
+        if (homeDir.isEmpty() && (res == null || res.isEmpty()) ){
             /* fail here */
             throw new NullPointerException("No such a directory in the system!");
         }

@@ -21,18 +21,6 @@ public class Config {
 
     private Config() {
         String parentDir = new Directories().getConfigDirectory();
-        File parentDirectoryFile = new File(parentDir);
-        /*if (parentDirectoryFile.exists()) {
-            if (parentDirectoryFile.isFile()) {
-                System.err.println("Found a file where directory was expected");
-            }
-        } else {
-            if (!parentDirectoryFile.mkdir()) {
-                System.out.println(parentDirectoryFile.getPath());
-                System.out.println("Directory couldn't be created");
-            }
-        }*/
-
         configFilePath = parentDir + "/config.cfg";
 
         try {
@@ -59,14 +47,6 @@ public class Config {
         } else {
             System.err.println("Agent must be a .jar file");
         }
-    }
-
-    public String getDecompilerName() {
-        return configMap.get("DECOMPILER_NAME");
-    }
-
-    public void setDecompilerName(String decompilerPath) {
-        configMap.put("DECOMPILER_NAME", decompilerPath);
     }
 
     private void loadConfigFile() throws IOException {

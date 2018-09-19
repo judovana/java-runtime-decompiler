@@ -35,7 +35,6 @@ public class PluginManager {
     private void loadConfigs() {
         wrappers = new LinkedList<>();
         String[] configLocations = new String[]{"/etc/java-runtime-decompiler/plugins/"
-                , "/usr/share/java/java-runtime-decompiler/plugins"
                 , new Directories().getConfigDirectory() + "/java-runtime-decompiler/plugins/"};
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(DecompilerWrapperInformation.class, new DecompilerWrapperInformationDeserializer());
