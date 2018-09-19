@@ -34,7 +34,7 @@ public class Main {
                 break;
             }
         }
-
+        Config configureAgent = Config.getConfig();
         VmManager manager = new VmManager();
         MainFrameView mainView = new MainFrameView();
         VmDecompilerInformationController controller = new VmDecompilerInformationController(mainView, manager);

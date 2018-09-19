@@ -2,7 +2,7 @@ package com.redhat.thermostat.vm.decompiler.decompiling;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import io.github.soc.directories.BaseDirectories;
+import com.redhat.thermostat.vm.decompiler.data.Directories;
 
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
@@ -36,7 +36,7 @@ public class PluginManager {
         wrappers = new LinkedList<>();
         String[] configLocations = new String[]{"/etc/java-runtime-decompiler/plugins/"
                 , "/usr/share/java/java-runtime-decompiler/plugins"
-                , BaseDirectories.get().configDir + "/java-runtime-decompiler/plugins/"};
+                , new Directories().getConfigDirectory() + "/java-runtime-decompiler/plugins/"};
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(DecompilerWrapperInformation.class, new DecompilerWrapperInformationDeserializer());
         Gson gson = gsonBuilder.create();

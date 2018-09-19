@@ -1,6 +1,5 @@
 package com.redhat.thermostat.vm.decompiler.data;
 
-import io.github.soc.directories.BaseDirectories;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,9 +20,9 @@ public class Config {
     private String configFilePath;
 
     private Config() {
-        String parentDir = BaseDirectories.get().configDir + "/java-runtime-decompiler";
+        String parentDir = new Directories().getConfigDirectory();
         File parentDirectoryFile = new File(parentDir);
-        if (parentDirectoryFile.exists()) {
+        /*if (parentDirectoryFile.exists()) {
             if (parentDirectoryFile.isFile()) {
                 System.err.println("Found a file where directory was expected");
             }
@@ -32,7 +31,7 @@ public class Config {
                 System.out.println(parentDirectoryFile.getPath());
                 System.out.println("Directory couldn't be created");
             }
-        }
+        }*/
 
         configFilePath = parentDir + "/config.cfg";
 
