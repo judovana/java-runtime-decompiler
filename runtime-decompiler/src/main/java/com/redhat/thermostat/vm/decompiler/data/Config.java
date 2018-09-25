@@ -21,8 +21,8 @@ public class Config {
 
     private Config() {
         String parentDir = new Directories().getConfigDirectory();
-        File parentDirectoryFile = new File(parentDir);
-        /*if (parentDirectoryFile.exists()) {
+        /*File parentDirectoryFile = new File(parentDir);
+        if (parentDirectoryFile.exists()) {
             if (parentDirectoryFile.isFile()) {
                 System.err.println("Found a file where directory was expected");
             }

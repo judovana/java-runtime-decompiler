@@ -96,7 +96,6 @@ public class DecompilerRequestReceiver {
         }
         CallDecompilerAgent nativeAgent = new CallDecompilerAgent(actualListenPort, hostname);
         try {
-            System.out.println(className);
             String bytes = nativeAgent.submitRequest("BYTES\n" + className);
             if ("ERROR".equals(bytes)) {
                 return ERROR_RESPONSE;

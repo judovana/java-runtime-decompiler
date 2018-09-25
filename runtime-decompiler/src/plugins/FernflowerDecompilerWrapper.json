@@ -1,8 +1,9 @@
 {
   "Name": "Fernflower",
   "FullyQualifiedClassName": "FernflowerDecompilerWrapper",
-  "WrapperURL": "${HOME}/.config/java-runtime-decompiler/plugins/FernflowerDecompilerWrapper.java",
+  "WrapperURL": "/etc/java-runtime-decompiler/plugins/FernflowerDecompilerWrapper.java",
   "DependencyURL": [
     "${HOME}/IdeaProjects/fernflower/build/libs/fernflower.jar"
-  ]
+  ],
+  "DecompilerDownloadURL": "https://github.com/JetBrains/intellij-community/tree/master/plugins/java-decompiler/engine"
 }

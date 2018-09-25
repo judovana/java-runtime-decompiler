@@ -164,7 +164,7 @@ public class MainFrameView {
                 "Before you start using the application you need to select Agent and Decompiler paths.\n" +
                 "Go to menubar -> config -> configure\n" +
                 "\n" +
-                "Agent is already attached to this project:\n" +
+                "Agent is already attached to this project.\n" +
                 "You need to download java decompiler (e.g. here):\n" +
                 "https://bitbucket.org/mstrobel/procyon/downloads/");
         welcomeJTextArea.setFont(new Font(welcomeJTextArea.getFont().getFontName(), welcomeJTextArea.getFont().getStyle(), 20));

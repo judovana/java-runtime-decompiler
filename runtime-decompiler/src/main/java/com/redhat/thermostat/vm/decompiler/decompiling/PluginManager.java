@@ -36,7 +36,7 @@ public class PluginManager {
         wrappers = new LinkedList<>();
         String[] configLocations = new String[]{"/etc/java-runtime-decompiler/plugins/"
                 , "/usr/share/java/java-runtime-decompiler/plugins"
-                , new Directories().getConfigDirectory() + "/java-runtime-decompiler/plugins/"};
+                , new Directories().getXdgJrdBaseDir() + "/plugins/"};
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(DecompilerWrapperInformation.class, new DecompilerWrapperInformationDeserializer());
         Gson gson = gsonBuilder.create();
@@ -49,7 +49,9 @@ public class PluginManager {
                 if (file.getName().endsWith(".json")) {
                     DecompilerWrapperInformation wrapper;
                     try{
+
                         wrapper = gson.fromJson(new FileReader(file.getAbsolutePath()), DecompilerWrapperInformation.class);
+                        wrapper.setScope(location);
                     } catch (Exception e){
                         wrapper = null;
                     }
@@ -69,7 +71,9 @@ public class PluginManager {
      */
     public synchronized String decompile(DecompilerWrapperInformation wrapper, byte[] bytecode) throws Exception {
         if (wrapper == null) {
-            return "No valid decompiler selected. Unable to decompile.";
+            return "No valid decompiler selected. Unable to decompile. \n " +
+                    "If there is no decompiler selected, you need to set paths to decompiler in" +
+                    "decompiler wrapper";
         }
         if (wrapper.getDecompileMethod() == null) {
             InitializeWrapper(wrapper);

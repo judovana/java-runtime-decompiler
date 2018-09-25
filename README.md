@@ -14,7 +14,9 @@ When the application opens go to menubar -> configure and select Agent path.
 
 Agent is built in decompiler-agent project.
 You need to get a java decompiler (e.g. here):
-https://bitbucket.org/mstrobel/procyon/downloads/  
+https://bitbucket.org/mstrobel/procyon/downloads/
+
+And place it accordingly, or change paths to its jars in configuration files.
 
 NOTE: Java Runtime Decompiler is currently in alpha and can be unstable. Use it at your own risk!
 

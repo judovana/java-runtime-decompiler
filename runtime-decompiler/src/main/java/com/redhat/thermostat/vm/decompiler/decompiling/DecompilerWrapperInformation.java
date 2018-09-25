@@ -1,5 +1,7 @@
 package com.redhat.thermostat.vm.decompiler.decompiling;
 
+import com.redhat.thermostat.vm.decompiler.data.Directories;
+
 import java.io.File;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -38,6 +40,7 @@ public class DecompilerWrapperInformation {
     private Method decompileMethod;
     private Object instance;
     private boolean invalidWrapper = false;
+    private String scope;
 
     public boolean isInvalidWrapper() {
         return invalidWrapper;
@@ -115,6 +118,21 @@ public class DecompilerWrapperInformation {
                 this.invalidWrapper = true;
             }
         }
+    }
+
+    public void setScope(String jsonURL){
+        String foundScope = "";
+        if (jsonURL.startsWith("/etc/")){
+            foundScope = " system";
+        }
+        else if (jsonURL.startsWith("/usr/share/")){
+            foundScope = " user shared";
+
+        }
+        else if (jsonURL.startsWith(new Directories().getXdgJrdBaseDir())){
+            foundScope = " local";
+        }
+        this.setName(this.name + foundScope);
     }
 
     private String addFileProtocolIfNone(String URL) {
