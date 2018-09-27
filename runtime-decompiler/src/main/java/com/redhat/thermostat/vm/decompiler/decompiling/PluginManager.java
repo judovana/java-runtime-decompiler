@@ -34,6 +34,7 @@ public class PluginManager {
      */
     private void loadConfigs() {
         wrappers = new LinkedList<>();
+        // keep all three locations - for default system scope, user shared scope and user-only scope
         String[] configLocations = new String[]{"/etc/java-runtime-decompiler/plugins/"
                 , "/usr/share/java/java-runtime-decompiler/plugins"
                 , new Directories().getXdgJrdBaseDir() + "/plugins/"};
