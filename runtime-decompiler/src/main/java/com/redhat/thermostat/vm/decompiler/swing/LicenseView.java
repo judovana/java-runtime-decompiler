@@ -16,7 +16,7 @@ public class LicenseView extends JDialog {
         licenseTextArea = new JTextArea();
         scrollPane = new JScrollPane(licenseTextArea);
 
-        InputStream in = getClass().getResourceAsStream("/src/main/resources/LICENSE");
+        InputStream in = getClass().getResourceAsStream("/LICENSE");
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
         StringBuilder sb = new StringBuilder();
         reader.lines().forEach(s -> sb.append(s).append('\n'));
