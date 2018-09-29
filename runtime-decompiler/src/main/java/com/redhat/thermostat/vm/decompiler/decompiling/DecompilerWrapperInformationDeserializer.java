@@ -14,11 +14,10 @@ public class DecompilerWrapperInformationDeserializer implements JsonDeserialize
         final JsonObject json = jsonElement.getAsJsonObject();
 
         final String name = json.get("Name").getAsString();
-        final String fullyQualifiedClassName = json.get("FullyQualifiedClassName").getAsString();
         final String wrapperURL = json.get("WrapperURL").getAsString();
         final List<String> dependencyURLs = new LinkedList<>();
         json.get("DependencyURL").getAsJsonArray().forEach(dependency -> dependencyURLs.add(dependency.getAsString()));
 
-        return new DecompilerWrapperInformation(name, fullyQualifiedClassName, wrapperURL, dependencyURLs);
+        return new DecompilerWrapperInformation(name, wrapperURL, dependencyURLs);
     }
 }

@@ -2,7 +2,10 @@ package com.redhat.thermostat.vm.decompiler.decompiling;
 
 import com.redhat.thermostat.vm.decompiler.data.Directories;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -20,14 +23,14 @@ public class DecompilerWrapperInformation {
      * @param dependencyURLs - location of wrapper dependencies
      * @throws MalformedURLException
      */
-    DecompilerWrapperInformation(String name, String fullyQualifiedClassName, String wrapperURL, List<String> dependencyURLs) {
+    public DecompilerWrapperInformation(String name, String wrapperURL, List<String> dependencyURLs) {
         setName(name);
-        setFullyQualifiedClassName(fullyQualifiedClassName);
         setWrapperURL(wrapperURL);
+        setFullyQualifiedClassName();
         setDependencyURLs(dependencyURLs);
     }
     // Constructor for broken wrappers, so we can track them.
-    DecompilerWrapperInformation(String url) {
+    public DecompilerWrapperInformation(String url) {
         setName(url);
         invalidWrapper = true;
     }
@@ -50,8 +53,26 @@ public class DecompilerWrapperInformation {
         return fullyQualifiedClassName;
     }
 
-    public void setFullyQualifiedClassName(String fullyQualifiedClassName) {
-        this.fullyQualifiedClassName = fullyQualifiedClassName;
+    public void setFullyQualifiedClassName() {
+        try (BufferedReader br = new BufferedReader(new FileReader(wrapperURL.getPath()))) {
+            String packageName = "";
+            String className = "";
+            String line = br.readLine();
+            // Check first line for package name
+            if (line.startsWith("package ")){
+                packageName = line.replace(";", ".").split(" ")[1];
+            }
+            // Find class name
+            while ((line = br.readLine()) != null) {
+                if (line.startsWith("public class ")){
+                    className = line.split(" ")[2];
+                    break;
+                }
+            }
+            fullyQualifiedClassName = packageName + className;
+        } catch (IOException e){
+            invalidWrapper = true;
+        }
     }
 
     public Object getInstance() {
@@ -123,16 +144,20 @@ public class DecompilerWrapperInformation {
     public void setScope(String jsonURL){
         String foundScope = "";
         if (jsonURL.startsWith("/etc/")){
-            foundScope = " system";
+            foundScope = "system";
         }
         else if (jsonURL.startsWith("/usr/share/")){
-            foundScope = " user shared";
+            foundScope = "user shared";
 
         }
         else if (jsonURL.startsWith(new Directories().getXdgJrdBaseDir())){
-            foundScope = " local";
+            foundScope = "local";
         }
-        this.setName(this.name + foundScope);
+        this.scope = foundScope;
+    }
+
+    public String getScope(){
+        return scope;
     }
 
     private String addFileProtocolIfNone(String URL) {
@@ -144,6 +169,7 @@ public class DecompilerWrapperInformation {
     }
 
     private static String expandEnvVars(String text) {
+        text.replaceAll("\\$\\{XDG_CONFIG_HOME\\}", new Directories().getXdgJrdBaseDir());
         Map<String, String> envMap = System.getenv();
         for (Map.Entry<String, String> entry : envMap.entrySet()) {
             String key = entry.getKey();
@@ -155,6 +181,6 @@ public class DecompilerWrapperInformation {
 
     @Override
     public String toString() {
-        return getName();
+        return getName() + " [" + getScope() + "]";
     }
 }
