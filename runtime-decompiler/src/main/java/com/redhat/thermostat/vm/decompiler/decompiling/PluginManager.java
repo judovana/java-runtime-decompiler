@@ -165,6 +165,10 @@ public class PluginManager {
         gsonBuilder.setPrettyPrinting();
         final Gson gson = gsonBuilder.create();
         final String json = gson.toJson(wrapper);
+        File pluginDir = new File(new Directories().getXdgJrdBaseDir() + "/plugins");
+        if (!pluginDir.exists()){
+            pluginDir.mkdir();
+        }
         try (PrintWriter out = new PrintWriter(wrapper.getFileLocation())) {
             out.println(json);
         }
