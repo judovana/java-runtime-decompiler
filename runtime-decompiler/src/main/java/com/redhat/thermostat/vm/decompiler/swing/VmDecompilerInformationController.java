@@ -21,6 +21,8 @@ public class VmDecompilerInformationController {
     private final MainFrameView mainFrameView;
     private final BytecodeDecompilerView bytecodeDecompilerView;
     private NewConnectionView newConnectionDialog;
+    private PluginConfigurationEditorView pluginConfigurationEditorView;
+    private PluginConfigurationEditorController pluginConfigurationEditorController;
     private LoadingDialog loadingDialog;
     private NewConnectionController newConnectionController;
     private VmManager vmManager;
@@ -31,7 +33,6 @@ public class VmDecompilerInformationController {
     public VmDecompilerInformationController(MainFrameView mainFrameView, VmManager vmManager) {
         this.mainFrameView = mainFrameView;
         this.bytecodeDecompilerView = mainFrameView.getBytecodeDecompilerView();
-        bytecodeDecompilerView.refreshComboBox(pluginManager.getWrappers());
         this.vmManager = vmManager;
 
         updateVmLists();
@@ -48,6 +49,26 @@ public class VmDecompilerInformationController {
 
         mainFrameView.setHaltAgentListener(e -> haltAgent());
 
+        mainFrameView.setPluginConfigurationEditorListener(actionEvent -> createConfigurationEditor());
+        bytecodeDecompilerView.refreshComboBox(pluginManager.getWrappers());
+    }
+
+    private void updatePluginLists() {
+        bytecodeDecompilerView.refreshComboBox(pluginManager.getWrappers());
+        pluginConfigurationEditorController.updateWrapperList(pluginManager.getWrappers());
+        pluginConfigurationEditorView.getWrapperJList().
+                setSelectedValue(pluginConfigurationEditorView.getPluginConfigPanel().getDecompilerWrapperInformatio(), true);
+    }
+
+    // Method for opening plugin configuration window
+    private void createConfigurationEditor() {
+        pluginConfigurationEditorView = new PluginConfigurationEditorView(mainFrameView);
+        pluginConfigurationEditorController = new PluginConfigurationEditorController(pluginConfigurationEditorView, pluginManager);
+        pluginConfigurationEditorController.setUpdateWrapperListsActionListener(actionEvent -> {
+            updatePluginLists();
+        });
+        updatePluginLists();
+        pluginConfigurationEditorView.setVisible(true);
     }
 
     private void createNewConnectionDialog() {

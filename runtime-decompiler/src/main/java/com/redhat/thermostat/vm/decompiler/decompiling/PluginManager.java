@@ -49,16 +49,16 @@ public class PluginManager {
             for (File file : files) {
                 if (file.getName().endsWith(".json")) {
                     DecompilerWrapperInformation wrapper;
-                    try{
+                    try {
 
                         wrapper = gson.fromJson(new FileReader(file.getAbsolutePath()), DecompilerWrapperInformation.class);
-                        wrapper.setScope(location);
-                    } catch (Exception e){
+                    } catch (FileNotFoundException e) {
                         wrapper = null;
                     }
-                    if (wrapper == null){
+                    if (wrapper == null) {
                         wrapper = new DecompilerWrapperInformation(file.getName());
                     }
+                    wrapper.setFileLocation(file.getAbsolutePath());
                     wrappers.add(wrapper);
                 }
             }
@@ -114,6 +114,59 @@ public class PluginManager {
         } finally {
             // Delete compiled class
             new File(System.getProperty("java.io.tmpdir") + "/" + wrapper.getFullyQualifiedClassName() + ".class").delete();
+        }
+    }
+
+    public void replace(DecompilerWrapperInformation oldWrapper, DecompilerWrapperInformation newWrapper) {
+        if (oldWrapper.getName().equals("")){
+            setLocationForNewWrapper(newWrapper);
+        }
+        wrappers.remove(oldWrapper);
+        wrappers.add(newWrapper);
+
+
+        if (newWrapper.getScope().equals("local")){
+            try {
+                saveWrapper(newWrapper);
+            } catch (IOException e) {
+                System.err.println("Error saving wrapper.");
+            }
+        }
+    }
+
+    public void deleteWrapper(DecompilerWrapperInformation wrapperInformation){
+        wrappers.remove(wrapperInformation);
+
+        if (wrapperInformation.getScope().equals("local")){
+            new File(wrapperInformation.getFileLocation()).delete();
+        }
+    }
+
+    private void setLocationForNewWrapper(DecompilerWrapperInformation wrapperInformation) {
+        File file = new File(new Directories().getXdgJrdBaseDir() + "/plugins/" + wrapperInformation.getName().replaceAll(" ", "_") + ".json");
+        int i = 1;
+        while (file.exists()) {
+            file = new File(new Directories().getXdgJrdBaseDir() + "/plugins/" + wrapperInformation.getName() + '(' + i + ')' + ".json");
+            i++;
+        }
+        wrapperInformation.setFileLocation(file.getAbsolutePath());
+    }
+
+    public DecompilerWrapperInformation createWrapper(){
+        DecompilerWrapperInformation newWrapper = new DecompilerWrapperInformation("");
+        setLocationForNewWrapper(newWrapper);
+        wrappers.add(newWrapper);
+        return newWrapper;
+    }
+
+    private void saveWrapper(DecompilerWrapperInformation wrapper) throws IOException {
+        final GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(DecompilerWrapperInformation.class, new DecompilerWrapperInformationSerializer());
+        gsonBuilder.setPrettyPrinting();
+        final Gson gson = gsonBuilder.create();
+        final String json = gson.toJson(wrapper);
+        try (PrintWriter out = new PrintWriter(wrapper.getFileLocation())) {
+            out.println(json);
         }
     }
 

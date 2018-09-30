@@ -29,6 +29,7 @@ public class DecompilerWrapperInformation {
         setFullyQualifiedClassName();
         setDependencyURLs(dependencyURLs);
     }
+
     // Constructor for broken wrappers, so we can track them.
     public DecompilerWrapperInformation(String url) {
         setName(url);
@@ -37,13 +38,21 @@ public class DecompilerWrapperInformation {
 
     private String name;
 
+    private String fileLocation;
     private String fullyQualifiedClassName;
     private URL wrapperURL;
     private List<URL> DependencyURLs;
     private Method decompileMethod;
     private Object instance;
     private boolean invalidWrapper = false;
-    private String scope;
+
+    public String getFileLocation() {
+        return fileLocation;
+    }
+
+    public void setFileLocation(String fileLocation) {
+        this.fileLocation = fileLocation;
+    }
 
     public boolean isInvalidWrapper() {
         return invalidWrapper;
@@ -59,18 +68,18 @@ public class DecompilerWrapperInformation {
             String className = "";
             String line = br.readLine();
             // Check first line for package name
-            if (line.startsWith("package ")){
+            if (line.startsWith("package ")) {
                 packageName = line.replace(";", ".").split(" ")[1];
             }
             // Find class name
             while ((line = br.readLine()) != null) {
-                if (line.startsWith("public class ")){
+                if (line.startsWith("public class ")) {
                     className = line.split(" ")[2];
                     break;
                 }
             }
             fullyQualifiedClassName = packageName + className;
-        } catch (IOException e){
+        } catch (IOException e) {
             invalidWrapper = true;
         }
     }
@@ -104,16 +113,16 @@ public class DecompilerWrapperInformation {
         return wrapperURL;
     }
 
-    private void setWrapperURL(String wrapperURL){
+    private void setWrapperURL(String wrapperURL) {
         wrapperURL = addFileProtocolIfNone(wrapperURL);
         wrapperURL = expandEnvVars(wrapperURL);
-        try{
+        try {
             this.wrapperURL = new URL(wrapperURL);
             File file = new File(this.wrapperURL.getFile());
-            if (!(file.exists() && file.canRead())){
+            if (!(file.exists() && file.canRead())) {
                 invalidWrapper = true;
             }
-        } catch (MalformedURLException e){
+        } catch (MalformedURLException e) {
             this.wrapperURL = null;
             this.invalidWrapper = true;
         }
@@ -123,40 +132,34 @@ public class DecompilerWrapperInformation {
         return DependencyURLs;
     }
 
-    private void setDependencyURLs(List<String> dependencyURLs){
+    private void setDependencyURLs(List<String> dependencyURLs) {
         DependencyURLs = new LinkedList<>();
         for (String s : dependencyURLs) {
             s = addFileProtocolIfNone(s);
-            try{
+            try {
                 URL dependencyURL = new URL(expandEnvVars(s));
                 DependencyURLs.add(dependencyURL);
                 File file = new File(dependencyURL.getFile());
-                if (!(file.exists() && file.canRead())){
+                if (!(file.exists() && file.canRead())) {
                     invalidWrapper = true;
                 }
-            } catch (MalformedURLException e){
+            } catch (MalformedURLException e) {
                 DependencyURLs.add(null);
                 this.invalidWrapper = true;
             }
         }
     }
 
-    public void setScope(String jsonURL){
-        String foundScope = "";
-        if (jsonURL.startsWith("/etc/")){
-            foundScope = "system";
-        }
-        else if (jsonURL.startsWith("/usr/share/")){
-            foundScope = "user shared";
+    public String getScope() {
+        String scope = "unknown";
+        if (fileLocation.startsWith("/etc/")) {
+            scope = "system";
+        } else if (fileLocation.startsWith("/usr/share/")) {
+            scope = "user shared";
 
+        } else if (fileLocation.startsWith(new Directories().getXdgJrdBaseDir())) {
+            scope = "local";
         }
-        else if (jsonURL.startsWith(new Directories().getXdgJrdBaseDir())){
-            foundScope = "local";
-        }
-        this.scope = foundScope;
-    }
-
-    public String getScope(){
         return scope;
     }
 

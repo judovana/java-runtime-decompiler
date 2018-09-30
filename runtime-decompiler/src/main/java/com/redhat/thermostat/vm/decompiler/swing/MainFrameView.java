@@ -31,6 +31,7 @@ public class MainFrameView {
     private JMenuItem jMenuItemNewConnection;
     private JMenu jMenuConfig;
     private JMenuItem jMenuItemConfigure;
+    private JMenuItem jMenuPluginEditor;
     private JMenu jMenuHelp;
     private JMenuItem jMenuItemAbout;
     private JMenuItem jMenuItemUsage;
@@ -41,6 +42,7 @@ public class MainFrameView {
 
     private ActionListener vmChangingListener;
     private ActionListener newConnectionDialogListener;
+    private ActionListener pluginConfigurationEditorListener;
 
     private ActionListener haltAgentListener;
 
@@ -67,10 +69,10 @@ public class MainFrameView {
         /**
          * Custom JList that disables selection with mouse drag.
          */
-        class UndragableJList extends JList{
+        class UndragableJList extends JList {
             @Override
             protected void processMouseMotionEvent(MouseEvent e) {
-                if(MouseEvent.MOUSE_DRAGGED != e.getID()) {
+                if (MouseEvent.MOUSE_DRAGGED != e.getID()) {
                     super.processMouseMotionEvent(e);
                 }
             }
@@ -201,6 +203,11 @@ public class MainFrameView {
             configureDialog = new ConfigureView(this);
         });
         jMenuConfig.add(jMenuItemConfigure);
+        jMenuPluginEditor = new JMenuItem("Plugin configuration");
+        jMenuPluginEditor.addActionListener(actionEvent -> {
+            pluginConfigurationEditorListener.actionPerformed(actionEvent);
+        });
+        jMenuConfig.add(jMenuPluginEditor);
         // jMenuConfig end
 
         jMenuHelp = new JMenu("Help");
@@ -274,7 +281,7 @@ public class MainFrameView {
 
     private void sendHaltRequest() {
         ActionEvent event = new ActionEvent(this, 0, null);
-        if (null != haltAgentListener){
+        if (null != haltAgentListener) {
             haltAgentListener.actionPerformed(event);
         } else {
             System.exit(0);
@@ -284,6 +291,10 @@ public class MainFrameView {
 
     void setCreateNewConnectionDialogListener(ActionListener listener) {
         this.newConnectionDialogListener = listener;
+    }
+
+    public void setPluginConfigurationEditorListener(ActionListener pluginConfigurationEditorListener) {
+        this.pluginConfigurationEditorListener = pluginConfigurationEditorListener;
     }
 
     void setLocalVmList(VmInfo[] vmInfos) {
