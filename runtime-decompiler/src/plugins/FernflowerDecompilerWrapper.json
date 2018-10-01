@@ -1,6 +1,5 @@
 {
   "Name": "Fernflower",
-  "FullyQualifiedClassName": "FernflowerDecompilerWrapper",
   "WrapperURL": "/etc/java-runtime-decompiler/plugins/FernflowerDecompilerWrapper.java",
   "DependencyURL": [
     "${HOME}/IdeaProjects/fernflower/build/libs/fernflower.jar"

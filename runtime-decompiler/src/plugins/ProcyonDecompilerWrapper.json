@@ -1,6 +1,5 @@
 {
   "Name": "Procyon",
-  "FullyQualifiedClassName": "ProcyonDecompilerWrapper",
   "WrapperURL": "/etc/java-runtime-decompiler/plugins/ProcyonDecompilerWrapper.java",
   "DependencyURL": [
     "/usr/share/java/procyon-compilertools.jar",
