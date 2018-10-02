@@ -35,7 +35,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>com.redhat.thermostat.vm.decompiler.data.Main</mainClass>
+                            <mainClass>org.jrd.backend.data.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

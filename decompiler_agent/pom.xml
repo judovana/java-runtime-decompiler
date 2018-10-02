@@ -27,8 +27,8 @@
                 <configuration>
                     <archive>
                         <manifestEntries>
-                            <Premain-Class>com.redhat.thermostat.decompiler.agent.Main</Premain-Class>
-                            <Agent-Class>com.redhat.thermostat.decompiler.agent.Main</Agent-Class>
+                            <Premain-Class>org.jrd.agent.Main</Premain-Class>
+                            <Agent-Class>org.jrd.agent.Main</Agent-Class>
                             <Can-Redefine-Classes>true</Can-Redefine-Classes>
                             <Can-Retransform-Classes>true</Can-Retransform-Classes>
                         </manifestEntries>
