@@ -19,7 +19,7 @@ public class Main {
     
     public static void main(String[] args){
         for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-            if ("com.sun.java.frontend.plaf.gtk.GTKLookAndFeel".equals(info.getClassName())) {
+            if ("com.sun.java.swing.plaf.gtk.GTKLookAndFeel".equals(info.getClassName())) {
                 try {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
                 } catch (ClassNotFoundException e) {
