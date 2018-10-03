@@ -41,6 +41,18 @@
                 </configuration>
             </plugin>
         </plugins>
+            <resources>
+                <resource>
+                    <directory>src/main/resources</directory>
+                    <filtering>false</filtering>
+                </resource>
+                <resource>
+                    <directory>${licenseDir}</directory>
+                    <includes>
+                        <include>LICENSE</include>
+                    </includes>
+                </resource>
+            </resources>
     </build>
     <dependencies>
         <dependency>
@@ -71,6 +83,7 @@
             <version>4.0.2</version>
             <type>jar</type>
         </dependency>
+
     </dependencies>
 
 </project>

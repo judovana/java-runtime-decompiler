@@ -36,6 +36,14 @@
                 </configuration>
             </plugin>
         </plugins>
+        <resources>
+        <resource>
+            <directory>${licenseDir}</directory>
+            <includes>
+                <include>LICENSE</include>
+            </includes>
+        </resource>
+        </resources>
     </build>
     <dependencies>
     </dependencies>
