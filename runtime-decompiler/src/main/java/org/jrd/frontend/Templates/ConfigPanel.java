@@ -6,6 +6,12 @@ import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.Desktop;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class ConfigPanel extends JPanel {
 
@@ -13,6 +19,7 @@ public class ConfigPanel extends JPanel {
 
     private FileSelectorPanel wrapperUrlPanel;
     private FileSelectorArrayPanel dependencyUrlPanel;
+    private JButton decompilerUrlLink;
     private ActionListener okButtonListener;
 
     private ActionListener cancelButtonListener;
@@ -118,6 +125,10 @@ public class ConfigPanel extends JPanel {
         this.add(bottomPanel, gbc);
         gbc.gridy = 0;
 
+        JLabel label = new JLabel();
+        label.setText("Configuration JSON file: " + wrapperInformation.getFileLocation());
+        this.addComponent(label);
+
         namePanel = new TextInputPanel("Name");
         namePanel.textField.setText(wrapperInformation.getName());
         this.addComponent(namePanel);
@@ -131,6 +142,23 @@ public class ConfigPanel extends JPanel {
             wrapperInformation.getDependencyURLs().forEach(url -> dependencyUrlPanel.addRow(url.getPath(), false));
         }
         this.addComponent(dependencyUrlPanel);
+        decompilerUrlLink = new JButton();
+        decompilerUrlLink.addMouseListener(new MouseAdapter() {
+                                            @Override
+                                            public void mouseClicked(MouseEvent e) {
+                                                try {
+                                                    Desktop.getDesktop().browse(new URI(wrapperInformation.getDecompilerURL().toString()));
+                                                } catch (IOException e1) {
+                                                    e1.printStackTrace();
+                                                } catch (URISyntaxException e1) {
+                                                    e1.printStackTrace();
+                                                }}
+                                            });
+        if (wrapperInformation.getDecompilerURL() != null) { ;
+            decompilerUrlLink.setText("Go to decompiler website: " + wrapperInformation.getDecompilerURL().toString());
+        }
+        this.addComponent(decompilerUrlLink);
+
     }
 
     private void addComponent(Component component) {
@@ -156,5 +184,8 @@ public class ConfigPanel extends JPanel {
 
     public FileSelectorArrayPanel getDependencyUrlPanel() {
         return dependencyUrlPanel;
+    }
+    public JButton getDecompilerLabel(){
+        return decompilerUrlLink;
     }
 }

@@ -1,9 +1,8 @@
 {
   "Name": "Procyon",
-  "WrapperURL": "/etc/java-runtime-decompiler/plugins/ProcyonDecompilerWrapper.java",
+  "WrapperURL": "file:///etc/java-runtime-decompiler/plugins/ProcyonDecompilerWrapper.java",
   "DependencyURL": [
-    "/usr/share/java/procyon-compilertools.jar",
-    "/usr/share/java/procyon-decompiler.jar"
+    "file:///usr/share/java/procyon-decompiler.jar"
   ],
   "DecompilerDownloadURL": "https://bitbucket.org/mstrobel/procyon/downloads/"
 }

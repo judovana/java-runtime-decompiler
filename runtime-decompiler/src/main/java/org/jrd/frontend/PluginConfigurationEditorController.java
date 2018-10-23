@@ -94,9 +94,10 @@ public class PluginConfigurationEditorController {
         String name = pluginConfigPanel.getNamePanel().getText();
         String wrapperUrl = pluginConfigPanel.getWrapperUrlPanel().getText();
         List<String> dependencyURLs = pluginConfigPanel.getDependencyUrlPanel().getStringList();
+        String decompilerUrl = pluginConfigPanel.getDecompilerLabel().getText();
 
         DecompilerWrapperInformation oldWrapper = pluginConfigPanel.getDecompilerWrapperInformatio();
-        DecompilerWrapperInformation newWrapper = new DecompilerWrapperInformation(name, wrapperUrl, dependencyURLs);
+        DecompilerWrapperInformation newWrapper = new DecompilerWrapperInformation(name, wrapperUrl, dependencyURLs, decompilerUrl );
         newWrapper.setFileLocation(oldWrapper.getFileLocation());
 
         view.dispose();

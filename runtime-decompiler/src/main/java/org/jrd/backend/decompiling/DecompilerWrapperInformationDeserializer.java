@@ -17,7 +17,8 @@ public class DecompilerWrapperInformationDeserializer implements JsonDeserialize
         final String wrapperURL = json.get("WrapperURL").getAsString();
         final List<String> dependencyURLs = new LinkedList<>();
         json.get("DependencyURL").getAsJsonArray().forEach(dependency -> dependencyURLs.add(dependency.getAsString()));
+        final String decompilerURL = json.get("DecompilerDownloadURL").getAsString();
 
-        return new DecompilerWrapperInformation(name, wrapperURL, dependencyURLs);
+        return new DecompilerWrapperInformation(name, wrapperURL, dependencyURLs, decompilerURL);
     }
 }
