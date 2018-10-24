@@ -52,7 +52,7 @@ public class PluginManager {
                     try {
 
                         wrapper = gson.fromJson(new FileReader(file.getAbsolutePath()), DecompilerWrapperInformation.class);
-                    } catch (FileNotFoundException e) {
+                    } catch (FileNotFoundException | NullPointerException e ) {
                         wrapper = null;
                     }
                     if (wrapper == null) {

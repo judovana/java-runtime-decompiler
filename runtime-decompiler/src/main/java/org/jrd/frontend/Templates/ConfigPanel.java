@@ -147,17 +147,17 @@ public class ConfigPanel extends JPanel {
                                             @Override
                                             public void mouseClicked(MouseEvent e) {
                                                 try {
-                                                    Desktop.getDesktop().browse(new URI(wrapperInformation.getDecompilerURL().toString()));
+                                                    Desktop.getDesktop().browse(new URI(wrapperInformation.getDecompilerDownloadURL()));
                                                 } catch (IOException e1) {
                                                     e1.printStackTrace();
                                                 } catch (URISyntaxException e1) {
                                                     e1.printStackTrace();
                                                 }}
                                             });
-        if (wrapperInformation.getDecompilerURL() != null) { ;
-            decompilerUrlLink.setText("Go to decompiler website: " + wrapperInformation.getDecompilerURL().toString());
+        if (wrapperInformation.getDecompilerDownloadURL() != null) {
+            decompilerUrlLink.setText("Go to decompiler website: " + wrapperInformation.getDecompilerDownloadURL());
+            this.addComponent(decompilerUrlLink);
         }
-        this.addComponent(decompilerUrlLink);
 
     }
 

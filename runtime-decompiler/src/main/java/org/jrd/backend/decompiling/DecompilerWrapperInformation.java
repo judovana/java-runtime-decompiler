@@ -24,12 +24,12 @@ public class DecompilerWrapperInformation {
      * @throws MalformedURLException
      */
     public DecompilerWrapperInformation(String name, String wrapperURL, List<String> dependencyURLs,
-                                        String decompilerURL) {
+                                        String decompilerDownloadURL) {
         setName(name);
         setWrapperURL(wrapperURL);
         setFullyQualifiedClassName();
         setDependencyURLs(dependencyURLs);
-        setDecompilerURL(decompilerURL);
+        setDecompilerDownloadURL(decompilerDownloadURL);
     }
 
     // Constructor for broken wrappers, so we can track them.
@@ -39,7 +39,7 @@ public class DecompilerWrapperInformation {
     }
 
     private String name;
-    private URL decompilerURL;
+    private String decompilerDownloadURL;
     private String fileLocation;
     private String fullyQualifiedClassName;
     private URL wrapperURL;
@@ -152,23 +152,12 @@ public class DecompilerWrapperInformation {
         }
     }
 
-    public URL getDecompilerURL() {
-        return decompilerURL;
+    public String getDecompilerDownloadURL() {
+        return decompilerDownloadURL;
     }
 
-    private void setDecompilerURL(String decompilerURL) {
-        decompilerURL = addFileProtocolIfNone(decompilerURL);
-        decompilerURL = expandEnvVars(decompilerURL);
-        try {
-            this.decompilerURL = new URL(decompilerURL);
-            File file = new File(this.decompilerURL.getFile());
-            if (!(file.exists() && file.canRead())) {
-                invalidWrapper = true;
-            }
-        } catch (MalformedURLException e) {
-            this.wrapperURL = null;
-            this.invalidWrapper = true;
-        }
+    private void setDecompilerDownloadURL(String decompilerDownloadURL) {
+        this.decompilerDownloadURL = decompilerDownloadURL;
     }
 
     public String getScope() {
