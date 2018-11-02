@@ -176,7 +176,7 @@ public class VmDecompilerInformationController {
         hideLoadingDialog();
         if (response.equals("error")) {
             JOptionPane.showMessageDialog(mainFrameView.getMainFrame(),
-                    "Classes couldn't be loaded.",
+                    "Classes couldn't be loaded. Do you have agent configured?",
                     "Error",
                     JOptionPane.ERROR_MESSAGE);
         }
