@@ -160,6 +160,8 @@ public class VmDecompilerInformationController {
         hideLoadingDialog();
     }
 
+    public static final String CLASSES_NOPE = "Classes couldn't be loaded. Do you have agent configured?";
+
     /**
      * Sends request for classes. If "ok" response is received updates classes list.
      * If "error" response is received shows an error dialog.
@@ -176,7 +178,7 @@ public class VmDecompilerInformationController {
         hideLoadingDialog();
         if (response.equals("error")) {
             JOptionPane.showMessageDialog(mainFrameView.getMainFrame(),
-                    "Classes couldn't be loaded. Do you have agent configured?",
+                    CLASSES_NOPE,
                     "Error",
                     JOptionPane.ERROR_MESSAGE);
         }
@@ -220,7 +222,12 @@ public class VmDecompilerInformationController {
         vmInfo = null;
     }
 
+
     private AgentRequestAction createRequest(String className, RequestAction action) {
+        return createRequest(vmManager, vmInfo, className, action);
+    }
+
+    public static AgentRequestAction createRequest(VmManager vmManager, VmInfo vmInfo,  String className, RequestAction action) {
         VmDecompilerStatus status = vmManager.getVmDecompilerStatus(vmInfo);
         int listenPort = AgentRequestAction.NOT_ATTACHED_PORT;
         String hostname = "localhost";
@@ -243,6 +250,10 @@ public class VmDecompilerInformationController {
     }
 
     private String submitRequest(AgentRequestAction request) {
+        return submitRequest(vmManager, request);
+    }
+
+    public static String submitRequest(VmManager vmManager, AgentRequestAction request) {
         //DecompilerAgentRequestResponseListener listener = new DecompilerAgentRequestResponseListener(latch);
         DecompilerRequestReceiver receiver = new DecompilerRequestReceiver(vmManager);
         String response = receiver.processRequest(request);
