@@ -62,6 +62,9 @@ public class Config {
 
     public void saveConfigFile() throws IOException {
         File confFile = new File(configFilePath);
+        if (!confFile.getParentFile().exists()){
+            confFile.getParentFile().mkdirs();
+        }
         if (!confFile.exists()) {
             confFile.createNewFile();
         }

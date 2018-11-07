@@ -18,4 +18,4 @@ $HOME/.m2/repository/com/fifesoft/rsyntaxtextarea/2.6.1/rsyntaxtextarea-2.6.1.ja
 $HOME/.m2/repository/io/github/soc/directories/10/directories-10.jar:\
 $HOME/.m2/repository/com/google/code/gson/gson/2.8.5/gson-2.8.5.jar:\
 $HOME/.m2/repository/java/runtime-decompiler/1.0.0-SNAPSHOT/runtime-decompiler-1.0.0-SNAPSHOT.jar\
- Main
+ org.jrd.backend.data.Main
