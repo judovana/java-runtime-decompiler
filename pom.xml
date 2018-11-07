@@ -9,7 +9,7 @@
         <module>runtime-decompiler</module>
         <module>decompiler_agent</module>
     </modules>
-    <groupId>java</groupId>
+    <groupId>java-runtime-decompiler</groupId>
     <artifactId>java-runtime-decompiler</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 
