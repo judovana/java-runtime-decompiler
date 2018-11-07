@@ -11,13 +11,13 @@ public class DecompilerWrapperInformationSerializer implements JsonSerializer<De
 
         final JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("Name", decompilerWrapperInformation.getName());
-        jsonObject.addProperty("WrapperURL", decompilerWrapperInformation.getWrapperURL().getPath());
+        jsonObject.addProperty("WrapperURL", decompilerWrapperInformation.getWrapperURL().toString());
         final JsonArray jsonArray = new JsonArray();
         decompilerWrapperInformation.getDependencyURLs().forEach(url -> {
             jsonArray.add(url.getPath());
         });
         jsonObject.add("DependencyURL", jsonArray);
-        jsonObject.addProperty("DecompilerDownloadURL", decompilerWrapperInformation.getDecompilerURL().getPath());
+        jsonObject.addProperty("DecompilerDownloadURL", decompilerWrapperInformation.getDecompilerURL().toString());
         return jsonObject;
     }
 }
