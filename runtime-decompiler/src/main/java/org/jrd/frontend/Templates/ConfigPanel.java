@@ -9,13 +9,18 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.Desktop;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
+
+import java.util.ArrayList;
 
 public class ConfigPanel extends JPanel {
 
     private TextInputPanel namePanel;
+    private boolean canWrite;
 
     private FileSelectorPanel wrapperUrlPanel;
     private FileSelectorArrayPanel dependencyUrlPanel;
@@ -124,13 +129,28 @@ public class ConfigPanel extends JPanel {
         gbc.weighty = 0;
         this.add(bottomPanel, gbc);
         gbc.gridy = 0;
+        File f = new File(wrapperInformation.getFileLocation());
+        if (f.canWrite()) {
+            canWrite = true;
+
+        } else {
+            canWrite = false;
+        }
+
 
         JLabel label = new JLabel();
         label.setText("Configuration JSON file: " + wrapperInformation.getFileLocation());
         this.addComponent(label);
+        if (!canWrite){
+            JLabel access = new JLabel();
+            access.setText("You are not able to edit this configuration, because you don't have the right permissions.");
+            this.addComponent(access);
+        }
 
         namePanel = new TextInputPanel("Name");
         namePanel.textField.setText(wrapperInformation.getName());
+
+
         this.addComponent(namePanel);
         wrapperUrlPanel = new FileSelectorPanel("Decompiler wrapper URL");
         if (wrapperInformation.getWrapperURL() != null) {
@@ -144,23 +164,42 @@ public class ConfigPanel extends JPanel {
         this.addComponent(dependencyUrlPanel);
         decompilerUrlLink = new JButton();
         decompilerUrlLink.addMouseListener(new MouseAdapter() {
-                                            @Override
-                                            public void mouseClicked(MouseEvent e) {
-                                                try {
-                                                    Desktop.getDesktop().browse(new URI(wrapperInformation.getDecompilerURL().toString()));
-                                                } catch (IOException e1) {
-                                                    e1.printStackTrace();
-                                                } catch (URISyntaxException e1) {
-                                                    e1.printStackTrace();
-                                                }}
-                                            });
-        if (wrapperInformation.getDecompilerURL() != null) { ;
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                try {
+                    Desktop.getDesktop().browse(new URI(wrapperInformation.getDecompilerURL().toString()));
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                } catch (URISyntaxException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
+        if (wrapperInformation.getDecompilerURL() != null) {
+            decompilerUrlLink.setName(wrapperInformation.getDecompilerURL().toString());
             decompilerUrlLink.setText("Go to decompiler website: " + wrapperInformation.getDecompilerURL().toString());
+            //decompilerUrlLink.setName();
         }
         this.addComponent(decompilerUrlLink);
+        this.setEnabled(canWrite);
+        List<Component> components = getAllComponents(this);
+        for  (Component compon : components){
+            compon.setEnabled(canWrite);
+        }
 
     }
 
+    public List<Component> getAllComponents(final Container c) {
+        Component[] comps = c.getComponents();
+        List<Component> compList = new ArrayList<>();
+        for (Component comp : comps) {
+            compList.add(comp);
+            if (comp instanceof Container) {
+                compList.addAll(getAllComponents((Container) comp));
+            }
+        }
+        return compList;
+    }
     private void addComponent(Component component) {
         gbc.gridy++;
         this.add(component, gbc);

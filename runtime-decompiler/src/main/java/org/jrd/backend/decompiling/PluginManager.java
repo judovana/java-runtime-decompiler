@@ -3,7 +3,9 @@ package org.jrd.backend.decompiling;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.jrd.backend.data.Directories;
+import org.jrd.frontend.Templates.ConfigPanel;
 
+import javax.swing.*;
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 import java.io.*;
@@ -118,20 +120,17 @@ public class PluginManager {
     }
 
     public void replace(DecompilerWrapperInformation oldWrapper, DecompilerWrapperInformation newWrapper) {
-        if (oldWrapper.getName().equals("")){
+        if (oldWrapper.getName().equals("") || oldWrapper.equals(null)){
             setLocationForNewWrapper(newWrapper);
         }
         wrappers.remove(oldWrapper);
         wrappers.add(newWrapper);
 
-
-        if (newWrapper.getScope().equals("local")){
             try {
                 saveWrapper(newWrapper);
             } catch (IOException e) {
                 System.err.println("Error saving wrapper.");
             }
-        }
     }
 
     public void deleteWrapper(DecompilerWrapperInformation wrapperInformation){
