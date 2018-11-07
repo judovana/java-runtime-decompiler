@@ -30,6 +30,7 @@ public class DecompilerWrapperInformation {
         setFullyQualifiedClassName();
         setDependencyURLs(dependencyURLs);
         setDecompilerURL(decompilerURL);
+        setFileLocation("");
     }
 
     // Constructor for broken wrappers, so we can track them.
@@ -123,10 +124,12 @@ public class DecompilerWrapperInformation {
             File file = new File(this.wrapperURL.getFile());
             if (!(file.exists() && file.canRead())) {
                 invalidWrapper = true;
+                System.out.println("Cant read file or does not exist!");
             }
         } catch (MalformedURLException e) {
             this.wrapperURL = null;
             this.invalidWrapper = true;
+            e.printStackTrace();
         }
     }
 
@@ -148,6 +151,7 @@ public class DecompilerWrapperInformation {
             } catch (MalformedURLException e) {
                 DependencyURLs.add(null);
                 this.invalidWrapper = true;
+                e.printStackTrace();
             }
         }
     }
@@ -157,19 +161,14 @@ public class DecompilerWrapperInformation {
     }
 
     private void setDecompilerURL(String decompilerURL) {
-        decompilerURL = addFileProtocolIfNone(decompilerURL);
-        decompilerURL = expandEnvVars(decompilerURL);
+
         try {
             this.decompilerURL = new URL(decompilerURL);
-            File file = new File(this.decompilerURL.getFile());
-            if (!(file.exists() && file.canRead())) {
-                invalidWrapper = true;
-            }
-        } catch (MalformedURLException e) {
-            this.wrapperURL = null;
-            this.invalidWrapper = true;
-        }
-    }
+            } catch (MalformedURLException e1) {
+            e1.printStackTrace();
+            this.decompilerURL = null;
+
+    }}
 
     public String getScope() {
         String scope = "unknown";
@@ -181,6 +180,10 @@ public class DecompilerWrapperInformation {
         } else if (fileLocation.startsWith(new Directories().getXdgJrdBaseDir())) {
             scope = "local";
         }
+        else{
+            scope = "invalid";
+        }
+
         return scope;
     }
 
@@ -202,7 +205,6 @@ public class DecompilerWrapperInformation {
         }
         return text;
     }
-
     @Override
     public String toString() {
         return getName() + " [" + getScope() + "]";
