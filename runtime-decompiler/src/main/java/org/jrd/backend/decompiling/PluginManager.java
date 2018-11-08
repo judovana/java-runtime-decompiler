@@ -3,9 +3,7 @@ package org.jrd.backend.decompiling;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.jrd.backend.data.Directories;
-import org.jrd.frontend.Templates.ConfigPanel;
 
-import javax.swing.*;
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 import java.io.*;
@@ -27,12 +25,14 @@ public class PluginManager {
         return wrappers;
     }
 
+    Gson gson;
+
     public PluginManager() {
         loadConfigs();
     }
 
     /**
-     * Loads information about available decompilers into List <DecompilerWrapperInformation> Wrapper.
+     * Searches plugin configuration locations and calls loadConfig(file) on files.
      */
     private void loadConfigs() {
         wrappers = new LinkedList<>();
@@ -42,28 +42,34 @@ public class PluginManager {
                 , new Directories().getXdgJrdBaseDir() + "/plugins/"};
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(DecompilerWrapperInformation.class, new DecompilerWrapperInformationDeserializer());
-        Gson gson = gsonBuilder.create();
+        gson = gsonBuilder.create();
         for (String location : configLocations) {
             File[] files = new File(location).listFiles();
             if (files == null) {
                 continue;
             }
             for (File file : files) {
-                if (file.getName().endsWith(".json")) {
-                    DecompilerWrapperInformation wrapper;
-                    try {
-
-                        wrapper = gson.fromJson(new FileReader(file.getAbsolutePath()), DecompilerWrapperInformation.class);
-                    } catch (FileNotFoundException | NullPointerException e ) {
-                        wrapper = null;
-                    }
-                    if (wrapper == null) {
-                        wrapper = new DecompilerWrapperInformation(file.getName());
-                    }
-                    wrapper.setFileLocation(file.getAbsolutePath());
-                    wrappers.add(wrapper);
-                }
+                loadConfig(file);
             }
+        }
+    }
+
+    /**
+     * Loads information decompiler json file into List<DecompilerWrapperInformation>Wrapper.
+     */
+    private void loadConfig(File file){
+        if (file.getName().endsWith(".json")) {
+            DecompilerWrapperInformation wrapper;
+            try {
+                wrapper = gson.fromJson(new FileReader(file.getAbsolutePath()), DecompilerWrapperInformation.class);
+            } catch (FileNotFoundException | NullPointerException e ) {
+                wrapper = null;
+            }
+            if (wrapper == null) {
+                wrapper = new DecompilerWrapperInformation(file.getName());
+            }
+            wrapper.setFileLocation(file.getAbsolutePath());
+            wrappers.add(wrapper);
         }
     }
 
