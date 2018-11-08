@@ -47,6 +47,15 @@ public class VmManager {
         updateVmListsListener.actionPerformed(new ActionEvent(this, 0, null));
     }
 
+    public VmInfo findVmFromPID(String param) {
+        int pid = Integer.valueOf(param);
+        for (VmInfo vm : vmList) {
+            if (vm.getVmPid() == pid) {
+                return vm;
+            }
+        }
+        throw new RuntimeException("VM with pid of " + pid + " not found");
+    }
 
     public VmInfo getVmInfoByID(String VmId){
         for (VmInfo vmInfo : vmList) {

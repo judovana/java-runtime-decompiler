@@ -76,7 +76,7 @@ public class Main {
                     }
                     String param = args[i + 1];
                     try {
-                        VmInfo vmInfo = findVm(param, manager);
+                        VmInfo vmInfo = manager.findVmFromPID(param);
                         AgentRequestAction request = VmDecompilerInformationController.createRequest(manager, vmInfo, null, AgentRequestAction.RequestAction.CLASSES);
                         String response = VmDecompilerInformationController.submitRequest(manager, request);
                         if (response.equals("ok")) {
@@ -106,7 +106,7 @@ public class Main {
                     String jvmStr = args[i + 1];
                     String classStr = args[i + 2];
                     try {
-                        VmInfo vmInfo = findVm(jvmStr, manager);
+                        VmInfo vmInfo = manager.findVmFromPID(jvmStr);
                         VmDecompilerStatus result = obtainClass(vmInfo, classStr, manager);
                         if (arg.equals(BYTES)) {
                             byte[] ba = Base64.getDecoder().decode(result.getLoadedClassBytes());
@@ -133,7 +133,7 @@ public class Main {
                     String classStr = args[i + 2];
                     String decompilerName = args[i + 3];
                     try {
-                        VmInfo vmInfo = findVm(jvmStr, manager);
+                        VmInfo vmInfo = manager.findVmFromPID(jvmStr);
                         VmDecompilerStatus result = obtainClass(vmInfo, classStr, manager);
                         byte[] bytes = Base64.getDecoder().decode(result.getLoadedClassBytes());
                         PluginManager pluginManager = new PluginManager();
@@ -182,16 +182,6 @@ public class Main {
         } else {
             return "valid";
         }
-    }
-
-    private static VmInfo findVm(String param, VmManager manager) {
-        int pid = Integer.valueOf(param);
-        for (VmInfo vm : manager.vmList) {
-            if (vm.getVmPid() == pid) {
-                return vm;
-            }
-        }
-        throw new RuntimeException("VM with pid of " + pid + " not found");
     }
 
     private static VmDecompilerStatus obtainClass(VmInfo vmInfo, String clazz, VmManager manager) {
