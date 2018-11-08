@@ -182,10 +182,6 @@ public class DecompilerWrapperInformation {
         } else if (fileLocation.startsWith(new Directories().getXdgJrdBaseDir())) {
             scope = LOCAL_SCOPE;
         }
-        else{
-            scope = "invalid";
-        }
-
         return scope;
     }
 
