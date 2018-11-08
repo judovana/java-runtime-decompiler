@@ -170,6 +170,8 @@ public class DecompilerWrapperInformation {
 
     }}
 
+    public static String LOCAL_SCOPE = "local";
+
     public String getScope() {
         String scope = "unknown";
         if (fileLocation.startsWith("/etc/")) {
@@ -178,7 +180,7 @@ public class DecompilerWrapperInformation {
             scope = "user shared";
 
         } else if (fileLocation.startsWith(new Directories().getXdgJrdBaseDir())) {
-            scope = "local";
+            scope = LOCAL_SCOPE;
         }
         else{
             scope = "invalid";
