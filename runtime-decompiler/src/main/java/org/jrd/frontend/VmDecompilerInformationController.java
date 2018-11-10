@@ -82,7 +82,7 @@ public class VmDecompilerInformationController {
         listsUpdating = true;
         ArrayList<VmInfo> localVms = new ArrayList<>();
         ArrayList<VmInfo> remoteVms = new ArrayList<>();
-        vmManager.getAllVm().forEach(info -> {
+        vmManager.getVmInfoList().forEach(info -> {
             if (info.getVmPid() > 0) {
                 localVms.add(info);
             } else {
@@ -172,7 +172,7 @@ public class VmDecompilerInformationController {
         AgentRequestAction request = createRequest("", RequestAction.CLASSES);
         String response = submitRequest(request);
         if (response.equals("ok")) {
-            VmDecompilerStatus vmStatus = vmManager.getVmDecompilerStatus(vmInfo);
+            VmDecompilerStatus vmStatus = vmInfo.getVmDecompilerStatus();
             String[] classes = vmStatus.getLoadedClassNames();
             bytecodeDecompilerView.reloadClassList(classes);
         }
@@ -196,7 +196,7 @@ public class VmDecompilerInformationController {
                     JOptionPane.ERROR_MESSAGE);
             return;
         }
-        VmDecompilerStatus vmStatus = vmManager.getVmDecompilerStatus(vmInfo);
+        VmDecompilerStatus vmStatus = vmInfo.getVmDecompilerStatus();
         String bytesInString = vmStatus.getLoadedClassBytes();
         byte[] bytes = Base64.getDecoder().decode(bytesInString);
         try {
@@ -225,11 +225,11 @@ public class VmDecompilerInformationController {
 
 
     private AgentRequestAction createRequest(String className, RequestAction action) {
-        return createRequest(vmManager, vmInfo, className, action);
+        return createRequest(vmInfo, className, action);
     }
 
-    public static AgentRequestAction createRequest(VmManager vmManager, VmInfo vmInfo,  String className, RequestAction action) {
-        VmDecompilerStatus status = vmManager.getVmDecompilerStatus(vmInfo);
+    public static AgentRequestAction createRequest(VmInfo vmInfo,  String className, RequestAction action) {
+        VmDecompilerStatus status = vmInfo.getVmDecompilerStatus();
         int listenPort = AgentRequestAction.NOT_ATTACHED_PORT;
         String hostname = "localhost";
         if (status != null) {

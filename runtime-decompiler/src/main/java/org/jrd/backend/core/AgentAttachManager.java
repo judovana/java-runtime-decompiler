@@ -48,7 +48,7 @@ public class AgentAttachManager {
         status.setListenPort(attachedPort);
         status.setVmId(vmId);
         status.setTimeStamp(System.currentTimeMillis());
-        vmManager.replaceVmDecompilerStatus(vmManager.getVmInfoByID(vmId), status);
+        vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
         return status;
     }
 }

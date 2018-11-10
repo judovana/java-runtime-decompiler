@@ -9,22 +9,28 @@ import java.awt.event.ActionListener;
 import java.util.*;
 
 /**
- * @author pmikova
+ * This class is used for creating/removing/updating information about available Java Virtual Machines.
  */
 public class VmManager {
 
-    ArrayList<VmInfo> vmList;
-    HashMap<VmInfo, VmDecompilerStatus> vmStatusMap;
-    HashSet<VirtualMachineDescriptor> descriptors;
+    private ArrayList<VmInfo> vmInfoList;
 
-    ActionListener updateVmListsListener;
+    private ActionListener updateVmListsListener;
 
     public VmManager() {
-        this.vmList = new ArrayList<>();
-        this.vmStatusMap = new HashMap<>();
-        this.descriptors = new HashSet<>();
-        createVmList();
-        createReferences(vmList);
+        this.vmInfoList = new ArrayList<>();
+        createLocalVMs();
+    }
+
+    private void createLocalVMs() {
+        for (VirtualMachineDescriptor descriptor : VirtualMachine.list()) {
+            String vmId = descriptor.id();
+            String processId = descriptor.id();
+            int pid = Integer.parseInt(processId);
+            String name = descriptor.displayName();
+            vmInfoList.add(new VmInfo(vmId, pid, name, true));
+        }
+
     }
 
     public void createRemoteVM(String hostname, int port){
@@ -34,31 +40,23 @@ public class VmManager {
         status.setVmId(id);
         status.setHostname(hostname);
         status.setListenPort(port);
-        vmList.add(vmInfo);
-        addVmDecompilerStatus(vmInfo, status);
+        vmInfo.setVmDecompilerStatus(status);
+        vmInfoList.add(vmInfo);
         updateLists();
-    }
-
-    public void setUpdateVmListsListener(ActionListener listener){
-        updateVmListsListener = listener;
-    }
-
-    public void updateLists(){
-        updateVmListsListener.actionPerformed(new ActionEvent(this, 0, null));
     }
 
     public VmInfo findVmFromPID(String param) {
         int pid = Integer.valueOf(param);
-        for (VmInfo vm : vmList) {
-            if (vm.getVmPid() == pid) {
-                return vm;
+        for (VmInfo vmInfo : vmInfoList) {
+            if (vmInfo.getVmPid() == pid) {
+                return vmInfo;
             }
         }
         throw new RuntimeException("VM with pid of " + pid + " not found");
     }
 
     public VmInfo getVmInfoByID(String VmId){
-        for (VmInfo vmInfo : vmList) {
+        for (VmInfo vmInfo : vmInfoList) {
             if (vmInfo.getVmId().equals(VmId)){
                 return vmInfo;
             }
@@ -66,74 +64,17 @@ public class VmManager {
         throw new NoSuchElementException("VmInfo with VmID" + VmId + "does no exist in VmList");
     }
 
-
-    public ArrayList<VmInfo> getAllVm() {
-        return this.vmList;
+    public ArrayList<VmInfo> getVmInfoList() {
+        return this.vmInfoList;
     }
 
-    public VmDecompilerStatus getVmDecompilerStatus(VmInfo vmInfo) {
-        return vmStatusMap.get(vmInfo);
-
+    public void setUpdateVmListsListener(ActionListener listener){
+        updateVmListsListener = listener;
     }
 
-    public void addVmDecompilerStatus(VmInfo vmInfo, VmDecompilerStatus status) {
-        // we need to check if the status is correct
-        if (!vmInfo.getVmId().equals(status.getVmId())) {
-            throw new IllegalArgumentException("Given VM ID does not equal VM"
-                    + " ID given in the VmDecompilerStatus class. This is not"
-                    + " allowed state.");
+    public void updateLists(){
+        if (updateVmListsListener != null){
+            updateVmListsListener.actionPerformed(new ActionEvent(this, 0, null));
         }
-        vmInfo.setVmDecompilerStatus(status);
-        vmStatusMap.put(vmInfo, status);
     }
-
-    public void removeVmDecompilerStatus(VmInfo vmInfo) {
-        vmStatusMap.remove(vmInfo);
-    }
-
-    // trigger reload
-    //must contain removing of old statuses, reload of vm's list, etc.
-    public boolean replaceVmDecompilerStatus(VmInfo vmInfo, VmDecompilerStatus status) {
-        for (VmInfo statusMapVmInfo : vmStatusMap.keySet()) {
-            if (statusMapVmInfo.equals(vmInfo)) {
-                if (vmInfo.getVmId().equals(status.getVmId())) {
-                    vmStatusMap.replace(vmInfo, status);
-                    return true;
-                }
-                else {
-                    //log that the status was kept old
-                    return false;
-                }
-            }
-        }
-
-        this.addVmDecompilerStatus(vmInfo, status);
-        return true;
-    }
-
-    private void createVmList() {
-        List<VirtualMachineDescriptor> descr = VirtualMachine.list();
-        this.descriptors = new HashSet(descr);
-    }
-
-    private void createReferences(List<VmInfo> vmList) {
-        for (VirtualMachineDescriptor descriptor : descriptors) {
-            String vmId = descriptor.id();
-            String processId = descriptor.id();
-            Integer pid = Integer.parseInt(processId);
-            String name = descriptor.displayName();
-            VmInfo vmInfo = new VmInfo(vmId, pid, name);
-            vmList.add(vmInfo);
-        }
-
-    }
-
-    public void refreshReferences() {
-        ArrayList<VmInfo> refList = new ArrayList<>();
-        createVmList();
-        createReferences(refList);
-        //part of the code where the old list is compared to the new list
-
-    }
-
 }

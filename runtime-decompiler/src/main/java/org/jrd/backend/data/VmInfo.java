@@ -1,8 +1,32 @@
 package org.jrd.backend.data;
 
+import org.jrd.backend.core.OutputController;
 import org.jrd.backend.core.VmDecompilerStatus;
 
+/**
+ * Stores information about Available Virtual Machine.
+ */
 public class VmInfo {
+
+    private VmDecompilerStatus vmDecompilerStatus;
+    private String vmId;
+    private int vmPid;
+    private String vmName;
+    private boolean local;
+
+    /**
+     * Stores information about Available Virtual Machine.
+     * @param vmId Unique ID for this VmInfo
+     * @param vmPid Virtual Machine process ID
+     * @param vmName Name for the Virtual Machine. Hostname for remote VMs
+     * @param local True - Local VM. False Remote VM
+     */
+    public VmInfo(String vmId, int vmPid, String vmName, boolean local) {
+        setVmId(vmId);
+        setVmPid(vmPid);
+        setVmName(vmName);
+        setLocal(local);
+    }
 
     public VmDecompilerStatus getVmDecompilerStatus() {
         return vmDecompilerStatus;
@@ -12,29 +36,24 @@ public class VmInfo {
         this.vmDecompilerStatus = vmDecompilerStatus;
     }
 
-    private VmDecompilerStatus vmDecompilerStatus;
-
-    private String vmId;
-    private int vmPid;
-    private String vmName;
-    private boolean local;
-
-    public VmInfo(String VmId, int VmPid, String vmName) {
-        this(VmId, VmPid, vmName, true);
+    public void removeVmDecompilerStatus() {
+        this.vmDecompilerStatus = new VmDecompilerStatus();
     }
 
-    public VmInfo(String VmId, int VmPid, String vmName, boolean local) {
-        this.vmId = VmId;
-        this.vmPid = VmPid;
-        this.vmName = vmName;
-        this.local = local;
+    public void replaceVmDecompilerStatus(VmDecompilerStatus status) {
+        if (getVmId().equals(status.getVmId())){
+            setVmDecompilerStatus(status);
+        } else {
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG,
+                    "Old and new VmDecompilerStatus id does not match!");
+        }
     }
 
     public String getVmId() {
         return vmId;
     }
 
-    public void setVmId(String vmId) {
+    private void setVmId(String vmId) {
         this.vmId = vmId;
     }
 

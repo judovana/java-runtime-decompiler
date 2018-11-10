@@ -68,7 +68,7 @@ public class Main {
                     if (args.size() != 1) {
                         throw new RuntimeException(LISTJVMS + " do not expect argument");
                     }
-                    for (VmInfo vm : manager.vmList) {
+                    for (VmInfo vm : manager.getVmInfoList()) {
                         System.out.println(vm.getVmPid() + " " + vm.getVmName());
                     }
                     break;
@@ -90,10 +90,10 @@ public class Main {
                     String param = args.get(i + 1);
                     try {
                         VmInfo vmInfo = manager.findVmFromPID(param);
-                        AgentRequestAction request = VmDecompilerInformationController.createRequest(manager, vmInfo, null, AgentRequestAction.RequestAction.CLASSES);
+                        AgentRequestAction request = VmDecompilerInformationController.createRequest(vmInfo, null, AgentRequestAction.RequestAction.CLASSES);
                         String response = VmDecompilerInformationController.submitRequest(manager, request);
                         if (response.equals("ok")) {
-                            VmDecompilerStatus vmStatus = manager.getVmDecompilerStatus(vmInfo);
+                            VmDecompilerStatus vmStatus = vmInfo.getVmDecompilerStatus();
                             String[] classes = vmStatus.getLoadedClassNames();
                             for (String clazz : classes) {
                                 System.out.println(clazz);
@@ -198,11 +198,10 @@ public class Main {
     }
 
     private static VmDecompilerStatus obtainClass(VmInfo vmInfo, String clazz, VmManager manager) {
-        AgentRequestAction request = VmDecompilerInformationController.createRequest(manager, vmInfo, clazz, AgentRequestAction.RequestAction.BYTES);
+        AgentRequestAction request = VmDecompilerInformationController.createRequest(vmInfo, clazz, AgentRequestAction.RequestAction.BYTES);
         String response = VmDecompilerInformationController.submitRequest(manager, request);
         if (response.equals("ok")) {
-            VmDecompilerStatus vmStatus = manager.getVmDecompilerStatus(vmInfo);
-            return vmStatus;
+            return vmInfo.getVmDecompilerStatus();
         } else {
             throw new RuntimeException(VmDecompilerInformationController.CLASSES_NOPE);
 

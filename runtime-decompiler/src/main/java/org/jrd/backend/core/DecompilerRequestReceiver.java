@@ -109,7 +109,7 @@ public class DecompilerRequestReceiver {
             status.setVmId(vmId);
             status.setBytesClassName(className);
             status.setLoadedClassBytes(bytes);
-            vmManager.replaceVmDecompilerStatus(vmManager.getVmInfoByID(vmId), status);
+            vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
 
         } catch (Exception ex) {
             OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
@@ -152,7 +152,7 @@ public class DecompilerRequestReceiver {
             status.setTimeStamp(System.currentTimeMillis());
             status.setVmId(vmId);
             status.setLoadedClassNames(arrayOfClasses);
-            vmManager.replaceVmDecompilerStatus(vmManager.getVmInfoByID(vmId), status);
+            vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
 
         } catch (Exception ex) {
             OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
@@ -190,7 +190,7 @@ public class DecompilerRequestReceiver {
         } catch (Exception e) {
             OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Exception when calling halt action", e));
         } finally {
-            vmManager.removeVmDecompilerStatus(vmManager.getVmInfoByID(vmId));
+            vmManager.getVmInfoByID(vmId).removeVmDecompilerStatus();
         }
         return OK_RESPONSE;
     }
