@@ -1,6 +1,8 @@
 package org.jrd.backend.communication;
 
 
+import org.jrd.backend.core.OutputController;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -35,24 +37,17 @@ public class Communicate {
         try {
             this.commSocket = new Socket(host, port);
         } catch (IOException ex) {
-            System.out.println("Error creating socket");
-            ex.printStackTrace();
-            //Logger.getLogger(Communicate.class.getName()).log(Level.SEVERE, null, ex);
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
         }
         InputStream is;
         try {
             is = this.commSocket.getInputStream();
         } catch (IOException e) {
-            System.out.println("Error getting stream");
-            //logger.log(Level.SEVERE, "Opening of input stream of a socket "
-                   // + "failed: " + e.getMessage());
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
             try {
                 this.commSocket.close();
             } catch (IOException e1) {
-                System.out.println("Error when closing the stream");
-                //logger.log(Level.WARNING, "Error while closing the socket: "
-                        //+ e1.getMessage());
-
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e1);
             }
             return;
         }
@@ -61,13 +56,11 @@ public class Communicate {
         try {
             os = this.commSocket.getOutputStream();
         } catch (IOException e) {
-            //logger.log(Level.SEVERE, "Opening of output stream of a socket "
-                    //+ "failed: " + e.getMessage());
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, e);
             try {
                 this.commSocket.close();
             } catch (IOException e1) {
-                //logger.log(Level.WARNING, "Error while closing the socket: "
-                        //+ "" + e1.getMessage());
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, e1);
             }
             return;
         }
@@ -85,9 +78,7 @@ public class Communicate {
         try {
             this.commSocket.close(); // also closes the in/out streams
         } catch (IOException e) {
-            //logger.log(Level.WARNING, "Error while closing the socket: "
-                    //+ "" + e.getMessage());
-
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, e);
         } finally {
             this.commSocket = null;
             this.commInput = null;
@@ -104,12 +95,12 @@ public class Communicate {
         try {
             initLine = this.commInput.readLine().trim();
         } catch (IOException ex) {
-            //logger.log(Level.SEVERE, "Agent did not return anything.");
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, ex);
             return "ERROR";
         }
         
         if (initLine.equals("ERROR")) {
-            //logger.log(Level.SEVERE, "Agent returned error.");
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Agent returned error."));
             return "ERROR";
         } 
         
@@ -117,11 +108,10 @@ public class Communicate {
             try {
                 String s = this.commInput.readLine();
                 s = s.trim();
-                //logger.log(Level.FINE, "Agent returned bytes.");
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, new RuntimeException("Agent returned bytes: "+s));
                 return s;
             } catch (IOException ex) {
-                //logger.log(Level.WARNING, "Can not read line, check "
-                        //+ "agent communication output.");
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, ex);
             }
 
         } 
@@ -139,11 +129,10 @@ public class Communicate {
                         str.append(s).append(";");
                     }
                 } catch (IOException ex) {
-                    //logger.log(Level.WARNING, "Can not read line, check "
-                        //+ "agent communication output.");
+                    OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, ex);
                 }
             }
-            //logger.log(Level.FINE, "Agent returned class names.");
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG,"Agent returned class names.");
             return str.toString();
 
             // Agent shutdown response
@@ -151,7 +140,7 @@ public class Communicate {
             return "OK";
         }
         
-        //logger.log(Level.SEVERE, "Unknow header of " + initLine);
+        OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Unknow header of " + initLine);
         return "ERROR";
     }
 

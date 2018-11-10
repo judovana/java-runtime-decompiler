@@ -1,5 +1,6 @@
 package org.jrd.backend.communication;
 
+import org.jrd.backend.core.OutputController;
 import org.jrd.backend.data.Config;
 
 import com.sun.tools.attach.AgentInitializationException;
@@ -107,15 +108,17 @@ public class InstallDecompilerAgentImpl {
             String value = (String) vm.getSystemProperties().get(property);
             return value;
         } catch (AttachNotSupportedException e) {
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, e);
             return null;
         } catch (IOException e) {
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, e);
             return null;
         } finally {
             if (vm != null) {
                 try {
                     vm.detach();
                 } catch (IOException e) {
-                    // ignore;
+                    OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, e);
                 }
             }
         }
@@ -266,8 +269,7 @@ public class InstallDecompilerAgentImpl {
                 try {
                     port = Integer.decode(nextArg);
                 } catch (NumberFormatException e) {
-                    System.out.println("Install : invalid value for port " + nextArg);
-                    //usage(1);
+                    OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Install : invalid value for port " + nextArg, e));
                 }
             } else if (nextArg.equals("-h")) {
                 idx++;
@@ -290,14 +292,14 @@ public class InstallDecompilerAgentImpl {
                 idx++;
                 String prop = nextArg.substring(2);
                 if (!prop.startsWith(DECOMPILER_PREFIX) || prop.contains(",")) {
-                    System.out.println("Install : invalid property setting " + prop);
+                    OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Install : invalid property setting " + prop));
                     //usage(1);
                 }
                 props = props + ",prop:" + prop;
             } else if (nextArg.equals("--help")) {
                 //usage(0);
             } else {
-                System.out.println("Install : invalid option " + args[idx]);
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Install : invalid option " + args[idx]));
                 //usage(1);
             }
             if (idx == argCount) {
@@ -396,7 +398,7 @@ public class InstallDecompilerAgentImpl {
         }
 
         if (jarname != null) {
-            System.out.println(libName + " jar is " + jarname);
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, libName + " jar is " + jarname);
             return jarname;
         } else {
             throw new  FileNotFoundException("Install : cannot find " + libName + " jar please set environment variable " 

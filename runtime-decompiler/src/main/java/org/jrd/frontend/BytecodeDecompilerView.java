@@ -1,5 +1,6 @@
 package org.jrd.frontend;
 
+import org.jrd.backend.core.OutputController;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
@@ -87,7 +88,7 @@ public class BytecodeDecompilerView {
                             bytesActionListener.actionPerformed(event);
                             
                         } catch (Throwable t) {
-                            // log exception
+                            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, t);
                         }
                         return null;
                     }
@@ -108,7 +109,7 @@ public class BytecodeDecompilerView {
 
                             classesActionListener.actionPerformed(event);
                         } catch (Throwable t) {
-                            // log exception
+                            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, t);
                         }
                         return null;
                     }

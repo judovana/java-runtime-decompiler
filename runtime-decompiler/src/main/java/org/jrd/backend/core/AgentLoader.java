@@ -49,7 +49,7 @@ public class AgentLoader {
             try{  
             InstallDecompilerAgentImpl.install(Integer.toString(pid), false, "localhost", port, installProps);
                 } catch (IllegalArgumentException | IOException | AttachNotSupportedException | AgentLoadException | AgentInitializationException ex) {
-                    //logger.log(Level.SEVERE, "Attach failed!! Cause: " + ex.getMessage());
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Attach failed!! Cause: " + ex.getMessage(), ex));
                     return INVALID_PORT;
                 }
 
@@ -59,7 +59,7 @@ public class AgentLoader {
                 return INVALID_PORT;
             }
         } catch (IllegalArgumentException | IOException e) {
-            //logger.log(Level.WARNING, "Unable to attach decompiler agent to VM '" + pid + "' on port '" + port + "'");
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Unable to attach decompiler agent to VM '" + pid + "' on port '" + port + "'", e));
         return INVALID_PORT;
         }
     }
@@ -72,7 +72,8 @@ public class AgentLoader {
                     return i;
                 }
             } catch (IOException e) {
-                //logger.log(Level.INFO, "Could not open socket on port " + i + ". Trying again.");
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, new RuntimeException("Could not open socket on port " + i + ". Trying again.", e));
+
             }
         }
         throw new IllegalStateException("No ports available in range [" + PORT_MIN + "," + PORT_MAX + "]");

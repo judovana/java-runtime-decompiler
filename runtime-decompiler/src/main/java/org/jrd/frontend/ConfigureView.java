@@ -1,5 +1,6 @@
 package org.jrd.frontend;
 
+import org.jrd.backend.core.OutputController;
 import org.jrd.backend.data.Config;
 
 import javax.swing.*;
@@ -83,7 +84,7 @@ public class ConfigureView extends JDialog{
             try {
                 config.saveConfigFile();
             } catch (IOException e) {
-                e.printStackTrace();
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
             }
             dispose();
         });

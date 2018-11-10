@@ -49,8 +49,7 @@ public class ConnectionDelegator extends Thread{
             initServerSocket = new ServerSocket();
             initServerSocket.bind(new InetSocketAddress(hostname, port));
         } catch (IOException e) {
-            System.err.println("Exception occurred when opening the socket: "
-                    + e);
+            OutputControllerAgent.getLogger().log( new RuntimeException("Exception occurred when opening the socket: ", e));
             return false;
         }
 
@@ -75,20 +74,19 @@ public class ConnectionDelegator extends Thread{
                 clientSocket = theServerSocket.accept();
             } catch (IOException e) {
                 if (!theServerSocket.isClosed()) {
-                    System.err.println("The server socket is closed, killing the thread.");
+                    OutputControllerAgent.getLogger().log(new RuntimeException("The server socket is closed, killing the thread.", e));
                 }
                 return;
             }
             new Thread(
-                    new AgentActionWorker(clientSocket, provider))
-                    .start();
+                    new AgentActionWorker(clientSocket, provider)).start();
         }
 
         if (!theServerSocket.isClosed()){
             try {
                 theServerSocket.close();
             } catch (IOException e) {
-                System.err.print("Error when closing the server socket" + e);
+                OutputControllerAgent.getLogger().log(new RuntimeException("Error when closing the server socket", e));
             }
         }
     }

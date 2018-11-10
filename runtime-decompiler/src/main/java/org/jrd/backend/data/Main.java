@@ -6,6 +6,7 @@
 package org.jrd.backend.data;
 
 import org.jrd.backend.core.AgentRequestAction;
+import org.jrd.backend.core.OutputController;
 import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 import org.jrd.backend.decompiling.PluginManager;
@@ -16,6 +17,7 @@ import javax.swing.*;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
@@ -24,17 +26,34 @@ import java.util.List;
  */
 public class Main {
 
+    private static final String VERBOSE = "-verbose";
+    private static final String LISTJVMS = "-listjvms";
+    private static final String LISTPLUGINS = "-listplugins";
+    private static final String LISTCLASSES = "-listclasses";
+    private static final String BASE64 = "-base64bytes";
+    private static final String BYTES = "-bytes";
+    private static final String DECOMPILE = "-decompile";
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] allargs) throws Exception {
+        //copy of alla rgs after verbose check
+        List<String> args = new ArrayList(allargs.length);
         Config configureAgent = Config.getConfig();
         VmManager manager = new VmManager();
-        if (args.length == 0) {
+        for(String arg: allargs){
+            String aarg = arg.replaceAll("^--*", "-").toLowerCase();
+            if (aarg.equals(VERBOSE)){
+                OutputController.getLogger().setVerbose();
+            } else {
+                args.add(arg);
+            }
+        }
+        if (args.isEmpty()) {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("com.sun.java.swing.plaf.gtk.GTKLookAndFeel".equals(info.getClassName())) {
                     try {
                         javax.swing.UIManager.setLookAndFeel(info.getClassName());
                     } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
-                        e.printStackTrace();
+                        OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, e);
                     }
                     break;
                 }
@@ -42,17 +61,11 @@ public class Main {
             MainFrameView mainView = new MainFrameView();
             VmDecompilerInformationController controller = new VmDecompilerInformationController(mainView, manager);
         } else {
-            String LISTJVMS = "-listjvms";
-            String LISTPLUGINS = "-listplugins";
-            String LISTCLASSES = "-listclasses";
-            String BASE64 = "-base64bytes";
-            String BYTES = "-bytes";
-            String DECOMPILE = "-decompile";
-            for (int i = 0; i < args.length; i++) {
-                String arg = args[i];
+            for (int i = 0; i < args.size(); i++) {
+                String arg = args.get(i);
                 arg = arg.replaceAll("^--*", "-").toLowerCase();
                 if (arg.equals(LISTJVMS)) {
-                    if (args.length != 1) {
+                    if (args.size() != 1) {
                         throw new RuntimeException(LISTJVMS + " do not expect argument");
                     }
                     for (VmInfo vm : manager.vmList) {
@@ -61,7 +74,7 @@ public class Main {
                     break;
                 }
                 if (arg.equals(LISTPLUGINS)) {
-                    if (args.length != 1) {
+                    if (args.size() != 1) {
                         throw new RuntimeException(LISTPLUGINS + " do not expect argument");
                     }
                     PluginManager pm = new PluginManager();
@@ -71,10 +84,10 @@ public class Main {
                     }
                     break;
                 } else if (arg.equals(LISTCLASSES)) {
-                    if (args.length != 2) {
+                    if (args.size() != 2) {
                         throw new RuntimeException(LISTCLASSES + " expect exactly one argument - pid or url");
                     }
-                    String param = args[i + 1];
+                    String param = args.get(i + 1);
                     try {
                         VmInfo vmInfo = manager.findVmFromPID(param);
                         AgentRequestAction request = VmDecompilerInformationController.createRequest(manager, vmInfo, null, AgentRequestAction.RequestAction.CLASSES);
@@ -95,16 +108,16 @@ public class Main {
                             URL u = new URL(param);
                             throw new RuntimeException("Remote VM not yet implemented");
                         } catch (MalformedURLException ee) {
-                            throw new RuntimeException("Second param was supposed to be URL or PID");
+                            throw new RuntimeException("Second param was supposed to be URL or PID", ee);
                         }
                     }
                     break;
                 } else if (arg.equals(BYTES) || arg.equals(BASE64)) {
-                    if (args.length != 3) {
+                    if (args.size() != 3) {
                         throw new RuntimeException(BYTES + " and " + BASE64 + " expect exactly two argument - pid or url of JVM and fully classified class name");
                     }
-                    String jvmStr = args[i + 1];
-                    String classStr = args[i + 2];
+                    String jvmStr = args.get(i + 1);
+                    String classStr = args.get(i + 2);
                     try {
                         VmInfo vmInfo = manager.findVmFromPID(jvmStr);
                         VmDecompilerStatus result = obtainClass(vmInfo, classStr, manager);
@@ -121,17 +134,17 @@ public class Main {
                             URL u = new URL(jvmStr);
                             throw new RuntimeException("Remote VM not yet implemented");
                         } catch (MalformedURLException ee) {
-                            throw new RuntimeException("Second param was supposed to be URL or PID");
+                            throw new RuntimeException("Second param was supposed to be URL or PID", ee);
                         }
                     }
                     break;
                 } else if (arg.equals(DECOMPILE)) {
-                    if (args.length != 4) {
+                    if (args.size() != 4) {
                         throw new RuntimeException(DECOMPILE + " expect exactly three argument - pid or url of JVM, fully classified class name and decompiler name (as set-up) or decompiler json file");
                     }
-                    String jvmStr = args[i + 1];
-                    String classStr = args[i + 2];
-                    String decompilerName = args[i + 3];
+                    String jvmStr = args.get(i + 1);
+                    String classStr = args.get(i + 2);
+                    String decompilerName = args.get(i + 3);
                     try {
                         VmInfo vmInfo = manager.findVmFromPID(jvmStr);
                         VmDecompilerStatus result = obtainClass(vmInfo, classStr, manager);
@@ -164,7 +177,7 @@ public class Main {
                             URL u = new URL(jvmStr);
                             throw new RuntimeException("Remote VM not yet implemented");
                         } catch (MalformedURLException ee) {
-                            throw new RuntimeException("Second param was supposed to be URL or PID");
+                            throw new RuntimeException("Second param was supposed to be URL or PID", ee);
                         }
                     }
                     break;

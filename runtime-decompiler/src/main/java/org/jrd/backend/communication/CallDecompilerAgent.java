@@ -1,6 +1,8 @@
 package org.jrd.backend.communication;
 
 
+import org.jrd.backend.core.OutputController;
+
 import java.io.IOException;
 
 /**
@@ -49,8 +51,7 @@ public class CallDecompilerAgent {
             String results = comm.readResponse();
             return results;
         }catch(IOException ex){
-            //logger.log(Level.SEVERE, "Communication with the agent failed,"
-                    //+ " could not send a request.");
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, ex);
             return null;
         }finally {
             comm.close();

@@ -32,15 +32,15 @@ public class AgentAttachManager {
   
 
     VmDecompilerStatus attachAgentToVm(String vmId, int vmPid)  {
-        //logger.fine("Attaching agent to VM '" + vmPid + "'");
+        OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Attaching agent to VM '" + vmPid + "'");
         int attachedPort = AgentLoader.INVALID_PORT;
         try {
             attachedPort = loader.attach(vmId, vmPid);
         } catch (Exception ex) {
-            Logger.getLogger(AgentAttachManager.class.getName()).log(Level.SEVERE, null, ex);
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
         }
         if (attachedPort == AgentLoader.INVALID_PORT) {
-            //logger.warning("Failed to attach agent for VM '" + vmPid);
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Failed to attach agent for VM '" + vmPid);
             return null;
         }
         VmDecompilerStatus status = new VmDecompilerStatus();

@@ -1,6 +1,8 @@
 package org.jrd.backend.data;
 
 
+import org.jrd.backend.core.OutputController;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -26,7 +28,7 @@ public class Config {
         try {
             loadConfigFile();
         } catch (IOException e) {
-            e.printStackTrace();
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
         }
     }
 
@@ -45,7 +47,7 @@ public class Config {
         if (agentPath.endsWith(".jar")) {
             configMap.put("AGENT_PATH", agentPath);
         } else {
-            System.err.println("Agent must be a .jar file");
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Agent must be a .jar file"));
         }
     }
 

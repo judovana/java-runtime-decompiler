@@ -2,6 +2,7 @@ package org.jrd.backend.decompiling;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.jrd.backend.core.OutputController;
 import org.jrd.backend.data.Directories;
 
 import javax.tools.JavaCompiler;
@@ -63,6 +64,7 @@ public class PluginManager {
             try {
                 wrapper = gson.fromJson(new FileReader(file.getAbsolutePath()), DecompilerWrapperInformation.class);
             } catch (FileNotFoundException | NullPointerException e ) {
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, e);
                 wrapper = null;
             }
             if (wrapper == null) {
@@ -135,7 +137,7 @@ public class PluginManager {
             try {
                 saveWrapper(newWrapper);
             } catch (IOException e) {
-                System.err.println("Error saving wrapper.");
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Error saving wrapper.", e));
             }
     }
 

@@ -36,12 +36,12 @@ public class Main {
                     try {
                         port = Integer.valueOf(arg.substring(PORT_STRING.length(), arg.length()));
                         if (port <= 0) {
-                            System.err.println("The port value is negative:" + port);
+                            OutputControllerAgent.getLogger().log(new RuntimeException("The port value is negative:" + port));
                             port = null;
 
                         }
                     } catch (Exception e) {
-                        System.err.println("The port value is invalid: " + arg + " . Exception: " + e);
+                        OutputControllerAgent.getLogger().log(new RuntimeException("The port value is invalid: " + arg + " . Exception: ", e));
                     }
                 }
             }

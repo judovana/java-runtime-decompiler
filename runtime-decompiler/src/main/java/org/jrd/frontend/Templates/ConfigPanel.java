@@ -1,5 +1,6 @@
 package org.jrd.frontend.Templates;
 
+import org.jrd.backend.core.OutputController;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 
 import javax.swing.*;
@@ -51,6 +52,8 @@ public class ConfigPanel extends JPanel {
     JPanel bottomPanel;
     GridBagConstraints gbc;
 
+    private static final String TRASH_ICON = "/icons/trash.png";
+
     public ConfigPanel(DecompilerWrapperInformation wrapperInformation) {
         this.decompilerWrapperInformatio = wrapperInformation;
         okButton = new JButton("OK");
@@ -85,10 +88,10 @@ public class ConfigPanel extends JPanel {
         // Panel for removing plugin
         trashCanPanel = new JPanel();
         try {
-            ImageIcon icon = new ImageIcon(FileSelectorArrayRow.class.getResource("/icons/trash.png"));
+            ImageIcon icon = new ImageIcon(FileSelectorArrayRow.class.getResource(TRASH_ICON));
             removeButton = new JButton(icon);
         } catch (NullPointerException e) {
-            System.err.println("File /icons/trash.png not found. Falling back to String version.");
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("File " + TRASH_ICON + "not found. Falling back to String version.", e));
             removeButton = new JButton("X");
         }
         removeButton.addActionListener(actionEvent -> {
@@ -168,10 +171,8 @@ public class ConfigPanel extends JPanel {
             public void mouseClicked(MouseEvent e) {
                 try {
                     Desktop.getDesktop().browse(new URI(wrapperInformation.getDecompilerURL().toString()));
-                } catch (IOException e1) {
-                    e1.printStackTrace();
-                } catch (URISyntaxException e1) {
-                    e1.printStackTrace();
+                } catch (IOException | URISyntaxException e1 ) {
+                    OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e1);
                 }
             }
         });

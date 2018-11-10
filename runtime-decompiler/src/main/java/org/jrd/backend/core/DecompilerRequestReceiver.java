@@ -43,13 +43,13 @@ public class DecompilerRequestReceiver {
         try {
             action = RequestAction.returnAction(actionStr);
         } catch (IllegalArgumentException e) {
-            //logger.log(Level.WARNING, "Illegal action in request", e);
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, new RuntimeException("Illegal action in request", e));
             return ERROR_RESPONSE;
         }
         port = tryParseInt(portStr, "Listen port is not an integer!");
         vmPid = tryParseInt(vmPidStr, "VM PID is not a number!");
 
-        //logger.log(Level.FINE, "Processing request. VM ID: " + vmId + ", PID: " + vmPid + ", action: " + action + ", port: " + portStr);
+        OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG,  "Processing request. VM ID: " + vmId + ", PID: " + vmPid + ", action: " + action + ", port: " + portStr);
         String response;
         switch (action) {
             case BYTES:
@@ -63,7 +63,7 @@ public class DecompilerRequestReceiver {
                 response = getHaltAction(hostname, port, vmId, vmPid);
                 break;
             default:
-                //logger.warning("Unknown action given: " + action);
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Unknown action given: " + action);
                 return ERROR_RESPONSE;
         }
         return response;
@@ -74,7 +74,7 @@ public class DecompilerRequestReceiver {
         try {
             return Integer.parseInt(intStr);
         } catch (NumberFormatException e) {
-            //logger.log(Level.WARNING, msg + " Given: " + intStr) ;
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
             return NOT_ATTACHED;
         }
     }
@@ -85,6 +85,7 @@ public class DecompilerRequestReceiver {
             try {
                 actualListenPort = checkIfAgentIsLoaded(listenPort, vmId, vmPid);
             } catch (Exception ex) {
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
                 return ERROR_RESPONSE;
             }
         } else {
@@ -111,6 +112,7 @@ public class DecompilerRequestReceiver {
             vmManager.replaceVmDecompilerStatus(vmManager.getVmInfoByID(vmId), status);
 
         } catch (Exception ex) {
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
             return ERROR_RESPONSE;
         }
         //logger.info("Request for bytecode sent");
@@ -124,6 +126,7 @@ public class DecompilerRequestReceiver {
             try {
                 actualListenPort = checkIfAgentIsLoaded(listenPort, vmId, vmPid);
             } catch (Exception ex) {
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
                 return ERROR_RESPONSE;
             }
         } else {
@@ -152,7 +155,7 @@ public class DecompilerRequestReceiver {
             vmManager.replaceVmDecompilerStatus(vmManager.getVmInfoByID(vmId), status);
 
         } catch (Exception ex) {
-            //logger.log(Level.SEVERE, "Exception occured while processing request: " + ex.getMessage());
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
             return ERROR_RESPONSE;
         }
         return OK_RESPONSE;
@@ -165,6 +168,7 @@ public class DecompilerRequestReceiver {
             try {
                 actualListenPort = checkIfAgentIsLoaded(listenPort, vmId, vmPid);
             } catch (Exception ex) {
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
                 return ERROR_RESPONSE;
             }
         } else {
@@ -184,8 +188,7 @@ public class DecompilerRequestReceiver {
             }
 
         } catch (Exception e) {
-            System.out.println("Exception when calling halt action");
-            e.printStackTrace();
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Exception when calling halt action", e));
         } finally {
             vmManager.removeVmDecompilerStatus(vmManager.getVmInfoByID(vmId));
         }

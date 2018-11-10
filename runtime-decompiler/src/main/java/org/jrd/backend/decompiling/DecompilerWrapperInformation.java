@@ -1,5 +1,6 @@
 package org.jrd.backend.decompiling;
 
+import org.jrd.backend.core.OutputController;
 import org.jrd.backend.data.Directories;
 
 import java.io.BufferedReader;
@@ -83,6 +84,7 @@ public class DecompilerWrapperInformation {
             }
             fullyQualifiedClassName = packageName + className;
         } catch (IOException e) {
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, e);
             invalidWrapper = true;
         }
     }
@@ -124,12 +126,12 @@ public class DecompilerWrapperInformation {
             File file = new File(this.wrapperURL.getFile());
             if (!(file.exists() && file.canRead())) {
                 invalidWrapper = true;
-                System.out.println("Cant read file or does not exist!");
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Cant read file or does not exist!"));
             }
         } catch (MalformedURLException e) {
             this.wrapperURL = null;
             this.invalidWrapper = true;
-            e.printStackTrace();
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
         }
     }
 
@@ -151,7 +153,7 @@ public class DecompilerWrapperInformation {
             } catch (MalformedURLException e) {
                 DependencyURLs.add(null);
                 this.invalidWrapper = true;
-                e.printStackTrace();
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
             }
         }
     }
@@ -165,8 +167,8 @@ public class DecompilerWrapperInformation {
         try {
             this.decompilerURL = new URL(decompilerURL);
             } catch (MalformedURLException e1) {
-            e1.printStackTrace();
             this.decompilerURL = null;
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e1);
 
     }}
 

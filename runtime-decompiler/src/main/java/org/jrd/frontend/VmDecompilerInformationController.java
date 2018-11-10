@@ -3,6 +3,7 @@ package org.jrd.frontend;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.AgentRequestAction.RequestAction;
 import org.jrd.backend.core.DecompilerRequestReceiver;
+import org.jrd.backend.core.OutputController;
 import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
@@ -142,7 +143,7 @@ public class VmDecompilerInformationController {
         try {
             Thread.sleep(100);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
         }
         loadingDialog.setVisible(false);
     }
@@ -201,7 +202,7 @@ public class VmDecompilerInformationController {
         try {
             decompiledClass = pluginManager.decompile(bytecodeDecompilerView.getSelecteddecompilerWrapperInformation(), bytes);
         } catch (Exception e) {
-            e.printStackTrace();
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
         }
         bytecodeDecompilerView.reloadTextField(decompiledClass);
     }
@@ -214,10 +215,10 @@ public class VmDecompilerInformationController {
             AgentRequestAction request = createRequest("", RequestAction.HALT);
             String response = submitRequest(request);
             if (response.equals("ok")) {
-                System.out.println("Agent closing socket and exiting");
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Agent closing socket and exiting");
             }
         } catch (Exception e) {
-            System.out.println("Error when sending request to halt agent");
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Error when sending request to halt agent", e));
         }
         vmInfo = null;
     }
