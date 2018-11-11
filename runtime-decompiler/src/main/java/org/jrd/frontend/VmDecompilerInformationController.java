@@ -82,7 +82,7 @@ public class VmDecompilerInformationController {
         listsUpdating = true;
         ArrayList<VmInfo> localVms = new ArrayList<>();
         ArrayList<VmInfo> remoteVms = new ArrayList<>();
-        vmManager.getVmInfoList().forEach(info -> {
+        vmManager.getVmInfoSet().forEach(info -> {
             if (info.getVmPid() > 0) {
                 localVms.add(info);
             } else {
@@ -220,7 +220,6 @@ public class VmDecompilerInformationController {
         } catch (Exception e) {
             OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Error when sending request to halt agent", e));
         }
-        vmInfo = null;
     }
 
 

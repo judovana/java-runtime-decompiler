@@ -213,8 +213,8 @@ public class Cli {
         if (args.size() != 1) {
             throw new RuntimeException(LISTJVMS + " do not expect argument");
         }
-        for (VmInfo vm : manager.getVmInfoList()) {
-            System.out.println(vm.getVmPid() + " " + vm.getVmName());
+        for (VmInfo vmInfo : manager.getVmInfoSet()) {
+            System.out.println(vmInfo.getVmPid() + " " + vmInfo.getVmName());
         }
     }
 

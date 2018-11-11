@@ -173,9 +173,9 @@ public class MainFrameView {
         welcomeJTextArea.setLineWrap(true);
         welcomeJTextArea.setWrapStyleWord(true);
         welcomeJTextArea.setEditable(false);
-        welcomePanel = new JPanel(new GridBagLayout());
+        welcomePanel = new JPanel(new BorderLayout());
         welcomeJTextArea.setBackground(welcomePanel.getBackground());
-        welcomePanel.add(welcomeJTextArea);
+        welcomePanel.add(welcomeJTextArea, BorderLayout.CENTER);
         // welcomePanel End
 
         centerPanel = new JPanel(new BorderLayout());

@@ -37,7 +37,7 @@ public class VmInfo {
     }
 
     public void removeVmDecompilerStatus() {
-        this.vmDecompilerStatus = new VmDecompilerStatus();
+        this.vmDecompilerStatus = null;
     }
 
     public void replaceVmDecompilerStatus(VmDecompilerStatus status) {
