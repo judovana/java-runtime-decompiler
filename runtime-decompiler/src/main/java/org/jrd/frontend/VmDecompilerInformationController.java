@@ -208,7 +208,7 @@ public class VmDecompilerInformationController {
     }
 
     private void haltAgent() {
-        if (vmInfo == null) {
+        if (vmInfo == null || !vmInfo.isLocal()) {
             return;
         }
         try {
