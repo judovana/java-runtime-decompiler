@@ -120,7 +120,7 @@ public class Cli {
             }
             if (decompilerName.startsWith("javap")) {
                 byte[] ba = Base64.getDecoder().decode(result.getLoadedClassBytes());
-                File f = File.createTempFile("classStr", ".class");
+                File f = File.createTempFile(classStr, ".class");
                 try (FileOutputStream fos = new FileOutputStream(f)) {
                     fos.write(ba);
                 }
