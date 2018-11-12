@@ -105,7 +105,7 @@ public class Cli {
 
     private void decompile(List<String> args, int i) throws Exception {
         if (args.size() != 4) {
-            throw new RuntimeException(DECOMPILE + " expect exactly three argument - pid or url of JVM, fully classified class name and decompiler name (as set-up) or decompiler json file, or javap(see help)");
+            throw new RuntimeException(DECOMPILE + " expects exactly three arguments - pid or url of JVM, fully classified class name and decompiler name (as set-up) or decompiler json file, or javap(see help)");
         }
         String jvmStr = args.get(i + 1);
         String classStr = args.get(i + 2);
@@ -116,7 +116,7 @@ public class Cli {
             byte[] bytes = Base64.getDecoder().decode(result.getLoadedClassBytes());
             PluginManager pluginManager = new PluginManager();
             if (new File(decompilerName).exists() && decompilerName.toLowerCase().endsWith(".json")) {
-                throw new RuntimeException("Plugins laoded directly form file are not yet implemented");
+                throw new RuntimeException("Plugins loading directly from file is not implemented yet.");
             }
             if (decompilerName.startsWith("javap")) {
                 byte[] ba = Base64.getDecoder().decode(result.getLoadedClassBytes());
@@ -159,7 +159,7 @@ public class Cli {
                 decompiler = dw;
             }
         }
-        //LOCAL is preffered one
+        //LOCAL is preferred one
         for (DecompilerWrapperInformation dw : wrappers) {
             if (dw.getScope().equals(DecompilerWrapperInformation.LOCAL_SCOPE) && dw.getName().equals(decompilerName)) {
                 decompiler = dw;
@@ -170,7 +170,7 @@ public class Cli {
 
     private void printBytes(List<String> args, int i, boolean bytes) throws IOException {
         if (args.size() != 3) {
-            throw new RuntimeException(BYTES + " and " + BASE64 + " expect exactly two argument - pid or url of JVM and fully classified class name");
+            throw new RuntimeException(BYTES + " and " + BASE64 + " expect exactly two arguments - pid or url of JVM and fully classified class name");
         }
         String jvmStr = args.get(i + 1);
         String classStr = args.get(i + 2);
@@ -224,7 +224,7 @@ public class Cli {
 
     private void listPlugins(List<String> args) {
         if (args.size() != 1) {
-            throw new RuntimeException(LISTPLUGINS + " do not expect argument");
+            throw new RuntimeException(LISTPLUGINS + " does not expect argument");
         }
         PluginManager pm = new PluginManager();
         List<DecompilerWrapperInformation> wrappers = pm.getWrappers();
@@ -235,7 +235,7 @@ public class Cli {
 
     private void listJvms(List<String> args) {
         if (args.size() != 1) {
-            throw new RuntimeException(LISTJVMS + " do not expect argument");
+            throw new RuntimeException(LISTJVMS + " does not expect argument");
         }
         for (VmInfo vmInfo : manager.getVmInfoSet()) {
             System.out.println(vmInfo.getVmPid() + " " + vmInfo.getVmName());
@@ -247,13 +247,13 @@ public class Cli {
         System.out.println(VERBOSE + " will set this app to print out all Exceptions and some debugging strings. Then continues ");
         System.out.println(HELP + "/" + H + " print this help end exit");
         System.out.println(LISTJVMS + " no arg expected, list available localhost JVMs ");
-        System.out.println(LISTPLUGINS + "  no arg expected, currnently configured plugins with theirs status");
-        System.out.println(LISTCLASSES + "  one arg - pid or url of JVM. List its laoded classes.");
-        System.out.println(BYTES + "  two args - pid or url of JVM and  class to obtain - will stdou out its binary form");
-        System.out.println(BASE64 + "  two args - pid or url of JVM and  class to obtain - will stdou out its binary encoded as base64");
-        System.out.println(DECOMPILE + "  three args - pid or url of JVM and  class to obtain and name/file of decompiler config - will stdou out decompiled class");
-        System.out.println("              you canuse special keword javap, instead of decompiler name, to use javap disassembler.");
-        System.out.println("              You can pass also parameters to it like any other javap, but witout space. So eg javap-v is equal of call javap -v /tmp/class_you_entered.class");
+        System.out.println(LISTPLUGINS + "  no arg expected, currently configured plugins with theirs status");
+        System.out.println(LISTCLASSES + "  one arg - pid or url of JVM. List its loaded classes.");
+        System.out.println(BYTES + "  two args - pid or url of JVM and class to obtain - will stdout its binary form");
+        System.out.println(BASE64 + "  two args - pid or url of JVM and class to obtain - will stdout its binary encoded as base64");
+        System.out.println(DECOMPILE + "  three args - pid or url of JVM and class to obtain and name/file of decompiler config - will stdout decompiled class");
+        System.out.println("              you can use special keyword javap, instead of decompiler name, to use javap disassembler.");
+        System.out.println("              You can pass also parameters to it like any other javap, but without space. So e.g. javap-v is equal to call javap -v /tmp/class_you_entered.class");
         System.out.println("Allowed are: " + LISTJVMS + " , " + LISTPLUGINS + " , " + LISTCLASSES + ", " + BASE64 + " , " + BYTES + ", " + DECOMPILE + ", " + VERBOSE);
     }
 
