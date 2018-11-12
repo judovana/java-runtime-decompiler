@@ -7,12 +7,15 @@ import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.VmDecompilerInformationController;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+
+import com.sun.tools.javap.Main;
 
 public class Cli {
 
@@ -102,7 +105,7 @@ public class Cli {
 
     private void decompile(List<String> args, int i) throws Exception {
         if (args.size() != 4) {
-            throw new RuntimeException(DECOMPILE + " expect exactly three argument - pid or url of JVM, fully classified class name and decompiler name (as set-up) or decompiler json file");
+            throw new RuntimeException(DECOMPILE + " expect exactly three argument - pid or url of JVM, fully classified class name and decompiler name (as set-up) or decompiler json file, or javap(see help)");
         }
         String jvmStr = args.get(i + 1);
         String classStr = args.get(i + 2);
@@ -113,26 +116,30 @@ public class Cli {
             byte[] bytes = Base64.getDecoder().decode(result.getLoadedClassBytes());
             PluginManager pluginManager = new PluginManager();
             if (new File(decompilerName).exists() && decompilerName.toLowerCase().endsWith(".json")) {
-                throw new RuntimeException("Plugins laoded directly form file are noty impelemnetd");
+                throw new RuntimeException("Plugins laoded directly form file are not yet implemented");
             }
-            List<DecompilerWrapperInformation> wrappers = pluginManager.getWrappers();
-            DecompilerWrapperInformation decompiler = null;
-            for (DecompilerWrapperInformation dw : wrappers) {
-                if (!dw.getScope().equals(DecompilerWrapperInformation.LOCAL_SCOPE) && dw.getName().equals(decompilerName)) {
-                    decompiler = dw;
+            if (decompilerName.startsWith("javap")) {
+                byte[] ba = Base64.getDecoder().decode(result.getLoadedClassBytes());
+                File f = File.createTempFile("classStr", ".class");
+                try (FileOutputStream fos = new FileOutputStream(f)) {
+                    fos.write(ba);
                 }
-            }
-            //LOCAL is preffered one
-            for (DecompilerWrapperInformation dw : wrappers) {
-                if (dw.getScope().equals(DecompilerWrapperInformation.LOCAL_SCOPE) && dw.getName().equals(decompilerName)) {
-                    decompiler = dw;
+                String[] input = decompilerName.split("-");
+                //remove javap, return "-"
+                for (int x = 1; x < input.length; x++) {
+                    input[x - 1] = "-" + input[x];
                 }
-            }
-            if (decompiler != null) {
-                String decompiledClass = pluginManager.decompile(decompiler, bytes);
-                System.out.println(decompiledClass);
+                //and add the file
+                input[input.length - 1] = f.getAbsolutePath();
+                Main.main(input);
             } else {
-                throw new RuntimeException("Decompiler " + decompilerName + " not found");
+                DecompilerWrapperInformation decompiler = findDecompiler(decompilerName, pluginManager);
+                if (decompiler != null) {
+                    String decompiledClass = pluginManager.decompile(decompiler, bytes);
+                    System.out.println(decompiledClass);
+                } else {
+                    throw new RuntimeException("Decompiler " + decompilerName + " not found");
+                }
             }
         } catch (NumberFormatException e) {
             try {
@@ -142,6 +149,23 @@ public class Cli {
                 throw new RuntimeException("Second param was supposed to be URL or PID", ee);
             }
         }
+    }
+
+    private DecompilerWrapperInformation findDecompiler(String decompilerName, PluginManager pluginManager) {
+        List<DecompilerWrapperInformation> wrappers = pluginManager.getWrappers();
+        DecompilerWrapperInformation decompiler = null;
+        for (DecompilerWrapperInformation dw : wrappers) {
+            if (!dw.getScope().equals(DecompilerWrapperInformation.LOCAL_SCOPE) && dw.getName().equals(decompilerName)) {
+                decompiler = dw;
+            }
+        }
+        //LOCAL is preffered one
+        for (DecompilerWrapperInformation dw : wrappers) {
+            if (dw.getScope().equals(DecompilerWrapperInformation.LOCAL_SCOPE) && dw.getName().equals(decompilerName)) {
+                decompiler = dw;
+            }
+        }
+        return decompiler;
     }
 
     private void printBytes(List<String> args, int i, boolean bytes) throws IOException {
@@ -228,6 +252,8 @@ public class Cli {
         System.out.println(BYTES + "  two args - pid or url of JVM and  class to obtain - will stdou out its binary form");
         System.out.println(BASE64 + "  two args - pid or url of JVM and  class to obtain - will stdou out its binary encoded as base64");
         System.out.println(DECOMPILE + "  three args - pid or url of JVM and  class to obtain and name/file of decompiler config - will stdou out decompiled class");
+        System.out.println("              you canuse special keword javap, instead of decompiler name, to use javap disassembler.");
+        System.out.println("              You can pass also parameters to it like any other javap, but witout space. So eg javap-v is equal of call javap -v /tmp/class_you_entered.class");
         System.out.println("Allowed are: " + LISTJVMS + " , " + LISTPLUGINS + " , " + LISTCLASSES + ", " + BASE64 + " , " + BYTES + ", " + DECOMPILE + ", " + VERBOSE);
     }
 
