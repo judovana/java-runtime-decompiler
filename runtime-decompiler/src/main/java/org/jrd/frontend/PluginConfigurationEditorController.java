@@ -100,7 +100,7 @@ public class PluginConfigurationEditorController {
         String fileLocation = pluginConfigPanel.getDecompilerWrapperInformatio().getFileLocation();
 
         File f = new File(pluginConfigPanel.getDecompilerWrapperInformatio().getFileLocation());
-        if(f.canWrite()) {
+        if(f.canWrite() || f.getName().equals(".json")) {
             DecompilerWrapperInformation oldWrapper = pluginConfigPanel.getDecompilerWrapperInformatio();
             DecompilerWrapperInformation newWrapper = new DecompilerWrapperInformation(name, wrapperUrl, dependencyURLs, decompilerUrl);
             newWrapper.setFileLocation(fileLocation);

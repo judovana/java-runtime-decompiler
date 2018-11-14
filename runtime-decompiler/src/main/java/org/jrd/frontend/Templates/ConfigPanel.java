@@ -133,9 +133,8 @@ public class ConfigPanel extends JPanel {
         this.add(bottomPanel, gbc);
         gbc.gridy = 0;
         File f = new File(wrapperInformation.getFileLocation());
-        if (f.canWrite()) {
+        if (f.canWrite() || f.getName().equals(".json")) {
             canWrite = true;
-
         } else {
             canWrite = false;
         }
@@ -180,13 +179,16 @@ public class ConfigPanel extends JPanel {
             decompilerUrlLink.setName(wrapperInformation.getDecompilerURL().toString());
             decompilerUrlLink.setText("Go to decompiler website: " + wrapperInformation.getDecompilerURL().toString());
             //decompilerUrlLink.setName();
+            this.addComponent(decompilerUrlLink);
         }
-        this.addComponent(decompilerUrlLink);
         this.setEnabled(canWrite);
         List<Component> components = getAllComponents(this);
         for  (Component compon : components){
-            compon.setEnabled(canWrite);
+            if (!(compon instanceof JLabel)){
+                compon.setEnabled(canWrite);
+            }
         }
+        decompilerUrlLink.setEnabled(true);
 
     }
 
