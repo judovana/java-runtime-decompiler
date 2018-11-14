@@ -181,7 +181,7 @@ public class DecompilerWrapperInformation {
         } else if (fileLocation.startsWith("/usr/share/")) {
             scope = "user shared";
 
-        } else if (fileLocation.startsWith(new Directories().getXdgJrdBaseDir())) {
+        } else if (fileLocation.startsWith(Directories.getXdgJrdBaseDir())) {
             scope = LOCAL_SCOPE;
         }
         return scope;
@@ -196,7 +196,7 @@ public class DecompilerWrapperInformation {
     }
 
     private static String expandEnvVars(String text) {
-        text.replaceAll("\\$\\{XDG_CONFIG_HOME\\}", new Directories().getXdgJrdBaseDir());
+        text.replaceAll("\\$\\{XDG_CONFIG_HOME\\}", Directories.getXdgJrdBaseDir());
         Map<String, String> envMap = System.getenv();
         for (Map.Entry<String, String> entry : envMap.entrySet()) {
             String key = entry.getKey();

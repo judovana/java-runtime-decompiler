@@ -22,7 +22,7 @@ public class Config {
     private String configFilePath;
 
     private Config() {
-        String parentDir = new Directories().getConfigDirectory();
+        String parentDir = Directories.getConfigDirectory();
         configFilePath = parentDir + "/config.cfg";
 
         try {

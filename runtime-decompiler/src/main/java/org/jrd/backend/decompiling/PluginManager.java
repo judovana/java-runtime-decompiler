@@ -40,7 +40,7 @@ public class PluginManager {
         // keep all three locations - for default system scope, user shared scope and user-only scope
         String[] configLocations = new String[]{"/etc/java-runtime-decompiler/plugins/"
                 , "/usr/share/java/java-runtime-decompiler/plugins"
-                , new Directories().getXdgJrdBaseDir() + "/plugins/"};
+                , Directories.getXdgJrdBaseDir() + "/plugins/"};
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(DecompilerWrapperInformation.class, new DecompilerWrapperInformationDeserializer());
         gson = gsonBuilder.create();
@@ -150,10 +150,10 @@ public class PluginManager {
     }
 
     private void setLocationForNewWrapper(DecompilerWrapperInformation wrapperInformation) {
-        File file = new File(new Directories().getXdgJrdBaseDir() + "/plugins/" + wrapperInformation.getName().replaceAll(" ", "_") + ".json");
+        File file = new File(Directories.getXdgJrdBaseDir() + "/plugins/" + wrapperInformation.getName().replaceAll(" ", "_") + ".json");
         int i = 1;
         while (file.exists()) {
-            file = new File(new Directories().getXdgJrdBaseDir() + "/plugins/" + wrapperInformation.getName() + '(' + i + ')' + ".json");
+            file = new File(Directories.getXdgJrdBaseDir() + "/plugins/" + wrapperInformation.getName() + '(' + i + ')' + ".json");
             i++;
         }
         wrapperInformation.setFileLocation(file.getAbsolutePath());
@@ -172,7 +172,7 @@ public class PluginManager {
         gsonBuilder.setPrettyPrinting();
         final Gson gson = gsonBuilder.create();
         final String json = gson.toJson(wrapper);
-        File pluginDir = new File(new Directories().getXdgJrdBaseDir() + "/plugins");
+        File pluginDir = new File(Directories.getXdgJrdBaseDir() + "/plugins");
         if (!pluginDir.exists()){
             pluginDir.mkdir();
         }
