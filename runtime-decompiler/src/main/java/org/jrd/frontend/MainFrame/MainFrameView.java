@@ -87,8 +87,9 @@ public class MainFrameView {
         localVmList.setCellRenderer(new VmListRenderer());
         localVmList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         //localVmList Listener
-        localVmList.addListSelectionListener(listSelectionEvent -> {
-            if (listSelectionEvent.getValueIsAdjusting()) {
+        localVmList.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent mouseEvent) {
                 ActionEvent event = new ActionEvent(localVmList, 0, null);
                 vmChangingListener.actionPerformed(event);
             }
@@ -128,8 +129,9 @@ public class MainFrameView {
         remoteVmList.setFixedCellHeight(80);
         remoteVmList.setCellRenderer(new VmListRenderer());
         remoteVmList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        remoteVmList.addListSelectionListener(listSelectionEvent -> {
-            if (listSelectionEvent.getValueIsAdjusting()) {
+        remoteVmList.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent mouseEvent) {
                 ActionEvent event = new ActionEvent(remoteVmList, 0, null);
                 vmChangingListener.actionPerformed(event);
             }
