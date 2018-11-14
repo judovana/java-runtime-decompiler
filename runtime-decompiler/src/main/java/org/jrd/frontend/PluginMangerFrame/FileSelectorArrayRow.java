@@ -1,4 +1,4 @@
-package org.jrd.frontend.Templates;
+package org.jrd.frontend.PluginMangerFrame;
 
 import org.jrd.backend.core.OutputController;
 

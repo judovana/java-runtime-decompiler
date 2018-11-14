@@ -4,7 +4,7 @@ import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 import org.jrd.backend.decompiling.PluginManager;
-import org.jrd.frontend.VmDecompilerInformationController;
+import org.jrd.frontend.MainFrame.VmDecompilerInformationController;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -33,9 +33,9 @@ public class Cli {
     private final String[] allargs;
     private final VmManager manager;
 
-    public Cli(String[] orig, VmManager manager) {
+    public Cli(String[] orig, Model model) {
         this.allargs = orig;
-        this.manager = manager;
+        this.manager = model.getVmManager();
         for (String arg : allargs) {
             String aarg = cleanParameter(arg);
             if (aarg.equals(HELP) || aarg.equals(H)) {

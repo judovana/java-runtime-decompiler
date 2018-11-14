@@ -1,4 +1,4 @@
-package org.jrd.frontend;
+package org.jrd.frontend.MainFrame;
 
 import javax.swing.*;
 import java.awt.*;
@@ -7,7 +7,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-class LoadingDialog extends JDialog {
+public class LoadingDialog extends JDialog {
 
     private JLabel infoLabel = new JLabel("Loading classes");
     private JProgressBar progressBar = new JProgressBar();
@@ -15,7 +15,7 @@ class LoadingDialog extends JDialog {
 
     private ActionListener abortActionListener;
 
-    LoadingDialog() {
+    public LoadingDialog() {
         this.setTitle("Connecting");
         this.setSize(new Dimension(256, 144));
         this.setResizable(false);
@@ -45,7 +45,7 @@ class LoadingDialog extends JDialog {
         abortActionListener.actionPerformed(abortEvent);
     }
 
-    void setAbortActionListener(ActionListener listener) {
+    public void setAbortActionListener(ActionListener listener) {
         abortActionListener = listener;
     }
 }

@@ -1,8 +1,7 @@
-package org.jrd.frontend;
+package org.jrd.frontend.PluginMangerFrame;
 
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 import org.jrd.backend.decompiling.PluginManager;
-import org.jrd.frontend.Templates.ConfigPanel;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -22,7 +21,7 @@ public class PluginConfigurationEditorController {
         this.updateWrapperListsActionListener = updateWrapperListsActionListner;
     }
 
-    PluginConfigurationEditorController(PluginConfigurationEditorView view, PluginManager pluginManager) {
+    public PluginConfigurationEditorController(PluginConfigurationEditorView view, PluginManager pluginManager) {
         this.view = view;
         this.pluginManager = pluginManager;
         updateWrapperList(pluginManager.getWrappers());
@@ -85,7 +84,7 @@ public class PluginConfigurationEditorController {
         }
     }
 
-    void updateWrapperList(List<DecompilerWrapperInformation> wrappers) {
+    public void updateWrapperList(List<DecompilerWrapperInformation> wrappers) {
         JList<DecompilerWrapperInformation> wrapperList = view.getWrapperJList();
         wrapperList.setListData(wrappers.toArray(new DecompilerWrapperInformation[0]));
     }

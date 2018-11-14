@@ -1,4 +1,4 @@
-package org.jrd.frontend.Templates;
+package org.jrd.frontend.PluginMangerFrame;
 
 import java.util.LinkedList;
 import java.util.List;

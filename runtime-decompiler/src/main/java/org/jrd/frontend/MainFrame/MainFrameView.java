@@ -1,6 +1,8 @@
-package org.jrd.frontend;
+package org.jrd.frontend.MainFrame;
 
 import org.jrd.backend.data.VmInfo;
+import org.jrd.frontend.ConfigureFrame.ConfigureView;
+import org.jrd.frontend.LicenseFrame.LicenseView;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
@@ -46,7 +48,7 @@ public class MainFrameView {
 
     private ActionListener haltAgentListener;
 
-    JFrame getMainFrame() {
+    public JFrame getMainFrame() {
         return mainFrame;
     }
 

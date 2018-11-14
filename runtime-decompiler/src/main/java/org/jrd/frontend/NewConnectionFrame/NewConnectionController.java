@@ -1,4 +1,4 @@
-package org.jrd.frontend;
+package org.jrd.frontend.NewConnectionFrame;
 
 import org.jrd.backend.core.OutputController;
 import org.jrd.backend.data.VmManager;
@@ -10,7 +10,7 @@ public class NewConnectionController {
     NewConnectionView newConnectionView;
     VmManager vmManager;
 
-    NewConnectionController(NewConnectionView newConnectionView, VmManager vmManager){
+    public NewConnectionController(NewConnectionView newConnectionView, VmManager vmManager){
         this.newConnectionView = newConnectionView;
         this.vmManager = vmManager;
 

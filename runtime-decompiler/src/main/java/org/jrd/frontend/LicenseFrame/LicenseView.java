@@ -1,4 +1,6 @@
-package org.jrd.frontend;
+package org.jrd.frontend.LicenseFrame;
+
+import org.jrd.frontend.MainFrame.MainFrameView;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,7 +13,7 @@ public class LicenseView extends JDialog {
     JTextArea licenseTextArea;
     JScrollPane scrollPane;
 
-    LicenseView(MainFrameView mainFrameView){
+    public LicenseView(MainFrameView mainFrameView){
 
         licenseTextArea = new JTextArea();
         scrollPane = new JScrollPane(licenseTextArea);

@@ -1,4 +1,4 @@
-package org.jrd.frontend;
+package org.jrd.frontend.MainFrame;
 
 import org.jrd.backend.core.OutputController;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;

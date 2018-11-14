@@ -1,13 +1,18 @@
-package org.jrd.frontend;
+package org.jrd.frontend.MainFrame;
 
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.AgentRequestAction.RequestAction;
 import org.jrd.backend.core.DecompilerRequestReceiver;
 import org.jrd.backend.core.OutputController;
 import org.jrd.backend.core.VmDecompilerStatus;
+import org.jrd.backend.data.Model;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
 import org.jrd.backend.decompiling.PluginManager;
+import org.jrd.frontend.NewConnectionFrame.NewConnectionController;
+import org.jrd.frontend.NewConnectionFrame.NewConnectionView;
+import org.jrd.frontend.PluginMangerFrame.PluginConfigurationEditorController;
+import org.jrd.frontend.PluginMangerFrame.PluginConfigurationEditorView;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -29,12 +34,13 @@ public class VmDecompilerInformationController {
     private VmManager vmManager;
     private VmInfo vmInfo;
     private boolean listsUpdating = false;
-    private PluginManager pluginManager = new PluginManager();
+    private PluginManager pluginManager;
 
-    public VmDecompilerInformationController(MainFrameView mainFrameView, VmManager vmManager) {
+    public VmDecompilerInformationController(MainFrameView mainFrameView, Model model) {
         this.mainFrameView = mainFrameView;
         this.bytecodeDecompilerView = mainFrameView.getBytecodeDecompilerView();
-        this.vmManager = vmManager;
+        this.vmManager = model.getVmManager();
+        this.pluginManager = model.getPluginManager();
 
         updateVmLists();
 

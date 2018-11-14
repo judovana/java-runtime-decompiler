@@ -1,70 +1,100 @@
-package org.jrd.frontend;
+package org.jrd.frontend.ConfigureFrame;
+
+import org.jrd.backend.core.OutputController;
+import org.jrd.backend.data.Config;
+import org.jrd.frontend.MainFrame.MainFrameView;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 
-public class NewConnectionView extends JDialog{
+public class ConfigureView extends JDialog{
 
-    private JPanel mainPanel;
-    private HostnamePortInputPanel hostnamePortInputPanel;
-    private JPanel okCancelPanel;
+    private confBrosePanel configureAgentPathPanel;
+    private confBrosePanel configureDecompilerPathPanel;
     private JPanel configureOKCancelPanel;
     private JButton okButton;
     private JButton cancelButton;
-
-    private ActionListener addButtonListener;
-
-    public class HostnamePortInputPanel extends JPanel{
-
-        JTextField hostnameTextField;
-        JTextField portTextField;
+    private JPanel okCancelPanel;
+    private Config config = Config.getConfig();
 
 
-        HostnamePortInputPanel(){
+    JPanel mainPanel;
 
-            this.hostnameTextField = new JTextField();
-            this.portTextField = new JTextField();
-            this.portTextField.setPreferredSize(new Dimension(90,0));
+    public class confBrosePanel extends JPanel{
+
+        public JTextField textField;
+        public JLabel label;
+        public JButton browseButton;
+
+        confBrosePanel(String label){
+            this(label, "Browse");
+        }
+
+        confBrosePanel(String label, String ButtonLabel){
+
+            this.textField = new JTextField();
+            this.label = new JLabel(label);
+            this.browseButton = new JButton(ButtonLabel);
 
             this.setLayout(new GridBagLayout());
             GridBagConstraints gbc = new GridBagConstraints();
             gbc.anchor = GridBagConstraints.WEST;
             gbc.fill = GridBagConstraints.BOTH;
             gbc.gridx = 1;
-            this.add(new JLabel("Hostname"), gbc);
-            gbc.gridx = 3;
-            this.add(new JLabel("Port"), gbc);
+            this.add(this.label, gbc);
             gbc.gridx = 0;
             gbc.gridy = 1;
             this.add(Box.createHorizontalStrut(20), gbc);
             gbc.weightx = 1;
             gbc.gridx = 1;
-            this.add(hostnameTextField, gbc);
+            this.add(textField, gbc);
             gbc.weightx = 0;
             gbc.gridx = 2;
             this.add(Box.createHorizontalStrut(20), gbc);
             gbc.gridx = 3;
-            this.add(portTextField, gbc);
+            this.add(browseButton, gbc);
             gbc.gridx = 4;
             this.add(Box.createHorizontalStrut(20), gbc);
             this.setPreferredSize(new Dimension(0,120));
         }
     }
 
-    NewConnectionView(MainFrameView mainFrameView){
 
-        hostnamePortInputPanel = new HostnamePortInputPanel();
+    public ConfigureView(MainFrameView mainFrameView){
 
-        okButton = new JButton("Add");
+        configureAgentPathPanel = new confBrosePanel("Path to agent");
+        configureAgentPathPanel.textField.setText(config.getAgentPath());
+        configureAgentPathPanel.browseButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                JFileChooser chooser = new JFileChooser();
+                int returnVar = chooser.showOpenDialog(configureAgentPathPanel);
+                if (returnVar == JFileChooser.APPROVE_OPTION){
+                    configureAgentPathPanel.textField.setText(chooser.getSelectedFile().getPath());
+                }
+            }
+        });
+
+        okButton = new JButton("OK");
         okButton.addActionListener(actionEvent -> {
-            addButtonListener.actionPerformed(actionEvent);
+            config.setAgentPath(configureAgentPathPanel.textField.getText());
+            try {
+                config.saveConfigFile();
+            } catch (IOException e) {
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
+            }
+            dispose();
         });
         okButton.setPreferredSize(new Dimension(90,30));
 
         cancelButton = new JButton("Cancel");
-        cancelButton.addActionListener(actionEvent -> dispose());
+        cancelButton.addActionListener(actionEvent -> {
+            dispose();
+        });
         cancelButton.setPreferredSize(new Dimension(90,30));
 
         okCancelPanel = new JPanel(new GridBagLayout());
@@ -107,7 +137,7 @@ public class NewConnectionView extends JDialog{
         gbc.weighty = 0;
         gbc.gridx = 0;
         gbc.gridy = 0;
-        mainPanel.add(hostnamePortInputPanel, gbc);
+        mainPanel.add(configureAgentPathPanel, gbc);
         gbc.gridy = 1;
         gbc.weighty = 1;
         mainPanel.add(Box.createVerticalGlue(),gbc);
@@ -116,25 +146,14 @@ public class NewConnectionView extends JDialog{
         mainPanel.add(configureOKCancelPanel, gbc);
 
 
-        this.setTitle("New connection");
-        this.setSize(new Dimension(400,220));
-        this.setMinimumSize(new Dimension(250,220));
+        this.setTitle("Configuration");
+        this.setSize(new Dimension(800,400));
+        this.setMinimumSize(new Dimension(250,330));
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setLocationRelativeTo(mainFrameView.getMainFrame());
         this.setModalityType(ModalityType.APPLICATION_MODAL);
         this.add(mainPanel);
-
+        this.setVisible(true);
     }
 
-    String getHostname(){
-        return hostnamePortInputPanel.hostnameTextField.getText();
-    }
-
-    String getPortString() throws NumberFormatException{
-        return hostnamePortInputPanel.portTextField.getText();
-    }
-
-    void setAddButtonListener(ActionListener addButtonListener) {
-        this.addButtonListener = addButtonListener;
-    }
 }

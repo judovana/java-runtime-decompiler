@@ -1,14 +1,14 @@
-package org.jrd.frontend;
+package org.jrd.frontend.PluginMangerFrame;
 
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
-import org.jrd.frontend.Templates.ConfigPanel;
+import org.jrd.frontend.MainFrame.MainFrameView;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-class PluginConfigurationEditorView extends JDialog {
+public class PluginConfigurationEditorView extends JDialog {
 
     private JPanel mainPanel;
     private JPanel leftPanel;
@@ -28,7 +28,7 @@ class PluginConfigurationEditorView extends JDialog {
      *
      * @param mainFrameView main window
      */
-    PluginConfigurationEditorView(MainFrameView mainFrameView) {
+    public PluginConfigurationEditorView(MainFrameView mainFrameView) {
 
         wrapperJList = new JList<>();
         wrapperJList.setFixedCellHeight(32);
