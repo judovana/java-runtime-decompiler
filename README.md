@@ -2,21 +2,21 @@
 # Java-Runtime-Decompiler
 This application allows you to extract bytecode from running JVM and decompile it with an external decompiler.
 ## Install
-###From GIT
+### From GIT
 ```
 git clone https://github.com/pmikova/java-runtime-decompiler.git
 cd java-runtime-decompiler
 mvn clean install
 ./start.sh
 ```
-###Fedora
+### Fedora
 copr repository for Fedora built from master is available.
 ```
 dnf copr enable radekmanak/java-runtime-decompiler
 dnf install java-runtime-decompiler
 ```
 
-##Usage
+## Usage
 When the application opens go to menubar -> configure and select Agent path.
 
 Agent is built in decompiler-agent project.
