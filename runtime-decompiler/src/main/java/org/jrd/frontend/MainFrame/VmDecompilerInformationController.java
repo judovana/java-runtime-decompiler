@@ -74,7 +74,6 @@ public class VmDecompilerInformationController {
         pluginConfigurationEditorController.setUpdateWrapperListsActionListener(actionEvent -> {
             updatePluginLists();
         });
-        updatePluginLists();
         pluginConfigurationEditorView.setVisible(true);
     }
 
