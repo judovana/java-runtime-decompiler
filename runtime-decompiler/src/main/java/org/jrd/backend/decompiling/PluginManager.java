@@ -53,6 +53,10 @@ public class PluginManager {
                 loadConfig(file);
             }
         }
+
+        DecompilerWrapperInformation javap = new DecompilerWrapperInformation();
+        javap.setName("javap");
+        wrappers.add(javap);
     }
 
     /**
@@ -76,11 +80,18 @@ public class PluginManager {
     }
 
     /**
+     * Decompile with default options
+     */
+    public String decompile(DecompilerWrapperInformation wrapper, byte[] bytecode) throws Exception {
+        return decompile(wrapper, bytecode, null);
+    }
+
+    /**
      * @param wrapper  decompiler used for decompiling
      * @param bytecode bytecode to be decompiled
      * @return Decompiled bytecode or exception String.
      */
-    public synchronized String decompile(DecompilerWrapperInformation wrapper, byte[] bytecode) throws Exception {
+    public synchronized String decompile(DecompilerWrapperInformation wrapper, byte[] bytecode, String[] options) throws Exception{
         if (wrapper == null) {
             return "No valid decompiler selected. Unable to decompile. \n " +
                     "If there is no decompiler selected, you need to set paths to decompiler in" +
@@ -89,41 +100,50 @@ public class PluginManager {
         if (wrapper.getDecompileMethod() == null) {
             InitializeWrapper(wrapper);
         }
-        return (String) wrapper.getDecompileMethod().invoke(wrapper.getInstance(), bytecode);
+        return (String) wrapper.getDecompileMethod().invoke(wrapper.getInstance(), bytecode, options);
     }
 
     /**
      * Compiles wrapper plugin, loads it into JVM and stores it for later.
      *
      * @param wrapper
-     * @throws Exception
+     * @throws RuntimeException
      */
-    private void InitializeWrapper(DecompilerWrapperInformation wrapper) throws Exception {
-        try {
-            // Compile Wrapper
-            JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-            compiler.run(null, null, null, wrapper.getWrapperURL().getPath(),
-                    "-cp", URLListToCSV(wrapper.getDependencyURLs(), ':'), "-d", System.getProperty("java.io.tmpdir"));
-            // Load wrapper
-            URL tempDirURL = new URL("file://" + System.getProperty("java.io.tmpdir") + "/");
-            List<URL> s = new LinkedList(wrapper.getDependencyURLs());
-            s.add(tempDirURL);
-            URL[] classpath = new URL[s.size()];
-            s.toArray(classpath);
-            ClassLoader loader = URLClassLoader.newInstance(
-                    classpath,
-                    getClass().getClassLoader()
-            );
-            // Reflect classes and store them in DecompilerWrapperInformation for later use
-            Class DecompilerClass = loader.loadClass(wrapper.getFullyQualifiedClassName());
-            Constructor constructor = DecompilerClass.getConstructor();
-            wrapper.setInstance(constructor.newInstance());
-            wrapper.setDecompileMethod(DecompilerClass.getMethod("decompile", byte[].class));
-        } catch (Exception e) {
-            throw e;
-        } finally {
-            // Delete compiled class
-            new File(System.getProperty("java.io.tmpdir") + "/" + wrapper.getFullyQualifiedClassName() + ".class").delete();
+    private void InitializeWrapper(DecompilerWrapperInformation wrapper){
+        if (wrapper.getName().equals("javap")){
+            try {
+                wrapper.setInstance(new JavapDisassemblerWrapper());
+                wrapper.setDecompileMethod(JavapDisassemblerWrapper.class.getMethod("decompile", byte[].class, String[].class));
+            } catch (NoSuchMethodException e) {
+                OutputController.getLogger().log("Could not find decompile method in org/jrd/backend/decompiling/JavapDisassemblerWrapper");
+            }
+        } else {
+            try {
+                // Compile Wrapper
+                JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+                compiler.run(null, null, null, wrapper.getWrapperURL().getPath(),
+                        "-cp", URLListToCSV(wrapper.getDependencyURLs(), ':'), "-d", System.getProperty("java.io.tmpdir"));
+                // Load wrapper
+                URL tempDirURL = new URL("file://" + System.getProperty("java.io.tmpdir") + "/");
+                List<URL> s = new LinkedList(wrapper.getDependencyURLs());
+                s.add(tempDirURL);
+                URL[] classpath = new URL[s.size()];
+                s.toArray(classpath);
+                ClassLoader loader = URLClassLoader.newInstance(
+                        classpath,
+                        getClass().getClassLoader()
+                );
+                // Reflect classes and store them in DecompilerWrapperInformation for later use
+                Class DecompilerClass = loader.loadClass(wrapper.getFullyQualifiedClassName());
+                Constructor constructor = DecompilerClass.getConstructor();
+                wrapper.setInstance(constructor.newInstance());
+                wrapper.setDecompileMethod(DecompilerClass.getMethod("decompile", byte[].class, String[].class));
+            } catch (Exception e) {
+                OutputController.getLogger().log("Decompiler wrapper could not be loaded." + Arrays.toString(e.getStackTrace()));
+            } finally {
+                // Delete compiled class
+                new File(System.getProperty("java.io.tmpdir") + "/" + wrapper.getFullyQualifiedClassName() + ".class").delete();
+            }
         }
     }
 

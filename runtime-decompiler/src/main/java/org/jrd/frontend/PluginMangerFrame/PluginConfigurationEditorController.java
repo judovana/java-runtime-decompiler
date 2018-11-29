@@ -7,6 +7,7 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public class PluginConfigurationEditorController {
@@ -85,8 +86,16 @@ public class PluginConfigurationEditorController {
     }
 
     public void updateWrapperList(List<DecompilerWrapperInformation> wrappers) {
-        JList<DecompilerWrapperInformation> wrapperList = view.getWrapperJList();
-        wrapperList.setListData(wrappers.toArray(new DecompilerWrapperInformation[0]));
+        JList<DecompilerWrapperInformation> wrapperJList = view.getWrapperJList();
+
+        List<DecompilerWrapperInformation> pluginsWithoutJavap = new ArrayList<>(wrappers);
+        for (DecompilerWrapperInformation wrapperInformation: pluginsWithoutJavap){
+            if (wrapperInformation.getName().equals("javap")){
+                pluginsWithoutJavap.remove(wrapperInformation);
+                break;
+            }
+        }
+        wrapperJList.setListData(pluginsWithoutJavap.toArray(new DecompilerWrapperInformation[0]));
     }
 
     private void applyWrapperChange() {

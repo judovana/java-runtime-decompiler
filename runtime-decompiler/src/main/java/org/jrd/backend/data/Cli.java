@@ -7,15 +7,12 @@ import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.MainFrame.VmDecompilerInformationController;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-
-import com.sun.tools.javap.Main;
 
 public class Cli {
 
@@ -31,11 +28,13 @@ public class Cli {
     private static final String H = "-h";
 
     private final String[] allargs;
-    private final VmManager manager;
+    private final VmManager vmManager;
+    private final PluginManager pluginManager;
 
     public Cli(String[] orig, Model model) {
         this.allargs = orig;
-        this.manager = model.getVmManager();
+        this.vmManager = model.getVmManager();
+        this.pluginManager = model.getPluginManager();
         for (String arg : allargs) {
             String aarg = cleanParameter(arg);
             if (aarg.equals(HELP) || aarg.equals(H)) {
@@ -111,27 +110,20 @@ public class Cli {
         String classStr = args.get(i + 2);
         String decompilerName = args.get(i + 3);
         try {
-            VmInfo vmInfo = manager.findVmFromPID(jvmStr);
-            VmDecompilerStatus result = obtainClass(vmInfo, classStr, manager);
+            VmInfo vmInfo = vmManager.findVmFromPID(jvmStr);
+            VmDecompilerStatus result = obtainClass(vmInfo, classStr, vmManager);
             byte[] bytes = Base64.getDecoder().decode(result.getLoadedClassBytes());
-            PluginManager pluginManager = new PluginManager();
             if (new File(decompilerName).exists() && decompilerName.toLowerCase().endsWith(".json")) {
                 throw new RuntimeException("Plugins loading directly from file is not implemented yet.");
             }
             if (decompilerName.startsWith("javap")) {
-                byte[] ba = Base64.getDecoder().decode(result.getLoadedClassBytes());
-                File f = File.createTempFile(classStr, ".class");
-                try (FileOutputStream fos = new FileOutputStream(f)) {
-                    fos.write(ba);
+                String[] split_name = decompilerName.split("-");
+                String[] options = new String[split_name.length-1];
+                for (int x = 1; x < split_name.length; x++) {
+                    options[x - 1] = "-" + split_name[x];
                 }
-                String[] input = decompilerName.split("-");
-                //remove javap, return "-"
-                for (int x = 1; x < input.length; x++) {
-                    input[x - 1] = "-" + input[x];
-                }
-                //and add the file
-                input[input.length - 1] = f.getAbsolutePath();
-                Main.main(input);
+                String decompile_output = pluginManager.decompile(findDecompiler("javap", pluginManager), bytes, options);
+                System.out.println(decompile_output);
             } else {
                 DecompilerWrapperInformation decompiler = findDecompiler(decompilerName, pluginManager);
                 if (decompiler != null) {
@@ -175,8 +167,8 @@ public class Cli {
         String jvmStr = args.get(i + 1);
         String classStr = args.get(i + 2);
         try {
-            VmInfo vmInfo = manager.findVmFromPID(jvmStr);
-            VmDecompilerStatus result = obtainClass(vmInfo, classStr, manager);
+            VmInfo vmInfo = vmManager.findVmFromPID(jvmStr);
+            VmDecompilerStatus result = obtainClass(vmInfo, classStr, vmManager);
             if (bytes) {
                 byte[] ba = Base64.getDecoder().decode(result.getLoadedClassBytes());
                 System.out.write(ba);
@@ -199,9 +191,9 @@ public class Cli {
         }
         String param = args.get(i + 1);
         try {
-            VmInfo vmInfo = manager.findVmFromPID(param);
+            VmInfo vmInfo = vmManager.findVmFromPID(param);
             AgentRequestAction request = VmDecompilerInformationController.createRequest(vmInfo, null, AgentRequestAction.RequestAction.CLASSES);
-            String response = VmDecompilerInformationController.submitRequest(manager, request);
+            String response = VmDecompilerInformationController.submitRequest(vmManager, request);
             if (response.equals("ok")) {
                 String[] classes = vmInfo.getVmDecompilerStatus().getLoadedClassNames();
                 for (String clazz : classes) {
@@ -237,7 +229,7 @@ public class Cli {
         if (args.size() != 1) {
             throw new RuntimeException(LISTJVMS + " does not expect argument");
         }
-        for (VmInfo vmInfo : manager.getVmInfoSet()) {
+        for (VmInfo vmInfo : vmManager.getVmInfoSet()) {
             System.out.println(vmInfo.getVmPid() + " " + vmInfo.getVmName());
         }
     }

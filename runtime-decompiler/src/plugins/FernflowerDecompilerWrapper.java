@@ -8,7 +8,7 @@ import java.nio.file.Paths;
 
 public class FernflowerDecompilerWrapper {
 
-    public String decompile(byte[] bytecode){
+    public String decompile(byte[] bytecode, String[] options){
         File tempByteFile = null;
         File decompiledFile = null;
         String decompiledString;

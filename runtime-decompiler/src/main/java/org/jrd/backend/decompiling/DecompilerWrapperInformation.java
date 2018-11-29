@@ -40,6 +40,9 @@ public class DecompilerWrapperInformation {
         invalidWrapper = true;
     }
 
+    public DecompilerWrapperInformation() {
+    }
+
     private String name;
     private URL decompilerURL;
     private String fileLocation;
@@ -126,7 +129,7 @@ public class DecompilerWrapperInformation {
             File file = new File(this.wrapperURL.getFile());
             if (!(file.exists() && file.canRead())) {
                 invalidWrapper = true;
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Cant read file or does not exist!"));
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Cant read file or does not exist! " + file.getAbsolutePath()));
             }
         } catch (MalformedURLException e) {
             this.wrapperURL = null;
@@ -176,6 +179,9 @@ public class DecompilerWrapperInformation {
 
     public String getScope() {
         String scope = "unknown";
+        if (fileLocation == null){
+            return "Internal";
+        }
         if (fileLocation.startsWith("/etc/")) {
             scope = "system";
         } else if (fileLocation.startsWith("/usr/share/")) {

@@ -10,7 +10,7 @@ public class ProcyonDecompilerWrapper {
 
     private StringWriter writer = new StringWriter();
 
-    public String decompile(byte[] bytecode) {
+    public String decompile(byte[] bytecode, String[] options) {
         File tempByteFile = null;
         writer.getBuffer().delete(0, writer.getBuffer().length());
         try {
