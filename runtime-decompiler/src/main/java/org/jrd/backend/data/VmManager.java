@@ -11,22 +11,35 @@ import java.util.*;
 /**
  * This class is used for creating/removing/updating information about available Java Virtual Machines.
  */
-public class VmManager {
+public class VmManager{
 
     private HashSet<VmInfo> vmInfoSet;
-    private ActionListener updateVmListsListener;
+    Set<ActionListener> actionListeners = new HashSet<>();
+    boolean changed;
 
     public VmManager() {
         this.vmInfoSet = new HashSet<>();
         updateLocalVMs();
-        updateLists();
+
+
+        new Thread(() -> {
+            while (true){
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                updateLocalVMs();
+            }
+        }).start();
+
     }
 
     /**
      * Obtains list of Virtual Machines.
      * This list is then compared to vmInfoSet. Old Vms are removed and new are added.
      */
-    private void updateLocalVMs() {
+    public void updateLocalVMs() {
         HashSet<VmInfo> newVmInfoSet = new HashSet<>();
         for (VirtualMachineDescriptor descriptor : VirtualMachine.list()) {
             String vmId = descriptor.id();
@@ -40,6 +53,7 @@ public class VmManager {
         newVmInfoSet.forEach(vmInfo -> {
             boolean isNewVm = vmInfoSet.stream().noneMatch(vmInfo1 -> vmInfo1.getVmId().equals(vmInfo.getVmId()));
             if (isNewVm){
+                setChanged();
                 vmInfoSet.add(vmInfo);
             }
         });
@@ -51,10 +65,13 @@ public class VmManager {
             VmInfo vmInfo = iterator.next();
             boolean noLongerExists = newVmInfoSet.stream().noneMatch(vmInfo1 -> vmInfo1.getVmId().equals(vmInfo.getVmId()));
             if (vmInfo.isLocal() && noLongerExists){
+                setChanged();
                 forRemoval.add(vmInfo);
             }
         }
         vmInfoSet.removeAll(forRemoval);
+
+        notifyListeners();
     }
 
     public void createRemoteVM(String hostname, int port){
@@ -66,7 +83,8 @@ public class VmManager {
         status.setListenPort(port);
         vmInfo.setVmDecompilerStatus(status);
         vmInfoSet.add(vmInfo);
-        updateLists();
+        setChanged();
+        notifyListeners();
     }
 
     public VmInfo findVmFromPID(String param) {
@@ -92,13 +110,31 @@ public class VmManager {
         return this.vmInfoSet;
     }
 
-    public void setUpdateVmListsListener(ActionListener listener){
-        updateVmListsListener = listener;
+    public void subscribeToVMChange(ActionListener listener){
+        if (listener == null){
+            throw new NullPointerException();
+        }
+        actionListeners.add(listener);
     }
 
-    public void updateLists(){
-        if (updateVmListsListener != null){
-            updateVmListsListener.actionPerformed(new ActionEvent(this, 0, null));
+    public void notifyListeners(){
+        if (hasChanged()){
+            clearChanged();
+            for (ActionListener listener: actionListeners){
+                listener.actionPerformed(new ActionEvent(this, 0, null));
+            }
         }
+    }
+
+    private boolean hasChanged(){
+        return changed;
+    }
+
+    private void setChanged(){
+        changed = true;
+    }
+
+    private  void clearChanged(){
+        changed = false;
     }
 }

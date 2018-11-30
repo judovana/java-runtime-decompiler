@@ -44,7 +44,7 @@ public class VmDecompilerInformationController {
 
         updateVmLists();
 
-        vmManager.setUpdateVmListsListener(e -> updateVmLists());
+        vmManager.subscribeToVMChange(e -> updateVmLists());
 
         mainFrameView.setCreateNewConnectionDialogListener(e -> createNewConnectionDialog());
 
