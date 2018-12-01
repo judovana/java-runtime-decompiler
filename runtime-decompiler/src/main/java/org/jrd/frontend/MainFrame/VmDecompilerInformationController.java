@@ -33,7 +33,6 @@ public class VmDecompilerInformationController {
     private NewConnectionController newConnectionController;
     private VmManager vmManager;
     private VmInfo vmInfo;
-    private boolean listsUpdating = false;
     private PluginManager pluginManager;
 
     public VmDecompilerInformationController(MainFrameView mainFrameView, Model model) {
@@ -84,7 +83,6 @@ public class VmDecompilerInformationController {
     }
 
     private void updateVmLists() {
-        listsUpdating = true;
         ArrayList<VmInfo> localVms = new ArrayList<>();
         ArrayList<VmInfo> remoteVms = new ArrayList<>();
         vmManager.getVmInfoSet().forEach(info -> {
@@ -96,11 +94,9 @@ public class VmDecompilerInformationController {
         });
         mainFrameView.setLocalVmList(localVms.toArray(new VmInfo[0]));
         mainFrameView.setRemoteVmList(remoteVms.toArray(new VmInfo[0]));
-        listsUpdating = false;
     }
 
     private void changeVm(ActionEvent event) {
-        if (!listsUpdating) {
             JList<VmInfo> vmList = (JList<VmInfo>) event.getSource();
             VmInfo selectedVmInfo = vmList.getSelectedValue();
             mainFrameView.switchPanel(selectedVmInfo != null);
@@ -112,7 +108,6 @@ public class VmDecompilerInformationController {
                     loadClassNames();
                 }).start();
             }
-        }
     }
 
     /**
@@ -122,7 +117,6 @@ public class VmDecompilerInformationController {
      * @param vmList list that doesn't get cleared containing the VM that user wants to attach.
      */
     private void clearOtherList(JList<VmInfo> vmList) {
-        listsUpdating = true;
         switch (vmList.getName()) {
             case "remoteVmList":
                 mainFrameView.clearLocalListSelection();
@@ -131,7 +125,6 @@ public class VmDecompilerInformationController {
                 mainFrameView.clearRemoteListSelection();
                 break;
         }
-        listsUpdating = false;
     }
 
     private void showLoadingDialog() {
@@ -158,11 +151,9 @@ public class VmDecompilerInformationController {
         mainFrameView.getBytecodeDecompilerView().reloadClassList(new String[0]);
         mainFrameView.getBytecodeDecompilerView().reloadTextField("");
         haltAgent();
-        listsUpdating = true;
         updateVmLists();
         mainFrameView.clearLocalListSelection();
         mainFrameView.clearRemoteListSelection();
-        listsUpdating = false;
         hideLoadingDialog();
     }
 
