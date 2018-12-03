@@ -139,7 +139,8 @@ public class PluginManager {
                 wrapper.setInstance(constructor.newInstance());
                 wrapper.setDecompileMethod(DecompilerClass.getMethod("decompile", byte[].class, String[].class));
             } catch (Exception e) {
-                OutputController.getLogger().log("Decompiler wrapper could not be loaded." + Arrays.toString(e.getStackTrace()));
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Decompiler wrapper could not be loaded. " + e.getMessage());
+                OutputController.getLogger().log(e);
             } finally {
                 // Delete compiled class
                 new File(System.getProperty("java.io.tmpdir") + "/" + wrapper.getFullyQualifiedClassName() + ".class").delete();
