@@ -2,22 +2,27 @@ package org.jrd.backend.data;
 
 public final class Directories {
 
-    private static final String xdgConfigSuffix = "/conf";
-    private static final String xdgJrdHome = "/.config/java-runtime-decompiler";
+    private static final String XDG_CONFIG_SUFFIX = "/conf";
+    private static final String XDG_PLUGIN_SUFFIX = "/plugins";
+    private static final String XDG_JRD_HOME = "/.config/java-runtime-decompiler";
 
     private Directories(){
+    }
+
+    /**
+     * Locate plugin directory as per XDG base directory specification.
+     * @return xdg config directory (e.g. ~/.config/java-runtime-decompiler/conf
+     */
+    public static String getConfigDirectory() {
+        return getXdgJrdBaseDir() + XDG_CONFIG_SUFFIX;
     }
 
     /**
      * Locate configuration directory as per XDG base directory specification.
      * @return xdg config directory (e.g. ~/.config/java-runtime-decompiler/conf
      */
-    public static String getConfigDirectory() {
-
-        String xdgJrdBase = getXdgJrdBaseDir();
-        String xdgConf = xdgJrdBase + xdgConfigSuffix;
-        return xdgConf;
-
+    public static String getPluginDirectory() {
+       return getXdgJrdBaseDir() + XDG_PLUGIN_SUFFIX;
     }
 
     /**
@@ -33,9 +38,9 @@ public final class Directories {
         }
         String xdgConfigHome;
         if (res == null || res.equals("")) {
-            xdgConfigHome = homeDir + xdgJrdHome;
+            xdgConfigHome = homeDir + XDG_JRD_HOME;
         } else {
-            xdgConfigHome = res + xdgJrdHome;
+            xdgConfigHome = res + XDG_JRD_HOME;
 
         }
         return xdgConfigHome;
