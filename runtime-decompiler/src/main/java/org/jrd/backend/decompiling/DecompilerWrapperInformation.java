@@ -166,14 +166,13 @@ public class DecompilerWrapperInformation {
     }
 
     private void setDecompilerURL(String decompilerURL) {
-
         try {
             this.decompilerURL = new URL(decompilerURL);
-            } catch (MalformedURLException e1) {
+        } catch (MalformedURLException e1) {
             this.decompilerURL = null;
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e1);
-
-    }}
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, e1);
+        }
+    }
 
     public static String LOCAL_SCOPE = "local";
 

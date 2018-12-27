@@ -55,6 +55,10 @@ public class ConfigPanel extends JPanel {
     private static final String TRASH_ICON = "/icons/trash.png";
 
     public ConfigPanel(DecompilerWrapperInformation wrapperInformation) {
+        if (wrapperInformation == null){
+            return;
+        }
+
         this.decompilerWrapperInformatio = wrapperInformation;
         okButton = new JButton("OK");
         okButton.addActionListener(actionEvent -> {
@@ -133,11 +137,7 @@ public class ConfigPanel extends JPanel {
         this.add(bottomPanel, gbc);
         gbc.gridy = 0;
         File f = new File(wrapperInformation.getFileLocation());
-        if (f.canWrite() || f.getName().equals(".json")) {
-            canWrite = true;
-        } else {
-            canWrite = false;
-        }
+        canWrite = f.canWrite();
 
 
         JLabel label = new JLabel();

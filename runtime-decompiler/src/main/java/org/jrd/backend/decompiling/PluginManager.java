@@ -149,13 +149,18 @@ public class PluginManager {
     }
 
     public void replace(DecompilerWrapperInformation oldWrapper, DecompilerWrapperInformation newWrapper) {
-        if (oldWrapper.getName().equals("") || oldWrapper.equals(null)){
+        if (oldWrapper == null){
             setLocationForNewWrapper(newWrapper);
         }
         wrappers.remove(oldWrapper);
         wrappers.add(newWrapper);
 
             try {
+                if (!oldWrapper.getName().equals(newWrapper.getName()) && oldWrapper.getScope().equals("local")){
+                    File oldWrapperFile = new File(oldWrapper.getFileLocation());
+                    oldWrapperFile.delete();
+                    setLocationForNewWrapper(newWrapper);
+                }
                 saveWrapper(newWrapper);
             } catch (IOException e) {
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Error saving wrapper.", e));
@@ -181,8 +186,16 @@ public class PluginManager {
     }
 
     public DecompilerWrapperInformation createWrapper(){
-        DecompilerWrapperInformation newWrapper = new DecompilerWrapperInformation("");
+        DecompilerWrapperInformation newWrapper = new DecompilerWrapperInformation();
+        newWrapper.setName("unnamed");
         setLocationForNewWrapper(newWrapper);
+        create_user_plugin_dir();
+        File plugin_json_file = new File(newWrapper.getFileLocation());
+        try {
+            plugin_json_file.createNewFile();
+        } catch (IOException e) {
+            OutputController.getLogger().log("Plugin wrapper json configuration file could not be loaded");
+        }
         wrappers.add(newWrapper);
         return newWrapper;
     }
@@ -193,12 +206,18 @@ public class PluginManager {
         gsonBuilder.setPrettyPrinting();
         final Gson gson = gsonBuilder.create();
         final String json = gson.toJson(wrapper);
-        File pluginDir = new File(Directories.getXdgJrdBaseDir() + "/plugins");
-        if (!pluginDir.exists()){
-            pluginDir.mkdir();
+        if (wrapper.getScope().equals("local")){
+            create_user_plugin_dir();
         }
         try (PrintWriter out = new PrintWriter(wrapper.getFileLocation())) {
             out.println(json);
+        }
+    }
+
+    private void create_user_plugin_dir() {
+        File pluginDir = new File(Directories.getPluginDirectory());
+        if (!pluginDir.exists()) {
+            pluginDir.mkdir();
         }
     }
 

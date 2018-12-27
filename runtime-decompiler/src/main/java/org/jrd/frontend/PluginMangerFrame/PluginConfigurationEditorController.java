@@ -26,7 +26,7 @@ public class PluginConfigurationEditorController {
         this.view = view;
         this.pluginManager = pluginManager;
         updateWrapperList(pluginManager.getWrappers());
-        if (pluginManager.getWrappers().size() == 0) {
+        if (pluginManager.getWrappers().size() <= 1) {
             pluginManager.createWrapper();
             updateWrapperList(pluginManager.getWrappers());
         }
@@ -75,7 +75,7 @@ public class PluginConfigurationEditorController {
                 name + "?", "Warning", JOptionPane.OK_CANCEL_OPTION);
         if (dialogResult == JOptionPane.OK_OPTION) {
             pluginManager.deleteWrapper(wrapperInformation);
-            if (pluginManager.getWrappers().size() == 0) {
+            if (pluginManager.getWrappers().size() <= 1) {
                 view.dispose();
                 return;
             }
@@ -108,7 +108,7 @@ public class PluginConfigurationEditorController {
         String fileLocation = pluginConfigPanel.getDecompilerWrapperInformatio().getFileLocation();
 
         File f = new File(pluginConfigPanel.getDecompilerWrapperInformatio().getFileLocation());
-        if(f.canWrite() || f.getName().equals(".json")) {
+        if(f.canWrite()) {
             DecompilerWrapperInformation oldWrapper = pluginConfigPanel.getDecompilerWrapperInformatio();
             DecompilerWrapperInformation newWrapper = new DecompilerWrapperInformation(name, wrapperUrl, dependencyURLs, decompilerUrl);
             newWrapper.setFileLocation(fileLocation);
