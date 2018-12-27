@@ -23,6 +23,7 @@ public class MainFrameView {
     private JButton remoteConnectionButton;
     private JScrollPane remoteVmScrollPane;
     private JList<VmInfo> remoteVmList;
+    private CardLayout cardLayout;
     private JPanel centerPanel;
     private JPanel welcomePanel;
     private JTextArea welcomeJTextArea;
@@ -182,8 +183,10 @@ public class MainFrameView {
         welcomePanel.add(welcomeJTextArea, BorderLayout.CENTER);
         // welcomePanel End
 
-        centerPanel = new JPanel(new BorderLayout());
-        centerPanel.add(welcomePanel, BorderLayout.CENTER);
+        cardLayout = new CardLayout();
+        centerPanel = new JPanel(cardLayout);
+        centerPanel.add(welcomePanel, "welcomePanel");
+        centerPanel.add(bytecodeDecompilerView.getBytecodeDecompilerPanel(), "decompilerView");
         // centerPanel End
 
 
@@ -271,15 +274,9 @@ public class MainFrameView {
      */
     void switchPanel(boolean isVmSelected) {
         if (isVmSelected) {
-            centerPanel.removeAll();
-            centerPanel.add(bytecodeDecompilerView.getBytecodeDecompilerPanel());
-            centerPanel.repaint();
-            centerPanel.revalidate();
+            cardLayout.show(centerPanel, "decompilerView");
         } else {
-            centerPanel.removeAll();
-            centerPanel.add(welcomePanel);
-            centerPanel.repaint();
-            centerPanel.revalidate();
+            cardLayout.show(centerPanel, "welcomePanel");
         }
     }
 
