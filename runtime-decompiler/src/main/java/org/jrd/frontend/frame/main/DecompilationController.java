@@ -57,12 +57,14 @@ public class DecompilationController {
     private VmManager vmManager;
     private VmInfo vmInfo;
     private PluginManager pluginManager;
+    private boolean isVerbose;
 
-    public DecompilationController(MainFrameView mainFrameView, Model model) {
+    public DecompilationController(MainFrameView mainFrameView, Model model, boolean isVerbose) {
         this.mainFrameView = mainFrameView;
         this.bytecodeDecompilerView = mainFrameView.getBytecodeDecompilerView();
         this.vmManager = model.getVmManager();
         this.pluginManager = model.getPluginManager();
+        this.isVerbose = isVerbose;
 
         updateVmLists();
 
@@ -413,7 +415,7 @@ public class DecompilationController {
             PluginManager.BundledCompilerStatus internalCompiler = pluginManager.getBundledCompilerStatus(wrapper);
             GlobalConsole.getConsole().addMessage(Level.ALL, internalCompiler.getStatus());
             OverwriteClassDialog.CompilationWithResult compiler = new OverwriteClassDialog.CompilationWithResult(
-                    OverwriteClassDialog.getClasspathlessCompiler(wrapper, internalCompiler.isEmbedded()),
+                    OverwriteClassDialog.getClasspathlessCompiler(wrapper, internalCompiler.isEmbedded(), isVerbose),
                     new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager),
                     GlobalConsole.getConsole(), srcs) {
 
@@ -452,7 +454,7 @@ public class DecompilationController {
             }
 
             final OverwriteClassDialog overwriteClassDialog = new OverwriteClassDialog(
-                    name, lastLoaded, buffer, binBuffer, vmInfo, vmManager, pluginManager, selectedDecompiler, isBinary
+                    name, lastLoaded, buffer, binBuffer, vmInfo, vmManager, pluginManager, selectedDecompiler, isBinary, isVerbose
             );
             ScreenFinder.centerWindowsToCurrentScreen(overwriteClassDialog);
             overwriteClassDialog.setVisible(true);
