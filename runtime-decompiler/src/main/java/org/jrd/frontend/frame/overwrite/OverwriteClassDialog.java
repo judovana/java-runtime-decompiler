@@ -147,7 +147,8 @@ public class OverwriteClassDialog extends JDialog {
             VmManager vmManager,
             PluginManager pluginManager,
             DecompilerWrapper selectedDecompiler,
-            boolean isBinaryVisible
+            boolean isBinaryVisible,
+            boolean isVerbose
     ) {
         super((JFrame) null, "Specify class and selectSrc its bytecode", true);
         this.setSize(400, 400);
@@ -250,7 +251,7 @@ public class OverwriteClassDialog extends JDialog {
         setLocationRelativeTo(null);
         setValidation();
         setSelectListener();
-        setOkListener();
+        setOkListener(isVerbose);
         addComponentsToPanels();
 
         this.pluginManager = pluginManager;
@@ -338,7 +339,7 @@ public class OverwriteClassDialog extends JDialog {
         });
     }
 
-    private void setOkListener() {
+    private void setOkListener(boolean isVerbose) {
         setSelectSaveListener(selectSrcTarget, futureSrcTarget, namingSource);
         setSelectSaveListener(selectBinTarget, futureBinTarget, namingBinary);
         setSelectSaveListener(selectExternalFilesSave, outputExternalFilesDir, namingExternal);
@@ -407,6 +408,7 @@ public class OverwriteClassDialog extends JDialog {
                         pluginManager,
                         decompiler,
                         haveCompiler.isEmbedded(),
+                        isVerbose,
                         namingBinary.getSelectedIndex(),
                         futureBinTarget.getText()
                 ).run(currentIs);
@@ -427,6 +429,7 @@ public class OverwriteClassDialog extends JDialog {
                         pluginManager,
                         decompiler,
                         haveCompiler.isEmbedded(),
+                        isVerbose,
                         namingBinary.getSelectedIndex(),
                         futureBinTarget.getText()
                 ).run(currentIs);
@@ -447,6 +450,7 @@ public class OverwriteClassDialog extends JDialog {
                             pluginManager,
                             decompiler,
                             haveCompiler.isEmbedded(),
+                            isVerbose,
                             namingExternal.getSelectedIndex(),
                             outputExternalFilesDir.getText()
                     ).run(loaded);
@@ -465,10 +469,11 @@ public class OverwriteClassDialog extends JDialog {
             VmManager vmManager,
             DecompilerWrapper wrapper,
             boolean hasCompiler,
+            boolean isVerbose,
             IdentifiedSource... sources
     ) {
         ClassesProvider cp = new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager);
-        ClasspathlessCompiler rc = getClasspathlessCompiler(wrapper, hasCompiler);
+        ClasspathlessCompiler rc = getClasspathlessCompiler(wrapper, hasCompiler, isVerbose);
         JDialog compilationRunningDialog = new JDialog((JFrame) null, "Compiling", true);
         final JTextArea compilationLog = new JTextArea();
         compilationRunningDialog.setSize(300, 400);
@@ -495,13 +500,18 @@ public class OverwriteClassDialog extends JDialog {
         return compiler;
     }
 
-    public static ClasspathlessCompiler getClasspathlessCompiler(DecompilerWrapper wrapper, boolean hasCompiler) {
+    public static ClasspathlessCompiler getClasspathlessCompiler(DecompilerWrapper wrapper, boolean hasCompiler, boolean isVerbose) {
         ClasspathlessCompiler rc;
         if (hasCompiler) {
             rc = new RuntimeCompilerConnector.ForeignCompilerWrapper(wrapper);
         } else {
             boolean useHostClasses = Config.getConfig().doUseHostSystemClasses();
             List<String> compilerArgs = Config.getConfig().getCompilerArgs();
+
+            if (isVerbose) {
+                compilerArgs.add("-verbose");
+            }
+
             ClasspathlessCompiler.Arguments arguments = new ClasspathlessCompiler
                     .Arguments()
                     .useHostSystemClasses(useHostClasses)
@@ -649,6 +659,7 @@ public class OverwriteClassDialog extends JDialog {
         protected final PluginManager pluginManager;
         protected final DecompilerWrapper decompilerWrapper;
         protected final boolean haveCompiler;
+        protected final boolean isVerbose;
 
         CompilerOutputActionFields(
                 JTextField status,
@@ -657,6 +668,7 @@ public class OverwriteClassDialog extends JDialog {
                 PluginManager pm,
                 DecompilerWrapper dwi,
                 boolean haveCompiler,
+                boolean isVerbose,
                 int namingSchema,
                 String destination
         ) {
@@ -668,6 +680,7 @@ public class OverwriteClassDialog extends JDialog {
             this.pluginManager = pm;
             this.decompilerWrapper = dwi;
             this.haveCompiler = haveCompiler;
+            this.isVerbose = isVerbose;
         }
     }
 
@@ -680,15 +693,16 @@ public class OverwriteClassDialog extends JDialog {
                 PluginManager pm,
                 DecompilerWrapper dwi,
                 boolean hasCompiler,
+                boolean isVerbose,
                 int namingSchema,
                 String destination
         ) {
-            super(status, vmInfo, vmManager, pm, dwi, hasCompiler, namingSchema, destination);
+            super(status, vmInfo, vmManager, pm, dwi, hasCompiler, isVerbose, namingSchema, destination);
         }
 
         public void run(IdentifiedSource... sources) {
             OverwriteClassDialog.CompilationWithResult compiler = compileWithGui(
-                    this.vmInfo, this.vmManager, decompilerWrapper, haveCompiler, sources
+                    this.vmInfo, this.vmManager, decompilerWrapper, haveCompiler, isVerbose, sources
             );
 
             if (compiler.ex == null && compiler.getResult() == null) {
@@ -755,14 +769,15 @@ public class OverwriteClassDialog extends JDialog {
                 PluginManager pm,
                 DecompilerWrapper wrapper,
                 boolean hasCompiler,
+                boolean isVerbose,
                 int namingSchema,
                 String destination) {
-            super(status, vmInfo, vmManager, pm, wrapper, hasCompiler, namingSchema, destination);
+            super(status, vmInfo, vmManager, pm, wrapper, hasCompiler, isVerbose, namingSchema, destination);
         }
 
         public void run(IdentifiedSource... sources) {
             OverwriteClassDialog.CompilationWithResult compiler = compileWithGui(
-                    this.vmInfo, this.vmManager, decompilerWrapper, haveCompiler, sources
+                    this.vmInfo, this.vmManager, decompilerWrapper, haveCompiler, isVerbose, sources
             );
 
             if (compiler.ex == null && compiler.getResult() == null) {

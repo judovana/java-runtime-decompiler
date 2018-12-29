@@ -168,7 +168,7 @@ public final class Config {
             return new ArrayList<>();
         }
 
-        return Collections.unmodifiableList(savedCompilerArgs);
+        return new ArrayList<>(savedCompilerArgs);
     }
 
     public void setCompilerArguments(String argString) {

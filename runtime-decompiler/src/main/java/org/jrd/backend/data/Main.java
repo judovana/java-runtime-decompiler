@@ -15,7 +15,7 @@ public class Main {
         if (cli.isGui()) {
             setLookAndFeel();
             MainFrameView mainView = new MainFrameView();
-            new DecompilationController(mainView, model);
+            new DecompilationController(mainView, model, cli.shouldBeVerbose());
         } else {
             cli.consumeCli();
         }
