@@ -22,7 +22,7 @@ public class VmManager{
         updateLocalVMs();
 
 
-        new Thread(() -> {
+        Thread VMUpdateThread = new Thread(() -> {
             while (true){
                 try {
                     Thread.sleep(5000);
@@ -31,7 +31,9 @@ public class VmManager{
                 }
                 updateLocalVMs();
             }
-        }).start();
+        });
+        VMUpdateThread.setDaemon(true);
+        VMUpdateThread.start();
 
     }
 
