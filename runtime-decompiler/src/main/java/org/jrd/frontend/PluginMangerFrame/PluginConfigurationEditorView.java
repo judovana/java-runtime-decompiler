@@ -1,27 +1,18 @@
 package org.jrd.frontend.PluginMangerFrame;
-
-import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 import org.jrd.frontend.MainFrame.MainFrameView;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class PluginConfigurationEditorView extends JDialog {
 
-    private JPanel mainPanel;
-    private JPanel leftPanel;
-    private JPanel rightPanel;
-    private ConfigPanel pluginConfigPanel;
+    JPanel configAndOptionPanel;
+    JScrollPane scrollPane;
+    CardLayout cardLayout;
+    JPanel centerpanel;
+    JPanel cardConfigPanel;
+    OkCancelPanel okCancelPanel;
 
-    private ActionListener switchPluginListener;
-    private ActionListener addWrapperButtonListener;
-
-    private JList<DecompilerWrapperInformation> wrapperJList;
-
-    private JButton addWrapperButton;
-    private JSplitPane splitPane;
 
     /**
      * Modal window for editing configuration files for decompilers.
@@ -29,34 +20,22 @@ public class PluginConfigurationEditorView extends JDialog {
      * @param mainFrameView main window
      */
     public PluginConfigurationEditorView(MainFrameView mainFrameView) {
+        this.setLayout(new BorderLayout());
 
-        wrapperJList = new JList<>();
-        wrapperJList.setFixedCellHeight(32);
-        wrapperJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        wrapperJList.addListSelectionListener(listSelectionEvent -> {
-            if (wrapperJList.getValueIsAdjusting()) {
-                if (wrapperJList.getSelectedValue() != null)
-                    switchPluginListener.actionPerformed(new ActionEvent(this, 0, null));
-            }
-        });
-
-        leftPanel = new JPanel(new BorderLayout());
-        leftPanel.add(wrapperJList, BorderLayout.CENTER);
-        addWrapperButton = new JButton("New");
-        addWrapperButton.addActionListener(actionEvent -> {
-            addWrapperButtonListener.actionPerformed(actionEvent);
-        });
-        leftPanel.add(addWrapperButton, BorderLayout.SOUTH);
-
-        rightPanel = new JPanel(new BorderLayout());
-
-        splitPane = new JSplitPane();
-        splitPane.setLeftComponent(leftPanel);
-        splitPane.setRightComponent(rightPanel);
-        splitPane.setDividerLocation(200);
-
-        mainPanel = new JPanel(new BorderLayout());
-        mainPanel.add(splitPane);
+        okCancelPanel = new OkCancelPanel();
+        centerpanel = new JPanel(new BorderLayout());
+        centerpanel.add(new PluginListPanel(), BorderLayout.WEST);
+        configAndOptionPanel = new JPanel(new BorderLayout());
+        configAndOptionPanel.add(new PluginTopOptionPanel(), BorderLayout.NORTH);
+        cardLayout = new CardLayout();
+        cardConfigPanel = new JPanel(cardLayout);
+        scrollPane = new JScrollPane(cardConfigPanel);
+        cardLayout.show(cardConfigPanel, "UUID");
+        configAndOptionPanel.add(scrollPane, BorderLayout.CENTER);
+        centerpanel.add(configAndOptionPanel, BorderLayout.CENTER);
+        centerpanel.setBackground(Color.RED);
+        this.add(centerpanel, BorderLayout.CENTER);
+        this.add(okCancelPanel, BorderLayout.SOUTH);
 
 
         this.setTitle("Plugin configuration");
@@ -64,33 +43,6 @@ public class PluginConfigurationEditorView extends JDialog {
         this.setMinimumSize(new Dimension(250, 330));
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setModalityType(ModalityType.APPLICATION_MODAL);
-        this.setLayout(new BorderLayout());
-        this.add(mainPanel, BorderLayout.CENTER);
         this.setLocationRelativeTo(mainFrameView.getMainFrame());
-    }
-
-    public void setSwitchPluginListener(ActionListener switchPluginListener) {
-        this.switchPluginListener = switchPluginListener;
-    }
-
-    public void setAddWrapperButtonListener(ActionListener addWrapperButtonListener) {
-        this.addWrapperButtonListener = addWrapperButtonListener;
-    }
-
-    public void switchPlugin() {
-        // Show dialog save/discard/cancel
-        pluginConfigPanel = new ConfigPanel(wrapperJList.getSelectedValue());
-
-        rightPanel.removeAll();
-        rightPanel.add(pluginConfigPanel, BorderLayout.CENTER);
-        rightPanel.revalidate();
-    }
-
-    public ConfigPanel getPluginConfigPanel() {
-        return pluginConfigPanel;
-    }
-
-    public JList<DecompilerWrapperInformation> getWrapperJList() {
-        return wrapperJList;
     }
 }
