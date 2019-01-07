@@ -89,10 +89,12 @@ public class PluginConfigurationEditorController {
         JList<DecompilerWrapperInformation> wrapperJList = view.getWrapperJList();
 
         List<DecompilerWrapperInformation> pluginsWithoutJavap = new ArrayList<>(wrappers);
-        for (DecompilerWrapperInformation wrapperInformation: pluginsWithoutJavap){
-            if (wrapperInformation.getName().equals("javap")){
+        for (int x = 0; x< pluginsWithoutJavap.size() ; x++) {
+            DecompilerWrapperInformation wrapperInformation = pluginsWithoutJavap.get(x);
+            if (wrapperInformation.getName().equals(DecompilerWrapperInformation.JAVAP_NAME)
+                    || wrapperInformation.getName().equals(DecompilerWrapperInformation.JAVAP_VERBOSE_NAME)) {
                 pluginsWithoutJavap.remove(wrapperInformation);
-                break;
+                x--;
             }
         }
         wrapperJList.setListData(pluginsWithoutJavap.toArray(new DecompilerWrapperInformation[0]));

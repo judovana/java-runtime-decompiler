@@ -53,6 +53,21 @@ public class DecompilerWrapperInformation {
     private Object instance;
     private boolean invalidWrapper = false;
 
+    public static final String JAVAP_NAME="javap";
+    public static final String JAVAP_VERBOSE_NAME="javap -v";
+
+    public static DecompilerWrapperInformation getJavap() {
+        DecompilerWrapperInformation javap = new DecompilerWrapperInformation();
+        javap.setName(JAVAP_NAME);
+        return javap;
+    }
+
+    public static DecompilerWrapperInformation getJavapv() {
+        DecompilerWrapperInformation javapv = new DecompilerWrapperInformation();
+        javapv.setName(JAVAP_VERBOSE_NAME);
+        return javapv;
+    }
+
     public String getFileLocation() {
         return fileLocation;
     }

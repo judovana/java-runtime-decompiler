@@ -54,9 +54,8 @@ public class PluginManager {
             }
         }
 
-        DecompilerWrapperInformation javap = new DecompilerWrapperInformation();
-        javap.setName("javap");
-        wrappers.add(javap);
+        wrappers.add(DecompilerWrapperInformation.getJavap());
+        wrappers.add(DecompilerWrapperInformation.getJavapv());
     }
 
     /**
@@ -110,9 +109,16 @@ public class PluginManager {
      * @throws RuntimeException
      */
     private void InitializeWrapper(DecompilerWrapperInformation wrapper){
-        if (wrapper.getName().equals("javap")){
+        if (wrapper.getName().equals(DecompilerWrapperInformation.JAVAP_NAME)){
             try {
-                wrapper.setInstance(new JavapDisassemblerWrapper());
+                wrapper.setInstance(new JavapDisassemblerWrapper(""));
+                wrapper.setDecompileMethod(JavapDisassemblerWrapper.class.getMethod("decompile", byte[].class, String[].class));
+            } catch (NoSuchMethodException e) {
+                OutputController.getLogger().log("Could not find decompile method in org/jrd/backend/decompiling/JavapDisassemblerWrapper");
+            }
+        } else if (wrapper.getName().equals(DecompilerWrapperInformation.JAVAP_VERBOSE_NAME)){
+            try {
+                wrapper.setInstance(new JavapDisassemblerWrapper("-v"));
                 wrapper.setDecompileMethod(JavapDisassemblerWrapper.class.getMethod("decompile", byte[].class, String[].class));
             } catch (NoSuchMethodException e) {
                 OutputController.getLogger().log("Could not find decompile method in org/jrd/backend/decompiling/JavapDisassemblerWrapper");

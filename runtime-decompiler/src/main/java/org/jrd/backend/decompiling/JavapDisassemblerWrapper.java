@@ -5,6 +5,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 public class JavapDisassemblerWrapper {
 
+    private final String otherArgs;
+
+    public JavapDisassemblerWrapper(String otherArgs){
+        this.otherArgs=otherArgs;
+    }
+
     public String decompile(byte[] bytecode, String[] options){
         try {
             File tempByteFile = bytesToFile(bytecode);
@@ -16,7 +22,7 @@ public class JavapDisassemblerWrapper {
                     OptionsString.append(option);
                 }
             }
-            com.sun.tools.javap.Main.run(new String[]{OptionsString.toString(), tempByteFile.getAbsolutePath()}, printWriter);
+            com.sun.tools.javap.Main.run(new String[]{otherArgs+OptionsString.toString(), tempByteFile.getAbsolutePath()}, printWriter);
             return readStringFromFile(tempOutputFile.getAbsolutePath());
         } catch (Exception e){
             StringWriter errors = new StringWriter();

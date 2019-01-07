@@ -116,13 +116,13 @@ public class Cli {
             if (new File(decompilerName).exists() && decompilerName.toLowerCase().endsWith(".json")) {
                 throw new RuntimeException("Plugins loading directly from file is not implemented yet.");
             }
-            if (decompilerName.startsWith("javap")) {
+            if (decompilerName.startsWith(DecompilerWrapperInformation.JAVAP_NAME)) {
                 String[] split_name = decompilerName.split("-");
                 String[] options = new String[split_name.length-1];
                 for (int x = 1; x < split_name.length; x++) {
                     options[x - 1] = "-" + split_name[x];
                 }
-                String decompile_output = pluginManager.decompile(findDecompiler("javap", pluginManager), bytes, options);
+                String decompile_output = pluginManager.decompile(findDecompiler(DecompilerWrapperInformation.JAVAP_NAME, pluginManager), bytes, options);
                 System.out.println(decompile_output);
             } else {
                 DecompilerWrapperInformation decompiler = findDecompiler(decompilerName, pluginManager);
