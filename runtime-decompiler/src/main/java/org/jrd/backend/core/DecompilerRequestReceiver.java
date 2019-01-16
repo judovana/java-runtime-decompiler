@@ -8,6 +8,7 @@ import org.jrd.backend.data.VmManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -146,6 +147,29 @@ public class DecompilerRequestReceiver {
                 return ERROR_RESPONSE;
             }
             String[] arrayOfClasses = parseClasses(classes);
+            if (arrayOfClasses != null){
+                Arrays.sort(arrayOfClasses, new Comparator<String>() {
+                    @Override
+                    public int compare(String o1, String o2) {
+                        if (o1 == null && o2 == null) {
+                            return 0;
+                        }
+                        if (o1 == null && o2 != null) {
+                            return 1;
+                        }
+                        if (o1 != null && o2 == null) {
+                            return -1;
+                        }
+                        if (o1.startsWith("[") && !o2.startsWith("[")) {
+                            return 1;
+                        }
+                        if (!o1.startsWith("[") && o2.startsWith("[")) {
+                            return -1;
+                        }
+                        return o1.compareTo(o2);
+                    }
+                });
+            }
             VmDecompilerStatus status = new VmDecompilerStatus();
             status.setHostname(hostname);
             status.setListenPort(actualListenPort);
@@ -214,9 +238,7 @@ public class DecompilerRequestReceiver {
         list.removeAll(Arrays.asList("", null));
         List<String> list1 = new ArrayList<>();
         for (String s : list) {
-            if (!(s.contains("Lambda") | s.startsWith("["))){
                 list1.add(s);
-            }
         }
         java.util.Collections.sort(list1);
         return list1.toArray(new String[]{});
