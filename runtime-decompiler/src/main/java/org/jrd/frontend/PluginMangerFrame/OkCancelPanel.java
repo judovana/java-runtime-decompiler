@@ -15,7 +15,7 @@ public class OkCancelPanel extends JPanel{
     OkCancelPanel(){
         this.setLayout(new GridBagLayout());
         this.setPreferredSize(new Dimension(0, 50));
-        setBorder(new MatteBorder(1,0,0,0, SystemColor.menu));
+        setBorder(new MatteBorder(1,0,0,0, UIManager.getColor("Separator.shadow")));
         GridBagConstraints gbc;
 
         okButton = new JButton("OK");
