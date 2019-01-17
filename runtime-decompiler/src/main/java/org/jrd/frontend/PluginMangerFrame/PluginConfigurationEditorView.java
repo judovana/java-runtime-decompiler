@@ -8,7 +8,7 @@ public class PluginConfigurationEditorView extends JDialog {
 
     private final JPanel configAndOptionPanel;
     private final JScrollPane scrollPane;
-    private final CardLayout cardLayout;
+    private final CardLayout cardLayoutForConfigPanels;
     private final PluginListPanel pluginListPanel;
     private final PluginTopOptionPanel pluginTopOptionPanel;
     private final JPanel centerPanel;
@@ -35,8 +35,8 @@ public class PluginConfigurationEditorView extends JDialog {
         pluginListPanel = new PluginListPanel();
         pluginTopOptionPanel = new PluginTopOptionPanel();
         configAndOptionPanel = new JPanel(new BorderLayout());
-        cardLayout = new CardLayout();
-        cardConfigPanel = new JPanel(cardLayout);
+        cardLayoutForConfigPanels = new CardLayout();
+        cardConfigPanel = new JPanel(cardLayoutForConfigPanels);
         scrollPane = new JScrollPane(cardConfigPanel);
 
         centerPanel.add(pluginListPanel, BorderLayout.WEST);
@@ -48,15 +48,29 @@ public class PluginConfigurationEditorView extends JDialog {
         this.add(okCancelPanel, BorderLayout.SOUTH);
     }
 
-    public JPanel getConfigAndOptionPanel() {
-        return configAndOptionPanel;
+    public PluginListPanel getPluginListPanel() {
+        return pluginListPanel;
     }
 
-    public JPanel getCenterPanel() {
-        return centerPanel;
+    public PluginTopOptionPanel getPluginTopOptionPanel() {
+        return pluginTopOptionPanel;
     }
 
     public OkCancelPanel getOkCancelPanel() {
         return okCancelPanel;
+    }
+
+    public void switchCard(JPanel jPanel, String id){
+        boolean isNew = true;
+        for (Component component : cardConfigPanel.getComponents()){
+            if (jPanel == component){
+                isNew = false;
+                break;
+            }
+        }
+        if (isNew){
+            cardConfigPanel.add(jPanel, id);
+        }
+        cardLayoutForConfigPanels.show(cardConfigPanel, id);
     }
 }

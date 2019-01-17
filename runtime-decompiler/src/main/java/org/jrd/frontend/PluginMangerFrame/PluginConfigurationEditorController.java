@@ -11,30 +11,62 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class PluginConfigurationEditorController {
 
     private PluginManager pluginManager;
     private PluginConfigurationEditorView view;
+    HashMap<DecompilerWrapperInformation, ConfigPanel> configPanelHashMap;
 
     public PluginConfigurationEditorController(PluginConfigurationEditorView view, PluginManager pluginManager) {
         this.view = view;
         this.pluginManager = pluginManager;
-//        updateWrapperList(pluginManager.getWrappers());
+        configPanelHashMap = new HashMap<>();
+
+        updateWrapperList(pluginManager.getWrappers());
+
 //        if (pluginManager.getWrappers().size() <= 1) {
 //            pluginManager.createWrapper();
 //            updateWrapperList(pluginManager.getWrappers());
 //        }
-//        view.getWrapperJList().setSelectedIndex(0);
-//        view.switchPlugin();
-//        updateListeners();
-//        view.setAddWrapperButtonListener(actionEvent -> {
-//            addWrapper();
-//        });
-//        view.setSwitchPluginListener(actionEvent -> {
-//            switchPlugin();
-//        });
+
+
+        view.getPluginListPanel().getWrapperJList().addListSelectionListener(listSelectionEvent -> {
+            if (!listSelectionEvent.getValueIsAdjusting()) return;
+            onPluginJListChange();
+        });
+        view.getPluginListPanel().getAddWrapperButton().addActionListener(actionEvent -> {
+
+        });
+        view.getPluginTopOptionPanel().getCloneButton().addActionListener(actionEvent -> {
+
+        });
+        view.getPluginTopOptionPanel().getRefreshButton().addActionListener(actionEvent -> {
+
+        });
+        view.getPluginTopOptionPanel().getDeleteButton().addActionListener(actionEvent -> {
+
+        });
+        view.getPluginTopOptionPanel().getOpenWebsiteButton().addActionListener(actionEvent -> {
+
+        });
+        view.getOkCancelPanel().getOkButton().addActionListener(actionEvent -> {
+
+        });
+        view.getOkCancelPanel().getCancelButton().addActionListener(actionEvent -> {
+
+        });
+
+        view.getPluginListPanel().getWrapperJList().setSelectedIndex(0);
+    }
+
+    void onPluginJListChange(){
+        DecompilerWrapperInformation selectedPlugin = (DecompilerWrapperInformation)view.getPluginListPanel().getWrapperJList().getSelectedValue();
+        ConfigPanel configPanel = getOrCreatePluginConfigPanel(selectedPlugin);
+        view.switchCard(configPanel, String.valueOf(System.identityHashCode(configPanel)));
     }
 
     private void addWrapper() {
@@ -48,20 +80,6 @@ public class PluginConfigurationEditorController {
 //        // Show dialog save/discard/cancel
 //        view.switchPlugin();
 //        updateListeners();
-    }
-
-    private void updateListeners() {
-//        pluginConfigPanel = view.getPluginConfigPanel();
-//        pluginConfigPanel.setOkButtonListener(actionEvent -> {
-//            applyWrapperChange();
-//            updateWrapperListsActionListener.actionPerformed(new ActionEvent(this, 0, null));
-//        });
-//        pluginConfigPanel.setCancelButtonListener(actionEvent -> {
-//            view.dispose();
-//        });
-//        pluginConfigPanel.setRemoveButtonListener(actionEvent -> {
-//            removeWrapper();
-//        });
     }
 
     private void removeWrapper() {
@@ -82,16 +100,16 @@ public class PluginConfigurationEditorController {
     }
 
     public void updateWrapperList(List<DecompilerWrapperInformation> wrappers) {
-//        JList<DecompilerWrapperInformation> wrapperJList = view.getWrapperJList();
-//
-//        List<DecompilerWrapperInformation> pluginsWithoutJavap = new ArrayList<>(wrappers);
-//        for (DecompilerWrapperInformation wrapperInformation: pluginsWithoutJavap){
-//            if (wrapperInformation.getName().equals("javap")){
-//                pluginsWithoutJavap.remove(wrapperInformation);
-//                break;
-//            }
-//        }
-//        wrapperJList.setListData(pluginsWithoutJavap.toArray(new DecompilerWrapperInformation[0]));
+        JList<DecompilerWrapperInformation> wrapperJList = view.getPluginListPanel().getWrapperJList();
+
+        List<DecompilerWrapperInformation> pluginsWithoutJavap = new ArrayList<>(wrappers);
+        for (DecompilerWrapperInformation wrapperInformation: pluginsWithoutJavap){
+            if (wrapperInformation.getName().equals("javap")){
+                pluginsWithoutJavap.remove(wrapperInformation);
+                break;
+            }
+        }
+        wrapperJList.setListData(pluginsWithoutJavap.toArray(new DecompilerWrapperInformation[0]));
     }
 
     private void applyWrapperChange() {
@@ -121,9 +139,13 @@ public class PluginConfigurationEditorController {
 
     }
 
-    public ConfigPanel createPluginConfigPanel(DecompilerWrapperInformation vmInfo){
+    public ConfigPanel getOrCreatePluginConfigPanel(DecompilerWrapperInformation vmInfo){
+        if (configPanelHashMap.containsKey(vmInfo)){
+            return configPanelHashMap.get(vmInfo);
+        }
         ConfigPanel configPanel = new ConfigPanel();
         updatePanelInfo(configPanel, vmInfo);
+        configPanelHashMap.put(vmInfo, configPanel);
         return configPanel;
     }
 
@@ -140,7 +162,7 @@ public class PluginConfigurationEditorController {
         }
 
         TextInputPanel namePanel = new TextInputPanel("Name");
-        namePanel.textField.setText(vmInfo.getName());
+//        namePanel.textField.setText(vmInfo.getName());
 
 
         pluginConfigPanel.addComponent(namePanel);
