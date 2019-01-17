@@ -3,19 +3,14 @@ package org.jrd.frontend.PluginMangerFrame;
 import javax.swing.*;
 import javax.swing.border.MatteBorder;
 import java.awt.*;
-import java.awt.event.ActionListener;
 
 /**
  * Panel with two buttons "OK" and "Cancel"
  */
 public class OkCancelPanel extends JPanel{
 
-    private JButton okButton;
-    private JButton cancelButton;
-
-    private ActionListener okActionListener;
-
-    private ActionListener cancelActionListener;
+    private final JButton okButton;
+    private final JButton cancelButton;
 
     OkCancelPanel(){
         this.setLayout(new GridBagLayout());
@@ -24,17 +19,13 @@ public class OkCancelPanel extends JPanel{
         GridBagConstraints gbc;
 
         okButton = new JButton("OK");
-        okButton.addActionListener(actionEvent -> this.okActionListener.actionPerformed(actionEvent));
-        okButton.setPreferredSize(new Dimension(90, 30));
-
+        okButton.setPreferredSize(new Dimension(90, 28));
         cancelButton = new JButton("Cancel");
-        cancelButton.addActionListener(actionEvent -> this.cancelActionListener.actionPerformed(actionEvent));
-        cancelButton.setPreferredSize(new Dimension(90, 30));
+        cancelButton.setPreferredSize(new Dimension(90, 28));
 
         gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.BOTH;
         gbc.anchor = GridBagConstraints.EAST;
-        gbc.gridy = 0;
         gbc.weightx = 1;
         this.add(Box.createHorizontalGlue(), gbc);
         gbc.weightx = 0;
@@ -48,11 +39,11 @@ public class OkCancelPanel extends JPanel{
         this.add(Box.createHorizontalStrut(20), gbc);
     }
 
-    public void setOkActionListener(ActionListener okActionListener) {
-        this.okActionListener = okActionListener;
+    public JButton getOkButton() {
+        return okButton;
     }
 
-    public void setCancelActionListener(ActionListener cancelActionListener) {
-        this.cancelActionListener = cancelActionListener;
+    public JButton getCancelButton() {
+        return cancelButton;
     }
 }
