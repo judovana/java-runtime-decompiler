@@ -17,10 +17,10 @@ public class DecompilerWrapperInformationSerializer implements JsonSerializer<De
             jsonArray.add(url.getPath());
         });
         jsonObject.add("DependencyURL", jsonArray);
-        if (decompilerWrapperInformation.getDecompilerURL() == null){
+        if (decompilerWrapperInformation.getDecompilerDownloadURL() == null){
             jsonObject.addProperty("DecompilerDownloadURL", "");
         } else {
-            jsonObject.addProperty("DecompilerDownloadURL", decompilerWrapperInformation.getDecompilerURL().toString());
+            jsonObject.addProperty("DecompilerDownloadURL", decompilerWrapperInformation.getDecompilerDownloadURL().toString());
         }
         return jsonObject;
     }

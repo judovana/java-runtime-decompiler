@@ -153,7 +153,7 @@ public class PluginConfigurationEditorController {
                 pluginConfigPanel.getDependencyUrlPanel().addRow(url.getPath(), false);
             });
         }
-        if (vmInfo.getDecompilerURL() != null){
+        if (vmInfo.getWrapperURL() != null){
             pluginConfigPanel.getWrapperUrlPanel().setText(vmInfo.getWrapperURL().getPath());
         }
     }

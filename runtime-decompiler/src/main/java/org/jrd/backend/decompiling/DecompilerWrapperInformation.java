@@ -25,12 +25,12 @@ public class DecompilerWrapperInformation {
      * @throws MalformedURLException
      */
     public DecompilerWrapperInformation(String name, String wrapperURL, List<String> dependencyURLs,
-                                        String decompilerURL) {
+                                        String decompilerDownloadURL) {
         setName(name);
         setWrapperURL(wrapperURL);
         setFullyQualifiedClassName();
         setDependencyURLs(dependencyURLs);
-        setDecompilerURL(decompilerURL);
+        setDecompilerDownloadURL(decompilerDownloadURL);
         setFileLocation("");
     }
 
@@ -44,7 +44,7 @@ public class DecompilerWrapperInformation {
     }
 
     private String name;
-    private URL decompilerURL;
+    private URL decompilerDownloadURL;
     private String fileLocation;
     private String fullyQualifiedClassName;
     private URL wrapperURL;
@@ -161,15 +161,15 @@ public class DecompilerWrapperInformation {
         }
     }
 
-    public URL getDecompilerURL() {
-        return decompilerURL;
+    public URL getDecompilerDownloadURL() {
+        return decompilerDownloadURL;
     }
 
-    private void setDecompilerURL(String decompilerURL) {
+    private void setDecompilerDownloadURL(String decompilerDownloadURL) {
         try {
-            this.decompilerURL = new URL(decompilerURL);
+            this.decompilerDownloadURL = new URL(decompilerDownloadURL);
         } catch (MalformedURLException e1) {
-            this.decompilerURL = null;
+            this.decompilerDownloadURL = null;
             OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, e1);
         }
     }
