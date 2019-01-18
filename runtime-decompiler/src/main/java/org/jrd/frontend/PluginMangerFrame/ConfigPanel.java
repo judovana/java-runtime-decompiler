@@ -2,42 +2,65 @@ package org.jrd.frontend.PluginMangerFrame;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.List;
-
-import java.util.ArrayList;
 
 public class ConfigPanel extends JPanel {
 
-    GridBagConstraints gbc;
+    private final JLabel jsonFileURL;
+    private final MessagePanel messagePanel;
+    private final TextInputPanel namePanel;
+    private final FileSelectorPanel wrapperUrlPanel;
+    private final FileSelectorArrayPanel dependencyUrlPanel;
 
     public ConfigPanel() {
         this.setLayout(new GridBagLayout());
-        gbc = new GridBagConstraints();
+
+        jsonFileURL = new JLabel();
+        messagePanel = new MessagePanel("<html><b>Info:</b> You don't have permissions to save this configuration! " +
+                "You can clone it and save the copy.</html>");
+        messagePanel.setVisible(false);
+        namePanel = new TextInputPanel("Name");
+        wrapperUrlPanel = new FileSelectorPanel("Decompiler wrapper URL");
+        dependencyUrlPanel = new FileSelectorArrayPanel("Decompiler and dependency jars");
+
+        GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.NORTHWEST;
         gbc.fill = GridBagConstraints.BOTH;
+        gbc.insets = new Insets(3,3,3,3);
         gbc.weightx = 1;
-        gbc.weighty = 0;
-        gbc.gridx = 0;
-        // addComponent inserts here
+        this.add(jsonFileURL, gbc);
+        gbc.gridy = 1;
+        this.add(messagePanel, gbc);
+        gbc.gridy = 2;
+        this.add(namePanel, gbc);
+        gbc.gridy = 3;
+        this.add(wrapperUrlPanel, gbc);
+        gbc.gridy = 4;
+        this.add(dependencyUrlPanel, gbc);
         gbc.gridy = 99999;
         gbc.weighty = 1;
         this.add(Box.createVerticalGlue(), gbc);
+        //sets gbc for addComponent method
+        gbc.gridy = 0;
+        gbc.weighty = 0;
     }
 
-    private List<Component> getAllComponents ( final Container c){
-        Component[] comps = c.getComponents();
-        List<Component> compList = new ArrayList<>();
-        for (Component comp : comps) {
-            compList.add(comp);
-            if (comp instanceof Container) {
-                compList.addAll(getAllComponents((Container) comp));
-            }
-        }
-        return compList;
+    public JLabel getJsonFileURL() {
+        return jsonFileURL;
     }
 
-    public void addComponent(Component component) {
-        gbc.gridy++;
-        this.add(component, gbc);
+    public MessagePanel getMessagePanel() {
+        return messagePanel;
+    }
+
+    public TextInputPanel getNamePanel() {
+        return namePanel;
+    }
+
+    public FileSelectorPanel getWrapperUrlPanel() {
+        return wrapperUrlPanel;
+    }
+
+    public FileSelectorArrayPanel getDependencyUrlPanel() {
+        return dependencyUrlPanel;
     }
 }

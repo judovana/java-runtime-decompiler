@@ -27,7 +27,7 @@ public class PluginTopOptionPanel extends JPanel {
         deleteButton.setPreferredSize(new Dimension(buttonWidth,height));
         openWebsiteButton = new JButton("Website");
         openWebsiteButton.setPreferredSize(new Dimension(buttonWidth,height));
-        validStatusLabel = new JLabel("Valid:      ");
+        validStatusLabel = new JLabel("Valid: unknown");
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.weightx = 0;

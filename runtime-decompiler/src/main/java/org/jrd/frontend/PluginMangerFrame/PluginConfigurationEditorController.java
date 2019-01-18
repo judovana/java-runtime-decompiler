@@ -1,16 +1,11 @@
 package org.jrd.frontend.PluginMangerFrame;
 
-import org.jrd.backend.core.OutputController;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 import org.jrd.backend.decompiling.PluginManager;
 
 import javax.swing.*;
-import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,7 +14,7 @@ public class PluginConfigurationEditorController {
 
     private PluginManager pluginManager;
     private PluginConfigurationEditorView view;
-    HashMap<DecompilerWrapperInformation, ConfigPanel> configPanelHashMap;
+    private HashMap<DecompilerWrapperInformation, ConfigPanel> configPanelHashMap;
 
     public PluginConfigurationEditorController(PluginConfigurationEditorView view, PluginManager pluginManager) {
         this.view = view;
@@ -144,55 +139,22 @@ public class PluginConfigurationEditorController {
     }
 
     public void updatePanelInfo(ConfigPanel pluginConfigPanel, DecompilerWrapperInformation vmInfo) {
-        boolean canWrite = true;
-
-        JLabel label = new JLabel();
-        label.setText("Configuration JSON file: " + vmInfo.getFileLocation());
-        pluginConfigPanel.addComponent(label);
-        if (!canWrite) {
-            JLabel access = new JLabel();
-            access.setText("You are not able to edit this configuration, because you don't have the right permissions.");
-            pluginConfigPanel.addComponent(access);
-        }
-
-        TextInputPanel namePanel = new TextInputPanel("Name");
-//        namePanel.textField.setText(vmInfo.getName());
-
-
-        pluginConfigPanel.addComponent(namePanel);
-        FileSelectorPanel wrapperUrlPanel = new FileSelectorPanel("Decompiler wrapper URL");
-        if (vmInfo.getWrapperURL() != null) {
-            wrapperUrlPanel.setText(vmInfo.getWrapperURL().getPath());
-        }
-        pluginConfigPanel.addComponent(wrapperUrlPanel);
-        FileSelectorArrayPanel dependencyUrlPanel = new FileSelectorArrayPanel("Decompiler and dependency jars");
-        if (vmInfo.getDependencyURLs() != null) {
-            vmInfo.getDependencyURLs().forEach(url -> dependencyUrlPanel.addRow(url.getPath(), false));
-        }
-        pluginConfigPanel.addComponent(dependencyUrlPanel);
-        JButton decompilerUrlLink = new JButton();
-        decompilerUrlLink.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                try {
-                    Desktop.getDesktop().browse(new URI(vmInfo.getDecompilerURL().toString()));
-                } catch (IOException | URISyntaxException e1) {
-                    OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e1);
-                }
+        if (vmInfo.getFileLocation() != null){
+            pluginConfigPanel.getJsonFileURL().setText("Location: " + vmInfo.getFileLocation());
+            if(!Files.isWritable(Paths.get(vmInfo.getFileLocation()))){
+                pluginConfigPanel.getMessagePanel().setVisible(true);
             }
-        });
-        if (vmInfo.getDecompilerURL() != null) {
-            decompilerUrlLink.setToolTipText(vmInfo.getDecompilerURL().toString());
-            decompilerUrlLink.setText("Go to decompiler website.");
-            //decompilerUrlLink.setName();
-            pluginConfigPanel.addComponent(decompilerUrlLink);
         }
-//            this.setEnabled(canWrite);
-//            List<Component> components = getAllComponents(this);
-//            for (Component compon : components) {
-//                if (!(compon instanceof JLabel)) {
-//                    compon.setEnabled(canWrite);
-//                }
-//            }
+        if (vmInfo.getName() != null){
+            pluginConfigPanel.getNamePanel().getTextField().setText(vmInfo.getName());
+        }
+        if (vmInfo.getDependencyURLs() != null){
+            vmInfo.getDependencyURLs().forEach(url -> {
+                pluginConfigPanel.getDependencyUrlPanel().addRow(url.getPath(), false);
+            });
+        }
+        if (vmInfo.getDecompilerURL() != null){
+            pluginConfigPanel.getWrapperUrlPanel().setText(vmInfo.getWrapperURL().getPath());
+        }
     }
 }
