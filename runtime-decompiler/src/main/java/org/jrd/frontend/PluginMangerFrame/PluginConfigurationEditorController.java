@@ -35,11 +35,10 @@ public class PluginConfigurationEditorController {
 
 
         view.getPluginListPanel().getWrapperJList().addListSelectionListener(listSelectionEvent -> {
-            if (!listSelectionEvent.getValueIsAdjusting()) return;
             onPluginJListChange();
         });
         view.getPluginListPanel().getAddWrapperButton().addActionListener(actionEvent -> {
-
+            addWrapper();
         });
         view.getPluginTopOptionPanel().getCloneButton().addActionListener(actionEvent -> {
 
@@ -48,7 +47,7 @@ public class PluginConfigurationEditorController {
 
         });
         view.getPluginTopOptionPanel().getDeleteButton().addActionListener(actionEvent -> {
-
+            removeWrapper();
         });
         view.getPluginTopOptionPanel().getOpenWebsiteButton().addActionListener(actionEvent -> {
 
@@ -64,39 +63,34 @@ public class PluginConfigurationEditorController {
     }
 
     void onPluginJListChange(){
+        if (view.getPluginListPanel().getWrapperJList().getSelectedIndex() == -1) return;
         DecompilerWrapperInformation selectedPlugin = (DecompilerWrapperInformation)view.getPluginListPanel().getWrapperJList().getSelectedValue();
         ConfigPanel configPanel = getOrCreatePluginConfigPanel(selectedPlugin);
         view.switchCard(configPanel, String.valueOf(System.identityHashCode(configPanel)));
     }
 
     private void addWrapper() {
-//        DecompilerWrapperInformation wrapperInformation = pluginManager.createWrapper();
-//        updateWrapperList(pluginManager.getWrappers());
-//        view.getWrapperJList().setSelectedValue(wrapperInformation, true);
-//        switchPlugin();
-    }
-
-    private void switchPlugin() {
-//        // Show dialog save/discard/cancel
-//        view.switchPlugin();
-//        updateListeners();
+        DecompilerWrapperInformation wrapperInformation = pluginManager.createWrapper();
+        updateWrapperList(pluginManager.getWrappers());
+        view.getPluginListPanel().getWrapperJList().setSelectedValue(wrapperInformation, true);
     }
 
     private void removeWrapper() {
-//        DecompilerWrapperInformation wrapperInformation = pluginConfigPanel.getDecompilerWrapperInformatio();
-//        String name = wrapperInformation.toString();
-//        int dialogResult = JOptionPane.showConfirmDialog(view, "Are you sure you want to remove " +
-//                name + "?", "Warning", JOptionPane.OK_CANCEL_OPTION);
-//        if (dialogResult == JOptionPane.OK_OPTION) {
-//            pluginManager.deleteWrapper(wrapperInformation);
-//            if (pluginManager.getWrappers().size() <= 1) {
-//                view.dispose();
-//                return;
-//            }
-//            updateWrapperListsActionListener.actionPerformed(new ActionEvent(this, 1, null));
-//            view.getWrapperJList().setSelectedIndex(0);
-//            switchPlugin();
-//        }
+        JList wrapperJList = view.getPluginListPanel().getWrapperJList();
+        DecompilerWrapperInformation wrapperInformation = (DecompilerWrapperInformation) wrapperJList.getSelectedValue();
+        String name = wrapperInformation.toString();
+        int dialogResult = JOptionPane.showConfirmDialog(view, "Are you sure you want to remove " +
+                name + "?", "Warning", JOptionPane.OK_CANCEL_OPTION);
+
+        if (dialogResult == JOptionPane.OK_OPTION) {
+            pluginManager.deleteWrapper(wrapperInformation);
+            updateWrapperList(pluginManager.getWrappers());
+            if (wrapperJList.getModel().getSize() == 0) {
+                view.dispose();
+                return;
+            }
+            view.getPluginListPanel().getWrapperJList().setSelectedIndex(0);
+        }
     }
 
     public void updateWrapperList(List<DecompilerWrapperInformation> wrappers) {
