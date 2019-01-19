@@ -7,38 +7,31 @@ import java.awt.*;
 
 public class FileSelectorArrayPanel extends JPanel {
 
-    private JLabel jLabel;
-    private GridBagConstraints gbc;
+    private final JLabel jLabel;
+    private final FileSelectorArrayAddRow fileSelectorArrayAddRow;
 
-    private JButton addButton = new JButton();
-    private List<JTextField> pathTextFields = new LinkedList<JTextField>();
+    private final GridBagConstraints gbc;
+    private List<JTextField> pathTextFields;
 
     private Boolean first = false;
 
     FileSelectorArrayPanel(String label) {
-        this.jLabel = new JLabel(label);
-
-        this.setLayout(new GridBagLayout());
         gbc = new GridBagConstraints();
+        this.setLayout(new GridBagLayout());
+        pathTextFields = new LinkedList<>();
         gbc.anchor = GridBagConstraints.NORTHWEST;
         gbc.fill = GridBagConstraints.BOTH;
 
-        // Label
-        gbc.gridy = 0;
-        gbc.gridx = 0;
+        jLabel = new JLabel(label);
+        fileSelectorArrayAddRow = new FileSelectorArrayAddRow();
+        fileSelectorArrayAddRow.getAddButton().addActionListener(actionEvent -> {
+            addRow("", true);
+        });
+
         gbc.weightx = 1;
         this.add(jLabel, gbc);
-
-        // gbc.gridy 1-9999 used for FileSelectorArrayRows created with addRow().
-
-        // Button for creating new row
         gbc.gridy = 10000;
-        gbc.gridx = 0;
-        this.add(addButton, gbc);
-        gbc.gridx = 0;
-        addButton.addActionListener(actionEvent -> addRow("", true));
-
-        gbc.gridx = 0;
+        this.add(fileSelectorArrayAddRow, gbc);
         gbc.gridy = 0;
 
         // Always have a least one row.
