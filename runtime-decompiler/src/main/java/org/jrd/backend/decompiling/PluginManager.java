@@ -148,23 +148,27 @@ public class PluginManager {
         }
     }
 
-    public void replace(DecompilerWrapperInformation oldWrapper, DecompilerWrapperInformation newWrapper) {
-        if (oldWrapper == null){
+    public void replace(DecompilerWrapperInformation oldWrapper, DecompilerWrapperInformation newWrapper) throws IOException{
+        if (oldWrapper == null || newWrapper == null){
+            return;
+        }
+        boolean nameChanged = !(oldWrapper.getName().equals(newWrapper.getName()));
+        if (nameChanged && oldWrapper.getScope().equals("local")){
             setLocationForNewWrapper(newWrapper);
         }
-        wrappers.remove(oldWrapper);
+        try {
+            saveWrapper(newWrapper);
+        } catch (IOException e) {
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Error saving wrapper.", e));
+            throw e;
+        }
+        boolean fileChanged = !oldWrapper.getFileLocation().equals(newWrapper.getFileLocation());
+        if (fileChanged && oldWrapper.getScope().equals("local")){
+            File oldWrapperFile = new File(oldWrapper.getFileLocation());
+            oldWrapperFile.delete();
+        }
         wrappers.add(newWrapper);
-
-            try {
-                if (!oldWrapper.getName().equals(newWrapper.getName()) && oldWrapper.getScope().equals("local")){
-                    File oldWrapperFile = new File(oldWrapper.getFileLocation());
-                    oldWrapperFile.delete();
-                    setLocationForNewWrapper(newWrapper);
-                }
-                saveWrapper(newWrapper);
-            } catch (IOException e) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Error saving wrapper.", e));
-            }
+        wrappers.remove(oldWrapper);
     }
 
     public void deleteWrapper(DecompilerWrapperInformation wrapperInformation){
@@ -175,7 +179,7 @@ public class PluginManager {
         }
     }
 
-    private void setLocationForNewWrapper(DecompilerWrapperInformation wrapperInformation) {
+    public void setLocationForNewWrapper(DecompilerWrapperInformation wrapperInformation) {
         File file = new File(Directories.getPluginDirectory() + "/" + wrapperInformation.getName().replaceAll(" ", "_") + ".json");
         int i = 1;
         while (file.exists()) {
@@ -200,7 +204,7 @@ public class PluginManager {
         return newWrapper;
     }
 
-    private void saveWrapper(DecompilerWrapperInformation wrapper) throws IOException {
+    public void saveWrapper(DecompilerWrapperInformation wrapper) throws IOException {
         final GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(DecompilerWrapperInformation.class, new DecompilerWrapperInformationSerializer());
         gsonBuilder.setPrettyPrinting();

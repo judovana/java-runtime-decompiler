@@ -4,6 +4,8 @@ import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 import org.jrd.backend.decompiling.PluginManager;
 
 import javax.swing.*;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -36,22 +38,31 @@ public class PluginConfigurationEditorController {
             addWrapper();
         });
         view.getPluginTopOptionPanel().getCloneButton().addActionListener(actionEvent -> {
-
+            JList wrapperJList = view.getPluginListPanel().getWrapperJList();
+            DecompilerWrapperInformation wrapperInformation = (DecompilerWrapperInformation) wrapperJList.getSelectedValue();
+            DecompilerWrapperInformation clonedWrapper = cloneWrapper(wrapperInformation);
+            updateWrapperList(pluginManager.getWrappers());
+            view.getPluginListPanel().getWrapperJList().setSelectedValue(clonedWrapper, true);
         });
         view.getPluginTopOptionPanel().getRefreshButton().addActionListener(actionEvent -> {
 
         });
         view.getPluginTopOptionPanel().getDeleteButton().addActionListener(actionEvent -> {
-            removeWrapper();
+            JList wrapperJList = view.getPluginListPanel().getWrapperJList();
+            DecompilerWrapperInformation wrapperInformation = (DecompilerWrapperInformation) wrapperJList.getSelectedValue();
+            removeWrapper(wrapperInformation);
         });
         view.getPluginTopOptionPanel().getOpenWebsiteButton().addActionListener(actionEvent -> {
 
         });
         view.getOkCancelPanel().getOkButton().addActionListener(actionEvent -> {
-
+            for (DecompilerWrapperInformation wrapperInformation: configPanelHashMap.keySet()){
+                applyWrapperChange(wrapperInformation);
+            }
+            view.dispose();
         });
         view.getOkCancelPanel().getCancelButton().addActionListener(actionEvent -> {
-
+            view.dispose();
         });
 
         view.getPluginListPanel().getWrapperJList().setSelectedIndex(0);
@@ -70,9 +81,8 @@ public class PluginConfigurationEditorController {
         view.getPluginListPanel().getWrapperJList().setSelectedValue(wrapperInformation, true);
     }
 
-    private void removeWrapper() {
+    private void removeWrapper(DecompilerWrapperInformation wrapperInformation) {
         JList wrapperJList = view.getPluginListPanel().getWrapperJList();
-        DecompilerWrapperInformation wrapperInformation = (DecompilerWrapperInformation) wrapperJList.getSelectedValue();
         String name = wrapperInformation.toString();
         int dialogResult = JOptionPane.showConfirmDialog(view, "Are you sure you want to remove " +
                 name + "?", "Warning", JOptionPane.OK_CANCEL_OPTION);
@@ -84,7 +94,7 @@ public class PluginConfigurationEditorController {
                 view.dispose();
                 return;
             }
-            view.getPluginListPanel().getWrapperJList().setSelectedIndex(0);
+            wrapperJList.setSelectedIndex(0);
         }
     }
 
@@ -101,31 +111,48 @@ public class PluginConfigurationEditorController {
         wrapperJList.setListData(pluginsWithoutJavap.toArray(new DecompilerWrapperInformation[0]));
     }
 
-    private void applyWrapperChange() {
+    private DecompilerWrapperInformation cloneWrapper(DecompilerWrapperInformation wrapperInformation){
+        DecompilerWrapperInformation clonedWrapper = getDataFromPanel(wrapperInformation);
+        pluginManager.setLocationForNewWrapper(clonedWrapper);
+        clonedWrapper.setDecompilerDownloadURL(wrapperInformation.getDecompilerDownloadURL().toString());
+        try {
+            pluginManager.saveWrapper(clonedWrapper);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(view,
+                    "Cloned decompiler configuration could not be saved.",
+                    "Saving error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+        pluginManager.getWrappers().add(clonedWrapper);
+        return clonedWrapper;
+    }
 
-//        // Get data from forms
-//        String name = pluginConfigPanel.getNamePanel().getText();
-//        String wrapperUrl = pluginConfigPanel.getWrapperUrlPanel().getText();
-//        List<String> dependencyURLs = pluginConfigPanel.getDependencyUrlPanel().getStringList();
-//        String decompilerUrl = pluginConfigPanel.getDecompilerLabel().getName();
-//        String fileLocation = pluginConfigPanel.getDecompilerWrapperInformatio().getFileLocation();
-//
-//        File f = new File(pluginConfigPanel.getDecompilerWrapperInformatio().getFileLocation());
-//        if(f.canWrite()) {
-//            DecompilerWrapperInformation oldWrapper = pluginConfigPanel.getDecompilerWrapperInformatio();
-//            DecompilerWrapperInformation newWrapper = new DecompilerWrapperInformation(name, wrapperUrl, dependencyURLs, decompilerUrl);
-//            newWrapper.setFileLocation(fileLocation);
-//            view.dispose();
-//            pluginManager.replace(oldWrapper, newWrapper);
-//        } else {
-//            JOptionPane.showMessageDialog(pluginConfigPanel,
-//                    "Your changes could not be saved. Please check your permissions to edit given files.",
-//                    "Saving error",
-//                    JOptionPane.ERROR_MESSAGE);
-//                pluginConfigPanel.repaint();
-//
-//        }
+    private void applyWrapperChange(DecompilerWrapperInformation oldWrapper) {
+        File f = new File(oldWrapper.getFileLocation());
+        if (!f.canWrite()){
+            return;
+        }
+        DecompilerWrapperInformation newWrapper = getDataFromPanel(oldWrapper);
+        newWrapper.setFileLocation(oldWrapper.getFileLocation());
+        newWrapper.setDecompilerDownloadURL(oldWrapper.getDecompilerDownloadURL().toString());
+        try {
+            pluginManager.replace(oldWrapper, newWrapper);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(view,
+                    "Your changes could not be saved. Please check your permissions to edit given files.",
+                    "Saving error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
 
+    public DecompilerWrapperInformation getDataFromPanel(DecompilerWrapperInformation wrapperInformation){
+        ConfigPanel configPanel = configPanelHashMap.get(wrapperInformation);
+        DecompilerWrapperInformation newWrapper = new DecompilerWrapperInformation();
+
+        newWrapper.setName(configPanel.getNamePanel().getTextField().getText());
+        newWrapper.setWrapperURL(configPanel.getWrapperUrlPanel().getText());
+        newWrapper.setDependencyURLs(configPanel.getDependencyUrlPanel().getStringList());
+        return newWrapper;
     }
 
     public ConfigPanel getOrCreatePluginConfigPanel(DecompilerWrapperInformation vmInfo){

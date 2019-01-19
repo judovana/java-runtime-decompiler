@@ -121,7 +121,7 @@ public class DecompilerWrapperInformation {
         return wrapperURL;
     }
 
-    private void setWrapperURL(String wrapperURL) {
+    public void setWrapperURL(String wrapperURL) {
         wrapperURL = addFileProtocolIfNone(wrapperURL);
         wrapperURL = expandEnvVars(wrapperURL);
         try {
@@ -142,7 +142,7 @@ public class DecompilerWrapperInformation {
         return DependencyURLs;
     }
 
-    private void setDependencyURLs(List<String> dependencyURLs) {
+    public void setDependencyURLs(List<String> dependencyURLs) {
         DependencyURLs = new LinkedList<>();
         for (String s : dependencyURLs) {
             s = addFileProtocolIfNone(s);
@@ -165,7 +165,7 @@ public class DecompilerWrapperInformation {
         return decompilerDownloadURL;
     }
 
-    private void setDecompilerDownloadURL(String decompilerDownloadURL) {
+    public void setDecompilerDownloadURL(String decompilerDownloadURL) {
         try {
             this.decompilerDownloadURL = new URL(decompilerDownloadURL);
         } catch (MalformedURLException e1) {
