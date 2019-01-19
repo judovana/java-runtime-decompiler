@@ -1,11 +1,14 @@
 package org.jrd.frontend.PluginMangerFrame;
 
+import org.jrd.backend.core.OutputController;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 import org.jrd.backend.decompiling.PluginManager;
 
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -53,7 +56,7 @@ public class PluginConfigurationEditorController {
             removeWrapper(wrapperInformation);
         });
         view.getPluginTopOptionPanel().getOpenWebsiteButton().addActionListener(actionEvent -> {
-
+            openDecompilerDownloadURL();
         });
         view.getOkCancelPanel().getOkButton().addActionListener(actionEvent -> {
             for (DecompilerWrapperInformation wrapperInformation: configPanelHashMap.keySet()){
@@ -73,6 +76,19 @@ public class PluginConfigurationEditorController {
         DecompilerWrapperInformation selectedPlugin = (DecompilerWrapperInformation)view.getPluginListPanel().getWrapperJList().getSelectedValue();
         ConfigPanel configPanel = getOrCreatePluginConfigPanel(selectedPlugin);
         view.switchCard(configPanel, String.valueOf(System.identityHashCode(configPanel)));
+    }
+
+    public void openDecompilerDownloadURL(){
+        JList wrapperJList = view.getPluginListPanel().getWrapperJList();
+        DecompilerWrapperInformation wrapperInformation = (DecompilerWrapperInformation) wrapperJList.getSelectedValue();
+        if (wrapperInformation.getDecompilerDownloadURL() != null) {
+            try {
+                URI downloadURI = wrapperInformation.getDecompilerDownloadURL().toURI();
+                java.awt.Desktop.getDesktop().browse(downloadURI);
+            } catch (IOException | URISyntaxException e) {
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
+            }
+        }
     }
 
     private void addWrapper() {
