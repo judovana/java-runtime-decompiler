@@ -26,13 +26,6 @@ public class PluginConfigurationEditorController {
         this.pluginManager = pluginManager;
         configPanelHashMap = new HashMap<>();
 
-        updateWrapperList(pluginManager.getWrappers());
-
-//        if (pluginManager.getWrappers().size() <= 1) {
-//            pluginManager.createWrapper();
-//            updateWrapperList(pluginManager.getWrappers());
-//        }
-
 
         view.getPluginListPanel().getWrapperJList().addListSelectionListener(listSelectionEvent -> {
             onPluginJListChange();
@@ -68,6 +61,7 @@ public class PluginConfigurationEditorController {
             view.dispose();
         });
 
+        updateWrapperList(pluginManager.getWrappers());
         view.getPluginListPanel().getWrapperJList().setSelectedIndex(0);
     }
 
