@@ -97,15 +97,17 @@ public class PluginConfigurationEditorController {
         int dialogResult = JOptionPane.showConfirmDialog(view, "Are you sure you want to remove " +
                 name + "?", "Warning", JOptionPane.OK_CANCEL_OPTION);
 
-        if (dialogResult == JOptionPane.OK_OPTION) {
-            pluginManager.deleteWrapper(wrapperInformation);
-            updateWrapperList(pluginManager.getWrappers());
-            if (wrapperJList.getModel().getSize() == 0) {
-                view.dispose();
-                return;
-            }
-            wrapperJList.setSelectedIndex(0);
+        if (dialogResult == JOptionPane.CANCEL_OPTION) {
+            return;
         }
+        pluginManager.deleteWrapper(wrapperInformation);
+        configPanelHashMap.remove(wrapperInformation);
+        updateWrapperList(pluginManager.getWrappers());
+        if (wrapperJList.getModel().getSize() == 0) {
+            view.dispose();
+            return;
+        }
+        wrapperJList.setSelectedIndex(0);
     }
 
     public void updateWrapperList(List<DecompilerWrapperInformation> wrappers) {
