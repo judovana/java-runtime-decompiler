@@ -5,6 +5,8 @@ import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 import org.jrd.backend.decompiling.PluginManager;
 
 import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -21,11 +23,12 @@ public class PluginConfigurationEditorController {
     private PluginConfigurationEditorView view;
     private HashMap<DecompilerWrapperInformation, ConfigPanel> configPanelHashMap;
 
+    private ActionListener pluginsConfiguredListener;
+
     public PluginConfigurationEditorController(PluginConfigurationEditorView view, PluginManager pluginManager) {
         this.view = view;
         this.pluginManager = pluginManager;
         configPanelHashMap = new HashMap<>();
-
 
         view.getPluginListPanel().getWrapperJList().addListSelectionListener(listSelectionEvent -> {
             onPluginJListChange();
@@ -56,6 +59,9 @@ public class PluginConfigurationEditorController {
                 applyWrapperChange(wrapperInformation);
             }
             view.dispose();
+            if (pluginsConfiguredListener != null){
+                pluginsConfiguredListener.actionPerformed(new ActionEvent(this, 0 , null));
+            }
         });
         view.getOkCancelPanel().getCancelButton().addActionListener(actionEvent -> {
             view.dispose();
@@ -195,5 +201,9 @@ public class PluginConfigurationEditorController {
         if (vmInfo.getWrapperURL() != null){
             pluginConfigPanel.getWrapperUrlPanel().setText(vmInfo.getWrapperURL().getPath());
         }
+    }
+
+    public void setPluginsConfiguredListener(ActionListener pluginsConfiguredListener) {
+        this.pluginsConfiguredListener = pluginsConfiguredListener;
     }
 }
