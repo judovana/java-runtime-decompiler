@@ -87,6 +87,8 @@ public class PluginConfigurationEditorController {
                 java.awt.Desktop.getDesktop().browse(downloadURI);
             } catch (IOException | URISyntaxException e) {
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
+            } catch (UnsupportedOperationException e){
+                JOptionPane.showMessageDialog(view, "Website could not be opened automatically. Go to: "  + wrapperInformation.getDecompilerDownloadURL().toString());
             }
         }
     }
