@@ -9,7 +9,6 @@ public class PluginTopOptionPanel extends JPanel {
     private final JButton refreshButton;
     private final JButton deleteButton;
     private final JButton openWebsiteButton;
-    private final JLabel validStatusLabel;
 
     public PluginTopOptionPanel(){
         final int height = 28;
@@ -17,7 +16,6 @@ public class PluginTopOptionPanel extends JPanel {
 
         this.setLayout(new GridBagLayout());
         this.setPreferredSize(new Dimension(0,height));
-
 
         cloneButton = new JButton("Clone");
         cloneButton.setPreferredSize(new Dimension(buttonWidth,height));
@@ -27,7 +25,6 @@ public class PluginTopOptionPanel extends JPanel {
         deleteButton.setPreferredSize(new Dimension(buttonWidth,height));
         openWebsiteButton = new JButton("Website");
         openWebsiteButton.setPreferredSize(new Dimension(buttonWidth,height));
-        validStatusLabel = new JLabel("Valid: unknown");
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.weightx = 0;
@@ -42,9 +39,6 @@ public class PluginTopOptionPanel extends JPanel {
         gbc.gridx = 4;
         gbc.weightx = 1;
         this.add(Box.createHorizontalGlue(), gbc);
-        gbc.weightx = 0;
-        gbc.gridx = 5;
-        this.add(validStatusLabel, gbc);
     }
 
     public JButton getCloneButton() {
@@ -61,9 +55,5 @@ public class PluginTopOptionPanel extends JPanel {
 
     public JButton getOpenWebsiteButton() {
         return openWebsiteButton;
-    }
-
-    public JLabel getValidStatusLabel() {
-        return validStatusLabel;
     }
 }
