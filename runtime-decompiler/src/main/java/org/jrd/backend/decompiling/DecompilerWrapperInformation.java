@@ -66,6 +66,9 @@ public class DecompilerWrapperInformation {
     }
 
     public String getFullyQualifiedClassName() {
+        if (fullyQualifiedClassName == null){
+            setFullyQualifiedClassName();
+        }
         return fullyQualifiedClassName;
     }
 
