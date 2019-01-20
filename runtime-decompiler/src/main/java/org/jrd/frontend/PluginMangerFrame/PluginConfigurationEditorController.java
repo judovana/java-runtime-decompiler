@@ -43,9 +43,6 @@ public class PluginConfigurationEditorController {
             updateWrapperList(pluginManager.getWrappers());
             view.getPluginListPanel().getWrapperJList().setSelectedValue(clonedWrapper, true);
         });
-        view.getPluginTopOptionPanel().getRefreshButton().addActionListener(actionEvent -> {
-
-        });
         view.getPluginTopOptionPanel().getDeleteButton().addActionListener(actionEvent -> {
             JList wrapperJList = view.getPluginListPanel().getWrapperJList();
             DecompilerWrapperInformation wrapperInformation = (DecompilerWrapperInformation) wrapperJList.getSelectedValue();

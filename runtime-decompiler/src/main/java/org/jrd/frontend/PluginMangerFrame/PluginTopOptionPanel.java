@@ -6,7 +6,6 @@ import java.awt.*;
 public class PluginTopOptionPanel extends JPanel {
 
     private final JButton cloneButton;
-    private final JButton refreshButton;
     private final JButton deleteButton;
     private final JButton openWebsiteButton;
 
@@ -19,8 +18,6 @@ public class PluginTopOptionPanel extends JPanel {
 
         cloneButton = new JButton("Clone");
         cloneButton.setPreferredSize(new Dimension(buttonWidth,height));
-        refreshButton = new JButton("Refresh");
-        refreshButton.setPreferredSize(new Dimension(buttonWidth,height));
         deleteButton = new JButton("Delete");
         deleteButton.setPreferredSize(new Dimension(buttonWidth,height));
         openWebsiteButton = new JButton("Website");
@@ -31,22 +28,16 @@ public class PluginTopOptionPanel extends JPanel {
         gbc.gridx = 0;
         this.add(cloneButton, gbc);
         gbc.gridx = 1;
-        this.add(refreshButton, gbc);
-        gbc.gridx = 2;
         this.add(deleteButton, gbc);
-        gbc.gridx = 3;
+        gbc.gridx = 2;
         this.add(openWebsiteButton, gbc);
-        gbc.gridx = 4;
+        gbc.gridx = 3;
         gbc.weightx = 1;
         this.add(Box.createHorizontalGlue(), gbc);
     }
 
     public JButton getCloneButton() {
         return cloneButton;
-    }
-
-    public JButton getRefreshButton() {
-        return refreshButton;
     }
 
     public JButton getDeleteButton() {
