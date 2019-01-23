@@ -1,27 +1,19 @@
 package org.jrd.frontend.PluginMangerFrame;
-
-import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 import org.jrd.frontend.MainFrame.MainFrameView;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class PluginConfigurationEditorView extends JDialog {
 
-    private JPanel mainPanel;
-    private JPanel leftPanel;
-    private JPanel rightPanel;
-    private ConfigPanel pluginConfigPanel;
-
-    private ActionListener switchPluginListener;
-    private ActionListener addWrapperButtonListener;
-
-    private JList<DecompilerWrapperInformation> wrapperJList;
-
-    private JButton addWrapperButton;
-    private JSplitPane splitPane;
+    private final JPanel configAndOptionPanel;
+    private final JScrollPane scrollPane;
+    private final CardLayout cardLayoutForConfigPanels;
+    private final PluginListPanel pluginListPanel;
+    private final PluginTopOptionPanel pluginTopOptionPanel;
+    private final JPanel centerPanel;
+    private final JPanel cardConfigPanel;
+    private final OkCancelPanel okCancelPanel;
 
     /**
      * Modal window for editing configuration files for decompilers.
@@ -29,68 +21,56 @@ public class PluginConfigurationEditorView extends JDialog {
      * @param mainFrameView main window
      */
     public PluginConfigurationEditorView(MainFrameView mainFrameView) {
-
-        wrapperJList = new JList<>();
-        wrapperJList.setFixedCellHeight(32);
-        wrapperJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        wrapperJList.addListSelectionListener(listSelectionEvent -> {
-            if (wrapperJList.getValueIsAdjusting()) {
-                if (wrapperJList.getSelectedValue() != null)
-                    switchPluginListener.actionPerformed(new ActionEvent(this, 0, null));
-            }
-        });
-
-        leftPanel = new JPanel(new BorderLayout());
-        leftPanel.add(wrapperJList, BorderLayout.CENTER);
-        addWrapperButton = new JButton("New");
-        addWrapperButton.addActionListener(actionEvent -> {
-            addWrapperButtonListener.actionPerformed(actionEvent);
-        });
-        leftPanel.add(addWrapperButton, BorderLayout.SOUTH);
-
-        rightPanel = new JPanel(new BorderLayout());
-
-        splitPane = new JSplitPane();
-        splitPane.setLeftComponent(leftPanel);
-        splitPane.setRightComponent(rightPanel);
-        splitPane.setDividerLocation(200);
-
-        mainPanel = new JPanel(new BorderLayout());
-        mainPanel.add(splitPane);
-
-
+        this.setLayout(new BorderLayout());
         this.setTitle("Plugin configuration");
         this.setSize(new Dimension(960, 540));
         this.setMinimumSize(new Dimension(250, 330));
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setModalityType(ModalityType.APPLICATION_MODAL);
-        this.setLayout(new BorderLayout());
-        this.add(mainPanel, BorderLayout.CENTER);
         this.setLocationRelativeTo(mainFrameView.getMainFrame());
+
+        centerPanel = new JPanel(new BorderLayout());
+        centerPanel.setBackground(Color.RED);
+        okCancelPanel = new OkCancelPanel();
+        pluginListPanel = new PluginListPanel();
+        pluginTopOptionPanel = new PluginTopOptionPanel();
+        configAndOptionPanel = new JPanel(new BorderLayout());
+        cardLayoutForConfigPanels = new CardLayout();
+        cardConfigPanel = new JPanel(cardLayoutForConfigPanels);
+        scrollPane = new JScrollPane(cardConfigPanel);
+
+        centerPanel.add(pluginListPanel, BorderLayout.WEST);
+        configAndOptionPanel.add(scrollPane, BorderLayout.CENTER);
+        centerPanel.add(configAndOptionPanel, BorderLayout.CENTER);
+        configAndOptionPanel.add(pluginTopOptionPanel, BorderLayout.NORTH);
+
+        this.add(centerPanel, BorderLayout.CENTER);
+        this.add(okCancelPanel, BorderLayout.SOUTH);
     }
 
-    public void setSwitchPluginListener(ActionListener switchPluginListener) {
-        this.switchPluginListener = switchPluginListener;
+    public PluginListPanel getPluginListPanel() {
+        return pluginListPanel;
     }
 
-    public void setAddWrapperButtonListener(ActionListener addWrapperButtonListener) {
-        this.addWrapperButtonListener = addWrapperButtonListener;
+    public PluginTopOptionPanel getPluginTopOptionPanel() {
+        return pluginTopOptionPanel;
     }
 
-    public void switchPlugin() {
-        // Show dialog save/discard/cancel
-        pluginConfigPanel = new ConfigPanel(wrapperJList.getSelectedValue());
-
-        rightPanel.removeAll();
-        rightPanel.add(pluginConfigPanel, BorderLayout.CENTER);
-        rightPanel.revalidate();
+    public OkCancelPanel getOkCancelPanel() {
+        return okCancelPanel;
     }
 
-    public ConfigPanel getPluginConfigPanel() {
-        return pluginConfigPanel;
-    }
-
-    public JList<DecompilerWrapperInformation> getWrapperJList() {
-        return wrapperJList;
+    public void switchCard(JPanel jPanel, String id){
+        boolean isNew = true;
+        for (Component component : cardConfigPanel.getComponents()){
+            if (jPanel == component){
+                isNew = false;
+                break;
+            }
+        }
+        if (isNew){
+            cardConfigPanel.add(jPanel, id);
+        }
+        cardLayoutForConfigPanels.show(cardConfigPanel, id);
     }
 }

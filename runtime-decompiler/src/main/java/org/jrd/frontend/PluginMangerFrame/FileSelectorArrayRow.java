@@ -14,7 +14,7 @@ public class FileSelectorArrayRow extends JPanel {
     private JButton removeButton;
     private JButton browseButton;
 
-    private static final String DELTE_ICON = "/icons/delete.png";
+    private static final String DELETE_ICON = "/icons/icons8-trash-24.png";
 
     FileSelectorArrayRow(FileSelectorArrayPanel parent, String url) {
         this.setLayout(new GridBagLayout());
@@ -25,11 +25,11 @@ public class FileSelectorArrayRow extends JPanel {
         textField.setPreferredSize(new Dimension(0, 32));
 
         try {
-            ImageIcon icon = new ImageIcon(FileSelectorArrayRow.class.getResource(DELTE_ICON));
+            ImageIcon icon = new ImageIcon(FileSelectorArrayRow.class.getResource(DELETE_ICON));
             removeButton = new JButton(icon);
         } catch (NullPointerException e) {
             removeButton = new JButton("X");
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("File " + DELTE_ICON + " not found. Falling back to String version.", e));
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("File " + DELETE_ICON + " not found. Falling back to String version.", e));
         }
         removeButton.addActionListener(actionEvent -> {
             parent.removeRow(this);

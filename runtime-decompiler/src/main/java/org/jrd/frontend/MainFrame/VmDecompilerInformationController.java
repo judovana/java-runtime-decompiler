@@ -59,19 +59,12 @@ public class VmDecompilerInformationController {
         bytecodeDecompilerView.refreshComboBox(pluginManager.getWrappers());
     }
 
-    private void updatePluginLists() {
-        bytecodeDecompilerView.refreshComboBox(pluginManager.getWrappers());
-        pluginConfigurationEditorController.updateWrapperList(pluginManager.getWrappers());
-        pluginConfigurationEditorView.getWrapperJList().
-                setSelectedValue(pluginConfigurationEditorView.getPluginConfigPanel().getDecompilerWrapperInformatio(), true);
-    }
-
     // Method for opening plugin configuration window
     private void createConfigurationEditor() {
         pluginConfigurationEditorView = new PluginConfigurationEditorView(mainFrameView);
         pluginConfigurationEditorController = new PluginConfigurationEditorController(pluginConfigurationEditorView, pluginManager);
-        pluginConfigurationEditorController.setUpdateWrapperListsActionListener(actionEvent -> {
-            updatePluginLists();
+        pluginConfigurationEditorController.setPluginsConfiguredListener(actionEvent -> {
+            bytecodeDecompilerView.refreshComboBox(pluginManager.getWrappers());
         });
         pluginConfigurationEditorView.setVisible(true);
     }
