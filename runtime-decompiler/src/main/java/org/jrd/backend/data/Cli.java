@@ -128,10 +128,7 @@ public class Cli {
                     VmDecompilerInformationController.fileToBase64(newBytecodeFile));
             String response = VmDecompilerInformationController.submitRequest(vmManager, request);
             if (response.equals("ok")) {
-                System.out.println("Most likely done.");
-//This is not enough, The changes still disapears from time to time                
-//                System.out.println("Press enter to terminate. By disconnecting the agent, your changes will be gone.");
-//                System.in.read();
+                System.out.println("Most likely done successfully.");
             } else {
                 throw new RuntimeException(VmDecompilerInformationController.CLASSES_NOPE);
 

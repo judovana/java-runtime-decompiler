@@ -208,8 +208,7 @@ public class VmDecompilerInformationController {
         bytecodeDecompilerView.reloadTextField(decompiledClass);
     }
 
-    //private static String lastFile = System.getProperty("user.home");
-    private static String lastFile = "/home/jvanek/git/java-runtime-decompiler/runtime-decompiler/target/classes/org/jrd/backend";
+    private static String lastFile = System.getProperty("user.home");
 
     private void rewriteClass(String name) {
         try {
