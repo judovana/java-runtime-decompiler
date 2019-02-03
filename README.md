@@ -10,11 +10,11 @@ mvn clean install
 ./start.sh
 ```
 ### Fedora
-copr repository for Fedora built from master is available.
+java-runtime decompiler + fernflower and procyoin ar epacke din mian Fedora repositories and in EPEL 7 and up for Fedora built from master is available.
 ```
-dnf copr enable radekmanak/java-runtime-decompiler
 dnf install java-runtime-decompiler
 ```
+The resulting installation is fully prconfigured
 
 ## Usage
 When the application opens go to menubar -> configure and select Agent path.
