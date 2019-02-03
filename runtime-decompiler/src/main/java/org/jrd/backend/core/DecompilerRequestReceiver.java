@@ -79,37 +79,58 @@ public class DecompilerRequestReceiver {
             return NOT_ATTACHED;
         }
     }
-
-    private String getByteCodeAction(String hostname, int listenPort, String vmId, int vmPid, String className) {
+    
+    private int getPort(String hostname, int listenPort, String vmId, int vmPid) {
         int actualListenPort;
-        if ("localhost".equals(hostname)){
+        if ("localhost".equals(hostname)) {
             try {
                 actualListenPort = checkIfAgentIsLoaded(listenPort, vmId, vmPid);
             } catch (Exception ex) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
-                return ERROR_RESPONSE;
+                throw ex;
             }
         } else {
             actualListenPort = listenPort;
         }
         if (actualListenPort == NOT_ATTACHED) {
-            //logger.log(Level.WARNING, "Failed to attach agent.");
-            return ERROR_RESPONSE;
+            throw new RuntimeException("Failed to attach agent.");
         }
-        CallDecompilerAgent nativeAgent = new CallDecompilerAgent(actualListenPort, hostname);
-        try {
-            String bytes = nativeAgent.submitRequest("BYTES\n" + className);
-            if ("ERROR".equals(bytes)) {
-                return ERROR_RESPONSE;
+        return actualListenPort;
+    }
+    
+    private class ResponseWithPort{
+        private final String response;
+        private final int port;
 
-            }
+        public ResponseWithPort(String response, int port) {
+            this.response = response;
+            this.port = port;
+        }
+        
+    }
+  
+    private ResponseWithPort getResponse(String hostname, int listenPort, String vmId, int vmPid, String requestBody) {
+        int actualListenPort = getPort(hostname, listenPort, vmId, vmPid);
+
+        CallDecompilerAgent nativeAgent = new CallDecompilerAgent(actualListenPort, hostname);
+        String reply = nativeAgent.submitRequest(requestBody);
+        if ("ERROR".equals(reply)) {
+            throw new RuntimeException("Agent returned ERROR");
+
+        }
+        return new ResponseWithPort(reply, actualListenPort);
+
+    }
+
+    private String getByteCodeAction(String hostname, int listenPort, String vmId, int vmPid, String className) {
+        try {
+            ResponseWithPort reply = getResponse(hostname, listenPort, vmId, vmPid, "BYTES\n" + className);
             VmDecompilerStatus status = new VmDecompilerStatus();
             status.setHostname(hostname);
-            status.setListenPort(actualListenPort);
+            status.setListenPort(reply.port);
             status.setTimeStamp(System.currentTimeMillis());
             status.setVmId(vmId);
             status.setBytesClassName(className);
-            status.setLoadedClassBytes(bytes);
+            status.setLoadedClassBytes(reply.response);
             vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
 
         } catch (Exception ex) {
@@ -122,32 +143,10 @@ public class DecompilerRequestReceiver {
     }
 
     private String getAllLoadedClassesAction(String hostname, int listenPort, String vmId, int vmPid) {
-        int actualListenPort;
-        if ("localhost".equals(hostname)){
-            try {
-                actualListenPort = checkIfAgentIsLoaded(listenPort, vmId, vmPid);
-            } catch (Exception ex) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
-                return ERROR_RESPONSE;
-            }
-        } else {
-            actualListenPort = listenPort;
-        }
-
-        if (actualListenPort == NOT_ATTACHED) {
-            //logger.log(Level.WARNING, "Failed to call decompiler agent.");
-            return ERROR_RESPONSE;
-        }
-
         try {
-            CallDecompilerAgent nativeAgent = new CallDecompilerAgent(actualListenPort, hostname);
-            String classes = nativeAgent.submitRequest("CLASSES");
-
-            if ("ERROR".equals(classes)) {
-                return ERROR_RESPONSE;
-            }
-            String[] arrayOfClasses = parseClasses(classes);
-            if (arrayOfClasses != null){
+            ResponseWithPort reply = getResponse(hostname, listenPort, vmId, vmPid, "CLASSES");
+            String[] arrayOfClasses = parseClasses(reply.response);
+            if (arrayOfClasses != null) {
                 Arrays.sort(arrayOfClasses, new Comparator<String>() {
                     @Override
                     public int compare(String o1, String o2) {
@@ -172,12 +171,11 @@ public class DecompilerRequestReceiver {
             }
             VmDecompilerStatus status = new VmDecompilerStatus();
             status.setHostname(hostname);
-            status.setListenPort(actualListenPort);
+            status.setListenPort(reply.port);
             status.setTimeStamp(System.currentTimeMillis());
             status.setVmId(vmId);
             status.setLoadedClassNames(arrayOfClasses);
             vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
-
         } catch (Exception ex) {
             OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
             return ERROR_RESPONSE;
@@ -187,30 +185,8 @@ public class DecompilerRequestReceiver {
     }
 
     private String getHaltAction(String hostname, int listenPort, String vmId, int vmPid) {
-        int actualListenPort;
-        if ("localhost".equals(hostname)){
-            try {
-                actualListenPort = checkIfAgentIsLoaded(listenPort, vmId, vmPid);
-            } catch (Exception ex) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
-                return ERROR_RESPONSE;
-            }
-        } else {
-            actualListenPort = listenPort;
-        }
-
-        if (actualListenPort == NOT_ATTACHED) {
-            return ERROR_RESPONSE;
-        }
-
         try {
-            CallDecompilerAgent nativeAgent = new CallDecompilerAgent(actualListenPort, hostname);
-            String halt = nativeAgent.submitRequest("HALT");
-
-            if (halt.equals("ERROR")) {
-                return ERROR_RESPONSE;
-            }
-
+            ResponseWithPort reply = getResponse(hostname, listenPort, vmId, vmPid, "HALT");
         } catch (Exception e) {
             OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Exception when calling halt action", e));
         } finally {
