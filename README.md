@@ -16,6 +16,8 @@ dnf install java-runtime-decompiler
 ```
 The resulting installation is fully prconfigured
 
+There is `dnf copr enable radekmanak/java-runtime-decompiler`  for nightly build, but the specfile may be outdated
+
 ## Usage
 When the application opens go to menubar -> configure and select Agent path.
 
