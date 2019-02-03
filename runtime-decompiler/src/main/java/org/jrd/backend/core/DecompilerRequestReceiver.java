@@ -53,6 +53,11 @@ public class DecompilerRequestReceiver {
         OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG,  "Processing request. VM ID: " + vmId + ", PID: " + vmPid + ", action: " + action + ", port: " + portStr);
         String response;
         switch (action) {
+            case OVERWRITE:
+                String classNameForOverwrite = request.getParameter(AgentRequestAction.CLASS_TO_DECOMPILE_NAME);
+                String classFutureBody = request.getParameter(AgentRequestAction.CLASS_TO_OVERWRITE_BODY);
+                response = getOverwriteAction(hostname, port, vmId, vmPid, classNameForOverwrite, classFutureBody);
+                break;
             case BYTES:
                 String className = request.getParameter(AgentRequestAction.CLASS_TO_DECOMPILE_NAME);
                 response = getByteCodeAction(hostname, port, vmId, vmPid, className);
@@ -119,6 +124,26 @@ public class DecompilerRequestReceiver {
         }
         return new ResponseWithPort(reply, actualListenPort);
 
+    }
+  
+    private String getOverwriteAction(String hostname, int listenPort, String vmId, int vmPid, String className, String nwBody) {
+        try {
+            ResponseWithPort reply = getResponse(hostname, listenPort, vmId, vmPid, "OVERWRITE\n" + className + "\n" + nwBody);
+            VmDecompilerStatus status = new VmDecompilerStatus();
+            status.setHostname(hostname);
+            status.setListenPort(reply.port);
+            status.setTimeStamp(System.currentTimeMillis());
+            status.setVmId(vmId);
+            status.setBytesClassName(className);
+            //note, that we have no reply from overwrite. Or better, nothing to do with reply
+            vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
+
+        } catch (Exception ex) {
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
+            return ERROR_RESPONSE;
+        }
+
+        return OK_RESPONSE;
     }
 
     private String getByteCodeAction(String hostname, int listenPort, String vmId, int vmPid, String className) {

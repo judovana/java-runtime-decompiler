@@ -23,6 +23,20 @@ public class InstrumentationProvider {
     InstrumentationProvider(Instrumentation inst, Transformer transformer) {
         this.transformer = transformer;
         this.instrumentation = inst;
+    }    
+        
+    public void setClassBody(String cname, byte[] nwBody) throws UnmodifiableClassException {
+        Class clazz = findClass(cname);
+        transformer.allowToSaveBytecode(); //?
+        try {
+            String nameWithSlashes = clazz.getName().replace(".", "/");
+            transformer.allowToSaveBytecode(); //? taken from getClassBody. Really twice?
+            transformer.setOverride(nameWithSlashes, nwBody);
+            instrumentation.retransformClasses(clazz);
+        } finally {
+            transformer.denyToSaveBytecode();
+            transformer.resetLastValidResult();
+        }
     }
 
     private byte[] getClassBody(Class clazz) throws UnmodifiableClassException {
@@ -34,10 +48,9 @@ public class InstrumentationProvider {
             String nameWithSlashes = clazz.getName().replace(".", "/");
             result = transformer.getResult(nameWithSlashes);
         } catch (RuntimeException ex) {
-            throw new RuntimeException(ex);
+            throw new RuntimeException(ex); //?? same exception?
         }
-
-        transformer.denyToSaveBytecode();
+        transformer.denyToSaveBytecode(); //should be in finally?
         transformer.resetLastValidResult();
         return result;
     }

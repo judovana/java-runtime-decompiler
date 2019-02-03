@@ -33,7 +33,6 @@ public class Communicate {
      * @param port port where we open the socket
      */
     public Communicate(String host, int port) {
-
         try {
             this.commSocket = new Socket(host, port);
         } catch (IOException ex) {
@@ -102,21 +101,16 @@ public class Communicate {
         if (initLine.equals("ERROR")) {
             OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Agent returned error."));
             return "ERROR";
-        } 
-        
-        else if (initLine.equals("BYTES")) {
+       } else if (initLine.equals("BYTES")) {
             try {
                 String s = this.commInput.readLine();
                 s = s.trim();
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, new RuntimeException("Agent returned bytes: "+s));
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Agent returned bytes: "+s);
                 return s;
             } catch (IOException ex) {
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, ex);
             }
-
-        } 
-        
-        else if (initLine.equals("CLASSES")) {
+        } else if (initLine.equals("CLASSES")) {
             StringBuilder str = new StringBuilder();
             while (true) {
                 try {
@@ -134,9 +128,11 @@ public class Communicate {
             }
             OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG,"Agent returned class names.");
             return str.toString();
-
             // Agent shutdown response
         } else if (initLine.equals("GOODBYE")) {
+            return "OK";
+            //generic done for non-returning  commands. Eg overwrite response. Made this confirmation more  granular? done-overwrite?
+        } else if (initLine.equals("DONE")) {
             return "OK";
         }
         
