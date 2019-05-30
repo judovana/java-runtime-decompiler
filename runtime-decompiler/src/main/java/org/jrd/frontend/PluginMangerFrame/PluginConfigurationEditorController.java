@@ -74,19 +74,18 @@ public class PluginConfigurationEditorController {
             //preparing data for the compiler
             List<URL> dependencyURLs = ((DecompilerWrapperInformation)view.getPluginListPanel().getWrapperJList().getSelectedValue()).getDependencyURLs();
             ArrayList<String> compileStringA = new ArrayList<>();
+            compileStringA.add("-d");
+            compileStringA.add("/tmp");
             compileStringA.add("-cp");
             StringBuilder dependencyS = new StringBuilder();
-            dependencyS.append("\"");
+
             for (URL dependency: dependencyURLs)
             {
                 dependencyS.append(":").append(dependency.getPath());
             }
-            dependencyS.append("\"");
             compileStringA.add(dependencyS.toString());
-            compileStringA.add("-d");
-            compileStringA.add("/tmp");
+
             compileStringA.add(((DecompilerWrapperInformation) view.getPluginListPanel().getWrapperJList().getSelectedValue()).getWrapperURL().getPath());
-            System.out.println(compileStringA);
             String[] compileString = compileStringA.toArray(new String[0]);
 
             //compiling and getting error from the compiler
