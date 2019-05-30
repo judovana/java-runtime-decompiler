@@ -137,6 +137,7 @@ public class VmDecompilerInformationController {
             OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
         }
         loadingDialog.setVisible(false);
+
     }
 
     private void abortAndCleanup() {

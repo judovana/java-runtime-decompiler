@@ -5,15 +5,20 @@ import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 import org.jrd.backend.decompiling.PluginManager;
 
 import javax.swing.*;
+import javax.tools.JavaCompiler;
+import javax.tools.ToolProvider;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -62,6 +67,57 @@ public class PluginConfigurationEditorController {
         });
         view.getOkCancelPanel().getCancelButton().addActionListener(actionEvent -> {
             view.dispose();
+        });
+        view.getOkCancelPanel().getValidateButton().addActionListener(actionEvent -> {
+            if(view.getPluginListPanel().getWrapperJList().getSelectedIndex() == -1) return;
+            JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+            //preparing data for the compiler
+            List<URL> dependencyURLs = ((DecompilerWrapperInformation)view.getPluginListPanel().getWrapperJList().getSelectedValue()).getDependencyURLs();
+            ArrayList<String> compileStringA = new ArrayList<>();
+            compileStringA.add("-cp");
+            StringBuilder dependencyS = new StringBuilder();
+            dependencyS.append("\"");
+            for (URL dependency: dependencyURLs)
+            {
+                dependencyS.append(":").append(dependency.getPath());
+            }
+            dependencyS.append("\"");
+            compileStringA.add(dependencyS.toString());
+            compileStringA.add("-d");
+            compileStringA.add("/tmp");
+            compileStringA.add(((DecompilerWrapperInformation) view.getPluginListPanel().getWrapperJList().getSelectedValue()).getWrapperURL().getPath());
+            System.out.println(compileStringA);
+            String[] compileString = compileStringA.toArray(new String[0]);
+
+            //compiling and getting error from the compiler
+            OutputStream errStream = new OutputStream() {
+                private String err = "";
+                @Override
+                public void write(int i){
+                    err += (char)i;
+                }
+
+                @Override
+                public String toString()
+                {
+                    return this.err;
+                }
+            };
+
+            int errLevel = compiler.run(null, null, errStream, compileString);
+
+            if (errLevel != 0) {
+                JOptionPane.showMessageDialog(view,
+                        "Validation failed: " + errStream.toString(),
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }else {
+                JOptionPane.showMessageDialog(view,"This plugin is valid.","Success", JOptionPane.INFORMATION_MESSAGE);
+            }
+            //cleaning after compilation
+            String fileName = new File(((DecompilerWrapperInformation) view.getPluginListPanel().getWrapperJList().getSelectedValue()).getWrapperURL().getFile()).getName();
+            File fileToRemove = new File("/tmp/" + fileName.substring(0,fileName.length()-4) + "class");
+            fileToRemove.delete();
         });
 
         updateWrapperList(pluginManager.getWrappers());
