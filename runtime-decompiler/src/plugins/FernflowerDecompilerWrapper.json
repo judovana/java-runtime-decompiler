@@ -2,7 +2,7 @@
   "Name": "Fernflower",
   "WrapperURL": "file:///etc/java-runtime-decompiler/plugins/FernflowerDecompilerWrapper.java",
   "DependencyURL": [
-    "file://${HOME}/IdeaProjects/fernflower/build/libs/fernflower.jar"
+    "file:///usr/share/java/fernflower.jar"
   ],
   "DecompilerDownloadURL": "https://github.com/JetBrains/intellij-community/tree/master/plugins/java-decompiler/engine"
 }
