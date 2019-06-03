@@ -5,15 +5,21 @@ import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 import org.jrd.backend.decompiling.PluginManager;
 
 import javax.swing.*;
+import javax.tools.JavaCompiler;
+import javax.tools.ToolProvider;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -30,12 +36,8 @@ public class PluginConfigurationEditorController {
         this.pluginManager = pluginManager;
         configPanelHashMap = new HashMap<>();
 
-        view.getPluginListPanel().getWrapperJList().addListSelectionListener(listSelectionEvent -> {
-            onPluginJListChange();
-        });
-        view.getPluginListPanel().getAddWrapperButton().addActionListener(actionEvent -> {
-            addWrapper();
-        });
+        view.getPluginListPanel().getWrapperJList().addListSelectionListener(listSelectionEvent -> onPluginJListChange());
+        view.getPluginListPanel().getAddWrapperButton().addActionListener(actionEvent -> addWrapper());
         view.getPluginTopOptionPanel().getCloneButton().addActionListener(actionEvent -> {
             JList wrapperJList = view.getPluginListPanel().getWrapperJList();
             DecompilerWrapperInformation wrapperInformation = (DecompilerWrapperInformation) wrapperJList.getSelectedValue();
@@ -48,9 +50,7 @@ public class PluginConfigurationEditorController {
             DecompilerWrapperInformation wrapperInformation = (DecompilerWrapperInformation) wrapperJList.getSelectedValue();
             removeWrapper(wrapperInformation);
         });
-        view.getPluginTopOptionPanel().getOpenWebsiteButton().addActionListener(actionEvent -> {
-            openDecompilerDownloadURL();
-        });
+        view.getPluginTopOptionPanel().getOpenWebsiteButton().addActionListener(actionEvent -> openDecompilerDownloadURL());
         view.getOkCancelPanel().getOkButton().addActionListener(actionEvent -> {
             for (DecompilerWrapperInformation wrapperInformation: configPanelHashMap.keySet()){
                 applyWrapperChange(wrapperInformation);
@@ -60,8 +60,19 @@ public class PluginConfigurationEditorController {
                 pluginsConfiguredListener.actionPerformed(new ActionEvent(this, 0 , null));
             }
         });
-        view.getOkCancelPanel().getCancelButton().addActionListener(actionEvent -> {
-            view.dispose();
+        view.getOkCancelPanel().getCancelButton().addActionListener(actionEvent -> view.dispose());
+        view.getOkCancelPanel().getValidateButton().addActionListener(actionEvent -> {
+            if(view.getPluginListPanel().getWrapperJList().getSelectedIndex() == -1) return;
+            String result = pluginManager.validatePlugin(getDataFromPanel((DecompilerWrapperInformation) view.getPluginListPanel().getWrapperJList().getSelectedValue()));
+            if (result != null){
+                JOptionPane.showMessageDialog(view,
+                        "Validation failed: " + result,
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }else {
+                JOptionPane.showMessageDialog(view,"This plugin is valid.","Success", JOptionPane.INFORMATION_MESSAGE);
+            }
+
         });
 
         updateWrapperList(pluginManager.getWrappers());
@@ -195,9 +206,7 @@ public class PluginConfigurationEditorController {
             pluginConfigPanel.getNamePanel().getTextField().setText(vmInfo.getName());
         }
         if (vmInfo.getDependencyURLs() != null){
-            vmInfo.getDependencyURLs().forEach(url -> {
-                pluginConfigPanel.getDependencyUrlPanel().addRow(url.getPath(), false);
-            });
+            vmInfo.getDependencyURLs().forEach(url -> pluginConfigPanel.getDependencyUrlPanel().addRow(url.getPath(), false));
         }
         if (vmInfo.getWrapperURL() != null){
             pluginConfigPanel.getWrapperUrlPanel().setText(vmInfo.getWrapperURL().getPath());

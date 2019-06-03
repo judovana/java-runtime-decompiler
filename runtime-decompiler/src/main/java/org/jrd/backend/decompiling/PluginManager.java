@@ -11,7 +11,9 @@ import java.io.*;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Executes manages external decompiler wrapper plugins.
@@ -193,6 +195,44 @@ public class PluginManager {
             i++;
         }
         wrapperInformation.setFileLocation(file.getAbsolutePath());
+    }
+
+    /**
+     * Validating the @param plugin using compilation
+     * @param plugin - plugin to validate
+     * @return error message or null
+     */
+    public String validatePlugin(DecompilerWrapperInformation plugin) {
+        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+        //preparing data for the compiler
+        List<URL> dependencyURLs = plugin.getDependencyURLs();
+        ArrayList<String> compileStringA = new ArrayList<>();
+        compileStringA.add("-d");
+        compileStringA.add(System.getProperty("java.io.tmpdir"));
+
+        if (dependencyURLs != null) {
+            compileStringA.add("-cp");
+
+            StringBuilder dependencyS = new StringBuilder();
+            for (URL dependency : dependencyURLs) {
+                dependencyS.append(":").append(dependency.getPath());
+            }
+            compileStringA.add(dependencyS.toString());
+        }
+
+        compileStringA.add(plugin.getWrapperURL().getPath());
+        String[] compileString = compileStringA.toArray(new String[0]);
+        //compiling and getting error from the compiler
+        ByteArrayOutputStream errStream = new ByteArrayOutputStream();
+
+        int errLevel = compiler.run(null, null, errStream, compileString);
+        //cleaning after compilation
+        String fileName = new File(plugin.getWrapperURL().getFile()).getName();
+        File fileToRemove = new File(System.getProperty("java.io.tmpdir") +"/"+ fileName.substring(0,fileName.length()-4) + "class");
+
+        if (fileToRemove.exists())
+            fileToRemove.delete();
+        return errLevel != 0 ? new String(errStream.toByteArray()): null;
     }
 
     public DecompilerWrapperInformation createWrapper(){
