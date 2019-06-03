@@ -197,13 +197,18 @@ public class PluginManager {
         wrapperInformation.setFileLocation(file.getAbsolutePath());
     }
 
+    /**
+     * Validating the @param plugin using compilation
+     * @param plugin - plugin to validate
+     * @return error message or null
+     */
     public String validatePlugin(DecompilerWrapperInformation plugin) {
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         //preparing data for the compiler
         List<URL> dependencyURLs = plugin.getDependencyURLs();
         ArrayList<String> compileStringA = new ArrayList<>();
         compileStringA.add("-d");
-        compileStringA.add("/tmp");
+        compileStringA.add(System.getProperty("java.io.tmpdir"));
 
         if (dependencyURLs != null) {
             compileStringA.add("-cp");
@@ -223,7 +228,7 @@ public class PluginManager {
         int errLevel = compiler.run(null, null, errStream, compileString);
         //cleaning after compilation
         String fileName = new File(plugin.getWrapperURL().getFile()).getName();
-        File fileToRemove = new File("/tmp/" + fileName.substring(0,fileName.length()-4) + "class");
+        File fileToRemove = new File(System.getProperty("java.io.tmpdir") +"/"+ fileName.substring(0,fileName.length()-4) + "class");
 
         if (fileToRemove.exists())
             fileToRemove.delete();
