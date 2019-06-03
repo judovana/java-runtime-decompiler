@@ -218,18 +218,8 @@ public class PluginManager {
         compileStringA.add(plugin.getWrapperURL().getPath());
         String[] compileString = compileStringA.toArray(new String[0]);
         //compiling and getting error from the compiler
-        OutputStream errStream = new OutputStream() {
-            private String err = "";
-            @Override
-            public void write(int i){
-                err += (char)i;
-            }
+        ByteArrayOutputStream errStream = new ByteArrayOutputStream();
 
-            @Override
-            public String toString() {
-                return this.err;
-            }
-        };
         int errLevel = compiler.run(null, null, errStream, compileString);
         //cleaning after compilation
         String fileName = new File(plugin.getWrapperURL().getFile()).getName();
@@ -237,7 +227,7 @@ public class PluginManager {
 
         if (fileToRemove.exists())
             fileToRemove.delete();
-        return errLevel != 0 ? errStream.toString() : null;
+        return errLevel != 0 ? new String(errStream.toByteArray()): null;
     }
 
     public DecompilerWrapperInformation createWrapper(){

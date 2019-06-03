@@ -63,7 +63,7 @@ public class PluginConfigurationEditorController {
         view.getOkCancelPanel().getCancelButton().addActionListener(actionEvent -> view.dispose());
         view.getOkCancelPanel().getValidateButton().addActionListener(actionEvent -> {
             if(view.getPluginListPanel().getWrapperJList().getSelectedIndex() == -1) return;
-            String result = pluginManager.validatePlugin((DecompilerWrapperInformation) view.getPluginListPanel().getWrapperJList().getSelectedValue());
+            String result = pluginManager.validatePlugin(getDataFromPanel((DecompilerWrapperInformation) view.getPluginListPanel().getWrapperJList().getSelectedValue()));
             if (result != null){
                 JOptionPane.showMessageDialog(view,
                         "Validation failed: " + result,
