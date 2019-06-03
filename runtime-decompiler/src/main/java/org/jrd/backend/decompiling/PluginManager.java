@@ -2,19 +2,18 @@ package org.jrd.backend.decompiling;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 import org.jrd.backend.core.OutputController;
 import org.jrd.backend.data.Directories;
-import org.jrd.frontend.PluginMangerFrame.PluginConfigurationEditorView;
 
-import javax.swing.*;
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 import java.io.*;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Executes manages external decompiler wrapper plugins.
