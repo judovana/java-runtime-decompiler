@@ -2,9 +2,12 @@ package org.jrd.backend.decompiling;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 import org.jrd.backend.core.OutputController;
 import org.jrd.backend.data.Directories;
+import org.jrd.frontend.PluginMangerFrame.PluginConfigurationEditorView;
 
+import javax.swing.*;
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 import java.io.*;
@@ -193,6 +196,49 @@ public class PluginManager {
             i++;
         }
         wrapperInformation.setFileLocation(file.getAbsolutePath());
+    }
+
+    public String validatePlugin(DecompilerWrapperInformation plugin) {
+        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+        //preparing data for the compiler
+        List<URL> dependencyURLs = plugin.getDependencyURLs();
+        ArrayList<String> compileStringA = new ArrayList<>();
+        compileStringA.add("-d");
+        compileStringA.add("/tmp");
+
+        if (dependencyURLs != null) {
+            compileStringA.add("-cp");
+
+            StringBuilder dependencyS = new StringBuilder();
+            for (URL dependency : dependencyURLs) {
+                dependencyS.append(":").append(dependency.getPath());
+            }
+            compileStringA.add(dependencyS.toString());
+        }
+
+        compileStringA.add(plugin.getWrapperURL().getPath());
+        String[] compileString = compileStringA.toArray(new String[0]);
+        //compiling and getting error from the compiler
+        OutputStream errStream = new OutputStream() {
+            private String err = "";
+            @Override
+            public void write(int i){
+                err += (char)i;
+            }
+
+            @Override
+            public String toString() {
+                return this.err;
+            }
+        };
+        int errLevel = compiler.run(null, null, errStream, compileString);
+        //cleaning after compilation
+        String fileName = new File(plugin.getWrapperURL().getFile()).getName();
+        File fileToRemove = new File("/tmp/" + fileName.substring(0,fileName.length()-4) + "class");
+
+        if (fileToRemove.exists())
+            fileToRemove.delete();
+        return errLevel != 0 ? errStream.toString() : null;
     }
 
     public DecompilerWrapperInformation createWrapper(){
