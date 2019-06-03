@@ -2,7 +2,8 @@
   "Name": "Procyon",
   "WrapperURL": "file:///etc/java-runtime-decompiler/plugins/ProcyonDecompilerWrapper.java",
   "DependencyURL": [
-    "file:///usr/share/java/procyon-decompiler.jar"
+    "file://${HOME}/.m2/repository/org/bitbucket/mstrobel/procyon-core/0.5.35/procyon-core-0.5.35.jar",
+    "file://${HOME}/.m2/repository/org/bitbucket/mstrobel/procyon-compilertools/0.5.35/procyon-compilertools-0.5.35.jar"
   ],
   "DecompilerDownloadURL": "https://bitbucket.org/mstrobel/procyon/downloads/"
 }
