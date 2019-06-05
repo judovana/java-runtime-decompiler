@@ -211,7 +211,7 @@ public class VmDecompilerInformationController {
 
             final RewriteClassDialog rewriteClassDialog = new RewriteClassDialog(name, lastFile);
 
-            if (!rewriteClassDialog.getOok()[0])
+            if (!rewriteClassDialog.getOok())
                 return;
             final String className = rewriteClassDialog.getClassName();
             lastFile = rewriteClassDialog.getFilePath();

@@ -16,7 +16,7 @@ public class RewriteClassDialog extends JDialog
     private final JButton select;
     private final JLabel nothing;
     private final JButton ok;
-    private final boolean[] ook;
+    private boolean ook;
 
     public RewriteClassDialog(String name, String lastFile)
     {
@@ -31,7 +31,7 @@ public class RewriteClassDialog extends JDialog
         select = new JButton("...");
         nothing = new JLabel();
         ok = new JButton("ok");
-        ook = new boolean[]{false};
+        ook = false;
         setValidation();
         setListeners();
         adds();
@@ -57,7 +57,7 @@ public class RewriteClassDialog extends JDialog
         });
 
         ok.addActionListener(e -> {
-            ook[0] = true;
+            ook = true;
             setVisible(false);
         });
     }
@@ -76,7 +76,7 @@ public class RewriteClassDialog extends JDialog
         this.pack();
     }
 
-    public boolean[] getOok()
+    public boolean getOok()
     {
         return ook;
     }
