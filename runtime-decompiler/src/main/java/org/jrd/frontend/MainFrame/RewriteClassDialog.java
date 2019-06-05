@@ -48,23 +48,17 @@ public class RewriteClassDialog extends JDialog
 
     private void setListeners()
     {
-        select.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JFileChooser jf = new JFileChooser(filePath.getText());
-                int returnVal = jf.showOpenDialog(null);
-                if (returnVal == JFileChooser.APPROVE_OPTION) {
-                    filePath.setText(jf.getSelectedFile().getAbsolutePath());
-                }
+        select.addActionListener(e -> {
+            JFileChooser jf = new JFileChooser(filePath.getText());
+            int returnVal = jf.showOpenDialog(null);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                filePath.setText(jf.getSelectedFile().getAbsolutePath());
             }
         });
 
-        ok.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ook[0] = true;
-                setVisible(false);
-            }
+        ok.addActionListener(e -> {
+            ook[0] = true;
+            setVisible(false);
         });
     }
 
