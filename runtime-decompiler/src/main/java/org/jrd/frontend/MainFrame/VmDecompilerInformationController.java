@@ -1,8 +1,5 @@
 package org.jrd.frontend.MainFrame;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.GridLayout;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.AgentRequestAction.RequestAction;
 import org.jrd.backend.core.DecompilerRequestReceiver;
@@ -19,14 +16,11 @@ import org.jrd.frontend.PluginMangerFrame.PluginConfigurationEditorView;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Base64;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 
 /**
  * This class provides Action listeners and result proccreateRequestessing for
@@ -212,67 +206,24 @@ public class VmDecompilerInformationController {
 
     private void rewriteClass(String name) {
         try {
-            if (name == null || name.trim().isEmpty()) {
+            if (name == null || name.trim().isEmpty())
                 name = "???";
-            }
-            final JDialog jd = new JDialog((JFrame) null, "Specify class and select its bytecode", true);
-            jd.setSize(400, 300);
-            jd.setLayout(new BorderLayout());
-            final JPanel inputs = new JPanel(new GridLayout(3, 1));
-            final JPanel buttons = new JPanel(new GridLayout(3, 1));
-            final JLabel validation = new JLabel("???");
-            final JTextField filePath = new JTextField(lastFile);
-            final JTextField className = new JTextField(name);
-            DocumentListener v = new FiletoClassValidator(validation, filePath, className);
-            filePath.getDocument().addDocumentListener(v);
-            className.getDocument().addDocumentListener(v);
-            v.changedUpdate(null);
-            final JButton select = new JButton("...");
-            select.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    JFileChooser jf = new JFileChooser(filePath.getText());
-                    int returnVal = jf.showOpenDialog(null);
-                    if (returnVal == JFileChooser.APPROVE_OPTION) {
-                        filePath.setText(jf.getSelectedFile().getAbsolutePath());
-                    }
-                }
-            });
-            final JLabel nothing = new JLabel();
-            final JButton ok = new JButton("ok");
-            final boolean[] ook = new boolean[]{false};
-            ok.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    ook[0] = true;
-                    jd.setVisible(false);
-                }
-            });
-            inputs.add(filePath);
-            inputs.add(className);
-            inputs.add(className);
-            inputs.add(validation);
-            buttons.add(select);
-            buttons.add(nothing);
-            buttons.add(ok);
-            jd.add(inputs);
-            jd.add(buttons, BorderLayout.EAST);
-            jd.pack();
-            jd.setVisible(true);
-            if (!ook[0]) {
+
+            final RewriteClassDialog rewriteClassDialog = new RewriteClassDialog(name, lastFile);
+
+            if (!rewriteClassDialog.getOok()[0])
                 return;
-            }
-            final String nname = className.getText();
-            lastFile = filePath.getText();
+            final String className = rewriteClassDialog.getClassName();
+            lastFile = rewriteClassDialog.getFilePath();
+
             final String body = fileToBase64(lastFile);
-            AgentRequestAction request = createRequest(RequestAction.OVERWRITE, nname, body);
+            AgentRequestAction request = createRequest(RequestAction.OVERWRITE, className, body);
             String response = submitRequest(request);
             if (response.equals("error")) {
                 JOptionPane.showMessageDialog(mainFrameView.getMainFrame(),
                         "class rewrite failed.",
                         "Error",
                         JOptionPane.ERROR_MESSAGE);
-
             }
         } catch (Exception ex) {
             OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
