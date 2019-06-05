@@ -27,10 +27,9 @@ public class InstrumentationProvider {
         
     public void setClassBody(String cname, byte[] nwBody) throws UnmodifiableClassException {
         Class clazz = findClass(cname);
-        transformer.allowToSaveBytecode(); //?
+        transformer.allowToSaveBytecode();
         try {
             String nameWithSlashes = clazz.getName().replace(".", "/");
-            transformer.allowToSaveBytecode(); //? taken from getClassBody. Really twice?
             transformer.setOverride(nameWithSlashes, nwBody);
             instrumentation.retransformClasses(clazz);
         } finally {
