@@ -3,11 +3,8 @@ package org.jrd.frontend.MainFrame;
 import javax.swing.*;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
-public class RewriteClassDialog extends JDialog
-{
+public class RewriteClassDialog extends JDialog {
     private final JPanel inputs;
     private final JPanel buttons;
     private final JLabel validation;
@@ -16,38 +13,35 @@ public class RewriteClassDialog extends JDialog
     private final JButton select;
     private final JLabel nothing;
     private final JButton ok;
-    private boolean ook;
+    private boolean wasOkPressed;
 
-    public RewriteClassDialog(String name, String lastFile)
-    {
+    public RewriteClassDialog(String name, String lastFile) {
         super((JFrame) null, "Specify class and select its bytecode", true);
-        this.setSize(400 ,300);
+        this.setSize(400, 300);
         this.setLayout(new BorderLayout());
         inputs = new JPanel(new GridLayout(3, 1));
         buttons = new JPanel(new GridLayout(3, 1));
-        validation  = new JLabel("???");
+        validation = new JLabel("???");
         filePath = new JTextField(lastFile);
         className = new JTextField(name);
         select = new JButton("...");
         nothing = new JLabel();
         ok = new JButton("ok");
-        ook = false;
+        wasOkPressed = false;
         setValidation();
-        setListeners();
+        setSelectListener();
+        setOkListener();
         adds();
-        setVisible(true);
     }
 
-    private void setValidation()
-    {
+    private void setValidation() {
         DocumentListener v = new FiletoClassValidator(validation, filePath, className);
         filePath.getDocument().addDocumentListener(v);
         className.getDocument().addDocumentListener(v);
         v.changedUpdate(null);
     }
 
-    private void setListeners()
-    {
+    private void setSelectListener() {
         select.addActionListener(e -> {
             JFileChooser jf = new JFileChooser(filePath.getText());
             int returnVal = jf.showOpenDialog(null);
@@ -55,15 +49,16 @@ public class RewriteClassDialog extends JDialog
                 filePath.setText(jf.getSelectedFile().getAbsolutePath());
             }
         });
+    }
 
+    private void setOkListener() {
         ok.addActionListener(e -> {
-            ook = true;
-            setVisible(false);
+            this.wasOkPressed = true;
+            this.setVisible(false);
         });
     }
 
-    private void adds()
-    {
+    private void adds() {
         inputs.add(filePath);
         inputs.add(className);
         inputs.add(className);
@@ -76,18 +71,15 @@ public class RewriteClassDialog extends JDialog
         this.pack();
     }
 
-    public boolean getOok()
-    {
-        return ook;
+    public boolean isOkPressed() {
+        return this.wasOkPressed;
     }
 
-    public String getClassName()
-    {
+    public String getClassName() {
         return this.className.getText();
     }
 
-    public String getFilePath()
-    {
+    public String getFilePath() {
         return this.filePath.getText();
     }
 }

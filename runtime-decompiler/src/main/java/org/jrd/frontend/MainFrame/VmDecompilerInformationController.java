@@ -204,15 +204,17 @@ public class VmDecompilerInformationController {
 
     private static String lastFile = System.getProperty("user.home");
 
+
     private void rewriteClass(String name) {
         try {
             if (name == null || name.trim().isEmpty())
                 name = "???";
 
             final RewriteClassDialog rewriteClassDialog = new RewriteClassDialog(name, lastFile);
-
-            if (!rewriteClassDialog.getOok())
+            rewriteClassDialog.setVisible(true);
+            if (!rewriteClassDialog.isOkPressed())
                 return;
+
             final String className = rewriteClassDialog.getClassName();
             lastFile = rewriteClassDialog.getFilePath();
 
