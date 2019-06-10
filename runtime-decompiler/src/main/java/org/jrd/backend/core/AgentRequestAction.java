@@ -47,17 +47,15 @@ import java.util.TreeMap;
  */
 public class AgentRequestAction {
     
-
     private final Map<String, String> parameters;
-
-
-
+    
     public static enum RequestAction {
         CLASSES(0),
         BYTES(1),
-        HALT(2);
+        HALT(2),
+        OVERWRITE(3);
 
-        private int intVal;
+        private final int intVal;
 
         private RequestAction(int intVal) {
             this.intVal = intVal;
@@ -83,6 +81,8 @@ public class AgentRequestAction {
                     return BYTES;
                 case 2:
                     return HALT;
+                case 3:
+                    return OVERWRITE;
                 default:
                     throw new IllegalArgumentException("Unknown request: " + action);
             }
@@ -109,7 +109,15 @@ public class AgentRequestAction {
     public static final String LISTEN_PORT_PARAM_NAME = "listen-port";
     public static final int NOT_ATTACHED_PORT = -1;
     public static final String CLASS_TO_DECOMPILE_NAME = "class-to-decompile";
+    
+    public static final String CLASS_TO_OVERWRITE_BODY = "body-to-overwrite";
 
+    public static AgentRequestAction create(VmInfo vmInfo, String hostname, int listenPort, RequestAction action, String name, String base64body) {
+        AgentRequestAction req = create(vmInfo, hostname, listenPort, action, name);
+        req.setParameter(CLASS_TO_OVERWRITE_BODY, base64body);
+        return req;
+    }
+    
     public static AgentRequestAction create(VmInfo vmInfo, String hostname, int listenPort, RequestAction action, String name) {
         AgentRequestAction req = create(vmInfo, hostname, listenPort, action);
         req.setParameter(CLASS_TO_DECOMPILE_NAME, name);

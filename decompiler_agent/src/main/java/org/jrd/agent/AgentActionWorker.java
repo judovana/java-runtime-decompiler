@@ -95,6 +95,9 @@ public class AgentActionWorker extends Thread {
                     case "BYTES":
                         sendByteCode(inputStream, outputStream);
                         break;
+                    case "OVERWRITE":
+                        recieveByteCode(inputStream, outputStream);
+                        break;
                     default:
                         outputStream.write("ERROR\n");
                         outputStream.flush();
@@ -146,13 +149,36 @@ public class AgentActionWorker extends Thread {
             out.flush();
             return;
         }
-
         try {
             byte[] body = provider.findClassBody(className);
             String encoded = Base64.getEncoder().encodeToString(body);
             out.write("BYTES");
             out.newLine();
             out.write(encoded);
+            out.newLine();
+        } catch (Exception ex) {
+            OutputControllerAgent.getLogger().log(ex);
+            out.write("ERROR\n");
+        }
+        out.flush();
+    }
+    
+    private void recieveByteCode(BufferedReader in, BufferedWriter out) throws IOException {
+        String className = in.readLine();
+        if (className == null) {
+            out.write("ERROR\n");
+            out.flush();
+            return;
+        }
+        String classBodyBase64 = in.readLine();
+        if (classBodyBase64 == null) {
+            out.write("ERROR\n");
+            out.flush();
+            return;
+        }
+        try {
+            provider.setClassBody(className, Base64.getDecoder().decode(classBodyBase64));
+            out.write("DONE");//overwrite specific done?
             out.newLine();
         } catch (Exception ex) {
             OutputControllerAgent.getLogger().log(ex);

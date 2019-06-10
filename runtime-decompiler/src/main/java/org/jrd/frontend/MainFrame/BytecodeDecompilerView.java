@@ -34,6 +34,7 @@ public class BytecodeDecompilerView {
     private RSyntaxTextArea bytecodeSyntaxTextArea;
     private ActionListener bytesActionListener;
     private ActionListener classesActionListener;
+    private ActionListener rewriteActionListener;
     private String[] classes;
 
     private boolean splitPaneFirstResize = true;
@@ -95,7 +96,25 @@ public class BytecodeDecompilerView {
                 }.execute();
             
         }});
-
+        JButton overwriteButton = new JButton("Overwrite class");
+        overwriteButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                final String name = filteredClassesJlist.getSelectedValue();
+                new SwingWorker<Void, Void>() {
+                    @Override
+                    protected Void doInBackground() throws Exception {
+                        try {
+                            ActionEvent event = new ActionEvent(this, 3, name);
+                            rewriteActionListener.actionPerformed(event);
+                        } catch (Throwable t) {
+                            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, t);
+                        }
+                        return null;
+                    }
+                }.execute();
+            }
+        });
         JButton topButton = new JButton("Refresh loaded classes list");
         topButton.addActionListener(new ActionListener() {
             @Override
@@ -137,6 +156,7 @@ public class BytecodeDecompilerView {
 
         topButtonPanel.setLayout(new BorderLayout());
         topButtonPanel.add(topButton, BorderLayout.WEST);
+        topButtonPanel.add(overwriteButton);
         topButtonPanel.add(topComboBox, BorderLayout.EAST);
 
         leftScrollPanel = new JScrollPane(filteredClassesJlist);
@@ -208,6 +228,10 @@ public class BytecodeDecompilerView {
 
     public void setBytesActionListener(ActionListener listener) {
         bytesActionListener = listener;
+    }
+    
+    public void setRewriteActionListener(ActionListener rewriteActionListener) {
+        this.rewriteActionListener = rewriteActionListener;
     }
 
     /**

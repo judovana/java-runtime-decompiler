@@ -16,11 +16,15 @@ import org.jrd.frontend.PluginMangerFrame.PluginConfigurationEditorView;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Base64;
 
 /**
- * This class provides Action listeners and result processing for the GUI.
+ * This class provides Action listeners and result proccreateRequestessing for
+ * the GUI.
  */
 public class VmDecompilerInformationController {
 
@@ -35,6 +39,10 @@ public class VmDecompilerInformationController {
     private VmInfo vmInfo;
     private PluginManager pluginManager;
 
+    //hte createRequest is ussing array of strings on input. Those are most common, usually shared indexes
+    public static final int CLASS_NAME = 0;
+    public static final int CLASS_BODY = 1;
+
     public VmDecompilerInformationController(MainFrameView mainFrameView, Model model) {
         this.mainFrameView = mainFrameView;
         this.bytecodeDecompilerView = mainFrameView.getBytecodeDecompilerView();
@@ -46,15 +54,12 @@ public class VmDecompilerInformationController {
         vmManager.subscribeToVMChange(e -> updateVmLists());
 
         mainFrameView.setCreateNewConnectionDialogListener(e -> createNewConnectionDialog());
-
         bytecodeDecompilerView.setClassesActionListener(e -> loadClassNames());
-
         bytecodeDecompilerView.setBytesActionListener(e -> loadClassBytecode(e.getActionCommand()));
+        bytecodeDecompilerView.setRewriteActionListener(e -> rewriteClass(e.getActionCommand()));
 
         mainFrameView.setVmChanging(this::changeVm);
-
         mainFrameView.setHaltAgentListener(e -> haltAgent());
-
         mainFrameView.setPluginConfigurationEditorListener(actionEvent -> createConfigurationEditor());
         bytecodeDecompilerView.refreshComboBox(pluginManager.getWrappers());
     }
@@ -90,24 +95,25 @@ public class VmDecompilerInformationController {
     }
 
     private void changeVm(ActionEvent event) {
-            JList<VmInfo> vmList = (JList<VmInfo>) event.getSource();
-            VmInfo selectedVmInfo = vmList.getSelectedValue();
-            mainFrameView.switchPanel(selectedVmInfo != null);
-            clearOtherList(vmList);
-            haltAgent();
-            if (selectedVmInfo != null) {
-                new Thread(() -> {
-                    this.vmInfo = selectedVmInfo;
-                    loadClassNames();
-                }).start();
-            }
+        JList<VmInfo> vmList = (JList<VmInfo>) event.getSource();
+        VmInfo selectedVmInfo = vmList.getSelectedValue();
+        mainFrameView.switchPanel(selectedVmInfo != null);
+        clearOtherList(vmList);
+        haltAgent();
+        if (selectedVmInfo != null) {
+            new Thread(() -> {
+                this.vmInfo = selectedVmInfo;
+                loadClassNames();
+            }).start();
+        }
     }
 
     /**
      * If selected list is remoteVmList clears localVmList and vice versa.<br>
      * Effectively merging them into one.
      *
-     * @param vmList list that doesn't get cleared containing the VM that user wants to attach.
+     * @param vmList list that doesn't get cleared containing the VM that user
+     * wants to attach.
      */
     private void clearOtherList(JList<VmInfo> vmList) {
         switch (vmList.getName()) {
@@ -123,8 +129,8 @@ public class VmDecompilerInformationController {
     private void showLoadingDialog() {
         SwingUtilities.invokeLater(() -> {
             loadingDialog = new LoadingDialog();
-            loadingDialog.setAbortActionListener(e ->
-                    abortAndCleanup());
+            loadingDialog.setAbortActionListener(e
+                    -> abortAndCleanup());
             loadingDialog.setVisible(true);
         });
     }
@@ -154,12 +160,12 @@ public class VmDecompilerInformationController {
     public static final String CLASSES_NOPE = "Classes couldn't be loaded. Do you have agent configured?";
 
     /**
-     * Sends request for classes. If "ok" response is received updates classes list.
-     * If "error" response is received shows an error dialog.
+     * Sends request for classes. If "ok" response is received updates classes
+     * list. If "error" response is received shows an error dialog.
      */
     private void loadClassNames() {
         showLoadingDialog();
-        AgentRequestAction request = createRequest("", RequestAction.CLASSES);
+        AgentRequestAction request = createRequest(RequestAction.CLASSES, "");
         String response = submitRequest(request);
         if (response.equals("ok")) {
             VmDecompilerStatus vmStatus = vmInfo.getVmDecompilerStatus();
@@ -176,7 +182,7 @@ public class VmDecompilerInformationController {
     }
 
     private void loadClassBytecode(String name) {
-        AgentRequestAction request = createRequest(name, RequestAction.BYTES);
+        AgentRequestAction request = createRequest(RequestAction.BYTES, name);
         String response = submitRequest(request);
         String decompiledClass = "";
         if (response.equals("error")) {
@@ -197,12 +203,54 @@ public class VmDecompilerInformationController {
         bytecodeDecompilerView.reloadTextField(decompiledClass);
     }
 
+    private static String lastFile = System.getProperty("user.home");
+
+
+    private void rewriteClass(String name) {
+        try {
+            if (name == null || name.trim().isEmpty())
+                name = "???";
+
+            final RewriteClassDialog rewriteClassDialog = new RewriteClassDialog(name, lastFile);
+            rewriteClassDialog.setVisible(true);
+            if (!rewriteClassDialog.isOkPressed())
+                return;
+
+            final String className = rewriteClassDialog.getClassName();
+            lastFile = rewriteClassDialog.getFilePath();
+
+            final String body = fileToBase64(lastFile);
+            AgentRequestAction request = createRequest(RequestAction.OVERWRITE, className, body);
+            String response = submitRequest(request);
+            if (response.equals("error")) {
+                JOptionPane.showMessageDialog(mainFrameView.getMainFrame(),
+                        "class rewrite failed.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Exception ex) {
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
+            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(),
+                    ex,
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    public static String fileToBase64(String path) {
+        try {
+            return Base64.getEncoder().encodeToString(Files.readAllBytes(new File(path).toPath()));
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
     private void haltAgent() {
         if (vmInfo == null || !vmInfo.isLocal()) {
             return;
         }
         try {
-            AgentRequestAction request = createRequest("", RequestAction.HALT);
+            AgentRequestAction request = createRequest(RequestAction.HALT, "");
             String response = submitRequest(request);
             if (response.equals("ok")) {
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Agent closing socket and exiting");
@@ -212,12 +260,11 @@ public class VmDecompilerInformationController {
         }
     }
 
-
-    private AgentRequestAction createRequest(String className, RequestAction action) {
-        return createRequest(vmInfo, className, action);
+    private AgentRequestAction createRequest(RequestAction action, String... commands) {
+        return createRequest(vmInfo, action, commands);
     }
 
-    public static AgentRequestAction createRequest(VmInfo vmInfo,  String className, RequestAction action) {
+    public static AgentRequestAction createRequest(VmInfo vmInfo, RequestAction action, String... commands) {
         VmDecompilerStatus status = vmInfo.getVmDecompilerStatus();
         int listenPort = AgentRequestAction.NOT_ATTACHED_PORT;
         String hostname = "localhost";
@@ -227,14 +274,30 @@ public class VmDecompilerInformationController {
         }
 
         AgentRequestAction request;
-        if (action == RequestAction.CLASSES) {
-            request = AgentRequestAction.create(vmInfo, hostname, listenPort, action);
-        } else if (action == RequestAction.BYTES) {
-            request = AgentRequestAction.create(vmInfo, hostname, listenPort, action, className);
-        } else if (action == RequestAction.HALT) {
-            request = AgentRequestAction.create(vmInfo, hostname, listenPort, action);
-        } else {
+        if (null == action) {
             throw new AssertionError("Unknown action: " + action);
+        } else {
+            switch (action) {
+                case CLASSES:
+                    request = AgentRequestAction.create(vmInfo, hostname, listenPort, action);
+                    break;
+                case BYTES:
+                    request = AgentRequestAction.create(vmInfo, hostname, listenPort, action, commands[CLASS_NAME]);
+                    break;
+                case OVERWRITE:
+                    try {
+                        request = AgentRequestAction.create(vmInfo, hostname, listenPort, action,
+                                commands[CLASS_NAME], commands[CLASS_BODY]);
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    break;
+                case HALT:
+                    request = AgentRequestAction.create(vmInfo, hostname, listenPort, action);
+                    break;
+                default:
+                    throw new AssertionError("Unknown action: " + action);
+            }
         }
         return request;
     }
@@ -251,4 +314,5 @@ public class VmDecompilerInformationController {
 
         return response; //listener
     }
+
 }
