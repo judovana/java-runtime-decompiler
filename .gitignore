@@ -1,3 +1,7 @@
+#image creation output
+build.log
+images/build.log
+
 # Compiled class file
 *.class
 
