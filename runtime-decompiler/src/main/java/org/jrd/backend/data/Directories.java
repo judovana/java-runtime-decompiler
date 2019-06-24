@@ -1,10 +1,12 @@
 package org.jrd.backend.data;
 
+import java.io.File;
+
 public final class Directories {
 
-    private static final String XDG_CONFIG_SUFFIX = "/conf";
-    private static final String XDG_PLUGIN_SUFFIX = "/plugins";
-    private static final String XDG_JRD_HOME = "/.config/java-runtime-decompiler";
+    private static final String XDG_CONFIG_SUFFIX = File.separator + "conf";
+    private static final String XDG_PLUGIN_SUFFIX = File.separator + "plugins";
+    private static final String XDG_JRD_HOME = File.separator + ".config" + File.separator + "java-runtime-decompiler";
 
     private Directories(){
     }
