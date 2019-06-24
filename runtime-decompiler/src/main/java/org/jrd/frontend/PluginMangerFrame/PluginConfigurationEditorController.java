@@ -51,6 +51,7 @@ public class PluginConfigurationEditorController {
             removeWrapper(wrapperInformation);
         });
         view.getPluginTopOptionPanel().getOpenWebsiteButton().addActionListener(actionEvent -> openDecompilerDownloadURL());
+        view.getPluginTopOptionPanel().getImportButton().addActionListener(actionEvent -> openImportDialog());
         view.getOkCancelPanel().getOkButton().addActionListener(actionEvent -> {
             for (DecompilerWrapperInformation wrapperInformation: configPanelHashMap.keySet()){
                 applyWrapperChange(wrapperInformation);
@@ -77,6 +78,22 @@ public class PluginConfigurationEditorController {
 
         updateWrapperList(pluginManager.getWrappers());
         view.getPluginListPanel().getWrapperJList().setSelectedIndex(0);
+    }
+
+    void openImportDialog(){
+        String[] values = {"Fernflower", "Procyon"};
+
+        Object selected = JOptionPane.showInputDialog(null,
+                "Which decompiler would you like to import?",
+                "Import decompiler",
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                values,
+                "Fernflower");
+
+        if(selected != null){ //null if the user cancels.
+            String selectedDecompiler = selected.toString();
+        }
     }
 
     void onPluginJListChange(){
