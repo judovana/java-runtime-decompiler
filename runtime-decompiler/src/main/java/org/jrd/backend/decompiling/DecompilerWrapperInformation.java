@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -204,8 +206,13 @@ public class DecompilerWrapperInformation {
         } else if (fileLocation.startsWith("/usr/share/")) {
             scope = "user shared";
 
-        } else if (fileLocation.startsWith(Directories.getXdgJrdBaseDir())) {
-            scope = LOCAL_SCOPE;
+        } else{
+            Path wrapperFile = Paths.get(fileLocation);
+            Path baseDir = Paths.get(Directories.getXdgJrdBaseDir());
+
+            if(wrapperFile.startsWith(baseDir)){
+                scope = LOCAL_SCOPE;
+            }
         }
         return scope;
     }
