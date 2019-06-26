@@ -4,6 +4,7 @@ import org.jrd.backend.core.OutputController;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 
 public class FileSelectorArrayRow extends JPanel {
 
@@ -13,6 +14,7 @@ public class FileSelectorArrayRow extends JPanel {
 
     private JButton removeButton;
     private JButton browseButton;
+    private JFileChooser chooser;
 
     private static final String DELETE_ICON = "/icons/icons8-trash-24.png";
 
@@ -34,9 +36,11 @@ public class FileSelectorArrayRow extends JPanel {
         removeButton.addActionListener(actionEvent -> {
             parent.removeRow(this);
         });
+
+        chooser = new JFileChooser();
+        chooser.setCurrentDirectory(new File(System.getProperty("user.home")));
         browseButton = new JButton("Browse");
         browseButton.addActionListener(actionEvent -> {
-            JFileChooser chooser = new JFileChooser();
             int returnVar = chooser.showOpenDialog(this);
             if (returnVar == JFileChooser.APPROVE_OPTION) {
                 textField.setText(chooser.getSelectedFile().getPath());
