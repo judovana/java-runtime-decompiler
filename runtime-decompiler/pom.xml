@@ -71,6 +71,20 @@
         </plugins>
             <resources>
                 <resource>
+                    <directory>src/plugins</directory>
+                    <targetPath>plugins</targetPath>
+                    <includes>
+                        <include>**/*.java</include>
+                    </includes>
+                </resource>
+                <resource>
+                    <directory>src/plugins</directory>
+                    <targetPath>plugins</targetPath>
+                    <includes>
+                        <include>**/*.json</include>
+                    </includes>
+                </resource>
+                <resource>
                     <directory>src/main/resources</directory>
                     <filtering>false</filtering>
                 </resource>
