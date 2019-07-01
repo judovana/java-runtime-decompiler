@@ -37,7 +37,7 @@ public class PluginManager {
     /**
      * Searches plugin configuration locations and calls loadConfig(file) on files.
      */
-    private void loadConfigs() {
+    public void loadConfigs() {
         wrappers = new LinkedList<>();
         // keep all three locations - for default system scope, user shared scope and user-only scope
         String[] configLocations = new String[]{"/etc/java-runtime-decompiler/plugins/"
@@ -184,6 +184,7 @@ public class PluginManager {
 
         if (wrapperInformation.getScope().equals("local")){
             new File(wrapperInformation.getFileLocation()).delete();
+            new File(flipWrapperExtension(wrapperInformation.getFileLocation())).delete();
         }
     }
 
@@ -291,4 +292,14 @@ public class PluginManager {
         }
     }
 
+    public static String flipWrapperExtension(String filePath){
+        if(filePath.endsWith(".json")){
+            return filePath.replace(".json", ".java");
+        } else if(filePath.endsWith(".java")){
+            return filePath.replace(".java", ".json");
+        } else {
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Incorrect plugin wrapper path: " + filePath));
+            return filePath;
+        }
+    }
 }

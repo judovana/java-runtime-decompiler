@@ -1,27 +1,23 @@
 package org.jrd.frontend.PluginMangerFrame;
 
 import org.jrd.backend.core.OutputController;
+import org.jrd.backend.data.Directories;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 import org.jrd.backend.decompiling.PluginManager;
+import org.jrd.backend.decompiling.PluginManager.*;
+import org.jrd.frontend.PluginMangerFrame.embedded.Directory;
+import org.jrd.frontend.PluginMangerFrame.embedded.Listable;
+import org.jrd.frontend.PluginMangerFrame.embedded.Zip;
 
 import javax.swing.*;
-import javax.tools.JavaCompiler;
-import javax.tools.ToolProvider;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.io.*;
+import java.net.*;
+import java.nio.file.*;
+import java.util.*;
+
+import static org.jrd.backend.decompiling.PluginManager.flipWrapperExtension;
 
 public class PluginConfigurationEditorController {
 
@@ -80,19 +76,98 @@ public class PluginConfigurationEditorController {
         view.getPluginListPanel().getWrapperJList().setSelectedIndex(0);
     }
 
-    void openImportDialog(){
-        String[] values = {"Fernflower", "Procyon"};
+    private List<URL> getWrappersFromClasspath(){
+        String classpath = System.getProperty("java.class.path");
+        String[] classpathEntries = classpath.split(File.pathSeparator);
+        List<URL> jsonFiles = new ArrayList<>();
+
+        for(String entry : classpathEntries) {
+            try {
+                Listable listable;
+                if(entry.endsWith(".jar")){
+                    listable = new Zip(new File(entry));
+                } else {
+                    listable = new Directory(new File(entry));
+                }
+                jsonFiles.addAll(listable.listChildren());
+
+            } catch (IOException e) {
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
+            }
+        }
+        return jsonFiles;
+    }
+
+    private void openImportDialog(){
+        List<URL> availableDecompilers = getWrappersFromClasspath();
+        ArrayList<String> availableDecompilerNames = new ArrayList<>();
+
+        for(URL url : availableDecompilers){
+            try {
+                URL javaWrapperComplement = new URL(flipWrapperExtension(url.toString()));
+                if (javaWrapperComplement.openStream() != null){
+                    availableDecompilerNames.add(url.toString().substring(url.toString().lastIndexOf("/") + 1));
+                }
+            } catch (IOException e) {
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
+            }
+        }
 
         Object selected = JOptionPane.showInputDialog(null,
                 "Which decompiler would you like to import?",
                 "Import decompiler",
                 JOptionPane.QUESTION_MESSAGE,
                 null,
-                values,
-                "Fernflower");
+                availableDecompilerNames.toArray(),
+                availableDecompilerNames.toArray()[0]);
 
-        if(selected != null){ //null if the user cancels.
-            String selectedDecompiler = selected.toString();
+        if(selected != null){ // null if the user cancels
+            URL selectedURL = availableDecompilers.get(availableDecompilerNames.indexOf(selected.toString()));
+            String selectedFilename = selectedURL.toString().substring(selectedURL.toString().lastIndexOf("/") + 1);
+
+            try {
+                copyWrappers(selectedURL, selectedFilename);
+            } catch (IOException e) {
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
+            }
+        }
+
+        pluginManager.loadConfigs();
+        updateWrapperList(pluginManager.getWrappers());
+    }
+
+    private void copyWrappers(URL wrapperURL, String wrapperFilename) throws IOException {
+        InputStream is = null;
+        OutputStream os = null;
+
+        try {
+            is = wrapperURL.openStream();
+            os = new FileOutputStream(Directories.getPluginDirectory() + File.separator + wrapperFilename);
+            byte[] buffer = new byte[1024];
+            int length;
+
+            while ((length = is.read(buffer)) > 0) {
+                os.write(buffer, 0, length);
+            }
+        } finally {
+            is.close();
+            os.close();
+        }
+
+        URL javaComplement = new URL(flipWrapperExtension(wrapperURL.toString()));
+        String javaComplementName = flipWrapperExtension(wrapperFilename);
+        try {
+            is = javaComplement.openStream();
+            os = new FileOutputStream(Directories.getPluginDirectory() + File.separator + javaComplementName);
+            byte[] buffer = new byte[1024];
+            int length;
+
+            while ((length = is.read(buffer)) > 0) {
+                os.write(buffer, 0, length);
+            }
+        } finally {
+            is.close();
+            os.close();
         }
     }
 
