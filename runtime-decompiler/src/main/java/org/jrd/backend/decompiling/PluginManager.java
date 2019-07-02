@@ -240,7 +240,7 @@ public class PluginManager {
         DecompilerWrapperInformation newWrapper = new DecompilerWrapperInformation();
         newWrapper.setName("unnamed");
         setLocationForNewWrapper(newWrapper);
-        create_user_plugin_dir();
+        createUserPluginDir();
         File plugin_json_file = new File(newWrapper.getFileLocation());
         try {
             plugin_json_file.createNewFile();
@@ -258,14 +258,14 @@ public class PluginManager {
         final Gson gson = gsonBuilder.create();
         final String json = gson.toJson(wrapper);
         if (wrapper.getScope().equals("local")){
-            create_user_plugin_dir();
+            createUserPluginDir();
         }
         try (PrintWriter out = new PrintWriter(wrapper.getFileLocation())) {
             out.println(json);
         }
     }
 
-    private void create_user_plugin_dir() {
+    public static void createUserPluginDir() {
         File pluginDir = new File(Directories.getPluginDirectory());
         if (!pluginDir.exists()) {
             pluginDir.mkdir();

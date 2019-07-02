@@ -4,7 +4,6 @@ import org.jrd.backend.core.OutputController;
 import org.jrd.backend.data.Directories;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 import org.jrd.backend.decompiling.PluginManager;
-import org.jrd.backend.decompiling.PluginManager.*;
 import org.jrd.frontend.PluginMangerFrame.embedded.Directory;
 import org.jrd.frontend.PluginMangerFrame.embedded.Listable;
 import org.jrd.frontend.PluginMangerFrame.embedded.Zip;
@@ -17,6 +16,7 @@ import java.net.*;
 import java.nio.file.*;
 import java.util.*;
 
+import static org.jrd.backend.decompiling.PluginManager.createUserPluginDir;
 import static org.jrd.backend.decompiling.PluginManager.flipWrapperExtension;
 
 public class PluginConfigurationEditorController {
@@ -139,6 +139,8 @@ public class PluginConfigurationEditorController {
     private void copyWrappers(URL wrapperURL, String wrapperFilename) throws IOException {
         InputStream is = null;
         OutputStream os = null;
+
+        createUserPluginDir();
 
         try {
             is = wrapperURL.openStream();
