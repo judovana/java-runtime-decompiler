@@ -1,5 +1,7 @@
 package org.jrd.frontend.PluginMangerFrame;
 
+import org.jrd.backend.data.Directories;
+
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
@@ -21,8 +23,13 @@ public class FileSelectorPanel extends JPanel {
         textField.setPreferredSize(new Dimension(0, 32));
         this.jLabel = new JLabel(label);
         this.browseButton = new JButton(ButtonLabel);
+
         this.chooser = new JFileChooser();
-        chooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+        File dir = new File(Directories.getPluginDirectory());
+        while(!dir.exists()){
+            dir = dir.getParentFile();
+        }
+        chooser.setCurrentDirectory(dir);
 
         browseButton.addActionListener(actionEvent -> {
             int returnVar = chooser.showOpenDialog(this);
