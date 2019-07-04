@@ -300,10 +300,10 @@ public class PluginConfigurationEditorController {
             pluginConfigPanel.getNamePanel().getTextField().setText(vmInfo.getName());
         }
         if (vmInfo.getDependencyURLs() != null){
-            vmInfo.getDependencyURLs().forEach(url -> pluginConfigPanel.getDependencyUrlPanel().addRow(url.getPath(), false));
+            vmInfo.getDependencyURLs().forEach(url -> pluginConfigPanel.getDependencyUrlPanel().addRow(url.getExpandedPath(), false));
         }
         if (vmInfo.getWrapperURL() != null){
-            pluginConfigPanel.getWrapperUrlPanel().setText(vmInfo.getWrapperURL().getPath());
+            pluginConfigPanel.getWrapperUrlPanel().setText(vmInfo.getWrapperURL().getExpandedPath());
         }
     }
 

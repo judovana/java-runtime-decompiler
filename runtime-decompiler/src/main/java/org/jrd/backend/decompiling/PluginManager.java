@@ -129,7 +129,7 @@ public class PluginManager {
             try {
                 // Compile Wrapper
                 JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-                compiler.run(null, null, null, wrapper.getWrapperURL().getPath(),
+                compiler.run(null, null, null, wrapper.getWrapperURL().getExpandedPath(),
                         "-cp", URLListToCSV(wrapper.getDependencyURLs(), ':'), "-d", System.getProperty("java.io.tmpdir"));
                 // Load wrapper
                 URL tempDirURL = new URL("file://" + System.getProperty("java.io.tmpdir") + "/");
@@ -216,12 +216,12 @@ public class PluginManager {
 
             StringBuilder dependencyS = new StringBuilder();
             for (URLExpandable dependency : dependencyURLs) {
-                dependencyS.append(":").append(dependency.getPath());
+                dependencyS.append(":").append(dependency.getExpandedPath());
             }
             compileStringA.add(dependencyS.toString());
         }
 
-        compileStringA.add(plugin.getWrapperURL().getPath());
+        compileStringA.add(plugin.getWrapperURL().getExpandedPath());
         String[] compileString = compileStringA.toArray(new String[0]);
         //compiling and getting error from the compiler
         ByteArrayOutputStream errStream = new ByteArrayOutputStream();
@@ -283,7 +283,7 @@ public class PluginManager {
     private String URLListToCSV(List<URLExpandable> list, char delimeter) {
         String out = "";
         for (URLExpandable url : list) {
-            out += url.getPath() + delimeter;
+            out += url.getExpandedPath() + delimeter;
         }
         if (out.length() == 0) {
             return out;

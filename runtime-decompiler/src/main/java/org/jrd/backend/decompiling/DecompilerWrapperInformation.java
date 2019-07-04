@@ -90,7 +90,7 @@ public class DecompilerWrapperInformation {
     }
 
     public void setFullyQualifiedClassName() {
-        try (BufferedReader br = new BufferedReader(new FileReader(wrapperURL.getPath()))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(wrapperURL.getExpandedPath()))) {
             String packageName = "";
             String className = "";
             String line = br.readLine();
@@ -144,7 +144,7 @@ public class DecompilerWrapperInformation {
     public void setWrapperURL(String wrapperURL) {
         try {
             this.wrapperURL = new URLExpandable(wrapperURL);
-            File file = new File(this.wrapperURL.getPath());
+            File file = this.wrapperURL.getFile();
             if (!(file.exists() && file.canRead())) {
                 invalidWrapper = true;
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Cant read file or does not exist! " + file.getAbsolutePath()));
@@ -166,7 +166,7 @@ public class DecompilerWrapperInformation {
             try {
                 URLExpandable dependencyURL = new URLExpandable(s);
                 DependencyURLs.add(dependencyURL);
-                File file = new File(dependencyURL.getPath());
+                File file = dependencyURL.getFile();
                 if (!(file.exists() && file.canRead())) {
                     invalidWrapper = true;
                 }

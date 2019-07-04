@@ -16,12 +16,7 @@ public class URLExpandable {
     private String url;
 
     public URLExpandable(String urlString) {
-        urlString = prependFileProtocolIfNone(urlString);
-        urlString = expandEnvVars(urlString);
         this.url = urlString;
-    }
-    public URLExpandable(URL url) {
-        this.url = url.toString();
     }
 
     static String prependFileProtocolIfNone(String url) {
@@ -51,24 +46,32 @@ public class URLExpandable {
         return url;
     }
 
-    public URL getURL() throws MalformedURLException {
-        return new URL(url);
+    static String collapseEnvVars(String url){
+        return null; //TODO
     }
 
-    public String getURLString(){
+    public URL getExpandedURL() throws MalformedURLException { // file:/C:/Users/user/path
+        return new URL(expandEnvVars(prependFileProtocolIfNone(url)));
+    }
+
+    public String getRawURL(){ // file:/${HOME}/path (returns as String cause URL constructor doesn't like the ${...} part)
+        return prependFileProtocolIfNone(url);
+    }
+
+    public String getRawPath(){ // ${HOME}/path
         return url;
     }
 
-    public String getPath() {
+    public String getExpandedPath(){ // C:/Users/user/path (doesn't use expandEnvVars(url) cause the exception logic is needed)
         try {
-            return getURL().getPath();
+            return getExpandedURL().getPath();
         } catch (MalformedURLException e) {
             throw new MalformedURLToPath(e);
         }
     }
 
     public File getFile(){
-        return new File(getPath());
+        return new File(getExpandedPath());
     }
 
     @Override
