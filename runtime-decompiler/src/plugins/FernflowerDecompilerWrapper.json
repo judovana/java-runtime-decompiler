@@ -1,6 +1,6 @@
 {
   "Name": "Fernflower",
-  "WrapperURL": "file:///etc/java-runtime-decompiler/plugins/FernflowerDecompilerWrapper.java",
+  "WrapperURL": "file://${XDG_CONFIG_HOME}/plugins/FernflowerDecompilerWrapper.java",
   "DependencyURL": [
     "file://${HOME}/.m2/repository/org/jboss/windup/decompiler/decompiler-fernflower/4.2.1.Final/decompiler-fernflower-4.2.1.Final.jar",
     "file://${HOME}/.m2/repository/org/jboss/windup/decompiler/fernflower/windup-fernflower/1.0.0.20171018/windup-fernflower-1.0.0.20171018.jar"
