@@ -39,7 +39,7 @@ public class FileSelectorArrayRow extends JPanel {
         });
 
         chooser = new JFileChooser();
-        File dir = new File(Directories.getPluginDirectory());
+        File dir = new File(System.getProperty("user.home") + File.separator + ".m2" + File.separator + "repository");
         while(!dir.exists()){
             dir = dir.getParentFile();
         }
