@@ -133,7 +133,11 @@ public class PluginManager {
                         "-cp", URLListToCSV(wrapper.getDependencyURLs(), ':'), "-d", System.getProperty("java.io.tmpdir"));
                 // Load wrapper
                 URL tempDirURL = new URL("file://" + System.getProperty("java.io.tmpdir") + "/");
-                List<URL> s = new LinkedList(wrapper.getDependencyURLs());
+                List<URLExpandable> sTemp = new LinkedList(wrapper.getDependencyURLs());
+                List<URL> s = new LinkedList<>();
+                for(URLExpandable u : sTemp){
+                    s.add(u.getExpandedURL());
+                }
                 s.add(tempDirURL);
                 URL[] classpath = new URL[s.size()];
                 s.toArray(classpath);
