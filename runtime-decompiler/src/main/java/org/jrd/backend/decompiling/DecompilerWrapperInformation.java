@@ -49,8 +49,8 @@ public class DecompilerWrapperInformation {
     private URL decompilerDownloadURL;
     private String fileLocation;
     private String fullyQualifiedClassName;
-    private URL wrapperURL;
-    private List<URL> DependencyURLs;
+    private URLExpandable wrapperURL;
+    private List<URLExpandable> DependencyURLs;
     private Method decompileMethod;
     private Object instance;
     private boolean invalidWrapper = false;
@@ -137,43 +137,40 @@ public class DecompilerWrapperInformation {
         this.name = name;
     }
 
-    public URL getWrapperURL() {
+    public URLExpandable getWrapperURL(){
         return wrapperURL;
     }
 
     public void setWrapperURL(String wrapperURL) {
-        wrapperURL = addFileProtocolIfNone(wrapperURL);
-        wrapperURL = expandEnvVars(wrapperURL);
         try {
-            this.wrapperURL = new URL(wrapperURL);
-            File file = new File(this.wrapperURL.getFile());
+            this.wrapperURL = new URLExpandable(wrapperURL);
+            File file = new File(this.wrapperURL.getPath());
             if (!(file.exists() && file.canRead())) {
                 invalidWrapper = true;
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Cant read file or does not exist! " + file.getAbsolutePath()));
             }
-        } catch (MalformedURLException e) {
+        } catch (URLExpandable.MalformedURLToPath e) {
             this.wrapperURL = null;
             this.invalidWrapper = true;
             OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
         }
     }
 
-    public List<URL> getDependencyURLs() {
+    public List<URLExpandable> getDependencyURLs() {
         return DependencyURLs;
     }
 
     public void setDependencyURLs(List<String> dependencyURLs) {
         DependencyURLs = new LinkedList<>();
         for (String s : dependencyURLs) {
-            s = addFileProtocolIfNone(s);
             try {
-                URL dependencyURL = new URL(expandEnvVars(s));
+                URLExpandable dependencyURL = new URLExpandable(s);
                 DependencyURLs.add(dependencyURL);
-                File file = new File(dependencyURL.getFile());
+                File file = new File(dependencyURL.getPath());
                 if (!(file.exists() && file.canRead())) {
                     invalidWrapper = true;
                 }
-            } catch (MalformedURLException e) {
+            } catch (URLExpandable.MalformedURLToPath e) {
                 DependencyURLs.add(null);
                 this.invalidWrapper = true;
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
@@ -215,25 +212,6 @@ public class DecompilerWrapperInformation {
             }
         }
         return scope;
-    }
-
-    private String addFileProtocolIfNone(String URL) {
-        if (URL.contains("://")) {
-            return URL;
-        } else {
-            return "file://" + URL;
-        }
-    }
-
-    private static String expandEnvVars(String text) {
-        text.replaceAll("\\$\\{XDG_CONFIG_HOME\\}", Directories.getXdgJrdBaseDir());
-        Map<String, String> envMap = System.getenv();
-        for (Map.Entry<String, String> entry : envMap.entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-            text = text.replaceAll("\\$\\{" + key + "\\}", value);
-        }
-        return text;
     }
 
     @Override

@@ -206,7 +206,7 @@ public class PluginManager {
     public String validatePlugin(DecompilerWrapperInformation plugin) {
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         //preparing data for the compiler
-        List<URL> dependencyURLs = plugin.getDependencyURLs();
+        List<URLExpandable> dependencyURLs = plugin.getDependencyURLs();
         ArrayList<String> compileStringA = new ArrayList<>();
         compileStringA.add("-d");
         compileStringA.add(System.getProperty("java.io.tmpdir"));
@@ -215,7 +215,7 @@ public class PluginManager {
             compileStringA.add("-cp");
 
             StringBuilder dependencyS = new StringBuilder();
-            for (URL dependency : dependencyURLs) {
+            for (URLExpandable dependency : dependencyURLs) {
                 dependencyS.append(":").append(dependency.getPath());
             }
             compileStringA.add(dependencyS.toString());
@@ -228,7 +228,7 @@ public class PluginManager {
 
         int errLevel = compiler.run(null, null, errStream, compileString);
         //cleaning after compilation
-        String fileName = new File(plugin.getWrapperURL().getFile()).getName();
+        String fileName = plugin.getWrapperURL().getFile().getName();
         File fileToRemove = new File(System.getProperty("java.io.tmpdir") +"/"+ fileName.substring(0,fileName.length()-4) + "class");
 
         if (fileToRemove.exists())
@@ -280,9 +280,9 @@ public class PluginManager {
      * @param delimeter
      * @return
      */
-    private String URLListToCSV(List<URL> list, char delimeter) {
+    private String URLListToCSV(List<URLExpandable> list, char delimeter) {
         String out = "";
-        for (URL url : list) {
+        for (URLExpandable url : list) {
             out += url.getPath() + delimeter;
         }
         if (out.length() == 0) {
