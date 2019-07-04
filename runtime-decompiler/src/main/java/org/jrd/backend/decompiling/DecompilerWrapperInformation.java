@@ -235,8 +235,32 @@ public class DecompilerWrapperInformation {
         }
         return text;
     }
+
     @Override
     public String toString() {
         return getName() + " [" + getScope() + "]";
     }
+
+    @Override
+    public int hashCode() {
+        return new File(this.fileLocation).hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (!(obj instanceof DecompilerWrapperInformation))
+            return false;
+
+        DecompilerWrapperInformation other = (DecompilerWrapperInformation) obj;
+        if(this.fileLocation == null || other.fileLocation == null){
+            return getName().equals(other.getName());
+        } else {
+            return new File(this.getFileLocation()).equals(new File(other.getFileLocation()));
+        }
+    }
+
 }
