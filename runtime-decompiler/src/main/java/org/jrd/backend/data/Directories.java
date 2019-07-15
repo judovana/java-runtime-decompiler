@@ -9,6 +9,7 @@ public final class Directories {
     private static final String XDG_JRD_HOME = File.separator + ".config" + File.separator + "java-runtime-decompiler";
     private static final String XDG_JRD_SUFFIX = File.separator + "java-runtime-decompiler";
 
+
     private Directories(){
     }
 
