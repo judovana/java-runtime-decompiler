@@ -18,11 +18,15 @@ The resulting installation is fully prconfigured.
 
 There is also `dnf copr enable radekmanak/java-runtime-decompiler`  for a nightly build, but the specfile may be outdated.
 ## Usage
-When the application starts go to Config -> Configure and select the Agent's path. The Decompiler Agent is a built-in project.
+When the application starts go to *Config → Configure* and select the Agent's path.
+The Decompiler Agent is a built-in project and can usually be found at `/decompiler_agent/target/decompiler-agent.jar`.
 
-You need to get a Java decompiler, e.g. here:
-https://bitbucket.org/mstrobel/procyon/downloads/
+By default you can use the internal *javap* and *javap -v* decompiling tools.
+You can also download an external decompiler and set it up in *Config → Plugin configuration*.
 
-And place it accordingly, or change paths to its jars in configuration files.
+Currently supported decompilers are:
+* [Fernflower](https://github.com/JetBrains/intellij-community/tree/master/plugins/java-decompiler/engine)
+* [Procyon](https://bitbucket.org/mstrobel/procyon/downloads/)
 
+___
 ![](https://i.imgur.com/3N8hFOp.png)
