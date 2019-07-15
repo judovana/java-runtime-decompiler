@@ -133,9 +133,9 @@ public class PluginManager {
                         "-cp", URLListToCSV(wrapper.getDependencyURLs(), ':'), "-d", System.getProperty("java.io.tmpdir"));
                 // Load wrapper
                 URL tempDirURL = new URL("file://" + System.getProperty("java.io.tmpdir") + "/");
-                List<URLExpandable> sTemp = new LinkedList(wrapper.getDependencyURLs());
+                List<ExpandableUrl> sTemp = new LinkedList(wrapper.getDependencyURLs());
                 List<URL> s = new LinkedList<>();
-                for(URLExpandable u : sTemp){
+                for(ExpandableUrl u : sTemp){
                     s.add(u.getExpandedURL());
                 }
                 s.add(tempDirURL);
@@ -210,7 +210,7 @@ public class PluginManager {
     public String validatePlugin(DecompilerWrapperInformation plugin) {
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         //preparing data for the compiler
-        List<URLExpandable> dependencyURLs = plugin.getDependencyURLs();
+        List<ExpandableUrl> dependencyURLs = plugin.getDependencyURLs();
         ArrayList<String> compileStringA = new ArrayList<>();
         compileStringA.add("-d");
         compileStringA.add(System.getProperty("java.io.tmpdir"));
@@ -219,7 +219,7 @@ public class PluginManager {
             compileStringA.add("-cp");
 
             StringBuilder dependencyS = new StringBuilder();
-            for (URLExpandable dependency : dependencyURLs) {
+            for (ExpandableUrl dependency : dependencyURLs) {
                 dependencyS.append(":").append(dependency.getExpandedPath());
             }
             compileStringA.add(dependencyS.toString());
@@ -284,9 +284,9 @@ public class PluginManager {
      * @param delimeter
      * @return
      */
-    private String URLListToCSV(List<URLExpandable> list, char delimeter) {
+    private String URLListToCSV(List<ExpandableUrl> list, char delimeter) {
         String out = "";
-        for (URLExpandable url : list) {
+        for (ExpandableUrl url : list) {
             out += url.getExpandedPath() + delimeter;
         }
         if (out.length() == 0) {

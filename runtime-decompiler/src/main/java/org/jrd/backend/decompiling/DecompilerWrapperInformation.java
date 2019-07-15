@@ -14,7 +14,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 public class DecompilerWrapperInformation {
 
@@ -49,8 +48,8 @@ public class DecompilerWrapperInformation {
     private URL decompilerDownloadURL;
     private String fileLocation;
     private String fullyQualifiedClassName;
-    private URLExpandable wrapperURL;
-    private List<URLExpandable> DependencyURLs;
+    private ExpandableUrl wrapperURL;
+    private List<ExpandableUrl> DependencyURLs;
     private Method decompileMethod;
     private Object instance;
     private boolean invalidWrapper = false;
@@ -137,26 +136,26 @@ public class DecompilerWrapperInformation {
         this.name = name;
     }
 
-    public URLExpandable getWrapperURL(){
+    public ExpandableUrl getWrapperURL(){
         return wrapperURL;
     }
 
     public void setWrapperURL(String wrapperURL) {
         try {
-            this.wrapperURL = new URLExpandable(wrapperURL);
+            this.wrapperURL = new ExpandableUrl(wrapperURL);
             File file = this.wrapperURL.getFile();
             if (!(file.exists() && file.canRead())) {
                 invalidWrapper = true;
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Cant read file or does not exist! " + file.getAbsolutePath()));
             }
-        } catch (URLExpandable.MalformedURLToPath e) {
+        } catch (ExpandableUrl.MalformedURLToPath e) {
             this.wrapperURL = null;
             this.invalidWrapper = true;
             OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
         }
     }
 
-    public List<URLExpandable> getDependencyURLs() {
+    public List<ExpandableUrl> getDependencyURLs() {
         return DependencyURLs;
     }
 
@@ -164,13 +163,13 @@ public class DecompilerWrapperInformation {
         DependencyURLs = new LinkedList<>();
         for (String s : dependencyURLs) {
             try {
-                URLExpandable dependencyURL = new URLExpandable(s);
+                ExpandableUrl dependencyURL = new ExpandableUrl(s);
                 DependencyURLs.add(dependencyURL);
                 File file = dependencyURL.getFile();
                 if (!(file.exists() && file.canRead())) {
                     invalidWrapper = true;
                 }
-            } catch (URLExpandable.MalformedURLToPath e) {
+            } catch (ExpandableUrl.MalformedURLToPath e) {
                 DependencyURLs.add(null);
                 this.invalidWrapper = true;
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
