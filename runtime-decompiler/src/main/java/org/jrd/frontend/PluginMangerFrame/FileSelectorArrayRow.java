@@ -40,10 +40,7 @@ public class FileSelectorArrayRow extends JPanel {
 
         chooser = new JFileChooser();
         File dir = new File(System.getProperty("user.home") + File.separator + ".m2" + File.separator + "repository");
-        while(!dir.exists()){
-            dir = dir.getParentFile();
-        }
-        chooser.setCurrentDirectory(dir);
+        chooser.setCurrentDirectory(fallback(dir));
 
         browseButton = new JButton("Browse");
         browseButton.addActionListener(actionEvent -> {
@@ -68,6 +65,13 @@ public class FileSelectorArrayRow extends JPanel {
         this.add(browseButton, gbc);
     }
 
+    public static File fallback(File currentDir){
+        while(!currentDir.exists()){
+            currentDir = currentDir.getParentFile();
+        }
+
+        return currentDir;
+    }
 
     public JTextField getTextField() {
         return textField;

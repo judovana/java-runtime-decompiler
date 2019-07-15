@@ -6,6 +6,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 
+import static org.jrd.frontend.PluginMangerFrame.FileSelectorArrayRow.fallback;
+
 public class FileSelectorPanel extends JPanel {
 
     private JTextField textField;
@@ -26,10 +28,7 @@ public class FileSelectorPanel extends JPanel {
 
         this.chooser = new JFileChooser();
         File dir = new File(Directories.getPluginDirectory());
-        while(!dir.exists()){
-            dir = dir.getParentFile();
-        }
-        chooser.setCurrentDirectory(dir);
+        chooser.setCurrentDirectory(fallback(dir));
 
         browseButton.addActionListener(actionEvent -> {
             int returnVar = chooser.showOpenDialog(this);
