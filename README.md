@@ -19,10 +19,10 @@ The resulting installation is fully prconfigured.
 There is also `dnf copr enable radekmanak/java-runtime-decompiler`  for a nightly build, but the specfile may be outdated.
 ## Usage
 When the application starts go to *Config → Configure* and select the Agent's path.
-The Decompiler Agent is a built-in project and can usually be found at `/decompiler_agent/target/decompiler-agent.jar`.
+The Decompiler Agent is a built-in project and can usually be found at `./decompiler_agent/target/decompiler-agent-*.jar`.
 
 By default you can use the internal *javap* and *javap -v* decompiling tools.
-You can also download an external decompiler and set it up in *Config → Plugin configuration*.
+You can also download an external decompiler, either yourself or with `mvn clean install -PdownloadPlugins`, and set it up in *Config → Plugin configuration*.
 
 Currently supported decompilers are:
 * [Fernflower](https://github.com/JetBrains/intellij-community/tree/master/plugins/java-decompiler/engine)
