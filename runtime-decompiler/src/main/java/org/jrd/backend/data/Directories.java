@@ -7,6 +7,7 @@ public final class Directories {
     private static final String XDG_CONFIG_SUFFIX = File.separator + "conf";
     private static final String XDG_PLUGIN_SUFFIX = File.separator + "plugins";
     private static final String XDG_JRD_HOME = File.separator + ".config" + File.separator + "java-runtime-decompiler";
+    private static final String XDG_JRD_SUFFIX = File.separator + "java-runtime-decompiler";
 
     private Directories(){
     }
@@ -42,7 +43,7 @@ public final class Directories {
         if (res == null || res.equals("")) {
             xdgConfigHome = homeDir + XDG_JRD_HOME;
         } else {
-            xdgConfigHome = res + XDG_JRD_HOME;
+            xdgConfigHome = res + XDG_JRD_SUFFIX;
 
         }
         return xdgConfigHome;
