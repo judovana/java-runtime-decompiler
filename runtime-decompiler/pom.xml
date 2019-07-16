@@ -69,18 +69,28 @@
                 </executions>
             </plugin>
         </plugins>
-            <resources>
-                <resource>
-                    <directory>src/main/resources</directory>
-                    <filtering>false</filtering>
-                </resource>
-                <resource>
-                    <directory>${licenseDir}</directory>
-                    <includes>
-                        <include>LICENSE</include>
-                    </includes>
-                </resource>
-            </resources>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>**/*.prop</exclude>
+                </excludes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.prop</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${licenseDir}</directory>
+                <includes>
+                    <include>LICENSE</include>
+                </includes>
+            </resource>
+        </resources>
     </build>
     <dependencies>
         <dependency>
