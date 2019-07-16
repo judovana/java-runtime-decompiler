@@ -66,7 +66,7 @@ public class FileSelectorArrayRow extends JPanel {
     }
 
     public static File fallback(File currentDir){
-        while(!currentDir.exists()){
+        while(!currentDir.exists() && currentDir.getParentFile() != null){
             currentDir = currentDir.getParentFile();
         }
 
