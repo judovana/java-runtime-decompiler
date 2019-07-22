@@ -130,7 +130,7 @@ public class PluginManager {
                 // Compile Wrapper
                 JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
                 compiler.run(null, null, null, wrapper.getWrapperURL().getExpandedPath(),
-                        "-cp", URLListToCSV(wrapper.getDependencyURLs(), ':'), "-d", System.getProperty("java.io.tmpdir"));
+                        "-cp", URLListToCSV(wrapper.getDependencyURLs(), System.getProperty("path.separator")), "-d", System.getProperty("java.io.tmpdir"));
                 // Load wrapper
                 URL tempDirURL = new URL("file://" + System.getProperty("java.io.tmpdir") + "/");
                 List<ExpandableUrl> sTemp = new LinkedList(wrapper.getDependencyURLs());
@@ -220,7 +220,7 @@ public class PluginManager {
 
             StringBuilder dependencyS = new StringBuilder();
             for (ExpandableUrl dependency : dependencyURLs) {
-                dependencyS.append(":").append(dependency.getExpandedPath());
+                dependencyS.append(System.getProperty("path.separator")).append(dependency.getExpandedPath());
             }
             compileStringA.add(dependencyS.toString());
         }
@@ -284,7 +284,7 @@ public class PluginManager {
      * @param delimeter
      * @return
      */
-    private String URLListToCSV(List<ExpandableUrl> list, char delimeter) {
+    private String URLListToCSV(List<ExpandableUrl> list, String delimeter) {
         String out = "";
         for (ExpandableUrl url : list) {
             out += url.getExpandedPath() + delimeter;
