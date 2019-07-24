@@ -2,6 +2,7 @@
 # Java-Runtime-Decompiler
 This application allows you to extract bytecode from the running JVM and decompile it with an external decompiler.
 ## Installation
+*Note that JDK 8 is required for this app to run.*
 ### From GIT
 ```
 git clone https://github.com/pmikova/java-runtime-decompiler.git
