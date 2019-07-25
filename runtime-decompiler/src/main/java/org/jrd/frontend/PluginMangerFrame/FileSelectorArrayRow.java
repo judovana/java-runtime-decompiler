@@ -7,6 +7,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 
+import static org.jrd.backend.decompiling.ExpandableUrl.isOsWindows;
+import static org.jrd.backend.decompiling.ExpandableUrl.unifySlashes;
+
 public class FileSelectorArrayRow extends JPanel {
 
     GridBagConstraints gbc;
@@ -26,6 +29,9 @@ public class FileSelectorArrayRow extends JPanel {
         gbc.fill = GridBagConstraints.BOTH;
         textField = new JTextField(url);
         textField.setPreferredSize(new Dimension(0, 32));
+        textField.setToolTipText("<html>Select a path to the dependency .jar file.<br />" +
+                getTextFieldToolTip()
+        );
 
         try {
             ImageIcon icon = new ImageIcon(FileSelectorArrayRow.class.getResource(DELETE_ICON));
@@ -71,6 +77,13 @@ public class FileSelectorArrayRow extends JPanel {
         }
 
         return currentDir;
+    }
+
+    public static String getTextFieldToolTip(){
+        return "A valid path is absolute, " + ((isOsWindows())?"can start with a single forward slash \"/\", ":"") + "and can contain the following macros:<br /><ul>" +
+                "<li><b>${HOME}</b>, which substitutes <b>" + unifySlashes(System.getProperty("user.home")) + "</b></li>" +
+                "<li><b>${XDG_CONFIG_HOME}</b>, which substitutes <b>" + unifySlashes(Directories.getXdgJrdBaseDir()) + "</b></li>" +
+                "</ul></html>";
     }
 
     public JTextField getTextField() {
