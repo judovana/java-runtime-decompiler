@@ -28,9 +28,9 @@ public class DecompilerWrapperInformation {
     public DecompilerWrapperInformation(String name, String wrapperURL, List<String> dependencyURLs,
                                         String decompilerDownloadURL) {
         setName(name);
-        setWrapperURL(wrapperURL);
+        setWrapperURLFromURL(wrapperURL);
         setFullyQualifiedClassName();
-        setDependencyURLs(dependencyURLs);
+        setDependencyURLsFromURL(dependencyURLs);
         setDecompilerDownloadURL(decompilerDownloadURL);
         setFileLocation("");
     }
@@ -140,9 +140,9 @@ public class DecompilerWrapperInformation {
         return wrapperURL;
     }
 
-    public void setWrapperURL(String wrapperURL) {
+    private void setWrapperURL(Runnable r) {
         try {
-            this.wrapperURL = new ExpandableUrl(wrapperURL);
+            r.run();
             File file = this.wrapperURL.getFile();
             if (!(file.exists() && file.canRead())) {
                 invalidWrapper = true;
@@ -155,15 +155,23 @@ public class DecompilerWrapperInformation {
         }
     }
 
+    public void setWrapperURLFromPath(String wrapperURL) {
+        setWrapperURL(() -> DecompilerWrapperInformation.this.wrapperURL = ExpandableUrl.createFromPath(wrapperURL));
+    }
+
+    private void setWrapperURLFromURL(String wrapperURL){
+        setWrapperURL(() -> DecompilerWrapperInformation.this.wrapperURL = ExpandableUrl.createFromStringUrl(wrapperURL));
+    }
+
     public List<ExpandableUrl> getDependencyURLs() {
         return DependencyURLs;
     }
 
-    public void setDependencyURLs(List<String> dependencyURLs) {
+    private void setDependencyURLs(List<String> dependencyURLs, Switcher switcher){
         DependencyURLs = new LinkedList<>();
         for (String s : dependencyURLs) {
             try {
-                ExpandableUrl dependencyURL = new ExpandableUrl(s);
+                ExpandableUrl dependencyURL = switcher.getExpandableUrl(s);
                 DependencyURLs.add(dependencyURL);
                 File file = dependencyURL.getFile();
                 if (!(file.exists() && file.canRead())) {
@@ -175,6 +183,18 @@ public class DecompilerWrapperInformation {
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
             }
         }
+    }
+
+    private interface Switcher{
+        ExpandableUrl getExpandableUrl(String s);
+    }
+
+    public void setDependencyURLsFromPath(List<String> dependencyURLs) {
+        setDependencyURLs(dependencyURLs, ExpandableUrl::createFromPath);
+    }
+
+    public void setDependencyURLsFromURL(List<String> dependencyURLs){
+        setDependencyURLs(dependencyURLs, ExpandableUrl::createFromStringUrl);
     }
 
     public URL getDecompilerDownloadURL() {

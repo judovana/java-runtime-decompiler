@@ -274,8 +274,8 @@ public class PluginConfigurationEditorController {
         DecompilerWrapperInformation newWrapper = new DecompilerWrapperInformation();
 
         newWrapper.setName(configPanel.getNamePanel().getTextField().getText());
-        newWrapper.setWrapperURL(configPanel.getWrapperUrlPanel().getText());
-        newWrapper.setDependencyURLs(configPanel.getDependencyUrlPanel().getStringList());
+        newWrapper.setWrapperURLFromPath(configPanel.getWrapperUrlPanel().getText());
+        newWrapper.setDependencyURLsFromPath(configPanel.getDependencyUrlPanel().getStringList());
         return newWrapper;
     }
 
@@ -300,10 +300,10 @@ public class PluginConfigurationEditorController {
             pluginConfigPanel.getNamePanel().getTextField().setText(vmInfo.getName());
         }
         if (vmInfo.getDependencyURLs() != null){
-            vmInfo.getDependencyURLs().forEach(url -> pluginConfigPanel.getDependencyUrlPanel().addRow(url.getExpandedPath(), false));
+            vmInfo.getDependencyURLs().forEach(url -> pluginConfigPanel.getDependencyUrlPanel().addRow(url.getRawPath(), false));
         }
         if (vmInfo.getWrapperURL() != null){
-            pluginConfigPanel.getWrapperUrlPanel().setText(vmInfo.getWrapperURL().getExpandedPath());
+            pluginConfigPanel.getWrapperUrlPanel().setText(vmInfo.getWrapperURL().getRawPath());
         }
     }
 
