@@ -206,7 +206,23 @@ public class PluginConfigurationEditorController {
         if (view.getPluginListPanel().getWrapperJList().getSelectedIndex() == -1) return;
         DecompilerWrapperInformation selectedPlugin = (DecompilerWrapperInformation)view.getPluginListPanel().getWrapperJList().getSelectedValue();
         ConfigPanel configPanel = getOrCreatePluginConfigPanel(selectedPlugin);
+
+        toggleWebsiteButton(selectedPlugin);
+
         view.switchCard(configPanel, String.valueOf(System.identityHashCode(configPanel)));
+    }
+
+    private void toggleWebsiteButton(DecompilerWrapperInformation plugin){
+        if(plugin.getDecompilerDownloadURL() != null){
+            view.getPluginTopOptionPanel().getOpenWebsiteButton().setEnabled(true);
+            view.getPluginTopOptionPanel().getOpenWebsiteButton().setToolTipText(null);
+        } else {
+            view.getPluginTopOptionPanel().getOpenWebsiteButton().setEnabled(false);
+            view.getPluginTopOptionPanel().getOpenWebsiteButton().setToolTipText("<html>" +
+                    "Button disabled by default on user-created plugins.<br />" +
+                    "You can manually set the decompiler download URL in this plugin's JSON file to enable this button." +
+                    "</html>");
+        }
     }
 
     public void openDecompilerDownloadURL(){
@@ -287,7 +303,11 @@ public class PluginConfigurationEditorController {
         }
         DecompilerWrapperInformation newWrapper = getDataFromPanel(oldWrapper);
         newWrapper.setFileLocation(oldWrapper.getFileLocation());
-        newWrapper.setDecompilerDownloadURL(oldWrapper.getDecompilerDownloadURL().toString());
+        if(oldWrapper.getDecompilerDownloadURL() == null){
+            newWrapper.setDecompilerDownloadURL("");
+        } else {
+            newWrapper.setDecompilerDownloadURL(oldWrapper.getDecompilerDownloadURL().toString());
+        }
         try {
             pluginManager.replace(oldWrapper, newWrapper);
         } catch (IOException e) {
