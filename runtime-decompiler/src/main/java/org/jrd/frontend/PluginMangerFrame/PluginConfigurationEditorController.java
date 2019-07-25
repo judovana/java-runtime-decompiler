@@ -113,9 +113,10 @@ public class PluginConfigurationEditorController {
             }
         }
 
-        Object selected = JOptionPane.showInputDialog(null,
-                "Which decompiler would you like to import?",
-                "Import decompiler",
+        Object selected = JOptionPane.showInputDialog(this.view,
+                "Which decompiler would you like to import?\n" +
+                        "The selected option will be copied to " + Directories.getPluginDirectory() + ".",
+                "Import decompiler files",
                 JOptionPane.QUESTION_MESSAGE,
                 null,
                 availableDecompilerNames.toArray(),
@@ -125,15 +126,43 @@ public class PluginConfigurationEditorController {
             URL selectedURL = availableDecompilers.get(availableDecompilerNames.indexOf(selected.toString()));
             String selectedFilename = selectedURL.toString().substring(selectedURL.toString().lastIndexOf("/") + 1);
 
+            if(new File(Directories.getPluginDirectory() + File.separator + selectedFilename).exists()){
+                if(confirmWrapperOverwrite() != JOptionPane.OK_OPTION){
+                    return;
+                }
+            }
+
             try {
                 copyWrappers(selectedURL, selectedFilename);
             } catch (IOException e) {
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
+                return;
+            }
+
+            configPanelHashMap.clear();
+            pluginManager.loadConfigs();
+            updateWrapperList(pluginManager.getWrappers());
+
+            for(int i = 0; i < pluginManager.getWrappers().size(); i++){
+                if(selected.toString().contains(pluginManager.getWrappers().get(i).getFullyQualifiedClassName())){
+                    view.getPluginListPanel().getWrapperJList().setSelectedIndex(i);
+                    break;
+                }
             }
         }
+    }
 
-        pluginManager.loadConfigs();
-        updateWrapperList(pluginManager.getWrappers());
+    private int confirmWrapperOverwrite(){
+        String[] options = {"Yes", "No"};
+        return JOptionPane.showOptionDialog(this.view,
+                "An identical file already exists in " + Directories.getPluginDirectory() + ".\n" +
+                        "Do you want to continue and overwrite the file?",
+                "Confirmation",
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.WARNING_MESSAGE,
+                null,
+                options,
+                options[1]);
     }
 
     private void copyWrappers(URL wrapperURL, String wrapperFilename) throws IOException {
