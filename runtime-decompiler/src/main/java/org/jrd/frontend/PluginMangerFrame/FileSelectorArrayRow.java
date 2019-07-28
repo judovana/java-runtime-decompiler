@@ -1,9 +1,14 @@
 package org.jrd.frontend.PluginMangerFrame;
 
 import org.jrd.backend.core.OutputController;
+import org.jrd.backend.data.Directories;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
+
+import static org.jrd.backend.decompiling.ExpandableUrl.isOsWindows;
+import static org.jrd.backend.decompiling.ExpandableUrl.unifySlashes;
 
 public class FileSelectorArrayRow extends JPanel {
 
@@ -13,6 +18,7 @@ public class FileSelectorArrayRow extends JPanel {
 
     private JButton removeButton;
     private JButton browseButton;
+    private JFileChooser chooser;
 
     private static final String DELETE_ICON = "/icons/icons8-trash-24.png";
 
@@ -23,6 +29,9 @@ public class FileSelectorArrayRow extends JPanel {
         gbc.fill = GridBagConstraints.BOTH;
         textField = new JTextField(url);
         textField.setPreferredSize(new Dimension(0, 32));
+        textField.setToolTipText("<html>Select a path to the dependency .jar file.<br />" +
+                getTextFieldToolTip()
+        );
 
         try {
             ImageIcon icon = new ImageIcon(FileSelectorArrayRow.class.getResource(DELETE_ICON));
@@ -34,9 +43,13 @@ public class FileSelectorArrayRow extends JPanel {
         removeButton.addActionListener(actionEvent -> {
             parent.removeRow(this);
         });
+
+        chooser = new JFileChooser();
+        File dir = new File(System.getProperty("user.home") + File.separator + ".m2" + File.separator + "repository");
+        chooser.setCurrentDirectory(fallback(dir));
+
         browseButton = new JButton("Browse");
         browseButton.addActionListener(actionEvent -> {
-            JFileChooser chooser = new JFileChooser();
             int returnVar = chooser.showOpenDialog(this);
             if (returnVar == JFileChooser.APPROVE_OPTION) {
                 textField.setText(chooser.getSelectedFile().getPath());
@@ -58,6 +71,20 @@ public class FileSelectorArrayRow extends JPanel {
         this.add(browseButton, gbc);
     }
 
+    public static File fallback(File currentDir){
+        while(!currentDir.exists() && currentDir.getParentFile() != null){
+            currentDir = currentDir.getParentFile();
+        }
+
+        return currentDir;
+    }
+
+    public static String getTextFieldToolTip(){
+        return "A valid path is absolute, " + ((isOsWindows())?"can start with a single forward slash \"/\", ":"") + "and can contain the following macros:<br /><ul>" +
+                "<li><b>${HOME}</b>, which substitutes <b>" + unifySlashes(System.getProperty("user.home")) + "</b></li>" +
+                "<li><b>${XDG_CONFIG_HOME}</b>, which substitutes <b>" + unifySlashes(Directories.getXdgJrdBaseDir()) + "</b></li>" +
+                "</ul></html>";
+    }
 
     public JTextField getTextField() {
         return textField;

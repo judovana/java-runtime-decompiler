@@ -1,13 +1,20 @@
 package org.jrd.frontend.PluginMangerFrame;
 
+import org.jrd.backend.data.Directories;
+
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
+
+import static org.jrd.frontend.PluginMangerFrame.FileSelectorArrayRow.fallback;
+import static org.jrd.frontend.PluginMangerFrame.FileSelectorArrayRow.getTextFieldToolTip;
 
 public class FileSelectorPanel extends JPanel {
 
     private JTextField textField;
     private JLabel jLabel;
     private JButton browseButton;
+    private JFileChooser chooser;
 
     FileSelectorPanel(String label) {
         this(label, "Browse");
@@ -17,11 +24,18 @@ public class FileSelectorPanel extends JPanel {
 
         this.textField = new JTextField();
         textField.setPreferredSize(new Dimension(0, 32));
+        textField.setToolTipText("<html>Select a path to the decompiler wrapper .java file.<br />" +
+                getTextFieldToolTip()
+        );
+
         this.jLabel = new JLabel(label);
         this.browseButton = new JButton(ButtonLabel);
 
+        this.chooser = new JFileChooser();
+        File dir = new File(Directories.getPluginDirectory());
+        chooser.setCurrentDirectory(fallback(dir));
+
         browseButton.addActionListener(actionEvent -> {
-            JFileChooser chooser = new JFileChooser();
             int returnVar = chooser.showOpenDialog(this);
             if (returnVar == JFileChooser.APPROVE_OPTION) {
                 textField.setText(chooser.getSelectedFile().getPath());
