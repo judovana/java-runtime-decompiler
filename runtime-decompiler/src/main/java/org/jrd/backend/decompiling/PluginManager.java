@@ -37,7 +37,7 @@ public class PluginManager {
     /**
      * Searches plugin configuration locations and calls loadConfig(file) on files.
      */
-    private void loadConfigs() {
+    public void loadConfigs() {
         wrappers = new LinkedList<>();
         // keep all three locations - for default system scope, user shared scope and user-only scope
         String[] configLocations = new String[]{"/etc/java-runtime-decompiler/plugins/"
@@ -129,11 +129,15 @@ public class PluginManager {
             try {
                 // Compile Wrapper
                 JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-                compiler.run(null, null, null, wrapper.getWrapperURL().getPath(),
-                        "-cp", URLListToCSV(wrapper.getDependencyURLs(), ':'), "-d", System.getProperty("java.io.tmpdir"));
+                compiler.run(null, null, null, wrapper.getWrapperURL().getExpandedPath(),
+                        "-cp", URLListToCSV(wrapper.getDependencyURLs(), System.getProperty("path.separator")), "-d", System.getProperty("java.io.tmpdir"));
                 // Load wrapper
                 URL tempDirURL = new URL("file://" + System.getProperty("java.io.tmpdir") + "/");
-                List<URL> s = new LinkedList(wrapper.getDependencyURLs());
+                List<ExpandableUrl> sTemp = new LinkedList(wrapper.getDependencyURLs());
+                List<URL> s = new LinkedList<>();
+                for(ExpandableUrl u : sTemp){
+                    s.add(u.getExpandedURL());
+                }
                 s.add(tempDirURL);
                 URL[] classpath = new URL[s.size()];
                 s.toArray(classpath);
@@ -184,6 +188,7 @@ public class PluginManager {
 
         if (wrapperInformation.getScope().equals("local")){
             new File(wrapperInformation.getFileLocation()).delete();
+            new File(flipWrapperExtension(wrapperInformation.getFileLocation())).delete();
         }
     }
 
@@ -205,7 +210,7 @@ public class PluginManager {
     public String validatePlugin(DecompilerWrapperInformation plugin) {
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         //preparing data for the compiler
-        List<URL> dependencyURLs = plugin.getDependencyURLs();
+        List<ExpandableUrl> dependencyURLs = plugin.getDependencyURLs();
         ArrayList<String> compileStringA = new ArrayList<>();
         compileStringA.add("-d");
         compileStringA.add(System.getProperty("java.io.tmpdir"));
@@ -214,20 +219,20 @@ public class PluginManager {
             compileStringA.add("-cp");
 
             StringBuilder dependencyS = new StringBuilder();
-            for (URL dependency : dependencyURLs) {
-                dependencyS.append(":").append(dependency.getPath());
+            for (ExpandableUrl dependency : dependencyURLs) {
+                dependencyS.append(System.getProperty("path.separator")).append(dependency.getExpandedPath());
             }
             compileStringA.add(dependencyS.toString());
         }
 
-        compileStringA.add(plugin.getWrapperURL().getPath());
+        compileStringA.add(plugin.getWrapperURL().getExpandedPath());
         String[] compileString = compileStringA.toArray(new String[0]);
         //compiling and getting error from the compiler
         ByteArrayOutputStream errStream = new ByteArrayOutputStream();
 
         int errLevel = compiler.run(null, null, errStream, compileString);
         //cleaning after compilation
-        String fileName = new File(plugin.getWrapperURL().getFile()).getName();
+        String fileName = plugin.getWrapperURL().getFile().getName();
         File fileToRemove = new File(System.getProperty("java.io.tmpdir") +"/"+ fileName.substring(0,fileName.length()-4) + "class");
 
         if (fileToRemove.exists())
@@ -239,7 +244,7 @@ public class PluginManager {
         DecompilerWrapperInformation newWrapper = new DecompilerWrapperInformation();
         newWrapper.setName("unnamed");
         setLocationForNewWrapper(newWrapper);
-        create_user_plugin_dir();
+        createUserPluginDir();
         File plugin_json_file = new File(newWrapper.getFileLocation());
         try {
             plugin_json_file.createNewFile();
@@ -257,14 +262,14 @@ public class PluginManager {
         final Gson gson = gsonBuilder.create();
         final String json = gson.toJson(wrapper);
         if (wrapper.getScope().equals("local")){
-            create_user_plugin_dir();
+            createUserPluginDir();
         }
         try (PrintWriter out = new PrintWriter(wrapper.getFileLocation())) {
             out.println(json);
         }
     }
 
-    private void create_user_plugin_dir() {
+    public static void createUserPluginDir() {
         File pluginDir = new File(Directories.getPluginDirectory());
         if (!pluginDir.exists()) {
             pluginDir.mkdir();
@@ -279,10 +284,10 @@ public class PluginManager {
      * @param delimeter
      * @return
      */
-    private String URLListToCSV(List<URL> list, char delimeter) {
+    private String URLListToCSV(List<ExpandableUrl> list, String delimeter) {
         String out = "";
-        for (URL url : list) {
-            out += url.getPath() + delimeter;
+        for (ExpandableUrl url : list) {
+            out += url.getExpandedPath() + delimeter;
         }
         if (out.length() == 0) {
             return out;
@@ -291,4 +296,14 @@ public class PluginManager {
         }
     }
 
+    public static String flipWrapperExtension(String filePath){
+        if(filePath.endsWith(".json")){
+            return filePath.replace(".json", ".java");
+        } else if(filePath.endsWith(".java")){
+            return filePath.replace(".java", ".json");
+        } else {
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Incorrect plugin wrapper path: " + filePath));
+            return filePath;
+        }
+    }
 }

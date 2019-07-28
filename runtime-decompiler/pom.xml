@@ -17,6 +17,7 @@
         <licenseDir>${basedir}/../</licenseDir>
         <jrd.client.main.class>org.jrd.backend.data.Main</jrd.client.main.class>
     </properties>
+
     <build>
         <plugins>
             <plugin>
@@ -68,8 +69,28 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- For tests -->
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.0</version>
+            </plugin>
         </plugins>
         <resources>
+            <resource>
+                <directory>src/plugins</directory>
+                <targetPath>plugins</targetPath>
+                <includes>
+                    <include>**/*.java</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/plugins</directory>
+                <targetPath>plugins</targetPath>
+                <includes>
+                    <include>**/*.json</include>
+                </includes>
+            </resource>
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>false</filtering>
@@ -120,6 +141,26 @@
             <artifactId>byteman-install</artifactId>
             <version>4.0.2</version>
             <type>jar</type>
+        </dependency>
+
+        <!-- For tests -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.5.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>5.5.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.5.0</version>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>

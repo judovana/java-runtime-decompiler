@@ -19,8 +19,8 @@ public class ConfigPanel extends JPanel {
                 "You can clone it and save the copy.</html>");
         messagePanel.setVisible(false);
         namePanel = new TextInputPanel("Name");
-        wrapperUrlPanel = new FileSelectorPanel("Decompiler wrapper URL");
-        dependencyUrlPanel = new FileSelectorArrayPanel("Decompiler and dependency jars");
+        wrapperUrlPanel = new FileSelectorPanel("Decompiler wrapper");
+        dependencyUrlPanel = new FileSelectorArrayPanel("Decompiler dependency jars");
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.NORTHWEST;
