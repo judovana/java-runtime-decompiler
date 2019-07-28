@@ -1,6 +1,7 @@
 package org.jrd.frontend.MainFrame;
 
 import org.jrd.backend.data.VmInfo;
+import org.jrd.frontend.AboutFrame.AboutView;
 import org.jrd.frontend.ConfigureFrame.ConfigureView;
 import org.jrd.frontend.LicenseFrame.LicenseView;
 
@@ -42,6 +43,7 @@ public class MainFrameView {
 
     private JDialog configureDialog;
     private JDialog licenseDialog;
+    private JDialog aboutDialog;
 
     private ActionListener vmChangingListener;
     private ActionListener newConnectionDialogListener;
@@ -165,22 +167,22 @@ public class MainFrameView {
         //westPanel End
 
         // centerPanel, welcomePanel
-        welcomeJTextArea = new JTextArea(20, 40);
+        welcomeJTextArea = new JTextArea(9, 40);
         welcomeJTextArea.setText("Welcome to Java-Runtime-Decompiler\n" +
                 "\n" +
-                "Before you start using the application you need to select Agent and Decompiler paths.\n" +
-                "Go to menubar -> config -> configure\n" +
+                "Before using the app, the Decompiler Agent's path needs to be selected in 'Config → Configure'.\n" +
+                "It's a built-in project and can usually be found at './decompiler_agent/target/decompiler-agent-*.jar'.\n" +
                 "\n" +
-                "Agent is already attached to this project.\n" +
-                "You need to download java decompiler (e.g. here):\n" +
-                "https://bitbucket.org/mstrobel/procyon/downloads/");
+                "Internal javap decompiling tools are available by default.\n" +
+                "You can also download an external decompiler, e.g. via 'mvn clean install -PdownloadPlugins', and set it up in 'Config → Plugin configuration'.\n" +
+                "Currently supported decompilers are: Fernflower, Procyon.\n");
         welcomeJTextArea.setFont(new Font(welcomeJTextArea.getFont().getFontName(), welcomeJTextArea.getFont().getStyle(), 20));
         welcomeJTextArea.setLineWrap(true);
         welcomeJTextArea.setWrapStyleWord(true);
         welcomeJTextArea.setEditable(false);
-        welcomePanel = new JPanel(new BorderLayout());
-        welcomeJTextArea.setBackground(welcomePanel.getBackground());
-        welcomePanel.add(welcomeJTextArea, BorderLayout.CENTER);
+        welcomePanel = new JPanel(new GridBagLayout());
+        welcomeJTextArea.setBackground(new Color(welcomePanel.getBackground().getRGB()));
+        welcomePanel.add(welcomeJTextArea);
         // welcomePanel End
 
         cardLayout = new CardLayout();
@@ -219,6 +221,9 @@ public class MainFrameView {
 
         jMenuHelp = new JMenu("Help");
         jMenuItemAbout = new JMenuItem("About");
+        jMenuItemAbout.addActionListener(actionEvent -> {
+            aboutDialog = new AboutView(this);
+        });
         jMenuItemUsage = new JMenuItem("Usage");
         jMenuItemLicense = new JMenuItem("License");
         jMenuItemLicense.addActionListener(actionEvent -> {
