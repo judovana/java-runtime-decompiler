@@ -1,16 +1,22 @@
 package org.jrd.frontend.PluginMangerFrame;
 
 import org.jrd.backend.data.Directories;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
 import java.io.File;
 
+import static org.jrd.backend.decompiling.PluginManager.createUserPluginDir;
 import static org.jrd.frontend.PluginMangerFrame.FileSelectorArrayRow.fallback;
 import static org.junit.jupiter.api.Assertions.*;
 
 class FileSelectorArrayRowTest {
+    @BeforeAll
+    static void setup(){
+        createUserPluginDir();
+    }
 
     @Test
     @EnabledOnOs(OS.WINDOWS)
