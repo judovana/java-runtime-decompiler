@@ -2,7 +2,7 @@
 # Java-Runtime-Decompiler
 This application allows you to extract bytecode from the running JVM and decompile it with an external decompiler.
 ## Installation
-*Note that Git, Maven & JDK 8 with its tools.jar file are required to run or help develop this app.*
+*Note that Git, Maven & [JDK 8](https://adoptopenjdk.net/) with its tools.jar file are required to run or help develop this app.*
 ### From GIT
 #### Initial setup
 ```
@@ -10,7 +10,7 @@ git clone https://github.com/pmikova/java-runtime-decompiler.git
 cd java-runtime-decompiler
 mvn clean install
 ```
-Then `./start.sh` on *Linux* or `./start.bat` on *Windows* to start the application.
+Then `./start.sh` in a *Linux terminal* or `start.bat` in a *Windows CMD* to start the application.
 #### Configuring decompiler agent
 In order to start using Java-Runtime-Decompiler, you will need to select the Decompiler Agent's path in *Config → Configure*.
 The Decompiler Agent is a built-in project and can usually be found at `./decompiler_agent/target/decompiler-agent-*.jar`.
@@ -35,7 +35,7 @@ Currently supported decompilers are:
 
    **Temporary solution**: Use `mvn clean install -DskipTests` to not run test classes when building.
 ### From Fedora repositories
-The Java-Runtime-Decompiler is packed together with Fernflower and Procyon decompilers in the main Fedora repositories and in EPEL 7 and up for Fedora built from master is available.
+The Java-Runtime-Decompiler is packed together with Fernflower and Procyon decompilers in the main Fedora repositories and in EPEL 7.
 ```
 dnf install java-runtime-decompiler
 ```
