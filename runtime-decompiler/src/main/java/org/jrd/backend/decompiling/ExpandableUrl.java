@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Paths;
 
 public class ExpandableUrl {
 
@@ -50,7 +51,9 @@ public class ExpandableUrl {
     static String expandEnvVars(String path){
         String pluginDir = unifySlashes(Directories.getXdgJrdBaseDir());
         String homeDir = unifySlashes(System.getProperty("user.home"));
+        String jrdDir = unifySlashes(getJrdLocation());
 
+        path = path.replace("${JRD}", jrdDir);
         path = path.replace("${XDG_CONFIG_HOME}", pluginDir);
         path = path.replace("${HOME}", homeDir);
 
@@ -60,11 +63,13 @@ public class ExpandableUrl {
     private static String collapseEnvVars(String path){
         String pluginDir = unifySlashes(Directories.getXdgJrdBaseDir());
         String homeDir = unifySlashes(System.getProperty("user.home"));
+        String jrdDir = unifySlashes(getJrdLocation());
 
-        return collapseEnvVars(unifySlashes(path), homeDir, pluginDir);
+        return collapseEnvVars(unifySlashes(path), homeDir, pluginDir, jrdDir);
     }
 
-    static String collapseEnvVars(String path, String home, String xdgConfigHome){
+    static String collapseEnvVars(String path, String home, String xdgConfigHome, String jrd){
+        path = path.replace(jrd, "${JRD}");
         path = path.replace(xdgConfigHome, "${XDG_CONFIG_HOME}");
         path = path.replace(home, "${HOME}");
 
@@ -86,6 +91,15 @@ public class ExpandableUrl {
 
     public URL getExpandedURL() throws MalformedURLException {
         return new URL("file", "", expandEnvVars(this.path));
+    }
+
+    public static String getJrdLocation(){
+        if(System.getProperty("jrd.location") == null){
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "jrd.location environment variable not found, using fallback");
+            return Paths.get(".").normalize().toAbsolutePath().toString();
+        } else {
+            return System.getProperty("jrd.location");
+        }
     }
 
     public String getRawURL(){
