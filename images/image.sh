@@ -40,6 +40,21 @@ cp "$BYTEMAN" "$DEPS_DIR"
 cp "$JRD" "$DEPS_DIR"
 cp "$SCRIPT_DIR/decompiler_agent/target/decompiler-agent-2.0.0-SNAPSHOT.jar" "$LIB_DIR"
 
+# inject different macro into default decompiler wrappers
+function modifyWrappers() {
+  name=$(echo $1 | sed "s#\b.#\u\0#g") # make first letter capital for the .json filename
+
+  mkdir -p temp/plugins
+  unzip -p "$DEPS_DIR/$NAME.jar" "plugins/${name}DecompilerWrapper.json" > "temp/plugins/${name}DecompilerWrapper.json"
+
+  sed -i "s#\${HOME}#\${JRD}#g" "temp/plugins/${name}DecompilerWrapper.json"
+  sed -i "s#/\.m2\(/.\+\)/#/libs/decompilers/${1}/#g" "temp/plugins/${name}DecompilerWrapper.json"
+
+  jar -uf "$DEPS_DIR/$NAME.jar" -C temp "plugins/${name}DecompilerWrapper".json
+
+  rm -rf temp
+}
+
 # if PLUGINS=TRUE && mvn install -PdownloadPlugins was run, and you really wont them to include plugins in images
 if [ "x$PLUGINS" == "xTRUE" ] ; then
   for dec in procyon fernflower ; do
@@ -48,6 +63,7 @@ if [ "x$PLUGINS" == "xTRUE" ] ; then
     for jar in $jars ; do
       cp "$jar" "$DECOMPS/$dec"
     done
+    modifyWrappers $dec
     rmdir "$DECOMPS/$dec" 2>/dev/null || true
   done
   rmdir "$DECOMPS" 2>/dev/null || true
