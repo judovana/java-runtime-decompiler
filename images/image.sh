@@ -70,8 +70,11 @@ if [ "x$PLUGINS" == "xTRUE" ] ; then
   SUFFIX="-with-decompilers"
 fi
 
-echo "creating $IMAGE_DIR/start.sh"
-cat $SCRIPT_DIR/start.sh | sed "s/PURPOSE=DEVELOPMENT/PURPOSE=RELEASE/" > $IMAGE_DIR/start.sh
+for extension in sh bat ; do
+  echo "creating $IMAGE_DIR/start.$extension"
+  cat $SCRIPT_DIR/start.$extension | sed "s/PURPOSE=DEVELOPMENT/PURPOSE=RELEASE/" > $IMAGE_DIR/start.${extension}
+  chmod 755 "$IMAGE_DIR/start.$extension"
+done
 
 pushd $TARGET_DIR
 cp -r $IMAGE_DIR $NAME$SUFFIX
