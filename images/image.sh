@@ -26,6 +26,7 @@ IMAGE_DIR="$TARGET_DIR/image"
 LIB_DIR="$IMAGE_DIR/libs"
 DEPS_DIR="$LIB_DIR/deps"
 DECOMPS="$LIB_DIR/decompilers"
+CONFIG="$IMAGE_DIR/config"
 
 rm -rvf "$TARGET_DIR"
 mkdir "$TARGET_DIR"
@@ -33,6 +34,7 @@ mkdir "$IMAGE_DIR"
 mkdir "$LIB_DIR"
 mkdir "$DEPS_DIR"
 mkdir "$DECOMPS"
+mkdir "$CONFIG"
 
 cp "$RSYNTAXTEXTAREA" "$DEPS_DIR"
 cp "$GSON" "$DEPS_DIR"
@@ -49,6 +51,8 @@ function modifyWrappers() {
 
   sed -i "s#\${HOME}#\${JRD}#g" "temp/plugins/${name}DecompilerWrapper.json"
   sed -i "s#/\.m2\(/.\+\)/#/libs/decompilers/${1}/#g" "temp/plugins/${name}DecompilerWrapper.json"
+
+  sed -i "s#\${XDG_CONFIG_HOME}#\${JRD}/config#" "temp/plugins/${name}DecompilerWrapper.json"
 
   jar -uf "$DEPS_DIR/$NAME.jar" -C temp "plugins/${name}DecompilerWrapper".json
 
