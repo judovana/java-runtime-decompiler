@@ -93,8 +93,10 @@ public class MainFrameView {
         localVmList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
-                ActionEvent event = new ActionEvent(localVmList, 0, null);
-                vmChangingListener.actionPerformed(event);
+                if(mouseEvent.getButton() == MouseEvent.BUTTON1){
+                    ActionEvent event = new ActionEvent(localVmList, 0, null);
+                    vmChangingListener.actionPerformed(event);
+                }
             }
         });
         //localVmList End
