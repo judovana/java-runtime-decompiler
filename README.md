@@ -12,12 +12,12 @@ mvn clean install
 ```
 Then `./start.sh` in a *Linux terminal* or `start.bat` in a *Windows CMD* to start the application.
 #### Configuring decompiler agent
-In order to start using Java-Runtime-Decompiler, you will need to select the Decompiler Agent's path in *Config → Configure*.
+In order to start using Java-Runtime-Decompiler, you will need to select the Decompiler Agent's path in *Configure → Agent Path*.
 The Decompiler Agent is a built-in project and can usually be found at `./decompiler_agent/target/decompiler-agent-*.jar`.
 #### Configuring external decompilers
 Internal *javap* and *javap -v* decompiling tools are available by default.
 
-Additionally, external decompilers are supported and can be configured in *Config → Plugin configuration*:
+Additionally, external decompilers are supported and can be configured in *Configure → Plugins*:
 * You can download them using the links below and set them up yourself using the *New* button.
 * You can use `mvn clean install -PdownloadPlugins` from a terminal in the project's directory and import the necessary files using the *Import* button.
 
