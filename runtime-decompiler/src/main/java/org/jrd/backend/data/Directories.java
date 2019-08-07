@@ -37,20 +37,25 @@ public final class Directories {
      * @return xdg decompiler directory (e.g. ~/.config/java-runtime-decompiler)
      */
     public static String getXdgJrdBaseDir() {
-        String homeDir = System.getProperty("user.home");
-        String res = System.getenv("XDG_CONFIG_HOME");
-        if (homeDir.isEmpty() && (res == null || res.isEmpty()) ){
-             /* fail here */
-            throw new NullPointerException("No such a directory in the system!");
-        }
-        String xdgConfigHome;
-        if (res == null || res.equals("")) {
-            xdgConfigHome = homeDir + XDG_JRD_HOME;
+        if(isRelease()){
+            return getJrdLocation() + File.separator + "config";
         } else {
-            xdgConfigHome = res + XDG_JRD_SUFFIX;
+            String homeDir = System.getProperty("user.home");
+            String res = System.getenv("XDG_CONFIG_HOME");
+            String xdgConfigHome;
 
+            if (homeDir.isEmpty() && (res == null || res.isEmpty()) ){
+                /* fail here */
+                throw new NullPointerException("No such a directory in the system!");
+            }
+            if (res == null || res.equals("")) {
+                xdgConfigHome = homeDir + XDG_JRD_HOME;
+            } else {
+                xdgConfigHome = res + XDG_JRD_SUFFIX;
+            }
+
+            return xdgConfigHome;
         }
-        return xdgConfigHome;
     }
 
     public static String getJrdLocation(){
