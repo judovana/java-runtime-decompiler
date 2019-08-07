@@ -7,6 +7,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 
+import static org.jrd.backend.data.Directories.*;
 import static org.jrd.backend.decompiling.ExpandableUrl.*;
 
 public class FileSelectorArrayRow extends JPanel {
@@ -44,7 +45,12 @@ public class FileSelectorArrayRow extends JPanel {
         });
 
         chooser = new JFileChooser();
-        File dir = new File(System.getProperty("user.home") + File.separator + ".m2" + File.separator + "repository");
+        File dir;
+        if(isRelease()){
+            dir = new File(getJrdLocation() + File.separator + "libs" + File.separator + "decompilers");
+        } else {
+            dir = new File(System.getProperty("user.home") + File.separator + ".m2" + File.separator + "repository");
+        }
         chooser.setCurrentDirectory(fallback(dir));
 
         browseButton = new JButton("Browse");

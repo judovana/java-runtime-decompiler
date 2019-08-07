@@ -9,6 +9,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Paths;
 
+import static org.jrd.backend.data.Directories.getJrdLocation;
+
 public class ExpandableUrl {
 
     public static class MalformedURLToPath extends RuntimeException{
@@ -102,15 +104,6 @@ public class ExpandableUrl {
 
     public URL getExpandedURL() throws MalformedURLException {
         return new URL("file", "", expandEnvVars(this.path));
-    }
-
-    public static String getJrdLocation(){
-        if(System.getProperty("jrd.location") == null){
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "jrd.location environment variable not found, using fallback");
-            return Paths.get(".").normalize().toAbsolutePath().toString();
-        } else {
-            return System.getProperty("jrd.location");
-        }
     }
 
     public String getRawURL(){

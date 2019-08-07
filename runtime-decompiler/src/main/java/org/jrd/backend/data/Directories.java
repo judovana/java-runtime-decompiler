@@ -1,6 +1,9 @@
 package org.jrd.backend.data;
 
+import org.jrd.backend.core.OutputController;
+
 import java.io.File;
+import java.nio.file.Paths;
 
 public final class Directories {
 
@@ -14,7 +17,7 @@ public final class Directories {
     }
 
     /**
-     * Locate plugin directory as per XDG base directory specification.
+     * Locate configuration directory as per XDG base directory specification.
      * @return xdg config directory (e.g. ~/.config/java-runtime-decompiler/conf
      */
     public static String getConfigDirectory() {
@@ -23,7 +26,7 @@ public final class Directories {
 
     /**
      * Locate configuration directory as per XDG base directory specification.
-     * @return xdg config directory (e.g. ~/.config/java-runtime-decompiler/conf
+     * @return xdg plugin directory (e.g. ~/.config/java-runtime-decompiler/plugins
      */
     public static String getPluginDirectory() {
        return getXdgJrdBaseDir() + XDG_PLUGIN_SUFFIX;
@@ -50,4 +53,17 @@ public final class Directories {
         return xdgConfigHome;
     }
 
+    public static String getJrdLocation(){
+        if(System.getProperty("jrd.location") == null){
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "jrd.location environment variable not found, using fallback");
+            return Paths.get(".").normalize().toAbsolutePath().toString();
+        } else {
+            return System.getProperty("jrd.location");
+        }
+    }
+
+    public static boolean isRelease(){
+        String purpose = System.getProperty("jrd.purpose");
+        return "RELEASE".equals(purpose);
+    }
 }
