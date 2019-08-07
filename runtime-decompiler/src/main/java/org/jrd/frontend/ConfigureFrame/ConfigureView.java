@@ -13,7 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 
-import static org.jrd.backend.decompiling.ExpandableUrl.getJrdLocation;
+import static org.jrd.backend.data.Directories.*;
 import static org.jrd.frontend.PluginMangerFrame.FileSelectorArrayRow.fallback;
 
 public class ConfigureView extends JDialog{
@@ -47,7 +47,12 @@ public class ConfigureView extends JDialog{
             this.browseButton = new JButton(ButtonLabel);
 
             chooser = new JFileChooser();
-            File dir = new File(getJrdLocation());
+            File dir;
+            if(isRelease()){
+                dir = new File(getJrdLocation() + File.separator + "libs");
+            } else {
+                dir = new File(getJrdLocation() + File.separator + "decompiler_agent" + File.separator + "target");
+            }
             chooser.setCurrentDirectory(fallback(dir));
 
             this.setLayout(new GridBagLayout());

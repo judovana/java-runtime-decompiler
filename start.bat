@@ -107,8 +107,9 @@ for /f "delims=" %%i in ('dir *runtime-decompiler-*.jar /B /S') do set JRD=%%i
 popd
 
 rem Create environment variable pointing to script's location
-set "PROPERTY=-Djrd.location=%PORTABLE_JRD_HOME%"
+set "PROPERTY_LOCATION=-Djrd.location=%PORTABLE_JRD_HOME%"
+set "PROPERTY_PURPOSE=-Djrd.purpose=%PURPOSE%"
 
 rem Concatenate classpath and launch the app
 set CLASSPATH=%TOOLS%;%RSYNTAXTEXTAREA%;%GSON%;%BYTEMAN%;%JRD%
-"%JDK_LOCATION%\bin\java.exe" %PROPERTY% -cp %CLASSPATH% org.jrd.backend.data.Main
+"%JDK_LOCATION%\bin\java.exe" %PROPERTY_LOCATION% %PROPERTY_PURPOSE% -cp %CLASSPATH% org.jrd.backend.data.Main
