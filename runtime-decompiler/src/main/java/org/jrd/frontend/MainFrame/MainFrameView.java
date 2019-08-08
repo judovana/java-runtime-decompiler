@@ -227,6 +227,11 @@ public class MainFrameView {
             aboutDialog = new AboutView(this);
         });
         jMenuItemUsage = new JMenuItem("Usage");
+        jMenuItemUsage.addActionListener(actionEvent -> {
+            clearLocalListSelection();
+            clearRemoteListSelection();
+            switchPanel(false);
+        });
         jMenuItemLicense = new JMenuItem("License");
         jMenuItemLicense.addActionListener(actionEvent -> {
             licenseDialog = new LicenseView(this);
