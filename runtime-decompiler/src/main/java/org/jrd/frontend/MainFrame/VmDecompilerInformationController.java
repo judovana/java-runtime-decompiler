@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Comparator;
 
 /**
  * This class provides Action listeners and result proccreateRequestessing for
@@ -80,9 +81,19 @@ public class VmDecompilerInformationController {
         newConnectionDialog.setVisible(true);
     }
 
+    public class vmArrayList<T> extends ArrayList<VmInfo>{
+        @Override
+        public boolean add(VmInfo vmInfo) {
+            super.add(vmInfo);
+            this.sort(Comparator.comparingInt(VmInfo::getVmPid));
+            return true;
+        }
+    }
+
     private void updateVmLists() {
-        ArrayList<VmInfo> localVms = new ArrayList<>();
-        ArrayList<VmInfo> remoteVms = new ArrayList<>();
+        ArrayList<VmInfo> localVms = new vmArrayList<>();
+        ArrayList<VmInfo> remoteVms = new vmArrayList<>();
+
         vmManager.getVmInfoSet().forEach(info -> {
             if (info.getVmPid() > 0) {
                 localVms.add(info);
