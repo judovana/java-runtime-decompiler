@@ -1,4 +1,4 @@
-@echo off
+rem @echo off
 setLocal EnableDelayedExpansion
 
 rem Resolve this batch file's location
@@ -106,10 +106,15 @@ for /f "delims=" %%i in ('dir *runtime-decompiler-*.jar /B /S') do set JRD=%%i
 
 popd
 
+rem Maps an available drive letter if script is located on a network drive, does pretty much nothing otherwise - done to counteract CMD not supporting UNC paths
+pushd %PORTABLE_JRD_HOME%
+
 rem Create environment variable pointing to script's location
-set "PROPERTY_LOCATION=-Djrd.location=%PORTABLE_JRD_HOME%"
 set "PROPERTY_PURPOSE=-Djrd.purpose=%PURPOSE%"
+set "PROPERTY_LOCATION=-Djrd.location=%CD%"
 
 rem Concatenate classpath and launch the app
 set CLASSPATH=%TOOLS%;%RSYNTAXTEXTAREA%;%GSON%;%BYTEMAN%;%JRD%
 "%JDK_LOCATION%\bin\java.exe" %PROPERTY_LOCATION% %PROPERTY_PURPOSE% -cp %CLASSPATH% org.jrd.backend.data.Main
+
+popd
