@@ -1,34 +1,53 @@
 package org.jrd.frontend.LicenseFrame;
 
+import org.jrd.backend.core.OutputController;
 import org.jrd.frontend.MainFrame.MainFrameView;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.event.HyperlinkEvent;
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 public class LicenseView extends JDialog {
 
-    JTextArea licenseTextArea;
+    JEditorPane licensePane;
     JScrollPane scrollPane;
 
     public LicenseView(MainFrameView mainFrameView){
+        licensePane = new JEditorPane();
+        licensePane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        scrollPane = new JScrollPane(licensePane);
+        scrollPane.setBorder(BorderFactory.createCompoundBorder(new EmptyBorder(10, 10, 10, 10), new EtchedBorder()));
 
-        licenseTextArea = new JTextArea();
-        scrollPane = new JScrollPane(licenseTextArea);
+        URL url = getClass().getResource("/LICENSE");
+        try {
+            licensePane.setPage(url);
+        } catch (IOException e) {
+            licensePane.setContentType("text/html");
+            licensePane.setText("<html>License text not found.</html>");
+        }
 
-        InputStream in = getClass().getResourceAsStream("/LICENSE");
-        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-        StringBuilder sb = new StringBuilder();
-        reader.lines().forEach(s -> sb.append(s).append('\n'));
-        licenseTextArea.setText(sb.toString());
-        licenseTextArea.setEditable(false);
-        licenseTextArea.setCaretPosition(0);
+        licensePane.setEditable(false);
+        licensePane.setCaretPosition(0);
+        licensePane.addHyperlinkListener(event -> {
+            if(event.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED)) {
+                try {
+                    Desktop.getDesktop().browse(event.getURL().toURI());
+                } catch (IOException | URISyntaxException e0) {
+                    OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e0);
+                } catch (UnsupportedOperationException e1){
+                    OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Unable to open link." + this.getWidth()));
+                }
+            }
+        });
 
         this.setTitle("License");
-        this.setSize(new Dimension(650,600));
-        this.setMinimumSize(new Dimension(250,330));
+        this.setSize(new Dimension(600,650));
+        this.setMinimumSize(new Dimension(300,330));
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setModalityType(ModalityType.APPLICATION_MODAL);
         this.setLayout(new BorderLayout());
