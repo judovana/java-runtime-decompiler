@@ -3,6 +3,7 @@ package org.jrd.frontend.LicenseFrame;
 import org.jrd.frontend.MainFrame.MainFrameView;
 
 import javax.swing.*;
+import javax.swing.border.*;
 import java.awt.*;
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -14,9 +15,10 @@ public class LicenseView extends JDialog {
     JScrollPane scrollPane;
 
     public LicenseView(MainFrameView mainFrameView){
-
         licenseTextArea = new JTextArea();
+        licenseTextArea.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         scrollPane = new JScrollPane(licenseTextArea);
+        scrollPane.setBorder(BorderFactory.createCompoundBorder(new EmptyBorder(10, 10, 10, 10), new EtchedBorder()));
 
         InputStream in = getClass().getResourceAsStream("/LICENSE");
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
@@ -27,7 +29,7 @@ public class LicenseView extends JDialog {
         licenseTextArea.setCaretPosition(0);
 
         this.setTitle("License");
-        this.setSize(new Dimension(650,600));
+        this.setSize(new Dimension(600,650));
         this.setMinimumSize(new Dimension(250,330));
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setModalityType(ModalityType.APPLICATION_MODAL);
