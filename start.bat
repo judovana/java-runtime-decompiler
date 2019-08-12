@@ -1,4 +1,5 @@
-rem @echo off
+@echo off
+echo.%* | find /I "verbose">nul && ( @echo on & set "VERBOSE=TRUE") || ( @echo off & set "VERBOSE=FALSE")
 setLocal EnableDelayedExpansion
 
 rem Resolve this batch file's location
@@ -13,9 +14,10 @@ if not "%JAVA_HOME%" == "" (
     set "JDK_LOCATION=%JAVA_HOME%"
   ) else (
     echo Your JDK at [%JAVA_HOME%] read from the JAVA_HOME environment variable is not valid. Please fix this.
+    goto:eof
   )
 ) else (
-  echo JAVA_HOME environment variable non-existent.
+  if "%VERBOSE%" == "TRUE" ( echo JAVA_HOME environment variable non-existent. )
 )
 
 if "%JDK_LOCATION%" == "" (
@@ -31,45 +33,30 @@ if "%JDK_LOCATION%" == "" (
         set JDK_LOCATION=!_REG_JAVA_HOME!
       ) else (
         echo Your JDK [!_REG_JAVA_HOME!] read from Registry HKLM\SOFTWARE\JavaSoft\Java Development Kit is not valid. Please fix this.
+        goto:eof
       )
   ) else (
-    echo Registry entries for JAVA_HOME non-existent.
+    if "%VERBOSE%" == "TRUE" ( echo Registry entries for JAVA_HOME non-existent. )
   )
   set "_version_key=" & set "_version=" & set "_jh_key=" & set "_BAD_SLASH_JAVA_HOME=" & set "_REG_JAVA_HOME="
 )
 
 if "%JDK_LOCATION%" == "" (
-  echo Searching for JAVA_HOME through the filesystem. This might take a while.
-
-  rem Get valid drive letters, remove trailing colon :
-  set _drives=
-  for /f "tokens=2 delims==" %%d in ('wmic logicaldisk where "drivetype=3" get name /format:value') do (
-    set "_editable=%%d"
-    set "_drives=!_drives! !_editable:~0,1!"
-  )
-
-  rem Search drive for java.exe, return last path that is not in a JRE
-  set _result=
-  for %%d in (!_drives!) do (
-    for /f "tokens=* delims=" %%f in ('dir/b/s %%d:\java.exe 2^>nul') do (
-      if exist %%f (
-        for /f "tokens=*" %%r in ('echo %%f^|findstr /rv "jre"') do set _result=%%r
-      )
+  set "_PATH_JAVA_HOME="
+  for %%a in ("%PATH:;=";"%") do (
+    if exist "%%~a/javac.exe" (
+      for %%a in ("%%~a!") do set "_parent=%%~dpa"
+      for %%a in ("!_parent!.") do set "_PATH_JAVA_HOME=%%~dpa"
     )
   )
-
-  rem Navigate to JDK's root directory
-  for %%a in ("!_result!") do set "_parent=%%~dpa"
-  for %%a in ("!_parent!.") do set "_PATH_JAVA_HOME=%%~dpa"
-
   "!_PATH_JAVA_HOME!/bin/java.exe" -version >nul 2>&1
-  if errorlevel 0 if not errorlevel 1 (
+    if errorlevel 0 if not errorlevel 1 (
       set JDK_LOCATION=!_PATH_JAVA_HOME!
     ) else (
-      echo "Your JDK found at [!_PATH_JAVA_HOME!] is not valid. Please fix this."
+      echo Your JDK [!_PATH_JAVA_HOME!] read from the PATH environment variable is not valid. Please fix this.
+      goto:eof
     )
-  )
-  set "_drives=" & set "_editable=" & set "_drives=" & set "_result=" & set "_parent=" & set "_PATH_JAVA_HOME="
+    set "_parent=" & set "_PATH_JAVA_HOME="
 )
 
 if "%JDK_LOCATION%" == "" (
@@ -78,8 +65,8 @@ if "%JDK_LOCATION%" == "" (
 )
 
 rem Remove trailing backslash if present
-IF "%JDK_LOCATION:~-1%"=="\" SET "JDK_LOCATION=%JDK_LOCATION:~0,-1%"
-IF "%PORTABLE_JRD_HOME:~-1%"=="\" SET "PORTABLE_JRD_HOME=%PORTABLE_JRD_HOME:~0,-1%"
+if "%JDK_LOCATION:~-1%"=="\" set "JDK_LOCATION=%JDK_LOCATION:~0,-1%"
+if "%PORTABLE_JRD_HOME:~-1%"=="\" set "PORTABLE_JRD_HOME=%PORTABLE_JRD_HOME:~0,-1%"
 
 rem Get and verify Java tools.jar
 set TOOLS="%JDK_LOCATION%\lib\tools.jar"
@@ -106,15 +93,21 @@ for /f "delims=" %%i in ('dir *runtime-decompiler-*.jar /B /S') do set JRD=%%i
 
 popd
 
-rem Maps an available drive letter if script is located on a network drive, does pretty much nothing otherwise - done to counteract CMD not supporting UNC paths
-pushd %PORTABLE_JRD_HOME%
+rem Maps an available drive letter via pushd if script is located on a network drive - done to counteract CMD not supporting UNC paths
+if "%PORTABLE_JRD_HOME:~0,2%"=="//" (
+  pushd %PORTABLE_JRD_HOME%
+  set "PROPERTY_LOCATION=-Djrd.location=%CD%"
+) else (
+  set "PROPERTY_LOCATION=-Djrd.location=%PORTABLE_JRD_HOME%"
+)
 
 rem Create environment variable pointing to script's location
 set "PROPERTY_PURPOSE=-Djrd.purpose=%PURPOSE%"
-set "PROPERTY_LOCATION=-Djrd.location=%CD%"
 
 rem Concatenate classpath and launch the app
 set CLASSPATH=%TOOLS%;%RSYNTAXTEXTAREA%;%GSON%;%BYTEMAN%;%JRD%
 "%JDK_LOCATION%\bin\java.exe" %PROPERTY_LOCATION% %PROPERTY_PURPOSE% -cp %CLASSPATH% org.jrd.backend.data.Main
 
-popd
+if "%PORTABLE_JRD_HOME:~0,2%"=="//" (
+  popd
+)
