@@ -46,7 +46,7 @@ public class FileSelectorArrayRow extends JPanel {
 
         chooser = new JFileChooser();
         File dir;
-        if(isRelease()){
+        if(isPortable()){
             dir = new File(getJrdLocation() + File.separator + "libs" + File.separator + "decompilers");
         } else {
             dir = new File(System.getProperty("user.home") + File.separator + ".m2" + File.separator + "repository");

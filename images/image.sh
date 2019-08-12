@@ -76,7 +76,7 @@ fi
 
 for extension in sh bat ; do
   echo "creating $IMAGE_DIR/start.$extension"
-  cat $SCRIPT_DIR/start.$extension | sed "s/PURPOSE=DEVELOPMENT/PURPOSE=RELEASE/" > $IMAGE_DIR/start.${extension}
+  cat $SCRIPT_DIR/start.$extension | sed "s/PURPOSE=DEVELOPMENT/PURPOSE=PORTABLE/" > $IMAGE_DIR/start.${extension}
   chmod 755 "$IMAGE_DIR/start.$extension"
 done
 

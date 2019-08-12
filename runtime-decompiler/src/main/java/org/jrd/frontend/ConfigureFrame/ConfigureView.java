@@ -7,11 +7,8 @@ import org.jrd.frontend.MainFrame.MainFrameView;
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 
 import static org.jrd.backend.data.Directories.*;
 import static org.jrd.frontend.PluginMangerFrame.FileSelectorArrayRow.fallback;
@@ -48,7 +45,7 @@ public class ConfigureView extends JDialog{
 
             chooser = new JFileChooser();
             File dir;
-            if(isRelease()){
+            if(isPortable()){
                 dir = new File(getJrdLocation() + File.separator + "libs");
             } else {
                 dir = new File(getJrdLocation() + File.separator + "decompiler_agent" + File.separator + "target");

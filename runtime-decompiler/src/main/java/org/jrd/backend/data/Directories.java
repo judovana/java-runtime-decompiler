@@ -37,7 +37,7 @@ public final class Directories {
      * @return xdg decompiler directory (e.g. ~/.config/java-runtime-decompiler)
      */
     public static String getXdgJrdBaseDir() {
-        if(isRelease()){
+        if(isPortable()){
             return getJrdLocation() + File.separator + "config";
         } else {
             String homeDir = System.getProperty("user.home");
@@ -67,8 +67,8 @@ public final class Directories {
         }
     }
 
-    public static boolean isRelease(){
+    public static boolean isPortable(){
         String purpose = System.getProperty("jrd.purpose");
-        return "RELEASE".equals(purpose);
+        return "PORTABLE".equals(purpose);
     }
 }
