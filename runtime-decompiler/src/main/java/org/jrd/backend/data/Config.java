@@ -20,7 +20,7 @@ import com.google.gson.Gson;
 public class Config {
 
     private static Config config;
-    private static Gson gson;
+    private final Gson gson;
     private HashMap<String, String> configMap;
     private String configFilePath;
     private String legacyConfigFilePath;
