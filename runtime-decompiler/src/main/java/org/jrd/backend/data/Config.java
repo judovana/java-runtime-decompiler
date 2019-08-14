@@ -23,11 +23,13 @@ public class Config {
     private static Gson gson;
     private HashMap<String, String> configMap;
     private String configFilePath;
+    private String legacyConfigFilePath;
 
 
     private Config() {
         String parentDir = Directories.getConfigDirectory();
         configFilePath = parentDir + "/config.json";
+        legacyConfigFilePath = parentDir + "/config.cfg";
         gson = new Gson();
 
         try {
@@ -59,8 +61,16 @@ public class Config {
     private void loadConfigFile() throws IOException {
         configMap = new HashMap<>();
         File confFile = new File(configFilePath);
+        File legacyConfFile = new File(legacyConfigFilePath);
         if (confFile.exists()) {
             configMap = gson.fromJson(new FileReader(confFile), configMap.getClass());
+        }else if (legacyConfFile.exists()){
+            Files.readAllLines(Paths.get(legacyConfigFilePath)).forEach(s -> {
+                String[] kv = s.split("===");
+                configMap.put(kv[0], kv[1]);
+            });
+            saveConfigFile();
+            legacyConfFile.delete();
         }
     }
 
