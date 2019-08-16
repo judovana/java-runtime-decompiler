@@ -4,13 +4,15 @@ package org.jrd.backend.data;
 import org.jrd.backend.core.OutputController;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Collections;
+import com.google.gson.Gson;
+
 
 /**
  * Singleton class for storing and retrieving configuration strings.
@@ -18,12 +20,17 @@ import java.util.List;
 public class Config {
 
     private static Config config;
+    private final Gson gson;
     private HashMap<String, String> configMap;
     private String configFilePath;
+    private String legacyConfigFilePath;
+
 
     private Config() {
         String parentDir = Directories.getConfigDirectory();
-        configFilePath = parentDir + "/config.cfg";
+        configFilePath = parentDir + "/config.json";
+        legacyConfigFilePath = parentDir + "/config.cfg";
+        gson = new Gson();
 
         try {
             loadConfigFile();
@@ -54,11 +61,16 @@ public class Config {
     private void loadConfigFile() throws IOException {
         configMap = new HashMap<>();
         File confFile = new File(configFilePath);
+        File legacyConfFile = new File(legacyConfigFilePath);
         if (confFile.exists()) {
-            Files.readAllLines(Paths.get(configFilePath)).forEach(s -> {
+            configMap = gson.fromJson(new FileReader(confFile), configMap.getClass());
+        }else if (legacyConfFile.exists()){
+            Files.readAllLines(Paths.get(legacyConfigFilePath)).forEach(s -> {
                 String[] kv = s.split("===");
                 configMap.put(kv[0], kv[1]);
             });
+            saveConfigFile();
+            legacyConfFile.delete();
         }
     }
 
@@ -70,11 +82,7 @@ public class Config {
         if (!confFile.exists()) {
             confFile.createNewFile();
         }
-        List<String> lines = new ArrayList<>();
-        for (String key : configMap.keySet()) {
-            lines.add(key + "===" + configMap.get(key));
-        }
-        Files.write(Paths.get(configFilePath), lines, Charset.forName("UTF-8"));
+        Files.write(Paths.get(configFilePath), Collections.singleton(gson.toJson(configMap)), Charset.forName("UTF-8"));
     }
 
 }

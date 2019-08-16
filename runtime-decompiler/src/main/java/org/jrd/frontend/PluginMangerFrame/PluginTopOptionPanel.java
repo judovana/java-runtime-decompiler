@@ -8,6 +8,7 @@ public class PluginTopOptionPanel extends JPanel {
     private final JButton cloneButton;
     private final JButton deleteButton;
     private final JButton openWebsiteButton;
+    private final JButton importButton;
 
     public PluginTopOptionPanel(){
         final int height = 28;
@@ -22,6 +23,8 @@ public class PluginTopOptionPanel extends JPanel {
         deleteButton.setPreferredSize(new Dimension(buttonWidth,height));
         openWebsiteButton = new JButton("Website");
         openWebsiteButton.setPreferredSize(new Dimension(buttonWidth,height));
+        importButton = new JButton("Import");
+        importButton.setPreferredSize(new Dimension(buttonWidth,height));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.weightx = 0;
@@ -32,6 +35,8 @@ public class PluginTopOptionPanel extends JPanel {
         gbc.gridx = 2;
         this.add(openWebsiteButton, gbc);
         gbc.gridx = 3;
+        this.add(importButton, gbc);
+        gbc.gridx = 4;
         gbc.weightx = 1;
         this.add(Box.createHorizontalGlue(), gbc);
     }
@@ -46,5 +51,9 @@ public class PluginTopOptionPanel extends JPanel {
 
     public JButton getOpenWebsiteButton() {
         return openWebsiteButton;
+    }
+
+    public JButton getImportButton() {
+        return importButton;
     }
 }
