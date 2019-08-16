@@ -14,7 +14,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 public class DecompilerWrapperInformation {
 
@@ -29,9 +28,9 @@ public class DecompilerWrapperInformation {
     public DecompilerWrapperInformation(String name, String wrapperURL, List<String> dependencyURLs,
                                         String decompilerDownloadURL) {
         setName(name);
-        setWrapperURL(wrapperURL);
+        setWrapperURLFromURL(wrapperURL);
         setFullyQualifiedClassName();
-        setDependencyURLs(dependencyURLs);
+        setDependencyURLsFromURL(dependencyURLs);
         setDecompilerDownloadURL(decompilerDownloadURL);
         setFileLocation("");
     }
@@ -49,8 +48,8 @@ public class DecompilerWrapperInformation {
     private URL decompilerDownloadURL;
     private String fileLocation;
     private String fullyQualifiedClassName;
-    private URL wrapperURL;
-    private List<URL> DependencyURLs;
+    private ExpandableUrl wrapperURL;
+    private List<ExpandableUrl> DependencyURLs;
     private Method decompileMethod;
     private Object instance;
     private boolean invalidWrapper = false;
@@ -90,7 +89,7 @@ public class DecompilerWrapperInformation {
     }
 
     public void setFullyQualifiedClassName() {
-        try (BufferedReader br = new BufferedReader(new FileReader(wrapperURL.getPath()))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(wrapperURL.getExpandedPath()))) {
             String packageName = "";
             String className = "";
             String line = br.readLine();
@@ -137,48 +136,65 @@ public class DecompilerWrapperInformation {
         this.name = name;
     }
 
-    public URL getWrapperURL() {
+    public ExpandableUrl getWrapperURL(){
         return wrapperURL;
     }
 
-    public void setWrapperURL(String wrapperURL) {
-        wrapperURL = addFileProtocolIfNone(wrapperURL);
-        wrapperURL = expandEnvVars(wrapperURL);
+    private void setWrapperURL(Runnable r) {
         try {
-            this.wrapperURL = new URL(wrapperURL);
-            File file = new File(this.wrapperURL.getFile());
+            r.run();
+            File file = this.wrapperURL.getFile();
             if (!(file.exists() && file.canRead())) {
                 invalidWrapper = true;
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Cant read file or does not exist! " + file.getAbsolutePath()));
             }
-        } catch (MalformedURLException e) {
+        } catch (ExpandableUrl.MalformedURLToPath e) {
             this.wrapperURL = null;
             this.invalidWrapper = true;
             OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
         }
     }
 
-    public List<URL> getDependencyURLs() {
+    public void setWrapperURLFromPath(String wrapperURL) {
+        setWrapperURL(() -> DecompilerWrapperInformation.this.wrapperURL = ExpandableUrl.createFromPath(wrapperURL));
+    }
+
+    private void setWrapperURLFromURL(String wrapperURL){
+        setWrapperURL(() -> DecompilerWrapperInformation.this.wrapperURL = ExpandableUrl.createFromStringUrl(wrapperURL));
+    }
+
+    public List<ExpandableUrl> getDependencyURLs() {
         return DependencyURLs;
     }
 
-    public void setDependencyURLs(List<String> dependencyURLs) {
+    private void setDependencyURLs(List<String> dependencyURLs, Switcher switcher){
         DependencyURLs = new LinkedList<>();
         for (String s : dependencyURLs) {
-            s = addFileProtocolIfNone(s);
             try {
-                URL dependencyURL = new URL(expandEnvVars(s));
+                ExpandableUrl dependencyURL = switcher.getExpandableUrl(s);
                 DependencyURLs.add(dependencyURL);
-                File file = new File(dependencyURL.getFile());
+                File file = dependencyURL.getFile();
                 if (!(file.exists() && file.canRead())) {
                     invalidWrapper = true;
                 }
-            } catch (MalformedURLException e) {
+            } catch (ExpandableUrl.MalformedURLToPath e) {
                 DependencyURLs.add(null);
                 this.invalidWrapper = true;
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
             }
         }
+    }
+
+    private interface Switcher{
+        ExpandableUrl getExpandableUrl(String s);
+    }
+
+    public void setDependencyURLsFromPath(List<String> dependencyURLs) {
+        setDependencyURLs(dependencyURLs, ExpandableUrl::createFromPath);
+    }
+
+    public void setDependencyURLsFromURL(List<String> dependencyURLs){
+        setDependencyURLs(dependencyURLs, ExpandableUrl::createFromStringUrl);
     }
 
     public URL getDecompilerDownloadURL() {
@@ -217,26 +233,31 @@ public class DecompilerWrapperInformation {
         return scope;
     }
 
-    private String addFileProtocolIfNone(String URL) {
-        if (URL.contains("://")) {
-            return URL;
-        } else {
-            return "file://" + URL;
-        }
-    }
-
-    private static String expandEnvVars(String text) {
-        text.replaceAll("\\$\\{XDG_CONFIG_HOME\\}", Directories.getXdgJrdBaseDir());
-        Map<String, String> envMap = System.getenv();
-        for (Map.Entry<String, String> entry : envMap.entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-            text = text.replaceAll("\\$\\{" + key + "\\}", value);
-        }
-        return text;
-    }
     @Override
     public String toString() {
         return getName() + " [" + getScope() + "]";
     }
+
+    @Override
+    public int hashCode() {
+        return new File(this.fileLocation).hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (!(obj instanceof DecompilerWrapperInformation))
+            return false;
+
+        DecompilerWrapperInformation other = (DecompilerWrapperInformation) obj;
+        if(this.fileLocation == null || other.fileLocation == null){
+            return getName().equals(other.getName());
+        } else {
+            return new File(this.getFileLocation()).equals(new File(other.getFileLocation()));
+        }
+    }
+
 }

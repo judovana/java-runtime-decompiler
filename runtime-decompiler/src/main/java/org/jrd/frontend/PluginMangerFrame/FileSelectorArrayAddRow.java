@@ -1,11 +1,13 @@
 package org.jrd.frontend.PluginMangerFrame;
 
+import org.jrd.backend.core.OutputController;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class FileSelectorArrayAddRow extends JPanel {
 
-    private final JButton addButton;
+    private JButton addButton;
     private static final String PLUS_SIGN_ICON = "/icons/icons8-sum-24.png";
 
     FileSelectorArrayAddRow(){
@@ -14,11 +16,15 @@ public class FileSelectorArrayAddRow extends JPanel {
         gbc.anchor = GridBagConstraints.NORTHWEST;
         gbc.fill = GridBagConstraints.BOTH;
 
-        addButton = new JButton();
+        try {
+            ImageIcon icon = new ImageIcon(FileSelectorArrayRow.class.getResource(PLUS_SIGN_ICON));
+            addButton = new JButton(icon);
+        } catch (NullPointerException e) {
+            addButton = new JButton("+");
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("File " + PLUS_SIGN_ICON + " not found. Falling back to String version.", e));
+        }
         addButton.setPreferredSize(new Dimension(32, 32));
         addButton.setBorderPainted(false);
-        ImageIcon icon = new ImageIcon(FileSelectorArrayRow.class.getResource(PLUS_SIGN_ICON));
-        addButton.setIcon(icon);
 
         gbc.weightx = 1;
         this.add(Box.createHorizontalGlue(), gbc);
