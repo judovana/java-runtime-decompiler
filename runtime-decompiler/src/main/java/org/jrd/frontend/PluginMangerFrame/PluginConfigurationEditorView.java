@@ -22,7 +22,7 @@ public class PluginConfigurationEditorView extends JDialog {
      */
     public PluginConfigurationEditorView(MainFrameView mainFrameView) {
         this.setLayout(new BorderLayout());
-        this.setTitle("Plugin configuration");
+        this.setTitle("Configure Plugins");
         this.setSize(new Dimension(960, 540));
         this.setMinimumSize(new Dimension(250, 330));
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);

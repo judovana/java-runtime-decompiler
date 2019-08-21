@@ -80,21 +80,20 @@ public class BytecodeDecompilerView {
             @Override
             public void mouseClicked(MouseEvent e) {
                 final String name = filteredClassesJlist.getSelectedValue();
-                new SwingWorker<Void, Void>() {
-                    @Override
-                    protected Void doInBackground() throws Exception {
-                        try {
-                           ActionEvent event = new ActionEvent(this, 1, name);
-
-                            bytesActionListener.actionPerformed(event);
-                            
-                        } catch (Throwable t) {
-                            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, t);
+                if(name != null || filteredClassesJlist.getSelectedIndex() != -1) {
+                    new SwingWorker<Void, Void>() {
+                        @Override
+                        protected Void doInBackground() throws Exception {
+                            try {
+                                ActionEvent event = new ActionEvent(this, 1, name);
+                                bytesActionListener.actionPerformed(event);
+                            } catch (Throwable t) {
+                                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, t);
+                            }
+                            return null;
                         }
-                        return null;
-                    }
-                }.execute();
-            
+                    }.execute();
+                }
         }});
         JButton overwriteButton = new JButton("Overwrite class");
         overwriteButton.addActionListener(new ActionListener() {
@@ -138,6 +137,15 @@ public class BytecodeDecompilerView {
         );
 
         topComboBox = new JComboBox<DecompilerWrapperInformation>();
+        topComboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                if(filteredClassesJlist.getSelectedIndex() != -1){
+                    ActionEvent event = new ActionEvent(this, 1, filteredClassesJlist.getSelectedValue());
+                    bytesActionListener.actionPerformed(event);
+                }
+            }
+        });
 
         bytecodeSyntaxTextArea = new RSyntaxTextArea();
         bytecodeSyntaxTextArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);

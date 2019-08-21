@@ -272,7 +272,7 @@ public class PluginManager {
     public static void createUserPluginDir() {
         File pluginDir = new File(Directories.getPluginDirectory());
         if (!pluginDir.exists()) {
-            pluginDir.mkdir();
+            pluginDir.mkdirs();
         }
     }
 
