@@ -11,7 +11,7 @@
 
     <artifactId>java-runtime-decompiler-images</artifactId>
     <name>Images</name>
-    <description>Helper to cvreate release images</description>
+    <description>Helper to create release images</description>
     <packaging>pom</packaging>
 
     <dependencies>
