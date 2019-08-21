@@ -10,6 +10,7 @@ import org.opentest4j.AssertionFailedError;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import static org.jrd.backend.data.Directories.getJrdLocation;
 import static org.jrd.backend.decompiling.ExpandableUrl.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,17 +29,19 @@ class ExpandableUrlTest {
 
     @Test
     void testCollapseEnvVars() {
-        assertEquals("${HOME}", collapseEnvVars("home_path", "home_path", "config_path"));
-        assertEquals("${XDG_CONFIG_HOME}", collapseEnvVars("config_path", "home_path", "config_path"));
-        assertEquals("${HOME}", collapseEnvVars("${HOME}", "home_path", "config_path"));
-        assertEquals("different_path", collapseEnvVars("different_path", "home_path", "config_path"));
-        assertEquals("/${HOME}", collapseEnvVars("/home_path", "home_path", "config_path"));
+        assertEquals("${HOME}", collapseEnvVars("home_path", "home_path", "config_path", "jrd_path"));
+        assertEquals("${XDG_CONFIG_HOME}", collapseEnvVars("config_path", "home_path", "config_path", "jrd_path"));
+        assertEquals("${JRD}", collapseEnvVars("jrd_path", "home_path", "config_path", "jrd_path"));
+        assertEquals("${HOME}", collapseEnvVars("${HOME}", "home_path", "config_path", "jrd_path"));
+        assertEquals("different_path", collapseEnvVars("different_path", "home_path", "config_path", "jrd_path"));
+        assertEquals("/${HOME}", collapseEnvVars("/home_path", "home_path", "config_path", "jrd_path"));
     }
 
     @Test
     void testExpandEnvVars() {
         assertEquals(unifySlashes(System.getProperty("user.home")), expandEnvVars("${HOME}"));
         assertEquals(unifySlashes(Directories.getXdgJrdBaseDir()), expandEnvVars("${XDG_CONFIG_HOME}"));
+        assertEquals(unifySlashes(getJrdLocation()), expandEnvVars("${JRD}"));
     }
 
     @Test

@@ -47,7 +47,11 @@ fi
 if [ "x$THE_TERRIBLE_INTERNAL_JRD" == "xtrue" ] ; then
   return 0
 fi
+
+readonly PROPERTY_LOCATION="-Djrd.location=$PORTABLE_JRD_HOME"
+readonly PROPERTY_PURPOSE="-Djrd.purpose=$PURPOSE"
+
 # launch application
-"$javac_home"/bin/java -cp "$TOOLS":\
+"$javac_home"/bin/java "$PROPERTY_LOCATION" "$PROPERTY_PURPOSE" -cp "$TOOLS":\
 "$JRD":"$RSYNTAXTEXTAREA":"$GSON":"$BYTEMAN" \
  org.jrd.backend.data.Main "$@"

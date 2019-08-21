@@ -7,8 +7,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 
-import static org.jrd.backend.decompiling.ExpandableUrl.isOsWindows;
-import static org.jrd.backend.decompiling.ExpandableUrl.unifySlashes;
+import static org.jrd.backend.data.Directories.*;
+import static org.jrd.backend.decompiling.ExpandableUrl.*;
 
 public class FileSelectorArrayRow extends JPanel {
 
@@ -45,7 +45,12 @@ public class FileSelectorArrayRow extends JPanel {
         });
 
         chooser = new JFileChooser();
-        File dir = new File(System.getProperty("user.home") + File.separator + ".m2" + File.separator + "repository");
+        File dir;
+        if(isPortable()){
+            dir = new File(getJrdLocation() + File.separator + "libs" + File.separator + "decompilers");
+        } else {
+            dir = new File(System.getProperty("user.home") + File.separator + ".m2" + File.separator + "repository");
+        }
         chooser.setCurrentDirectory(fallback(dir));
 
         browseButton = new JButton("Browse");
@@ -83,6 +88,7 @@ public class FileSelectorArrayRow extends JPanel {
         return "A valid path is absolute, " + ((isOsWindows())?"can start with a single forward slash \"/\", ":"") + "and can contain the following macros:<br /><ul>" +
                 "<li><b>${HOME}</b>, which substitutes <b>" + unifySlashes(System.getProperty("user.home")) + "</b></li>" +
                 "<li><b>${XDG_CONFIG_HOME}</b>, which substitutes <b>" + unifySlashes(Directories.getXdgJrdBaseDir()) + "</b></li>" +
+                "<li><b>${JRD}</b>, which substitutes <b>" + unifySlashes(getJrdLocation()) + "</b></li>" +
                 "</ul></html>";
     }
 

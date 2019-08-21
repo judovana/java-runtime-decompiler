@@ -7,9 +7,11 @@ import org.jrd.frontend.MainFrame.MainFrameView;
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
+
+import static org.jrd.backend.data.Directories.*;
+import static org.jrd.frontend.PluginMangerFrame.FileSelectorArrayRow.fallback;
 
 public class ConfigureView extends JDialog{
 
@@ -29,6 +31,7 @@ public class ConfigureView extends JDialog{
         public JTextField textField;
         public JLabel label;
         public JButton browseButton;
+        public JFileChooser chooser;
 
         confBrosePanel(String label){
             this(label, "Browse");
@@ -39,6 +42,15 @@ public class ConfigureView extends JDialog{
             this.textField = new JTextField();
             this.label = new JLabel(label);
             this.browseButton = new JButton(ButtonLabel);
+
+            chooser = new JFileChooser();
+            File dir;
+            if(isPortable()){
+                dir = new File(getJrdLocation() + File.separator + "libs");
+            } else {
+                dir = new File(getJrdLocation() + File.separator + "decompiler_agent" + File.separator + "target");
+            }
+            chooser.setCurrentDirectory(fallback(dir));
 
             this.setLayout(new GridBagLayout());
             GridBagConstraints gbc = new GridBagConstraints();
@@ -65,17 +77,12 @@ public class ConfigureView extends JDialog{
 
 
     public ConfigureView(MainFrameView mainFrameView){
-
-        configureAgentPathPanel = new confBrosePanel("Path to agent");
+        configureAgentPathPanel = new confBrosePanel("Decompiler Agent path");
         configureAgentPathPanel.textField.setText(config.getAgentPath());
-        configureAgentPathPanel.browseButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                JFileChooser chooser = new JFileChooser();
-                int returnVar = chooser.showOpenDialog(configureAgentPathPanel);
-                if (returnVar == JFileChooser.APPROVE_OPTION){
-                    configureAgentPathPanel.textField.setText(chooser.getSelectedFile().getPath());
-                }
+        configureAgentPathPanel.browseButton.addActionListener(actionEvent -> {
+            int returnVar = configureAgentPathPanel.chooser.showOpenDialog(configureAgentPathPanel);
+            if (returnVar == JFileChooser.APPROVE_OPTION){
+                configureAgentPathPanel.textField.setText(configureAgentPathPanel.chooser.getSelectedFile().getPath());
             }
         });
 
