@@ -153,7 +153,7 @@ public class ConfigureView extends JDialog{
         mainPanel.add(configureOKCancelPanel, gbc);
 
 
-        this.setTitle("Configuration");
+        this.setTitle("Configure Decompiler Agent");
         this.setSize(new Dimension(800,400));
         this.setMinimumSize(new Dimension(250,330));
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);

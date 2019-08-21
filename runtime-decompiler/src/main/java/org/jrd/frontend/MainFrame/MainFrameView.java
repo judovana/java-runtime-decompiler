@@ -95,8 +95,10 @@ public class MainFrameView {
         localVmList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
-                ActionEvent event = new ActionEvent(localVmList, 0, null);
-                vmChangingListener.actionPerformed(event);
+                if(mouseEvent.getButton() == MouseEvent.BUTTON1){
+                    ActionEvent event = new ActionEvent(localVmList, 0, null);
+                    vmChangingListener.actionPerformed(event);
+                }
             }
         });
         //localVmList End
@@ -176,7 +178,7 @@ public class MainFrameView {
                 "It's a built-in project and can usually be found at '"+ ((isPortable())?"./libs/":"./decompiler_agent/target/") +"decompiler-agent-*.jar'.\n" +
                 "\n" +
                 "Internal javap decompiling tools are available by default.\n" +
-                "You can also download an external decompiler, e.g. via 'mvn clean install -PdownloadPlugins', and set it up in 'Config → Plugin configuration'.\n" +
+                "You can also download an external decompiler, e.g. via 'mvn clean install -PdownloadPlugins', and set it up in 'Configure → Plugins'.\n" +
                 "Currently supported decompilers are: Fernflower, Procyon.\n");
         welcomeJTextArea.setFont(new Font(welcomeJTextArea.getFont().getFontName(), welcomeJTextArea.getFont().getStyle(), 20));
         welcomeJTextArea.setLineWrap(true);
@@ -208,13 +210,13 @@ public class MainFrameView {
         jMenuConnect.add(jMenuItemNewConnection);
         // jMenuConnect end
 
-        jMenuConfig = new JMenu("Config");
-        jMenuItemConfigure = new JMenuItem("Configure");
+        jMenuConfig = new JMenu("Configure");
+        jMenuItemConfigure = new JMenuItem("Decompiler Agent");
         jMenuItemConfigure.addActionListener(actionEvent -> {
             configureDialog = new ConfigureView(this);
         });
         jMenuConfig.add(jMenuItemConfigure);
-        jMenuPluginEditor = new JMenuItem("Plugin configuration");
+        jMenuPluginEditor = new JMenuItem("Plugins");
         jMenuPluginEditor.addActionListener(actionEvent -> {
             pluginConfigurationEditorListener.actionPerformed(actionEvent);
         });
@@ -227,6 +229,11 @@ public class MainFrameView {
             aboutDialog = new AboutView(this);
         });
         jMenuItemUsage = new JMenuItem("Usage");
+        jMenuItemUsage.addActionListener(actionEvent -> {
+            clearLocalListSelection();
+            clearRemoteListSelection();
+            switchPanel(false);
+        });
         jMenuItemLicense = new JMenuItem("License");
         jMenuItemLicense.addActionListener(actionEvent -> {
             licenseDialog = new LicenseView(this);

@@ -43,10 +43,21 @@ public class ExpandableUrl {
     }
 
     public static ExpandableUrl createFromStringUrl(String url) throws MalformedMacroExpansion{
+        if(!url.startsWith("file:")){ //Backward compatibility reasons, prior to 2.0.0 URLs were stored without file protocol prefix in the .json file
+            url = prependFileProtocol(url);
+        }
         try {
             return createFromPath(new URL(expandEnvVars(url)).getPath());
         } catch (MalformedURLException e) {
             throw new MalformedMacroExpansion(e);
+        }
+    }
+
+    private static String prependFileProtocol(String url){
+        if(url.startsWith("/")){
+            return "file:" + url;
+        } else {
+            return "file:/" + url;
         }
     }
 
@@ -103,7 +114,7 @@ public class ExpandableUrl {
         }
     }
 
-    public String getExpandedPath(){ // /C:/Users/user/path
+    public String getExpandedPath(){
         try {
             return getExpandedURL().getPath();
         } catch (MalformedURLException e) {
