@@ -171,7 +171,7 @@ public class MainFrameView {
         welcomeJTextArea.setText("Welcome to Java-Runtime-Decompiler\n" +
                 "\n" +
                 "Before using the app, the Decompiler Agent's path needs to be selected in 'Config → Configure'.\n" +
-                "It's a built-in project and can usually be found at './decompiler_agent/target/decompiler-agent-*.jar'.\n" +
+                "It's a built-in project and can usually be found at '\"+ ((isRelease())?\"./libs\":\"./decompiler_agent/target/\") +\"decompiler-agent-*.jar'.\\n" +
                 "\n" +
                 "Internal javap decompiling tools are available by default.\n" +
                 "You can also download an external decompiler, e.g. via 'mvn clean install -PdownloadPlugins', and set it up in 'Config → Plugin configuration'.\n" +
