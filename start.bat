@@ -1,5 +1,5 @@
 @echo off
-echo.%* | find /I "verbose">nul && ( @echo on & set "VERBOSE=TRUE") || ( @echo off & set "VERBOSE=FALSE")
+echo.%* | find /I "-verbose">nul && ( @echo on & set "VERBOSE=TRUE") || ( @echo off & set "VERBOSE=FALSE")
 setLocal EnableDelayedExpansion
 
 rem Resolve this batch file's location
