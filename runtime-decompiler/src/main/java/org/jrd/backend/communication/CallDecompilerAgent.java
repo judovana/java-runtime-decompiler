@@ -48,8 +48,7 @@ public class CallDecompilerAgent {
         final Communicate comm = new Communicate(this.address, this.port);
         try {
             comm.println(request);
-            String results = comm.readResponse();
-            return results;
+            return comm.readResponse();
         }catch(IOException ex){
             OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, ex);
             return null;

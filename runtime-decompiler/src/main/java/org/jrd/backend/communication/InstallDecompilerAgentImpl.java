@@ -105,12 +105,8 @@ public class InstallDecompilerAgentImpl {
         VirtualMachine vm = null;
         try {
             vm = VirtualMachine.attach(id);
-            String value = (String) vm.getSystemProperties().get(property);
-            return value;
-        } catch (AttachNotSupportedException e) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, e);
-            return null;
-        } catch (IOException e) {
+            return (String) vm.getSystemProperties().get(property);
+        } catch (AttachNotSupportedException | IOException e) {
             OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, e);
             return null;
         } finally {
