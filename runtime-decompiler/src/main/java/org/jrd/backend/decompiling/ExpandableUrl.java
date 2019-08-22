@@ -7,6 +7,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Paths;
+
+import static org.jrd.backend.data.Directories.getJrdLocation;
 
 public class ExpandableUrl {
 
@@ -61,7 +64,9 @@ public class ExpandableUrl {
     static String expandEnvVars(String path){
         String pluginDir = unifySlashes(Directories.getXdgJrdBaseDir());
         String homeDir = unifySlashes(System.getProperty("user.home"));
+        String jrdDir = unifySlashes(getJrdLocation());
 
+        path = path.replace("${JRD}", jrdDir);
         path = path.replace("${XDG_CONFIG_HOME}", pluginDir);
         path = path.replace("${HOME}", homeDir);
 
@@ -71,11 +76,13 @@ public class ExpandableUrl {
     private static String collapseEnvVars(String path){
         String pluginDir = unifySlashes(Directories.getXdgJrdBaseDir());
         String homeDir = unifySlashes(System.getProperty("user.home"));
+        String jrdDir = unifySlashes(getJrdLocation());
 
-        return collapseEnvVars(unifySlashes(path), homeDir, pluginDir);
+        return collapseEnvVars(unifySlashes(path), homeDir, pluginDir, jrdDir);
     }
 
-    static String collapseEnvVars(String path, String home, String xdgConfigHome){
+    static String collapseEnvVars(String path, String home, String xdgConfigHome, String jrd){
+        path = path.replace(jrd, "${JRD}");
         path = path.replace(xdgConfigHome, "${XDG_CONFIG_HOME}");
         path = path.replace(home, "${HOME}");
 
