@@ -66,4 +66,4 @@ Using the *Overwrite button* at the top, you can replace the currently selected 
 
 `PLUGINS=TRUE mvn install -Pimages` includes the decompiler plugins in `images/target` if you've previously called `mvn clean install -PdownloadPlugins`. 
 ___
-![](https://i.imgur.com/3N8hFOp.png)
+![](https://user-images.githubusercontent.com/47597303/63510098-01977e00-c4de-11e9-8a72-24cec35bbc79.png)

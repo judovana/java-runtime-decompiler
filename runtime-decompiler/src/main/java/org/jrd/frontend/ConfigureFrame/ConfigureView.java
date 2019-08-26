@@ -12,6 +12,7 @@ import java.io.IOException;
 
 import static org.jrd.backend.data.Directories.*;
 import static org.jrd.frontend.PluginMangerFrame.FileSelectorArrayRow.fallback;
+import static org.jrd.frontend.PluginMangerFrame.FileSelectorArrayRow.getTextFieldToolTip;
 
 public class ConfigureView extends JDialog{
 
@@ -40,6 +41,10 @@ public class ConfigureView extends JDialog{
         confBrosePanel(String label, String ButtonLabel){
 
             this.textField = new JTextField();
+            this.textField.setToolTipText("<html>Select a path to the Decompiler Agent.<br />" +
+                    getTextFieldToolTip()
+            );
+
             this.label = new JLabel(label);
             this.browseButton = new JButton(ButtonLabel);
 
@@ -78,7 +83,7 @@ public class ConfigureView extends JDialog{
 
     public ConfigureView(MainFrameView mainFrameView){
         configureAgentPathPanel = new confBrosePanel("Decompiler Agent path");
-        configureAgentPathPanel.textField.setText(config.getAgentPath());
+        configureAgentPathPanel.textField.setText(config.getAgentRawPath());
         configureAgentPathPanel.browseButton.addActionListener(actionEvent -> {
             int returnVar = configureAgentPathPanel.chooser.showOpenDialog(configureAgentPathPanel);
             if (returnVar == JFileChooser.APPROVE_OPTION){

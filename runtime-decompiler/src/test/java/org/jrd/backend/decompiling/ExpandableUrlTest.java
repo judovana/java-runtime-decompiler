@@ -1,11 +1,9 @@
 package org.jrd.backend.decompiling;
 
 import org.jrd.backend.data.Directories;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
-import org.opentest4j.AssertionFailedError;
 
 import java.net.MalformedURLException;
 import java.net.URL;

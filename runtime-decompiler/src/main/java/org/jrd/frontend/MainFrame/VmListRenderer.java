@@ -26,7 +26,7 @@ public class VmListRenderer extends JPanel implements ListCellRenderer {
         gbc.weighty = 0.75;
         gbc.gridy = 1;
         this.add(pid, gbc);
-        this.setBorder(new EtchedBorder(1));
+        this.setBorder(new EtchedBorder(EtchedBorder.LOWERED));
 
     }
 
