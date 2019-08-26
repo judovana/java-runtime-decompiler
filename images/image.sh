@@ -20,6 +20,7 @@ set -ex
 set -o pipefail
 
 NAME=`basename $JRD | sed "s;.jar;;"`
+VERSION=$1
 
 TARGET_DIR="$SCRIPT_DIR/images/target"
 IMAGE_DIR="$TARGET_DIR/image"
@@ -40,7 +41,7 @@ cp "$RSYNTAXTEXTAREA" "$DEPS_DIR"
 cp "$GSON" "$DEPS_DIR"
 cp "$BYTEMAN" "$DEPS_DIR"
 cp "$JRD" "$DEPS_DIR"
-cp "$SCRIPT_DIR/decompiler_agent/target/decompiler-agent-2.0.0-SNAPSHOT.jar" "$LIB_DIR"
+cp "$SCRIPT_DIR/decompiler_agent/target/decompiler-agent-$VERSION.jar" "$LIB_DIR"
 
 # inject different macro into default decompiler wrappers
 function modifyWrappers() {
