@@ -5,7 +5,7 @@
     <parent>
         <groupId>java-runtime-decompiler</groupId>
         <artifactId>java-runtime-decompiler</artifactId>
-        <version>3.0.0</version>
+        <version>4.0.0-SNAPSHOT</version>
         <relativePath>../</relativePath>
     </parent>
 
@@ -18,12 +18,12 @@
         <dependency>
             <groupId>java-runtime-decompiler</groupId>
             <artifactId>runtime-decompiler</artifactId>
-            <version>3.0.0</version>
+            <version>4.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>java-runtime-decompiler</groupId>
             <artifactId>decompiler-agent</artifactId>
-            <version>3.0.0</version>
+            <version>4.0.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

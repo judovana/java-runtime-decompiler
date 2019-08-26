@@ -12,5 +12,5 @@
     </modules>
     <groupId>java-runtime-decompiler</groupId>
     <artifactId>java-runtime-decompiler</artifactId>
-    <version>3.0.0</version>
+    <version>4.0.0-SNAPSHOT</version>
 </project>
