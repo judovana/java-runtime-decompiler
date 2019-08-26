@@ -15,7 +15,6 @@ readonly SCRIPT_DIR=`readlink -f "$THIS_SCRIPT_DIR/../"`
 THE_TERRIBLE_INTERNAL_JRD=true
 . $SCRIPT_DIR/start.sh
 
-
 set -ex
 set -o pipefail
 
@@ -28,6 +27,8 @@ LIB_DIR="$IMAGE_DIR/libs"
 DEPS_DIR="$LIB_DIR/deps"
 DECOMPS="$LIB_DIR/decompilers"
 CONFIG="$IMAGE_DIR/config"
+AGENT_CONF="$CONFIG/conf"
+PLUGINS_CONF="$CONFIG/plugins"
 
 rm -rvf "$TARGET_DIR"
 mkdir "$TARGET_DIR"
@@ -36,19 +37,23 @@ mkdir "$LIB_DIR"
 mkdir "$DEPS_DIR"
 mkdir "$DECOMPS"
 mkdir "$CONFIG"
+mkdir "$AGENT_CONF"
+mkdir "$PLUGINS_CONF"
 
 cp "$RSYNTAXTEXTAREA" "$DEPS_DIR"
 cp "$GSON" "$DEPS_DIR"
 cp "$BYTEMAN" "$DEPS_DIR"
 cp "$JRD" "$DEPS_DIR"
 cp "$SCRIPT_DIR/decompiler_agent/target/decompiler-agent-$VERSION.jar" "$LIB_DIR"
+echo "{\"AGENT_PATH\":\"\${JRD}/libs/decompiler-agent-$VERSION.jar\"}" > "$AGENT_CONF/config.json"
 
 # inject different macro into default decompiler wrappers
-function modifyWrappers() {
+function modifyAndCopyWrappers() {
   name=$(echo $1 | sed "s#\b.#\u\0#g") # make first letter capital for the .json filename
 
   mkdir -p temp/plugins
   unzip -p "$DEPS_DIR/$NAME.jar" "plugins/${name}DecompilerWrapper.json" > "temp/plugins/${name}DecompilerWrapper.json"
+  unzip -p "$DEPS_DIR/$NAME.jar" "plugins/${name}DecompilerWrapper.java" > "temp/plugins/${name}DecompilerWrapper.java"
 
   sed -i "s#\${HOME}#\${JRD}#g" "temp/plugins/${name}DecompilerWrapper.json"
   sed -i "s#/\.m2\(/.\+\)/#/libs/decompilers/${1}/#g" "temp/plugins/${name}DecompilerWrapper.json"
@@ -56,6 +61,9 @@ function modifyWrappers() {
   sed -i "s#\${XDG_CONFIG_HOME}#\${JRD}/config#" "temp/plugins/${name}DecompilerWrapper.json"
 
   jar -uf "$DEPS_DIR/$NAME.jar" -C temp "plugins/${name}DecompilerWrapper".json
+
+  cp "temp/plugins/${name}DecompilerWrapper.json" "$PLUGINS_CONF"
+  cp "temp/plugins/${name}DecompilerWrapper.java" "$PLUGINS_CONF"
 
   rm -rf temp
 }
@@ -68,7 +76,7 @@ if [ "x$PLUGINS" == "xTRUE" ] ; then
     for jar in $jars ; do
       cp "$jar" "$DECOMPS/$dec"
     done
-    modifyWrappers $dec
+    modifyAndCopyWrappers $dec
     rmdir "$DECOMPS/$dec" 2>/dev/null || true
   done
   rmdir "$DECOMPS" 2>/dev/null || true
