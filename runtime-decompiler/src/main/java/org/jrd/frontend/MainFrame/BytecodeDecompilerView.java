@@ -1,9 +1,10 @@
 package org.jrd.frontend.MainFrame;
 
+import org.fife.ui.rsyntaxtextarea.*;
+import org.fife.ui.rtextarea.SearchContext;
+import org.fife.ui.rtextarea.SearchEngine;
 import org.jrd.backend.core.OutputController;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
 import javax.swing.*;
@@ -25,6 +26,7 @@ public class BytecodeDecompilerView {
     private JSplitPane splitPane;
     private JPanel leftMainPanel;
     private JTextField classesSortField;
+    private JTextField searchCodeField;
     private JComboBox topComboBox;
     private JPanel classesPanel;
     private JPanel rightMainPanel;
@@ -53,6 +55,7 @@ public class BytecodeDecompilerView {
         BytecodeDecompilerPanel = new JPanel(new BorderLayout());
 
         classesPanel = new JPanel(new BorderLayout());
+
         classesSortField = new JTextField();
         classesSortField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -71,6 +74,23 @@ public class BytecodeDecompilerView {
             }
         });
 
+        searchCodeField = new JTextField();
+        searchCodeField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent documentEvent) {
+                searchCode();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent documentEvent) {
+                searchCode();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent documentEvent) {
+                searchCode();
+            }
+        });
 
         classesPanel.add(classesSortField, BorderLayout.NORTH);
 
@@ -95,6 +115,7 @@ public class BytecodeDecompilerView {
                     }.execute();
                 }
         }});
+
         JButton overwriteButton = new JButton("Overwrite class");
         overwriteButton.addActionListener(new ActionListener() {
             @Override
@@ -114,6 +135,7 @@ public class BytecodeDecompilerView {
                 }.execute();
             }
         });
+
         JButton topButton = new JButton("Refresh loaded classes list");
         topButton.addActionListener(new ActionListener() {
             @Override
@@ -133,8 +155,7 @@ public class BytecodeDecompilerView {
                     }
                 }.execute();
             }
-        }
-        );
+        });
 
         topComboBox = new JComboBox<DecompilerWrapperInformation>();
         topComboBox.addActionListener(new ActionListener() {
@@ -156,11 +177,11 @@ public class BytecodeDecompilerView {
         leftMainPanel.setLayout(new BorderLayout());
         leftMainPanel.setBorder(new EtchedBorder());
 
-        JPanel topButtonPanel = new JPanel();
-
         rightMainPanel = new JPanel();
         rightMainPanel.setLayout(new BorderLayout());
         rightMainPanel.setBorder(new EtchedBorder());
+
+        JPanel topButtonPanel = new JPanel();
 
         topButtonPanel.setLayout(new BorderLayout());
         topButtonPanel.add(topButton, BorderLayout.WEST);
@@ -173,6 +194,7 @@ public class BytecodeDecompilerView {
         classesPanel.add(leftScrollPanel);
         leftMainPanel.add(classesPanel);
         rightMainPanel.add(bytecodeScrollPane);
+        rightMainPanel.add(searchCodeField, BorderLayout.NORTH);
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                 leftMainPanel, rightMainPanel);
 
@@ -270,4 +292,18 @@ public class BytecodeDecompilerView {
         return (DecompilerWrapperInformation) topComboBox.getSelectedItem();
     }
 
+    /**
+     Search string in decompiled code
+     */
+    private void searchCode() {
+        SearchContext context = new SearchContext();
+        String match = searchCodeField.getText();
+        context.setSearchFor(match);
+        context.setWholeWord(false);
+        SearchEngine.markAll(bytecodeSyntaxTextArea, context);
+        int line = SearchEngine.getNextMatchPos(match, bytecodeSyntaxTextArea.getText(), true, true, false);
+        if(line >= 0) {
+            bytecodeSyntaxTextArea.setCaretPosition(line);
+        }
+    }
 }
