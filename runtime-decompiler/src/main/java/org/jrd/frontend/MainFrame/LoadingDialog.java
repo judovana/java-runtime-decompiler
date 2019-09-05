@@ -29,6 +29,7 @@ public class LoadingDialog extends JDialog {
         this.add(progressBar, BorderLayout.CENTER);
         progressBar.setIndeterminate(true);
         this.add(abortButton, BorderLayout.SOUTH);
+        this.setLocation(ScreenFinder.getCurrentPoint());
 
         this.addWindowListener(new WindowAdapter() {
             @Override

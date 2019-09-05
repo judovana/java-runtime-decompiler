@@ -256,7 +256,7 @@ public class MainFrameView {
         mainFrame.setSize(1280, 720);
         mainFrame.setMinimumSize(new Dimension(700, 340));
         mainFrame.setLayout(new BorderLayout());
-        mainFrame.setLocationRelativeTo(null);
+        ScreenFinder.centerWindowsToCurrentScreen(mainFrame);
         mainFrame.setJMenuBar(menuBar);
         mainFrame.add(mainPanel, BorderLayout.CENTER);
         mainFrame.setVisible(true);
