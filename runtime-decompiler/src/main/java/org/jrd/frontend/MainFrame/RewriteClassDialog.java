@@ -28,6 +28,7 @@ public class RewriteClassDialog extends JDialog {
         nothing = new JLabel();
         ok = new JButton("ok");
         wasOkPressed = false;
+        setLocation(ScreenFinder.getCurrentPoint());
         setValidation();
         setSelectListener();
         setOkListener();
@@ -44,7 +45,7 @@ public class RewriteClassDialog extends JDialog {
     private void setSelectListener() {
         select.addActionListener(e -> {
             JFileChooser jf = new JFileChooser(filePath.getText());
-            int returnVal = jf.showOpenDialog(null);
+            int returnVal = jf.showOpenDialog(select);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 filePath.setText(jf.getSelectedFile().getAbsolutePath());
             }
