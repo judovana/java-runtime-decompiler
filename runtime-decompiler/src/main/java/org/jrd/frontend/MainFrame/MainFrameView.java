@@ -174,11 +174,11 @@ public class MainFrameView {
         welcomeJTextArea = new JTextArea(9, 40);
         welcomeJTextArea.setText("Welcome to Java-Runtime-Decompiler\n" +
                 "\n" +
-                "Before using the app, the Decompiler Agent's path needs to be selected in 'Configure → Decompiler Agent'.\n" +
+                "Before using the app, the Decompiler Agent's path needs to be selected in 'Configure -> Decompiler Agent'.\n" +
                 "It's a built-in project and can usually be found at '"+ ((isPortable())?"./libs/":"./decompiler_agent/target/") +"decompiler-agent-*.jar'.\n" +
                 "\n" +
                 "Internal javap decompiling tools are available by default.\n" +
-                "You can also download an external decompiler, e.g. via 'mvn clean install -PdownloadPlugins', and set it up in 'Configure → Plugins'.\n" +
+                "You can also download an external decompiler, e.g. via 'mvn clean install -PdownloadPlugins', and set it up in 'Configure -> Plugins'.\n" +
                 "Currently supported decompilers are: Fernflower, Procyon.\n");
         welcomeJTextArea.setFont(new Font(welcomeJTextArea.getFont().getFontName(), welcomeJTextArea.getFont().getStyle(), 20));
         welcomeJTextArea.setLineWrap(true);

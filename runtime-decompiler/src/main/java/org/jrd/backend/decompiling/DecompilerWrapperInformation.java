@@ -20,10 +20,10 @@ public class DecompilerWrapperInformation {
     /**
      * Class containing information about available Decompiler wrapper
      *
-     * @param name           - Decompiler name
-     * @param wrapperURL     - location of wrapper.java file
-     * @param dependencyURLs - location of wrapper dependencies
-     * @throws MalformedURLException
+     * @param name             Decompiler name
+     * @param wrapperURL       location of wrapper.java file
+     * @param dependencyURLs   location of wrapper dependencies
+     * @param decompilerDownloadURL   decompiler download URL
      */
     public DecompilerWrapperInformation(String name, String wrapperURL, List<String> dependencyURLs,
                                         String decompilerDownloadURL) {
