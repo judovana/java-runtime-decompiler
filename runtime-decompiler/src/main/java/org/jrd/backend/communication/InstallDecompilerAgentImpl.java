@@ -321,13 +321,13 @@ public class InstallDecompilerAgentImpl {
 
     /**
      *
-     * @param bmHome
-     * @param baseDir
-     * @param libName
-     * @return
-     * @throws IOException
+     * @param bmHome        home
+     * @param baseDir       base directory
+     * @param libName       library name
+     * @return              jar path
+     * @throws IOException  file not found
      */
-    public String locateJarFromHomeDir(String bmHome, String baseDir, String libName) throws IOException
+        public String locateJarFromHomeDir(String bmHome, String baseDir, String libName) throws IOException
     {
         if (bmHome.endsWith("/")) {
             bmHome = bmHome.substring(0, bmHome.length() - 1);
@@ -354,9 +354,9 @@ public class InstallDecompilerAgentImpl {
 
     /**
      *
-     * @param libName
-     * @return
-     * @throws IOException
+     * @param libName           name of library
+     * @return                  jar name
+     * @throws IOException      file not found
      */
     public String locateJarFromClasspath(String libName) throws IOException
     {

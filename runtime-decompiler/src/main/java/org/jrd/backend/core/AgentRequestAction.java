@@ -63,8 +63,8 @@ public class AgentRequestAction {
 
         /**
          *
-         * @param act
-         * @return
+         * @param act action string
+         * @return request
          */
         public static RequestAction returnAction(String act) {
 

@@ -43,6 +43,7 @@ public class BytecodeDecompilerView {
 
     /**
      * Constructor creates the graphics and adds the action listeners.
+     * @return BytecodeDecompilerPanel
      */
 
     public JPanel getBytecodeDecompilerPanel(){
@@ -229,7 +230,7 @@ public class BytecodeDecompilerView {
     /**
      * Sets the unfiltered class list array and invokes an update.
      *
-     * @param classesToReload
+     * @param classesToReload       String[] classesToReload.
      */
     public void reloadClassList(String[] classesToReload) {
         classes = classesToReload;

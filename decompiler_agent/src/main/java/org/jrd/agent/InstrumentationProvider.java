@@ -83,6 +83,7 @@ public class InstrumentationProvider {
      *
      * @param queue output queue
      * @param abort abort signal
+     * @throws InterruptedException interrupted exception
      */
     public void getClassesNames(LinkedBlockingQueue<String> queue, Boolean abort) throws InterruptedException {
         Class[] loadedClasses = instrumentation.getAllLoadedClasses();

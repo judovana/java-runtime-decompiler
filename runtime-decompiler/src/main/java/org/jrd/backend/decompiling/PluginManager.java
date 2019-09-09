@@ -82,6 +82,10 @@ public class PluginManager {
 
     /**
      * Decompile with default options
+     * @param wrapper decompiler used for decompiling
+     * @param bytecode bytecode to be decompiled
+     * @return decompiled bytecode or exception String
+     * @throws Exception exception String
      */
     public String decompile(DecompilerWrapperInformation wrapper, byte[] bytecode) throws Exception {
         return decompile(wrapper, bytecode, null);
@@ -90,7 +94,9 @@ public class PluginManager {
     /**
      * @param wrapper  decompiler used for decompiling
      * @param bytecode bytecode to be decompiled
-     * @return Decompiled bytecode or exception String.
+     * @param options decompile options
+     * @return Decompiled bytecode or exception String
+     * @throws Exception exception String
      */
     public synchronized String decompile(DecompilerWrapperInformation wrapper, byte[] bytecode, String[] options) throws Exception{
         if (wrapper == null) {
