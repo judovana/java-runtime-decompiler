@@ -23,10 +23,16 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.7.0</version>
+                <version>3.8.1</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>11</source>
+                    <target>11</target>
+                    <compilerArgs>
+                        <arg>--add-modules</arg>
+                        <arg>jdk.jdeps,jdk.attach,jdk.hotspot.agent</arg>
+                        <arg>--add-exports</arg>
+                        <arg>jdk.jdeps/com.sun.tools.javap=ALL-UNNAMED</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
             <plugin>
@@ -124,13 +130,6 @@
             <artifactId>directories</artifactId>
             <version>10</version>
         </dependency>-->
-        <dependency>
-            <groupId>com.sun</groupId>
-            <artifactId>tools</artifactId>
-            <version>1.7.0</version>
-            <scope>system</scope>
-            <systemPath>${java.home}/../lib/tools.jar</systemPath>
-        </dependency>
         <dependency>
             <groupId>com.fifesoft</groupId>
             <artifactId>rsyntaxtextarea</artifactId>
