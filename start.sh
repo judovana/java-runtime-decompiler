@@ -11,10 +11,14 @@ while [ -h "$SCRIPT_SOURCE" ]; do # resolve $SOURCE until the file is no longer 
 done
 readonly PORTABLE_JRD_HOME="$( cd -P "$( dirname "$SCRIPT_SOURCE" )" && pwd )"
 
-# Locate JDK from $PATH
-javac_home=$(command -v javac)
-javac_home=$(readlink -f "$javac_home")
-javac_home="$(dirname "$(dirname "$javac_home")")"
+if  [ "x$JAVA_HOME" = "x" ] ;  then
+  # Locate JDK from $PATH
+  javac_home=$(command -v javac)
+  javac_home=$(readlink -f "$javac_home")
+  javac_home="$(dirname "$(dirname "$javac_home")")"
+else
+  javac_home="$JAVA_HOME"
+fi
 
 PURPOSE=DEVELOPMENT
 MVN_SOURCE="$HOME/.m2/repository"
@@ -32,7 +36,7 @@ function findLib(){
   find "$BASE/$GROUP"  | grep "$FILENAME$"   | sort -V | tail -n 1
 }
 
-TOOLS="$javac_home"/lib/tools.jar
+TOOLS="$javac_home"/lib/tools.jar  #jsut jdk8 and down
 
 readonly RSYNTAXTEXTAREA=$(findLib "com/fifesoft/rsyntaxtextarea" "rsyntaxtextarea-.*\.jar" )
 readonly GSON=$(findLib "com/google/code/gson/gson" "gson-.*\.jar")
@@ -52,6 +56,6 @@ readonly PROPERTY_LOCATION="-Djrd.location=$PORTABLE_JRD_HOME"
 readonly PROPERTY_PURPOSE="-Djrd.purpose=$PURPOSE"
 
 # launch application
-"$javac_home"/bin/java "$PROPERTY_LOCATION" "$PROPERTY_PURPOSE" -cp "$TOOLS":\
+"$javac_home"/bin/java -Djdk.attach.allowAttachSelf=true  "$PROPERTY_LOCATION" "$PROPERTY_PURPOSE" -cp "$TOOLS":\
 "$JRD":"$RSYNTAXTEXTAREA":"$GSON":"$BYTEMAN" \
  org.jrd.backend.data.Main "$@"
