@@ -97,7 +97,7 @@ public class DecompilerRequestReceiver {
             actualListenPort = listenPort;
         }
         if (actualListenPort == NOT_ATTACHED) {
-            throw new RuntimeException("Failed to attach agent.");
+            throw new RuntimeException("Failed to attach agent. On Jdk9+ you must run target process with -Djdk.attach.allowAttachSelf=true");
         }
         return actualListenPort;
     }

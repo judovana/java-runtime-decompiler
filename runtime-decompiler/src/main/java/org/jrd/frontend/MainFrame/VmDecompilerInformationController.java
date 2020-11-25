@@ -168,7 +168,7 @@ public class VmDecompilerInformationController {
         hideLoadingDialog();
     }
 
-    public static final String CLASSES_NOPE = "Classes couldn't be loaded. Do you have agent configured?";
+    public static final String CLASSES_NOPE = "Classes couldn't be loaded. Do you have agent configured? Do you run target jdk9+ with -Djdk.attach.allowAttachSelf=true?";
 
     /**
      * Sends request for classes. If "ok" response is received updates classes
