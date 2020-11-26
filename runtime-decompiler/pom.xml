@@ -22,6 +22,7 @@
         <jrd.jdk.arg4>jdk.jdeps/com.sun.tools.javap=ALL-UNNAMED</jrd.jdk.arg4>
     </properties>
 
+
     <build>
         <plugins>
             <plugin>
@@ -185,6 +186,30 @@
                     <version>4.2.1.Final</version>
                     <scope>provided</scope>
                 </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>legacy</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <jrd.jdk.version>8</jrd.jdk.version>
+                <jrd.jdk.arg1></jrd.jdk.arg1>
+                <jrd.jdk.arg2></jrd.jdk.arg2>
+                <jrd.jdk.arg3></jrd.jdk.arg3>
+                <jrd.jdk.arg4></jrd.jdk.arg4>
+            </properties>
+            <dependencies>
+<!--for jdk8 we needs tools.jar, for jdk11 we must not hav it,
+    surprsingly, by not having it declared, makes it work for both jdk8 and jdk11 -->
+<!--                <dependency>
+                    <groupId>com.sun</groupId>
+                    <artifactId>tools</artifactId>
+                    <version>1.7.0</version>
+                    <scope>system</scope>
+                    <systemPath>${java.home}/../lib/tools.jar</systemPath>
+                </dependency>-->
             </dependencies>
         </profile>
     </profiles>

@@ -66,5 +66,19 @@
     <dependencies>
     </dependencies>
 
-
+    <profiles>
+        <profile>
+            <id>legacy</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <jrd.jdk.version>8</jrd.jdk.version>
+                <jrd.jdk.arg1></jrd.jdk.arg1>
+                <jrd.jdk.arg2></jrd.jdk.arg2>
+                <jrd.jdk.arg3></jrd.jdk.arg3>
+                <jrd.jdk.arg4></jrd.jdk.arg4>
+            </properties>
+        </profile>
+    </profiles>
 </project>
