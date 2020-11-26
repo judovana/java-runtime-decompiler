@@ -15,6 +15,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <licenseDir>${basedir}/../</licenseDir>
         <jrd.client.main.class>org.jrd.backend.data.Main</jrd.client.main.class>
+        <jrd.jdk.version>11</jrd.jdk.version>
+        <jrd.jdk.arg1>--add-modules</jrd.jdk.arg1>
+        <jrd.jdk.arg2>jdk.jdeps,jdk.attach,jdk.hotspot.agent</jrd.jdk.arg2>
+        <jrd.jdk.arg3>--add-exports</jrd.jdk.arg3>
+        <jrd.jdk.arg4>jdk.jdeps/com.sun.tools.javap=ALL-UNNAMED</jrd.jdk.arg4>
     </properties>
 
     <build>
@@ -24,13 +29,13 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <source>11</source>
-                    <target>11</target>
+                    <source>${jrd.jdk.version}</source>
+                    <target>${jrd.jdk.version}</target>
                     <compilerArgs>
-                        <arg>--add-modules</arg>
-                        <arg>jdk.jdeps,jdk.attach,jdk.hotspot.agent</arg>
-                        <arg>--add-exports</arg>
-                        <arg>jdk.jdeps/com.sun.tools.javap=ALL-UNNAMED</arg>
+                        <arg>${jrd.jdk.arg1}</arg>
+                        <arg>${jrd.jdk.arg2}</arg>
+                        <arg>${jrd.jdk.arg3}</arg>
+                        <arg>${jrd.jdk.arg4}</arg>
                     </compilerArgs>
                 </configuration>
             </plugin>
