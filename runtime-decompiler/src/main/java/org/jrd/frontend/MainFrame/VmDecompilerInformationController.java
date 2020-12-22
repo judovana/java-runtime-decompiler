@@ -225,7 +225,7 @@ public class VmDecompilerInformationController {
                 if (name == null || name.trim().isEmpty())
                     name = "???";
 
-                final RewriteClassDialog rewriteClassDialog = new RewriteClassDialog(name, lastLoaded, buffer, lastSavedSrc, lastSavedBin);
+                final RewriteClassDialog rewriteClassDialog = new RewriteClassDialog(name, lastLoaded, buffer, lastSavedSrc, lastSavedBin, vmInfo, vmManager);
                 rewriteClassDialog.setVisible(true);
                 if (!rewriteClassDialog.isOkPressed())
                     return;

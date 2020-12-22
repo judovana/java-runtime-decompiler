@@ -13,6 +13,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+
 import org.jrd.frontend.MainFrame.FiletoClassValidator;
 
 public class Cli {
@@ -233,17 +234,9 @@ public class Cli {
         String param = args.get(i + 1);
         try {
             VmInfo vmInfo = vmManager.findVmFromPID(param);
-            AgentRequestAction request = VmDecompilerInformationController.createRequest(vmInfo, AgentRequestAction.RequestAction.CLASSES, null);
-            String response = VmDecompilerInformationController.submitRequest(vmManager, request);
-            if (response.equals("ok")) {
-                String[] classes = vmInfo.getVmDecompilerStatus().getLoadedClassNames();
-                for (String clazz : classes) {
-                    System.out.println(clazz);
-                }
-            }
-            if (response.equals("error")) {
-                throw new RuntimeException(VmDecompilerInformationController.CLASSES_NOPE);
-
+            String[] classes = obtainClasses(vmInfo, vmManager);
+            for (String clazz : classes) {
+                System.out.println(clazz);
             }
         } catch (NumberFormatException e) {
             try {
@@ -299,7 +292,18 @@ public class Cli {
         }
     }
 
-    private static VmDecompilerStatus obtainClass(VmInfo vmInfo, String clazz, VmManager manager) {
+    public static String[] obtainClasses(VmInfo vmInfo, VmManager manager) {
+        AgentRequestAction request = VmDecompilerInformationController.createRequest(vmInfo, AgentRequestAction.RequestAction.CLASSES, null);
+        String response = VmDecompilerInformationController.submitRequest(manager, request);
+        if (response.equals("ok")) {
+            String[] classes = vmInfo.getVmDecompilerStatus().getLoadedClassNames();
+            return classes;
+        } else {
+            throw new RuntimeException(VmDecompilerInformationController.CLASSES_NOPE);
+        }
+    }
+
+    public static VmDecompilerStatus obtainClass(VmInfo vmInfo, String clazz, VmManager manager) {
         AgentRequestAction request = VmDecompilerInformationController.createRequest(vmInfo, AgentRequestAction.RequestAction.BYTES, clazz);
         String response = VmDecompilerInformationController.submitRequest(manager, request);
         if (response.equals("ok")) {

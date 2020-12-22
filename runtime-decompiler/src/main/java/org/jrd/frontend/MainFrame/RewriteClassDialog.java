@@ -1,5 +1,15 @@
 package org.jrd.frontend.MainFrame;
 
+import org.jc.api.ClassIdentifier;
+import org.jc.api.ClassesProvider;
+import org.jc.api.IdentifiedSource;
+import org.jc.api.InMemoryCompiler;
+import org.jc.api.MessagesListener;
+import org.jrd.backend.communication.RuntimeCompilerConnector;
+import org.jrd.backend.core.OutputController;
+import org.jrd.backend.data.VmInfo;
+import org.jrd.backend.data.VmManager;
+
 import javax.swing.*;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
@@ -7,6 +17,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.nio.file.Files;
+import java.util.Optional;
+import java.util.logging.Level;
 
 public class RewriteClassDialog extends JDialog {
 
@@ -39,18 +51,24 @@ public class RewriteClassDialog extends JDialog {
 
     private final String origName;
     private final String origBuffer;
+    private final VmInfo vmInfo;
+    private final VmManager vmManager;
 
-    public RewriteClassDialog(final String name, final String lastLoad, final String currentBuffer, final String lastSaveSrc, final String lastSaveBin) {
+    public RewriteClassDialog(final String name, final String lastLoad, final String currentBuffer, final String lastSaveSrc, final String lastSaveBin, VmInfo vmInfo, VmManager vmManager) {
         super((JFrame) null, "Specify class and selectSrc its bytecode", true);
         this.setSize(400, 400);
         this.setLayout(new BorderLayout());
+
+        this.origName = name;
+        this.origBuffer = currentBuffer;
+        this.vmInfo = vmInfo;
+        this.vmManager = vmManager;
+
         dualpane = new JTabbedPane();
 
         currentBufferPane = new JPanel();
         currentBufferPane.setName("Current buffer");
         currentBufferPane.setLayout(new GridLayout(0, 1));
-        origName = name;
-        origBuffer = currentBuffer;
         status = new JTextField();
         status.setEditable(false);
         if (origBuffer == null || origBuffer.length() == 0) {
@@ -176,6 +194,27 @@ public class RewriteClassDialog extends JDialog {
         ok.addActionListener(e -> {
             this.wasOkPressed = true;
             this.setVisible(false);
+        });
+
+        compileAndSave.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                ClassesProvider cp = new RuntimeCompilerConnector.JRDClassesProvider(vmInfo, vmManager);
+                InMemoryCompiler rc = new RuntimeCompilerConnector.DummyRuntimeCompiler();
+                try {
+                    rc.compileClass(cp, Optional.of(new MessagesListener() {
+                        @Override
+                        public void addMessage(Level level, String s) {
+                            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, s);
+                        }
+                    }), new IdentifiedSource(new ClassIdentifier(origName), origBuffer.getBytes(), Optional.empty()));
+                    status.setText("something done, see stdout");
+                }catch(Exception ex){
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, ex.getMessage());
+                status.setText("Failed - " + ex.getMessage());
+            }
+            }
         });
     }
 
