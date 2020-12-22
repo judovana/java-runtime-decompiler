@@ -57,7 +57,7 @@ public class VmDecompilerInformationController {
         mainFrameView.setCreateNewConnectionDialogListener(e -> createNewConnectionDialog());
         bytecodeDecompilerView.setClassesActionListener(e -> loadClassNames());
         bytecodeDecompilerView.setBytesActionListener(e -> loadClassBytecode(e.getActionCommand()));
-        bytecodeDecompilerView.setRewriteActionListener(e -> rewriteClass(e.getActionCommand()));
+        bytecodeDecompilerView.setRewriteActionListener(new ClassRewriter());
 
         mainFrameView.setVmChanging(this::changeVm);
         mainFrameView.setHaltAgentListener(e -> haltAgent());
@@ -160,7 +160,7 @@ public class VmDecompilerInformationController {
     private void abortAndCleanup() {
         mainFrameView.switchPanel(false);
         mainFrameView.getBytecodeDecompilerView().reloadClassList(new String[0]);
-        mainFrameView.getBytecodeDecompilerView().reloadTextField("");
+        mainFrameView.getBytecodeDecompilerView().reloadTextField("", "");
         haltAgent();
         updateVmLists();
         mainFrameView.clearLocalListSelection();
@@ -211,40 +211,46 @@ public class VmDecompilerInformationController {
         } catch (Exception e) {
             OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
         }
-        bytecodeDecompilerView.reloadTextField(decompiledClass);
+        bytecodeDecompilerView.reloadTextField(name, decompiledClass);
     }
 
-    private static String lastFile = System.getProperty("user.home");
+    private static String lastLoaded = System.getProperty("user.home");
+    private static String lastSavedSrc = System.getProperty("user.home");
+    private static String lastSavedBin = System.getProperty("user.home");
 
+    class ClassRewriter {
 
-    private void rewriteClass(String name) {
-        try {
-            if (name == null || name.trim().isEmpty())
-                name = "???";
+        void rewriteClass(String name, String buffer) {
+            try {
+                if (name == null || name.trim().isEmpty())
+                    name = "???";
 
-            final RewriteClassDialog rewriteClassDialog = new RewriteClassDialog(name, lastFile);
-            rewriteClassDialog.setVisible(true);
-            if (!rewriteClassDialog.isOkPressed())
-                return;
+                final RewriteClassDialog rewriteClassDialog = new RewriteClassDialog(name, lastLoaded, buffer, lastSavedSrc, lastSavedBin);
+                rewriteClassDialog.setVisible(true);
+                if (!rewriteClassDialog.isOkPressed())
+                    return;
 
-            final String className = rewriteClassDialog.getClassName();
-            lastFile = rewriteClassDialog.getFilePath();
+                final String className = rewriteClassDialog.getClassName();
+                lastLoaded = rewriteClassDialog.getLoadFilePath();
+                lastSavedSrc = rewriteClassDialog.getSaveSrcPath();
+                lastSavedBin = rewriteClassDialog.getSaveBinPath();
 
-            final String body = fileToBase64(lastFile);
-            AgentRequestAction request = createRequest(RequestAction.OVERWRITE, className, body);
-            String response = submitRequest(request);
-            if (response.equals("error")) {
+                final String body = fileToBase64(lastLoaded);
+                AgentRequestAction request = createRequest(RequestAction.OVERWRITE, className, body);
+                String response = submitRequest(request);
+                if (response.equals("error")) {
+                    JOptionPane.showMessageDialog(mainFrameView.getMainFrame(),
+                            "class rewrite failed.",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (Exception ex) {
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
                 JOptionPane.showMessageDialog(mainFrameView.getMainFrame(),
-                        "class rewrite failed.",
+                        ex,
                         "Error",
                         JOptionPane.ERROR_MESSAGE);
             }
-        } catch (Exception ex) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
-            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(),
-                    ex,
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
         }
     }
 

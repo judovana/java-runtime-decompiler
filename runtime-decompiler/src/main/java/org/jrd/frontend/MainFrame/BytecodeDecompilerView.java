@@ -34,9 +34,10 @@ public class BytecodeDecompilerView {
     private JList<String> filteredClassesJlist;
     private RTextScrollPane bytecodeScrollPane;
     private RSyntaxTextArea bytecodeSyntaxTextArea;
+    private String lastDecompiledClass = "";
     private ActionListener bytesActionListener;
     private ActionListener classesActionListener;
-    private ActionListener rewriteActionListener;
+    private RewriteActionListener rewriteActionListener;
     private String[] classes;
 
     private boolean splitPaneFirstResize = true;
@@ -242,14 +243,19 @@ public class BytecodeDecompilerView {
      *
      * @param decompiledClass String of source code of decompiler class
      */
-    public void reloadTextField(String decompiledClass) {
+    public void reloadTextField(String name, String decompiledClass) {
         final String data = decompiledClass;
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                bytecodeSyntaxTextArea.setText(data);
+                BytecodeDecompilerView.this.setDecompiledClass(name, data);
             }
         });
+    }
+
+    private void setDecompiledClass(String name, String data) {
+        bytecodeSyntaxTextArea.setText(data);
+        this.lastDecompiledClass=name;
     }
 
     public void setClassesActionListener(ActionListener listener) {
@@ -260,9 +266,22 @@ public class BytecodeDecompilerView {
     public void setBytesActionListener(ActionListener listener) {
         bytesActionListener = listener;
     }
-    
-    public void setRewriteActionListener(ActionListener rewriteActionListener) {
-        this.rewriteActionListener = rewriteActionListener;
+
+    private class RewriteActionListener implements  ActionListener {
+
+        private final VmDecompilerInformationController.ClassRewriter worker;
+
+        public RewriteActionListener(VmDecompilerInformationController.ClassRewriter worker) {
+            this.worker = worker;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            worker.rewriteClass(  BytecodeDecompilerView.this.lastDecompiledClass, BytecodeDecompilerView.this.bytecodeSyntaxTextArea.getText());
+        }
+    }
+    public void setRewriteActionListener(VmDecompilerInformationController.ClassRewriter worker) {
+        this.rewriteActionListener =  new RewriteActionListener(worker);
     }
 
     /**
