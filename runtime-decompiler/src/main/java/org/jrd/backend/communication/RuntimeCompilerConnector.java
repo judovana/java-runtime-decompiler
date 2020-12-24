@@ -49,7 +49,9 @@ public class RuntimeCompilerConnector {
                             for(IdentifiedBytecode ib: obtained){
                                 messagesListener.ifPresent(message -> message.addMessage(Level.INFO, ib.getClassIdentifier().getFullName()+" of "+ib.getFile().length+" bytes"));
                             }
+                            Thread.sleep(1000);
                         }
+                        Thread.sleep(1000);
                     }
                     IdentifiedBytecode ib = new IdentifiedBytecode(is.getClassIdentifier(), ("Freshly compiled " + is.getClassIdentifier().getFullName() + " from src of lenght of " + is.getFile().length + " bytes (" + getSrcLengthCatched(is) + " characters) at " + new Date().toString()).getBytes());
                     messagesListener.ifPresent(message -> message.addMessage(Level.INFO, "Compiled " + ib.getClassIdentifier().getFullName() + " to " + ib.getFile().length + " bytes"));

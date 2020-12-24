@@ -115,7 +115,7 @@ public class RewriteClassDialog extends JDialog {
                 try {
                     name = cheatName(futureSrcTarget.getText(), namingSource.getSelectedIndex(), ".java");
                     File f = new File(name);
-                    if (namingSource.getSelectedIndex() == 1){
+                    if (namingSource.getSelectedIndex() == 1) {
                         f.getParentFile().mkdirs();
                     }
                     Files.writeString(f.toPath(), origBuffer);
@@ -201,19 +201,35 @@ public class RewriteClassDialog extends JDialog {
             public void actionPerformed(ActionEvent actionEvent) {
                 ClassesProvider cp = new RuntimeCompilerConnector.JRDClassesProvider(vmInfo, vmManager);
                 InMemoryCompiler rc = new RuntimeCompilerConnector.DummyRuntimeCompiler();
-                try {
-                    rc.compileClass(cp, Optional.of(new MessagesListener() {
-                        @Override
-                        public void addMessage(Level level, String s) {
-                            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, s);
-                        }
-                    }), new IdentifiedSource(new ClassIdentifier(origName), origBuffer.getBytes(), Optional.empty()));
-                    status.setText("something done, see stdout");
-                }catch(Exception ex){
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(null, ex.getMessage());
-                status.setText("Failed - " + ex.getMessage());
-            }
+                JDialog compialtionRunningDialog = new JDialog(RewriteClassDialog.this, "Compiling", true);
+                JTextArea compilationLog = new JTextArea();
+                compialtionRunningDialog.setSize(300, 400);
+                compialtionRunningDialog.add(new JScrollPane(compilationLog));
+                Thread t = new Thread(() -> {
+                    try {
+                        rc.compileClass(cp, Optional.of(new MessagesListener() {
+                            @Override
+                            public void addMessage(Level level, String s) {
+                                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, s);
+                                compilationLog.setText(compilationLog.getText() + s + "\n");
+                            }
+                        }), new IdentifiedSource(new ClassIdentifier(origName), origBuffer.getBytes(), Optional.empty()));
+                        status.setText("something done, see stdout");
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(null, ex.getMessage());
+                        compilationLog.setText(compilationLog.getText() + ex.getMessage() + "\n");
+                        status.setText("Failed - " + ex.getMessage());
+                    } finally {
+                        OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Operation finished");
+                        compilationLog.setText(compilationLog.getText() + "Operatin finished, you may close dialog\n");
+                    }
+
+                }
+                );
+                t.start();
+                compialtionRunningDialog.setLocationRelativeTo(RewriteClassDialog.this);
+                compialtionRunningDialog.setVisible(true);
             }
         });
     }
