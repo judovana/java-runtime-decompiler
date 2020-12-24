@@ -26,6 +26,8 @@ import java.util.logging.Level;
 
 public class RuntimeCompilerConnector {
 
+    private static final boolean slow = true;
+
     public static class DummyRuntimeCompiler implements InMemoryCompiler {
 
         @Override
@@ -36,7 +38,7 @@ public class RuntimeCompilerConnector {
                     messagesListener.ifPresent(message -> {
                         message.addMessage(Level.INFO, "Compiling " + is.getClassIdentifier().getFullName() + " of lenght of " + is.getFile().length + " bytes (" + getSrcLengthCatched(is) + " characters)");
                     });
-                    Thread.sleep(1000);
+                    sleepIfSlow(1000);
                     for (int x = 0; x < 3; x++) {
                         messagesListener.ifPresent(message -> message.addMessage(Level.INFO, "Listing classes"));
                         List<String> l = classesProvider.getClassPathListing();
@@ -45,15 +47,24 @@ public class RuntimeCompilerConnector {
                             String clname = l.get(new Random().nextInt(l.size() / 2));
                             messagesListener.ifPresent(message -> message.addMessage(Level.INFO, "Obtaining class: " + clname));
                             Collection<IdentifiedBytecode> obtained = classesProvider.getClass(new ClassIdentifier(clname));
-                            messagesListener.ifPresent(message -> message.addMessage(Level.INFO, "got " + obtained.size()+" classes: "));
-                            for(IdentifiedBytecode ib: obtained){
-                                messagesListener.ifPresent(message -> message.addMessage(Level.INFO, ib.getClassIdentifier().getFullName()+" of "+ib.getFile().length+" bytes"));
+                            messagesListener.ifPresent(message -> message.addMessage(Level.INFO, "got " + obtained.size() + " classes: "));
+                            for (IdentifiedBytecode ib : obtained) {
+                                messagesListener.ifPresent(message -> message.addMessage(Level.INFO, ib.getClassIdentifier().getFullName() + " of " + ib.getFile().length + " bytes"));
                             }
-                            Thread.sleep(1000);
+                            sleepIfSlow(1000);
                         }
-                        Thread.sleep(1000);
+                        sleepIfSlow(1000);
                     }
                     IdentifiedBytecode ib = new IdentifiedBytecode(is.getClassIdentifier(), ("Freshly compiled " + is.getClassIdentifier().getFullName() + " from src of lenght of " + is.getFile().length + " bytes (" + getSrcLengthCatched(is) + " characters) at " + new Date().toString()).getBytes());
+                    messagesListener.ifPresent(message -> message.addMessage(Level.INFO, "Compiled " + ib.getClassIdentifier().getFullName() + " to " + ib.getFile().length + " bytes"));
+                    results.add(ib);
+                }
+                int i = 0;
+                Random r = new Random();
+                while (r.nextBoolean()) {
+                    i++;
+                    String n = "random.inner$class" + i;
+                    IdentifiedBytecode ib = new IdentifiedBytecode(new ClassIdentifier(n), ("Freshly compiled " + n + new Date().toString()).getBytes());
                     messagesListener.ifPresent(message -> message.addMessage(Level.INFO, "Compiled " + ib.getClassIdentifier().getFullName() + " to " + ib.getFile().length + " bytes"));
                     results.add(ib);
                 }
@@ -61,6 +72,12 @@ public class RuntimeCompilerConnector {
                 throw new RuntimeException(ex);
             }
             return results;
+        }
+
+        private void sleepIfSlow(long i) throws InterruptedException {
+            if (slow){
+                Thread.sleep(i);
+            }
         }
 
     }

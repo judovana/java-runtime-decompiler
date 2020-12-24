@@ -2,6 +2,7 @@ package org.jrd.frontend.MainFrame;
 
 import org.jc.api.ClassIdentifier;
 import org.jc.api.ClassesProvider;
+import org.jc.api.IdentifiedBytecode;
 import org.jc.api.IdentifiedSource;
 import org.jc.api.InMemoryCompiler;
 import org.jc.api.MessagesListener;
@@ -17,6 +18,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.nio.file.Files;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.logging.Level;
 
@@ -110,34 +112,42 @@ public class RewriteClassDialog extends JDialog {
         saveSrcBuffer.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                String name = "???";
-                String ss = "Error to save: ";
-                try {
-                    name = cheatName(futureSrcTarget.getText(), namingSource.getSelectedIndex(), ".java");
-                    File f = new File(name);
-                    if (namingSource.getSelectedIndex() == 1) {
-                        f.getParentFile().mkdirs();
-                    }
-                    Files.writeString(f.toPath(), origBuffer);
-                    ss = "Saved: ";
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    JOptionPane.showMessageDialog(RewriteClassDialog.this, ex.getMessage());
-                }
-                status.setText(ss + name);
+                saveByGui(futureSrcTarget.getText(), namingSource.getSelectedIndex(), ".java", status, origName, origBuffer.getBytes());
+
             }
         });
     }
 
-    private String cheatName(String base, int selectedIndex, String suffix) {
+    private static boolean saveByGui(String fileNameBase, int naming, String suffix, JTextField status, String clazz, byte[] content) {
+        String name = "???";
+        String ss = "Error to save: ";
+        boolean r = true;
+        try {
+            name = cheatName(fileNameBase, naming, suffix, clazz);
+            File f = new File(name);
+            if (naming == 1) {
+                f.getParentFile().mkdirs();
+            }
+            Files.write(f.toPath(), content);
+            ss = "Saved: ";
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, ex.getMessage());
+            r = false;
+        }
+        status.setText(ss + name);
+        return r;
+    }
+
+    private static String cheatName(String base, int selectedIndex, String suffix, String fullyClasifiedName) {
         if (selectedIndex == 2) {
             return base;
         }
         if (selectedIndex == 0) {
-            return base + "/" + origName + suffix;
+            return base + "/" + fullyClasifiedName + suffix;
         }
         if (selectedIndex == 1) {
-            return base + "/" + origName.replaceAll("\\.", "/") + suffix;
+            return base + "/" + fullyClasifiedName.replaceAll("\\.", "/") + suffix;
         }
         throw new RuntimeException("Unknown name target " + selectedIndex);
     }
@@ -199,39 +209,60 @@ public class RewriteClassDialog extends JDialog {
         compileAndSave.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                ClassesProvider cp = new RuntimeCompilerConnector.JRDClassesProvider(vmInfo, vmManager);
-                InMemoryCompiler rc = new RuntimeCompilerConnector.DummyRuntimeCompiler();
-                JDialog compialtionRunningDialog = new JDialog(RewriteClassDialog.this, "Compiling", true);
-                JTextArea compilationLog = new JTextArea();
-                compialtionRunningDialog.setSize(300, 400);
-                compialtionRunningDialog.add(new JScrollPane(compilationLog));
-                Thread t = new Thread(() -> {
-                    try {
-                        rc.compileClass(cp, Optional.of(new MessagesListener() {
-                            @Override
-                            public void addMessage(Level level, String s) {
-                                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, s);
-                                compilationLog.setText(compilationLog.getText() + s + "\n");
-                            }
-                        }), new IdentifiedSource(new ClassIdentifier(origName), origBuffer.getBytes(), Optional.empty()));
-                        status.setText("something done, see stdout");
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                        JOptionPane.showMessageDialog(null, ex.getMessage());
-                        compilationLog.setText(compilationLog.getText() + ex.getMessage() + "\n");
-                        status.setText("Failed - " + ex.getMessage());
-                    } finally {
-                        OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Operation finished");
-                        compilationLog.setText(compilationLog.getText() + "Operatin finished, you may close dialog\n");
+                CompilationWithResult compiler = xompileWithGui();
+                if (compiler.ex == null && compiler.result == null) {
+                    String s = "No output from compiler, maybe still running?";
+                    JOptionPane.showMessageDialog(null, s);
+                    status.setText(s);
+                } else if (compiler.ex != null) {
+                    JOptionPane.showMessageDialog(null, compiler.ex.getMessage());
+                    status.setText("Failed - " + compiler.ex.getMessage());
+                } else if (compiler.result != null) {
+                    status.setText("something done, will save now");
+                    status.repaint();
+                    if (namingBinary.getSelectedIndex() == 2) {
+                        if (compiler.result.size() != 1) {
+                            String s = "Output of compilation was " + compiler.result.size() + "classes. Can not save more then one file to exact filename";
+                            JOptionPane.showMessageDialog(null, s);
+                            status.setText(s);
+                            return;
+                        }
                     }
-
+                    int saved = 0;
+                    for (IdentifiedBytecode clazz : compiler.result) {
+                        boolean r = saveByGui(futureBinTarget.getText(), namingBinary.getSelectedIndex(), ".class", status, clazz.getClassIdentifier().getFullName(), clazz.getFile());
+                        if (r) {
+                            saved++;
+                        }
+                    }
+                    if (compiler.result.size() > 1) {
+                        if (saved == compiler.result.size()) {
+                            status.setText("Saved all " + saved + "classes to" + futureBinTarget.getText());
+                        } else {
+                            status.setText("Saved only " + saved + " from total of " + compiler.result.size() + " classes to" + futureBinTarget.getText());
+                        }
+                    }
+                } else {
+                    status.setText("Really weird state, report bug how to achieve this");
                 }
-                );
-                t.start();
-                compialtionRunningDialog.setLocationRelativeTo(RewriteClassDialog.this);
-                compialtionRunningDialog.setVisible(true);
             }
         });
+    }
+
+
+    private CompilationWithResult xompileWithGui() {
+        ClassesProvider cp = new RuntimeCompilerConnector.JRDClassesProvider(vmInfo, vmManager);
+        InMemoryCompiler rc = new RuntimeCompilerConnector.DummyRuntimeCompiler();
+        JDialog compialtionRunningDialog = new JDialog(RewriteClassDialog.this, "Compiling", true);
+        JTextArea compilationLog = new JTextArea();
+        compialtionRunningDialog.setSize(300, 400);
+        compialtionRunningDialog.add(new JScrollPane(compilationLog));
+        CompilationWithResult compiler = new CompilationWithResult(rc, cp, compilationLog);
+        Thread t = new Thread(compiler);
+        t.start();
+        compialtionRunningDialog.setLocationRelativeTo(RewriteClassDialog.this);
+        compialtionRunningDialog.setVisible(true);
+        return compiler;
     }
 
     private void adds() {
@@ -290,4 +321,39 @@ public class RewriteClassDialog extends JDialog {
         return this.futureBinTarget.getText();
     }
 
+    private class CompilationWithResult implements Runnable {
+        private final InMemoryCompiler rc;
+        private final ClassesProvider cp;
+        private final JTextArea compilationLog;
+        private Exception ex;
+        private Collection<IdentifiedBytecode> result;
+
+
+        public CompilationWithResult(InMemoryCompiler rc, ClassesProvider cp, JTextArea compilationLog) {
+            this.rc = rc;
+            this.cp = cp;
+            this.compilationLog = compilationLog;
+        }
+
+        @Override
+        public void run() {
+            try {
+                result = rc.compileClass(cp, Optional.of(new MessagesListener() {
+                    @Override
+                    public void addMessage(Level level, String s) {
+                        OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, s);
+                        compilationLog.setText(compilationLog.getText() + s + "\n");
+                    }
+                }), new IdentifiedSource(new ClassIdentifier(origName), origBuffer.getBytes(), Optional.empty()));
+            } catch (Exception ex) {
+                this.ex = ex;
+                ex.printStackTrace();
+                compilationLog.setText(compilationLog.getText() + ex.getMessage() + "\n");
+            } finally {
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Operation finished");
+                compilationLog.setText(compilationLog.getText() + "Operatin finished, you may close dialog\n");
+            }
+
+        }
+    }
 }
