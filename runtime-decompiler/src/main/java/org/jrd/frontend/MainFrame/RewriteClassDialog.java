@@ -25,6 +25,9 @@ import java.util.logging.Level;
 public class RewriteClassDialog extends JDialog {
 
     private static final String[] saveOptions = new String[]{"fully qualified name", "src subdirectories name", "custom name"};
+    private static int FULLY_QUALIFIED_NAME=0;
+    private static int SRC_SUBDIRS_NAME=1;
+    private static int CUSTOM_NAME=2;
     private final JTabbedPane dualpane;
 
     private final JPanel currentBufferPane;
@@ -82,8 +85,8 @@ public class RewriteClassDialog extends JDialog {
         compileAndSave = new JButton("Compile and save as");
         namingBinary = new JComboBox<String>(saveOptions);
         namingSource = new JComboBox<String>(saveOptions);
-        namingBinary.setSelectedIndex(0);
-        namingBinary.setSelectedIndex(1);
+        namingBinary.setSelectedIndex(FULLY_QUALIFIED_NAME);
+        namingBinary.setSelectedIndex(SRC_SUBDIRS_NAME);
         futureBinTarget = new JTextField(lastSaveBin);
         futureSrcTarget = new JTextField(lastSaveSrc);
         selectBinTarget = new JButton("...");
@@ -125,7 +128,7 @@ public class RewriteClassDialog extends JDialog {
         try {
             name = cheatName(fileNameBase, naming, suffix, clazz);
             File f = new File(name);
-            if (naming == 1) {
+            if (naming == SRC_SUBDIRS_NAME) {
                 f.getParentFile().mkdirs();
             }
             Files.write(f.toPath(), content);
@@ -140,13 +143,13 @@ public class RewriteClassDialog extends JDialog {
     }
 
     private static String cheatName(String base, int selectedIndex, String suffix, String fullyClasifiedName) {
-        if (selectedIndex == 2) {
+        if (selectedIndex == CUSTOM_NAME) {
             return base;
         }
-        if (selectedIndex == 0) {
+        if (selectedIndex == FULLY_QUALIFIED_NAME) {
             return base + "/" + fullyClasifiedName + suffix;
         }
-        if (selectedIndex == 1) {
+        if (selectedIndex == SRC_SUBDIRS_NAME) {
             return base + "/" + fullyClasifiedName.replaceAll("\\.", "/") + suffix;
         }
         throw new RuntimeException("Unknown name target " + selectedIndex);
@@ -173,7 +176,7 @@ public class RewriteClassDialog extends JDialog {
     private void setSelectSaveListenrListener() {
         selectSrcTarget.addActionListener(e -> {
             JFileChooser jf = new JFileChooser(futureSrcTarget.getText());
-            if (namingSource.getSelectedIndex() < 2) {
+            if (namingSource.getSelectedIndex() < CUSTOM_NAME) {
                 jf.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             } else {
                 jf.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -188,7 +191,7 @@ public class RewriteClassDialog extends JDialog {
     private void setSelectSaveBinListener() {
         selectBinTarget.addActionListener(e -> {
             JFileChooser jf = new JFileChooser(futureBinTarget.getText());
-            if (namingBinary.getSelectedIndex() < 2) {
+            if (namingBinary.getSelectedIndex() < CUSTOM_NAME) {
                 jf.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             } else {
                 jf.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -220,7 +223,7 @@ public class RewriteClassDialog extends JDialog {
                 } else if (compiler.result != null) {
                     status.setText("something done, will save now");
                     status.repaint();
-                    if (namingBinary.getSelectedIndex() == 2) {
+                    if (namingBinary.getSelectedIndex() == CUSTOM_NAME) {
                         if (compiler.result.size() != 1) {
                             String s = "Output of compilation was " + compiler.result.size() + "classes. Can not save more then one file to exact filename";
                             JOptionPane.showMessageDialog(null, s);
