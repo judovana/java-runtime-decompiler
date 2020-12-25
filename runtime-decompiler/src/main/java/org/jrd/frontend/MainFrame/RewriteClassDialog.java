@@ -41,7 +41,7 @@ public class RewriteClassDialog extends JDialog {
     private final JButton saveSrcBuffer;
     private final JButton compileAndSave;
     private final JButton compileAndUpload;
-    private final JTextField status;
+    private final JTextField statusCompileCurrentBuffer;
 
     private final JPanel manualPane;
     private final JPanel inputs;
@@ -58,10 +58,12 @@ public class RewriteClassDialog extends JDialog {
     private final JTextField filesToCompile;
     private final JButton selectExternalFiles;
     private final JCheckBox recursive;
-    /*private final JTextField outputExternalFilesDir;
+    private final JTextField outputExternalFilesDir;
     private final JComboBox<String> namingExternal;
-    private final JButton compileExternalFiles;*/
+    private final JButton selectExternalFilesSave;
+    private final JButton compileExternalFiles;
     private final JButton compileExternalFilesAndUpload;
+    private final JTextField statusExternalFiles;
 
 
     private final String origName;
@@ -84,8 +86,8 @@ public class RewriteClassDialog extends JDialog {
         currentBufferPane = new JPanel();
         currentBufferPane.setName("Current buffer");
         currentBufferPane.setLayout(new GridLayout(0, 1));
-        status = new JTextField();
-        status.setEditable(false);
+        statusCompileCurrentBuffer = new JTextField();
+        statusCompileCurrentBuffer.setEditable(false);
         if (origBuffer == null || origBuffer.length() == 0) {
             currentClass = new JLabel(origName + " !!MISSING!!");
         } else {
@@ -95,7 +97,7 @@ public class RewriteClassDialog extends JDialog {
         compileAndSave = new JButton("Compile and save as");
         namingBinary = new JComboBox<String>(saveOptions);
         namingSource = new JComboBox<String>(saveOptions);
-        namingBinary.setSelectedIndex(FULLY_QUALIFIED_NAME);
+        namingSource.setSelectedIndex(FULLY_QUALIFIED_NAME);
         namingBinary.setSelectedIndex(SRC_SUBDIRS_NAME);
         futureBinTarget = new JTextField(lastSaveBin);
         futureSrcTarget = new JTextField(lastSaveSrc);
@@ -117,17 +119,34 @@ public class RewriteClassDialog extends JDialog {
         ok = new JButton("ok");
         wasOkPressed = false;
 
-        externalFiles= new JPanel(new BorderLayout());
+        externalFiles= new JPanel(new GridLayout(0,1));
         externalFiles.setName("Compile external files");
         externalFiles.add(new JLabel("Select external files to compile against runtime classpath"), BorderLayout.NORTH);
+        JPanel exFilesIn = new JPanel(new BorderLayout());
         filesToCompile = new JTextField("todo");
-        externalFiles.add(filesToCompile, BorderLayout.CENTER);
+        exFilesIn.add(filesToCompile, BorderLayout.CENTER);
         recursive = new JCheckBox("recursive");
-        externalFiles.add(recursive, BorderLayout.WEST);
+        exFilesIn.add(recursive, BorderLayout.WEST);
         selectExternalFiles= new JButton("...");
-        externalFiles.add(selectExternalFiles, BorderLayout.EAST);
+        exFilesIn.add(selectExternalFiles, BorderLayout.EAST);
+        externalFiles.add(exFilesIn);
+        outputExternalFilesDir = new JTextField("todo");
+        namingExternal = new JComboBox<>(saveOptions);
+        namingExternal.setSelectedIndex(SRC_SUBDIRS_NAME);
+        selectExternalFilesSave = new JButton("...");
+        JPanel saveExFilesIn = new JPanel(new BorderLayout());
+        saveExFilesIn.add(selectExternalFilesSave, BorderLayout.EAST);
+        saveExFilesIn.add(outputExternalFilesDir, BorderLayout.CENTER);
+        saveExFilesIn.add(namingExternal, BorderLayout.WEST);
+        externalFiles.add(saveExFilesIn);
+        compileExternalFiles= new JButton("Compile and save");
+        externalFiles.add(compileExternalFiles);
         compileExternalFilesAndUpload= new JButton("Compile and upload");
-        externalFiles.add(compileExternalFilesAndUpload, BorderLayout.SOUTH);
+        compileExternalFilesAndUpload.setFont(compileExternalFilesAndUpload.getFont().deriveFont(Font.BOLD));
+        externalFiles.add(compileExternalFilesAndUpload);
+        statusExternalFiles = new JTextField("");
+        statusExternalFiles.setEditable(false);
+        externalFiles.add(statusExternalFiles);
 
 
         setLocation(ScreenFinder.getCurrentPoint());
@@ -139,7 +158,7 @@ public class RewriteClassDialog extends JDialog {
         saveSrcBuffer.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                saveByGui(futureSrcTarget.getText(), namingSource.getSelectedIndex(), ".java", status, origName, origBuffer.getBytes());
+                saveByGui(futureSrcTarget.getText(), namingSource.getSelectedIndex(), ".java", statusCompileCurrentBuffer, origName, origBuffer.getBytes());
 
             }
         });
@@ -240,37 +259,37 @@ public class RewriteClassDialog extends JDialog {
                 if (compiler.ex == null && compiler.result == null) {
                     String s = "No output from compiler, maybe still running?";
                     JOptionPane.showMessageDialog(null, s);
-                    status.setText(s);
+                    statusCompileCurrentBuffer.setText(s);
                 } else if (compiler.ex != null) {
                     JOptionPane.showMessageDialog(null, compiler.ex.getMessage());
-                    status.setText("Failed - " + compiler.ex.getMessage());
+                    statusCompileCurrentBuffer.setText("Failed - " + compiler.ex.getMessage());
                 } else if (compiler.result != null) {
-                    status.setText("something done, will save now");
-                    status.repaint();
+                    statusCompileCurrentBuffer.setText("something done, will save now");
+                    statusCompileCurrentBuffer.repaint();
                     if (namingBinary.getSelectedIndex() == CUSTOM_NAME) {
                         if (compiler.result.size() != 1) {
                             String s = "Output of compilation was " + compiler.result.size() + "classes. Can not save more then one file to exact filename";
                             JOptionPane.showMessageDialog(null, s);
-                            status.setText(s);
+                            statusCompileCurrentBuffer.setText(s);
                             return;
                         }
                     }
                     int saved = 0;
                     for (IdentifiedBytecode clazz : compiler.result) {
-                        boolean r = saveByGui(futureBinTarget.getText(), namingBinary.getSelectedIndex(), ".class", status, clazz.getClassIdentifier().getFullName(), clazz.getFile());
+                        boolean r = saveByGui(futureBinTarget.getText(), namingBinary.getSelectedIndex(), ".class", statusCompileCurrentBuffer, clazz.getClassIdentifier().getFullName(), clazz.getFile());
                         if (r) {
                             saved++;
                         }
                     }
                     if (compiler.result.size() > 1) {
                         if (saved == compiler.result.size()) {
-                            status.setText("Saved all " + saved + "classes to" + futureBinTarget.getText());
+                            statusCompileCurrentBuffer.setText("Saved all " + saved + "classes to" + futureBinTarget.getText());
                         } else {
-                            status.setText("Saved only " + saved + " from total of " + compiler.result.size() + " classes to" + futureBinTarget.getText());
+                            statusCompileCurrentBuffer.setText("Saved only " + saved + " from total of " + compiler.result.size() + " classes to" + futureBinTarget.getText());
                         }
                     }
                 } else {
-                    status.setText("Really weird state, report bug how to achieve this");
+                    statusCompileCurrentBuffer.setText("Really weird state, report bug how to achieve this");
                 }
             }
         });
@@ -321,7 +340,7 @@ public class RewriteClassDialog extends JDialog {
         currentBufferPane.add(p21);
         currentBufferPane.add(compileAndSave);
         currentBufferPane.add(compileAndUpload);
-        currentBufferPane.add(status);
+        currentBufferPane.add(statusCompileCurrentBuffer);
         dualpane.add(currentBufferPane);
         dualpane.add(manualPane);
         dualpane.add(externalFiles);
