@@ -54,6 +54,16 @@ public class RewriteClassDialog extends JDialog {
     private final JButton ok;
     private boolean wasOkPressed;
 
+    private final JPanel externalFiles;
+    private final JTextField filesToCompile;
+    private final JButton selectExternalFiles;
+    private final JCheckBox recursive;
+    /*private final JTextField outputExternalFilesDir;
+    private final JComboBox<String> namingExternal;
+    private final JButton compileExternalFiles;*/
+    private final JButton compileExternalFilesAndUpload;
+
+
     private final String origName;
     private final String origBuffer;
     private final VmInfo vmInfo;
@@ -106,6 +116,20 @@ public class RewriteClassDialog extends JDialog {
         nothing = new JLabel();
         ok = new JButton("ok");
         wasOkPressed = false;
+
+        externalFiles= new JPanel(new BorderLayout());
+        externalFiles.setName("Compile external files");
+        externalFiles.add(new JLabel("Select external files to compile against runtime classpath"), BorderLayout.NORTH);
+        filesToCompile = new JTextField("todo");
+        externalFiles.add(filesToCompile, BorderLayout.CENTER);
+        recursive = new JCheckBox("recursive");
+        externalFiles.add(recursive, BorderLayout.WEST);
+        selectExternalFiles= new JButton("...");
+        externalFiles.add(selectExternalFiles, BorderLayout.EAST);
+        compileExternalFilesAndUpload= new JButton("Compile and upload");
+        externalFiles.add(compileExternalFilesAndUpload, BorderLayout.SOUTH);
+
+
         setLocation(ScreenFinder.getCurrentPoint());
         setValidation();
         setSelectListener();
@@ -300,6 +324,7 @@ public class RewriteClassDialog extends JDialog {
         currentBufferPane.add(status);
         dualpane.add(currentBufferPane);
         dualpane.add(manualPane);
+        dualpane.add(externalFiles);
         this.add(dualpane);
         this.pack();
     }
