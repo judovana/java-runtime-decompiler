@@ -14,6 +14,7 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Executes manages external decompiler wrapper plugins.
@@ -110,6 +111,19 @@ public class PluginManager {
         return (String) wrapper.getDecompileMethod().invoke(wrapper.getInstance(), bytecode, options);
     }
 
+    public synchronized boolean haveCompiler(DecompilerWrapperInformation wrapper) throws Exception{
+        if (wrapper == null) {
+            throw new RuntimeException("No valid decompiler selected. Current-Buffer may not be usable");
+        }
+        if (wrapper.getDecompileMethod() == null) {
+            InitializeWrapper(wrapper);
+        }
+        if (wrapper.getName().equals(DecompilerWrapperInformation.JAVAP_NAME) || wrapper.getName().equals(DecompilerWrapperInformation.JAVAP_VERBOSE_NAME)){
+            throw new RuntimeException("Javap can not back-compiled. Current-Buffer may not be usable");
+        }
+        return wrapper.getCompileMethod() != null;
+    }
+
     /**
      * Compiles wrapper plugin, loads it into JVM and stores it for later.
      *
@@ -156,6 +170,11 @@ public class PluginManager {
                 Constructor constructor = DecompilerClass.getConstructor();
                 wrapper.setInstance(constructor.newInstance());
                 wrapper.setDecompileMethod(DecompilerClass.getMethod("decompile", byte[].class, String[].class));
+                try{
+                    wrapper.setCompileMethod(DecompilerClass.getMethod("compile", Map.class, String[].class));
+                }catch (Exception e){
+                    OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "No custom compile method: " + e.getMessage());
+                }
             } catch (Exception e) {
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Decompiler wrapper could not be loaded. " + e.getMessage());
                 OutputController.getLogger().log(e);

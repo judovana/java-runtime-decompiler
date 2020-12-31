@@ -10,6 +10,8 @@ import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.core.OutputController;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
+import org.jrd.backend.decompiling.DecompilerWrapperInformation;
+import org.jrd.backend.decompiling.PluginManager;
 
 import javax.swing.*;
 import javax.swing.event.DocumentListener;
@@ -71,7 +73,7 @@ public class RewriteClassDialog extends JDialog {
     private final VmInfo vmInfo;
     private final VmManager vmManager;
 
-    public RewriteClassDialog(final String name, final String lastLoad, final String currentBuffer, final String lastSaveSrc, final String lastSaveBin, VmInfo vmInfo, VmManager vmManager) {
+    public RewriteClassDialog(final String name, final String lastLoad, final String currentBuffer, final String lastSaveSrc, final String lastSaveBin, VmInfo vmInfo, VmManager vmManager, PluginManager pluginManager, DecompilerWrapperInformation selectedDecompiler) {
         super((JFrame) null, "Specify class and selectSrc its bytecode", true);
         this.setSize(400, 400);
         this.setLayout(new BorderLayout());
@@ -148,12 +150,26 @@ public class RewriteClassDialog extends JDialog {
         statusExternalFiles.setEditable(false);
         externalFiles.add(statusExternalFiles);
 
-
         setLocation(ScreenFinder.getCurrentPoint());
         setValidation();
         setSelectListener();
         setOkListener();
         adds();
+
+        try {
+            boolean haveDecompiler = pluginManager.haveCompiler(selectedDecompiler);
+            String s = "Default runtime compiler will be used";
+            if (haveDecompiler) {
+                s = selectedDecompiler.getName() + " plugin is delivered with its own compiler!!";
+            }
+            statusExternalFiles.setText(s);
+            statusCompileCurrentBuffer.setText(s);
+        } catch (Exception ex) {
+            statusExternalFiles.setText(ex.getMessage());
+            statusCompileCurrentBuffer.setText(ex.getMessage());
+            dualpane.setSelectedIndex(1);
+        }
+
 
         saveSrcBuffer.addActionListener(new ActionListener() {
             @Override
@@ -163,6 +179,7 @@ public class RewriteClassDialog extends JDialog {
             }
         });
     }
+
 
     private static boolean saveByGui(String fileNameBase, int naming, String suffix, JTextField status, String clazz, byte[] content) {
         String name = "???";

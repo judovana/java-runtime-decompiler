@@ -51,6 +51,7 @@ public class DecompilerWrapperInformation {
     private ExpandableUrl wrapperURL;
     private List<ExpandableUrl> DependencyURLs;
     private Method decompileMethod;
+    private Method compileMethod;
     private Object instance;
     private boolean invalidWrapper = false;
 
@@ -126,6 +127,14 @@ public class DecompilerWrapperInformation {
 
     public void setDecompileMethod(Method decompile) {
         this.decompileMethod = decompile;
+    }
+
+    public Method getCompileMethod() {
+        return compileMethod;
+    }
+
+    public void setCompileMethod(Method compileMethod) {
+        this.compileMethod = compileMethod;
     }
 
     public String getName() {

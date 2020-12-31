@@ -44,15 +44,16 @@ public class BytecodeDecompilerView {
 
     /**
      * Constructor creates the graphics and adds the action listeners.
+     *
      * @return BytecodeDecompilerPanel
      */
 
-    public JPanel getBytecodeDecompilerPanel(){
+    public JPanel getBytecodeDecompilerPanel() {
         return BytecodeDecompilerPanel;
     }
 
 
-    public BytecodeDecompilerView(){
+    public BytecodeDecompilerView() {
 
         BytecodeDecompilerPanel = new JPanel(new BorderLayout());
 
@@ -102,7 +103,7 @@ public class BytecodeDecompilerView {
             @Override
             public void mouseClicked(MouseEvent e) {
                 final String name = filteredClassesJlist.getSelectedValue();
-                if(name != null || filteredClassesJlist.getSelectedIndex() != -1) {
+                if (name != null || filteredClassesJlist.getSelectedIndex() != -1) {
                     new SwingWorker<Void, Void>() {
                         @Override
                         protected Void doInBackground() throws Exception {
@@ -116,7 +117,8 @@ public class BytecodeDecompilerView {
                         }
                     }.execute();
                 }
-        }});
+            }
+        });
 
         JButton overwriteButton = new JButton("Overwrite class");
         overwriteButton.addActionListener(new ActionListener() {
@@ -142,7 +144,7 @@ public class BytecodeDecompilerView {
         topButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-               new SwingWorker<Void, Void>() {
+                new SwingWorker<Void, Void>() {
                     @Override
                     protected Void doInBackground() throws Exception {
                         try {
@@ -163,7 +165,7 @@ public class BytecodeDecompilerView {
         topComboBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                if(filteredClassesJlist.getSelectedIndex() != -1){
+                if (filteredClassesJlist.getSelectedIndex() != -1) {
                     ActionEvent event = new ActionEvent(this, 1, filteredClassesJlist.getSelectedValue());
                     bytesActionListener.actionPerformed(event);
                 }
@@ -203,7 +205,7 @@ public class BytecodeDecompilerView {
         splitPane.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                if(splitPaneFirstResize){
+                if (splitPaneFirstResize) {
                     splitPane.setDividerLocation(0.5);
                     splitPaneFirstResize = false;
                 }
@@ -217,11 +219,11 @@ public class BytecodeDecompilerView {
 
     }
 
-    private void updateClassList(){
+    private void updateClassList() {
         ArrayList<String> filtered = new ArrayList<>();
         String filter = classesSortField.getText();
-        for (String classe: classes){
-            if (classe.contains(filter)){
+        for (String classe : classes) {
+            if (classe.contains(filter)) {
                 filtered.add(classe);
             }
         }
@@ -231,7 +233,7 @@ public class BytecodeDecompilerView {
     /**
      * Sets the unfiltered class list array and invokes an update.
      *
-     * @param classesToReload       String[] classesToReload.
+     * @param classesToReload String[] classesToReload.
      */
     public void reloadClassList(String[] classesToReload) {
         classes = classesToReload;
@@ -255,7 +257,7 @@ public class BytecodeDecompilerView {
 
     private void setDecompiledClass(String name, String data) {
         bytecodeSyntaxTextArea.setText(data);
-        this.lastDecompiledClass=name;
+        this.lastDecompiledClass = name;
     }
 
     public void setClassesActionListener(ActionListener listener) {
@@ -267,7 +269,7 @@ public class BytecodeDecompilerView {
         bytesActionListener = listener;
     }
 
-    private class RewriteActionListener implements  ActionListener {
+    private class RewriteActionListener implements ActionListener {
 
         private final VmDecompilerInformationController.ClassRewriter worker;
 
@@ -277,15 +279,17 @@ public class BytecodeDecompilerView {
 
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
-            worker.rewriteClass(  BytecodeDecompilerView.this.lastDecompiledClass, BytecodeDecompilerView.this.bytecodeSyntaxTextArea.getText());
+            worker.rewriteClass(getSelecteddecompilerWrapperInformation(), BytecodeDecompilerView.this.lastDecompiledClass, BytecodeDecompilerView.this.bytecodeSyntaxTextArea.getText());
         }
     }
+
     public void setRewriteActionListener(VmDecompilerInformationController.ClassRewriter worker) {
-        this.rewriteActionListener =  new RewriteActionListener(worker);
+        this.rewriteActionListener = new RewriteActionListener(worker);
     }
 
     /**
      * Creates a warning table in case of error.
+     *
      * @param msg message
      */
     public void handleError(final String msg) {
@@ -299,21 +303,21 @@ public class BytecodeDecompilerView {
         });
     }
 
-    public void refreshComboBox(List<DecompilerWrapperInformation> wrappers){
+    public void refreshComboBox(List<DecompilerWrapperInformation> wrappers) {
         topComboBox.removeAllItems();
         wrappers.forEach(decompilerWrapperInformation -> {
-            if (!decompilerWrapperInformation.isInvalidWrapper()){
+            if (!decompilerWrapperInformation.isInvalidWrapper()) {
                 topComboBox.addItem(decompilerWrapperInformation);
             }
         });
     }
 
-    public DecompilerWrapperInformation getSelecteddecompilerWrapperInformation(){
+    public DecompilerWrapperInformation getSelecteddecompilerWrapperInformation() {
         return (DecompilerWrapperInformation) topComboBox.getSelectedItem();
     }
 
     /**
-     Search string in decompiled code
+     * Search string in decompiled code
      */
     private void searchCode() {
         SearchContext context = new SearchContext();
@@ -322,7 +326,7 @@ public class BytecodeDecompilerView {
         context.setWholeWord(false);
         SearchEngine.markAll(bytecodeSyntaxTextArea, context);
         int line = SearchEngine.getNextMatchPos(match, bytecodeSyntaxTextArea.getText(), true, true, false);
-        if(line >= 0) {
+        if (line >= 0) {
             bytecodeSyntaxTextArea.setCaretPosition(line);
         }
     }

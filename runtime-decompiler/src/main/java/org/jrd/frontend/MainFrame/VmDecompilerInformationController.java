@@ -8,6 +8,7 @@ import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.data.Model;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
+import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.NewConnectionFrame.NewConnectionController;
 import org.jrd.frontend.NewConnectionFrame.NewConnectionView;
@@ -220,12 +221,12 @@ public class VmDecompilerInformationController {
 
     class ClassRewriter {
 
-        void rewriteClass(String name, String buffer) {
+        void rewriteClass(DecompilerWrapperInformation selectedDecompiler, String name, String buffer) {
             try {
                 if (name == null || name.trim().isEmpty())
                     name = "???";
 
-                final RewriteClassDialog rewriteClassDialog = new RewriteClassDialog(name, lastLoaded, buffer, lastSavedSrc, lastSavedBin, vmInfo, vmManager);
+                final RewriteClassDialog rewriteClassDialog = new RewriteClassDialog(name, lastLoaded, buffer, lastSavedSrc, lastSavedBin, vmInfo, vmManager, pluginManager, selectedDecompiler);
                 rewriteClassDialog.setVisible(true);
                 if (!rewriteClassDialog.isOkPressed())
                     return;
