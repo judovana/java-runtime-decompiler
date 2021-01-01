@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 public class ByteBuffer {
     private byte[] buffer;
@@ -104,5 +105,9 @@ public class ByteBuffer {
 
     public void setByte(final int offset, final byte b) {
         this.buffer[offset] = b;
+    }
+
+    public byte[] getBuffer() {
+        return  Arrays.copyOf(buffer, buffer.length);
     }
 }

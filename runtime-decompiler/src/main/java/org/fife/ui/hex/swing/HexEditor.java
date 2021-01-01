@@ -129,6 +129,10 @@ public class HexEditor extends JScrollPane {
         this.table.open(fileName);
     }
 
+    public byte[] get(){
+        return table.getDocBuffer();
+    }
+
     public void open(final InputStream in) throws IOException {
         this.table.open(in);
     }

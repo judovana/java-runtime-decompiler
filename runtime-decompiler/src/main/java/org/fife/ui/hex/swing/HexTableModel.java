@@ -252,4 +252,8 @@ public class HexTableModel extends AbstractTableModel {
             HexTableModel.this.editor.fireHexEditorEvent(this.offs, addCount, remCount);
         }
     }
+
+    public byte[] getDoc() {
+        return doc.getBuffer();
+    }
 }

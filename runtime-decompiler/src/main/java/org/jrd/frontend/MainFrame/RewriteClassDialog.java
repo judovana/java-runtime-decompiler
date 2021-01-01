@@ -71,19 +71,29 @@ public class RewriteClassDialog extends JDialog {
     private final JButton compileExternalFilesAndUpload;
     private final JTextField statusExternalFiles;
 
+    private final JPanel binaryView;
+    private final JLabel binaryFilename;
+    private final JComboBox<String> namingBinaryView;
+    private final JTextField outputBinaries;
+    private final JButton selectBinary;
+    private final JButton saveBinary;
+    private final JButton uploadBinary;
+    private final JTextField statusBinary;
 
     private final String origName;
     private final String origBuffer;
+    private final byte[] origBin;
     private final VmInfo vmInfo;
     private final VmManager vmManager;
 
-    public RewriteClassDialog(final String name, final String lastLoad, final String currentBuffer, final String lastSaveSrc, final String lastSaveBin, VmInfo vmInfo, VmManager vmManager, PluginManager pluginManager, DecompilerWrapperInformation selectedDecompiler) {
+    public RewriteClassDialog(final String name, final String lastLoad, final String currentBuffer, final byte[] cBinBuffer, final String lastSaveSrc, final String lastSaveBin, VmInfo vmInfo, VmManager vmManager, PluginManager pluginManager, DecompilerWrapperInformation selectedDecompiler) {
         super((JFrame) null, "Specify class and selectSrc its bytecode", true);
         this.setSize(400, 400);
         this.setLayout(new BorderLayout());
 
         this.origName = name;
         this.origBuffer = currentBuffer;
+        this.origBin = cBinBuffer;
         this.vmInfo = vmInfo;
         this.vmManager = vmManager;
 
@@ -153,7 +163,29 @@ public class RewriteClassDialog extends JDialog {
         statusExternalFiles.setEditable(false);
         externalFiles.add(statusExternalFiles);
 
-        setLocation(ScreenFinder.getCurrentPoint());
+        binaryView = new JPanel(new GridLayout(0,1));
+        binaryView.setName("Current binary buffer");
+        binaryFilename = new JLabel(origName);
+        namingBinaryView = new JComboBox<>(saveOptions);
+        namingBinaryView.setSelectedIndex(SRC_SUBDIRS_NAME);
+        outputBinaries = new JTextField("todo");
+        selectBinary = new JButton("...");
+        saveBinary = new JButton("Save current binary buffer");
+        uploadBinary = new JButton("Upload current binary " + origName + " to pid:" + vmInfo.getVmPid());
+        uploadBinary.setFont(uploadBinary.getFont().deriveFont(Font.BOLD));
+        statusBinary = new JTextField("");
+        statusBinary.setEditable(false);
+        binaryView.add(binaryFilename);
+        JPanel binarySaving = new JPanel(new BorderLayout());
+        binarySaving.add(namingBinaryView, BorderLayout.WEST);
+        binarySaving.add(outputBinaries, BorderLayout.CENTER);
+        binarySaving.add(selectBinary, BorderLayout.EAST);
+        binaryView.add(binarySaving);
+        binaryView.add(saveBinary);
+        binaryView.add(uploadBinary);
+        binaryView.add(statusBinary);
+
+        setLocationRelativeTo(null);
         setValidation();
         setSelectListener();
         setOkListener();
@@ -182,6 +214,14 @@ public class RewriteClassDialog extends JDialog {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 saveByGui(futureSrcTarget.getText(), namingSource.getSelectedIndex(), ".java", statusCompileCurrentBuffer, origName, origBuffer.getBytes());
+
+            }
+        });
+
+        saveBinary.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                saveByGui(outputBinaries.getText(), namingBinaryView.getSelectedIndex(), ".class", statusBinary, origName, origBin);
 
             }
         });
@@ -279,6 +319,7 @@ public class RewriteClassDialog extends JDialog {
         setSelectSaveListenr(selectSrcTarget, futureSrcTarget, namingSource);
         setSelectSaveListenr(selectBinTarget, futureBinTarget, namingBinary);
         setSelectSaveListenr(selectExternalFilesSave, outputExternalFilesDir, namingExternal);
+        setSelectSaveListenr(selectBinary, outputBinaries, namingBinary);
         selectExternalFiles.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -398,6 +439,7 @@ public class RewriteClassDialog extends JDialog {
         dualpane.add(currentBufferPane);
         dualpane.add(manualPane);
         dualpane.add(externalFiles);
+        dualpane.add(binaryView);
         this.add(dualpane);
         this.pack();
     }

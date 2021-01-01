@@ -150,7 +150,7 @@ class HexTable extends JTable {
 
     @Override
     public boolean isCellEditable(final int row, final int col) {
-        return false;
+        return row >= 0 && col >= 0 && col < 16; //headers are not part of this condition
     }
 
     @Override
@@ -305,6 +305,10 @@ class HexTable extends JTable {
         return this.model.undo();
     }
 
+    public byte[] getDocBuffer() {
+        return model.getDoc();
+    }
+
     static {
         ANTERNATING_CELL_COLOR = new Color(240, 240, 240);
     }
@@ -313,10 +317,16 @@ class HexTable extends JTable {
         private static final long serialVersionUID = 1L;
 
         public CellEditor() {
-            super(new JTextField());
+            super(createTextField());
             final AbstractDocument doc = (AbstractDocument) ((JTextComponent) this.editorComponent).getDocument();
             doc.setDocumentFilter(new EditorDocumentFilter());
             this.getComponent().addFocusListener(this);
+        }
+
+        private static JTextField createTextField() {
+            JTextField r = new JTextField();
+            r.setBorder(BorderFactory.createEmptyBorder());
+            return r;
         }
 
         public void focusGained(final FocusEvent e) {
@@ -373,7 +383,7 @@ class HexTable extends JTable {
         }
 
         private Object sanitize(Object value, int row, int column) {
-            if (column < 1 || column > 15) {
+            if (column < 0 || column > 15) {
                 return value;
             }
             if (value instanceof String) {

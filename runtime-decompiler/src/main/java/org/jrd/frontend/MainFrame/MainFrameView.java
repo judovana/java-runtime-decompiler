@@ -179,7 +179,10 @@ public class MainFrameView {
                 "\n" +
                 "Internal javap decompiling tools are available by default.\n" +
                 "You can also download an external decompiler, e.g. via 'mvn clean install -PdownloadPlugins', and set it up in 'Configure -> Plugins'.\n" +
-                "Currently supported decompilers are: Fernflower, Procyon.\n");
+                "Currently supported decompilers are: Fernflower, Procyon, jasm.\n"+
+                "\n" +
+                "JRD is dangerous program, and as it allows you to overwrite classes in running JVM. By doing so, you can break the JVM .\n"+
+                "Use with caution.  jdk9+ is not allwoed to attach by default. Run JVM with -Djdk.attach.allowAttachSelf=true.\n");
         welcomeJTextArea.setFont(new Font(welcomeJTextArea.getFont().getFontName(), welcomeJTextArea.getFont().getStyle(), 20));
         welcomeJTextArea.setLineWrap(true);
         welcomeJTextArea.setWrapStyleWord(true);

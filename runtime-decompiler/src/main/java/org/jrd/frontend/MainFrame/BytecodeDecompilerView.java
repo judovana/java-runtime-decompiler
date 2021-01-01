@@ -39,6 +39,7 @@ public class BytecodeDecompilerView {
     private RTextScrollPane bytecodeScrollPane;
     private RSyntaxTextArea bytecodeSyntaxTextArea;
     private HexEditor hex;
+    private JPanel hexControls;
     private String lastDecompiledClass = "";
     private ActionListener bytesActionListener;
     private ActionListener classesActionListener;
@@ -183,6 +184,7 @@ public class BytecodeDecompilerView {
         bytecodeScrollPane = new RTextScrollPane(bytecodeSyntaxTextArea);
 
         hex = new HexEditor();
+        hexControls = new JPanel();
 
         leftMainPanel = new JPanel();
         leftMainPanel.setLayout(new BorderLayout());
@@ -215,6 +217,14 @@ public class BytecodeDecompilerView {
         rightMainPanel.add(searchCodeField, BorderLayout.NORTH);
         rightBin.setName("Binary buffer");
         rightBin.add(hex);
+        rightBin.add(hexControls, BorderLayout.NORTH);
+        hexControls.setLayout(new GridLayout(1,2));
+        JButton undo = new JButton("Undo");
+        hexControls.add(undo);
+        JButton redo = new JButton("Redo");
+        hexControls.add(redo);
+        undo.addActionListener(actionEvent -> hex.undo());
+        redo.addActionListener(actionEvent -> hex.redo());
         srcBin.add(rightMainPanel);
         srcBin.add(rightBin);
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
@@ -301,7 +311,7 @@ public class BytecodeDecompilerView {
 
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
-            worker.rewriteClass(getSelecteddecompilerWrapperInformation(), BytecodeDecompilerView.this.lastDecompiledClass, BytecodeDecompilerView.this.bytecodeSyntaxTextArea.getText());
+            worker.rewriteClass(getSelecteddecompilerWrapperInformation(), BytecodeDecompilerView.this.lastDecompiledClass, BytecodeDecompilerView.this.bytecodeSyntaxTextArea.getText(), BytecodeDecompilerView.this.hex.get());
         }
     }
 
