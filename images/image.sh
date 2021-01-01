@@ -71,9 +71,14 @@ function modifyAndCopyWrappers() {
 
 # if PLUGINS=TRUE && mvn install -PdownloadPlugins was run, and you really wont them to include plugins in images
 if [ "x$PLUGINS" == "xTRUE" ] ; then
-  for dec in procyon fernflower ; do
+  for dec in procyon fernflower jasm; do
     mkdir "$DECOMPS/$dec"
-    jars=`find $MVN_SOURCE | grep -e $dec | grep \.jar$`
+    if [ "x$dec" == "xjasm" ] ; then
+      lname=asmtools
+    else
+      lname=$dec
+    fi
+    jars=`find $MVN_SOURCE | grep -e $lname | grep \.jar$`
     for jar in $jars ; do
       cp "$jar" "$DECOMPS/$dec"
     done

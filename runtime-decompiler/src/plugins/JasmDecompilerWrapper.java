@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 
-public class Jasm {
+public class JasmDecompilerWrapper {
 
     public String decompile(byte[] bytecode, String[] options) {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();

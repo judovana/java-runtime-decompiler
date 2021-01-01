@@ -191,6 +191,13 @@
                     <version>4.2.1.Final</version>
                     <scope>provided</scope>
                 </dependency>
+
+                <dependency>
+                    <groupId>org.openjdk</groupId>
+                    <artifactId>asmtools</artifactId>
+                    <version>7.0.b10-SNAPSHOT</version>
+                    <scope>provided</scope>
+                </dependency>
             </dependencies>
         </profile>
         <profile>
