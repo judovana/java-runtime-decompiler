@@ -222,36 +222,14 @@ public class VmDecompilerInformationController {
     class ClassRewriter {
 
         void rewriteClass(DecompilerWrapperInformation selectedDecompiler, String name, String buffer) {
-            try {
                 if (name == null || name.trim().isEmpty())
                     name = "???";
 
                 final RewriteClassDialog rewriteClassDialog = new RewriteClassDialog(name, lastLoaded, buffer, lastSavedSrc, lastSavedBin, vmInfo, vmManager, pluginManager, selectedDecompiler);
                 rewriteClassDialog.setVisible(true);
-                if (!rewriteClassDialog.isOkPressed())
-                    return;
-
-                final String className = rewriteClassDialog.getClassName();
                 lastLoaded = rewriteClassDialog.getLoadFilePath();
                 lastSavedSrc = rewriteClassDialog.getSaveSrcPath();
                 lastSavedBin = rewriteClassDialog.getSaveBinPath();
-
-                final String body = fileToBase64(lastLoaded);
-                AgentRequestAction request = createRequest(RequestAction.OVERWRITE, className, body);
-                String response = submitRequest(request);
-                if (response.equals("error")) {
-                    JOptionPane.showMessageDialog(mainFrameView.getMainFrame(),
-                            "class rewrite failed.",
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE);
-                }
-            } catch (Exception ex) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
-                JOptionPane.showMessageDialog(mainFrameView.getMainFrame(),
-                        ex,
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE);
-            }
         }
     }
 

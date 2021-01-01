@@ -7,6 +7,7 @@ import org.jc.api.IdentifiedSource;
 import org.jc.api.InMemoryCompiler;
 import org.jc.api.MessagesListener;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
+import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.OutputController;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
@@ -56,7 +57,6 @@ public class RewriteClassDialog extends JDialog {
     private final JButton ok;
     private final PluginManager pluginManager;
     private final DecompilerWrapperInformation decompiler;
-    private boolean wasOkPressed;
     private boolean haveCompiler;
 
     private final JPanel externalFiles;
@@ -121,8 +121,7 @@ public class RewriteClassDialog extends JDialog {
         className = new JTextField(name);
         selectSrc = new JButton("...");
         nothing = new JLabel();
-        ok = new JButton("ok");
-        wasOkPressed = false;
+        ok = new JButton("upload to vm");
 
         externalFiles = new JPanel(new GridLayout(0, 1));
         externalFiles.setName("Compile external files");
@@ -272,8 +271,20 @@ public class RewriteClassDialog extends JDialog {
             }
         });
         ok.addActionListener(e -> {
-            this.wasOkPressed = true;
-            this.setVisible(false);
+            try {
+                final String body = VmDecompilerInformationController.fileToBase64(filePath.getText());
+                AgentRequestAction request = VmDecompilerInformationController.createRequest(vmInfo, AgentRequestAction.RequestAction.OVERWRITE, className.getText(), body);
+                String response = VmDecompilerInformationController.submitRequest(vmManager, request);
+                if (response.equals("error")) {
+                    JOptionPane.showMessageDialog(null,"class rewrite failed.","Error", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    validation.setForeground(Color.black);
+                    validation.setText("Upload looks ok");
+                }
+            } catch (Exception ex) {
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
+                JOptionPane.showMessageDialog(null, ex,"Error", JOptionPane.ERROR_MESSAGE);
+            }
         });
 
         compileAndSave.addActionListener(actionEvent -> {
@@ -360,14 +371,6 @@ public class RewriteClassDialog extends JDialog {
         dualpane.add(externalFiles);
         this.add(dualpane);
         this.pack();
-    }
-
-    public boolean isOkPressed() {
-        return this.wasOkPressed;
-    }
-
-    public String getClassName() {
-        return this.className.getText();
     }
 
     public String getLoadFilePath() {
