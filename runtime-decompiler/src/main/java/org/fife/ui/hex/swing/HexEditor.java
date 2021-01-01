@@ -176,7 +176,7 @@ public class HexEditor extends JScrollPane
         if (alternate != this.alternateColumnBG) {
             this.alternateColumnBG = alternate;
             this.table.repaint();
-            this.firePropertyChange("alternateColBG", !alternate, alternate);
+            this.firePropertyChange(PROPERTY_ALTERNATE_COLUMN_BG, !alternate, alternate);
         }
     }
     
@@ -184,7 +184,7 @@ public class HexEditor extends JScrollPane
         if (alternate != this.alternateRowBG) {
             this.alternateRowBG = alternate;
             this.table.repaint();
-            this.firePropertyChange("alternateRowBG", !alternate, alternate);
+            this.firePropertyChange(PROPERTY_ALTERNATE_ROW_BG, !alternate, alternate);
         }
     }
     
@@ -192,7 +192,7 @@ public class HexEditor extends JScrollPane
         if (highlight != this.highlightSelectionInAsciiDump) {
             this.highlightSelectionInAsciiDump = highlight;
             this.table.repaint();
-            this.firePropertyChange("highlightAsciiDump", !highlight, highlight);
+            this.firePropertyChange(PROPERTY_HIGHLIGHT_ASCII_DUMP, !highlight, highlight);
         }
     }
     
@@ -201,7 +201,7 @@ public class HexEditor extends JScrollPane
             final Color old = this.highlightSelectionInAsciiDumpColor;
             this.highlightSelectionInAsciiDumpColor = c;
             this.table.repaint();
-            this.firePropertyChange("asciiDumpHighlightColor", old, c);
+            this.firePropertyChange(PROPERTY_ASCII_DUMP_HIGHLIGHT_COLOR, old, c);
         }
     }
     
@@ -216,7 +216,7 @@ public class HexEditor extends JScrollPane
     public void setShowGrid(final boolean show) {
         if (show != this.table.getShowHorizontalLines()) {
             this.table.setShowGrid(show);
-            this.firePropertyChange("showGrid", !show, show);
+            this.firePropertyChange(PROPERTY_SHOW_GRID, !show, show);
         }
     }
     
