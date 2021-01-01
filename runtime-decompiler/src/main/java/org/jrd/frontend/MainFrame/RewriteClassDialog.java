@@ -225,6 +225,13 @@ public class RewriteClassDialog extends JDialog {
 
             }
         });
+
+        uploadBinary.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                uploadByGui(vmInfo, vmManager, statusBinary, origName, origBin);
+            }
+        });
     }
 
 
