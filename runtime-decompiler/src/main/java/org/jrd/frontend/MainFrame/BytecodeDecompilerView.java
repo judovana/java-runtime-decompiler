@@ -1,5 +1,6 @@
 package org.jrd.frontend.MainFrame;
 
+import org.fife.ui.hex.swing.HexEditor;
 import org.fife.ui.rsyntaxtextarea.*;
 import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
@@ -13,6 +14,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,10 +33,12 @@ public class BytecodeDecompilerView {
     private JComboBox topComboBox;
     private JPanel classesPanel;
     private JPanel rightMainPanel;
+    private JPanel rightBin;
     private JScrollPane leftScrollPanel;
     private JList<String> filteredClassesJlist;
     private RTextScrollPane bytecodeScrollPane;
     private RSyntaxTextArea bytecodeSyntaxTextArea;
+    private HexEditor hex;
     private String lastDecompiledClass = "";
     private ActionListener bytesActionListener;
     private ActionListener classesActionListener;
@@ -177,6 +182,8 @@ public class BytecodeDecompilerView {
         bytecodeSyntaxTextArea.setCodeFoldingEnabled(true);
         bytecodeScrollPane = new RTextScrollPane(bytecodeSyntaxTextArea);
 
+        hex = new HexEditor();
+
         leftMainPanel = new JPanel();
         leftMainPanel.setLayout(new BorderLayout());
         leftMainPanel.setBorder(new EtchedBorder());
@@ -184,6 +191,10 @@ public class BytecodeDecompilerView {
         rightMainPanel = new JPanel();
         rightMainPanel.setLayout(new BorderLayout());
         rightMainPanel.setBorder(new EtchedBorder());
+
+        rightBin = new JPanel();
+        rightBin.setLayout(new BorderLayout());
+        rightBin.setBorder(new EtchedBorder());
 
         JPanel topButtonPanel = new JPanel();
 
@@ -197,10 +208,17 @@ public class BytecodeDecompilerView {
 
         classesPanel.add(leftScrollPanel);
         leftMainPanel.add(classesPanel);
+
+        JTabbedPane srcBin = new JTabbedPane();
+        rightMainPanel.setName("source buffer");
         rightMainPanel.add(bytecodeScrollPane);
         rightMainPanel.add(searchCodeField, BorderLayout.NORTH);
+        rightBin.setName("Binary buffer");
+        rightBin.add(hex);
+        srcBin.add(rightMainPanel);
+        srcBin.add(rightBin);
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-                leftMainPanel, rightMainPanel);
+                leftMainPanel, srcBin);
 
         splitPane.addComponentListener(new ComponentAdapter() {
             @Override
@@ -245,18 +263,22 @@ public class BytecodeDecompilerView {
      *
      * @param decompiledClass String of source code of decompiler class
      */
-    public void reloadTextField(String name, String decompiledClass) {
-        final String data = decompiledClass;
+    public void reloadTextField(String name, String decompiledClass, byte[] source) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                BytecodeDecompilerView.this.setDecompiledClass(name, data);
+                BytecodeDecompilerView.this.setDecompiledClass(name, decompiledClass, source);
             }
         });
     }
 
-    private void setDecompiledClass(String name, String data) {
+    private void setDecompiledClass(String name, String data, byte[] source) {
         bytecodeSyntaxTextArea.setText(data);
+        try {
+            hex.open(new ByteArrayInputStream(source));
+        } catch (IOException ex){
+            OutputController.getLogger().log(ex);
+        }
         this.lastDecompiledClass = name;
     }
 

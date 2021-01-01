@@ -90,7 +90,7 @@ public class RewriteClassDialog extends JDialog {
         dualpane = new JTabbedPane();
 
         currentBufferPane = new JPanel();
-        currentBufferPane.setName("Current buffer");
+        currentBufferPane.setName("Current source buffer");
         currentBufferPane.setLayout(new GridLayout(0, 1));
         statusCompileCurrentBuffer = new JTextField();
         statusCompileCurrentBuffer.setEditable(false);
@@ -201,7 +201,7 @@ public class RewriteClassDialog extends JDialog {
             Files.write(f.toPath(), content);
             ss = "Saved: ";
         } catch (Exception ex) {
-            ex.printStackTrace();
+            OutputController.getLogger().log(ex);
             JOptionPane.showMessageDialog(null, ex.getMessage());
             r = false;
         }
@@ -220,7 +220,7 @@ public class RewriteClassDialog extends JDialog {
             }
             ss = "uploaded: ";
         } catch (Exception ex) {
-            ex.printStackTrace();
+            OutputController.getLogger().log(ex);
             JOptionPane.showMessageDialog(null, ex.getMessage());
             r = false;
         }
@@ -324,7 +324,7 @@ public class RewriteClassDialog extends JDialog {
                 }
                 new SavingCompilerOutputAction(statusExternalFiles, vmInfo, vmManager, pluginManager, decompiler, haveCompiler, namingExternal.getSelectedIndex(), outputExternalFilesDir.getText()).run(loaded);
             } catch (Exception ex) {
-                ex.printStackTrace();
+                OutputController.getLogger().log(ex);
                 statusExternalFiles.setText(ex.getMessage());
                 JOptionPane.showMessageDialog(null, ex.getMessage());
             }
@@ -442,7 +442,7 @@ public class RewriteClassDialog extends JDialog {
                 }), sources);
             } catch (Exception ex) {
                 this.ex = ex;
-                ex.printStackTrace();
+                OutputController.getLogger().log(ex);
                 compilationLog.setText(compilationLog.getText() + ex.getMessage() + "\n");
             } finally {
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Operation finished");

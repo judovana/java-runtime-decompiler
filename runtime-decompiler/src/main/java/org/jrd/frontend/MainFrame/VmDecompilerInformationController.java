@@ -161,7 +161,7 @@ public class VmDecompilerInformationController {
     private void abortAndCleanup() {
         mainFrameView.switchPanel(false);
         mainFrameView.getBytecodeDecompilerView().reloadClassList(new String[0]);
-        mainFrameView.getBytecodeDecompilerView().reloadTextField("", "");
+        mainFrameView.getBytecodeDecompilerView().reloadTextField("", "", new byte[16]);
         haltAgent();
         updateVmLists();
         mainFrameView.clearLocalListSelection();
@@ -212,7 +212,7 @@ public class VmDecompilerInformationController {
         } catch (Exception e) {
             OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
         }
-        bytecodeDecompilerView.reloadTextField(name, decompiledClass);
+        bytecodeDecompilerView.reloadTextField(name, decompiledClass,  bytes);
     }
 
     private static String lastLoaded = System.getProperty("user.home");

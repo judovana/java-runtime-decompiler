@@ -1,5 +1,6 @@
 package org.jrd.backend.data;
 
+import org.jrd.backend.core.OutputController;
 import org.jrd.backend.core.VmDecompilerStatus;
 import com.sun.tools.attach.VirtualMachine;
 import com.sun.tools.attach.VirtualMachineDescriptor;
@@ -27,7 +28,7 @@ public class VmManager{
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    OutputController.getLogger().log(e);
                 }
                 updateLocalVMs();
             }
