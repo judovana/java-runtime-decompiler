@@ -54,7 +54,10 @@ public class RewriteClassDialog extends JDialog {
     private final JButton selectSrc;
     private final JLabel nothing;
     private final JButton ok;
+    private final PluginManager pluginManager;
+    private final DecompilerWrapperInformation decompiler;
     private boolean wasOkPressed;
+    private boolean haveCompiler;
 
     private final JPanel externalFiles;
     private final JTextField filesToCompile;
@@ -156,11 +159,15 @@ public class RewriteClassDialog extends JDialog {
         setOkListener();
         adds();
 
+        this.pluginManager = pluginManager;
+        this.decompiler = selectedDecompiler;
         try {
-            boolean haveDecompiler = pluginManager.haveCompiler(selectedDecompiler);
+            this.haveCompiler = false;
+            boolean haveDecompiler = this.pluginManager.haveCompiler(decompiler);
             String s = "Default runtime compiler will be used";
             if (haveDecompiler) {
                 s = selectedDecompiler.getName() + " plugin is delivered with its own compiler!!";
+                this.haveCompiler = true;
             }
             statusExternalFiles.setText(s);
             statusCompileCurrentBuffer.setText(s);
@@ -271,7 +278,7 @@ public class RewriteClassDialog extends JDialog {
 
         compileAndSave.addActionListener(actionEvent -> {
             IdentifiedSource currrentIs = new IdentifiedSource(new ClassIdentifier(origName), origBuffer.getBytes(), Optional.empty());
-            new SavingCompilerOutputAction(statusCompileCurrentBuffer, vmInfo, vmManager, namingBinary.getSelectedIndex(), futureBinTarget.getText()).run(currrentIs);
+            new SavingCompilerOutputAction(statusCompileCurrentBuffer, vmInfo, vmManager, pluginManager, decompiler, haveCompiler, namingBinary.getSelectedIndex(), futureBinTarget.getText()).run(currrentIs);
         });
 
         compileExternalFiles.addActionListener(actionEvent -> {
@@ -281,7 +288,7 @@ public class RewriteClassDialog extends JDialog {
                 for (int i = 0; i < srcs.length; i++) {
                     loaded[i] = new IdentifiedSource(new ClassIdentifier(guessClass(srcs[i])), Files.readAllBytes(new File(srcs[i]).toPath()), Optional.empty());
                 }
-                new SavingCompilerOutputAction(statusExternalFiles, vmInfo, vmManager, namingExternal.getSelectedIndex(), outputExternalFilesDir.getText()).run(loaded);
+                new SavingCompilerOutputAction(statusExternalFiles, vmInfo, vmManager, pluginManager, decompiler, haveCompiler, namingExternal.getSelectedIndex(), outputExternalFilesDir.getText()).run(loaded);
             } catch (Exception ex) {
                 ex.printStackTrace();
                 statusExternalFiles.setText(ex.getMessage());
@@ -298,9 +305,14 @@ public class RewriteClassDialog extends JDialog {
     }
 
 
-    private static CompilationWithResult xompileWithGui(VmInfo vmInfo, VmManager vmManager, IdentifiedSource... sources) {
+    private static CompilationWithResult xompileWithGui(VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapperInformation currentDecompiler, boolean haveCompiler, IdentifiedSource... sources) {
         ClassesProvider cp = new RuntimeCompilerConnector.JRDClassesProvider(vmInfo, vmManager);
-        InMemoryCompiler rc = new RuntimeCompilerConnector.DummyRuntimeCompiler();
+        InMemoryCompiler rc;
+        if (haveCompiler) {
+            rc = new RuntimeCompilerConnector.ForeignCompilerWrapper(pm, currentDecompiler);
+        } else {
+            rc = new RuntimeCompilerConnector.DummyRuntimeCompiler();
+        }
         JDialog compialtionRunningDialog = new JDialog((JFrame) null, "Compiling", true);
         JTextArea compilationLog = new JTextArea();
         compialtionRunningDialog.setSize(300, 400);
@@ -370,97 +382,103 @@ public class RewriteClassDialog extends JDialog {
         return this.futureBinTarget.getText();
     }
 
-    private static class CompilationWithResult implements Runnable {
-        private final InMemoryCompiler rc;
-        private final ClassesProvider cp;
-        private final JTextArea compilationLog;
-        private final IdentifiedSource[] sources;
-        private Exception ex;
-        private Collection<IdentifiedBytecode> result;
+private static class CompilationWithResult implements Runnable {
+    private final InMemoryCompiler rc;
+    private final ClassesProvider cp;
+    private final JTextArea compilationLog;
+    private final IdentifiedSource[] sources;
+    private Exception ex;
+    private Collection<IdentifiedBytecode> result;
 
 
-        public CompilationWithResult(InMemoryCompiler rc, ClassesProvider cp, JTextArea compilationLog, IdentifiedSource... sources) {
-            this.rc = rc;
-            this.cp = cp;
-            this.compilationLog = compilationLog;
-            this.sources = sources;
-        }
-
-        @Override
-        public void run() {
-            try {
-                result = rc.compileClass(cp, Optional.of(new MessagesListener() {
-                    @Override
-                    public void addMessage(Level level, String s) {
-                        OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, s);
-                        compilationLog.setText(compilationLog.getText() + s + "\n");
-                    }
-                }), sources);
-            } catch (Exception ex) {
-                this.ex = ex;
-                ex.printStackTrace();
-                compilationLog.setText(compilationLog.getText() + ex.getMessage() + "\n");
-            } finally {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Operation finished");
-                compilationLog.setText(compilationLog.getText() + "Operatin finished, you may close dialog\n");
-            }
-
-        }
+    public CompilationWithResult(InMemoryCompiler rc, ClassesProvider cp, JTextArea compilationLog, IdentifiedSource... sources) {
+        this.rc = rc;
+        this.cp = cp;
+        this.compilationLog = compilationLog;
+        this.sources = sources;
     }
 
-    private static class SavingCompilerOutputAction {
-
-        private final JTextField status;
-        private final VmInfo vmInfo;
-        private final VmManager vmManager;
-        private final int namingSchema;
-        private final String destination;
-
-        public SavingCompilerOutputAction(JTextField status, VmInfo vmInfo, VmManager vmManager, int namingSchema, String destination) {
-            this.status = status;
-            this.vmInfo = vmInfo;
-            this.vmManager = vmManager;
-            this.namingSchema = namingSchema;
-            this.destination = destination;
+    @Override
+    public void run() {
+        try {
+            result = rc.compileClass(cp, Optional.of(new MessagesListener() {
+                @Override
+                public void addMessage(Level level, String s) {
+                    OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, s);
+                    compilationLog.setText(compilationLog.getText() + s + "\n");
+                }
+            }), sources);
+        } catch (Exception ex) {
+            this.ex = ex;
+            ex.printStackTrace();
+            compilationLog.setText(compilationLog.getText() + ex.getMessage() + "\n");
+        } finally {
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Operation finished");
+            compilationLog.setText(compilationLog.getText() + "Operatin finished, you may close dialog\n");
         }
 
-        public void run(IdentifiedSource... sources) {
-            RewriteClassDialog.CompilationWithResult compiler = xompileWithGui(this.vmInfo, this.vmManager, sources);
-            if (compiler.ex == null && compiler.result == null) {
-                String s = "No output from compiler, maybe still running?";
-                JOptionPane.showMessageDialog(null, s);
-                status.setText(s);
-            } else if (compiler.ex != null) {
-                JOptionPane.showMessageDialog(null, compiler.ex.getMessage());
-                status.setText("Failed - " + compiler.ex.getMessage());
-            } else if (compiler.result != null) {
-                status.setText("something done, will save now");
-                status.repaint();
-                if (namingSchema == CUSTOM_NAME) {
-                    if (compiler.result.size() != 1) {
-                        String s = "Output of compilation was " + compiler.result.size() + "classes. Can not save more then one file to exact filename";
-                        JOptionPane.showMessageDialog(null, s);
-                        status.setText(s);
-                        return;
-                    }
+    }
+}
+
+private static class SavingCompilerOutputAction {
+
+    private final JTextField status;
+    private final VmInfo vmInfo;
+    private final VmManager vmManager;
+    private final int namingSchema;
+    private final String destination;
+    private final PluginManager pluginManager;
+    private final DecompilerWrapperInformation decompilerWrapper;
+    private final boolean haveCompiler;
+
+    public SavingCompilerOutputAction(JTextField status, VmInfo vmInfo, VmManager vmManager,PluginManager pm, DecompilerWrapperInformation dwi, boolean haveCompiler, int namingSchema, String destination) {
+        this.status = status;
+        this.vmInfo = vmInfo;
+        this.vmManager = vmManager;
+        this.namingSchema = namingSchema;
+        this.destination = destination;
+        this.pluginManager = pm;
+        this.decompilerWrapper = dwi;
+        this.haveCompiler = haveCompiler;
+    }
+
+    public void run(IdentifiedSource... sources) {
+        RewriteClassDialog.CompilationWithResult compiler = xompileWithGui(this.vmInfo, this.vmManager, pluginManager, decompilerWrapper, haveCompiler, sources);
+        if (compiler.ex == null && compiler.result == null) {
+            String s = "No output from compiler, maybe still running?";
+            JOptionPane.showMessageDialog(null, s);
+            status.setText(s);
+        } else if (compiler.ex != null) {
+            JOptionPane.showMessageDialog(null, compiler.ex.getMessage());
+            status.setText("Failed - " + compiler.ex.getMessage());
+        } else if (compiler.result != null) {
+            status.setText("something done, will save now");
+            status.repaint();
+            if (namingSchema == CUSTOM_NAME) {
+                if (compiler.result.size() != 1) {
+                    String s = "Output of compilation was " + compiler.result.size() + "classes. Can not save more then one file to exact filename";
+                    JOptionPane.showMessageDialog(null, s);
+                    status.setText(s);
+                    return;
                 }
-                int saved = 0;
-                for (IdentifiedBytecode clazz : compiler.result) {
-                    boolean r = saveByGui(destination, namingSchema, ".class", status, clazz.getClassIdentifier().getFullName(), clazz.getFile());
-                    if (r) {
-                        saved++;
-                    }
-                }
-                if (compiler.result.size() > 1) {
-                    if (saved == compiler.result.size()) {
-                        status.setText("Saved all " + saved + "classes to" + destination);
-                    } else {
-                        status.setText("Saved only " + saved + " from total of " + compiler.result.size() + " classes to" + destination);
-                    }
-                }
-            } else {
-                status.setText("Really weird state, report bug how to achieve this");
             }
+            int saved = 0;
+            for (IdentifiedBytecode clazz : compiler.result) {
+                boolean r = saveByGui(destination, namingSchema, ".class", status, clazz.getClassIdentifier().getFullName(), clazz.getFile());
+                if (r) {
+                    saved++;
+                }
+            }
+            if (compiler.result.size() > 1) {
+                if (saved == compiler.result.size()) {
+                    status.setText("Saved all " + saved + "classes to" + destination);
+                } else {
+                    status.setText("Saved only " + saved + " from total of " + compiler.result.size() + " classes to" + destination);
+                }
+            }
+        } else {
+            status.setText("Really weird state, report bug how to achieve this");
         }
     }
+}
 }

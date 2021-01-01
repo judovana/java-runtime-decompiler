@@ -115,7 +115,7 @@ public class PluginManager {
         if (wrapper == null) {
             throw new RuntimeException("No valid decompiler selected. Current-Buffer may not be usable");
         }
-        if (wrapper.getDecompileMethod() == null) {
+        if (wrapper.getDecompileMethod() == null) { //compile method may remian null
             InitializeWrapper(wrapper);
         }
         if (wrapper.getName().equals(DecompilerWrapperInformation.JAVAP_NAME) || wrapper.getName().equals(DecompilerWrapperInformation.JAVAP_VERBOSE_NAME)){
@@ -171,9 +171,9 @@ public class PluginManager {
                 wrapper.setInstance(constructor.newInstance());
                 wrapper.setDecompileMethod(DecompilerClass.getMethod("decompile", byte[].class, String[].class));
                 try{
-                    wrapper.setCompileMethod(DecompilerClass.getMethod("compile", Map.class, String[].class));
+                    wrapper.setCompileMethod(DecompilerClass.getMethod("compile", Map.class, String[].class, Object.class));
                 }catch (Exception e){
-                    OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "No custom compile method: " + e.getMessage());
+                    OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "No custom compile method: " + e.getMessage());
                 }
             } catch (Exception e) {
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Decompiler wrapper could not be loaded. " + e.getMessage());

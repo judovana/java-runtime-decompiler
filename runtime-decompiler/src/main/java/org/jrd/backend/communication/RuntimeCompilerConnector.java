@@ -11,6 +11,8 @@ import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.data.Cli;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
+import org.jrd.backend.decompiling.DecompilerWrapperInformation;
+import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.MainFrame.VmDecompilerInformationController;
 
 import java.io.UnsupportedEncodingException;
@@ -19,7 +21,9 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.logging.Level;
@@ -75,7 +79,7 @@ public class RuntimeCompilerConnector {
         }
 
         private void sleepIfSlow(long i) throws InterruptedException {
-            if (slow){
+            if (slow) {
                 Thread.sleep(i);
             }
         }
@@ -119,6 +123,35 @@ public class RuntimeCompilerConnector {
                 return Arrays.asList(classes);
             } else {
                 throw new RuntimeException("Error obtaining list of classes: " + response);
+            }
+        }
+    }
+
+    public static class ForeignCompilerWrapper implements InMemoryCompiler {
+        private final PluginManager pluginManager;
+        private final DecompilerWrapperInformation currentDecompiler;
+
+        public ForeignCompilerWrapper(PluginManager pm, DecompilerWrapperInformation currentDecompiler) {
+            this.pluginManager = pm;
+            this.currentDecompiler = currentDecompiler;
+        }
+
+        @Override
+        public Collection<IdentifiedBytecode> compileClass(ClassesProvider classprovider, Optional<MessagesListener> messagesConsummer, IdentifiedSource... javaSourceFiles) {
+            try {
+                Map<String,String> inputs = new HashMap<>();
+                for(IdentifiedSource is: javaSourceFiles) {
+                    inputs.put(is.getClassIdentifier().getFullName(), is.getSourceCode());
+                }
+                Object r = currentDecompiler.getCompileMethod().invoke(currentDecompiler.getInstance(), inputs, new String[0], messagesConsummer.get());
+                Map<String, byte[]> rr = (Map<String, byte[]>) r;
+                List<IdentifiedBytecode> rrr = new ArrayList<>(rr.size());
+                for(Map.Entry<String, byte[]> e: rr.entrySet()){
+                    rrr.add(new IdentifiedBytecode(new ClassIdentifier(e.getKey()), e.getValue()));
+                }
+                return  rrr;
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
             }
         }
     }
