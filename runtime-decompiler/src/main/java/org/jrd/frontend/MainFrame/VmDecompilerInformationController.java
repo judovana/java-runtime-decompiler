@@ -82,7 +82,7 @@ public class VmDecompilerInformationController {
         newConnectionDialog.setVisible(true);
     }
 
-    public class vmArrayList<T> extends ArrayList<VmInfo>{
+    public class vmArrayList<T> extends ArrayList<VmInfo> {
         @Override
         public boolean add(VmInfo vmInfo) {
             super.add(vmInfo);
@@ -125,7 +125,7 @@ public class VmDecompilerInformationController {
      * Effectively merging them into one.
      *
      * @param vmList list that doesn't get cleared containing the VM that user
-     * wants to attach.
+     *               wants to attach.
      */
     private void clearOtherList(JList<VmInfo> vmList) {
         switch (vmList.getName()) {
@@ -222,23 +222,31 @@ public class VmDecompilerInformationController {
     class ClassRewriter {
 
         void rewriteClass(DecompilerWrapperInformation selectedDecompiler, String name, String buffer) {
-                if (name == null || name.trim().isEmpty())
-                    name = "???";
+            if (name == null || name.trim().isEmpty())
+                name = "???";
 
-                final RewriteClassDialog rewriteClassDialog = new RewriteClassDialog(name, lastLoaded, buffer, lastSavedSrc, lastSavedBin, vmInfo, vmManager, pluginManager, selectedDecompiler);
-                rewriteClassDialog.setVisible(true);
-                lastLoaded = rewriteClassDialog.getLoadFilePath();
-                lastSavedSrc = rewriteClassDialog.getSaveSrcPath();
-                lastSavedBin = rewriteClassDialog.getSaveBinPath();
+            final RewriteClassDialog rewriteClassDialog = new RewriteClassDialog(name, lastLoaded, buffer, lastSavedSrc, lastSavedBin, vmInfo, vmManager, pluginManager, selectedDecompiler);
+            rewriteClassDialog.setVisible(true);
+            lastLoaded = rewriteClassDialog.getLoadFilePath();
+            lastSavedSrc = rewriteClassDialog.getSaveSrcPath();
+            lastSavedBin = rewriteClassDialog.getSaveBinPath();
         }
     }
 
     public static String fileToBase64(String path) {
         try {
-            return Base64.getEncoder().encodeToString(Files.readAllBytes(new File(path).toPath()));
+            return bytesToBase64(fileToBytes(path));
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    public static byte[] fileToBytes(String path) throws IOException {
+        return Files.readAllBytes(new File(path).toPath());
+    }
+
+    public static String bytesToBase64(byte[] bytes) {
+        return Base64.getEncoder().encodeToString(bytes);
     }
 
     private void haltAgent() {

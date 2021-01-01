@@ -208,6 +208,22 @@ public class RewriteClassDialog extends JDialog {
         return r;
     }
 
+    private static boolean uploadByGui(VmInfo vmInfo, VmManager vmManager, JTextField status, String clazz, byte[] content) {
+        String name = "???";
+        String ss = "Error to upload: ";
+        boolean r = true;
+        try {
+            uploadBytecode(clazz, vmManager, vmInfo, content);
+            ss = "uploaded: ";
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, ex.getMessage());
+            r = false;
+        }
+        status.setText(ss + clazz);
+        return r;
+    }
+
     private static String cheatName(String base, int selectedIndex, String suffix, String fullyClasifiedName) {
         if (selectedIndex == CUSTOM_NAME) {
             return base;
@@ -272,24 +288,27 @@ public class RewriteClassDialog extends JDialog {
         });
         ok.addActionListener(e -> {
             try {
-                final String body = VmDecompilerInformationController.fileToBase64(filePath.getText());
-                AgentRequestAction request = VmDecompilerInformationController.createRequest(vmInfo, AgentRequestAction.RequestAction.OVERWRITE, className.getText(), body);
-                String response = VmDecompilerInformationController.submitRequest(vmManager, request);
+                String response = uploadBytecode(className.getText(), vmManager, vmInfo, VmDecompilerInformationController.fileToBytes(filePath.getText()));
                 if (response.equals("error")) {
-                    JOptionPane.showMessageDialog(null,"class rewrite failed.","Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "class rewrite failed.", "Error", JOptionPane.ERROR_MESSAGE);
                 } else {
                     validation.setForeground(Color.black);
                     validation.setText("Upload looks ok");
                 }
             } catch (Exception ex) {
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
-                JOptionPane.showMessageDialog(null, ex,"Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, ex, "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
         compileAndSave.addActionListener(actionEvent -> {
             IdentifiedSource currrentIs = new IdentifiedSource(new ClassIdentifier(origName), origBuffer.getBytes(), Optional.empty());
             new SavingCompilerOutputAction(statusCompileCurrentBuffer, vmInfo, vmManager, pluginManager, decompiler, haveCompiler, namingBinary.getSelectedIndex(), futureBinTarget.getText()).run(currrentIs);
+        });
+
+        compileAndUpload.addActionListener(actionEvent -> {
+            IdentifiedSource currrentIs = new IdentifiedSource(new ClassIdentifier(origName), origBuffer.getBytes(), Optional.empty());
+            new UploadingCompilerOutputAction(statusCompileCurrentBuffer, vmInfo, vmManager, pluginManager, decompiler, haveCompiler, namingBinary.getSelectedIndex(), futureBinTarget.getText()).run(currrentIs);
         });
 
         compileExternalFiles.addActionListener(actionEvent -> {
@@ -306,6 +325,12 @@ public class RewriteClassDialog extends JDialog {
                 JOptionPane.showMessageDialog(null, ex.getMessage());
             }
         });
+    }
+
+    private static String uploadBytecode(String clazz, VmManager vmManager, VmInfo vmInfo, byte[] bytes) {
+        final String body = VmDecompilerInformationController.bytesToBase64(bytes);
+        AgentRequestAction request = VmDecompilerInformationController.createRequest(vmInfo, AgentRequestAction.RequestAction.OVERWRITE, clazz, body);
+        return VmDecompilerInformationController.submitRequest(vmManager, request);
     }
 
     private String guessClass(String src) {
@@ -385,103 +410,162 @@ public class RewriteClassDialog extends JDialog {
         return this.futureBinTarget.getText();
     }
 
-private static class CompilationWithResult implements Runnable {
-    private final InMemoryCompiler rc;
-    private final ClassesProvider cp;
-    private final JTextArea compilationLog;
-    private final IdentifiedSource[] sources;
-    private Exception ex;
-    private Collection<IdentifiedBytecode> result;
+    private static class CompilationWithResult implements Runnable {
+        private final InMemoryCompiler rc;
+        private final ClassesProvider cp;
+        private final JTextArea compilationLog;
+        private final IdentifiedSource[] sources;
+        private Exception ex;
+        private Collection<IdentifiedBytecode> result;
 
 
-    public CompilationWithResult(InMemoryCompiler rc, ClassesProvider cp, JTextArea compilationLog, IdentifiedSource... sources) {
-        this.rc = rc;
-        this.cp = cp;
-        this.compilationLog = compilationLog;
-        this.sources = sources;
-    }
-
-    @Override
-    public void run() {
-        try {
-            result = rc.compileClass(cp, Optional.of(new MessagesListener() {
-                @Override
-                public void addMessage(Level level, String s) {
-                    OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, s);
-                    compilationLog.setText(compilationLog.getText() + s + "\n");
-                }
-            }), sources);
-        } catch (Exception ex) {
-            this.ex = ex;
-            ex.printStackTrace();
-            compilationLog.setText(compilationLog.getText() + ex.getMessage() + "\n");
-        } finally {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Operation finished");
-            compilationLog.setText(compilationLog.getText() + "Operatin finished, you may close dialog\n");
+        public CompilationWithResult(InMemoryCompiler rc, ClassesProvider cp, JTextArea compilationLog, IdentifiedSource... sources) {
+            this.rc = rc;
+            this.cp = cp;
+            this.compilationLog = compilationLog;
+            this.sources = sources;
         }
 
-    }
-}
+        @Override
+        public void run() {
+            try {
+                result = rc.compileClass(cp, Optional.of(new MessagesListener() {
+                    @Override
+                    public void addMessage(Level level, String s) {
+                        OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, s);
+                        compilationLog.setText(compilationLog.getText() + s + "\n");
+                    }
+                }), sources);
+            } catch (Exception ex) {
+                this.ex = ex;
+                ex.printStackTrace();
+                compilationLog.setText(compilationLog.getText() + ex.getMessage() + "\n");
+            } finally {
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Operation finished");
+                compilationLog.setText(compilationLog.getText() + "Operatin finished, you may close dialog\n");
+            }
 
-private static class SavingCompilerOutputAction {
-
-    private final JTextField status;
-    private final VmInfo vmInfo;
-    private final VmManager vmManager;
-    private final int namingSchema;
-    private final String destination;
-    private final PluginManager pluginManager;
-    private final DecompilerWrapperInformation decompilerWrapper;
-    private final boolean haveCompiler;
-
-    public SavingCompilerOutputAction(JTextField status, VmInfo vmInfo, VmManager vmManager,PluginManager pm, DecompilerWrapperInformation dwi, boolean haveCompiler, int namingSchema, String destination) {
-        this.status = status;
-        this.vmInfo = vmInfo;
-        this.vmManager = vmManager;
-        this.namingSchema = namingSchema;
-        this.destination = destination;
-        this.pluginManager = pm;
-        this.decompilerWrapper = dwi;
-        this.haveCompiler = haveCompiler;
+        }
     }
 
-    public void run(IdentifiedSource... sources) {
-        RewriteClassDialog.CompilationWithResult compiler = xompileWithGui(this.vmInfo, this.vmManager, pluginManager, decompilerWrapper, haveCompiler, sources);
-        if (compiler.ex == null && compiler.result == null) {
-            String s = "No output from compiler, maybe still running?";
-            JOptionPane.showMessageDialog(null, s);
-            status.setText(s);
-        } else if (compiler.ex != null) {
-            JOptionPane.showMessageDialog(null, compiler.ex.getMessage());
-            status.setText("Failed - " + compiler.ex.getMessage());
-        } else if (compiler.result != null) {
-            status.setText("something done, will save now");
-            status.repaint();
-            if (namingSchema == CUSTOM_NAME) {
-                if (compiler.result.size() != 1) {
-                    String s = "Output of compilation was " + compiler.result.size() + "classes. Can not save more then one file to exact filename";
-                    JOptionPane.showMessageDialog(null, s);
-                    status.setText(s);
+    private static class CompilerOutputActionFields {
+
+        protected final JTextField status;
+        protected final VmInfo vmInfo;
+        protected final VmManager vmManager;
+        protected final int namingSchema;
+        protected final String destination;
+        protected final PluginManager pluginManager;
+        protected final DecompilerWrapperInformation decompilerWrapper;
+        protected final boolean haveCompiler;
+
+        public CompilerOutputActionFields(JTextField status, VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapperInformation dwi, boolean haveCompiler, int namingSchema, String destination) {
+            this.status = status;
+            this.vmInfo = vmInfo;
+            this.vmManager = vmManager;
+            this.namingSchema = namingSchema;
+            this.destination = destination;
+            this.pluginManager = pm;
+            this.decompilerWrapper = dwi;
+            this.haveCompiler = haveCompiler;
+        }
+    }
+
+    private static class SavingCompilerOutputAction extends CompilerOutputActionFields {
+
+
+        public SavingCompilerOutputAction(JTextField status, VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapperInformation dwi, boolean haveCompiler, int namingSchema, String destination) {
+            super(status, vmInfo, vmManager, pm, dwi, haveCompiler, namingSchema, destination);
+        }
+
+        public void run(IdentifiedSource... sources) {
+            RewriteClassDialog.CompilationWithResult compiler = xompileWithGui(this.vmInfo, this.vmManager, pluginManager, decompilerWrapper, haveCompiler, sources);
+            if (compiler.ex == null && compiler.result == null) {
+                String s = "No output from compiler, maybe still running?";
+                JOptionPane.showMessageDialog(null, s);
+                status.setText(s);
+            } else if (compiler.ex != null) {
+                JOptionPane.showMessageDialog(null, compiler.ex.getMessage());
+                status.setText("Failed - " + compiler.ex.getMessage());
+            } else if (compiler.result != null) {
+                if (compiler.result.size() <= 0) {
+                    status.setText("compilation finished, but no output.. nothing to save");
+                    status.repaint();
                     return;
-                }
-            }
-            int saved = 0;
-            for (IdentifiedBytecode clazz : compiler.result) {
-                boolean r = saveByGui(destination, namingSchema, ".class", status, clazz.getClassIdentifier().getFullName(), clazz.getFile());
-                if (r) {
-                    saved++;
-                }
-            }
-            if (compiler.result.size() > 1) {
-                if (saved == compiler.result.size()) {
-                    status.setText("Saved all " + saved + "classes to" + destination);
                 } else {
-                    status.setText("Saved only " + saved + " from total of " + compiler.result.size() + " classes to" + destination);
+                    status.setText("something done, will save now");
+                    status.repaint();
                 }
+                if (namingSchema == CUSTOM_NAME) {
+                    if (compiler.result.size() > 0) {
+                        String s = "Output of compilation was " + compiler.result.size() + "classes. Can not save more then one file to exact filename";
+                        JOptionPane.showMessageDialog(null, s);
+                        status.setText(s);
+                        return;
+                    }
+                }
+                int saved = 0;
+                for (IdentifiedBytecode clazz : compiler.result) {
+                    boolean r = saveByGui(destination, namingSchema, ".class", status, clazz.getClassIdentifier().getFullName(), clazz.getFile());
+                    if (r) {
+                        saved++;
+                    }
+                }
+                if (compiler.result.size() > 1) {
+                    if (saved == compiler.result.size()) {
+                        status.setText("Saved all " + saved + "classes to" + destination);
+                    } else {
+                        status.setText("Saved only " + saved + " from total of " + compiler.result.size() + " classes to" + destination);
+                    }
+                }
+            } else {
+                status.setText("Really weird state, report bug how to achieve this");
             }
-        } else {
-            status.setText("Really weird state, report bug how to achieve this");
         }
     }
-}
+
+    private static class UploadingCompilerOutputAction extends CompilerOutputActionFields {
+
+
+        public UploadingCompilerOutputAction(JTextField status, VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapperInformation dwi, boolean haveCompiler, int namingSchema, String destination) {
+            super(status, vmInfo, vmManager, pm, dwi, haveCompiler, namingSchema, destination);
+        }
+
+        public void run(IdentifiedSource... sources) {
+            RewriteClassDialog.CompilationWithResult compiler = xompileWithGui(this.vmInfo, this.vmManager, pluginManager, decompilerWrapper, haveCompiler, sources);
+            if (compiler.ex == null && compiler.result == null) {
+                String s = "No output from compiler, maybe still running?";
+                JOptionPane.showMessageDialog(null, s);
+                status.setText(s);
+            } else if (compiler.ex != null) {
+                JOptionPane.showMessageDialog(null, compiler.ex.getMessage());
+                status.setText("Failed - " + compiler.ex.getMessage());
+            } else if (compiler.result != null) {
+                if (compiler.result.size() <= 0) {
+                    status.setText("compilation finished, but no output.. nothing to upload");
+                    status.repaint();
+                    return;
+                } else {
+                    status.setText("something done, will upload now");
+                    status.repaint();
+                }
+                int saved = 0;
+                for (IdentifiedBytecode clazz : compiler.result) {
+                    boolean r = uploadByGui(vmInfo, vmManager, status, clazz.getClassIdentifier().getFullName(), clazz.getFile());
+                    if (r) {
+                        saved++;
+                    }
+                }
+                if (compiler.result.size() > 1) {
+                    if (saved == compiler.result.size()) {
+                        status.setText("uploaded all " + saved + "classes to" + vmInfo.getVmId());
+                    } else {
+                        status.setText("uploaded only " + saved + " from total of " + compiler.result.size() + " classes to" + vmInfo.getVmId());
+                    }
+                }
+            } else {
+                status.setText("Really weird state, report bug how to achieve this");
+            }
+        }
+    }
 }
