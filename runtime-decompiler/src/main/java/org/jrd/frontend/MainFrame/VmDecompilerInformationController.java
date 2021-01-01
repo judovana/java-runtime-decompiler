@@ -185,7 +185,7 @@ public class VmDecompilerInformationController {
             bytecodeDecompilerView.reloadClassList(classes);
         }
         hideLoadingDialog();
-        if (response.equals("error")) {
+        if (response.equals(DecompilerRequestReceiver.ERROR_RESPONSE)) {
             JOptionPane.showMessageDialog(mainFrameView.getMainFrame(),
                     CLASSES_NOPE,
                     "Error",
@@ -197,7 +197,7 @@ public class VmDecompilerInformationController {
         AgentRequestAction request = createRequest(RequestAction.BYTES, name);
         String response = submitRequest(request);
         String decompiledClass = "";
-        if (response.equals("error")) {
+        if (response.equals(DecompilerRequestReceiver.ERROR_RESPONSE)) {
             JOptionPane.showMessageDialog(mainFrameView.getMainFrame(),
                     "Bytecode couldn't be loaded.",
                     "Error",

@@ -8,6 +8,7 @@ import org.jc.api.InMemoryCompiler;
 import org.jc.api.MessagesListener;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.core.AgentRequestAction;
+import org.jrd.backend.core.DecompilerRequestReceiver;
 import org.jrd.backend.core.OutputController;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
@@ -213,7 +214,10 @@ public class RewriteClassDialog extends JDialog {
         String ss = "Error to upload: ";
         boolean r = true;
         try {
-            uploadBytecode(clazz, vmManager, vmInfo, content);
+            String respomse = uploadBytecode(clazz, vmManager, vmInfo, content);
+            if (respomse.equals(DecompilerRequestReceiver.ERROR_RESPONSE)) {
+                throw new Exception("Agent returned error");
+            }
             ss = "uploaded: ";
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -289,7 +293,7 @@ public class RewriteClassDialog extends JDialog {
         ok.addActionListener(e -> {
             try {
                 String response = uploadBytecode(className.getText(), vmManager, vmInfo, VmDecompilerInformationController.fileToBytes(filePath.getText()));
-                if (response.equals("error")) {
+                if (response.equals(DecompilerRequestReceiver.ERROR_RESPONSE)) {
                     JOptionPane.showMessageDialog(null, "class rewrite failed.", "Error", JOptionPane.ERROR_MESSAGE);
                 } else {
                     validation.setForeground(Color.black);
@@ -441,7 +445,7 @@ public class RewriteClassDialog extends JDialog {
                 ex.printStackTrace();
                 compilationLog.setText(compilationLog.getText() + ex.getMessage() + "\n");
             } finally {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Operation finished");
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Operation finished");
                 compilationLog.setText(compilationLog.getText() + "Operatin finished, you may close dialog\n");
             }
 

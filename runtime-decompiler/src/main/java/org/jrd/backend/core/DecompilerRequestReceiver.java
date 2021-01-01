@@ -21,7 +21,7 @@ public class DecompilerRequestReceiver {
     private final AgentAttachManager attachManager;
     private VmManager vmManager;
 
-    private static final String ERROR_RESPONSE = "error";
+    public static final String ERROR_RESPONSE = "error";
     private static final String OK_RESPONSE = "ok";
     private static final int NOT_ATTACHED = -1;
 
