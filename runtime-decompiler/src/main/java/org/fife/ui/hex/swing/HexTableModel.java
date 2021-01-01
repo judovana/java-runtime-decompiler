@@ -4,22 +4,20 @@
 
 package org.fife.ui.hex.swing;
 
-import java.awt.Point;
+import org.fife.ui.hex.ByteBuffer;
+
+import javax.swing.*;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.undo.AbstractUndoableEdit;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
-import javax.swing.undo.AbstractUndoableEdit;
-import java.io.InputStream;
-import java.io.IOException;
-import javax.swing.undo.UndoableEdit;
-import java.awt.Component;
-import javax.swing.UIManager;
-import java.util.Arrays;
 import javax.swing.undo.UndoManager;
-import org.fife.ui.hex.ByteBuffer;
-import javax.swing.table.AbstractTableModel;
+import java.awt.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
 
-public class HexTableModel extends AbstractTableModel
-{
+public class HexTableModel extends AbstractTableModel {
     private static final long serialVersionUID = 1L;
     private HexEditor editor;
     private ByteBuffer doc;
@@ -29,7 +27,7 @@ public class HexTableModel extends AbstractTableModel
     private byte[] bitBuf;
     private char[] dumpColBuf;
     private String[] byteStrVals;
-    
+
     public HexTableModel(final HexEditor editor) {
         this.bitBuf = new byte[16];
         this.editor = editor;
@@ -47,32 +45,32 @@ public class HexTableModel extends AbstractTableModel
             this.byteStrVals[i] = Integer.toHexString(i);
         }
     }
-    
+
     public byte getByte(final int offset) {
         return this.doc.getByte(offset);
     }
-    
+
     public int getByteCount() {
         return this.doc.getSize();
     }
-    
+
     public int getBytesPerRow() {
         return this.bytesPerRow;
     }
-    
+
     public int getColumnCount() {
         return this.getBytesPerRow() + 1;
     }
-    
+
     @Override
     public String getColumnName(final int col) {
         return this.columnNames[col];
     }
-    
+
     public int getRowCount() {
         return this.doc.getSize() / this.bytesPerRow + ((this.doc.getSize() % this.bytesPerRow > 0) ? 1 : 0);
     }
-    
+
     public Object getValueAt(final int row, final int col) {
         if (col != this.bytesPerRow) {
             final int pos = this.editor.cellToOffset(row, col);
@@ -84,7 +82,7 @@ public class HexTableModel extends AbstractTableModel
         }
         final int count = this.doc.read(pos, this.bitBuf);
         for (int i = 0; i < count; ++i) {
-            char ch = (char)this.bitBuf[i];
+            char ch = (char) this.bitBuf[i];
             if (ch < ' ' || ch > '~') {
                 ch = '.';
             }
@@ -92,23 +90,22 @@ public class HexTableModel extends AbstractTableModel
         }
         return new String(this.dumpColBuf, 0, count);
     }
-    
+
     public boolean redo() {
         boolean canRedo = this.undoManager.canRedo();
         if (canRedo) {
             this.undoManager.redo();
             canRedo = this.undoManager.canRedo();
-        }
-        else {
+        } else {
             UIManager.getLookAndFeel().provideErrorFeedback(this.editor);
         }
         return canRedo;
     }
-    
+
     public void removeBytes(final int offset, final int len) {
         this.replaceBytes(offset, len, null);
     }
-    
+
     public void replaceBytes(final int offset, final int len, final byte[] bytes) {
         byte[] removed = null;
         if (len > 0) {
@@ -128,24 +125,24 @@ public class HexTableModel extends AbstractTableModel
             this.editor.fireHexEditorEvent(offset, addCount, remCount);
         }
     }
-    
+
     public void setBytes(final String fileName) throws IOException {
         this.doc = new ByteBuffer(fileName);
         this.undoManager.discardAllEdits();
         this.fireTableDataChanged();
         this.editor.fireHexEditorEvent(0, this.doc.getSize(), 0);
     }
-    
+
     public void setBytes(final InputStream in) throws IOException {
         this.doc = new ByteBuffer(in);
         this.undoManager.discardAllEdits();
         this.fireTableDataChanged();
         this.editor.fireHexEditorEvent(0, this.doc.getSize(), 0);
     }
-    
+
     @Override
     public void setValueAt(final Object value, final int row, final int col) {
-        final byte b = (byte)Integer.parseInt((String)value, 16);
+        final byte b = (byte) Integer.parseInt((String) value, 16);
         final int offset = this.editor.cellToOffset(row, col);
         if (offset > -1) {
             final byte old = this.doc.getByte(offset);
@@ -159,32 +156,30 @@ public class HexTableModel extends AbstractTableModel
             this.editor.fireHexEditorEvent(offset, 1, 1);
         }
     }
-    
+
     public boolean undo() {
         boolean canUndo = this.undoManager.canUndo();
         if (canUndo) {
             this.undoManager.undo();
             canUndo = this.undoManager.canUndo();
-        }
-        else {
+        } else {
             UIManager.getLookAndFeel().provideErrorFeedback(this.editor);
         }
         return canUndo;
     }
-    
-    private class ByteChangedUndoableEdit extends AbstractUndoableEdit
-    {
+
+    private class ByteChangedUndoableEdit extends AbstractUndoableEdit {
         private static final long serialVersionUID = 1L;
         private int offs;
         private byte oldVal;
         private byte newVal;
-        
+
         public ByteChangedUndoableEdit(final int offs, final byte oldVal, final byte newVal) {
             this.offs = offs;
             this.oldVal = oldVal;
             this.newVal = newVal;
         }
-        
+
         @Override
         public void undo() {
             super.undo();
@@ -193,7 +188,7 @@ public class HexTableModel extends AbstractTableModel
             }
             this.setValueImpl(this.offs, this.oldVal);
         }
-        
+
         @Override
         public void redo() {
             super.redo();
@@ -202,7 +197,7 @@ public class HexTableModel extends AbstractTableModel
             }
             this.setValueImpl(this.offs, this.newVal);
         }
-        
+
         private void setValueImpl(final int offset, final byte val) {
             HexTableModel.this.editor.setSelectedRange(offset, offset);
             HexTableModel.this.doc.setByte(offset, val);
@@ -212,20 +207,19 @@ public class HexTableModel extends AbstractTableModel
             HexTableModel.this.editor.fireHexEditorEvent(offset, 1, 1);
         }
     }
-    
-    private class BytesReplacedUndoableEdit extends AbstractUndoableEdit
-    {
+
+    private class BytesReplacedUndoableEdit extends AbstractUndoableEdit {
         private static final long serialVersionUID = 1L;
         private int offs;
         private byte[] removed;
         private byte[] added;
-        
+
         public BytesReplacedUndoableEdit(final int offs, final byte[] removed, final byte[] added) {
             this.offs = offs;
             this.removed = removed;
             this.added = added;
         }
-        
+
         @Override
         public void undo() {
             super.undo();
@@ -234,7 +228,7 @@ public class HexTableModel extends AbstractTableModel
             }
             this.removeAndAdd(this.added, this.removed);
         }
-        
+
         @Override
         public void redo() {
             super.redo();
@@ -243,7 +237,7 @@ public class HexTableModel extends AbstractTableModel
             }
             this.removeAndAdd(this.removed, this.added);
         }
-        
+
         private void removeAndAdd(final byte[] toRemove, final byte[] toAdd) {
             final int remCount = (toRemove == null) ? 0 : toRemove.length;
             final int addCount = (toAdd == null) ? 0 : toAdd.length;

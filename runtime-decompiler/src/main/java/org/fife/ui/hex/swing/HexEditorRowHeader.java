@@ -4,26 +4,19 @@
 
 package org.fife.ui.hex.swing;
 
-import java.awt.Graphics;
-import javax.swing.border.EmptyBorder;
-import javax.swing.AbstractListModel;
-import java.awt.Component;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.BorderFactory;
-import javax.swing.event.TableModelEvent;
-import javax.swing.ListCellRenderer;
-import javax.swing.ListModel;
+import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
+import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import javax.swing.JList;
+import java.awt.*;
 
-class HexEditorRowHeader extends JList implements TableModelListener
-{
+class HexEditorRowHeader extends JList implements TableModelListener {
     private static final long serialVersionUID = 1L;
     private HexTable table;
     private RowHeaderListModel model;
     private static final Border CELL_BORDER;
-    
+
     public HexEditorRowHeader(final HexTable table) {
         this.table = table;
         this.setModel(this.model = new RowHeaderListModel());
@@ -36,7 +29,7 @@ class HexEditorRowHeader extends JList implements TableModelListener
         this.syncRowCount();
         table.getModel().addTableModelListener(this);
     }
-    
+
     @Override
     public void addSelectionInterval(final int anchor, final int lead) {
         super.addSelectionInterval(anchor, lead);
@@ -44,7 +37,7 @@ class HexEditorRowHeader extends JList implements TableModelListener
         final int max = Math.max(anchor, lead);
         this.table.setSelectedRows(min, max);
     }
-    
+
     @Override
     public void removeSelectionInterval(final int index0, final int index1) {
         super.removeSelectionInterval(index0, index1);
@@ -52,7 +45,7 @@ class HexEditorRowHeader extends JList implements TableModelListener
         final int lead = this.getLeadSelectionIndex();
         this.table.setSelectedRows(Math.min(anchor, lead), Math.max(anchor, lead));
     }
-    
+
     @Override
     public void setSelectionInterval(final int anchor, final int lead) {
         super.setSelectionInterval(anchor, lead);
@@ -60,29 +53,28 @@ class HexEditorRowHeader extends JList implements TableModelListener
         final int max = Math.max(anchor, lead);
         this.table.setSelectedRows(min, max);
     }
-    
+
     private void syncRowCount() {
         if (this.table.getRowCount() != this.model.getSize()) {
             this.model.setSize(this.table.getRowCount());
         }
     }
-    
+
     public void tableChanged(final TableModelEvent e) {
         this.syncRowCount();
     }
-    
+
     static {
         CELL_BORDER = BorderFactory.createEmptyBorder(0, 5, 0, 5);
     }
-    
-    private class CellRenderer extends DefaultListCellRenderer
-    {
+
+    private class CellRenderer extends DefaultListCellRenderer {
         private static final long serialVersionUID = 1L;
-        
+
         public CellRenderer() {
             this.setHorizontalAlignment(4);
         }
-        
+
         @Override
         public Component getListCellRendererComponent(final JList list, final Object value, final int index, final boolean selected, final boolean hasFocus) {
             super.getListCellRendererComponent(list, value, index, false, hasFocus);
@@ -90,41 +82,38 @@ class HexEditorRowHeader extends JList implements TableModelListener
             return this;
         }
     }
-    
-    private static class RowHeaderListModel extends AbstractListModel
-    {
+
+    private static class RowHeaderListModel extends AbstractListModel {
         private static final long serialVersionUID = 1L;
         private int size;
-        
+
         public Object getElementAt(final int index) {
             return "0x" + Integer.toHexString(index * 16);
         }
-        
+
         public int getSize() {
             return this.size;
         }
-        
+
         public void setSize(final int size) {
             final int old = this.size;
             this.size = size;
             final int diff = size - old;
             if (diff > 0) {
                 this.fireIntervalAdded(this, old, size - 1);
-            }
-            else if (diff < 0) {
+            } else if (diff < 0) {
                 this.fireIntervalRemoved(this, size + 1, old - 1);
             }
         }
     }
-    
-    private class RowHeaderBorder extends EmptyBorder
-    {
+
+    private class RowHeaderBorder extends EmptyBorder {
         private static final long serialVersionUID = 1L;
-        
+
         public RowHeaderBorder() {
             super(0, 0, 0, 2);
         }
-        
+
         @Override
         public void paintBorder(final Component c, final Graphics g, int x, final int y, final int width, final int height) {
             x = x + width - this.right;

@@ -6,7 +6,6 @@ package org.fife.ui.hex.event;
 
 import java.util.EventListener;
 
-public interface HexEditorListener extends EventListener
-{
+public interface HexEditorListener extends EventListener {
     void hexBytesChanged(final HexEditorEvent p0);
 }

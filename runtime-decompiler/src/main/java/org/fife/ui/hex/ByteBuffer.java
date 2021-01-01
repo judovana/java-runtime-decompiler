@@ -4,27 +4,26 @@
 
 package org.fife.ui.hex;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.File;
+import java.io.InputStream;
 
-public class ByteBuffer
-{
+public class ByteBuffer {
     private byte[] buffer;
-    
+
     public ByteBuffer(final int size) {
         this.buffer = new byte[size];
     }
-    
+
     public ByteBuffer(final String file) throws IOException {
         this(new File(file));
     }
-    
+
     public ByteBuffer(final File file) throws IOException {
-        final int size = (int)file.length();
+        final int size = (int) file.length();
         if (size < 0) {
             throw new IOException("Negative file length: " + size);
         }
@@ -37,13 +36,12 @@ public class ByteBuffer
                 while (pos < this.buffer.length && (count = in.read(this.buffer, pos, this.buffer.length - pos)) > -1) {
                     pos += count;
                 }
-            }
-            finally {
+            } finally {
                 in.close();
             }
         }
     }
-    
+
     public ByteBuffer(final InputStream in) throws IOException {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         this.buffer = new byte[4096];
@@ -53,15 +51,15 @@ public class ByteBuffer
         }
         this.buffer = baos.toByteArray();
     }
-    
+
     public byte getByte(final int offset) {
         return this.buffer[offset];
     }
-    
+
     public int getSize() {
         return this.buffer.length;
     }
-    
+
     public void insertByte(final int offset, final byte b) {
         final byte[] buf2 = new byte[this.buffer.length + 1];
         System.arraycopy(this.buffer, 0, buf2, 0, offset);
@@ -69,7 +67,7 @@ public class ByteBuffer
         System.arraycopy(this.buffer, offset, buf2, offset + 1, this.buffer.length - offset);
         this.buffer = buf2;
     }
-    
+
     public void insertBytes(final int offs, final byte[] b) {
         if (b == null || b.length == 0) {
             return;
@@ -80,7 +78,7 @@ public class ByteBuffer
         System.arraycopy(this.buffer, offs, buf2, offs + b.length, this.buffer.length - offs);
         this.buffer = buf2;
     }
-    
+
     public int read(final int offset, final byte[] buf) {
         if (buf == null) {
             return -1;
@@ -89,11 +87,11 @@ public class ByteBuffer
         System.arraycopy(this.buffer, offset, buf, 0, count);
         return count;
     }
-    
+
     public void remove(final int offset, final int len) {
         this.remove(offset, len, null);
     }
-    
+
     public void remove(final int offset, final int len, final byte[] removed) {
         if (removed != null) {
             System.arraycopy(this.buffer, offset, removed, 0, len);
@@ -103,7 +101,7 @@ public class ByteBuffer
         System.arraycopy(this.buffer, offset + len, buf, offset, buf.length - offset);
         this.buffer = buf;
     }
-    
+
     public void setByte(final int offset, final byte b) {
         this.buffer[offset] = b;
     }
