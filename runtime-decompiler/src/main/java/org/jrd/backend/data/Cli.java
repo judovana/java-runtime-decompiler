@@ -238,7 +238,7 @@ public class Cli {
         String pkg = null;
         String clazz = null;
         try (BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(bytes)))) {
-            while(true) {
+            while (true) {
                 if (clazz != null && pkg != null) {
                     return pkg + "." + clazz; //this return should be most likely everywhere inline
                 }
@@ -263,7 +263,7 @@ public class Cli {
                         if (key.equals("package")) {
                             pkg = keys[i + 1].replace("/", "."); //jasm's disasm uses / instead of .
                         }
-                        if (key.equals("class")) {
+                        if (key.equals("class") || key.equals("interface") || key.equals("enum")) {
                             clazz = keys[i + 1];
                         }
                     }
