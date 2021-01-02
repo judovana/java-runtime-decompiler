@@ -1,20 +1,33 @@
 package org.jrd.backend.data;
 
+import org.jc.api.ClassIdentifier;
+import org.jc.api.ClassesProvider;
+import org.jc.api.IdentifiedBytecode;
+import org.jc.api.IdentifiedSource;
+import org.jc.api.InMemoryCompiler;
+import org.jc.api.MessagesListener;
+import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 import org.jrd.backend.decompiling.PluginManager;
+import org.jrd.frontend.MainFrame.FiletoClassValidator;
 import org.jrd.frontend.MainFrame.VmDecompilerInformationController;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.List;
-
-import org.jrd.frontend.MainFrame.FiletoClassValidator;
+import java.util.Optional;
+import java.util.logging.Level;
 
 public class Cli {
 
@@ -25,6 +38,7 @@ public class Cli {
     private static final String BASE64 = "-base64bytes";
     private static final String BYTES = "-bytes";
     private static final String DECOMPILE = "-decompile";
+    private static final String COMPILE = "-compile";
     private static final String OVERWRITE = "-overwrite";
     private static final String HELP = "-help";
     private static final String H = "-h";
@@ -97,6 +111,9 @@ public class Cli {
             } else if (arg.equals(DECOMPILE)) {
                 decompile(args, i);
                 break;
+            } else if (arg.equals(COMPILE)) {
+                compile(args, i);
+                break;
             } else if (arg.equals(OVERWRITE)) {
                 overwrite(args, i);
                 break;
@@ -140,6 +157,117 @@ public class Cli {
                 throw new RuntimeException("Remote VM not yet implemented");
             } catch (MalformedURLException ee) {
                 throw new RuntimeException("Second param was supposed to be URL or PID", ee);
+            }
+        }
+    }
+
+    private void compile(List<String> args, int i) throws Exception {
+        if (args.size() < 2) {
+            throw new RuntimeException(COMPILE + " expects at least oen file to compile");
+        }
+        String cpPidUrl = null;
+        String customCompiler = null;
+        boolean haveCompiler = false;
+        List<File> toCompile = new ArrayList<>(1);
+        for (int x = i + 1; x < args.size(); x++) {
+            String arg = args.get(x);
+            if (arg.equals("-p")) {
+                customCompiler = args.get(x + 1);
+                x++;
+            } else {
+                toCompile.add(new File(arg));
+                if (!toCompile.get(toCompile.size() - 1).exists()) {
+                    throw new RuntimeException(toCompile.get(toCompile.size() - 1).getAbsolutePath() + " does not exists");
+                }
+            }
+        }
+        ClassesProvider cp;
+        if (cpPidUrl == null) {
+            cp = new ClassesProvider() {
+                @Override
+                public Collection<IdentifiedBytecode> getClass(ClassIdentifier... names) {
+                    return new ArrayList<>();
+                }
+
+                @Override
+                public List<String> getClassPathListing() {
+                    return new ArrayList<>();
+                }
+            };
+        } else {
+            throw new RuntimeException("Not yet implemented: cp = new RuntimeCompilerConnector.JRDClassesProvider(vmInfo, vmManager);");
+        }
+        DecompilerWrapperInformation decompiler = null;
+        String s = "Default runtime compiler will be used";
+        if (customCompiler == null) {
+            haveCompiler = false;
+        } else {
+            decompiler = findDecompiler(customCompiler, pluginManager);
+            haveCompiler = false;
+            boolean pluginsDecompiler = this.pluginManager.haveCompiler(decompiler);
+            if (pluginsDecompiler) {
+                s = customCompiler + " plugin is delivered with its own compiler!!";
+                haveCompiler = true;
+            }
+        }
+        System.err.println(s);
+        InMemoryCompiler rc;
+        if (haveCompiler) {
+            rc = new RuntimeCompilerConnector.ForeignCompilerWrapper(pluginManager, decompiler);
+        } else {
+            rc = new RuntimeCompilerConnector.DummyRuntimeCompiler();
+        }
+        IdentifiedSource[] isis = new IdentifiedSource[toCompile.size()];
+        for (int x = 0; x < isis.length; x++) {
+            byte[] bytes = Files.readAllBytes(toCompile.get(x).toPath());
+            String name = guessName(bytes);
+            isis[x] = new IdentifiedSource(new ClassIdentifier(name), bytes, Optional.empty());
+        }
+        Collection<IdentifiedBytecode> result = rc.compileClass(cp, Optional.of(new MessagesListener() {
+            @Override
+            public void addMessage(Level level, String message) {
+                System.err.println(message);
+            }
+        }), isis);
+        for (IdentifiedBytecode ib : result) {
+            System.out.write(ib.getFile());
+        }
+    }
+
+    private String guessName(byte[] bytes) throws IOException {
+        String pkg = null;
+        String clazz = null;
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(bytes)))) {
+            while(true) {
+                if (clazz != null && pkg != null) {
+                    return pkg + "." + clazz; //this return should be most likely everywhere inline
+                }
+                String s = br.readLine();
+                if (s == null) {
+                    if (pkg == null && clazz == null) {
+                        return "pkg.and.class.not.found";
+                    } else if (pkg == null) {
+                        return "pkg.not.found.for." + clazz;
+                    } else if (clazz == null) {
+                        return pkg + ".lost.its.class";
+                    } else {
+                        return pkg + "." + clazz;
+                    }
+                }
+                s = s.trim();
+                String[] ss = s.split(";");
+                for (String sss : ss) {
+                    String[] keys = sss.split("\\s+");
+                    for (int i = 0; i < keys.length; i++) {
+                        String key = keys[i];
+                        if (key.equals("package")) {
+                            pkg = keys[i + 1].replace("/", "."); //jasm's disasm uses / instead of .
+                        }
+                        if (key.equals("class")) {
+                            clazz = keys[i + 1];
+                        }
+                    }
+                }
             }
         }
     }
@@ -269,7 +397,7 @@ public class Cli {
     }
 
     private void printHelp() {
-        System.out.println("Allowed are: " + LISTJVMS + " , " + LISTPLUGINS + " , " + LISTCLASSES + ", " + BASE64 + " , " + BYTES + ", " + DECOMPILE + ", " + VERBOSE + ", " + OVERWRITE);
+        System.out.println("Allowed are: " + LISTJVMS + " , " + LISTPLUGINS + " , " + LISTCLASSES + ", " + BASE64 + " , " + BYTES + ", " + DECOMPILE + ", " + COMPILE + ", " + VERBOSE + ", " + OVERWRITE);
         System.out.println(VERBOSE + " will set this app to print out all Exceptions and some debugging strings. Then continues ");
         System.out.println(HELP + "/" + H + " print this help end exit");
         System.out.println(LISTJVMS + " no arg expected, list available localhost JVMs ");
@@ -280,8 +408,12 @@ public class Cli {
         System.out.println(DECOMPILE + "  three args - pid or url of JVM and class to obtain and name/file of decompiler config - will stdout decompiled class");
         System.out.println("              you can use special keyword javap, instead of decompiler name, to use javap disassembler.");
         System.out.println("              You can pass also parameters to it like any other javap, but without space. So e.g. javap-v is equal to call javap -v /tmp/class_you_entered.class");
+        System.out.println(COMPILE + "  compile local file(s) against runtime classapth. Plugin can have its own compiler, eg jasm do nto require runtime classpath");
+        System.out.println("              mandatory: file(s) to compile");
+        System.out.println(" wip!         optional: pid or url of runtime classpath, plugin, recursive, directory to save to (if missing then stdout, failing if more then one file is result)");
+        System.out.println(" wip!                 -cp                              -p <plugin> -r     -d <dir>");
         System.out.println(OVERWRITE + "  three args - pid or url of JVM and class to overwrite and file with new bytecode");
-        System.out.println("Allowed are: " + LISTJVMS + " , " + LISTPLUGINS + " , " + LISTCLASSES + ", " + BASE64 + " , " + BYTES + ", " + DECOMPILE + ", " + VERBOSE + ", " + OVERWRITE);
+        System.out.println("Allowed are: " + LISTJVMS + " , " + LISTPLUGINS + " , " + LISTCLASSES + ", " + BASE64 + " , " + BYTES + ", " + DECOMPILE + ", " + COMPILE + ", " + VERBOSE + ", " + OVERWRITE);
     }
 
     private static String invalidityToString(boolean invalidWrapper) {
