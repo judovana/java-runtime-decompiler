@@ -234,7 +234,7 @@ public class Cli {
         }
     }
 
-    private String guessName(byte[] bytes) throws IOException {
+    public static String guessName(byte[] bytes) throws IOException {
         String pkg = null;
         String clazz = null;
         try (BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(bytes)))) {

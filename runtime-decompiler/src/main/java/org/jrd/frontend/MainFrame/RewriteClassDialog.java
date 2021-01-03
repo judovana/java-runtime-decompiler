@@ -10,6 +10,7 @@ import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.DecompilerRequestReceiver;
 import org.jrd.backend.core.OutputController;
+import org.jrd.backend.data.Cli;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
@@ -21,10 +22,13 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class RewriteClassDialog extends JDialog {
 
@@ -86,7 +90,7 @@ public class RewriteClassDialog extends JDialog {
     private final VmInfo vmInfo;
     private final VmManager vmManager;
 
-    public RewriteClassDialog(final String name, final String lastLoad, final String currentBuffer, final byte[] cBinBuffer, final String lastSaveSrc, final String lastSaveBin, VmInfo vmInfo, VmManager vmManager, PluginManager pluginManager, DecompilerWrapperInformation selectedDecompiler) {
+    public RewriteClassDialog(final String name, final LatestPaths latestPaths, final String currentBuffer, final byte[] cBinBuffer, VmInfo vmInfo, VmManager vmManager, PluginManager pluginManager, DecompilerWrapperInformation selectedDecompiler) {
         super((JFrame) null, "Specify class and selectSrc its bytecode", true);
         this.setSize(400, 400);
         this.setLayout(new BorderLayout());
@@ -115,8 +119,8 @@ public class RewriteClassDialog extends JDialog {
         namingSource = new JComboBox<String>(saveOptions);
         namingSource.setSelectedIndex(FULLY_QUALIFIED_NAME);
         namingBinary.setSelectedIndex(SRC_SUBDIRS_NAME);
-        futureBinTarget = new JTextField(lastSaveBin);
-        futureSrcTarget = new JTextField(lastSaveSrc);
+        futureBinTarget = new JTextField(latestPaths.lastSaveBin);
+        futureSrcTarget = new JTextField(latestPaths.lastSaveSrc);
         selectBinTarget = new JButton("...");
         selectSrcTarget = new JButton("...");
         compileAndUpload = new JButton("Compile and directly upload");
@@ -128,7 +132,7 @@ public class RewriteClassDialog extends JDialog {
         inputs = new JPanel(new GridLayout(3, 1));
         buttons = new JPanel(new GridLayout(3, 1));
         validation = new JLabel("???");
-        filePath = new JTextField(lastLoad);
+        filePath = new JTextField(latestPaths.lastManualUplaod);
         className = new JTextField(name);
         selectSrc = new JButton("...");
         nothing = new JLabel();
@@ -138,14 +142,14 @@ public class RewriteClassDialog extends JDialog {
         externalFiles.setName("Compile external files");
         externalFiles.add(new JLabel("Select external files to compile against runtime classpath"), BorderLayout.NORTH);
         JPanel exFilesIn = new JPanel(new BorderLayout());
-        filesToCompile = new JTextField("todo");
+        filesToCompile = new JTextField(latestPaths.filesToCompile);
         exFilesIn.add(filesToCompile, BorderLayout.CENTER);
         recursive = new JCheckBox("recursive");
         exFilesIn.add(recursive, BorderLayout.WEST);
         selectExternalFiles = new JButton("...");
         exFilesIn.add(selectExternalFiles, BorderLayout.EAST);
         externalFiles.add(exFilesIn);
-        outputExternalFilesDir = new JTextField("todo");
+        outputExternalFilesDir = new JTextField(latestPaths.outputExternalFilesDir);
         namingExternal = new JComboBox<>(saveOptions);
         namingExternal.setSelectedIndex(SRC_SUBDIRS_NAME);
         selectExternalFilesSave = new JButton("...");
@@ -165,10 +169,10 @@ public class RewriteClassDialog extends JDialog {
 
         binaryView = new JPanel(new GridLayout(0,1));
         binaryView.setName("Current binary buffer");
-        binaryFilename = new JLabel(origName);
+        binaryFilename = new JLabel(origName + " - " + origBin.length);
         namingBinaryView = new JComboBox<>(saveOptions);
         namingBinaryView.setSelectedIndex(SRC_SUBDIRS_NAME);
-        outputBinaries = new JTextField("todo");
+        outputBinaries = new JTextField(latestPaths.outputBinaries);
         selectBinary = new JButton("...");
         saveBinary = new JButton("Save current binary buffer");
         uploadBinary = new JButton("Upload current binary " + origName + " to pid:" + vmInfo.getVmPid());
@@ -332,9 +336,10 @@ public class RewriteClassDialog extends JDialog {
             public void actionPerformed(ActionEvent actionEvent) {
                 JFileChooser jf = new JFileChooser(filesToCompile.getText());
                 jf.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+                jf.setMultiSelectionEnabled(true);
                 int returnVal = jf.showOpenDialog(selectExternalFiles);
                 if (returnVal == JFileChooser.APPROVE_OPTION) {
-                    filesToCompile.setText(jf.getSelectedFile().getAbsolutePath());
+                    filesToCompile.setText(Stream.of(jf.getSelectedFiles()).map(a -> a.getAbsolutePath()).collect(Collectors.joining(" ")));
                 }
             }
         });
@@ -385,11 +390,8 @@ public class RewriteClassDialog extends JDialog {
         return VmDecompilerInformationController.submitRequest(vmManager, request);
     }
 
-    private String guessClass(String src) {
-        //todo, parse package and classname from .java file.
-        //then use it. if it fails, warnn user severely and advise him to terminate action
-        JOptionPane.showMessageDialog(null, "Not implemented, hoe it dies");
-        return src;
+    private String guessClass(String src) throws IOException {
+        return Cli.guessName(Files.readAllBytes(new File(src).toPath()));
     }
 
 
@@ -451,7 +453,7 @@ public class RewriteClassDialog extends JDialog {
         this.pack();
     }
 
-    public String getLoadFilePath() {
+    public String getManualUploadPath() {
         return this.filePath.getText();
     }
 
@@ -461,6 +463,18 @@ public class RewriteClassDialog extends JDialog {
 
     public String getSaveBinPath() {
         return this.futureBinTarget.getText();
+    }
+
+    public String getFilesToCompile() {
+        return filesToCompile.getText();
+    }
+
+    public String getOutputExternalFilesDir() {
+        return outputExternalFilesDir.getText();
+    }
+
+    public String getOutputBinaries() {
+        return outputBinaries.getText();
     }
 
     private static class CompilationWithResult implements Runnable {

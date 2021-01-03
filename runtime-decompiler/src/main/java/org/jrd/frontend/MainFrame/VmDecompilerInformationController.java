@@ -215,9 +215,7 @@ public class VmDecompilerInformationController {
         bytecodeDecompilerView.reloadTextField(name, decompiledClass,  bytes);
     }
 
-    private static String lastLoaded = System.getProperty("user.home");
-    private static String lastSavedSrc = System.getProperty("user.home");
-    private static String lastSavedBin = System.getProperty("user.home");
+    private static LatestPaths lastLoaded = new LatestPaths();
 
     class ClassRewriter {
 
@@ -225,11 +223,14 @@ public class VmDecompilerInformationController {
             if (name == null || name.trim().isEmpty())
                 name = "???";
 
-            final RewriteClassDialog rewriteClassDialog = new RewriteClassDialog(name, lastLoaded, buffer, binBuffer, lastSavedSrc, lastSavedBin, vmInfo, vmManager, pluginManager, selectedDecompiler);
+            final RewriteClassDialog rewriteClassDialog = new RewriteClassDialog(name, lastLoaded, buffer, binBuffer, vmInfo, vmManager, pluginManager, selectedDecompiler);
             rewriteClassDialog.setVisible(true);
-            lastLoaded = rewriteClassDialog.getLoadFilePath();
-            lastSavedSrc = rewriteClassDialog.getSaveSrcPath();
-            lastSavedBin = rewriteClassDialog.getSaveBinPath();
+            lastLoaded.lastManualUplaod = rewriteClassDialog.getManualUploadPath();
+            lastLoaded.lastSaveSrc = rewriteClassDialog.getSaveSrcPath();
+            lastLoaded.lastSaveBin = rewriteClassDialog.getSaveBinPath();
+            lastLoaded.filesToCompile = rewriteClassDialog.getFilesToCompile();
+            lastLoaded.outputExternalFilesDir = rewriteClassDialog.getOutputExternalFilesDir();
+            lastLoaded.outputBinaries  = rewriteClassDialog.getOutputBinaries();
         }
     }
 
