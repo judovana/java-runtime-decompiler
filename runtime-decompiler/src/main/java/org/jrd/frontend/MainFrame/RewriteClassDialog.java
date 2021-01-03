@@ -123,7 +123,7 @@ public class RewriteClassDialog extends JDialog {
         futureSrcTarget = new JTextField(latestPaths.lastSaveSrc);
         selectBinTarget = new JButton("...");
         selectSrcTarget = new JButton("...");
-        compileAndUpload = new JButton("Compile and directly upload");
+        compileAndUpload = new JButton("Compile "+origName+"and directly upload to "  + vmInfo.getVmId());
         compileAndUpload.setFont(compileAndSave.getFont().deriveFont(Font.BOLD));
 
         manualPane = new JPanel();
@@ -133,10 +133,10 @@ public class RewriteClassDialog extends JDialog {
         buttons = new JPanel(new GridLayout(3, 1));
         validation = new JLabel("???");
         filePath = new JTextField(latestPaths.lastManualUplaod);
-        className = new JTextField(name);
+        className = new JTextField(origName);
         selectSrc = new JButton("...");
         nothing = new JLabel();
-        ok = new JButton("upload to vm");
+        ok = new JButton("upload to vm - "+vmInfo.getVmId());
 
         externalFiles = new JPanel(new GridLayout(0, 1));
         externalFiles.setName("Compile external files");
@@ -160,7 +160,7 @@ public class RewriteClassDialog extends JDialog {
         externalFiles.add(saveExFilesIn);
         compileExternalFiles = new JButton("Compile and save");
         externalFiles.add(compileExternalFiles);
-        compileExternalFilesAndUpload = new JButton("Compile and upload");
+        compileExternalFilesAndUpload = new JButton("Compile and upload to " + vmInfo.getVmId());
         compileExternalFilesAndUpload.setFont(compileExternalFilesAndUpload.getFont().deriveFont(Font.BOLD));
         externalFiles.add(compileExternalFilesAndUpload);
         statusExternalFiles = new JTextField("");
@@ -175,7 +175,7 @@ public class RewriteClassDialog extends JDialog {
         outputBinaries = new JTextField(latestPaths.outputBinaries);
         selectBinary = new JButton("...");
         saveBinary = new JButton("Save current binary buffer");
-        uploadBinary = new JButton("Upload current binary " + origName + " to pid:" + vmInfo.getVmPid());
+        uploadBinary = new JButton("Upload current binary " + origName + " to " + vmInfo.getVmId());
         uploadBinary.setFont(uploadBinary.getFont().deriveFont(Font.BOLD));
         statusBinary = new JTextField("");
         statusBinary.setEditable(false);
