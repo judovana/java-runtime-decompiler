@@ -245,11 +245,11 @@ public class Cli {
                 String s = br.readLine();
                 if (s == null) {
                     if (pkg == null && clazz == null) {
-                        return "pkg.and.class.not.found";
+                        throw new RuntimeException("pkg.and.class.not.found");
                     } else if (pkg == null) {
-                        return "pkg.not.found.for." + clazz;
+                        throw new RuntimeException("pkg.not.found.for." + clazz);
                     } else if (clazz == null) {
-                        return pkg + ".lost.its.class";
+                        throw new RuntimeException(pkg + ".lost.its.class");
                     } else {
                         return pkg + "." + clazz;
                     }
