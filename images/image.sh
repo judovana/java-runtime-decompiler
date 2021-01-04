@@ -71,9 +71,9 @@ function modifyAndCopyWrappers() {
 
 # if PLUGINS=TRUE && mvn install -PdownloadPlugins was run, and you really wont them to include plugins in images
 if [ "x$PLUGINS" == "xTRUE" ] ; then
-  for dec in procyon fernflower jasm; do
+  for dec in procyon fernflower jasm jcoder; do
     mkdir "$DECOMPS/$dec"
-    if [ "x$dec" == "xjasm" ] ; then
+    if [ "x$dec" == "xjasm" -o "x$dec" == "xjcoder" ] ; then
       lname=asmtools
     else
       lname=$dec

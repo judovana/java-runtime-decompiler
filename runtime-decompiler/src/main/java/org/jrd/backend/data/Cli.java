@@ -260,6 +260,9 @@ public class Cli {
                     String[] keys = sss.split("\\s+");
                     for (int i = 0; i < keys.length; i++) {
                         String key = keys[i];
+                        if (key.equals("0xCAFEBABE")) {
+                            return clazz.replace("/", "."); //jcod's disasm uses / instead of and have fully qulified class name as class name
+                        }
                         if (key.equals("package")) {
                             pkg = keys[i + 1].replace("/", "."); //jasm's disasm uses / instead of .
                         }
