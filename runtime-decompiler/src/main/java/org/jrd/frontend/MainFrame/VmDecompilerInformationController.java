@@ -105,16 +105,20 @@ public class VmDecompilerInformationController {
     private void updateVmLists() {
         ArrayList<VmInfo> localVms = new vmArrayList<>();
         ArrayList<VmInfo> remoteVms = new vmArrayList<>();
+        ArrayList<VmInfo> fsVms = new vmArrayList<>();
 
         vmManager.getVmInfoSet().forEach(info -> {
-            if (info.getVmPid() > 0) {
+            if (info.getType() == VmInfo.Type.LOCAL) {
                 localVms.add(info);
-            } else {
+            } else if (info.getType() == VmInfo.Type.REMOTE) {
                 remoteVms.add(info);
+            } else if (info.getType() == VmInfo.Type.FS) {
+                fsVms.add(info);
             }
         });
         mainFrameView.setLocalVmList(localVms.toArray(new VmInfo[0]));
         mainFrameView.setRemoteVmList(remoteVms.toArray(new VmInfo[0]));
+        mainFrameView.setFsVmList(fsVms.toArray(new VmInfo[0]));
     }
 
     private void changeVm(ActionEvent event) {

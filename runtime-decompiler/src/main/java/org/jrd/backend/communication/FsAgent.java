@@ -39,6 +39,8 @@ public class FsAgent implements JrdAgent {
             switch (q[0]) {
                 case "CLASSES":
                     return readClasses();
+                case "HALT":
+                    return "OK";
                 default:
                     throw new RuntimeException("Unknown command: " + q[0]);
             }

@@ -8,7 +8,12 @@ import org.jrd.frontend.LicenseFrame.LicenseView;
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import static org.jrd.backend.data.Directories.isPortable;
 
@@ -101,7 +106,7 @@ public class MainFrameView {
         localVmList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
-                if(mouseEvent.getButton() == MouseEvent.BUTTON1){
+                if (mouseEvent.getButton() == MouseEvent.BUTTON1) {
                     ActionEvent event = new ActionEvent(localVmList, 0, null);
                     vmChangingListener.actionPerformed(event);
                 }
@@ -164,8 +169,10 @@ public class MainFrameView {
         localFsVmList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
-                //todo
-                JOptionPane.showMessageDialog(null, "todo");
+                if (mouseEvent.getButton() == MouseEvent.BUTTON1) {
+                    ActionEvent event = new ActionEvent(localFsVmList, 0, null);
+                    vmChangingListener.actionPerformed(event);
+                }
             }
         });
         localFsScrollPane = new JScrollPane(localFsVmList,
@@ -199,13 +206,13 @@ public class MainFrameView {
         welcomeJTextArea.setText("Welcome to Java-Runtime-Decompiler\n" +
                 "\n" +
                 "Before using the app, the Decompiler Agent's path needs to be selected in 'Configure -> Decompiler Agent'.\n" +
-                "It's a built-in project and can usually be found at '"+ ((isPortable())?"./libs/":"./decompiler_agent/target/") +"decompiler-agent-*.jar'.\n" +
+                "It's a built-in project and can usually be found at '" + ((isPortable()) ? "./libs/" : "./decompiler_agent/target/") + "decompiler-agent-*.jar'.\n" +
                 "\n" +
                 "Internal javap decompiling tools are available by default.\n" +
                 "You can also download an external decompiler, e.g. via 'mvn clean install -PdownloadPlugins', and set it up in 'Configure -> Plugins'.\n" +
-                "Currently supported decompilers are: Fernflower, Procyon, jasm.\n"+
+                "Currently supported decompilers are: Fernflower, Procyon, jasm.\n" +
                 "\n" +
-                "JRD is dangerous program, and as it allows you to overwrite classes in running JVM. By doing so, you can break the JVM .\n"+
+                "JRD is dangerous program, and as it allows you to overwrite classes in running JVM. By doing so, you can break the JVM .\n" +
                 "Use with caution.  jdk9+ is not allwoed to attach by default. Run JVM with -Djdk.attach.allowAttachSelf=true.\n");
         welcomeJTextArea.setFont(new Font(welcomeJTextArea.getFont().getFontName(), welcomeJTextArea.getFont().getStyle(), 20));
         welcomeJTextArea.setLineWrap(true);
@@ -349,6 +356,10 @@ public class MainFrameView {
 
     void setRemoteVmList(VmInfo[] vmInfos) {
         setVmList(remoteVmList, vmInfos);
+    }
+
+    void setFsVmList(VmInfo[] vmInfos) {
+        setVmList(localFsVmList, vmInfos);
     }
 
     private void setVmList(JList<VmInfo> vmList, VmInfo[] vmInfos) {

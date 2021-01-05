@@ -77,7 +77,6 @@ public class VmManager{
             }
         }
         vmInfoSet.removeAll(forRemoval);
-
         notifyListeners();
     }
 

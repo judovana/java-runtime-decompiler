@@ -2,23 +2,20 @@ package org.jrd.frontend.NewFsVmFrame;
 
 import org.jrd.frontend.MainFrame.MainFrameView;
 
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.event.ActionListener;
-
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.border.EtchedBorder;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
-public class NewFsVmView extends JDialog{
+public class NewFsVmView extends JDialog {
+
+    private static String lastOpened = System.getProperty("user.home");
 
     private JPanel mainPanel;
-    private JButton selectCpButton;
     private CpNamePanel mCpNamePanel;
     private JPanel okCancelPanel;
     private JPanel configureOKCancelPanel;
@@ -27,44 +24,72 @@ public class NewFsVmView extends JDialog{
 
     private ActionListener addButtonListener;
 
-    public class CpNamePanel extends JPanel{
+    public class CpNamePanel extends JPanel {
 
-        JTextField hostnameTextField;
-        JTextField portTextField;
+        JTextField cpTextField;
+        JTextField nameTextField;
+        JButton selectCpButton;
+        JPanel textAndName;
 
+        CpNamePanel() {
+            this.selectCpButton = new JButton("...");
+            this.cpTextField = new JTextField();
+            this.nameTextField = new JTextField();
+            this.nameTextField.setPreferredSize(new Dimension(90, 0));
+            this.textAndName = new JPanel();
 
-        CpNamePanel(){
-
-            this.hostnameTextField = new JTextField();
-            this.portTextField = new JTextField();
-            this.portTextField.setPreferredSize(new Dimension(90,0));
-
-            this.setLayout(new GridBagLayout());
+            textAndName.setLayout(new GridBagLayout());
             GridBagConstraints gbc = new GridBagConstraints();
             gbc.anchor = GridBagConstraints.WEST;
             gbc.fill = GridBagConstraints.BOTH;
             gbc.gridx = 1;
-            this.add(new JLabel("class-path"), gbc);
+            textAndName.add(new JLabel("class-path"), gbc);
             gbc.gridx = 3;
-            this.add(new JLabel("optinal name"), gbc);
+            textAndName.add(new JLabel("optinal name"), gbc);
             gbc.gridx = 0;
             gbc.gridy = 1;
-            this.add(Box.createHorizontalStrut(20), gbc);
+            textAndName.add(Box.createHorizontalStrut(20), gbc);
             gbc.weightx = 1;
             gbc.gridx = 1;
-            this.add(hostnameTextField, gbc);
+            textAndName.add(cpTextField, gbc);
             gbc.weightx = 0;
             gbc.gridx = 2;
-            this.add(Box.createHorizontalStrut(20), gbc);
+            textAndName.add(Box.createHorizontalStrut(20), gbc);
             gbc.gridx = 3;
-            this.add(portTextField, gbc);
+            textAndName.add(nameTextField, gbc);
             gbc.gridx = 4;
-            this.add(Box.createHorizontalStrut(20), gbc);
-            this.setPreferredSize(new Dimension(0,120));
+            textAndName.add(Box.createHorizontalStrut(20), gbc);
+            textAndName.setPreferredSize(new Dimension(0, 100));
+            this.setLayout(new BorderLayout());
+            this.add(textAndName);
+            JPanel seelctButonPane = new JPanel(new GridBagLayout());
+            seelctButonPane.add(selectCpButton);
+            selectCpButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent actionEvent) {
+                    JFileChooser jf = new JFileChooser(lastOpened);
+                    jf.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+                    int returnVal = jf.showOpenDialog(selectCpButton);
+                    if (returnVal == JFileChooser.APPROVE_OPTION) {
+                        if (jf.getSelectedFile().isDirectory()){
+                            lastOpened = jf.getSelectedFile().getAbsolutePath();
+                        } else {
+                            lastOpened = jf.getSelectedFile().getParentFile().getAbsolutePath();
+                        }
+                        String lcp = jf.getSelectedFile().getAbsolutePath();
+                        if (cpTextField.getText().trim().isEmpty()) {
+                            cpTextField.setText(lcp);
+                        } else {
+                            cpTextField.setText(cpTextField.getText() + File.pathSeparator + lcp);
+                        }
+                    }
+                }
+            });
+            this.add(seelctButonPane, BorderLayout.WEST);
         }
     }
 
-    public NewFsVmView(MainFrameView mainFrameView){
+    public NewFsVmView(MainFrameView mainFrameView) {
 
         mCpNamePanel = new CpNamePanel();
 
@@ -72,11 +97,11 @@ public class NewFsVmView extends JDialog{
         okButton.addActionListener(actionEvent -> {
             addButtonListener.actionPerformed(actionEvent);
         });
-        okButton.setPreferredSize(new Dimension(90,30));
+        okButton.setPreferredSize(new Dimension(90, 30));
 
         cancelButton = new JButton("Cancel");
         cancelButton.addActionListener(actionEvent -> dispose());
-        cancelButton.setPreferredSize(new Dimension(90,30));
+        cancelButton.setPreferredSize(new Dimension(90, 30));
 
         okCancelPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -107,7 +132,7 @@ public class NewFsVmView extends JDialog{
         configureOKCancelPanel.add(Box.createHorizontalGlue(), gbc);
         gbc.gridx = 1;
         configureOKCancelPanel.add(okCancelPanel, gbc);
-        configureOKCancelPanel.setPreferredSize(new Dimension(0,60));
+        configureOKCancelPanel.setPreferredSize(new Dimension(0, 60));
 
 
         mainPanel = new JPanel(new GridBagLayout());
@@ -121,15 +146,15 @@ public class NewFsVmView extends JDialog{
         mainPanel.add(mCpNamePanel, gbc);
         gbc.gridy = 1;
         gbc.weighty = 1;
-        mainPanel.add(Box.createVerticalGlue(),gbc);
+        mainPanel.add(Box.createVerticalGlue(), gbc);
         gbc.gridy = 2;
         gbc.weighty = 0;
         mainPanel.add(configureOKCancelPanel, gbc);
 
 
-        this.setTitle("New connection");
-        this.setSize(new Dimension(400,220));
-        this.setMinimumSize(new Dimension(250,220));
+        this.setTitle("New filesystem `VM`");
+        this.setSize(new Dimension(400, 220));
+        this.setMinimumSize(new Dimension(250, 220));
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setLocationRelativeTo(mainFrameView.getMainFrame());
         this.setModalityType(ModalityType.APPLICATION_MODAL);
@@ -137,12 +162,12 @@ public class NewFsVmView extends JDialog{
 
     }
 
-    String getHostname(){
-        return mCpNamePanel.hostnameTextField.getText();
+    String getCP() {
+        return mCpNamePanel.cpTextField.getText();
     }
 
-    String getPortString() throws NumberFormatException{
-        return mCpNamePanel.portTextField.getText();
+    String getNameHelper() throws NumberFormatException {
+        return mCpNamePanel.nameTextField.getText();
     }
 
     void setAddButtonListener(ActionListener addButtonListener) {
