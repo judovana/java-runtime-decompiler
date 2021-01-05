@@ -54,6 +54,7 @@ public class MainFrameView {
 
     private ActionListener vmChangingListener;
     private ActionListener newConnectionDialogListener;
+    private ActionListener newFsVmDialogListener;
     private ActionListener pluginConfigurationEditorListener;
 
     private ActionListener haltAgentListener;
@@ -163,6 +164,7 @@ public class MainFrameView {
         localFsVmList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
+                //todo
                 JOptionPane.showMessageDialog(null, "todo");
             }
         });
@@ -172,7 +174,7 @@ public class MainFrameView {
 
         localFsButton = new JButton("+");
         localFsButton.addActionListener(actionEvent -> {
-            JOptionPane.showMessageDialog(null, "todo");
+            newFsVmDialogListener.actionPerformed(actionEvent);
         });
         localFsButton.setMargin(new Insets(5, 9, 5, 9));
         localFsLabelPanel = new JPanel(new BorderLayout());
@@ -331,6 +333,10 @@ public class MainFrameView {
 
     void setCreateNewConnectionDialogListener(ActionListener listener) {
         this.newConnectionDialogListener = listener;
+    }
+
+    public void setNewFsVmDialogListener(ActionListener newFsVmDialogListener) {
+        this.newFsVmDialogListener = newFsVmDialogListener;
     }
 
     public void setPluginConfigurationEditorListener(ActionListener pluginConfigurationEditorListener) {

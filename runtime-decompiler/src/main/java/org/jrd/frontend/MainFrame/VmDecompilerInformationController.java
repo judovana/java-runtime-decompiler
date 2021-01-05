@@ -12,6 +12,8 @@ import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.NewConnectionFrame.NewConnectionController;
 import org.jrd.frontend.NewConnectionFrame.NewConnectionView;
+import org.jrd.frontend.NewFsVmFrame.NewFsVmController;
+import org.jrd.frontend.NewFsVmFrame.NewFsVmView;
 import org.jrd.frontend.PluginMangerFrame.PluginConfigurationEditorController;
 import org.jrd.frontend.PluginMangerFrame.PluginConfigurationEditorView;
 
@@ -33,10 +35,12 @@ public class VmDecompilerInformationController {
     private final MainFrameView mainFrameView;
     private final BytecodeDecompilerView bytecodeDecompilerView;
     private NewConnectionView newConnectionDialog;
+    private NewFsVmView newFsVmDialog;
     private PluginConfigurationEditorView pluginConfigurationEditorView;
     private PluginConfigurationEditorController pluginConfigurationEditorController;
     private LoadingDialog loadingDialog;
     private NewConnectionController newConnectionController;
+    private NewFsVmController newFsVmController;
     private VmManager vmManager;
     private VmInfo vmInfo;
     private PluginManager pluginManager;
@@ -56,6 +60,7 @@ public class VmDecompilerInformationController {
         vmManager.subscribeToVMChange(e -> updateVmLists());
 
         mainFrameView.setCreateNewConnectionDialogListener(e -> createNewConnectionDialog());
+        mainFrameView.setNewFsVmDialogListener(e -> createNewFsVMDialog());
         bytecodeDecompilerView.setClassesActionListener(e -> loadClassNames());
         bytecodeDecompilerView.setBytesActionListener(e -> loadClassBytecode(e.getActionCommand()));
         bytecodeDecompilerView.setRewriteActionListener(new ClassRewriter());
@@ -80,6 +85,12 @@ public class VmDecompilerInformationController {
         newConnectionDialog = new NewConnectionView(mainFrameView);
         newConnectionController = new NewConnectionController(newConnectionDialog, vmManager);
         newConnectionDialog.setVisible(true);
+    }
+
+    private void createNewFsVMDialog() {
+        newFsVmDialog = new NewFsVmView(mainFrameView);
+        newFsVmController = new NewFsVmController(newFsVmDialog, vmManager);
+        newFsVmDialog.setVisible(true);
     }
 
     public class vmArrayList<T> extends ArrayList<VmInfo> {
