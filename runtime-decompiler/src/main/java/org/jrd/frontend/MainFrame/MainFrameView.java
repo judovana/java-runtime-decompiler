@@ -16,7 +16,7 @@ public class MainFrameView {
 
     private JFrame mainFrame;
     private JPanel mainPanel;
-    private JPanel westPanel;
+    private JTabbedPane vmsPanel;
     private JPanel localVmPanel;
     private JScrollPane localVmScrollPane;
     private JPanel localVmLabelPanel;
@@ -26,6 +26,11 @@ public class MainFrameView {
     private JButton remoteConnectionButton;
     private JScrollPane remoteVmScrollPane;
     private JList<VmInfo> remoteVmList;
+    private JPanel localFsPanel;
+    private JPanel localFsLabelPanel;
+    private JButton localFsButton;
+    private JScrollPane localFsScrollPane;
+    private JList<VmInfo> localFsVmList;
     private CardLayout cardLayout;
     private JPanel centerPanel;
     private JPanel welcomePanel;
@@ -102,18 +107,15 @@ public class MainFrameView {
             }
         });
         //localVmList End
-
         localVmScrollPane = new JScrollPane(localVmList,
                 ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         // localVmScrollPane End
-
         localVmLabelPanel = new JPanel();
         localVmLabelPanel.add(new JLabel("Local Processes", SwingConstants.CENTER));
         // localVmLabelPanel End
-
-
         localVmPanel = new JPanel(new BorderLayout());
+        localVmPanel.setName("Local VMs");
         localVmPanel.add(localVmLabelPanel, BorderLayout.NORTH);
         localVmPanel.add(localVmScrollPane, BorderLayout.CENTER);
         // localVmPanel End
@@ -125,12 +127,10 @@ public class MainFrameView {
         });
         remoteConnectionButton.setMargin(new Insets(5, 9, 5, 9));
         // remoteConnectionButton End
-
         remoteVmLabelPanel = new JPanel(new BorderLayout());
         remoteVmLabelPanel.add(new JLabel("    Remote Processes", SwingConstants.CENTER), BorderLayout.CENTER);
         remoteVmLabelPanel.add(remoteConnectionButton, BorderLayout.EAST);
         // remoteVmLabelPanel end
-
         remoteVmList = new UndragableJList();
         remoteVmList.setName("remoteVmList");
         remoteVmList.setFixedCellHeight(80);
@@ -144,30 +144,52 @@ public class MainFrameView {
             }
         });
         // remoteVmList
-
         remoteVmScrollPane = new JScrollPane(remoteVmList,
                 ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         // remoteVmScrollPane end
 
         remoteVmPanel = new JPanel(new BorderLayout());
+        remoteVmPanel.setName("Remote VMs");
         remoteVmPanel.add(remoteVmLabelPanel, BorderLayout.NORTH);
         remoteVmPanel.add(remoteVmScrollPane, BorderLayout.CENTER);
         // remoteVmPanel End
 
-        westPanel = new JPanel(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        westPanel.setBorder(new EtchedBorder());
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.weightx = 1;
-        gbc.weighty = 1;
-        westPanel.add(localVmPanel, gbc);
-        gbc.weighty = 0.75;
-        gbc.gridy = 1;
-        westPanel.add(remoteVmPanel, gbc);
-        westPanel.setPreferredSize(new Dimension(400, 0));
+        localFsVmList = new UndragableJList();
+        localFsVmList.setName("localFsVmList");
+        localFsVmList.setFixedCellHeight(80);
+        localFsVmList.setCellRenderer(new VmListRenderer());
+        localFsVmList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        localFsVmList.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent mouseEvent) {
+                JOptionPane.showMessageDialog(null, "todo");
+            }
+        });
+        localFsScrollPane = new JScrollPane(localFsVmList,
+                ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+                ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+
+        localFsButton = new JButton("+");
+        localFsButton.addActionListener(actionEvent -> {
+            JOptionPane.showMessageDialog(null, "todo");
+        });
+        localFsButton.setMargin(new Insets(5, 9, 5, 9));
+        localFsLabelPanel = new JPanel(new BorderLayout());
+        localFsLabelPanel.add(localFsButton, BorderLayout.EAST);
+        localFsLabelPanel.add(new JLabel("    Local filesystem CP elements", SwingConstants.CENTER), BorderLayout.CENTER);
+        localFsPanel = new JPanel(new BorderLayout());
+        localFsPanel.setName("Local FS");
+        localFsPanel.add(localFsLabelPanel, BorderLayout.NORTH);
+        localFsPanel.add(localFsScrollPane, BorderLayout.CENTER);
+        // localFsPanel End
+
+        vmsPanel = new JTabbedPane();
+        vmsPanel.setBorder(new EtchedBorder());
+        vmsPanel.add(localVmPanel);
+        vmsPanel.add(remoteVmPanel);
+        vmsPanel.add(localFsPanel);
+        vmsPanel.setPreferredSize(new Dimension(400, 0));
         //westPanel End
 
         // centerPanel, welcomePanel
@@ -200,7 +222,7 @@ public class MainFrameView {
 
 
         mainPanel = new JPanel(new BorderLayout());
-        mainPanel.add(westPanel, BorderLayout.WEST);
+        mainPanel.add(vmsPanel, BorderLayout.WEST);
         mainPanel.add(centerPanel, BorderLayout.CENTER);
         // mainPanel end
 

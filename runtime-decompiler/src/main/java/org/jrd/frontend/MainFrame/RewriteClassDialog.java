@@ -339,7 +339,7 @@ public class RewriteClassDialog extends JDialog {
                 jf.setMultiSelectionEnabled(true);
                 int returnVal = jf.showOpenDialog(selectExternalFiles);
                 if (returnVal == JFileChooser.APPROVE_OPTION) {
-                    filesToCompile.setText(Stream.of(jf.getSelectedFiles()).map(a -> a.getAbsolutePath()).collect(Collectors.joining(" ")));
+                    filesToCompile.setText(Stream.of(jf.getSelectedFiles()).map(a -> a.getAbsolutePath()).collect(Collectors.joining(File.pathSeparator)));
                 }
             }
         });
@@ -369,7 +369,7 @@ public class RewriteClassDialog extends JDialog {
         });
 
         compileExternalFiles.addActionListener(actionEvent -> {
-            String[] srcs = filesToCompile.getText().split("\\s+");
+            String[] srcs = filesToCompile.getText().split(File.pathSeparator);
             IdentifiedSource[] loaded = new IdentifiedSource[srcs.length];
             try {
                 for (int i = 0; i < srcs.length; i++) {
