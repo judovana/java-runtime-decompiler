@@ -7,12 +7,16 @@ import com.sun.tools.attach.VirtualMachineDescriptor;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This class is used for creating/removing/updating information about available Java Virtual Machines.
  */
 public class VmManager{
+
+    private static AtomicInteger FsVmCounter = new AtomicInteger();
 
     private HashSet<VmInfo> vmInfoSet;
     Set<ActionListener> actionListeners = new HashSet<>();
@@ -49,7 +53,7 @@ public class VmManager{
             String processId = descriptor.id();
             int pid = Integer.parseInt(processId);
             String name = descriptor.displayName();
-            newVmInfoSet.add(new VmInfo(vmId, pid, name, true));
+            newVmInfoSet.add(new VmInfo(vmId, pid, name, VmInfo.Type.LOCAL, null));
         }
 
         // Add all new VMs.
@@ -67,7 +71,7 @@ public class VmManager{
         while (iterator.hasNext()){
             VmInfo vmInfo = iterator.next();
             boolean noLongerExists = newVmInfoSet.stream().noneMatch(vmInfo1 -> vmInfo1.getVmId().equals(vmInfo.getVmId()));
-            if (vmInfo.isLocal() && noLongerExists){
+            if (vmInfo.getType() == VmInfo.Type.LOCAL && noLongerExists){
                 setChanged();
                 forRemoval.add(vmInfo);
             }
@@ -77,9 +81,9 @@ public class VmManager{
         notifyListeners();
     }
 
-    public void createRemoteVM(String hostname, int port){
+    public VmInfo createRemoteVM(String hostname, int port){
         String id = UUID.randomUUID().toString();
-        VmInfo vmInfo = new VmInfo(id, -1, hostname, false);
+        VmInfo vmInfo = new VmInfo(id, 0, hostname, VmInfo.Type.REMOTE, null);
         VmDecompilerStatus status = new VmDecompilerStatus();
         status.setVmId(id);
         status.setHostname(hostname);
@@ -88,6 +92,21 @@ public class VmManager{
         vmInfoSet.add(vmInfo);
         setChanged();
         notifyListeners();
+        return vmInfo;
+    }
+
+    public VmInfo createFsVM(List<File> cp, String name){
+        int pid = FsVmCounter.addAndGet(-1);
+        VmInfo vmInfo = new VmInfo(""+pid, pid, name, VmInfo.Type.FS, cp);
+        VmDecompilerStatus status = new VmDecompilerStatus();
+        status.setVmId(""+pid);
+        status.setHostname(null);
+        status.setListenPort(pid);
+        vmInfo.setVmDecompilerStatus(status);
+        vmInfoSet.add(vmInfo);
+        setChanged();
+        notifyListeners();
+        return vmInfo;
     }
 
     public VmInfo findVmFromPID(String param) {

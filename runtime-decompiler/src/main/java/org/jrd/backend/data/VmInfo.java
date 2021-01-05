@@ -3,29 +3,41 @@ package org.jrd.backend.data;
 import org.jrd.backend.core.OutputController;
 import org.jrd.backend.core.VmDecompilerStatus;
 
+import java.io.File;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * Stores information about Available Virtual Machine.
  */
 public class VmInfo {
 
+    public static enum  Type{
+        LOCAL, REMOTE, FS
+    }
+
     private VmDecompilerStatus vmDecompilerStatus;
     private String vmId;
     private int vmPid;
     private String vmName;
-    private boolean local;
+    private Type type;
+    private java.util.List<File> cp;
+
 
     /**
      * Stores information about Available Virtual Machine.
      * @param vmId Unique ID for this VmInfo
      * @param vmPid Virtual Machine process ID
      * @param vmName Name for the Virtual Machine. Hostname for remote VMs
-     * @param local True - Local VM. False Remote VM
+     * @param type local, remote, type
      */
-    public VmInfo(String vmId, int vmPid, String vmName, boolean local) {
+    public VmInfo(String vmId, int vmPid, String vmName, Type type, List<File> cp) {
         setVmId(vmId);
         setVmPid(vmPid);
         setVmName(vmName);
-        setLocal(local);
+        setType(type);
+        setCp(cp);
     }
 
     public VmDecompilerStatus getVmDecompilerStatus() {
@@ -73,11 +85,34 @@ public class VmInfo {
         this.vmName = vmName;
     }
 
-    public boolean isLocal() {
-        return local;
+    public Type getType() {
+        return type;
     }
 
-    public void setLocal(boolean local) {
-        this.local = local;
+    public void setType(Type local) {
+        this.type = local;
+    }
+    public void setCp(List<File> cp) {
+        if (cp == null){
+            this.cp = cp;
+        } else {
+            this.cp = Collections.unmodifiableList(cp);
+        }
+    }
+
+    public List<File> getCp() {
+        return cp;
+    }
+
+    public String nameOrCp() {
+        if (cp == null) {
+            return getVmName();
+        } else {
+            if (getVmName() != null && !getVmName().trim().isEmpty()){
+                return getVmName();
+            } else {
+              return cp.stream().map(a -> a.getAbsolutePath()).collect(Collectors.joining(File.pathSeparator));
+            }
+        }
     }
 }

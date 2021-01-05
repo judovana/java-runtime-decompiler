@@ -126,7 +126,7 @@ public class Cli {
 
     private void overwrite(List<String> args, int i) throws Exception {
         if (args.size() != 4) {
-            throw new RuntimeException(OVERWRITE + "  three args - pid or url of JVM and class to overwrite and file with new bytecode");
+            throw new RuntimeException(OVERWRITE + "  three args - PUC of JVM and class to overwrite and file with new bytecode");
         }
         String jvmStr = args.get(i + 1);
         String classStr = args.get(i + 2);
@@ -156,7 +156,7 @@ public class Cli {
                 URL u = new URL(jvmStr);
                 throw new RuntimeException("Remote VM not yet implemented");
             } catch (MalformedURLException ee) {
-                throw new RuntimeException("Second param was supposed to be URL or PID", ee);
+                throw new RuntimeException("Second param was supposed to be PUC", ee);
             }
         }
     }
@@ -277,7 +277,7 @@ public class Cli {
 
     private void decompile(List<String> args, int i) throws Exception {
         if (args.size() != 4) {
-            throw new RuntimeException(DECOMPILE + " expects exactly three arguments - pid or url of JVM, fully classified class name and decompiler name (as set-up) or decompiler json file, or javap(see help)");
+            throw new RuntimeException(DECOMPILE + " expects exactly three arguments - PUC of JVM, fully classified class name and decompiler name (as set-up) or decompiler json file, or javap(see help)");
         }
         String jvmStr = args.get(i + 1);
         String classStr = args.get(i + 2);
@@ -311,7 +311,7 @@ public class Cli {
                 URL u = new URL(jvmStr);
                 throw new RuntimeException("Remote VM not yet implemented");
             } catch (MalformedURLException ee) {
-                throw new RuntimeException("Second param was supposed to be URL or PID", ee);
+                throw new RuntimeException("Second param was supposed to be PUC", ee);
             }
         }
     }
@@ -335,7 +335,7 @@ public class Cli {
 
     private void printBytes(List<String> args, int i, boolean bytes) throws IOException {
         if (args.size() != 3) {
-            throw new RuntimeException(BYTES + " and " + BASE64 + " expect exactly two arguments - pid or url of JVM and fully classified class name");
+            throw new RuntimeException(BYTES + " and " + BASE64 + " expect exactly two arguments - PUC of JVM and fully classified class name");
         }
         String jvmStr = args.get(i + 1);
         String classStr = args.get(i + 2);
@@ -353,14 +353,14 @@ public class Cli {
                 URL u = new URL(jvmStr);
                 throw new RuntimeException("Remote VM not yet implemented");
             } catch (MalformedURLException ee) {
-                throw new RuntimeException("Second param was supposed to be URL or PID", ee);
+                throw new RuntimeException("Second param was supposed to be PUC", ee);
             }
         }
     }
 
     private void listClasses(List<String> args, int i) {
         if (args.size() != 2) {
-            throw new RuntimeException(LISTCLASSES + " expect exactly one argument - pid or url");
+            throw new RuntimeException(LISTCLASSES + " expect exactly one argument - PUC");
         }
         String param = args.get(i + 1);
         try {
@@ -374,7 +374,24 @@ public class Cli {
                 URL u = new URL(param);
                 throw new RuntimeException("Remote VM not yet implemented");
             } catch (MalformedURLException ee) {
-                throw new RuntimeException("Second param was supposed to be URL or PID", ee);
+                String[] cpElements = param.split(File.pathSeparator);
+                if (cpElements.length == 0 ){
+                    throw new RuntimeException("Second param was supposed to be PUC", ee);
+                }
+                List<File> cp = new ArrayList<>(cpElements.length);
+                for(String cpe: cpElements){
+                    File f = new File(cpe);
+                    if (!f.exists()){
+                        throw new RuntimeException("Second param was supposed to be PUC", ee);
+                    } else {
+                        cp.add(f);
+                    }
+                }
+                VmInfo vmInfo = vmManager.createFsVM(cp, null);
+                String[] classes = obtainClasses(vmInfo, vmManager);
+                for (String clazz : classes) {
+                    System.out.println(clazz);
+                }
             }
         }
     }
@@ -405,17 +422,18 @@ public class Cli {
         System.out.println(HELP + "/" + H + " print this help end exit");
         System.out.println(LISTJVMS + " no arg expected, list available localhost JVMs ");
         System.out.println(LISTPLUGINS + "  no arg expected, currently configured plugins with theirs status");
-        System.out.println(LISTCLASSES + "  one arg - pid or url of JVM. List its loaded classes.");
-        System.out.println(BYTES + "  two args - pid or url of JVM and class to obtain - will stdout its binary form");
-        System.out.println(BASE64 + "  two args - pid or url of JVM and class to obtain - will stdout its binary encoded as base64");
-        System.out.println(DECOMPILE + "  three args - pid or url of JVM and class to obtain and name/file of decompiler config - will stdout decompiled class");
+        System.out.println(" wip! ! PUC ! pid xor url xor class-path of VM");
+        System.out.println(LISTCLASSES + "  one arg - PUC of JVM. List its loaded classes.");
+        System.out.println(BYTES + "  two args - PUC of JVM and class to obtain - will stdout its binary form");
+        System.out.println(BASE64 + "  two args - PUC of JVM and class to obtain - will stdout its binary encoded as base64");
+        System.out.println(DECOMPILE + "  three args - PUC of JVM and class to obtain and name/file of decompiler config - will stdout decompiled class");
         System.out.println("              you can use special keyword javap, instead of decompiler name, to use javap disassembler.");
         System.out.println("              You can pass also parameters to it like any other javap, but without space. So e.g. javap-v is equal to call javap -v /tmp/class_you_entered.class");
         System.out.println(COMPILE + "  compile local file(s) against runtime classapth. Plugin can have its own compiler, eg jasm do nto require runtime classpath");
         System.out.println("              mandatory: file(s) to compile");
-        System.out.println(" wip!         optional: pid or url of runtime classpath, plugin, recursive, directory to save to (if missing then stdout, failing if more then one file is result)");
+        System.out.println(" wip!         optional: PUC of runtime classpath, plugin, recursive, directory to save to (if missing then stdout, failing if more then one file is result)");
         System.out.println(" wip!                 -cp                              -p <plugin> -r     -d <dir>");
-        System.out.println(OVERWRITE + "  three args - pid or url of JVM and class to overwrite and file with new bytecode");
+        System.out.println(OVERWRITE + "  three args - PUC of JVM and class to overwrite and file with new bytecode");
         System.out.println("Allowed are: " + LISTJVMS + " , " + LISTPLUGINS + " , " + LISTCLASSES + ", " + BASE64 + " , " + BYTES + ", " + DECOMPILE + ", " + COMPILE + ", " + VERBOSE + ", " + OVERWRITE);
     }
 

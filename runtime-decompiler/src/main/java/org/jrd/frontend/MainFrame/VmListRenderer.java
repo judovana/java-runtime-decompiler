@@ -33,14 +33,18 @@ public class VmListRenderer extends JPanel implements ListCellRenderer {
     @Override
     public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         VmInfo vminfo = (VmInfo)value;
-        if (vminfo.isLocal()){
+        if (vminfo.getType() == VmInfo.Type.LOCAL){
             name.setText("   " + vminfo.getVmName().split(" ")[0]);
             pid.setText("   PID: " + vminfo.getVmPid());
             this.setToolTipText("<html>NAME: " + vminfo.getVmName().split(" ")[0] + "<br>PID: " + vminfo.getVmPid() + "</html>");
-        } else {
+        } if (vminfo.getType() == VmInfo.Type.REMOTE){
             name.setText("   Hostname: " + vminfo.getVmName());
             pid.setText("   Port: " + vminfo.getVmDecompilerStatus().getListenPort());
             this.setToolTipText("<html>Hostname: " + vminfo.getVmName() + "<br>Port: " + vminfo.getVmDecompilerStatus().getListenPort() + "</html>");
+        } else {
+            name.setText("   " + vminfo.nameOrCp());
+            pid.setText("   PID: " + vminfo.getVmPid());
+            pid.setText("   id: " + vminfo.getVmId());
         }
 
         if (isSelected){

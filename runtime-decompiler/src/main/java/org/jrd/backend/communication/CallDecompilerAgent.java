@@ -9,7 +9,7 @@ import java.io.IOException;
  * This class is handling opening of communication socket and request submitting.
  *  
  */
-public class CallDecompilerAgent {
+public class CallDecompilerAgent implements JrdAgent {
     
     public static final String DEFAULT_ADDRESS = "localhost";
     public static final int DEFAULT_PORT= 5395;
@@ -44,6 +44,7 @@ public class CallDecompilerAgent {
      * are refused
      * @return agents response or null
      */
+    @Override
     public String submitRequest(final String request){
         final Communicate comm = new Communicate(this.address, this.port);
         try {

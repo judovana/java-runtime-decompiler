@@ -2,8 +2,10 @@ package org.jrd.backend.core;
 
 
 import org.jrd.backend.communication.CallDecompilerAgent;
-
+import org.jrd.backend.communication.FsAgent;
+import org.jrd.backend.communication.JrdAgent;
 import org.jrd.backend.core.AgentRequestAction.RequestAction;
+import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
 
 import java.util.ArrayList;
@@ -50,7 +52,11 @@ public class DecompilerRequestReceiver {
         port = tryParseInt(portStr, "Listen port is not an integer!");
         vmPid = tryParseInt(vmPidStr, "VM PID is not a number!");
 
-        OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG,  "Processing request. VM ID: " + vmId + ", PID: " + vmPid + ", action: " + action + ", port: " + portStr);
+        if (vmPid >= 0 || port >= 0) {
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Processing request. VM ID: " + vmId + ", PID: " + vmPid + ", action: " + action + ", port: " + portStr);
+        } else {
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Processing request. VM ID: " + vmId + ", action: " + action);
+        }
         String response;
         switch (action) {
             case OVERWRITE:
@@ -84,7 +90,7 @@ public class DecompilerRequestReceiver {
             return NOT_ATTACHED;
         }
     }
-    
+
     private int getPort(String hostname, int listenPort, String vmId, int vmPid) {
         int actualListenPort;
         if ("localhost".equals(hostname)) {
@@ -101,8 +107,8 @@ public class DecompilerRequestReceiver {
         }
         return actualListenPort;
     }
-    
-    private class ResponseWithPort{
+
+    private class ResponseWithPort {
         private final String response;
         private final int port;
 
@@ -110,22 +116,27 @@ public class DecompilerRequestReceiver {
             this.response = response;
             this.port = port;
         }
-        
-    }
-  
-    private ResponseWithPort getResponse(String hostname, int listenPort, String vmId, int vmPid, String requestBody) {
-        int actualListenPort = getPort(hostname, listenPort, vmId, vmPid);
 
-        CallDecompilerAgent nativeAgent = new CallDecompilerAgent(actualListenPort, hostname);
+    }
+
+    private ResponseWithPort getResponse(String hostname, int listenPort, String vmId, int vmPid, String requestBody) {
+        int actualListenPort = -1;
+        JrdAgent nativeAgent;
+        if (listenPort >= 0 || vmPid >= 0) {
+            actualListenPort = getPort(hostname, listenPort, vmId, vmPid);
+            nativeAgent = new CallDecompilerAgent(actualListenPort, hostname);
+        } else {
+            VmInfo vmInfo = vmManager.findVmFromPID(vmId);
+            nativeAgent = new FsAgent(vmInfo.getCp());
+        }
         String reply = nativeAgent.submitRequest(requestBody);
         if ("ERROR".equals(reply)) {
             throw new RuntimeException("Agent returned ERROR");
 
         }
         return new ResponseWithPort(reply, actualListenPort);
-
     }
-  
+
     private String getOverwriteAction(String hostname, int listenPort, String vmId, int vmPid, String className, String nwBody) {
         try {
             ResponseWithPort reply = getResponse(hostname, listenPort, vmId, vmPid, "OVERWRITE\n" + className + "\n" + nwBody);
@@ -233,13 +244,13 @@ public class DecompilerRequestReceiver {
         return actualListenPort;
     }
 
-    private String[] parseClasses(String classes){
+    private String[] parseClasses(String classes) {
         String[] array = classes.split(";");
         List<String> list = new ArrayList<>(Arrays.asList(array));
         list.removeAll(Arrays.asList("", null));
         List<String> list1 = new ArrayList<>();
         for (String s : list) {
-                list1.add(s);
+            list1.add(s);
         }
         java.util.Collections.sort(list1);
         return list1.toArray(new String[]{});

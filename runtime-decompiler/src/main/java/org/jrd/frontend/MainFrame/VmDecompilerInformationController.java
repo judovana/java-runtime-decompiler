@@ -251,7 +251,7 @@ public class VmDecompilerInformationController {
     }
 
     private void haltAgent() {
-        if (vmInfo == null || !vmInfo.isLocal()) {
+        if (vmInfo == null || vmInfo.getType() == VmInfo.Type.REMOTE || vmInfo.getType() == VmInfo.Type.FS) {
             return;
         }
         try {
