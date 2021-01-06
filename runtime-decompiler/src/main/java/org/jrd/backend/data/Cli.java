@@ -8,16 +8,17 @@ import org.jc.api.InMemoryCompiler;
 import org.jc.api.MessagesListener;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.core.AgentRequestAction;
+import org.jrd.backend.core.OutputController;
 import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.MainFrame.FiletoClassValidator;
 import org.jrd.frontend.MainFrame.VmDecompilerInformationController;
+import org.jrd.frontend.NewFsVmFrame.NewFsVmController;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
@@ -365,34 +366,22 @@ public class Cli {
             throw new RuntimeException(LISTCLASSES + " expect exactly one argument - PUC");
         }
         String param = args.get(i + 1);
-        try {
-            VmInfo vmInfo = vmManager.findVmFromPID(param);
-            listClassesFromVmInfo(vmInfo);
-        } catch (NumberFormatException e) {
-            try {
-                System.err.println("No PID, trying class path");
-                String[] cpElements = param.split(File.pathSeparator);
-                if (cpElements.length == 0) {
-                    throw new ProbablyNotClassPathElementException("Second param was supposed to be PUC");
-                }
-                List<File> cp = new ArrayList<>(cpElements.length);
-                for (String cpe : cpElements) {
-                    File f = new File(cpe);
-                    if (!f.exists()) {
-                        throw new ProbablyNotClassPathElementException("Second param was supposed to be PUC");
-                    } else {
-                        cp.add(f);
-                    }
-                }
-                VmInfo vmInfo = vmManager.createFsVM(cp, null);
-                listClassesFromVmInfo(vmInfo);
-            } catch (ProbablyNotClassPathElementException fnf) {
-                //unluckily, we can not check host:port sooner, as on many systems, : is part of classapth
-                System.err.println("No CP, trying remote VM");
-                VmInfo vmInfo = vmManager.createRemoteVM(param.split(":")[0], Integer.valueOf(param.split(":")[1]));
-                listClassesFromVmInfo(vmInfo);
-            }
+        VmInfo.Type puc = guessType(param);
+        VmInfo vmInfo;
+        switch (puc) {
+            case LOCAL:
+                vmInfo = vmManager.findVmFromPID(param);
+                break;
+            case FS:
+                vmInfo = vmManager.createFsVM(NewFsVmController.cpToFilesCatched(param), null);
+                break;
+            case REMOTE:
+                vmInfo = vmManager.createRemoteVM(param.split(":")[0], Integer.valueOf(param.split(":")[1]));
+                break;
+            default:
+                throw new RuntimeException("Unknown VmInfo.Type.");
         }
+        listClassesFromVmInfo(vmInfo);
     }
 
     private void listClassesFromVmInfo(VmInfo vmInfo) {
@@ -429,7 +418,7 @@ public class Cli {
         System.out.println(HELP + "/" + H + " print this help end exit");
         System.out.println(LISTJVMS + " no arg expected, list available localhost JVMs ");
         System.out.println(LISTPLUGINS + "  no arg expected, currently configured plugins with theirs status");
-        System.out.println(" wip! ! PUC ! pid xor hostname:port xor class-path of VM");
+        System.out.println(" wip! ! PUC ! pid xor hostname:port xor class-path of VM. Classpath separator is `" + File.pathSeparator + "`");
         System.out.println(LISTCLASSES + "  one arg - PUC of JVM. List its loaded classes.");
         System.out.println(BYTES + "  two args - PUC of JVM and class to obtain - will stdout its binary form");
         System.out.println(BASE64 + "  two args - PUC of JVM and class to obtain - will stdout its binary encoded as base64");
@@ -475,13 +464,48 @@ public class Cli {
         }
     }
 
-    private class ProbablyNotClassPathElementException extends Exception {
-        public ProbablyNotClassPathElementException(String s, Throwable cause) {
-            super(s, cause);
+    private VmInfo.Type guessType(String input) {
+        if (input == null || input.trim().isEmpty()) {
+            throw new RuntimeException("No input to check P(pid) xor U(host:port) xor C(classpath) from.");
         }
-
-        public ProbablyNotClassPathElementException(String s) {
-            super(s);
+        try {
+            Integer.valueOf(input);
+            if (OutputController.getLogger().isVerbose()) {
+                System.err.println("Using " + input + " as pid. For files/folders of number try ./number format");
+            }
+            return VmInfo.Type.LOCAL;
+        } catch (NumberFormatException eee) {
+            if (OutputController.getLogger().isVerbose()) {
+                eee.printStackTrace();
+            }
+            try {
+                if (input.split(":").length == 2) {
+                    Integer.valueOf(input.split(":")[1]);
+                    if (OutputController.getLogger().isVerbose()) {
+                        System.err.println("Using " + input + " as host:port. For files/folders of number try ./number format");
+                    }
+                    return VmInfo.Type.REMOTE;
+                } else {
+                    throw new NumberFormatException("it is not host:number format");
+                }
+            } catch (NumberFormatException ee) {
+                if (OutputController.getLogger().isVerbose()) {
+                    ee.printStackTrace();
+                }
+                try {
+                    NewFsVmController.cpToFiles(input);
+                    if (OutputController.getLogger().isVerbose()) {
+                        System.err.println("Using " + input + " as host:port. For files/folders of number try ./number format");
+                    }
+                    return VmInfo.Type.FS;
+                } catch (NewFsVmController.ProbablyNotClassPathElementException e) {
+                    if (OutputController.getLogger().isVerbose()) {
+                        e.printStackTrace();
+                    }
+                }
+            }
         }
+        throw new RuntimeException("Unable to determine " + input + " as Pid xor host:port xor classpath");
     }
+
 }

@@ -16,6 +16,9 @@ public class OutputController {
         verbose = true;
     }
 
+    public boolean isVerbose() {
+        return verbose;
+    }
 
     private static class OutputControllerHolder {
 
