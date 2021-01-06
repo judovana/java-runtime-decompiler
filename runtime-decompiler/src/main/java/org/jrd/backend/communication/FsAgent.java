@@ -54,34 +54,36 @@ public class FsAgent implements JrdAgent {
         List<String> classes = new ArrayList<>();
         for (File c : cp) {
             String root = sanitize(c.getAbsolutePath());
-            Files.walkFileTree(c.toPath(), new FileVisitor<Path>() {
-                @Override
-                public FileVisitResult preVisitDirectory(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
-                    return FileVisitResult.CONTINUE;
-                }
-
-                @Override
-                public FileVisitResult visitFile(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
-                    String s = sanitize(path.toFile().getAbsolutePath());
-                    if (s.endsWith(".class")) {
-                        classes.add(toClass(s.substring(root.length()+1)));
-                    } else {
-                        //todo!
-                        //is it zip? look into it!
+            if (c.isDirectory()) {
+                Files.walkFileTree(c.toPath(), new FileVisitor<Path>() {
+                    @Override
+                    public FileVisitResult preVisitDirectory(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
+                        return FileVisitResult.CONTINUE;
                     }
-                    return FileVisitResult.CONTINUE;
-                }
 
-                @Override
-                public FileVisitResult visitFileFailed(Path path, IOException e) throws IOException {
-                    return FileVisitResult.CONTINUE;
-                }
+                    @Override
+                    public FileVisitResult visitFile(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
+                        String s = sanitize(path.toFile().getAbsolutePath());
+                        if (s.endsWith(".class")) {
+                            classes.add(toClass(s.substring(root.length() + 1)));
+                        } else {
+                        }
+                        return FileVisitResult.CONTINUE;
+                    }
 
-                @Override
-                public FileVisitResult postVisitDirectory(Path path, IOException e) throws IOException {
-                    return FileVisitResult.CONTINUE;
-                }
-            });
+                    @Override
+                    public FileVisitResult visitFileFailed(Path path, IOException e) throws IOException {
+                        return FileVisitResult.CONTINUE;
+                    }
+
+                    @Override
+                    public FileVisitResult postVisitDirectory(Path path, IOException e) throws IOException {
+                        return FileVisitResult.CONTINUE;
+                    }
+                });
+            } else {
+                //is it jar/zip? trasnaprently traverse it!
+            }
         }
         return classes.stream().collect(Collectors.joining(";"));
     }
