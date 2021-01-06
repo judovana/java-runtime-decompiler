@@ -17,6 +17,7 @@ import org.jrd.frontend.MainFrame.VmDecompilerInformationController;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
@@ -277,7 +278,8 @@ public class Cli {
 
     private void decompile(List<String> args, int i) throws Exception {
         if (args.size() != 4) {
-            throw new RuntimeException(DECOMPILE + " expects exactly three arguments - PUC of JVM, fully classified class name and decompiler name (as set-up) or decompiler json file, or javap(see help)");
+            throw new RuntimeException(
+                    DECOMPILE + " expects exactly three arguments - PUC of JVM, fully classified class name and decompiler name (as set-up) or decompiler json file, or javap(see help)");
         }
         String jvmStr = args.get(i + 1);
         String classStr = args.get(i + 2);
@@ -365,34 +367,38 @@ public class Cli {
         String param = args.get(i + 1);
         try {
             VmInfo vmInfo = vmManager.findVmFromPID(param);
-            String[] classes = obtainClasses(vmInfo, vmManager);
-            for (String clazz : classes) {
-                System.out.println(clazz);
-            }
+            listClassesFromVmInfo(vmInfo);
         } catch (NumberFormatException e) {
             try {
-                URL u = new URL(param);
-                throw new RuntimeException("Remote VM not yet implemented");
-            } catch (MalformedURLException ee) {
+                System.err.println("No PID, trying class path");
                 String[] cpElements = param.split(File.pathSeparator);
-                if (cpElements.length == 0 ){
-                    throw new RuntimeException("Second param was supposed to be PUC", ee);
+                if (cpElements.length == 0) {
+                    throw new ProbablyNotClassPathElementException("Second param was supposed to be PUC");
                 }
                 List<File> cp = new ArrayList<>(cpElements.length);
-                for(String cpe: cpElements){
+                for (String cpe : cpElements) {
                     File f = new File(cpe);
-                    if (!f.exists()){
-                        throw new RuntimeException("Second param was supposed to be PUC", ee);
+                    if (!f.exists()) {
+                        throw new ProbablyNotClassPathElementException("Second param was supposed to be PUC");
                     } else {
                         cp.add(f);
                     }
                 }
                 VmInfo vmInfo = vmManager.createFsVM(cp, null);
-                String[] classes = obtainClasses(vmInfo, vmManager);
-                for (String clazz : classes) {
-                    System.out.println(clazz);
-                }
+                listClassesFromVmInfo(vmInfo);
+            } catch (ProbablyNotClassPathElementException fnf) {
+                //unluckily, we can not check host:port sooner, as on many systems, : is part of classapth
+                System.err.println("No CP, trying remote VM");
+                VmInfo vmInfo = vmManager.createRemoteVM(param.split(":")[0], Integer.valueOf(param.split(":")[1]));
+                listClassesFromVmInfo(vmInfo);
             }
+        }
+    }
+
+    private void listClassesFromVmInfo(VmInfo vmInfo) {
+        String[] classes = obtainClasses(vmInfo, vmManager);
+        for (String clazz : classes) {
+            System.out.println(clazz);
         }
     }
 
@@ -417,12 +423,13 @@ public class Cli {
     }
 
     private void printHelp() {
-        System.out.println("Allowed are: " + LISTJVMS + " , " + LISTPLUGINS + " , " + LISTCLASSES + ", " + BASE64 + " , " + BYTES + ", " + DECOMPILE + ", " + COMPILE + ", " + VERBOSE + ", " + OVERWRITE);
+        System.out.println(
+                "Allowed are: " + LISTJVMS + " , " + LISTPLUGINS + " , " + LISTCLASSES + ", " + BASE64 + " , " + BYTES + ", " + DECOMPILE + ", " + COMPILE + ", " + VERBOSE + ", " + OVERWRITE);
         System.out.println(VERBOSE + " will set this app to print out all Exceptions and some debugging strings. Then continues ");
         System.out.println(HELP + "/" + H + " print this help end exit");
         System.out.println(LISTJVMS + " no arg expected, list available localhost JVMs ");
         System.out.println(LISTPLUGINS + "  no arg expected, currently configured plugins with theirs status");
-        System.out.println(" wip! ! PUC ! pid xor url xor class-path of VM");
+        System.out.println(" wip! ! PUC ! pid xor hostname:port xor class-path of VM");
         System.out.println(LISTCLASSES + "  one arg - PUC of JVM. List its loaded classes.");
         System.out.println(BYTES + "  two args - PUC of JVM and class to obtain - will stdout its binary form");
         System.out.println(BASE64 + "  two args - PUC of JVM and class to obtain - will stdout its binary encoded as base64");
@@ -434,7 +441,8 @@ public class Cli {
         System.out.println(" wip!         optional: PUC of runtime classpath, plugin, recursive, directory to save to (if missing then stdout, failing if more then one file is result)");
         System.out.println(" wip!                 -cp                              -p <plugin> -r     -d <dir>");
         System.out.println(OVERWRITE + "  three args - PUC of JVM and class to overwrite and file with new bytecode");
-        System.out.println("Allowed are: " + LISTJVMS + " , " + LISTPLUGINS + " , " + LISTCLASSES + ", " + BASE64 + " , " + BYTES + ", " + DECOMPILE + ", " + COMPILE + ", " + VERBOSE + ", " + OVERWRITE);
+        System.out.println(
+                "Allowed are: " + LISTJVMS + " , " + LISTPLUGINS + " , " + LISTCLASSES + ", " + BASE64 + " , " + BYTES + ", " + DECOMPILE + ", " + COMPILE + ", " + VERBOSE + ", " + OVERWRITE);
     }
 
     private static String invalidityToString(boolean invalidWrapper) {
@@ -464,6 +472,16 @@ public class Cli {
         } else {
             throw new RuntimeException(VmDecompilerInformationController.CLASSES_NOPE);
 
+        }
+    }
+
+    private class ProbablyNotClassPathElementException extends Exception {
+        public ProbablyNotClassPathElementException(String s, Throwable cause) {
+            super(s, cause);
+        }
+
+        public ProbablyNotClassPathElementException(String s) {
+            super(s);
         }
     }
 }
