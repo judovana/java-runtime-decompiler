@@ -20,6 +20,7 @@ import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -91,11 +92,11 @@ public class PluginManager {
     }
 
     /**
-     * @param wrapper  decompiler used for decompiling
-     * @param name  optional name for decompielrs supporting inner classes
-     * @param bytecode bytecode to be decompiled
-     * @param options  decompile options
-     * @param vmInfo otional vminfo to find inner classes
+     * @param wrapper   decompiler used for decompiling
+     * @param name      optional name for decompielrs supporting inner classes
+     * @param bytecode  bytecode to be decompiled
+     * @param options   decompile options
+     * @param vmInfo    otional vminfo to find inner classes
      * @param vmManager otional vmmanager to find inner classes
      * @return Decompiled bytecode or exception String
      * @throws Exception exception String
@@ -110,14 +111,18 @@ public class PluginManager {
             InitializeWrapper(wrapper);
         }
         if (wrapper.getDecompileMethodWithInners() != null && name != null && vmInfo != null && vmManager != null) {
-            //locate all inner classes
             String[] allClasses = Cli.obtainClasses(vmInfo, vmManager);
-            //load bytecodes
-            return (String) wrapper.getDecompileMethodWithInners().invoke(wrapper.getInstance(), name, bytecode, new HashMap<>(), options);
-        } else if ( wrapper.getDecompileMethodNoInners() != null) {
+            Map<String, byte[]> innerClasses = new HashMap<>();
+            for (String clazz : allClasses) {
+                if (clazz.startsWith(name + "$")) {
+                    innerClasses.put(clazz, Base64.getDecoder().decode(Cli.obtainClass(vmInfo, clazz, vmManager).getLoadedClassBytes()));
+                }
+            }
+            return (String) wrapper.getDecompileMethodWithInners().invoke(wrapper.getInstance(), name, bytecode, innerClasses, options);
+        } else if (wrapper.getDecompileMethodNoInners() != null) {
             return (String) wrapper.getDecompileMethodNoInners().invoke(wrapper.getInstance(), bytecode, options);
         } else {
-            throw  new RuntimeException("This decompiler have no suitable decompile method for give parameters");
+            throw new RuntimeException("This decompiler have no suitable decompile method for give parameters");
         }
     }
 
