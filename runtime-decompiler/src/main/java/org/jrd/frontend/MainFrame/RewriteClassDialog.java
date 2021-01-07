@@ -508,8 +508,8 @@ public class RewriteClassDialog extends JDialog {
                 OutputController.getLogger().log(ex);
                 compilationLog.setText(compilationLog.getText() + ex.getMessage() + "\n");
             } finally {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Operation finished");
-                compilationLog.setText(compilationLog.getText() + "Operatin finished, you may close dialog\n");
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Compilation finished");
+                compilationLog.setText(compilationLog.getText() + "Compilation finished, you may close dialog\n");
             }
 
         }
