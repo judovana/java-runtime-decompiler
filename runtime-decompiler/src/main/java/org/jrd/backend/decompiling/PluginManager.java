@@ -3,15 +3,24 @@ package org.jrd.backend.decompiling;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.jrd.backend.core.OutputController;
+import org.jrd.backend.data.Cli;
 import org.jrd.backend.data.Directories;
+import org.jrd.backend.data.VmInfo;
+import org.jrd.backend.data.VmManager;
 
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -64,12 +73,12 @@ public class PluginManager {
     /**
      * Loads information decompiler json file into List<DecompilerWrapperInformation>Wrapper.
      */
-    private void loadConfig(File file){
+    private void loadConfig(File file) {
         if (file.getName().endsWith(".json")) {
             DecompilerWrapperInformation wrapper;
             try {
                 wrapper = gson.fromJson(new FileReader(file.getAbsolutePath()), DecompilerWrapperInformation.class);
-            } catch (FileNotFoundException | NullPointerException e ) {
+            } catch (FileNotFoundException | NullPointerException e) {
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, e);
                 wrapper = null;
             }
@@ -82,43 +91,44 @@ public class PluginManager {
     }
 
     /**
-     * Decompile with default options
-     * @param wrapper decompiler used for decompiling
-     * @param bytecode bytecode to be decompiled
-     * @return decompiled bytecode or exception String
-     * @throws Exception exception String
-     */
-    public String decompile(DecompilerWrapperInformation wrapper, byte[] bytecode) throws Exception {
-        return decompile(wrapper, bytecode, null);
-    }
-
-    /**
      * @param wrapper  decompiler used for decompiling
+     * @param name  optional name for decompielrs supporting inner classes
      * @param bytecode bytecode to be decompiled
-     * @param options decompile options
+     * @param options  decompile options
+     * @param vmInfo otional vminfo to find inner classes
+     * @param vmManager otional vmmanager to find inner classes
      * @return Decompiled bytecode or exception String
      * @throws Exception exception String
      */
-    public synchronized String decompile(DecompilerWrapperInformation wrapper, byte[] bytecode, String[] options) throws Exception{
+    public synchronized String decompile(DecompilerWrapperInformation wrapper, String name, byte[] bytecode, String[] options, VmInfo vmInfo, VmManager vmManager) throws Exception {
         if (wrapper == null) {
             return "No valid decompiler selected. Unable to decompile. \n " +
                     "If there is no decompiler selected, you need to set paths to decompiler in" +
                     "decompiler wrapper";
         }
-        if (wrapper.getDecompileMethod() == null) {
+        if (!wrapper.haveDecompilerMethod()) {
             InitializeWrapper(wrapper);
         }
-        return (String) wrapper.getDecompileMethod().invoke(wrapper.getInstance(), bytecode, options);
+        if (wrapper.getDecompileMethodWithInners() != null && name != null && vmInfo != null && vmManager != null) {
+            //locate all inner classes
+            String[] allClasses = Cli.obtainClasses(vmInfo, vmManager);
+            //load bytecodes
+            return (String) wrapper.getDecompileMethodWithInners().invoke(wrapper.getInstance(), name, bytecode, new HashMap<>(), options);
+        } else if ( wrapper.getDecompileMethodNoInners() != null) {
+            return (String) wrapper.getDecompileMethodNoInners().invoke(wrapper.getInstance(), bytecode, options);
+        } else {
+            throw  new RuntimeException("This decompiler have no suitable decompile method for give parameters");
+        }
     }
 
-    public synchronized boolean haveCompiler(DecompilerWrapperInformation wrapper) throws Exception{
+    public synchronized boolean haveCompiler(DecompilerWrapperInformation wrapper) throws Exception {
         if (wrapper == null) {
             throw new RuntimeException("No valid decompiler selected. Current-Buffer may not be usable");
         }
-        if (wrapper.getDecompileMethod() == null) { //compile method may remian null
+        if (!wrapper.haveDecompilerMethod()) { //compile method may remian null
             InitializeWrapper(wrapper);
         }
-        if (wrapper.getName().equals(DecompilerWrapperInformation.JAVAP_NAME) || wrapper.getName().equals(DecompilerWrapperInformation.JAVAP_VERBOSE_NAME)){
+        if (wrapper.getName().equals(DecompilerWrapperInformation.JAVAP_NAME) || wrapper.getName().equals(DecompilerWrapperInformation.JAVAP_VERBOSE_NAME)) {
             throw new RuntimeException("Javap can not back-compiled. Current-Buffer may not be usable");
         }
         return wrapper.getCompileMethod() != null;
@@ -130,18 +140,18 @@ public class PluginManager {
      * @param wrapper
      * @throws RuntimeException
      */
-    private void InitializeWrapper(DecompilerWrapperInformation wrapper){
-        if (wrapper.getName().equals(DecompilerWrapperInformation.JAVAP_NAME)){
+    private void InitializeWrapper(DecompilerWrapperInformation wrapper) {
+        if (wrapper.getName().equals(DecompilerWrapperInformation.JAVAP_NAME)) {
             try {
                 wrapper.setInstance(new JavapDisassemblerWrapper(""));
-                wrapper.setDecompileMethod(JavapDisassemblerWrapper.class.getMethod("decompile", byte[].class, String[].class));
+                wrapper.setDecompileMethodNoInners(JavapDisassemblerWrapper.class.getMethod("decompile", byte[].class, String[].class));
             } catch (NoSuchMethodException e) {
                 OutputController.getLogger().log("Could not find decompile method in org/jrd/backend/decompiling/JavapDisassemblerWrapper");
             }
-        } else if (wrapper.getName().equals(DecompilerWrapperInformation.JAVAP_VERBOSE_NAME)){
+        } else if (wrapper.getName().equals(DecompilerWrapperInformation.JAVAP_VERBOSE_NAME)) {
             try {
                 wrapper.setInstance(new JavapDisassemblerWrapper("-v"));
-                wrapper.setDecompileMethod(JavapDisassemblerWrapper.class.getMethod("decompile", byte[].class, String[].class));
+                wrapper.setDecompileMethodNoInners(JavapDisassemblerWrapper.class.getMethod("decompile", byte[].class, String[].class));
             } catch (NoSuchMethodException e) {
                 OutputController.getLogger().log("Could not find decompile method in org/jrd/backend/decompiling/JavapDisassemblerWrapper");
             }
@@ -155,7 +165,7 @@ public class PluginManager {
                 URL tempDirURL = new URL("file://" + System.getProperty("java.io.tmpdir") + "/");
                 List<ExpandableUrl> sTemp = new LinkedList(wrapper.getDependencyURLs());
                 List<URL> s = new LinkedList<>();
-                for(ExpandableUrl u : sTemp){
+                for (ExpandableUrl u : sTemp) {
                     s.add(u.getExpandedURL());
                 }
                 s.add(tempDirURL);
@@ -169,10 +179,22 @@ public class PluginManager {
                 Class DecompilerClass = loader.loadClass(wrapper.getFullyQualifiedClassName());
                 Constructor constructor = DecompilerClass.getConstructor();
                 wrapper.setInstance(constructor.newInstance());
-                wrapper.setDecompileMethod(DecompilerClass.getMethod("decompile", byte[].class, String[].class));
-                try{
+                try {
+                    wrapper.setDecompileMethodNoInners(DecompilerClass.getMethod("decompile", byte[].class, String[].class));
+                } catch (Exception e) {
+                    OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "No custom deompile method (without inner classes): " + e.getMessage());
+                }
+                try {
+                    wrapper.setDecompileMethodWithInners(DecompilerClass.getMethod("decompile", String.class, byte[].class, Map.class, String[].class));
+                } catch (Exception e) {
+                    OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "No custom compile method (with inner classes): " + e.getMessage());
+                }
+                if (!wrapper.haveDecompilerMethod()) {
+                    throw new InstantiationException("Decompiler " + wrapper.getName() + " do not have decompile method(s)");
+                }
+                try {
                     wrapper.setCompileMethod(DecompilerClass.getMethod("compile", Map.class, String[].class, Object.class));
-                }catch (Exception e){
+                } catch (Exception e) {
                     OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "No custom compile method: " + e.getMessage());
                 }
             } catch (Exception e) {
@@ -185,12 +207,12 @@ public class PluginManager {
         }
     }
 
-    public void replace(DecompilerWrapperInformation oldWrapper, DecompilerWrapperInformation newWrapper) throws IOException{
-        if (oldWrapper == null || newWrapper == null){
+    public void replace(DecompilerWrapperInformation oldWrapper, DecompilerWrapperInformation newWrapper) throws IOException {
+        if (oldWrapper == null || newWrapper == null) {
             return;
         }
         boolean nameChanged = !(oldWrapper.getName().equals(newWrapper.getName()));
-        if (nameChanged && oldWrapper.getScope().equals("local")){
+        if (nameChanged && oldWrapper.getScope().equals("local")) {
             setLocationForNewWrapper(newWrapper);
         }
         try {
@@ -200,7 +222,7 @@ public class PluginManager {
             throw e;
         }
         boolean fileChanged = !oldWrapper.getFileLocation().equals(newWrapper.getFileLocation());
-        if (fileChanged && oldWrapper.getScope().equals("local")){
+        if (fileChanged && oldWrapper.getScope().equals("local")) {
             File oldWrapperFile = new File(oldWrapper.getFileLocation());
             oldWrapperFile.delete();
         }
@@ -208,10 +230,10 @@ public class PluginManager {
         wrappers.remove(oldWrapper);
     }
 
-    public void deleteWrapper(DecompilerWrapperInformation wrapperInformation){
+    public void deleteWrapper(DecompilerWrapperInformation wrapperInformation) {
         wrappers.remove(wrapperInformation);
 
-        if (wrapperInformation.getScope().equals("local")){
+        if (wrapperInformation.getScope().equals("local")) {
             new File(wrapperInformation.getFileLocation()).delete();
             new File(flipWrapperExtension(wrapperInformation.getFileLocation())).delete();
         }
@@ -229,6 +251,7 @@ public class PluginManager {
 
     /**
      * Validating the @param plugin using compilation
+     *
      * @param plugin - plugin to validate
      * @return error message or null
      */
@@ -258,14 +281,14 @@ public class PluginManager {
         int errLevel = compiler.run(null, null, errStream, compileString);
         //cleaning after compilation
         String fileName = plugin.getWrapperURL().getFile().getName();
-        File fileToRemove = new File(System.getProperty("java.io.tmpdir") +"/"+ fileName.substring(0,fileName.length()-4) + "class");
+        File fileToRemove = new File(System.getProperty("java.io.tmpdir") + "/" + fileName.substring(0, fileName.length() - 4) + "class");
 
         if (fileToRemove.exists())
             fileToRemove.delete();
-        return errLevel != 0 ? new String(errStream.toByteArray()): null;
+        return errLevel != 0 ? new String(errStream.toByteArray()) : null;
     }
 
-    public DecompilerWrapperInformation createWrapper(){
+    public DecompilerWrapperInformation createWrapper() {
         DecompilerWrapperInformation newWrapper = new DecompilerWrapperInformation();
         newWrapper.setName("unnamed");
         setLocationForNewWrapper(newWrapper);
@@ -286,7 +309,7 @@ public class PluginManager {
         gsonBuilder.setPrettyPrinting();
         final Gson gson = gsonBuilder.create();
         final String json = gson.toJson(wrapper);
-        if (wrapper.getScope().equals("local")){
+        if (wrapper.getScope().equals("local")) {
             createUserPluginDir();
         }
         try (PrintWriter out = new PrintWriter(wrapper.getFileLocation())) {
@@ -321,10 +344,10 @@ public class PluginManager {
         }
     }
 
-    public static String flipWrapperExtension(String filePath){
-        if(filePath.endsWith(".json")){
+    public static String flipWrapperExtension(String filePath) {
+        if (filePath.endsWith(".json")) {
             return filePath.replace(".json", ".java");
-        } else if(filePath.endsWith(".java")){
+        } else if (filePath.endsWith(".java")) {
             return filePath.replace(".java", ".json");
         } else {
             OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Incorrect plugin wrapper path: " + filePath));

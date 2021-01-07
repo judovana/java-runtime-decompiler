@@ -20,10 +20,10 @@ public class DecompilerWrapperInformation {
     /**
      * Class containing information about available Decompiler wrapper
      *
-     * @param name             Decompiler name
-     * @param wrapperURL       location of wrapper.java file
-     * @param dependencyURLs   location of wrapper dependencies
-     * @param decompilerDownloadURL   decompiler download URL
+     * @param name                  Decompiler name
+     * @param wrapperURL            location of wrapper.java file
+     * @param dependencyURLs        location of wrapper dependencies
+     * @param decompilerDownloadURL decompiler download URL
      */
     public DecompilerWrapperInformation(String name, String wrapperURL, List<String> dependencyURLs,
                                         String decompilerDownloadURL) {
@@ -50,13 +50,14 @@ public class DecompilerWrapperInformation {
     private String fullyQualifiedClassName;
     private ExpandableUrl wrapperURL;
     private List<ExpandableUrl> DependencyURLs;
-    private Method decompileMethod;
+    private Method decompileMethodNoInners;
+    private Method decompileMethodWithInners;
     private Method compileMethod;
     private Object instance;
     private boolean invalidWrapper = false;
 
-    public static final String JAVAP_NAME="javap";
-    public static final String JAVAP_VERBOSE_NAME="javap -v";
+    public static final String JAVAP_NAME = "javap";
+    public static final String JAVAP_VERBOSE_NAME = "javap -v";
 
     public static DecompilerWrapperInformation getJavap() {
         DecompilerWrapperInformation javap = new DecompilerWrapperInformation();
@@ -83,7 +84,7 @@ public class DecompilerWrapperInformation {
     }
 
     public String getFullyQualifiedClassName() {
-        if (fullyQualifiedClassName == null){
+        if (fullyQualifiedClassName == null) {
             setFullyQualifiedClassName();
         }
         return fullyQualifiedClassName;
@@ -120,13 +121,20 @@ public class DecompilerWrapperInformation {
         this.instance = instance;
     }
 
-
-    public Method getDecompileMethod() {
-        return decompileMethod;
+    public Method getDecompileMethodNoInners() {
+        return decompileMethodNoInners;
     }
 
-    public void setDecompileMethod(Method decompile) {
-        this.decompileMethod = decompile;
+    public void setDecompileMethodNoInners(Method decompileMethodNoInners) {
+        this.decompileMethodNoInners = decompileMethodNoInners;
+    }
+
+    public Method getDecompileMethodWithInners() {
+        return decompileMethodWithInners;
+    }
+
+    public void setDecompileMethodWithInners(Method decompileMethodWithInners) {
+        this.decompileMethodWithInners = decompileMethodWithInners;
     }
 
     public Method getCompileMethod() {
@@ -145,7 +153,7 @@ public class DecompilerWrapperInformation {
         this.name = name;
     }
 
-    public ExpandableUrl getWrapperURL(){
+    public ExpandableUrl getWrapperURL() {
         return wrapperURL;
     }
 
@@ -168,7 +176,7 @@ public class DecompilerWrapperInformation {
         setWrapperURL(() -> DecompilerWrapperInformation.this.wrapperURL = ExpandableUrl.createFromPath(wrapperURL));
     }
 
-    private void setWrapperURLFromURL(String wrapperURL){
+    private void setWrapperURLFromURL(String wrapperURL) {
         setWrapperURL(() -> DecompilerWrapperInformation.this.wrapperURL = ExpandableUrl.createFromStringUrl(wrapperURL));
     }
 
@@ -176,7 +184,7 @@ public class DecompilerWrapperInformation {
         return DependencyURLs;
     }
 
-    private void setDependencyURLs(List<String> dependencyURLs, Switcher switcher){
+    private void setDependencyURLs(List<String> dependencyURLs, Switcher switcher) {
         DependencyURLs = new LinkedList<>();
         for (String s : dependencyURLs) {
             try {
@@ -194,7 +202,11 @@ public class DecompilerWrapperInformation {
         }
     }
 
-    private interface Switcher{
+    public boolean haveDecompilerMethod() {
+        return getDecompileMethodNoInners() != null || getDecompileMethodWithInners() != null;
+    }
+
+    private interface Switcher {
         ExpandableUrl getExpandableUrl(String s);
     }
 
@@ -202,7 +214,7 @@ public class DecompilerWrapperInformation {
         setDependencyURLs(dependencyURLs, ExpandableUrl::createFromPath);
     }
 
-    public void setDependencyURLsFromURL(List<String> dependencyURLs){
+    public void setDependencyURLsFromURL(List<String> dependencyURLs) {
         setDependencyURLs(dependencyURLs, ExpandableUrl::createFromStringUrl);
     }
 
@@ -223,7 +235,7 @@ public class DecompilerWrapperInformation {
 
     public String getScope() {
         String scope = "unknown";
-        if (fileLocation == null){
+        if (fileLocation == null) {
             return "Internal";
         }
         if (fileLocation.startsWith("/etc/")) {
@@ -231,11 +243,11 @@ public class DecompilerWrapperInformation {
         } else if (fileLocation.startsWith("/usr/share/")) {
             scope = "user shared";
 
-        } else{
+        } else {
             Path wrapperFile = Paths.get(fileLocation);
             Path baseDir = Paths.get(Directories.getXdgJrdBaseDir());
 
-            if(wrapperFile.startsWith(baseDir)){
+            if (wrapperFile.startsWith(baseDir)) {
                 scope = LOCAL_SCOPE;
             }
         }
@@ -262,7 +274,7 @@ public class DecompilerWrapperInformation {
             return false;
 
         DecompilerWrapperInformation other = (DecompilerWrapperInformation) obj;
-        if(this.fileLocation == null || other.fileLocation == null){
+        if (this.fileLocation == null || other.fileLocation == null) {
             return getName().equals(other.getName());
         } else {
             return new File(this.getFileLocation()).equals(new File(other.getFileLocation()));

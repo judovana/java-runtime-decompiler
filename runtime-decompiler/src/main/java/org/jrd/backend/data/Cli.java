@@ -298,12 +298,12 @@ public class Cli {
                 for (int x = 1; x < split_name.length; x++) {
                     options[x - 1] = "-" + split_name[x];
                 }
-                String decompile_output = pluginManager.decompile(findDecompiler(DecompilerWrapperInformation.JAVAP_NAME, pluginManager), bytes, options);
+                String decompile_output = pluginManager.decompile(findDecompiler(DecompilerWrapperInformation.JAVAP_NAME, pluginManager), classStr, bytes, options, vmInfo, vmManager);
                 System.out.println(decompile_output);
             } else {
                 DecompilerWrapperInformation decompiler = findDecompiler(decompilerName, pluginManager);
                 if (decompiler != null) {
-                    String decompiledClass = pluginManager.decompile(decompiler, bytes);
+                    String decompiledClass = pluginManager.decompile(decompiler, classStr, bytes, null, vmInfo, vmManager);
                     System.out.println(decompiledClass);
                 } else {
                     throw new RuntimeException("Decompiler " + decompilerName + " not found");

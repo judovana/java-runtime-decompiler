@@ -1,5 +1,7 @@
 import org.jetbrains.java.decompiler.main.decompiler.ConsoleDecompiler;
 
+import java.util.Map;
+import java.io.File;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -7,6 +9,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class FernflowerDecompilerWrapper {
+
+    public String decompile(String name, byte[] bytecode, Map<String,byte[]> innerClasses, String[] options){
+        return "";
+    }
 
     public String decompile(byte[] bytecode, String[] options){
         File tempByteFile = null;
