@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,6 +40,8 @@ public class FsAgent implements JrdAgent {
             switch (q[0]) {
                 case "CLASSES":
                     return readClasses();
+                case "BYTES":
+                    return sendByteCode(request);
                 case "HALT":
                     return "OK";
                 default:
@@ -48,6 +51,28 @@ public class FsAgent implements JrdAgent {
             OutputController.getLogger().log(ex);
             return "ERROR";
         }
+    }
+
+    private String sendByteCode(String request) {
+        String[] clazz = request.split("\\s+");
+        try {
+            return sendByteCodeImpl(clazz[1]);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String sendByteCodeImpl(String clazz) throws IOException {
+        for (File c : cp) {
+            String root = sanitize(c.getAbsolutePath());
+            String classOnFs = clazz.replace(".", File.separator) + ".class";
+            File f = new File(root + File.separator + classOnFs);
+            if (f.exists()) {
+                byte[] bytes = Files.readAllBytes(f.toPath());
+                return Base64.getEncoder().encodeToString(bytes);
+            }
+        }
+        throw new IOException(clazz + " not found on CP");
     }
 
     private String readClasses() throws IOException {
