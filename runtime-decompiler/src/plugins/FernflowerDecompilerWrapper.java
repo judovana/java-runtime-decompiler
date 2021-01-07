@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.io.PrintStream;
 
 public class FernflowerDecompilerWrapper {
 
@@ -86,10 +87,16 @@ and just bunch of tmp files can be used. Final file is always given_dir/Cazz.jav
     }
 
     private Object[] fernflower(String decompiledFilePath, String... args) throws IOException {
-        ConsoleDecompiler.main(args);
-        File decompiledFile = new File(decompiledFilePath);
-        String decompiledString = readStringFromFile(decompiledFilePath);
-        return new Object[]{decompiledFile, decompiledString};
+        PrintStream old = System.out;
+        System.setOut(System.err);
+        try {
+            ConsoleDecompiler.main(args);
+            File decompiledFile = new File(decompiledFilePath);
+            String decompiledString = readStringFromFile(decompiledFilePath);
+            return new Object[]{decompiledFile, decompiledString};
+       } finally {
+           System.setOut(old);
+       }
     }
 
     private String readStringFromFile(String filePath) throws IOException {
