@@ -18,6 +18,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Class that creates GUI for attached VM.
@@ -65,7 +67,8 @@ public class BytecodeDecompilerView {
 
         classesPanel = new JPanel(new BorderLayout());
 
-        classesSortField = new JTextField();
+        classesSortField = new JTextField(".*");
+        classesSortField.setToolTipText("Use regular expression; eg com.*");
         classesSortField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent documentEvent) {
@@ -249,9 +252,14 @@ public class BytecodeDecompilerView {
 
     private void updateClassList() {
         ArrayList<String> filtered = new ArrayList<>();
-        String filter = classesSortField.getText();
+        String filter = classesSortField.getText().trim();
+        if (filter.isEmpty()){
+            filter = ".*";
+        }
+        Pattern p = Pattern.compile(filter);
         for (String classe : classes) {
-            if (classe.contains(filter)) {
+            Matcher m = p.matcher(classe);
+            if (m.matches()) {
                 filtered.add(classe);
             }
         }
