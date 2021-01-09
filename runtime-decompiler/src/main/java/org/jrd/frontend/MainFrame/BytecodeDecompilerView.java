@@ -1,19 +1,25 @@
 package org.jrd.frontend.MainFrame;
 
 import org.fife.ui.hex.swing.HexEditor;
-import org.fife.ui.rsyntaxtextarea.*;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.fife.ui.rtextarea.RTextScrollPane;
 import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
 import org.jrd.backend.core.OutputController;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
-import org.fife.ui.rtextarea.RTextScrollPane;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -221,13 +227,25 @@ public class BytecodeDecompilerView {
         rightBin.setName("Binary buffer");
         rightBin.add(hex);
         rightBin.add(hexControls, BorderLayout.NORTH);
-        hexControls.setLayout(new GridLayout(1,2));
+        hexControls.setLayout(new GridLayout(1, 2));
         JButton undo = new JButton("Undo");
         hexControls.add(undo);
         JButton redo = new JButton("Redo");
         hexControls.add(redo);
         undo.addActionListener(actionEvent -> hex.undo());
         redo.addActionListener(actionEvent -> hex.redo());
+
+        JPanel hexSearchControls = new JPanel(new GridLayout(1, 4));
+        JComboBox hexSearchType = new JComboBox(new String[]{"text", "hex"});
+        hexSearchControls.add(hexSearchType);
+        JTextField hexSearch = new JTextField();
+        hexSearchControls.add(hexSearch);
+        JButton hexPrev = new JButton("prev");
+        hexSearchControls.add(hexPrev);
+        JButton hexNext = new JButton("next");
+        hexSearchControls.add(hexNext);
+        rightBin.add(hexSearchControls, BorderLayout.SOUTH);
+
         srcBin.add(rightMainPanel);
         srcBin.add(rightBin);
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
@@ -253,7 +271,7 @@ public class BytecodeDecompilerView {
     private void updateClassList() {
         ArrayList<String> filtered = new ArrayList<>();
         String filter = classesSortField.getText().trim();
-        if (filter.isEmpty()){
+        if (filter.isEmpty()) {
             filter = ".*";
         }
         Pattern p = Pattern.compile(filter);
@@ -294,7 +312,7 @@ public class BytecodeDecompilerView {
         bytecodeSyntaxTextArea.setText(data);
         try {
             hex.open(new ByteArrayInputStream(source));
-        } catch (IOException ex){
+        } catch (IOException ex) {
             OutputController.getLogger().log(ex);
         }
         this.lastDecompiledClass = name;
