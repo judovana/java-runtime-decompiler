@@ -17,23 +17,32 @@ import org.jrd.frontend.MainFrame.VmDecompilerInformationController;
 import org.jrd.frontend.NewFsVmFrame.NewFsVmController;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
 
 public class Cli {
 
     public static final String VERBOSE = "-verbose";
+    public static final String SAVEAS = "-saveas";
+    public static final String SAVELIKE = "-savelike";
     private static final String LISTJVMS = "-listjvms";
     private static final String LISTPLUGINS = "-listplugins";
     private static final String LISTCLASSES = "-listclasses";
@@ -48,6 +57,34 @@ public class Cli {
     private final String[] allargs;
     private final VmManager vmManager;
     private final PluginManager pluginManager;
+    private Saving saving;
+
+    private static class Saving {
+        public static final String DEFAULT = "default";
+        public static final String EXACT = "exact";
+        public static final String FQN = "fqn";
+        public static final String dir = "dir";
+        private final String as;
+        private final String like;
+
+        public Saving(String as, String like) {
+            this.as = as;
+            if (like == null) {
+                this.like = DEFAULT;
+            } else {
+                this.like = DEFAULT;
+            }
+        }
+
+        public Saving(String as) {
+            this.as = as;
+            this.like = "default";
+        }
+
+        public boolean shouldSave() {
+            return as != null;
+        }
+    }
 
     public Cli(String[] orig, Model model) {
         this.allargs = orig;
@@ -82,12 +119,26 @@ public class Cli {
 
     private List<String> prefilterArgs() {
         List<String> args = new ArrayList(allargs.length);
-        for (String arg : allargs) {
+        String saveas = null;
+        String savelike = null;
+        for (int i = 0; i < allargs.length; i++) {
+            String arg = allargs[i];
             String aarg = cleanParameter(arg);
-            if (!aarg.equals(VERBOSE)) {
+            if (aarg.equals(VERBOSE)) {
+                //alread processed
+            }
+            if (aarg.equals(SAVEAS)) {
+                saveas = allargs[i + 1];
+                i++;
+            }
+            if (aarg.equals(SAVELIKE)) {
+                savelike = allargs[i + 1];
+                i++;
+            } else {
                 args.add(arg);
             }
         }
+        this.saving = new Saving(saveas, savelike);
         return args;
     }
 
@@ -278,44 +329,49 @@ public class Cli {
     }
 
     private void decompile(List<String> args, int i) throws Exception {
-        if (args.size() != 4) {
+        if (args.size() < 4) {
             throw new RuntimeException(
-                    DECOMPILE + " expects exactly three arguments - PUC of JVM, fully classified class name and decompiler name (as set-up) or decompiler json file, or javap(see help)");
+                    DECOMPILE + " at least three arguments - PUC of JVM,  decompiler name (as set-up) or decompiler json file, or javap(see help) followed by fully classified class name(s)/regex(es)");
         }
         String jvmStr = args.get(i + 1);
-        String classStr = args.get(i + 2);
-        String decompilerName = args.get(i + 3);
-        try {
-            VmInfo vmInfo = vmManager.findVmFromPID(jvmStr);
-            VmDecompilerStatus result = obtainClass(vmInfo, classStr, vmManager);
-            byte[] bytes = Base64.getDecoder().decode(result.getLoadedClassBytes());
-            if (new File(decompilerName).exists() && decompilerName.toLowerCase().endsWith(".json")) {
-                throw new RuntimeException("Plugins loading directly from file is not implemented yet.");
-            }
-            if (decompilerName.startsWith(DecompilerWrapperInformation.JAVAP_NAME)) {
-                String[] split_name = decompilerName.split("-");
-                String[] options = new String[split_name.length - 1];
-                for (int x = 1; x < split_name.length; x++) {
-                    options[x - 1] = "-" + split_name[x];
+        String decompilerName = args.get(i + 2);
+        VmInfo vmInfo = getVmInfo(jvmStr);
+        for (int y = 3; y < args.size(); y++) {
+            String clazzRegex = args.get(y);
+            List<String> clazzes = obtainFilteredClasses(vmInfo, vmManager, Arrays.asList(Pattern.compile(clazzRegex)));
+            for (String classStr : clazzes) {
+                VmDecompilerStatus result = obtainClass(vmInfo, classStr, vmManager);
+                byte[] bytes = Base64.getDecoder().decode(result.getLoadedClassBytes());
+                if (new File(decompilerName).exists() && decompilerName.toLowerCase().endsWith(".json")) {
+                    throw new RuntimeException("Plugins loading directly from file is not implemented yet.");
                 }
-                String decompile_output = pluginManager.decompile(findDecompiler(DecompilerWrapperInformation.JAVAP_NAME, pluginManager), classStr, bytes, options, vmInfo, vmManager);
-                System.out.println(decompile_output);
-            } else {
-                DecompilerWrapperInformation decompiler = findDecompiler(decompilerName, pluginManager);
-                if (decompiler != null) {
-                    String decompiledClass = pluginManager.decompile(decompiler, classStr, bytes, null, vmInfo, vmManager);
-                    System.out.println(decompiledClass);
+                if (decompilerName.startsWith(DecompilerWrapperInformation.JAVAP_NAME)) {
+                    String[] split_name = decompilerName.split("-");
+                    String[] options = new String[split_name.length - 1];
+                    for (int x = 1; x < split_name.length; x++) {
+                        options[x - 1] = "-" + split_name[x];
+                    }
+                    String decompile_output = pluginManager.decompile(findDecompiler(DecompilerWrapperInformation.JAVAP_NAME, pluginManager), classStr, bytes, options, vmInfo, vmManager);
+                    outOrSave(classStr, ".java", decompile_output.getBytes(Charset.forName("utf-8")));
                 } else {
-                    throw new RuntimeException("Decompiler " + decompilerName + " not found");
+                    DecompilerWrapperInformation decompiler = findDecompiler(decompilerName, pluginManager);
+                    if (decompiler != null) {
+                        String decompiledClass = pluginManager.decompile(decompiler, classStr, bytes, null, vmInfo, vmManager);
+                        outOrSave(classStr, ".java", decompiledClass.getBytes(Charset.forName("utf-8")));
+                    } else {
+                        throw new RuntimeException("Decompiler " + decompilerName + " not found");
+                    }
                 }
             }
-        } catch (NumberFormatException e) {
-            try {
-                URL u = new URL(jvmStr);
-                throw new RuntimeException("Remote VM not yet implemented");
-            } catch (MalformedURLException ee) {
-                throw new RuntimeException("Second param was supposed to be PUC", ee);
-            }
+        }
+    }
+
+    private void outOrSave(String name, String suffix, byte[] body) throws UnsupportedEncodingException {
+        if (saving.shouldSave()) {
+            //todo
+            System.out.println("would save " + name + suffix + " of " + body.length + " as " + saving.as + " like " + saving.like);
+        } else {
+            System.out.println(new String(body, "utf-8"));
         }
     }
 
@@ -361,34 +417,60 @@ public class Cli {
         }
     }
 
-    private void listClasses(List<String> args, int i) {
-        if (args.size() != 2) {
-            throw new RuntimeException(LISTCLASSES + " expect exactly one argument - PUC");
+    private void listClasses(List<String> args, int i) throws IOException {
+        if (args.size() < 2) {
+            throw new RuntimeException(LISTCLASSES + " expect at least one argument - PUC. Second, optional is list of filtering regexes");
         }
         String param = args.get(i + 1);
-        VmInfo.Type puc = guessType(param);
-        VmInfo vmInfo;
-        switch (puc) {
-            case LOCAL:
-                vmInfo = vmManager.findVmFromPID(param);
-                break;
-            case FS:
-                vmInfo = vmManager.createFsVM(NewFsVmController.cpToFilesCatched(param), null);
-                break;
-            case REMOTE:
-                vmInfo = vmManager.createRemoteVM(param.split(":")[0], Integer.valueOf(param.split(":")[1]));
-                break;
-            default:
-                throw new RuntimeException("Unknown VmInfo.Type.");
+        List<Pattern> filter = new ArrayList<>(args.size() - 1);
+        for (int x = 2; x < args.size(); x++) {
+            filter.add(Pattern.compile(args.get(x)));
         }
-        listClassesFromVmInfo(vmInfo);
+        if (filter.isEmpty()) {
+            filter.add(Pattern.compile(".*"));
+        }
+        VmInfo vmInfo = getVmInfo(param);
+        listClassesFromVmInfo(vmInfo, filter);
     }
 
-    private void listClassesFromVmInfo(VmInfo vmInfo) {
-        String[] classes = obtainClasses(vmInfo, vmManager);
-        for (String clazz : classes) {
-            System.out.println(clazz);
+    private static List<String> obtainFilteredClasses(VmInfo vmInfo, VmManager vmManager, List<Pattern> filter) throws IOException {
+        String[] allClasses = obtainClasses(vmInfo, vmManager);
+        List<String> filteredClasses = new ArrayList<>(allClasses.length);
+        for (String clazz : allClasses) {
+            if (matchesAtLeastOne(clazz, filter)) {
+                filteredClasses.add(clazz);
+            }
         }
+        return filteredClasses;
+    }
+
+    private void listClassesFromVmInfo(VmInfo vmInfo, List<Pattern> filter) throws IOException {
+        List<String> classes = obtainFilteredClasses(vmInfo, vmManager, filter);
+        if (saving.shouldSave()) {
+            if (saving.like.equals(Saving.DEFAULT) || saving.like.equals(Saving.EXACT)) {
+                try (BufferedWriter bw = new BufferedWriter((new OutputStreamWriter(new FileOutputStream(new File(saving.as)))))) {
+                    for (String clazz : classes) {
+                        bw.write(clazz);
+                        bw.newLine();
+                    }
+                }
+            } else {
+                throw new RuntimeException("Only " + Saving.DEFAULT + " and " + Saving.EXACT + "allowed for saving list of classes");
+            }
+        } else {
+            for (String clazz : classes) {
+                System.out.println(clazz);
+            }
+        }
+    }
+
+    private static boolean matchesAtLeastOne(String clazz, List<Pattern> filter) {
+        for (Pattern p : filter) {
+            if (p.matcher(clazz).matches()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void listPlugins(List<String> args) {
@@ -419,17 +501,21 @@ public class Cli {
         System.out.println(LISTJVMS + " no arg expected, list available localhost JVMs ");
         System.out.println(LISTPLUGINS + "  no arg expected, currently configured plugins with theirs status");
         System.out.println(" wip! ! PUC ! pid xor hostname:port xor class-path of VM. Classpath separator is `" + File.pathSeparator + "`");
-        System.out.println(LISTCLASSES + "  one arg - PUC of JVM. List its loaded classes.");
+        System.out.println("        Dont forget to repalce $ in inner classes as \\$ otherwise it is regex's end of line");
+        System.out.println(LISTCLASSES + "  first arg - PUC of JVM. List its loaded classes. Optionally takes more arguments - filtering regexes");
         System.out.println(BYTES + "  two args - PUC of JVM and class to obtain - will stdout its binary form");
         System.out.println(BASE64 + "  two args - PUC of JVM and class to obtain - will stdout its binary encoded as base64");
-        System.out.println(DECOMPILE + "  three args - PUC of JVM and class to obtain and name/file of decompiler config - will stdout decompiled class");
+        System.out.println(DECOMPILE + "  three args - PUC of JVM and name/file of decompiler config and class(es)/regex(es) to obtain - will stdout/save decompiled class(es)");
         System.out.println("              you can use special keyword javap, instead of decompiler name, to use javap disassembler.");
         System.out.println("              You can pass also parameters to it like any other javap, but without space. So e.g. javap-v is equal to call javap -v /tmp/class_you_entered.class");
         System.out.println(COMPILE + "  compile local file(s) against runtime classapth. Plugin can have its own compiler, eg jasm do nto require runtime classpath");
         System.out.println("              mandatory: file(s) to compile");
-        System.out.println(" wip!         optional: PUC of runtime classpath, plugin, recursive, directory to save to (if missing then stdout, failing if more then one file is result)");
-        System.out.println(" wip!                 -cp                              -p <plugin> -r     -d <dir>");
+        System.out.println(" wip!         optional: PUC of runtime classpath, plugin, recursive, if no " + SAVEAS + " is presented, then stdout is used, but will fail if more then one file is result)");
+        System.out.println(" wip!                 -cp                              -p <plugin> -r     ");
         System.out.println(OVERWRITE + "  three args - PUC of JVM and class to overwrite and file with new bytecode");
+        System.out.println(SAVEAS + "  can acompany most of above command, and will repalce stdout with file(s) by its " + SAVELIKE + " style");
+        System.out.println(SAVELIKE + "  can acompany " + SAVEAS + " and canbe one of:");
+        System.out.println("        " + Saving.dir + "(to save class/in/folder/name.class, default for binaries), " + Saving.FQN + "(to save as fully.qualified.name.java, default for sources) or " + Saving.EXACT + "(to save as you say, default for everything else)");
         System.out.println(
                 "Allowed are: " + LISTJVMS + " , " + LISTPLUGINS + " , " + LISTCLASSES + ", " + BASE64 + " , " + BYTES + ", " + DECOMPILE + ", " + COMPILE + ", " + VERBOSE + ", " + OVERWRITE);
     }
@@ -506,6 +592,25 @@ public class Cli {
             }
         }
         throw new RuntimeException("Unable to determine " + input + " as Pid xor host:port xor classpath");
+    }
+
+    private VmInfo getVmInfo(String param) {
+        VmInfo.Type puc = guessType(param);
+        VmInfo vmInfo;
+        switch (puc) {
+            case LOCAL:
+                vmInfo = vmManager.findVmFromPID(param);
+                break;
+            case FS:
+                vmInfo = vmManager.createFsVM(NewFsVmController.cpToFilesCatched(param), null);
+                break;
+            case REMOTE:
+                vmInfo = vmManager.createRemoteVM(param.split(":")[0], Integer.valueOf(param.split(":")[1]));
+                break;
+            default:
+                throw new RuntimeException("Unknown VmInfo.Type.");
+        }
+        return vmInfo;
     }
 
 }
