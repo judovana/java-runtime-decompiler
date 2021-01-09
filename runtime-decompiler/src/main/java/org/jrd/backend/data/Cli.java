@@ -15,6 +15,7 @@ import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.MainFrame.FiletoClassValidator;
 import org.jrd.frontend.MainFrame.VmDecompilerInformationController;
 import org.jrd.frontend.NewFsVmFrame.NewFsVmController;
+import org.jrd.frontend.Utils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -59,11 +60,11 @@ public class Cli {
     private final PluginManager pluginManager;
     private Saving saving;
 
-    private static class Saving {
+    private static class Saving implements Utils.StatusKeeper {
         public static final String DEFAULT = "default";
         public static final String EXACT = "exact";
         public static final String FQN = "fqn";
-        public static final String dir = "dir";
+        public static final String DIR = "dir";
         private final String as;
         private final String like;
 
@@ -72,7 +73,7 @@ public class Cli {
             if (like == null) {
                 this.like = DEFAULT;
             } else {
-                this.like = DEFAULT;
+                this.like = like;
             }
         }
 
@@ -83,6 +84,37 @@ public class Cli {
 
         public boolean shouldSave() {
             return as != null;
+        }
+
+        @Override
+        public void setText(String s) {
+            System.err.println(s);
+        }
+
+        @Override
+        public void onException(Exception ex) {
+            OutputController.getLogger().log(ex);
+        }
+
+        public int toInt(String suffix) {
+            switch (like) {
+                case FQN:
+                    return Utils.FULLY_QUALIFIED_NAME;
+                case EXACT:
+                    return Utils.CUSTOM_NAME;
+                case DIR:
+                    return Utils.SRC_SUBDIRS_NAME;
+                case DEFAULT:
+                    if (".java".equals(suffix)) {
+                        return Utils.FULLY_QUALIFIED_NAME;
+                    }
+                    if (".class".equals(suffix)) {
+                        return Utils.SRC_SUBDIRS_NAME;
+                    }
+                    return Utils.CUSTOM_NAME;
+                default:
+                    throw new RuntimeException("Unknown savng typr: " + like + ". Allowed are: " + FQN + "," + DIR + "," + EXACT);
+            }
         }
     }
 
@@ -336,6 +368,7 @@ public class Cli {
         String jvmStr = args.get(i + 1);
         String decompilerName = args.get(i + 2);
         VmInfo vmInfo = getVmInfo(jvmStr);
+        int failures = 0;
         for (int y = 3; y < args.size(); y++) {
             String clazzRegex = args.get(y);
             List<String> clazzes = obtainFilteredClasses(vmInfo, vmManager, Arrays.asList(Pattern.compile(clazzRegex)));
@@ -352,26 +385,33 @@ public class Cli {
                         options[x - 1] = "-" + split_name[x];
                     }
                     String decompile_output = pluginManager.decompile(findDecompiler(DecompilerWrapperInformation.JAVAP_NAME, pluginManager), classStr, bytes, options, vmInfo, vmManager);
-                    outOrSave(classStr, ".java", decompile_output.getBytes(Charset.forName("utf-8")));
+                    if (!outOrSave(classStr, ".java", decompile_output.getBytes(Charset.forName("utf-8")))) {
+                        failures++;
+                    }
                 } else {
                     DecompilerWrapperInformation decompiler = findDecompiler(decompilerName, pluginManager);
                     if (decompiler != null) {
                         String decompiledClass = pluginManager.decompile(decompiler, classStr, bytes, null, vmInfo, vmManager);
-                        outOrSave(classStr, ".java", decompiledClass.getBytes(Charset.forName("utf-8")));
+                        if (!outOrSave(classStr, ".java", decompiledClass.getBytes(Charset.forName("utf-8")))) {
+                            failures++;
+                        }
                     } else {
                         throw new RuntimeException("Decompiler " + decompilerName + " not found");
                     }
                 }
             }
         }
+        if (failures > 0) {
+            throw new Exception(failures + " saving failed");
+        }
     }
 
-    private void outOrSave(String name, String suffix, byte[] body) throws UnsupportedEncodingException {
+    private boolean outOrSave(String name, String suffix, byte[] body) throws UnsupportedEncodingException {
         if (saving.shouldSave()) {
-            //todo
-            System.out.println("would save " + name + suffix + " of " + body.length + " as " + saving.as + " like " + saving.like);
+            return Utils.saveByGui(saving.as, saving.toInt(suffix), suffix, saving, name, body);
         } else {
             System.out.println(new String(body, "utf-8"));
+            return true;
         }
     }
 
@@ -508,14 +548,14 @@ public class Cli {
         System.out.println(DECOMPILE + "  three args - PUC of JVM and name/file of decompiler config and class(es)/regex(es) to obtain - will stdout/save decompiled class(es)");
         System.out.println("              you can use special keyword javap, instead of decompiler name, to use javap disassembler.");
         System.out.println("              You can pass also parameters to it like any other javap, but without space. So e.g. javap-v is equal to call javap -v /tmp/class_you_entered.class");
-        System.out.println(COMPILE + "  compile local file(s) against runtime classapth. Plugin can have its own compiler, eg jasm do nto require runtime classpath");
+        System.out.println(COMPILE + "  compile local file(s) against runtime classapth. Plugin can have its own compiler, eg jasm or jcoder do not require runtime classpath");
         System.out.println("              mandatory: file(s) to compile");
         System.out.println(" wip!         optional: PUC of runtime classpath, plugin, recursive, if no " + SAVEAS + " is presented, then stdout is used, but will fail if more then one file is result)");
         System.out.println(" wip!                 -cp                              -p <plugin> -r     ");
         System.out.println(OVERWRITE + "  three args - PUC of JVM and class to overwrite and file with new bytecode");
         System.out.println(SAVEAS + "  can acompany most of above command, and will repalce stdout with file(s) by its " + SAVELIKE + " style");
         System.out.println(SAVELIKE + "  can acompany " + SAVEAS + " and canbe one of:");
-        System.out.println("        " + Saving.dir + "(to save class/in/folder/name.class, default for binaries), " + Saving.FQN + "(to save as fully.qualified.name.java, default for sources) or " + Saving.EXACT + "(to save as you say, default for everything else)");
+        System.out.println("        " + Saving.DIR + "(to save class/in/folder/name.class, default for binaries), " + Saving.FQN + "(to save as fully.qualified.name.java, default for sources) or " + Saving.EXACT + "(to save as you say, default for everything else)");
         System.out.println(
                 "Allowed are: " + LISTJVMS + " , " + LISTPLUGINS + " , " + LISTCLASSES + ", " + BASE64 + " , " + BYTES + ", " + DECOMPILE + ", " + COMPILE + ", " + VERBOSE + ", " + OVERWRITE);
     }
