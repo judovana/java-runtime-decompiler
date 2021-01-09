@@ -74,7 +74,8 @@ public class BytecodeDecompilerView {
         classesPanel = new JPanel(new BorderLayout());
 
         classesSortField = new JTextField(".*");
-        classesSortField.setToolTipText("Use regular expression; eg com.*");
+        classesSortField.setToolTipText(styleTooltip() + "Use regular expression; eg com.*. <br/>Dont forget to escape $ as \\$ otherwise it is end of line." +
+                "</div><html>");
         classesSortField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent documentEvent) {
@@ -266,6 +267,10 @@ public class BytecodeDecompilerView {
 
         BytecodeDecompilerPanel.setVisible(true);
 
+    }
+
+    public static String styleTooltip() {
+        return "<html>" + "<div style='background:yellow;color:black'>";
     }
 
     private void updateClassList() {

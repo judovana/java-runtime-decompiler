@@ -1,6 +1,7 @@
 package org.jrd.frontend.PluginMangerFrame;
 
 import org.jrd.backend.data.Directories;
+import org.jrd.frontend.MainFrame.BytecodeDecompilerView;
 
 import javax.swing.*;
 import java.awt.*;
@@ -24,7 +25,7 @@ public class FileSelectorPanel extends JPanel {
 
         this.textField = new JTextField();
         textField.setPreferredSize(new Dimension(0, 32));
-        textField.setToolTipText("<html>Select a path to the decompiler wrapper .java file.<br />" +
+        textField.setToolTipText(BytecodeDecompilerView.styleTooltip() + "Select a path to the decompiler wrapper .java file.<br />" +
                 getTextFieldToolTip()
         );
 
