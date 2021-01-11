@@ -25,7 +25,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -369,10 +368,12 @@ public class Cli {
         String decompilerName = args.get(i + 2);
         VmInfo vmInfo = getVmInfo(jvmStr);
         int failures = 0;
+        int total = 0;
         for (int y = 3; y < args.size(); y++) {
             String clazzRegex = args.get(y);
             List<String> clazzes = obtainFilteredClasses(vmInfo, vmManager, Arrays.asList(Pattern.compile(clazzRegex)));
             for (String classStr : clazzes) {
+                total++;
                 VmDecompilerStatus result = obtainClass(vmInfo, classStr, vmManager);
                 byte[] bytes = Base64.getDecoder().decode(result.getLoadedClassBytes());
                 if (new File(decompilerName).exists() && decompilerName.toLowerCase().endsWith(".json")) {
@@ -385,14 +386,14 @@ public class Cli {
                         options[x - 1] = "-" + split_name[x];
                     }
                     String decompile_output = pluginManager.decompile(findDecompiler(DecompilerWrapperInformation.JAVAP_NAME, pluginManager), classStr, bytes, options, vmInfo, vmManager);
-                    if (!outOrSave(classStr, ".java", decompile_output.getBytes(Charset.forName("utf-8")))) {
+                    if (!outOrSave(classStr, ".java", decompile_output)) {
                         failures++;
                     }
                 } else {
                     DecompilerWrapperInformation decompiler = findDecompiler(decompilerName, pluginManager);
                     if (decompiler != null) {
                         String decompiledClass = pluginManager.decompile(decompiler, classStr, bytes, null, vmInfo, vmManager);
-                        if (!outOrSave(classStr, ".java", decompiledClass.getBytes(Charset.forName("utf-8")))) {
+                        if (!outOrSave(classStr, ".java", decompiledClass)) {
                             failures++;
                         }
                     } else {
@@ -401,16 +402,31 @@ public class Cli {
                 }
             }
         }
+        returnNonzero(failures, total);
+    }
+
+    private void returnNonzero(int failures, int total) throws Exception {
+        if (total == 0) {
+            throw new Exception("No class found!");
+        }
         if (failures > 0) {
             throw new Exception(failures + " saving failed");
         }
     }
 
-    private boolean outOrSave(String name, String suffix, byte[] body) throws UnsupportedEncodingException {
+    private boolean outOrSave(String name, String suffix, String s) throws IOException {
+        return outOrSave(name, suffix, s.getBytes(Charset.forName("utf-8")), false);
+    }
+
+    private boolean outOrSave(String name, String suffix, byte[] body, boolean forceBin) throws IOException {
         if (saving.shouldSave()) {
             return Utils.saveByGui(saving.as, saving.toInt(suffix), suffix, saving, name, body);
         } else {
-            System.out.println(new String(body, "utf-8"));
+            if (forceBin) {
+                System.out.write(body);
+            } else {
+                System.out.println(new String(body, "utf-8"));
+            }
             return true;
         }
     }
@@ -432,29 +448,33 @@ public class Cli {
         return decompiler;
     }
 
-    private void printBytes(List<String> args, int i, boolean bytes) throws IOException {
-        if (args.size() != 3) {
-            throw new RuntimeException(BYTES + " and " + BASE64 + " expect exactly two arguments - PUC of JVM and fully classified class name");
+    private void printBytes(List<String> args, int i, boolean bytes) throws Exception {
+        if (args.size() < 3) {
+            throw new RuntimeException(BYTES + " and " + BASE64 + " expect at least two arguments - PUC of JVM and fully classified class name(s)/regex(es)");
         }
         String jvmStr = args.get(i + 1);
-        String classStr = args.get(i + 2);
-        try {
-            VmInfo vmInfo = vmManager.findVmFromPID(jvmStr);
-            VmDecompilerStatus result = obtainClass(vmInfo, classStr, vmManager);
-            if (bytes) {
-                byte[] ba = Base64.getDecoder().decode(result.getLoadedClassBytes());
-                System.out.write(ba);
-            } else {
-                System.out.println(result.getLoadedClassBytes());
-            }
-        } catch (NumberFormatException e) {
-            try {
-                URL u = new URL(jvmStr);
-                throw new RuntimeException("Remote VM not yet implemented");
-            } catch (MalformedURLException ee) {
-                throw new RuntimeException("Second param was supposed to be PUC", ee);
+        VmInfo vmInfo = getVmInfo(jvmStr);
+        int failures = 0;
+        int total = 0;
+        for (int y = 2; y < args.size(); y++) {
+            String clazzRegex = args.get(y);
+            List<String> clazzes = obtainFilteredClasses(vmInfo, vmManager, Arrays.asList(Pattern.compile(clazzRegex)));
+            for (String classStr : clazzes) {
+                total++;
+                VmDecompilerStatus result = obtainClass(vmInfo, classStr, vmManager);
+                if (bytes) {
+                    byte[] ba = Base64.getDecoder().decode(result.getLoadedClassBytes());
+                    if (!outOrSave(classStr, ".class", ba, true)) {
+                        failures++;
+                    }
+                } else {
+                    if (!outOrSave(classStr, ".class", result.getLoadedClassBytes())) {
+                        failures++;
+                    }
+                }
             }
         }
+        returnNonzero(failures, total);
     }
 
     private void listClasses(List<String> args, int i) throws IOException {
