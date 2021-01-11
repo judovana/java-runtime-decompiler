@@ -157,12 +157,10 @@ public class Cli {
             String aarg = cleanParameter(arg);
             if (aarg.equals(VERBOSE)) {
                 //alread processed
-            }
-            if (aarg.equals(SAVEAS)) {
+            } else  if (aarg.equals(SAVEAS)) {
                 saveas = allargs[i + 1];
                 i++;
-            }
-            if (aarg.equals(SAVELIKE)) {
+            } else if (aarg.equals(SAVELIKE)) {
                 savelike = allargs[i + 1];
                 i++;
             } else {
@@ -258,7 +256,10 @@ public class Cli {
             if (arg.equals("-p")) {
                 customCompiler = args.get(x + 1);
                 x++;
-            } else {
+            } else if (arg.equals("-cp")) {
+                cpPidUrl = args.get(x + 1);
+                x++;
+            }  else {
                 toCompile.add(new File(arg));
                 if (!toCompile.get(toCompile.size() - 1).exists()) {
                     throw new RuntimeException(toCompile.get(toCompile.size() - 1).getAbsolutePath() + " does not exists");
@@ -279,7 +280,8 @@ public class Cli {
                 }
             };
         } else {
-            throw new RuntimeException("Not yet implemented: cp = new RuntimeCompilerConnector.JRDClassesProvider(vmInfo, vmManager);");
+            VmInfo vmInfo = getVmInfo(cpPidUrl);
+            cp = new RuntimeCompilerConnector.JRDClassesProvider(vmInfo, vmManager);
         }
         DecompilerWrapperInformation decompiler = null;
         String s = "Default runtime compiler will be used";
@@ -313,8 +315,11 @@ public class Cli {
                 System.err.println(message);
             }
         }), isis);
+        if (!saving.shouldSave() && result.size() > 1) {
+            throw new RuntimeException("more then one file is output of compilation, but yuo have stdout enabled. Use " + SAVEAS + " and friends to save the output of compilation");
+        }
         for (IdentifiedBytecode ib : result) {
-            System.out.write(ib.getFile());
+            outOrSave(ib.getClassIdentifier().getFullName(), ".class", ib.getFile(), true);
         }
     }
 
@@ -570,8 +575,8 @@ public class Cli {
         System.out.println("              You can pass also parameters to it like any other javap, but without space. So e.g. javap-v is equal to call javap -v /tmp/class_you_entered.class");
         System.out.println(COMPILE + "  compile local file(s) against runtime classapth. Plugin can have its own compiler, eg jasm or jcoder do not require runtime classpath");
         System.out.println("              mandatory: file(s) to compile");
-        System.out.println(" wip!         optional: PUC of runtime classpath, plugin, recursive, if no " + SAVEAS + " is presented, then stdout is used, but will fail if more then one file is result)");
-        System.out.println(" wip!                 -cp                              -p <plugin> -r     ");
+        System.out.println(" wip!         optional: PUC of runtime classpath, plugin, recursive if sources are in dis, if no " + SAVEAS + " is presented, then stdout is used, but will fail if more then one file is result)");
+        System.out.println(" wip!                      -cp <PUC>     -p <plugin>     -r     ");
         System.out.println(OVERWRITE + "  three args - PUC of JVM and class to overwrite and file with new bytecode");
         System.out.println(SAVEAS + "  can acompany most of above command, and will repalce stdout with file(s) by its " + SAVELIKE + " style");
         System.out.println(SAVELIKE + "  can acompany " + SAVEAS + " and canbe one of:");
