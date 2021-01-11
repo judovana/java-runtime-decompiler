@@ -34,6 +34,8 @@ public class BytecodeDecompilerView {
 
     private JPanel BytecodeDecompilerPanel;
 
+    private final JTabbedPane srcBin;
+
     private JSplitPane splitPane;
     private JPanel leftMainPanel;
     private JTextField classesSortField;
@@ -221,7 +223,7 @@ public class BytecodeDecompilerView {
         classesPanel.add(leftScrollPanel);
         leftMainPanel.add(classesPanel);
 
-        JTabbedPane srcBin = new JTabbedPane();
+        srcBin = new JTabbedPane();
         rightMainPanel.setName("source buffer");
         rightMainPanel.add(bytecodeScrollPane);
         rightMainPanel.add(searchCodeField, BorderLayout.NORTH);
@@ -237,9 +239,9 @@ public class BytecodeDecompilerView {
         redo.addActionListener(actionEvent -> hex.redo());
 
         JPanel hexSearchControls = new JPanel(new GridLayout(1, 4));
-        JComboBox hexSearchType = new JComboBox(new String[]{"text", "hex"});
+        JComboBox hexSearchType = new JComboBox(new String[]{"hex", "int", "text"});
         hexSearchControls.add(hexSearchType);
-        JTextField hexSearch = new JTextField();
+        JTextField hexSearch = new JTextField("todo: just convert and search in byteBuffer of fife.ui.hex");
         hexSearchControls.add(hexSearch);
         JButton hexPrev = new JButton("prev");
         hexSearchControls.add(hexPrev);
@@ -342,7 +344,7 @@ public class BytecodeDecompilerView {
 
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
-            worker.rewriteClass(getSelecteddecompilerWrapperInformation(), BytecodeDecompilerView.this.lastDecompiledClass, BytecodeDecompilerView.this.bytecodeSyntaxTextArea.getText(), BytecodeDecompilerView.this.hex.get());
+            worker.rewriteClass(getSelecteddecompilerWrapperInformation(), BytecodeDecompilerView.this.lastDecompiledClass, BytecodeDecompilerView.this.bytecodeSyntaxTextArea.getText(), BytecodeDecompilerView.this.hex.get(), srcBin.getSelectedIndex());
         }
     }
 

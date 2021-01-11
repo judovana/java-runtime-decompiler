@@ -107,7 +107,7 @@ public class RewriteClassDialog extends JDialog {
     private final VmInfo vmInfo;
     private final VmManager vmManager;
 
-    public RewriteClassDialog(final String name, final LatestPaths latestPaths, final String currentBuffer, final byte[] cBinBuffer, VmInfo vmInfo, VmManager vmManager, PluginManager pluginManager, DecompilerWrapperInformation selectedDecompiler) {
+    public RewriteClassDialog(final String name, final LatestPaths latestPaths, final String currentBuffer, final byte[] cBinBuffer, VmInfo vmInfo, VmManager vmManager, PluginManager pluginManager, DecompilerWrapperInformation selectedDecompiler, int supperSelection) {
         super((JFrame) null, "Specify class and selectSrc its bytecode", true);
         this.setSize(400, 400);
         this.setLayout(new BorderLayout());
@@ -228,6 +228,9 @@ public class RewriteClassDialog extends JDialog {
             statusExternalFiles.setText(ex.getMessage());
             statusCompileCurrentBuffer.setText(ex.getMessage());
             dualpane.setSelectedIndex(1);
+        }
+        if (supperSelection>0){
+            dualpane.setSelectedIndex(3);
         }
 
 

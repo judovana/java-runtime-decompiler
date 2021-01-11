@@ -234,11 +234,11 @@ public class VmDecompilerInformationController {
 
     class ClassRewriter {
 
-        void rewriteClass(DecompilerWrapperInformation selectedDecompiler, String name, String buffer, byte[] binBuffer) {
+        void rewriteClass(DecompilerWrapperInformation selectedDecompiler, String name, String buffer, byte[] binBuffer, int supperSelect) {
             if (name == null || name.trim().isEmpty())
                 name = "???";
 
-            final RewriteClassDialog rewriteClassDialog = new RewriteClassDialog(name, lastLoaded, buffer, binBuffer, vmInfo, vmManager, pluginManager, selectedDecompiler);
+            final RewriteClassDialog rewriteClassDialog = new RewriteClassDialog(name, lastLoaded, buffer, binBuffer, vmInfo, vmManager, pluginManager, selectedDecompiler, supperSelect);
             rewriteClassDialog.setVisible(true);
             lastLoaded.lastManualUplaod = rewriteClassDialog.getManualUploadPath();
             lastLoaded.lastSaveSrc = rewriteClassDialog.getSaveSrcPath();
