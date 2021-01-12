@@ -19,6 +19,7 @@ import org.jrd.frontend.PluginMangerFrame.PluginConfigurationEditorView;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -257,8 +258,26 @@ public class VmDecompilerInformationController {
         }
     }
 
+    public static String stdinToBase64() {
+        try {
+            return bytesToBase64(stdinToBytes());
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
     public static byte[] fileToBytes(String path) throws IOException {
         return Files.readAllBytes(new File(path).toPath());
+    }
+
+    public static byte[] stdinToBytes() throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] buffer = new byte[32 * 1024];
+        int bytesRead;
+        while ((bytesRead = System.in.read(buffer)) > 0) {
+            baos.write(buffer, 0, bytesRead);
+        }
+        return baos.toByteArray();
     }
 
     public static String bytesToBase64(byte[] bytes) {

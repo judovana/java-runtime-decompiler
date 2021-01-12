@@ -157,7 +157,7 @@ public class Cli {
             String aarg = cleanParameter(arg);
             if (aarg.equals(VERBOSE)) {
                 //alread processed
-            } else  if (aarg.equals(SAVEAS)) {
+            } else if (aarg.equals(SAVEAS)) {
                 saveas = allargs[i + 1];
                 i++;
             } else if (aarg.equals(SAVELIKE)) {
@@ -207,25 +207,39 @@ public class Cli {
     }
 
     private void overwrite(List<String> args, int i) throws Exception {
-        if (args.size() != 4) {
-            throw new RuntimeException(OVERWRITE + "  three args - PUC of JVM and class to overwrite and file with new bytecode");
+        String newBytecodeFile;
+        if (args.size() == 3 ) {
+            System.err.println("reading class from std.in");
+            newBytecodeFile = null;
+        } else {
+            if (args.size() != 4) {
+                throw new RuntimeException(OVERWRITE + "  three args - PUC of JVM and class to overwrite and file with new bytecode");
+            }
+            newBytecodeFile = args.get(i + 3);
         }
         String jvmStr = args.get(i + 1);
         String classStr = args.get(i + 2);
-        String newBytecodeFile = args.get(i + 3);
         try {
-            FiletoClassValidator.StringAndScore r = FiletoClassValidator.validate(classStr, newBytecodeFile);
-            if (r.score > 0 && r.score < 10) {
-                System.err.println("WARNING:" + r.message);
-            }
-            if (r.score >= 10) {
-                System.err.println("ERROR:" + r.message);
+            if (newBytecodeFile != null) {
+                FiletoClassValidator.StringAndScore r = FiletoClassValidator.validate(classStr, newBytecodeFile);
+                if (r.score > 0 && r.score < 10) {
+                    System.err.println("WARNING:" + r.message);
+                }
+                if (r.score >= 10) {
+                    System.err.println("ERROR:" + r.message);
+                }
             }
             VmInfo vmInfo = vmManager.findVmFromPID(jvmStr);
+            String clazz;
+            if (newBytecodeFile == null){
+                clazz = VmDecompilerInformationController.stdinToBase64();
+            } else {
+                clazz = VmDecompilerInformationController.fileToBase64(newBytecodeFile);
+            }
             AgentRequestAction request = VmDecompilerInformationController.createRequest(vmInfo,
                     AgentRequestAction.RequestAction.OVERWRITE,
                     classStr,
-                    VmDecompilerInformationController.fileToBase64(newBytecodeFile));
+                    clazz);
             String response = VmDecompilerInformationController.submitRequest(vmManager, request);
             if (response.equals("ok")) {
                 System.out.println("Most likely done successfully.");
@@ -259,7 +273,7 @@ public class Cli {
             } else if (arg.equals("-cp")) {
                 cpPidUrl = args.get(x + 1);
                 x++;
-            }  else {
+            } else {
                 toCompile.add(new File(arg));
                 if (!toCompile.get(toCompile.size() - 1).exists()) {
                     throw new RuntimeException(toCompile.get(toCompile.size() - 1).getAbsolutePath() + " does not exists");
@@ -367,7 +381,8 @@ public class Cli {
     private void decompile(List<String> args, int i) throws Exception {
         if (args.size() < 4) {
             throw new RuntimeException(
-                    DECOMPILE + " at least three arguments - PUC of JVM,  decompiler name (as set-up) or decompiler json file, or javap(see help) followed by fully classified class name(s)/regex(es)");
+                    DECOMPILE
+                            + " at least three arguments - PUC of JVM,  decompiler name (as set-up) or decompiler json file, or javap(see help) followed by fully classified class name(s)/regex(es)");
         }
         String jvmStr = args.get(i + 1);
         String decompilerName = args.get(i + 2);
@@ -560,7 +575,8 @@ public class Cli {
 
     private void printHelp() {
         System.out.println(
-                "Allowed are: " + LISTJVMS + " , " + LISTPLUGINS + " , " + LISTCLASSES + ", " + BASE64 + " , " + BYTES + ", " + DECOMPILE + ", " + COMPILE + ", " + VERBOSE + ", " + OVERWRITE);
+                "Allowed are: " + LISTJVMS + " , " + LISTPLUGINS + " , " + LISTCLASSES + ", " + BASE64 + " , " + BYTES + ", " + DECOMPILE + ", " + COMPILE + ", " + VERBOSE + ", " + OVERWRITE + " (+ "
+                        + SAVEAS + " and " + SAVELIKE + ")");
         System.out.println(VERBOSE + " will set this app to print out all Exceptions and some debugging strings. Then continues ");
         System.out.println(HELP + "/" + H + " print this help end exit");
         System.out.println(LISTJVMS + " no arg expected, list available localhost JVMs ");
@@ -575,14 +591,19 @@ public class Cli {
         System.out.println("              You can pass also parameters to it like any other javap, but without space. So e.g. javap-v is equal to call javap -v /tmp/class_you_entered.class");
         System.out.println(COMPILE + "  compile local file(s) against runtime classapth. Plugin can have its own compiler, eg jasm or jcoder do not require runtime classpath");
         System.out.println("              mandatory: file(s) to compile");
-        System.out.println(" wip!         optional: PUC of runtime classpath, plugin, recursive if sources are in dis, if no " + SAVEAS + " is presented, then stdout is used, but will fail if more then one file is result)");
-        System.out.println(" wip!                      -cp <PUC>     -p <plugin>     -r    If the "+SAVEAS+" is pid of existing vm or host:port, the output of compilation will be attempted to be injected ");
-        System.out.println(OVERWRITE + "  three args - PUC of JVM and class to overwrite and file with new bytecode");
+        System.out.println(" wip!         optional: PUC of runtime classpath, plugin, recursive if sources are in dir(s), if no " + SAVEAS
+                + " is presented, then stdout is used, but will fail if more then one file is result)");
+        System.out.println(
+                " wip!                      -cp <PUC>     -p <plugin>     -r    If the " + SAVEAS + " is pid of existing vm or host:port, the output of compilation will be attempted to be injected ");
+        System.out.println(OVERWRITE + "  three args - PUC of JVM and class to overwrite and file with new bytecode. If file is missing, stdin will be used");
         System.out.println(SAVEAS + "  can acompany most of above command, and will repalce stdout with file(s) by its " + SAVELIKE + " style");
         System.out.println(SAVELIKE + "  can acompany " + SAVEAS + " and canbe one of:");
-        System.out.println("        " + Saving.DIR + "(to save class/in/folder/name.class, default for binaries), " + Saving.FQN + "(to save as fully.qualified.name.java, default for sources) or " + Saving.EXACT + "(to save as you say, default for everything else)");
         System.out.println(
-                "Allowed are: " + LISTJVMS + " , " + LISTPLUGINS + " , " + LISTCLASSES + ", " + BASE64 + " , " + BYTES + ", " + DECOMPILE + ", " + COMPILE + ", " + VERBOSE + ", " + OVERWRITE);
+                "        " + Saving.DIR + "(to save class/in/folder/name.class, default for binaries), " + Saving.FQN + "(to save as fully.qualified.name.java, default for sources) or " + Saving.EXACT
+                        + "(to save as you say, default for everything else)");
+        System.out.println(
+                "Allowed are: " + LISTJVMS + " , " + LISTPLUGINS + " , " + LISTCLASSES + ", " + BASE64 + " , " + BYTES + ", " + DECOMPILE + ", " + COMPILE + ", " + VERBOSE + ", " + OVERWRITE + " (+ "
+                        + SAVEAS + " and " + SAVELIKE + ")");
     }
 
     private static String invalidityToString(boolean invalidWrapper) {
