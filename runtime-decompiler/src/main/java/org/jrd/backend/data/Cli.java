@@ -565,12 +565,12 @@ public class Cli {
         System.out.println(HELP + "/" + H + " print this help end exit");
         System.out.println(LISTJVMS + " no arg expected, list available localhost JVMs ");
         System.out.println(LISTPLUGINS + "  no arg expected, currently configured plugins with theirs status");
-        System.out.println(" wip! ! PUC ! pid xor hostname:port xor class-path of VM. Classpath separator is `" + File.pathSeparator + "`");
-        System.out.println("        Dont forget to repalce $ in inner classes as \\$ otherwise it is regex's end of line");
+        System.out.println(" ! PUC ! pid xor hostname:port xor class-path of VM. Classpath separator is `" + File.pathSeparator + "`");
+        System.out.println("    ! Dont forget to repalce $ in inner classes as \\$ otherwise it is regex's end of line");
         System.out.println(LISTCLASSES + "  first arg - PUC of JVM. List its loaded classes. Optionally takes more arguments - filtering regexes");
-        System.out.println(BYTES + "  two args - PUC of JVM and class to obtain - will stdout its binary form");
-        System.out.println(BASE64 + "  two args - PUC of JVM and class to obtain - will stdout its binary encoded as base64");
-        System.out.println(DECOMPILE + "  three args - PUC of JVM and name/file of decompiler config and class(es)/regex(es) to obtain - will stdout/save decompiled class(es)");
+        System.out.println(BYTES + "  at least two args - PUC of JVM and class(es)/regex(es) to obtain - will stdout its binary form");
+        System.out.println(BASE64 + " at least  two args - PUC of JVM and class(es)/regex(es) to obtain - will stdout its binary encoded as base64");
+        System.out.println(DECOMPILE + "  at least three args - PUC of JVM and name/file of decompiler config and class(es)/regex(es) to obtain - will stdout/save decompiled class(es)");
         System.out.println("              you can use special keyword javap, instead of decompiler name, to use javap disassembler.");
         System.out.println("              You can pass also parameters to it like any other javap, but without space. So e.g. javap-v is equal to call javap -v /tmp/class_you_entered.class");
         System.out.println(COMPILE + "  compile local file(s) against runtime classapth. Plugin can have its own compiler, eg jasm or jcoder do not require runtime classpath");
