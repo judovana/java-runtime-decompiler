@@ -7,7 +7,6 @@ import org.jc.api.IdentifiedSource;
 import org.jc.api.InMemoryCompiler;
 import org.jc.api.MessagesListener;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
-import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.DecompilerRequestReceiver;
 import org.jrd.backend.core.OutputController;
 import org.jrd.backend.data.Cli;
@@ -19,6 +18,7 @@ import org.jrd.frontend.Utils;
 
 import javax.swing.*;
 import javax.swing.event.DocumentListener;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -28,12 +28,11 @@ import java.nio.file.Files;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
 
 public class RewriteClassDialog extends JDialog {
 
-    private static class TextFieldBasedStus implements Utils.StatusKeeper{
+    private static class TextFieldBasedStus implements Utils.StatusKeeper {
         private final JTextField status;
 
         public TextFieldBasedStus(JTextField status) {
@@ -107,7 +106,8 @@ public class RewriteClassDialog extends JDialog {
     private final VmInfo vmInfo;
     private final VmManager vmManager;
 
-    public RewriteClassDialog(final String name, final LatestPaths latestPaths, final String currentBuffer, final byte[] cBinBuffer, VmInfo vmInfo, VmManager vmManager, PluginManager pluginManager, DecompilerWrapperInformation selectedDecompiler, int supperSelection) {
+    public RewriteClassDialog(final String name, final LatestPaths latestPaths, final String currentBuffer, final byte[] cBinBuffer, VmInfo vmInfo, VmManager vmManager, PluginManager pluginManager,
+            DecompilerWrapperInformation selectedDecompiler, int supperSelection) {
         super((JFrame) null, "Specify class and selectSrc its bytecode", true);
         this.setSize(400, 400);
         this.setLayout(new BorderLayout());
@@ -140,7 +140,7 @@ public class RewriteClassDialog extends JDialog {
         futureSrcTarget = new JTextField(latestPaths.lastSaveSrc);
         selectBinTarget = new JButton("...");
         selectSrcTarget = new JButton("...");
-        compileAndUpload = new JButton("Compile "+origName+"and directly upload to "  + vmInfo.getVmId());
+        compileAndUpload = new JButton("Compile " + origName + "and directly upload to " + vmInfo.getVmId());
         compileAndUpload.setFont(compileAndSave.getFont().deriveFont(Font.BOLD));
 
         manualPane = new JPanel();
@@ -153,7 +153,7 @@ public class RewriteClassDialog extends JDialog {
         className = new JTextField(origName);
         selectSrc = new JButton("...");
         nothing = new JLabel();
-        ok = new JButton("upload to vm - "+vmInfo.getVmId());
+        ok = new JButton("upload to vm - " + vmInfo.getVmId());
 
         externalFiles = new JPanel(new GridLayout(0, 1));
         externalFiles.setName("Compile external files");
@@ -184,7 +184,7 @@ public class RewriteClassDialog extends JDialog {
         statusExternalFiles.setEditable(false);
         externalFiles.add(statusExternalFiles);
 
-        binaryView = new JPanel(new GridLayout(0,1));
+        binaryView = new JPanel(new GridLayout(0, 1));
         binaryView.setName("Current binary buffer");
         binaryFilename = new JLabel(origName + " - " + origBin.length);
         namingBinaryView = new JComboBox<>(saveOptions);
@@ -229,7 +229,7 @@ public class RewriteClassDialog extends JDialog {
             statusCompileCurrentBuffer.setText(ex.getMessage());
             dualpane.setSelectedIndex(1);
         }
-        if (supperSelection>0){
+        if (supperSelection > 0) {
             dualpane.setSelectedIndex(3);
         }
 
@@ -300,12 +300,20 @@ public class RewriteClassDialog extends JDialog {
         selectExternalFiles.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                JFileChooser jf = new JFileChooser(filesToCompile.getText());
+                String[] sss = filesToCompile.getText().split(File.pathSeparator);
+                File ff = new File(sss[sss.length - 1]);
+                if (ff.isFile()) {
+                    ff = ff.getParentFile();
+                }
+                JFileChooser jf = new JFileChooser(ff.getAbsolutePath());
                 jf.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-                jf.setMultiSelectionEnabled(true);
                 int returnVal = jf.showOpenDialog(selectExternalFiles);
                 if (returnVal == JFileChooser.APPROVE_OPTION) {
-                    filesToCompile.setText(Stream.of(jf.getSelectedFiles()).map(a -> a.getAbsolutePath()).collect(Collectors.joining(File.pathSeparator)));
+                    if (filesToCompile.getText().trim().isEmpty()) {
+                        filesToCompile.setText(jf.getSelectedFile().getAbsolutePath());
+                    } else {
+                        filesToCompile.setText(filesToCompile.getText() + File.pathSeparator + jf.getSelectedFile().getAbsolutePath());
+                    }
                 }
             }
         });
@@ -326,12 +334,14 @@ public class RewriteClassDialog extends JDialog {
 
         compileAndSave.addActionListener(actionEvent -> {
             IdentifiedSource currrentIs = new IdentifiedSource(new ClassIdentifier(origName), origBuffer.getBytes(), Optional.empty());
-            new SavingCompilerOutputAction(statusCompileCurrentBuffer, vmInfo, vmManager, pluginManager, decompiler, haveCompiler, namingBinary.getSelectedIndex(), futureBinTarget.getText()).run(currrentIs);
+            new SavingCompilerOutputAction(statusCompileCurrentBuffer, vmInfo, vmManager, pluginManager, decompiler, haveCompiler, namingBinary.getSelectedIndex(), futureBinTarget.getText()).run(
+                    currrentIs);
         });
 
         compileAndUpload.addActionListener(actionEvent -> {
             IdentifiedSource currrentIs = new IdentifiedSource(new ClassIdentifier(origName), origBuffer.getBytes(), Optional.empty());
-            new UploadingCompilerOutputAction(statusCompileCurrentBuffer, vmInfo, vmManager, pluginManager, decompiler, haveCompiler, namingBinary.getSelectedIndex(), futureBinTarget.getText()).run(currrentIs);
+            new UploadingCompilerOutputAction(statusCompileCurrentBuffer, vmInfo, vmManager, pluginManager, decompiler, haveCompiler, namingBinary.getSelectedIndex(), futureBinTarget.getText()).run(
+                    currrentIs);
         });
 
         compileExternalFiles.addActionListener(actionEvent -> {
@@ -341,7 +351,8 @@ public class RewriteClassDialog extends JDialog {
                 for (int i = 0; i < srcs.length; i++) {
                     loaded[i] = new IdentifiedSource(new ClassIdentifier(guessClass(srcs[i])), Files.readAllBytes(new File(srcs[i]).toPath()), Optional.empty());
                 }
-                new SavingCompilerOutputAction(statusExternalFiles, vmInfo, vmManager, pluginManager, decompiler, haveCompiler, namingExternal.getSelectedIndex(), outputExternalFilesDir.getText()).run(loaded);
+                new SavingCompilerOutputAction(statusExternalFiles, vmInfo, vmManager, pluginManager, decompiler, haveCompiler, namingExternal.getSelectedIndex(),
+                        outputExternalFilesDir.getText()).run(loaded);
             } catch (Exception ex) {
                 OutputController.getLogger().log(ex);
                 statusExternalFiles.setText(ex.getMessage());
@@ -354,7 +365,8 @@ public class RewriteClassDialog extends JDialog {
         return Cli.guessName(Files.readAllBytes(new File(src).toPath()));
     }
 
-    private static RewriteClassDialog.CompilationWithResult xompileWithGui(VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapperInformation currentDecompiler, boolean haveCompiler, IdentifiedSource... sources) {
+    private static RewriteClassDialog.CompilationWithResult xompileWithGui(VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapperInformation currentDecompiler, boolean haveCompiler,
+            IdentifiedSource... sources) {
         ClassesProvider cp = new RuntimeCompilerConnector.JRDClassesProvider(vmInfo, vmManager);
         InMemoryCompiler rc;
         if (haveCompiler) {
@@ -485,7 +497,8 @@ public class RewriteClassDialog extends JDialog {
         protected final DecompilerWrapperInformation decompilerWrapper;
         protected final boolean haveCompiler;
 
-        public CompilerOutputActionFields(JTextField status, VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapperInformation dwi, boolean haveCompiler, int namingSchema, String destination) {
+        public CompilerOutputActionFields(JTextField status, VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapperInformation dwi, boolean haveCompiler, int namingSchema,
+                String destination) {
             this.status = status;
             this.vmInfo = vmInfo;
             this.vmManager = vmManager;
@@ -500,7 +513,8 @@ public class RewriteClassDialog extends JDialog {
     private static class SavingCompilerOutputAction extends CompilerOutputActionFields {
 
 
-        public SavingCompilerOutputAction(JTextField status, VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapperInformation dwi, boolean haveCompiler, int namingSchema, String destination) {
+        public SavingCompilerOutputAction(JTextField status, VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapperInformation dwi, boolean haveCompiler, int namingSchema,
+                String destination) {
             super(status, vmInfo, vmManager, pm, dwi, haveCompiler, namingSchema, destination);
         }
 
@@ -553,7 +567,8 @@ public class RewriteClassDialog extends JDialog {
     private static class UploadingCompilerOutputAction extends CompilerOutputActionFields {
 
 
-        public UploadingCompilerOutputAction(JTextField status, VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapperInformation dwi, boolean haveCompiler, int namingSchema, String destination) {
+        public UploadingCompilerOutputAction(JTextField status, VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapperInformation dwi, boolean haveCompiler, int namingSchema,
+                String destination) {
             super(status, vmInfo, vmManager, pm, dwi, haveCompiler, namingSchema, destination);
         }
 
