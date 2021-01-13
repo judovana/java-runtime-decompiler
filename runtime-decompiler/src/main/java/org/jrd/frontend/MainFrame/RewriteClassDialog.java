@@ -16,16 +16,37 @@ import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.Utils;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.event.DocumentListener;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 
@@ -346,11 +367,8 @@ public class RewriteClassDialog extends JDialog {
 
         compileExternalFiles.addActionListener(actionEvent -> {
             String[] srcs = filesToCompile.getText().split(File.pathSeparator);
-            IdentifiedSource[] loaded = new IdentifiedSource[srcs.length];
             try {
-                for (int i = 0; i < srcs.length; i++) {
-                    loaded[i] = new IdentifiedSource(new ClassIdentifier(guessClass(srcs[i])), Files.readAllBytes(new File(srcs[i]).toPath()), Optional.empty());
-                }
+                IdentifiedSource[] loaded = Utils.sourcesToIdentifiedSources(recursive.isSelected(), srcs);
                 new SavingCompilerOutputAction(statusExternalFiles, vmInfo, vmManager, pluginManager, decompiler, haveCompiler, namingExternal.getSelectedIndex(),
                         outputExternalFilesDir.getText()).run(loaded);
             } catch (Exception ex) {
@@ -361,9 +379,6 @@ public class RewriteClassDialog extends JDialog {
         });
     }
 
-    private String guessClass(String src) throws IOException {
-        return Cli.guessName(Files.readAllBytes(new File(src).toPath()));
-    }
 
     private static RewriteClassDialog.CompilationWithResult xompileWithGui(VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapperInformation currentDecompiler, boolean haveCompiler,
             IdentifiedSource... sources) {

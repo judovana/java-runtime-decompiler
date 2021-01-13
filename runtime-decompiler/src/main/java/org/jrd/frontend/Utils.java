@@ -1,5 +1,6 @@
 package org.jrd.frontend;
 
+import org.jc.api.ClassIdentifier;
 import org.jc.api.ClassesProvider;
 import org.jc.api.IdentifiedSource;
 import org.jc.api.InMemoryCompiler;
@@ -7,6 +8,7 @@ import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.DecompilerRequestReceiver;
 import org.jrd.backend.core.OutputController;
+import org.jrd.backend.data.Cli;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
@@ -15,15 +17,24 @@ import org.jrd.frontend.MainFrame.RewriteClassDialog;
 import org.jrd.frontend.MainFrame.VmDecompilerInformationController;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public class Utils {
     public static int FULLY_QUALIFIED_NAME = 0;
     public static int SRC_SUBDIRS_NAME = 1;
     public static int CUSTOM_NAME = 2;
 
-    public static interface  StatusKeeper {
+    public static interface StatusKeeper {
         public void setText(String s);
+
         public void onException(Exception ex);
     }
 
@@ -85,7 +96,52 @@ public class Utils {
         return VmDecompilerInformationController.submitRequest(vmManager, request);
     }
 
+    public static String guessClass(String src) throws IOException {
+        return Cli.guessName(Files.readAllBytes(new File(src).toPath()));
+    }
+    public static IdentifiedSource[] sourcesToIdentifiedSources(boolean recursive, List<File> srcs) throws IOException {
+        return sourcesToIdentifiedSources(recursive, srcs.stream().map(x -> x.getAbsolutePath()).toArray(String[]::new));
+    }
 
+    public static IdentifiedSource[] sourcesToIdentifiedSources(boolean recursive, String... srcs) throws IOException {
+        List<IdentifiedSource> loaded = new ArrayList<>(srcs.length);
+        for (int i = 0; i < srcs.length; i++) {
+            File f = new File(srcs[i]);
+            if (f.isDirectory()) {
+                if (recursive) {
+                    Files.walkFileTree(f.toPath(), new FileVisitor<Path>() {
+                        @Override
+                        public FileVisitResult preVisitDirectory(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
+                            return FileVisitResult.CONTINUE;
+                        }
 
+                        @Override
+                        public FileVisitResult visitFile(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
+                            File clazz = path.toFile();
+                            if (clazz.getName().endsWith(".java")) {
+                                loaded.add(new IdentifiedSource(new ClassIdentifier(guessClass(clazz.getAbsolutePath())), Files.readAllBytes(clazz.toPath()), Optional.empty()));
+                            }
+                            return FileVisitResult.CONTINUE;
+                        }
+
+                        @Override
+                        public FileVisitResult visitFileFailed(Path path, IOException e) throws IOException {
+                            return FileVisitResult.CONTINUE;
+                        }
+
+                        @Override
+                        public FileVisitResult postVisitDirectory(Path path, IOException e) throws IOException {
+                            return FileVisitResult.CONTINUE;
+                        }
+                    });
+                }
+            } else {
+                loaded.add(new IdentifiedSource(new ClassIdentifier(guessClass(f.getAbsolutePath())), Files.readAllBytes(f.toPath()), Optional.empty()));
+            }
+        }
+        return loaded.toArray(new IdentifiedSource[0]);
+    }
+
+    ;
 
 }

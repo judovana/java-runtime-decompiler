@@ -264,6 +264,7 @@ public class Cli {
         String cpPidUrl = null;
         String customCompiler = null;
         boolean haveCompiler = false;
+        boolean recursive = false;
         List<File> toCompile = new ArrayList<>(1);
         for (int x = i + 1; x < args.size(); x++) {
             String arg = args.get(x);
@@ -273,6 +274,8 @@ public class Cli {
             } else if (arg.equals("-cp")) {
                 cpPidUrl = args.get(x + 1);
                 x++;
+            } else if (arg.equals("-r")) {
+                recursive=true;
             } else {
                 toCompile.add(new File(arg));
                 if (!toCompile.get(toCompile.size() - 1).exists()) {
@@ -317,12 +320,7 @@ public class Cli {
         } else {
             rc = new RuntimeCompilerConnector.DummyRuntimeCompiler();
         }
-        IdentifiedSource[] isis = new IdentifiedSource[toCompile.size()];
-        for (int x = 0; x < isis.length; x++) {
-            byte[] bytes = Files.readAllBytes(toCompile.get(x).toPath());
-            String name = guessName(bytes);
-            isis[x] = new IdentifiedSource(new ClassIdentifier(name), bytes, Optional.empty());
-        }
+        IdentifiedSource[] isis = Utils.sourcesToIdentifiedSources(recursive, toCompile);
         Collection<IdentifiedBytecode> result = rc.compileClass(cp, Optional.of(new MessagesListener() {
             @Override
             public void addMessage(Level level, String message) {
@@ -591,10 +589,10 @@ public class Cli {
         System.out.println("              You can pass also parameters to it like any other javap, but without space. So e.g. javap-v is equal to call javap -v /tmp/class_you_entered.class");
         System.out.println(COMPILE + "  compile local file(s) against runtime classapth. Plugin can have its own compiler, eg jasm or jcoder do not require runtime classpath");
         System.out.println("              mandatory: file(s) to compile");
-        System.out.println(" wip!         optional: PUC of runtime classpath, plugin, recursive if sources are in dir(s), if no " + SAVEAS
+        System.out.println("              optional: PUC of runtime classpath, plugin, recursive if sources are in dir(s), if no " + SAVEAS
                 + " is presented, then stdout is used, but will fail if more then one file is result)");
         System.out.println(
-                " wip!                      -cp <PUC>     -p <plugin>     -r    If the " + SAVEAS + " is pid of existing vm or host:port, the output of compilation will be attempted to be injected ");
+                "                           -cp <PUC>     -p <plugin>     -r    If the " + SAVEAS + " is pid of existing vm or host:port, the output of compilation will be attempted to be injected ");
         System.out.println(OVERWRITE + "  three args - PUC of JVM and class to overwrite and file with new bytecode. If file is missing, stdin will be used");
         System.out.println(SAVEAS + "  can acompany most of above command, and will repalce stdout with file(s) by its " + SAVELIKE + " style");
         System.out.println(SAVELIKE + "  can acompany " + SAVEAS + " and canbe one of:");
