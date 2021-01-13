@@ -208,7 +208,7 @@ public class Cli {
 
     private void overwrite(List<String> args, int i) throws Exception {
         String newBytecodeFile;
-        if (args.size() == 3 ) {
+        if (args.size() == 3) {
             System.err.println("reading class from std.in");
             newBytecodeFile = null;
         } else {
@@ -231,7 +231,7 @@ public class Cli {
             }
             VmInfo vmInfo = vmManager.findVmFromPID(jvmStr);
             String clazz;
-            if (newBytecodeFile == null){
+            if (newBytecodeFile == null) {
                 clazz = VmDecompilerInformationController.stdinToBase64();
             } else {
                 clazz = VmDecompilerInformationController.fileToBase64(newBytecodeFile);
@@ -259,7 +259,7 @@ public class Cli {
 
     private void compile(List<String> args, int i) throws Exception {
         if (args.size() < 2) {
-            throw new RuntimeException(COMPILE + " expects at least oen file to compile");
+            throw new RuntimeException(COMPILE + " expects at least one file to compile");
         }
         String cpPidUrl = null;
         String customCompiler = null;
@@ -275,7 +275,7 @@ public class Cli {
                 cpPidUrl = args.get(x + 1);
                 x++;
             } else if (arg.equals("-r")) {
-                recursive=true;
+                recursive = true;
             } else {
                 toCompile.add(new File(arg));
                 if (!toCompile.get(toCompile.size() - 1).exists()) {
@@ -327,11 +327,46 @@ public class Cli {
                 System.err.println(message);
             }
         }), isis);
-        if (!saving.shouldSave() && result.size() > 1) {
-            throw new RuntimeException("more then one file is output of compilation, but yuo have stdout enabled. Use " + SAVEAS + " and friends to save the output of compilation");
+        boolean upload = false;
+        if (saving.shouldSave()) {
+            try {
+                VmInfo.Type t = guessType(saving.as);
+                if (t == VmInfo.Type.LOCAL || t == VmInfo.Type.REMOTE) {
+                    upload = true;
+                }
+            } catch (Exception ex) {
+                OutputController.getLogger().log(ex);
+            }
         }
-        for (IdentifiedBytecode ib : result) {
-            outOrSave(ib.getClassIdentifier().getFullName(), ".class", ib.getFile(), true);
+        if (upload) {
+            VmInfo target = getVmInfo(saving.as);
+            int f = 0;
+            for (IdentifiedBytecode ib : result) {
+                System.out.println("Uploading " + ib.getClassIdentifier().getFullName());
+                AgentRequestAction request = VmDecompilerInformationController.createRequest(target,
+                        AgentRequestAction.RequestAction.OVERWRITE,
+                        ib.getClassIdentifier().getFullName(),
+                        Base64.getEncoder().encodeToString(ib.getFile()));
+                String response = VmDecompilerInformationController.submitRequest(vmManager, request);
+                if (response.equals("ok")) {
+                    System.out.println("    Most likely done successfully.");
+                } else {
+                    f++;
+                    System.out.println("    failed");
+                }
+            }
+            if (f > 0) {
+                throw new RuntimeException("Not uploaded " + f + " classes of total " + result.size());
+            } else {
+                System.out.println("Done all " + result.size() + " classes");
+            }
+        } else {
+            if (!saving.shouldSave() && result.size() > 1) {
+                throw new RuntimeException("more then one file is output of compilation, but yuo have stdout enabled. Use " + SAVEAS + " and friends to save the output of compilation");
+            }
+            for (IdentifiedBytecode ib : result) {
+                outOrSave(ib.getClassIdentifier().getFullName(), ".class", ib.getFile(), true);
+            }
         }
     }
 
