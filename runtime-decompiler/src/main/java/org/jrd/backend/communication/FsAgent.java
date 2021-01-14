@@ -122,6 +122,7 @@ public class FsAgent implements JrdAgent {
                     while (entries.hasMoreElements()) {
                         ZipEntry ze = entries.nextElement();
                         if (!ze.isDirectory()) {
+                            //todo add uspport for ested jars
                             String clazzInJar = toClass((ze.getName()));
                             if (clazz == null) {
                                 //no return reading all
