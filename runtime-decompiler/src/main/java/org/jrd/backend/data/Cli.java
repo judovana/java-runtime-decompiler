@@ -87,7 +87,7 @@ public class Cli {
 
         @Override
         public void setText(String s) {
-            System.err.println(s);
+            System.out.println(s);
         }
 
         @Override
