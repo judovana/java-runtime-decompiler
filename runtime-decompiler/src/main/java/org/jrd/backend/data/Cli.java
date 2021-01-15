@@ -28,7 +28,6 @@ import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -87,7 +86,11 @@ public class Cli {
 
         @Override
         public void setText(String s) {
-            System.out.println(s);
+            if (shouldSave()) {
+                System.out.println(s);
+            } else {
+                System.err.println(s);
+            }
         }
 
         @Override
