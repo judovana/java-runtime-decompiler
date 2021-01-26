@@ -33,7 +33,8 @@ function findLib(){
     GROUP=""
     FILENAME="$2"
   fi
-  find "$BASE/$GROUP"  | grep "$FILENAME$"   | sort -V | tail -n 1
+  name=`find "$BASE/$GROUP"  | sed "s;.*/;;" | grep "$FILENAME$"   | sort -V | tail -n 1`
+  find "$BASE/$GROUP"  |  grep "/$name$"   | sort -V | tail -n 1
 }
 
 TOOLS="$javac_home"/lib/tools.jar  #jsut jdk8 and down
