@@ -39,6 +39,7 @@ public class BytecodeDecompilerView {
     private JSplitPane splitPane;
     private JPanel leftMainPanel;
     private JTextField classesSortField;
+    private final Color classesSortFieldColor;
     private JTextField searchCodeField;
     private JComboBox topComboBox;
     private JPanel classesPanel;
@@ -76,7 +77,8 @@ public class BytecodeDecompilerView {
         classesPanel = new JPanel(new BorderLayout());
 
         classesSortField = new JTextField(".*");
-        classesSortField.setToolTipText(styleTooltip() + "Use regular expression; eg com.*. <br/>Dont forget to escape $ as \\$ otherwise it is end of line.<br/>Nothing shown? Try.*pkg.* or .*SomeClass.*<br/>Search java pattern for help" +
+        classesSortFieldColor = classesSortField.getForeground();
+        classesSortField.setToolTipText(styleTooltip() + "Use regular expression; eg com.*. <br/>Dont forget to escape $ as \\$ otherwise it is end of line.<br/>Nothing shown? Try.*pkg.* or .*SomeClass.*<br/>Search java pattern for help<br/>For negation use ^(?!.*bar).*$  for or use | note, that or and negation do not like each other. Escape character is \\" +
                 "</div><html>");
         classesSortField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -281,14 +283,27 @@ public class BytecodeDecompilerView {
         if (filter.isEmpty()) {
             filter = ".*";
         }
-        Pattern p = Pattern.compile(filter);
-        for (String classe : classes) {
-            Matcher m = p.matcher(classe);
-            if (m.matches()) {
-                filtered.add(classe);
+        try {
+            Pattern p = Pattern.compile(filter);
+            classesSortField.setForeground(classesSortFieldColor);
+            classesSortField.repaint();
+            for (String classe : classes) {
+                Matcher m = p.matcher(classe);
+                if (m.matches()) {
+                    filtered.add(classe);
+                }
+            }
+        }catch(Exception ex){
+            classesSortField.setForeground(Color.red);
+            classesSortField.repaint();
+            for (String classe : classes) {
+                if (!classe.contains(filter)) {
+                    filtered.add(classe);
+                }
             }
         }
         filteredClassesJlist.setListData(filtered.toArray(new String[filtered.size()]));
+
     }
 
     /**
