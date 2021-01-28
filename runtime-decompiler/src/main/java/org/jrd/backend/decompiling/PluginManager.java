@@ -2,6 +2,7 @@ package org.jrd.backend.decompiling;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import org.jrd.backend.core.OutputController;
 import org.jrd.backend.data.Cli;
 import org.jrd.backend.data.Directories;
@@ -10,6 +11,7 @@ import org.jrd.backend.data.VmManager;
 
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -114,7 +116,7 @@ public class PluginManager {
             String[] allClasses = Cli.obtainClasses(vmInfo, vmManager);
             Map<String, byte[]> innerClasses = new HashMap<>();
             for (String clazz : allClasses) {
-                if (clazz.startsWith(name + "$")) {
+                if (clazz.startsWith(name + "$") || clazz.startsWith(name.replaceAll("__init$", "") + "$")) {
                     innerClasses.put(clazz, Base64.getDecoder().decode(Cli.obtainClass(vmInfo, clazz, vmManager).getLoadedClassBytes()));
                 }
             }
@@ -141,9 +143,6 @@ public class PluginManager {
 
     /**
      * Compiles wrapper plugin, loads it into JVM and stores it for later.
-     *
-     * @param wrapper
-     * @throws RuntimeException
      */
     private void InitializeWrapper(DecompilerWrapperInformation wrapper) {
         if (wrapper.getName().equals(DecompilerWrapperInformation.JAVAP_NAME)) {
@@ -288,8 +287,9 @@ public class PluginManager {
         String fileName = plugin.getWrapperURL().getFile().getName();
         File fileToRemove = new File(System.getProperty("java.io.tmpdir") + "/" + fileName.substring(0, fileName.length() - 4) + "class");
 
-        if (fileToRemove.exists())
+        if (fileToRemove.exists()) {
             fileToRemove.delete();
+        }
         return errLevel != 0 ? new String(errStream.toByteArray()) : null;
     }
 
@@ -332,10 +332,6 @@ public class PluginManager {
     /**
      * Converts list of URLs to CSV String<br>
      * example: (list){URL1,URL2,URL3} -> (String)URL1:URL2:URL3
-     *
-     * @param list
-     * @param delimeter
-     * @return
      */
     private String URLListToCSV(List<ExpandableUrl> list, String delimeter) {
         String out = "";
