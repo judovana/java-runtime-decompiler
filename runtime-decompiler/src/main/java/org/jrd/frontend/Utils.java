@@ -1,9 +1,9 @@
 package org.jrd.frontend;
 
-import org.jc.api.ClassIdentifier;
-import org.jc.api.ClassesProvider;
-import org.jc.api.IdentifiedSource;
-import org.jc.api.InMemoryCompiler;
+import org.terminusbrut.classpathless.api.ClassIdentifier;
+import org.terminusbrut.classpathless.api.ClassesProvider;
+import org.terminusbrut.classpathless.api.IdentifiedSource;
+import org.terminusbrut.classpathless.api.InMemoryCompiler;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.DecompilerRequestReceiver;
