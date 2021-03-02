@@ -1,6 +1,7 @@
 package org.jrd.frontend.MainFrame;
 
 import org.fife.ui.hex.swing.HexEditor;
+import org.fife.ui.hex.swing.HexSearch;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
@@ -241,13 +242,42 @@ public class BytecodeDecompilerView {
         redo.addActionListener(actionEvent -> hex.redo());
 
         JPanel hexSearchControls = new JPanel(new GridLayout(1, 4));
-        JComboBox hexSearchType = new JComboBox(new String[]{"hex", "int", "text"});
+        HexSearch hexSearchEngine = new HexSearch(hex);
+        JComboBox hexSearchType = new JComboBox(HexSearch.HexSearchOptions.values());
         hexSearchControls.add(hexSearchType);
-        JTextField hexSearch = new JTextField("todo: just convert and search in byteBuffer of fife.ui.hex");
+        JTextField hexSearch = new JTextField("");
+        hexSearch.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent documentEvent) {
+                hexSearchEngine.searchHexCode(hexSearch.getText(), hexSearchType.getSelectedItem().toString());
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent documentEvent) {
+                hexSearchEngine.searchHexCode(hexSearch.getText(), hexSearchType.getSelectedItem().toString());
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent documentEvent) {
+                hexSearchEngine.searchHexCode(hexSearch.getText(), hexSearchType.getSelectedItem().toString());
+            }
+        });
         hexSearchControls.add(hexSearch);
         JButton hexPrev = new JButton("prev");
+        hexPrev.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                hexSearchEngine.previous(hexSearch.getText(), hexSearchType.getSelectedItem().toString());
+            }
+        });
         hexSearchControls.add(hexPrev);
         JButton hexNext = new JButton("next");
+        hexNext.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                hexSearchEngine.next(hexSearch.getText(), hexSearchType.getSelectedItem().toString());
+            }
+        });
         hexSearchControls.add(hexNext);
         rightBin.add(hexSearchControls, BorderLayout.SOUTH);
 
