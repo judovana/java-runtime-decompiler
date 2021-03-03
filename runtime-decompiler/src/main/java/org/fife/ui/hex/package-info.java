@@ -1,4 +1,4 @@
 package org.fife.ui.hex;
 /**
- * Reincarnation - by decomplation of the only found binary - of http://fifesoft.com/#/hexeditor
+ * Reincarnation - by decompilation of the only found binary - of http://fifesoft.com/#/hexeditor
  **/
