@@ -26,7 +26,7 @@ public class HexSearch {
             case "TEXT":
                 byte[] bytesText = str.getBytes();
                 if (bytesText.length == 0) {
-                    return null;
+                    throw new StringIndexOutOfBoundsException();
                 }
                 for (byte b : bytesText) {
                     arr.add(b);
@@ -42,8 +42,7 @@ public class HexSearch {
                     try {
                         arr.add(Integer.valueOf(s).byteValue());
                     } catch (NumberFormatException e) {
-                        System.out.println("NAN");
-                        return null;
+                        throw e;
                     }
                 }
                 break;
@@ -58,8 +57,7 @@ public class HexSearch {
                         int i = Integer.parseInt(s, 16);
                         arr.add(Integer.valueOf(i).byteValue());
                     } catch (NumberFormatException e) {
-                        System.out.println("NAN");
-                        return null;
+                        throw e;
                     }
                 }
                 break;
@@ -71,27 +69,30 @@ public class HexSearch {
     }
 
     public void searchHexCode(String str, String type) {
-        ArrayList<Byte> arr = getByteArray(str, type);
-        if (arr == null) {
-            return;
-        }
-        int byteCount = hex.getByteCount();
-        start = 0;
-        end = 0;
-        counter = 0;
-        found = false;
-        for (int i = 0; i < byteCount; i++) {
-            if (arr.get(0) == hex.getByte(i)) {
-                if (checkIfMatches(arr, i)) {
-                    found = true;
-                    start = i;
-                    end = i + arr.size();
-                    break;
+        try {
+            ArrayList<Byte> arr = getByteArray(str, type);
+            int byteCount = hex.getByteCount();
+            start = 0;
+            end = 0;
+            counter = 0;
+            found = false;
+            for (int i = 0; i < byteCount; i++) {
+                if (arr.get(0) == hex.getByte(i)) {
+                    if (checkIfMatches(arr, i)) {
+                        found = true;
+                        start = i;
+                        end = i + arr.size();
+                        break;
+                    }
                 }
             }
-        }
-        if (found) {
-            hex.setSelectedRange(start, end - 1);
+            if (found) {
+                hex.setSelectedRange(start, end - 1);
+            }
+        } catch (NumberFormatException e) {
+            System.err.println("NAN");
+        } catch (StringIndexOutOfBoundsException e) {
+            // Ignore
         }
     }
 
