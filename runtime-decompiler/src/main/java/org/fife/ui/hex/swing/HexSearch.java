@@ -20,10 +20,10 @@ public class HexSearch {
         this.hex = hex;
     }
 
-    private ArrayList<Byte> getByteArray(String str, String type) {
+    private ArrayList<Byte> getByteArray(String str, HexSearchOptions type) {
         ArrayList<Byte> arr = new ArrayList<>();
         switch (type) {
-            case "TEXT":
+            case TEXT:
                 byte[] bytesText = str.getBytes();
                 if (bytesText.length == 0) {
                     throw new StringIndexOutOfBoundsException();
@@ -33,8 +33,8 @@ public class HexSearch {
                 }
                 break;
 
-            case "INT":
-                if (str.equals("")) {
+            case INT:
+                if (str.trim().equals("")) {
                     throw new StringIndexOutOfBoundsException();
                 }
                 String[] spliced = str.split(" ");
@@ -47,8 +47,8 @@ public class HexSearch {
                 }
                 break;
 
-            case "HEX":
-                if (str.equals("")) {
+            case HEX:
+                if (str.trim().equals("")) {
                     throw new StringIndexOutOfBoundsException();
                 }
                 String[] splicedHex = str.split(" ");
@@ -68,7 +68,7 @@ public class HexSearch {
         return arr;
     }
 
-    public void searchHexCode(String str, String type) {
+    public void searchHexCode(String str, HexSearchOptions type) {
         try {
             ArrayList<Byte> arr = getByteArray(str, type);
             int byteCount = hex.getByteCount();
@@ -105,7 +105,7 @@ public class HexSearch {
         return true;
     }
 
-    public void next(String str, String type) {
+    public void next(String str, HexSearchOptions type) {
         if (!found) {
             return;
         }
@@ -132,7 +132,7 @@ public class HexSearch {
         }
     }
 
-    public void previous(String str, String type) {
+    public void previous(String str, HexSearchOptions type) {
         if (!found) {
             return;
         }

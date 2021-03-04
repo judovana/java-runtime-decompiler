@@ -243,23 +243,23 @@ public class BytecodeDecompilerView {
 
         JPanel hexSearchControls = new JPanel(new GridLayout(1, 4));
         HexSearch hexSearchEngine = new HexSearch(hex);
-        JComboBox hexSearchType = new JComboBox(HexSearch.HexSearchOptions.values());
+        JComboBox<HexSearch.HexSearchOptions> hexSearchType = new JComboBox<HexSearch.HexSearchOptions>(HexSearch.HexSearchOptions.values());
         hexSearchControls.add(hexSearchType);
         JTextField hexSearch = new JTextField("");
         hexSearch.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent documentEvent) {
-                hexSearchEngine.searchHexCode(hexSearch.getText(), hexSearchType.getSelectedItem().toString());
+                hexSearchEngine.searchHexCode(hexSearch.getText(), (HexSearch.HexSearchOptions) hexSearchType.getSelectedItem());
             }
 
             @Override
             public void removeUpdate(DocumentEvent documentEvent) {
-                hexSearchEngine.searchHexCode(hexSearch.getText(), hexSearchType.getSelectedItem().toString());
+                hexSearchEngine.searchHexCode(hexSearch.getText(), (HexSearch.HexSearchOptions) hexSearchType.getSelectedItem());
             }
 
             @Override
             public void changedUpdate(DocumentEvent documentEvent) {
-                hexSearchEngine.searchHexCode(hexSearch.getText(), hexSearchType.getSelectedItem().toString());
+                hexSearchEngine.searchHexCode(hexSearch.getText(), (HexSearch.HexSearchOptions) hexSearchType.getSelectedItem());
             }
         });
         hexSearchControls.add(hexSearch);
@@ -267,7 +267,7 @@ public class BytecodeDecompilerView {
         hexPrev.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                hexSearchEngine.previous(hexSearch.getText(), hexSearchType.getSelectedItem().toString());
+                hexSearchEngine.previous(hexSearch.getText(), (HexSearch.HexSearchOptions) hexSearchType.getSelectedItem());
             }
         });
         hexSearchControls.add(hexPrev);
@@ -275,7 +275,7 @@ public class BytecodeDecompilerView {
         hexNext.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                hexSearchEngine.next(hexSearch.getText(), hexSearchType.getSelectedItem().toString());
+                hexSearchEngine.next(hexSearch.getText(), (HexSearch.HexSearchOptions) hexSearchType.getSelectedItem());
             }
         });
         hexSearchControls.add(hexNext);
