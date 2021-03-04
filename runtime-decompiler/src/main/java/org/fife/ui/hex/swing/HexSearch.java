@@ -34,8 +34,8 @@ public class HexSearch {
                 break;
 
             case "INT":
-                if (str.equals(" ")) {
-                    return null;
+                if (str.equals("")) {
+                    throw new StringIndexOutOfBoundsException();
                 }
                 String[] spliced = str.split(" ");
                 for (String s : spliced) {
@@ -49,7 +49,7 @@ public class HexSearch {
 
             case "HEX":
                 if (str.equals("")) {
-                    return null;
+                    throw new StringIndexOutOfBoundsException();
                 }
                 String[] splicedHex = str.split(" ");
                 for (String s : splicedHex) {
