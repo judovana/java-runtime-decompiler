@@ -1,32 +1,25 @@
 package org.fife.ui.hex.swing;
 
-public class SearchState {
-    private int start = 0;
-    private int end = 0;
-    private boolean found = false;
+public final class SearchState {
+    private final int start;
+    private final int end;
+    private final boolean found;
 
+    public SearchState(int start, int end, boolean found) {
+        this.start = start;
+        this.end = end;
+        this.found = found;
+    }
 
     public int getStart() {
         return start;
-    }
-
-    public void setStart(int start) {
-        this.start = start;
     }
 
     public int getEnd() {
         return end;
     }
 
-    public void setEnd(int end) {
-        this.end = end;
-    }
-
     public boolean isFound() {
         return found;
-    }
-
-    public void setFound(boolean found) {
-        this.found = found;
     }
 }
