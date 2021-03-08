@@ -62,25 +62,28 @@ public class HexSearch {
         return arr;
     }
 
-    public void searchHexCode(String str, HexSearchOptions type) {
+    public boolean searchHexCode(String str, HexSearchOptions type) {
         searchState = new SearchState(0, 0, false);
         ArrayList<Byte> arr = getByteArray(str, type);
         findMatch(arr,0);
         if (searchState.isFound()) {
             hex.setSelectedRange(searchState.getStart(), searchState.getEnd() - 1);
+            return true;
         }
+        return false;
     }
 
-    private void findMatch(ArrayList<Byte> arr, int start) {
+    private boolean findMatch(ArrayList<Byte> arr, int start) {
         int byteCount = hex.getByteCount();
         for (int i = start; i < byteCount; i++) {
             if (arr.get(0) == hex.getByte(i)) {
                 if (checkIfMatches(arr, i)) {
                     searchState = new SearchState(i, i + arr.size(), true);
-                    break;
+                    return true;
                 }
             }
         }
+        return false;
     }
 
     private boolean checkIfMatches(ArrayList<Byte> arr, int start) {
@@ -92,23 +95,25 @@ public class HexSearch {
         return true;
     }
 
-    public void next(String str, HexSearchOptions type) {
+    public boolean next(String str, HexSearchOptions type) {
         if (!searchState.isFound()) {
-            return;
+            return false;
         }
         ArrayList<Byte> arr = getByteArray(str, type);
         searchState = new SearchState(searchState.getStart(), searchState.getEnd(), false);
         findMatch(arr, searchState.getStart() + 1);
         if (searchState.isFound()) {
             hex.setSelectedRange(searchState.getStart(), searchState.getEnd() - 1);
+            return true;
         } else {
             searchState = new SearchState(searchState.getStart(), searchState.getEnd(), true);
+            return false;
         }
     }
 
-    public void previous(String str, HexSearchOptions type) {
+    public boolean previous(String str, HexSearchOptions type) {
         if (!searchState.isFound()) {
-            return;
+            return false;
         }
         ArrayList<Byte> arr = getByteArray(str, type);
         searchState = new SearchState(searchState.getStart(), searchState.getEnd(), false);
@@ -122,8 +127,10 @@ public class HexSearch {
         }
         if (searchState.isFound()) {
             hex.setSelectedRange(searchState.getStart(), searchState.getEnd() - 1);
+            return true;
         } else {
             searchState = new SearchState(searchState.getStart(), searchState.getEnd(), true);
+            return false;
         }
     }
 }
