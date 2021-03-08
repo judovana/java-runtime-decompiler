@@ -21,6 +21,10 @@ public class HexSearch {
         this.searchState = new SearchState();
     }
 
+    public SearchState getSearchState() {
+        return searchState;
+    }
+
     private ArrayList<Byte> getByteArray(String str, HexSearchOptions type) throws HexSearchParseException {
         ArrayList<Byte> arr = new ArrayList<>();
         switch (type) {
