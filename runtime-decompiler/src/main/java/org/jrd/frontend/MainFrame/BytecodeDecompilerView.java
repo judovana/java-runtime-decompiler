@@ -1,6 +1,9 @@
 package org.jrd.frontend.MainFrame;
 
+import org.fife.ui.hex.event.HexSearchActionListener;
+import org.fife.ui.hex.event.HexSearchDocumentListener;
 import org.fife.ui.hex.swing.HexEditor;
+import org.fife.ui.hex.swing.HexSearch;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
@@ -241,13 +244,17 @@ public class BytecodeDecompilerView {
         redo.addActionListener(actionEvent -> hex.redo());
 
         JPanel hexSearchControls = new JPanel(new GridLayout(1, 4));
-        JComboBox hexSearchType = new JComboBox(new String[]{"hex", "int", "text"});
+        HexSearch hexSearchEngine = new HexSearch(hex);
+        JComboBox<HexSearch.HexSearchOptions> hexSearchType = new JComboBox<HexSearch.HexSearchOptions>(HexSearch.HexSearchOptions.values());
         hexSearchControls.add(hexSearchType);
-        JTextField hexSearch = new JTextField("todo: just convert and search in byteBuffer of fife.ui.hex");
+        JTextField hexSearch = new JTextField("");
+        hexSearch.getDocument().addDocumentListener(new HexSearchDocumentListener(hexSearchEngine, hexSearch, hexSearchType));
         hexSearchControls.add(hexSearch);
         JButton hexPrev = new JButton("prev");
+        hexPrev.addActionListener(new HexSearchActionListener(hexSearchEngine, hexSearch, hexSearchType, HexSearchActionListener.Method.PREV));
         hexSearchControls.add(hexPrev);
         JButton hexNext = new JButton("next");
+        hexNext.addActionListener(new HexSearchActionListener(hexSearchEngine, hexSearch, hexSearchType, HexSearchActionListener.Method.NEXT));
         hexSearchControls.add(hexNext);
         rightBin.add(hexSearchControls, BorderLayout.SOUTH);
 
