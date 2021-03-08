@@ -1,5 +1,6 @@
 package org.jrd.frontend.MainFrame;
 
+import org.fife.ui.hex.event.HexSearchDocumentListener;
 import org.fife.ui.hex.swing.HexEditor;
 import org.fife.ui.hex.swing.HexSearch;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
@@ -246,22 +247,7 @@ public class BytecodeDecompilerView {
         JComboBox<HexSearch.HexSearchOptions> hexSearchType = new JComboBox<HexSearch.HexSearchOptions>(HexSearch.HexSearchOptions.values());
         hexSearchControls.add(hexSearchType);
         JTextField hexSearch = new JTextField("");
-        hexSearch.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent documentEvent) {
-                hexSearchEngine.searchHexCode(hexSearch.getText(), (HexSearch.HexSearchOptions) hexSearchType.getSelectedItem());
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent documentEvent) {
-                hexSearchEngine.searchHexCode(hexSearch.getText(), (HexSearch.HexSearchOptions) hexSearchType.getSelectedItem());
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent documentEvent) {
-                hexSearchEngine.searchHexCode(hexSearch.getText(), (HexSearch.HexSearchOptions) hexSearchType.getSelectedItem());
-            }
-        });
+        hexSearch.getDocument().addDocumentListener(new HexSearchDocumentListener(hex, hexSearchEngine, hexSearch, hexSearchType));
         hexSearchControls.add(hexSearch);
         JButton hexPrev = new JButton("prev");
         hexPrev.addActionListener(new ActionListener() {

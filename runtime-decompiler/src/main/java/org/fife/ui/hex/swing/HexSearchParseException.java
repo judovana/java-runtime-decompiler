@@ -1,6 +1,6 @@
 package org.fife.ui.hex.swing;
 
-public class HexSearchParseException extends Exception {
+public class HexSearchParseException extends RuntimeException {
     public HexSearchParseException(String exceptionMessage) {
         super(exceptionMessage);
     }

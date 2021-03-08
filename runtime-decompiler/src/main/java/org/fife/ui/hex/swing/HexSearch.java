@@ -25,7 +25,7 @@ public class HexSearch {
         return searchState;
     }
 
-    private ArrayList<Byte> getByteArray(String str, HexSearchOptions type) throws HexSearchParseException {
+    private ArrayList<Byte> getByteArray(String str, HexSearchOptions type) {
         ArrayList<Byte> arr = new ArrayList<>();
         switch (type) {
             case TEXT:
@@ -66,29 +66,23 @@ public class HexSearch {
     }
 
     public void searchHexCode(String str, HexSearchOptions type) {
-        try {
-            searchState.setFound(false);
-            ArrayList<Byte> arr = getByteArray(str, type);
-            int byteCount = hex.getByteCount();
-            searchState.setStart(0);
-            searchState.setEnd(0);
-            for (int i = 0; i < byteCount; i++) {
-                if (arr.get(0) == hex.getByte(i)) {
-                    if (checkIfMatches(arr, i)) {
-                        searchState.setFound(true);
-                        searchState.setStart(i);
-                        searchState.setEnd(i + arr.size());
-                        break;
-                    }
+        searchState.setFound(false);
+        ArrayList<Byte> arr = getByteArray(str, type);
+        int byteCount = hex.getByteCount();
+        searchState.setStart(0);
+        searchState.setEnd(0);
+        for (int i = 0; i < byteCount; i++) {
+            if (arr.get(0) == hex.getByte(i)) {
+                if (checkIfMatches(arr, i)) {
+                    searchState.setFound(true);
+                    searchState.setStart(i);
+                    searchState.setEnd(i + arr.size());
+                    break;
                 }
             }
-            if (searchState.isFound()) {
-                hex.setSelectedRange(searchState.getStart(), searchState.getEnd() - 1);
-            }
-        } catch (NumberFormatException|StringIndexOutOfBoundsException e) {
-            OutputController.getLogger().log(e);
-        } catch (HexSearchParseException e) {
-            JOptionPane.showMessageDialog(new JFrame(), e.getMessage(), e.getName(), JOptionPane.ERROR_MESSAGE);
+        }
+        if (searchState.isFound()) {
+            hex.setSelectedRange(searchState.getStart(), searchState.getEnd() - 1);
         }
     }
 
@@ -105,27 +99,23 @@ public class HexSearch {
         if (!searchState.isFound()) {
             return;
         }
-        try {
-            ArrayList<Byte> arr = getByteArray(str, type);
-            searchState.setFound(false);
-            int byteCount = hex.getByteCount();
-            for (int i = searchState.getStart() + 1; i < byteCount; i++) {
-                if (arr.get(0) == hex.getByte(i)) {
-                    if (checkIfMatches(arr, i)) {
-                        searchState.setFound(true);
-                        searchState.setStart(i);
-                        searchState.setEnd(i + arr.size());
-                        break;
-                    }
+        ArrayList<Byte> arr = getByteArray(str, type);
+        searchState.setFound(false);
+        int byteCount = hex.getByteCount();
+        for (int i = searchState.getStart() + 1; i < byteCount; i++) {
+            if (arr.get(0) == hex.getByte(i)) {
+                if (checkIfMatches(arr, i)) {
+                    searchState.setFound(true);
+                    searchState.setStart(i);
+                    searchState.setEnd(i + arr.size());
+                    break;
                 }
             }
-            if (searchState.isFound()) {
-                hex.setSelectedRange(searchState.getStart(), searchState.getEnd() - 1);
-            } else {
-                searchState.setFound(true);
-            }
-        } catch (HexSearchParseException e) {
-            JOptionPane.showMessageDialog(new JFrame(), e.getMessage(), e.getName(), JOptionPane.ERROR_MESSAGE);
+        }
+        if (searchState.isFound()) {
+            hex.setSelectedRange(searchState.getStart(), searchState.getEnd() - 1);
+        } else {
+            searchState.setFound(true);
         }
     }
 
@@ -133,27 +123,23 @@ public class HexSearch {
         if (!searchState.isFound()) {
             return;
         }
-        try {
-            ArrayList<Byte> arr = getByteArray(str, type);
-            searchState.setFound(false);
-            int byteCount = hex.getByteCount();
-            for (int i = searchState.getStart() - 1; i >= 0; i--) {
-                if (arr.get(0) == hex.getByte(i)) {
-                    if (checkIfMatches(arr, i)) {
-                        searchState.setFound(true);
-                        searchState.setStart(i);
-                        searchState.setEnd(i + arr.size());
-                        break;
-                    }
+        ArrayList<Byte> arr = getByteArray(str, type);
+        searchState.setFound(false);
+        int byteCount = hex.getByteCount();
+        for (int i = searchState.getStart() - 1; i >= 0; i--) {
+            if (arr.get(0) == hex.getByte(i)) {
+                if (checkIfMatches(arr, i)) {
+                    searchState.setFound(true);
+                    searchState.setStart(i);
+                    searchState.setEnd(i + arr.size());
+                    break;
                 }
             }
-            if (searchState.isFound()) {
-                hex.setSelectedRange(searchState.getStart(), searchState.getEnd() - 1);
-            } else {
-                searchState.setFound(true);
-            }
-        } catch (HexSearchParseException e) {
-            JOptionPane.showMessageDialog(new JFrame(), e.getMessage(), e.getName(), JOptionPane.ERROR_MESSAGE);
+        }
+        if (searchState.isFound()) {
+            hex.setSelectedRange(searchState.getStart(), searchState.getEnd() - 1);
+        } else {
+            searchState.setFound(true);
         }
     }
 }
