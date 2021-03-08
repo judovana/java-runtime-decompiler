@@ -248,7 +248,7 @@ public class BytecodeDecompilerView {
         JComboBox<HexSearch.HexSearchOptions> hexSearchType = new JComboBox<HexSearch.HexSearchOptions>(HexSearch.HexSearchOptions.values());
         hexSearchControls.add(hexSearchType);
         JTextField hexSearch = new JTextField("");
-        hexSearch.getDocument().addDocumentListener(new HexSearchDocumentListener(hex, hexSearchEngine, hexSearch, hexSearchType));
+        hexSearch.getDocument().addDocumentListener(new HexSearchDocumentListener(hexSearchEngine, hexSearch, hexSearchType));
         hexSearchControls.add(hexSearch);
         JButton hexPrev = new JButton("prev");
         hexPrev.addActionListener(new HexSearchActionListener(hexSearchEngine, hexSearch, hexSearchType, HexSearchActionListener.Method.PREV));

@@ -10,13 +10,11 @@ import javax.swing.event.DocumentListener;
 
 public class HexSearchDocumentListener implements DocumentListener {
 
-    private final HexEditor hex;
     private final HexSearch hexSearchEngine;
     private final JTextField hexSearch;
     private final JComboBox<HexSearch.HexSearchOptions> hexSearchType;
 
-    public HexSearchDocumentListener(HexEditor hex, HexSearch hexSearchEngine, JTextField hexSearch, JComboBox<HexSearch.HexSearchOptions> hexSearchType) {
-        this.hex = hex;
+    public HexSearchDocumentListener(HexSearch hexSearchEngine, JTextField hexSearch, JComboBox<HexSearch.HexSearchOptions> hexSearchType) {
         this.hexSearchEngine = hexSearchEngine;
         this.hexSearch = hexSearch;
         this.hexSearchType = hexSearchType;

@@ -1,8 +1,5 @@
 package org.fife.ui.hex.swing;
 
-import org.jrd.backend.core.OutputController;
-
-import javax.swing.*;
 import java.util.ArrayList;
 
 public class HexSearch {
