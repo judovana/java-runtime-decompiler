@@ -1,5 +1,6 @@
 package org.jrd.frontend.MainFrame;
 
+import org.fife.ui.hex.event.HexSearchActionListener;
 import org.fife.ui.hex.event.HexSearchDocumentListener;
 import org.fife.ui.hex.swing.HexEditor;
 import org.fife.ui.hex.swing.HexSearch;
@@ -250,20 +251,10 @@ public class BytecodeDecompilerView {
         hexSearch.getDocument().addDocumentListener(new HexSearchDocumentListener(hex, hexSearchEngine, hexSearch, hexSearchType));
         hexSearchControls.add(hexSearch);
         JButton hexPrev = new JButton("prev");
-        hexPrev.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                hexSearchEngine.previous(hexSearch.getText(), (HexSearch.HexSearchOptions) hexSearchType.getSelectedItem());
-            }
-        });
+        hexPrev.addActionListener(new HexSearchActionListener(hexSearchEngine, hexSearch, hexSearchType, HexSearchActionListener.Method.PREV));
         hexSearchControls.add(hexPrev);
         JButton hexNext = new JButton("next");
-        hexNext.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                hexSearchEngine.next(hexSearch.getText(), (HexSearch.HexSearchOptions) hexSearchType.getSelectedItem());
-            }
-        });
+        hexNext.addActionListener(new HexSearchActionListener(hexSearchEngine, hexSearch, hexSearchType, HexSearchActionListener.Method.NEXT));
         hexSearchControls.add(hexNext);
         rightBin.add(hexSearchControls, BorderLayout.SOUTH);
 
