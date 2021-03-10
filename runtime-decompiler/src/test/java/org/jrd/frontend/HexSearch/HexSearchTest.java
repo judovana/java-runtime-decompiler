@@ -47,7 +47,7 @@ public class HexSearchTest {
     void hexSearchTestsHex() throws IOException {
         // Create test data
         byte[] testData = "test 123 456 789 tset +-*+// te te te 123 123 56 56".getBytes(StandardCharsets.UTF_8);
-        
+
         HexEditor hex = new HexEditor();
         hex.open(new ByteArrayInputStream(testData));
         HexSearch hexSearchEngine = new HexSearch(hex);
@@ -59,13 +59,24 @@ public class HexSearchTest {
         assertTrue(hexSearchEngine.getSearchState().isFound());
         assertEquals(hexSearchEngine.getSearchState().getStart(), 0);
         assertEquals(hexSearchEngine.getSearchState().getEnd(), 4);
+
+        Exception ex = null;
         try {
             testString = "";
             hexSearchEngine.searchHexCode(testString, type);
-            fail("Did not throw exception on empty HEX");
         } catch (Exception e) {
-            // Good
+            ex = e;
         }
+        assertTrue(ex instanceof StringIndexOutOfBoundsException);
+        assertFalse(hexSearchEngine.getSearchState().isFound());
+
+        try {
+            testString = "r";
+            hexSearchEngine.searchHexCode(testString, type);
+        } catch (Exception e) {
+            ex = e;
+        }
+        assertTrue(ex instanceof NumberFormatException);
         assertFalse(hexSearchEngine.getSearchState().isFound());
 
         testString = "74 65 20 74 65";
@@ -91,13 +102,24 @@ public class HexSearchTest {
         assertTrue(hexSearchEngine.getSearchState().isFound());
         assertEquals(hexSearchEngine.getSearchState().getStart(), 0);
         assertEquals(hexSearchEngine.getSearchState().getEnd(), 4);
+
+        Exception ex = null;
         try {
             testString = "";
             hexSearchEngine.searchHexCode(testString, type);
-            fail("Did not throw exception on empty INT");
         } catch (Exception e) {
-            // Good
+            ex = e;
         }
+        assertTrue(ex instanceof StringIndexOutOfBoundsException);
+        assertFalse(hexSearchEngine.getSearchState().isFound());
+
+        try {
+            testString = "r";
+            hexSearchEngine.searchHexCode(testString, type);
+        } catch (Exception e) {
+            ex = e;
+        }
+        assertTrue(ex instanceof NumberFormatException);
         assertFalse(hexSearchEngine.getSearchState().isFound());
 
         testString = "116 101 32 116 101";
