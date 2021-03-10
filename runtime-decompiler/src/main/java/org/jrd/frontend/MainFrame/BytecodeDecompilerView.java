@@ -129,18 +129,7 @@ public class BytecodeDecompilerView {
             public void mouseClicked(MouseEvent e) {
                 final String name = filteredClassesJlist.getSelectedValue();
                 if (name != null || filteredClassesJlist.getSelectedIndex() != -1) {
-                    new SwingWorker<Void, Void>() {
-                        @Override
-                        protected Void doInBackground() throws Exception {
-                            try {
-                                ActionEvent event = new ActionEvent(this, 1, name);
-                                bytesActionListener.actionPerformed(event);
-                            } catch (Throwable t) {
-                                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, t);
-                            }
-                            return null;
-                        }
-                    }.execute();
+                    classWorker(name);
                 }
             }
         });
@@ -151,18 +140,7 @@ public class BytecodeDecompilerView {
                 if (e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_DOWN) {
                     final String name = filteredClassesJlist.getSelectedValue();
                     if (name != null || filteredClassesJlist.getSelectedIndex() != -1) {
-                        new SwingWorker<Void, Void>() {
-                            @Override
-                            protected Void doInBackground() throws Exception {
-                                try {
-                                    ActionEvent event = new ActionEvent(this, 1, name);
-                                    bytesActionListener.actionPerformed(event);
-                                } catch (Throwable t) {
-                                    OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, t);
-                                }
-                                return null;
-                            }
-                        }.execute();
+                        classWorker(name);
                     }
                 }
             }
@@ -441,5 +419,20 @@ public class BytecodeDecompilerView {
         if (line >= 0) {
             bytecodeSyntaxTextArea.setCaretPosition(line);
         }
+    }
+
+    private void classWorker(String name) {
+        new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                try {
+                    ActionEvent event = new ActionEvent(this, 1, name);
+                    bytesActionListener.actionPerformed(event);
+                } catch (Throwable t) {
+                    OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, t);
+                }
+                return null;
+            }
+        }.execute();
     }
 }
