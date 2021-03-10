@@ -31,7 +31,7 @@ public class HexSearchTest {
             try {
                 testString = "";
                 hexSearchEngine.searchHexCode(testString, type);
-                fail("Did not throw exception ono empty TEXT");
+                fail("Did not throw exception on empty TEXT");
             } catch (Exception e) {
                 // Good
             }
@@ -68,7 +68,7 @@ public class HexSearchTest {
             try {
                 testString = "";
                 hexSearchEngine.searchHexCode(testString, type);
-                fail("Did not throw exception ono empty HEX");
+                fail("Did not throw exception on empty HEX");
             } catch (Exception e) {
                 // Good
             }
@@ -105,7 +105,7 @@ public class HexSearchTest {
             try {
                 testString = "";
                 hexSearchEngine.searchHexCode(testString, type);
-                fail("Did not throw exception ono empty INT");
+                fail("Did not throw exception on empty INT");
             } catch (Exception e) {
                 // Good
             }
