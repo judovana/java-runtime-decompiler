@@ -44,7 +44,7 @@ cp "$RSYNTAXTEXTAREA" "$DEPS_DIR"
 cp "$GSON" "$DEPS_DIR"
 cp "$BYTEMAN" "$DEPS_DIR"
 cp "$JRD" "$DEPS_DIR"
-cp "$JC" "$DEPS_DIR"
+cp "$CPC" "$DEPS_DIR"
 cp "$SCRIPT_DIR/decompiler_agent/target/decompiler-agent-$VERSION.jar" "$LIB_DIR"
 echo "{\"AGENT_PATH\":\"\${JRD}/libs/decompiler-agent-$VERSION.jar\"}" > "$AGENT_CONF/config.json"
 
