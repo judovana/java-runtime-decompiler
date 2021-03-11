@@ -1,8 +1,0 @@
-{
-  "Name": "Clojure",
-  "WrapperURL": "file://${XDG_CONFIG_HOME}/plugins/ClojureDecompilerWrapper.java",
-  "DependencyURL": [
-    "file://${HOME}/Downloads/clojure-decompiler/decompiler.jar"
-  ],
-  "DecompilerDownloadURL": "https://github.com/msimacek/clojure-decompiler"
-}
