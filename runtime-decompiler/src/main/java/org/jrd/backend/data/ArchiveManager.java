@@ -11,8 +11,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class ArchiveManager {
-    File c;
-    String tmpdir = System.getProperty("java.io.tmpdir");
+    final File c;
+    final String tmpdir = System.getProperty("java.io.tmpdir");
     ArrayList<String> currentJars = new ArrayList<>();
     int currentD = 0;
 
