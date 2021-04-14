@@ -127,9 +127,7 @@ public class FsAgent implements JrdAgent {
                         }
                     } else {
                         if (clazz == null) {
-                            // Should be impossible to get here
-                            // TODO decide what better to doo
-                            return null;
+                            throw new IOException("Trying to find class but no class is specified");
                         }
                         ArchiveManager am = new ArchiveManager(c);
                         if (am.isClassInFile(clazz)) {
@@ -188,7 +186,6 @@ public class FsAgent implements JrdAgent {
             while (entries.hasMoreElements()) {
                 ZipEntry ze = entries.nextElement();
                 if (!ze.isDirectory()) {
-                    //todo add uspport for ested jars
                     String clazzInJar = toClass((ze.getName()));
                     if (clazzInJar.equals(clazz)) {
                         return op.onJarEntry(f, zipFile, ze, clazz);

@@ -13,7 +13,7 @@ import java.util.zip.ZipInputStream;
 public class ArchiveManager {
     final File c;
     final String tmpdir = System.getProperty("java.io.tmpdir");
-    ArrayList<String> currentJars = new ArrayList<>();
+    ArrayList<String> currentPathInJars = new ArrayList<>();
     int currentD = 0;
 
     public ArchiveManager(File c) {
@@ -29,13 +29,13 @@ public class ArchiveManager {
      */
     public boolean isClassInFile(String clazz) throws IOException {
         ZipInputStream zis = new ZipInputStream(new FileInputStream(c));
-        if (!currentJars.isEmpty()) {
-            currentJars = new ArrayList<>();
+        if (!currentPathInJars.isEmpty()) {
+            currentPathInJars = new ArrayList<>();
         }
-        currentJars.add(c.getName());
+        currentPathInJars.add(c.getName());
         boolean ret = findClazz(zis, clazz);
         if (!ret) {
-            currentJars.remove(c.getName());
+            currentPathInJars.remove(c.getName());
         }
         return ret;
     }
@@ -53,11 +53,11 @@ public class ArchiveManager {
         while ((entry = zis.getNextEntry()) != null) {
             if (!entry.isDirectory()) {
                 if (entry.getName().endsWith(".jar") || entry.getName().endsWith(".zip")) {
-                    currentJars.add(entry.getName());
+                    currentPathInJars.add(entry.getName());
                     if(findClazz(new ZipInputStream(zis), clazz)) {
                         return true;
                     }
-                    currentJars.remove(entry.getName());
+                    currentPathInJars.remove(entry.getName());
                 } else {
                     String clazzInJar = FsAgent.toClass(entry.getName());
                     if (clazzInJar.equals(clazz)) {
@@ -75,7 +75,7 @@ public class ArchiveManager {
      * @return If extraction is necessary
      */
     public boolean needExtract() {
-        return !(currentJars.size() == 1);
+        return !(currentPathInJars.size() == 1);
     }
 
     /**
@@ -131,12 +131,12 @@ public class ArchiveManager {
             throw new IOException();
         }
         currentD++;
-        if (currentD == currentJars.size() - 1) {
-            return new File(destDir.getAbsolutePath() + "/" + currentJars.get(currentD));
-        } else if (currentD == currentJars.size()) {
+        if (currentD == currentPathInJars.size() - 1) {
+            return new File(destDir.getAbsolutePath() + "/" + currentPathInJars.get(currentD));
+        } else if (currentD == currentPathInJars.size()) {
             throw new IOException("Somehow got past");
         }
-        return recursiveUnpack(new File(destDir.getAbsolutePath() + "/" + currentJars.get(currentD)));
+        return recursiveUnpack(new File(destDir.getAbsolutePath() + "/" + currentPathInJars.get(currentD)));
     }
 
     /**
