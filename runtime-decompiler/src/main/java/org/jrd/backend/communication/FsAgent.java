@@ -121,9 +121,11 @@ public class FsAgent implements JrdAgent {
                     }
                 } else {
                     if (op instanceof ListingCpOperator){
-                        T ret = onEntryList(new ZipInputStream(new FileInputStream(c)), clazz, op);
-                        if (ret != null) {
-                            return ret;
+                        try (ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(c))) {
+                            T ret = onEntryList(zipInputStream, clazz, op);
+                            if (ret != null) {
+                                return ret;
+                            }
                         }
                     } else {
                         if (clazz == null) {
@@ -132,10 +134,9 @@ public class FsAgent implements JrdAgent {
                         ArchiveManager am = new ArchiveManager(c);
                         if (am.isClassInFile(clazz)) {
                             if (am.needExtract()) {
-                                // TODO Extracting and packaging
                                 File f = am.unpack();
                                 if (cp instanceof WriteingCpOperator) {
-                                    // Implement packaging
+                                    // TODO Implement packaging and cache
                                     throw new IOException(clazz + " to be implemented");
                                 } else {
                                     T ret = onEntryOther(f, clazz, op);
