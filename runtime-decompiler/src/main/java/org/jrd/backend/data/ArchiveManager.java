@@ -52,7 +52,7 @@ public class ArchiveManager {
         ZipEntry entry = null;
         while ((entry = zis.getNextEntry()) != null) {
             if (!entry.isDirectory()) {
-                if (entry.getName().endsWith(".jar") || entry.getName().endsWith(".zip")) {
+                if (shouldOpen(new ZipInputStream(zis))) {
                     currentPathInJars.add(entry.getName());
                     if(findClazz(new ZipInputStream(zis), clazz)) {
                         return true;
@@ -67,6 +67,10 @@ public class ArchiveManager {
             }
         }
         return false;
+    }
+
+    public static boolean shouldOpen(ZipInputStream zis) throws IOException {
+        return zis.getNextEntry() != null;
     }
 
     /**
