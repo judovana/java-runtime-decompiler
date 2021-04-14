@@ -2,6 +2,7 @@ package org.jrd.backend.communication;
 
 
 import org.jrd.backend.core.OutputController;
+import org.jrd.backend.data.ArchiveManager;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -106,7 +107,6 @@ public class FsAgent implements JrdAgent {
 
         private T operatetOnCp(String clazz, CpOperator<T> op) throws IOException {
             for (File c : cp) {
-                //System.out.println("DIRECTORY");
                 if (c.isDirectory()) {
                     String root = sanitize(c.getAbsolutePath());
                     if (clazz == null) {
@@ -120,39 +120,38 @@ public class FsAgent implements JrdAgent {
                         }
                     }
                 } else {
-
-                    // Check if it needs to only read, or write too
-                    if (clazz == null) {
-                        System.out.println("Clazz is null");
-                    }
-                    if (op instanceof WriteingCpOperator) {
-                        System.out.println("Called with WriteingCpOperator");
-                        // TODO Add support for nested jars editing
-                        ZipFile zipFile = new ZipFile(c);
-                        Enumeration<? extends ZipEntry> entries = zipFile.entries();
-                        while (entries.hasMoreElements()) {
-                            ZipEntry ze = entries.nextElement();
-                            if (!ze.isDirectory()) {
-                                //todo add uspport for ested jars
-                                String clazzInJar = toClass((ze.getName()));
-                                if (clazz == null) {
-                                    //no return reading all
-                                    op.onJarEntry(c, zipFile, ze, clazz);
-                                } else {
-                                    if (clazzInJar.equals(clazz)) {
-                                        return op.onJarEntry(c, zipFile, ze, clazz);
-                                    }
-                                }
-                            }
-                        }
-                    } else if (op instanceof ReadingCpOperator) {
-                        System.out.println("Called with ReadingCpOperator");
-                        // return onEntry(new ZipInputStream(new FileInputStream(c)), clazz, op);
-                    } else if (op instanceof ListingCpOperator){
-                        System.out.println("Called with ListingCpOperator");
+                    if (op instanceof ListingCpOperator){
                         T ret = onEntryList(new ZipInputStream(new FileInputStream(c)), clazz, op);
                         if (ret != null) {
                             return ret;
+                        }
+                    } else {
+                        if (clazz == null) {
+                            // Should be impossible to get here
+                            // TODO decide what better to doo
+                            return null;
+                        }
+                        ArchiveManager am = new ArchiveManager(c);
+                        if (am.isClassInFile(clazz)) {
+                            if (am.needExtract()) {
+                                // TODO Extracting and packaging
+                                File f = am.unpack();
+                                if (cp instanceof WriteingCpOperator) {
+                                    // Implement packaging
+                                    throw new IOException(clazz + " to be implemented");
+                                } else {
+                                    T ret = onEntryOther(f, clazz, op);
+                                    am.delete();
+                                    if (ret != null) {
+                                        return ret;
+                                    }
+                                }
+                            } else {
+                                T ret = onEntryOther(c, clazz, op);
+                                if (ret != null) {
+                                    return ret;
+                                }
+                            }
                         }
                     }
                 }
@@ -177,6 +176,22 @@ public class FsAgent implements JrdAgent {
                         if (clazzInJar.equals(clazz)) {
                             return op.onJarEntry(null, null, entry, clazz);
                         }
+                    }
+                }
+            }
+            return null;
+        }
+
+        private T onEntryOther(File f, String clazz, CpOperator<T> op) throws IOException {
+            ZipFile zipFile = new ZipFile(f);
+            Enumeration<? extends ZipEntry> entries = zipFile.entries();
+            while (entries.hasMoreElements()) {
+                ZipEntry ze = entries.nextElement();
+                if (!ze.isDirectory()) {
+                    //todo add uspport for ested jars
+                    String clazzInJar = toClass((ze.getName()));
+                    if (clazzInJar.equals(clazz)) {
+                        return op.onJarEntry(f, zipFile, ze, clazz);
                     }
                 }
             }
