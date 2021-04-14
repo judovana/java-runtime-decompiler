@@ -5,6 +5,7 @@ import org.jrd.backend.core.OutputController;
 
 import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 /**
  * This class is doing agent-like based operations on filesystem
@@ -104,6 +106,7 @@ public class FsAgent implements JrdAgent {
 
         private T operatetOnCp(String clazz, CpOperator<T> op) throws IOException {
             for (File c : cp) {
+                //System.out.println("DIRECTORY");
                 if (c.isDirectory()) {
                     String root = sanitize(c.getAbsolutePath());
                     if (clazz == null) {
@@ -117,21 +120,39 @@ public class FsAgent implements JrdAgent {
                         }
                     }
                 } else {
-                    ZipFile zipFile = new ZipFile(c);
-                    Enumeration<? extends ZipEntry> entries = zipFile.entries();
-                    while (entries.hasMoreElements()) {
-                        ZipEntry ze = entries.nextElement();
-                        if (!ze.isDirectory()) {
-                            //todo add uspport for ested jars
-                            String clazzInJar = toClass((ze.getName()));
-                            if (clazz == null) {
-                                //no return reading all
-                                op.onJarEntry(c, zipFile, ze, clazz);
-                            } else {
-                                if (clazzInJar.equals(clazz)) {
-                                    return op.onJarEntry(c, zipFile, ze, clazz);
+
+                    // Check if it needs to only read, or write too
+                    if (clazz == null) {
+                        System.out.println("Clazz is null");
+                    }
+                    if (op instanceof WriteingCpOperator) {
+                        System.out.println("Called with WriteingCpOperator");
+                        // TODO Add support for nested jars editing
+                        ZipFile zipFile = new ZipFile(c);
+                        Enumeration<? extends ZipEntry> entries = zipFile.entries();
+                        while (entries.hasMoreElements()) {
+                            ZipEntry ze = entries.nextElement();
+                            if (!ze.isDirectory()) {
+                                //todo add uspport for ested jars
+                                String clazzInJar = toClass((ze.getName()));
+                                if (clazz == null) {
+                                    //no return reading all
+                                    op.onJarEntry(c, zipFile, ze, clazz);
+                                } else {
+                                    if (clazzInJar.equals(clazz)) {
+                                        return op.onJarEntry(c, zipFile, ze, clazz);
+                                    }
                                 }
                             }
+                        }
+                    } else if (op instanceof ReadingCpOperator) {
+                        System.out.println("Called with ReadingCpOperator");
+                        // return onEntry(new ZipInputStream(new FileInputStream(c)), clazz, op);
+                    } else if (op instanceof ListingCpOperator){
+                        System.out.println("Called with ListingCpOperator");
+                        T ret = onEntryList(new ZipInputStream(new FileInputStream(c)), clazz, op);
+                        if (ret != null) {
+                            return ret;
                         }
                     }
                 }
@@ -140,6 +161,26 @@ public class FsAgent implements JrdAgent {
                 return op.finalizirung();
             }
             throw new IOException(clazz + " not found on CP");
+        }
+
+        // Only Listing - no need to unpack
+        private T onEntryList(ZipInputStream zipInputStream, String clazz, CpOperator<T> op) throws IOException {
+            ZipEntry entry = null;
+            while ((entry = zipInputStream.getNextEntry()) != null) {
+                if (entry.getName().endsWith(".jar")) {
+                    onEntryList(new ZipInputStream(zipInputStream), clazz, op);
+                } else {
+                    if (clazz == null) {
+                        op.onJarEntry(null, null, entry, null);
+                    } else {
+                        String clazzInJar = toClass(entry.getName());
+                        if (clazzInJar.equals(clazz)) {
+                            return op.onJarEntry(null, null, entry, clazz);
+                        }
+                    }
+                }
+            }
+            return null;
         }
     }
 
