@@ -164,7 +164,7 @@ public class FsAgent implements JrdAgent {
         private T onEntryList(ZipInputStream zipInputStream, String clazz, CpOperator<T> op) throws IOException {
             ZipEntry entry = null;
             while ((entry = zipInputStream.getNextEntry()) != null) {
-                if (entry.getName().endsWith(".jar")) {
+                if (entry.getName().endsWith(".jar") || entry.getName().endsWith(".zip")) {
                     onEntryList(new ZipInputStream(zipInputStream), clazz, op);
                 } else {
                     if (clazz == null) {
