@@ -24,7 +24,7 @@ public class ArchiveManager {
             currentJars = new ArrayList<>();
         }
         currentJars.add(c.getName());
-        var ret = findClazz(zis, clazz);
+        boolean ret = findClazz(zis, clazz);
         if (!ret) {
             currentJars.remove(c.getName());
         }
