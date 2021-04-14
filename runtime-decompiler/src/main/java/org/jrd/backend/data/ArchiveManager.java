@@ -28,16 +28,17 @@ public class ArchiveManager {
      * @throws IOException Error while reading streams
      */
     public boolean isClassInFile(String clazz) throws IOException {
-        ZipInputStream zis = new ZipInputStream(new FileInputStream(c));
         if (!currentPathInJars.isEmpty()) {
             currentPathInJars = new ArrayList<>();
         }
         currentPathInJars.add(c.getName());
-        boolean ret = findClazz(zis, clazz);
-        if (!ret) {
-            currentPathInJars.remove(c.getName());
+        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(c))) {
+            boolean ret = findClazz(zis, clazz);
+            if (!ret) {
+                currentPathInJars.remove(c.getName());
+            }
+            return ret;
         }
-        return ret;
     }
 
     /**
