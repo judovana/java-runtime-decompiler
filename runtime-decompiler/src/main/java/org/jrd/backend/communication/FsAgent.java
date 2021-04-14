@@ -192,7 +192,7 @@ public class FsAgent implements JrdAgent {
         }
     }
 
-    private static String toClass(String s) {
+    public static String toClass(String s) {
         return s.replace("/", ".").replaceAll("\\\\", ".").replaceAll(".class$", "");
     }
 
