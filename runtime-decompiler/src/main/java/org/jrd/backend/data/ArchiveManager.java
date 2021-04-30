@@ -14,6 +14,7 @@ public class ArchiveManager {
     final File c;
     final String tmpdir = System.getProperty("java.io.tmpdir");
     ArrayList<String> currentPathInJars = new ArrayList<>();
+    ArchivePathManager pathManager = ArchivePathManager.getInstance();
     int currentD = 0;
 
     public ArchiveManager(File c) {
@@ -28,16 +29,15 @@ public class ArchiveManager {
      * @throws IOException Error while reading streams
      */
     public boolean isClassInFile(String clazz) throws IOException {
-        if (!currentPathInJars.isEmpty()) {
-            currentPathInJars = new ArrayList<>();
-        }
-        currentPathInJars.add(c.getName());
-        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(c))) {
-            boolean ret = findClazz(zis, clazz);
-            if (!ret) {
-                currentPathInJars.remove(c.getName());
-            }
-            return ret;
+        ZipInputStream zis = new ZipInputStream(new FileInputStream(c));
+        if (pathManager.wasFound() && pathManager.getCurrentClazz().equals(clazz)) {
+            return true;
+        } else {
+            delete();
+            pathManager.clear();
+            pathManager.setClazz(clazz);
+            pathManager.addPathPart(c.getName());
+            return findClazz(zis, clazz);
         }
     }
 
@@ -53,15 +53,16 @@ public class ArchiveManager {
         ZipEntry entry = null;
         while ((entry = zis.getNextEntry()) != null) {
             if (!entry.isDirectory()) {
-                if (shouldOpen(new ZipInputStream(zis))) {
-                    currentPathInJars.add(entry.getName());
+                if (shouldOpen(entry.getName())) {
+                    pathManager.addPathPart(entry.getName());
                     if(findClazz(new ZipInputStream(zis), clazz)) {
                         return true;
                     }
-                    currentPathInJars.remove(entry.getName());
+                    pathManager.removePathPart(entry.getName());
                 } else {
                     String clazzInJar = FsAgent.toClass(entry.getName());
                     if (clazzInJar.equals(clazz)) {
+                        pathManager.setFound();
                         return true;
                     }
                 }
@@ -70,8 +71,17 @@ public class ArchiveManager {
         return false;
     }
 
-    public static boolean shouldOpen(ZipInputStream zis) throws IOException {
-        return zis.getNextEntry() != null;
+    /**
+     * Determines whether this file can be opened with ZipInputStream
+     * @param n Name of the file
+     * @return Whether file can opened with ZipInputStream
+     */
+    public static boolean shouldOpen(String n) throws IOException {
+        /* This way has been selected as there's no other "easier" way of determining if it is an archive.
+         * If you wish to add a format, feel free to PR */
+        // return name.endsWith(".zip") || name.endsWith(".zipx") || name.endsWith(".zz") || name.endsWith(".jar") || name.endsWith(".a") || name.endsWith(".ar") || name.endsWith(".cpio") || name.endsWith(".shar") || name.endsWith(".lbr") || name.endsWith(".iso") || name.endsWith(".mar") || name.endsWith(".sbx") || name.endsWith(".tar");
+        String name = n.toLowerCase();
+        return name.endsWith(".zip") || name.endsWith(".jar");
     }
 
     /**
@@ -80,7 +90,7 @@ public class ArchiveManager {
      * @return If extraction is necessary
      */
     public boolean needExtract() {
-        return !(currentPathInJars.size() == 1);
+        return !(pathManager.getPathSize() == 1 || pathManager.isExtracted());
     }
 
     /**
@@ -93,7 +103,11 @@ public class ArchiveManager {
         // Create my dir in tmpdir
         File f = new File(tmpdir + "/jrd/");
         if (f.mkdir()) {
-            return recursiveUnpack(c);
+            File ret = recursiveUnpack(c);
+            if (ret != null) {
+                pathManager.setExtracted();
+            }
+            return ret;
         } else {
             throw new IOException("Couldn't create temp file");
         }
@@ -136,12 +150,12 @@ public class ArchiveManager {
             throw new IOException();
         }
         currentD++;
-        if (currentD == currentPathInJars.size() - 1) {
-            return new File(destDir.getAbsolutePath() + "/" + currentPathInJars.get(currentD));
-        } else if (currentD == currentPathInJars.size()) {
+        if (currentD == pathManager.getPathSize() - 1) {
+            return new File(destDir.getAbsolutePath() + "/" + pathManager.get(currentD));
+        } else if (currentD == pathManager.getPathSize()) {
             throw new IOException("Somehow got past");
         }
-        return recursiveUnpack(new File(destDir.getAbsolutePath() + "/" + currentPathInJars.get(currentD)));
+        return recursiveUnpack(new File(destDir.getAbsolutePath() + "/" + pathManager.get(currentD)));
     }
 
     /**
@@ -170,6 +184,7 @@ public class ArchiveManager {
      * @return whether folder was successfully deleted
      */
     public boolean delete() {
+        pathManager.clear();
         return deleteRecursive(new File(tmpdir + "/jrd/"));
     }
 
