@@ -140,7 +140,6 @@ public class FsAgent implements JrdAgent {
                                     throw new IOException(clazz + " to be implemented");
                                 } else {
                                     T ret = onEntryOther(f, clazz, op);
-                                    am.delete();
                                     if (ret != null) {
                                         return ret;
                                     }
