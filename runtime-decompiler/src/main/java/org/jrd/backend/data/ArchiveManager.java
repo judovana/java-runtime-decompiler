@@ -6,9 +6,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
+
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class ArchiveManager {
     final File c;
@@ -90,7 +95,7 @@ public class ArchiveManager {
      * @return If extraction is necessary
      */
     public boolean needExtract() {
-        return !(pathManager.getPathSize() == 1 || pathManager.isExtracted());
+        return !(pathManager.getPathSize() == 1);
     }
 
     /**
@@ -100,6 +105,10 @@ public class ArchiveManager {
      * @throws IOException Error while reading streams
      */
     public File unpack() throws IOException {
+        if (pathManager.isExtracted()) {
+            // If file is already extracted, return the extracted one
+           return new File(tmpdir + "/jrd/" + (pathManager.getPathSize() - 2) + "/" + (pathManager.get(pathManager.getPathSize() - 1)));
+        }
         // Create my dir in tmpdir
         File f = new File(tmpdir + "/jrd/");
         if (f.mkdir()) {
@@ -176,6 +185,70 @@ public class ArchiveManager {
         }
 
         return destFile;
+    }
+
+    /**
+     * Packs unpacked files
+     */
+    public void pack() throws IOException {
+        // Go from end to start
+        int i = pathManager.getPathSize();
+        i -= 2;
+        for (; i >= 0; i--) {
+            // Create new zip that will contain edited files
+            String[] tmp = pathManager.get(i).split("/");
+            String path = tmpdir + "/jrd/" + tmp[tmp.length - 1] + "/";
+            FileOutputStream fileStream = new FileOutputStream(path);
+            ZipOutputStream zOut = new ZipOutputStream(fileStream);
+            File f2zip = new File(tmpdir + "/jrd/" + (i));
+            for (File f : f2zip.listFiles()) {
+                recursiveZip(f, f.getName(), zOut);
+            }
+            zOut.finish();
+            zOut.close();
+            fileStream.close();
+            // Move it into the temp file if it's not last, so it can be packaged
+            if (i > 0) {
+                Files.copy(Path.of(path), Path.of(tmpdir + "/jrd/" + (i - 1) + "/" + pathManager.get(i)), REPLACE_EXISTING);
+            } else {
+                // It's the last, replace the original
+                Files.copy(Path.of(path), c.toPath(), REPLACE_EXISTING);
+            }
+            // Delete once it was moved
+            new File(path).delete();
+        }
+    }
+
+    /**
+     * Recursively adds file or files inside folder to archive
+     * @param f2zip File/Folder to be archived
+     * @param fName Name of the file
+     * @param zOut Zip output stream used to output zipped bytes
+     * @throws IOException
+     */
+    public void recursiveZip(File f2zip, String fName, ZipOutputStream zOut) throws IOException {
+        if (f2zip.isDirectory()) {
+            if (!fName.endsWith("/")) {
+                fName += "/";
+            }
+            zOut.putNextEntry(new ZipEntry(fName));
+            zOut.closeEntry();
+            File[] sub = f2zip.listFiles();
+            for (File child : sub) {
+                recursiveZip(child, fName + child.getName(), zOut);
+            }
+            return;
+        }
+        FileInputStream fis = new FileInputStream(f2zip);
+        ZipEntry zEntry = new ZipEntry(fName);
+        zOut.putNextEntry(zEntry);
+        byte[] bytes = new byte[1024];
+        int length;
+        while ((length = fis.read(bytes)) >= 0) {
+            zOut.write(bytes, 0, length);
+        }
+        zOut.closeEntry();
+        fis.close();
     }
 
     /**

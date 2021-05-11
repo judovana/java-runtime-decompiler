@@ -135,14 +135,12 @@ public class FsAgent implements JrdAgent {
                         if (am.isClassInFile(clazz)) {
                             if (am.needExtract()) {
                                 File f = am.unpack();
+                                T ret = onEntryOther(f, clazz, op);
                                 if (cp instanceof WriteingCpOperator) {
-                                    // TODO Implement packaging and cache
-                                    throw new IOException(clazz + " to be implemented");
-                                } else {
-                                    T ret = onEntryOther(f, clazz, op);
-                                    if (ret != null) {
-                                        return ret;
-                                    }
+                                    am.pack();
+                                }
+                                if (ret != null) {
+                                    return ret;
                                 }
                             } else {
                                 T ret = onEntryOther(c, clazz, op);
