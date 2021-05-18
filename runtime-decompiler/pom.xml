@@ -195,7 +195,7 @@
                 <dependency>
                     <groupId>org.openjdk</groupId>
                     <artifactId>asmtools</artifactId>
-                    <version>7.0.b10-SNAPSHOT</version>
+                    <version>7.0.b10-ea</version>
                     <scope>provided</scope>
                 </dependency>
             </dependencies>
