@@ -18,6 +18,7 @@ import org.jrd.frontend.frame.filesystem.NewFsVmView;
 import org.jrd.frontend.frame.plugins.PluginConfigurationEditorController;
 import org.jrd.frontend.frame.plugins.PluginConfigurationEditorView;
 
+import java.util.*;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.io.ByteArrayOutputStream;
@@ -75,7 +76,8 @@ public class VmDecompilerInformationController {
     // Method for opening plugin configuration window
     private void createConfigurationEditor() {
         pluginConfigurationEditorView = new PluginConfigurationEditorView(mainFrameView);
-        pluginConfigurationEditorController = new PluginConfigurationEditorController(pluginConfigurationEditorView, pluginManager);
+        pluginConfigurationEditorController = new PluginConfigurationEditorController(pluginConfigurationEditorView,
+                pluginManager);
         pluginConfigurationEditorController.setPluginsConfiguredListener(actionEvent -> {
             bytecodeDecompilerView.refreshComboBox(pluginManager.getWrappers());
         });
@@ -172,6 +174,7 @@ public class VmDecompilerInformationController {
             new Thread(() -> {
                 this.vmInfo = selectedVmInfo;
                 loadClassNames();
+                loadClassInfos();
             }).start();
         }
     }
@@ -239,10 +242,11 @@ public class VmDecompilerInformationController {
     public static final String CLASSES_NOPE = "Classes couldn't be loaded. Do you have agent configured? On JDK 9 and higher, did you run the target process with '-Djdk.attach.allowAttachSelf=true'?";
 
     /**
-     * Sends request for classes. If "ok" response is received updates classes
-     * list. If "error" response is received shows an error dialog.
+     * Sends request for classes. If "ok" response is received updates classes list.
+     * If "error" response is received shows an error dialog.
      */
     private void loadClassNames() {
+        OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Loading Class Names");
         showLoadingDialog();
         AgentRequestAction request = createRequest(RequestAction.CLASSES, "");
         String response = submitRequest(request);
@@ -256,6 +260,24 @@ public class VmDecompilerInformationController {
             JOptionPane.showMessageDialog(mainFrameView.getMainFrame(),
                     CLASSES_NOPE,
                     "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+
+	private void loadClassInfos() {
+        OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Loading Class Infos");
+        showLoadingDialog();
+        AgentRequestAction request = createRequest(RequestAction.CLASSINFOS, "");
+        String response = submitRequest(request);
+        if (response.equals("ok")) {
+            VmDecompilerStatus vmStatus = vmInfo.getVmDecompilerStatus();
+            List<String[]> classInfos = vmStatus.getLoadedClassInfos();
+            bytecodeDecompilerView.writeClassInfos(classInfos);
+        }
+        hideLoadingDialog();
+        if (response.equals("error")) {
+            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), CLASSES_NOPE, "Error",
                     JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -345,10 +367,12 @@ public class VmDecompilerInformationController {
             AgentRequestAction request = createRequest(RequestAction.HALT, "");
             String response = submitRequest(request);
             if (response.equals("ok")) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Agent closing socket and exiting");
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG,
+                        "Agent closing socket and exiting");
             }
         } catch (Exception e) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Error when sending request to halt agent", e));
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL,
+                    new RuntimeException("Error when sending request to halt agent", e));
         }
     }
 
@@ -371,6 +395,7 @@ public class VmDecompilerInformationController {
         }
 
         switch (action) {
+        	case CLASSINFOS:
             case CLASSES:
             case HALT:
                 request = AgentRequestAction.create(vmInfo, hostname, listenPort, action);
@@ -398,11 +423,12 @@ public class VmDecompilerInformationController {
     }
 
     public static String submitRequest(VmManager vmManager, AgentRequestAction request) {
-        //DecompilerAgentRequestResponseListener listener = new DecompilerAgentRequestResponseListener(latch);
+        // DecompilerAgentRequestResponseListener listener = new
+        // DecompilerAgentRequestResponseListener(latch);
         DecompilerRequestReceiver receiver = new DecompilerRequestReceiver(vmManager);
         // wait for the request processing
 
-        return receiver.processRequest(request); //listener
+        return receiver.processRequest(request); // listener
     }
 
 }
