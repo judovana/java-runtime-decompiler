@@ -198,6 +198,12 @@
                     <version>7.0.b10-ea</version>
                     <scope>provided</scope>
                 </dependency>
+
+                <dependency>
+                    <groupId>org.benf</groupId>
+                    <artifactId>cfr</artifactId>
+                    <version>0.151</version>
+                </dependency>
             </dependencies>
         </profile>
         <profile>
