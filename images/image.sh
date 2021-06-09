@@ -78,6 +78,8 @@ if [ "x$PLUGINS" == "xTRUE" ] ; then
     else
       lname=$dec
     fi
+    # this is very naive, and may cause multiple versions in images
+    # TODO, read depndencies from pom even with versions, and maybe check them against the jsons
     jars=`find $MVN_SOURCE | grep -e $lname | grep \.jar$`
     for jar in $jars ; do
       cp "$jar" "$DECOMPS/$dec"

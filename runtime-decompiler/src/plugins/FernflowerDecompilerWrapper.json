@@ -2,7 +2,7 @@
   "Name": "Fernflower",
   "WrapperURL": "file://${XDG_CONFIG_HOME}/plugins/FernflowerDecompilerWrapper.java",
   "DependencyURL": [
-    "file://${HOME}/.m2/repository/org/jboss/windup/decompiler/decompiler-fernflower/4.2.1.Final/decompiler-fernflower-4.2.1.Final.jar",
+    "file://${HOME}/.m2/repository/org/jboss/windup/decompiler/decompiler-fernflower/5.1.4.Final/decompiler-fernflower-5.1.4.Final.jar",
     "file://${HOME}/.m2/repository/org/jboss/windup/decompiler/fernflower/windup-fernflower/1.0.0.20171018/windup-fernflower-1.0.0.20171018.jar"
   ],
   "DecompilerDownloadURL": "https://github.com/JetBrains/intellij-community/tree/master/plugins/java-decompiler/engine"
