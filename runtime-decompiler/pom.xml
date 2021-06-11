@@ -22,15 +22,6 @@
         <jrd.jdk.arg4>jdk.jdeps/com.sun.tools.javap=ALL-UNNAMED</jrd.jdk.arg4>
     </properties>
 
-  <repositories>
-    <repository>
-      <!-- should be removed or commented out once asmtools are in main repos-->
-      <id>asmtools-staging</id>
-      <name>openjdk asmtools staging repository</name>
-      <url>https://oss.sonatype.org/content/repositories/orgopenjdkasmtools-1002</url>
-    </repository>
-  </repositories>
-
     <build>
         <plugins>
             <plugin>
