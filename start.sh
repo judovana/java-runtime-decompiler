@@ -42,7 +42,7 @@ TOOLS="$javac_home"/lib/tools.jar  #jsut jdk8 and down
 readonly RSYNTAXTEXTAREA=$(findLib "com/fifesoft/rsyntaxtextarea" "rsyntaxtextarea-.*\.jar" )
 readonly GSON=$(findLib "com/google/code/gson/gson" "gson-.*\.jar")
 readonly BYTEMAN=$(findLib "org/jboss/byteman/byteman-install" "byteman-install-.*\.jar")
-readonly CPC=$(findLib "org/terminusbrut/classpathless-compiler" "classpathless-compiler-.*\.jar")
+readonly CPC=$(findLib "io/github/mkoncek/classpathless-compiler" "classpathless-compiler-.*\.jar")
 readonly JUST_BUILD_JRD=`find "$PORTABLE_JRD_HOME"/runtime-decompiler/target/runtime-decompiler-*-SNAPSHOT.jar 2> /dev/null`
 if [ -f "$JUST_BUILD_JRD" ] ; then
   readonly JRD="$JUST_BUILD_JRD"

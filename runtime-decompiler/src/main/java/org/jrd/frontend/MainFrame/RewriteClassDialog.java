@@ -1,11 +1,11 @@
 package org.jrd.frontend.MainFrame;
 
-import org.terminusbrut.classpathless.api.ClassIdentifier;
-import org.terminusbrut.classpathless.api.ClassesProvider;
-import org.terminusbrut.classpathless.api.IdentifiedBytecode;
-import org.terminusbrut.classpathless.api.IdentifiedSource;
-import org.terminusbrut.classpathless.api.InMemoryCompiler;
-import org.terminusbrut.classpathless.api.MessagesListener;
+import io.github.mkoncek.classpathless.api.ClassIdentifier;
+import io.github.mkoncek.classpathless.api.ClassesProvider;
+import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
+import io.github.mkoncek.classpathless.api.IdentifiedSource;
+import io.github.mkoncek.classpathless.api.InMemoryCompiler;
+import io.github.mkoncek.classpathless.api.MessagesListener;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.core.DecompilerRequestReceiver;
 import org.jrd.backend.core.OutputController;
@@ -380,7 +380,7 @@ public class RewriteClassDialog extends JDialog {
             rc = new RuntimeCompilerConnector.ForeignCompilerWrapper(pm, currentDecompiler);
         } else {
             try {
-                rc = new org.terminusbrut.classpathless.impl.Compiler();
+                rc = new io.github.mkoncek.classpathless.impl.Compiler();
             }catch (IOException ex) {
                 throw  new RuntimeException(ex);
             }
@@ -484,6 +484,9 @@ public class RewriteClassDialog extends JDialog {
                     public void addMessage(Level level, String s) {
                         OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, s);
                         compilationLog.setText(compilationLog.getText() + s + "\n");
+                    }
+                    public void addMessage(Level var1, String var2, Object... var3) {
+                        addMessage(var1, String.format(var2, var3));
                     }
                 }), sources);
             } catch (Exception ex) {

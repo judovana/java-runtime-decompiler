@@ -1,11 +1,11 @@
 package org.jrd.backend.data;
 
-import org.terminusbrut.classpathless.api.ClassIdentifier;
-import org.terminusbrut.classpathless.api.ClassesProvider;
-import org.terminusbrut.classpathless.api.IdentifiedBytecode;
-import org.terminusbrut.classpathless.api.IdentifiedSource;
-import org.terminusbrut.classpathless.api.InMemoryCompiler;
-import org.terminusbrut.classpathless.api.MessagesListener;
+import io.github.mkoncek.classpathless.api.ClassIdentifier;
+import io.github.mkoncek.classpathless.api.ClassesProvider;
+import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
+import io.github.mkoncek.classpathless.api.IdentifiedSource;
+import io.github.mkoncek.classpathless.api.InMemoryCompiler;
+import io.github.mkoncek.classpathless.api.MessagesListener;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.OutputController;
@@ -321,13 +321,16 @@ public class Cli {
         if (haveCompiler) {
             rc = new RuntimeCompilerConnector.ForeignCompilerWrapper(pluginManager, decompiler);
         } else {
-            rc = new org.terminusbrut.classpathless.impl.Compiler();
+            rc = new io.github.mkoncek.classpathless.impl.Compiler();
         }
         IdentifiedSource[] isis = Utils.sourcesToIdentifiedSources(recursive, toCompile);
         Collection<IdentifiedBytecode> result = rc.compileClass(cp, Optional.of(new MessagesListener() {
             @Override
             public void addMessage(Level level, String message) {
                 System.err.println(message);
+            }
+            public void addMessage(Level var1, String var2, Object... var3) {
+                addMessage(var1, String.format(var2, var3));
             }
         }), isis);
         boolean upload = false;
