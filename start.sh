@@ -33,8 +33,8 @@ function findLib(){
     local GROUP=""
     local FILENAME="$2"
   fi
-  local name=`find "$BASE/$GROUP"  | sed "s;.*/;;" | grep "$FILENAME$"   | sort -V | tail -n 1`
-  local result=$(find "$BASE/$GROUP"  | grep -v -e source -e javadoc | grep -e "/$name$"   | sort -V | tail -n 1)
+  local name=$(find "$BASE/$GROUP"  | grep -v -e sources.jar -e javadoc.jar | sed "s;.*/;;" | grep "$FILENAME$"   | sort -V | tail -n 1)
+  local result=$(find "$BASE/$GROUP"  | grep -v -e sources.jar -e javadoc.jar | grep -e "/$name$"   | sort -V | tail -n 1)
   # only for build time! Useless in runtime; from image.sh
   if  [ "x$VERIFY_CP" = "xTRUE" ] ;  then
     verifyonCp "$result"
