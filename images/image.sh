@@ -30,6 +30,7 @@ if  [ "x$VERIFY_CP" = "xTRUE"  -a "x$PLUGINS" = "xTRUE" ] ;  then
   fi
 fi
 
+FROM_CP=`mktemp`
 if  [ "x$VERIFY_CP" = "xTRUE" ] ;  then
   a=`mktemp`
   pushd ../runtime-decompiler
@@ -48,6 +49,7 @@ function verifyonCp() {
   for x in $CP_TO_VERIFY ;  do
     if [ `basename "$file"` == `basename "$x"` ] ; then
       echo "verified as $x" 1>&2
+      echo -n ":$x" >> $FROM_CP
       IFS="$IFS_BACKUP"
       return 0
     fi
@@ -58,6 +60,7 @@ function verifyonCp() {
   exit 1
 }
 
+set -x
 THE_TERRIBLE_INTERNAL_JRD=true
 source  $SCRIPT_DIR/start.sh
 
@@ -156,3 +159,10 @@ if which zip  ; then
   zip  $TARGET_DIR/$NAME$SUFFIX.zip `find $NAME$SUFFIX`
 fi
 popd
+
+maven_cp=`mktemp`
+echo              "$CP_TO_VERIFY" | sed "s/:/\\n/g" | sort | uniq | grep -v -e com/google/code/findbugs -e spotbugs -e guava -e apiguardian -e junit -e opentest4j > $maven_cp
+used_cp=`mktemp`
+cat "$FROM_CP" |sed "s/^://g" | sed "s/:/\\n/g" | sort | uniq > $used_cp
+echo "There are following (with few filtered out) additional deps on mvn cp:"
+diff $used_cp $maven_cp | grep -e  ">"  -e "<"  || echo "no fail now - but worthy to investigate"  

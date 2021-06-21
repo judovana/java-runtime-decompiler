@@ -37,7 +37,7 @@ function findLib(){
   local result=$(find "$BASE/$GROUP"  | grep -v -e source -e javadoc | grep -e "/$name$"   | sort -V | tail -n 1)
   # only for build time! Useless in runtime; from image.sh
   if  [ "x$VERIFY_CP" = "xTRUE" ] ;  then
-    verifyonCp $result
+    verifyonCp "$result"
   fi
   echo $result
 }
