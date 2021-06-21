@@ -12,8 +12,54 @@ done
 readonly THIS_SCRIPT_DIR="$( cd -P "$( dirname "$SCRIPT_SOURCE" )" && pwd )"
 readonly SCRIPT_DIR=`readlink -f "$THIS_SCRIPT_DIR/../"`
 
+if [ "x$VERIFY_CP" = "x" ] ; then
+  VERIFY_CP=TRUE
+fi
+
+if [ "x$PLUGINS" = "x" ] ; then
+  PLUGINS=TRUE
+fi
+
+if  [ "x$VERIFY_CP" = "xTRUE"  -a "x$PLUGINS" = "xTRUE" ] ;  then
+  find "$HOME/.m2/repository" -type d | grep -e bitbucket/mstrobel/procyon -e org/jboss/windup/decompiler/fernflower -e  openjdk/asmtools -e benf/cfr
+  if [ $? -eq 0 ] ; then
+    echo "decompilers found in maven repo"
+  else
+    echo "no decompilers found! run 'mvn clean install -PdownloadPlugins' to obtain decompielrs form maven repos or use VERIFY_CP/PLUGINS to beeter setup"
+    exit 1
+  fi
+fi
+
+if  [ "x$VERIFY_CP" = "xTRUE" ] ;  then
+  a=`mktemp`
+  pushd ../runtime-decompiler
+    mvn dependency:build-classpath  -PdownloadPlugins  -Dmdep.outputFile=$a
+    readonly CP_TO_VERIFY=$(cat $a)
+  popd
+else
+  readonly CP_TO_VERIFY=""
+fi
+
+function verifyonCp() {
+  local file="$1"
+  echo "checking: $file agaisnt classpath" 1>&2
+  IFS_BACKUP="$IFS"
+  IFS=":"
+  for x in $CP_TO_VERIFY ;  do
+    if [ `basename "$file"` == `basename "$x"` ] ; then
+      echo "verified as $x" 1>&2
+      IFS="$IFS_BACKUP"
+      return 0
+    fi
+  done
+  echo "not found on maven cp: $file ($CP_TO_VERIFY)" 1>&2
+  echo "bad version? clean .m2?"  1>&2
+  IFS="$IFS_BACKUP"
+  exit 1
+}
+
 THE_TERRIBLE_INTERNAL_JRD=true
-. $SCRIPT_DIR/start.sh
+source  $SCRIPT_DIR/start.sh
 
 set -ex
 set -o pipefail
@@ -50,7 +96,7 @@ echo "{\"AGENT_PATH\":\"\${JRD}/libs/decompiler-agent-$VERSION.jar\"}" > "$AGENT
 
 # inject different macro into default decompiler wrappers
 function modifyAndCopyWrappers() {
-  name=$(echo $1 | sed "s#\b.#\u\0#g") # make first letter capital for the .json filename
+  local name=$(echo $1 | sed "s#\b.#\u\0#g") # make first letter capital for the .json filename
 
   mkdir -p temp/plugins
   unzip -p "$DEPS_DIR/$NAME.jar" "plugins/${name}DecompilerWrapper.json" > "temp/plugins/${name}DecompilerWrapper.json"
@@ -65,6 +111,12 @@ function modifyAndCopyWrappers() {
 
   cp "temp/plugins/${name}DecompilerWrapper.json" "$PLUGINS_CONF"
   cp "temp/plugins/${name}DecompilerWrapper.java" "$PLUGINS_CONF"
+
+  if  [ "x$VERIFY_CP" = "xTRUE" ] ;  then
+    for jar in `cat  "temp/plugins/${name}DecompilerWrapper.json" | jq -r ".DependencyURL[]"` ; do
+      verifyonCp "$jar"
+    done
+  fi
 
   rm -rf temp
 }

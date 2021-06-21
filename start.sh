@@ -25,16 +25,21 @@ MVN_SOURCE="$HOME/.m2/repository"
 
 function findLib(){
   if [ "x$PURPOSE" = "xDEVELOPMENT" ] ; then
-    BASE="$MVN_SOURCE"
-    GROUP="$1"
-    FILENAME="$2"
+    local BASE="$MVN_SOURCE"
+    local GROUP="$1"
+    local FILENAME="$2"
   else
-    BASE="$PORTABLE_JRD_HOME/libs/deps"
-    GROUP=""
-    FILENAME="$2"
+    local BASE="$PORTABLE_JRD_HOME/libs/deps"
+    local GROUP=""
+    local FILENAME="$2"
   fi
-  name=`find "$BASE/$GROUP"  | sed "s;.*/;;" | grep "$FILENAME$"   | sort -V | tail -n 1`
-  find "$BASE/$GROUP"  |  grep "/$name$"   | sort -V | tail -n 1
+  local name=`find "$BASE/$GROUP"  | sed "s;.*/;;" | grep "$FILENAME$"   | sort -V | tail -n 1`
+  local result=$(find "$BASE/$GROUP"  | grep -v -e source -e javadoc | grep -e "/$name$"   | sort -V | tail -n 1)
+  # only for build time! Useless in runtime; from image.sh
+  if  [ "x$VERIFY_CP" = "xTRUE" ] ;  then
+    verifyonCp $result
+  fi
+  echo $result
 }
 
 TOOLS="$javac_home"/lib/tools.jar  #jsut jdk8 and down
