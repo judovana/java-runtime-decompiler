@@ -9,8 +9,8 @@ This application allows you to extract bytecode from the running JVM and decompi
 $ git clone https://github.com/pmikova/java-runtime-decompiler.git
 $ cd java-runtime-decompiler
 $ mvn clean install  # will build the runtime decpompiler
-$ mvn clean install -PdownloadPlugins # will build decmpiler and download the decompiler plugins for fututre usage to maven repos
-$ mvn clean install -Pimages # on linux, will bundle the plugins and JRD to standalone, portable image
+$ mvn clean install -PdownloadPlugins # will build the decmpiler and download the decompiler plugins for future usage to maven repos
+$ mvn clean install -Pimages # on linux, will bundle the plugins and JRD to standalone portable image
 
 $PLUGINS and $VERIFY_CP variables may help to solve some weird image building issues
 ```
