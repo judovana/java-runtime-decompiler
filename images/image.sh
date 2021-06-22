@@ -25,7 +25,7 @@ if  [ "x$VERIFY_CP" = "xTRUE"  -a "x$PLUGINS" = "xTRUE" ] ;  then
   if [ $? -eq 0 ] ; then
     echo "decompilers found in maven repo"
   else
-    echo "no decompilers found! run 'mvn clean install -PdownloadPlugins' to obtain decompielrs form maven repos or use VERIFY_CP/PLUGINS to beeter setup"
+    echo "no decompilers found! run 'mvn clean install -PdownloadPlugins' to obtain decompilers from maven repos or use VERIFY_CP/PLUGINS"
     exit 1
   fi
 fi
@@ -43,7 +43,7 @@ fi
 
 function verifyonCp() {
   local file="$1"
-  echo "checking: $file agaisnt classpath" 1>&2
+  echo "checking: $file against the classpath" 1>&2
   IFS_BACKUP="$IFS"
   IFS=":"
   for x in $CP_TO_VERIFY ;  do
@@ -124,7 +124,7 @@ function modifyAndCopyWrappers() {
   rm -rf temp
 }
 
-# if PLUGINS=TRUE && mvn install -PdownloadPlugins was run, and you really wont them to include plugins in images
+# if PLUGINS=TRUE && mvn install -PdownloadPlugins was run, and you really want them to include plugins in images
 if [ "x$PLUGINS" == "xTRUE" ] ; then
   for dec in procyon fernflower jasm jcoder cfr; do
     mkdir "$DECOMPS/$dec"
@@ -134,7 +134,7 @@ if [ "x$PLUGINS" == "xTRUE" ] ; then
       lname=$dec
     fi
     # this is very naive, and may cause multiple versions in images
-    # TODO, read depndencies from pom even with versions, and maybe check them against the jsons
+    # TODO, read dependencies from pom even with versions, and maybe check them against the jsons
     jars=`find $MVN_SOURCE | grep -e $lname | grep \.jar$`
     for jar in $jars ; do
       cp "$jar" "$DECOMPS/$dec"
@@ -165,4 +165,4 @@ echo              "$CP_TO_VERIFY" | sed "s/:/\\n/g" | sort | uniq | grep -v -e c
 used_cp=`mktemp`
 cat "$FROM_CP" |sed "s/^://g" | sed "s/:/\\n/g" | sort | uniq > $used_cp
 echo "There are following (with few filtered out) additional deps on mvn cp:"
-diff $used_cp $maven_cp | grep -e  ">"  -e "<"  || echo "no fail now - but worthy to investigate"  
+diff $used_cp $maven_cp | grep -e  ">"  -e "<"  || echo "no fail now - but worthy to investigate"
