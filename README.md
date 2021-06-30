@@ -59,6 +59,8 @@ To return to the Welcome screen, simply unselect the item by holding Control whi
 ### Remote Processes
 The list on the bottom left shows any remote processes.
 Connections to remote processes can be established either by using the *+ button* to the right of the heading, or by going to *Connect → New Connection*.
+### Local FS (file-system)
+Here you can turn runtime decompiler to casual, user friendly jar/folder/file decompiler. You create FS vm by setting up classpath as you are used for JVM.
 ### Loaded Classes
 The middle list contains the classes present in the selected process.
 This list can be reloaded with the *Refresh button* at the top and searched through with the *Search field*.
@@ -68,11 +70,8 @@ Different results may be achieved with different decompilers; you can select the
 ### Overwriting classes
 Using the *Overwrite button* at the top, you can replace the currently selected class' bytecode with your own compiled .class file via a dialog.
 
-## Generating portable images
-`mvn install -Pimages` creates a portable binary, tar.gz and zip archives in the `images/target` directory.
-
-`mvn clean -Pimages` deletes the images/target directory.
-
-`PLUGINS=TRUE mvn install -Pimages` includes the decompiler plugins in `images/target` if you've previously called `mvn clean install -PdownloadPlugins`. 
 ___
 ![](https://user-images.githubusercontent.com/47597303/63510098-01977e00-c4de-11e9-8a72-24cec35bbc79.png)
+
+### CLI
+Commandline interface is powerfull and allows you  to bulk process VMs, jars and similarly...
