@@ -71,8 +71,7 @@ if "%PORTABLE_JRD_HOME:~-1%"=="\" set "PORTABLE_JRD_HOME=%PORTABLE_JRD_HOME:~0,-
 rem Get and verify Java tools.jar
 set TOOLS="%JDK_LOCATION%\lib\tools.jar"
 if not exist %TOOLS% (
-  echo %TOOLS% file not found. Perhaps you are using a wrong JDK or a JRE. Please fix this before trying to launch the app again.
-  goto:eof
+  if "%VERBOSE%" == "TRUE" ( echo %TOOLS% file not found, however it isn't necessary for JDK 11+ )
 )
 
 rem Dummy that gets edited in image generation
@@ -90,6 +89,7 @@ for /f "delims=" %%i in ('dir *rsyntaxtextarea-*.jar /B /S') do set RSYNTAXTEXTA
 for /f "delims=" %%i in ('dir *gson-*.jar /B /S') do set GSON=%%i
 for /f "delims=" %%i in ('dir *byteman-install-*.jar /B /S') do set BYTEMAN=%%i
 for /f "delims=" %%i in ('dir *runtime-decompiler-*.jar /B /S') do set JRD=%%i
+for /f "delims=" %%i in ('dir *classpathless-compiler-*.jar /B /S') do set CPC=%%i
 
 popd
 
@@ -105,8 +105,8 @@ rem Create environment variable pointing to script's location
 set "PROPERTY_PURPOSE=-Djrd.purpose=%PURPOSE%"
 
 rem Concatenate classpath and launch the app
-set CLASSPATH=%TOOLS%;%RSYNTAXTEXTAREA%;%GSON%;%BYTEMAN%;%JRD%
-"%JDK_LOCATION%\bin\java.exe"  -Djdk.attach.allowAttachSelf=true  %PROPERTY_LOCATION% %PROPERTY_PURPOSE% -cp %CLASSPATH% org.jrd.backend.data.Main
+set CLASSPATH=%TOOLS%;%RSYNTAXTEXTAREA%;%GSON%;%BYTEMAN%;%JRD%;%CPC%
+"%JDK_LOCATION%\bin\java.exe" -Djdk.attach.allowAttachSelf=true %PROPERTY_LOCATION% %PROPERTY_PURPOSE% -cp %CLASSPATH% org.jrd.backend.data.Main
 
 if "%PORTABLE_JRD_HOME:~0,2%"=="//" (
   popd
