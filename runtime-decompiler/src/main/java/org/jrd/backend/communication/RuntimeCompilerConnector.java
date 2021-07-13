@@ -15,7 +15,6 @@ import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.MainFrame.VmDecompilerInformationController;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -87,11 +86,7 @@ public class RuntimeCompilerConnector {
     }
 
     private static int getSrcLengthCatched(IdentifiedSource is) {
-        try {
-            return is.getSourceCode().length();
-        } catch (UnsupportedEncodingException ex) {
-            throw new RuntimeException(ex);
-        }
+        return is.getSourceCode().length();
     }
 
     public static class JRDClassesProvider implements ClassesProvider {

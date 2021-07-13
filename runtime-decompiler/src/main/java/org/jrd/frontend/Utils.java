@@ -25,7 +25,6 @@ import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class Utils {
     public static int FULLY_QUALIFIED_NAME = 0;
@@ -119,7 +118,7 @@ public class Utils {
                         public FileVisitResult visitFile(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
                             File clazz = path.toFile();
                             if (clazz.getName().endsWith(".java")) {
-                                loaded.add(new IdentifiedSource(new ClassIdentifier(guessClass(clazz.getAbsolutePath())), Files.readAllBytes(clazz.toPath()), Optional.empty()));
+                                loaded.add(new IdentifiedSource(new ClassIdentifier(guessClass(clazz.getAbsolutePath())), Files.readAllBytes(clazz.toPath())));
                             }
                             return FileVisitResult.CONTINUE;
                         }
@@ -136,7 +135,7 @@ public class Utils {
                     });
                 }
             } else {
-                loaded.add(new IdentifiedSource(new ClassIdentifier(guessClass(f.getAbsolutePath())), Files.readAllBytes(f.toPath()), Optional.empty()));
+                loaded.add(new IdentifiedSource(new ClassIdentifier(guessClass(f.getAbsolutePath())), Files.readAllBytes(f.toPath())));
             }
         }
         return loaded.toArray(new IdentifiedSource[0]);
