@@ -127,7 +127,7 @@
         <dependency>
             <groupId>io.github.mkoncek</groupId>
             <artifactId>classpathless-compiler</artifactId>
-            <version>LATEST</version>
+            <version>[1.3,)</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
