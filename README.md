@@ -1,18 +1,18 @@
 <a href="https://copr.fedorainfracloud.org/coprs/radekmanak/java-runtime-decompiler/package/java-runtime-decompiler/"><img src="https://copr.fedorainfracloud.org/coprs/radekmanak/java-runtime-decompiler/package/java-runtime-decompiler/status_image/last_build.png" /></a>
-# Java-Runtime-Decompiler
-This application allows you to extract bytecode from the running JVM and decompile it with an external decompiler.
+# Java Runtime Decompiler
+*Java Runtime Decompiler*, or *JRD* for short, allows you to extract bytecode from the running JVM and decompile it with an external decompiler.
 ## Installation
-*Note that Git, Maven & [JDK 8](https://adoptopenjdk.net/) with its tools.jar or [JDK11 and up](https://adoptopenjdk.net/) file are required to run or help develop this app.*
+*Note that Git, Maven & [JDK 8](https://adoptopenjdk.net/) with its tools.jar or [JDK11 and higher](https://adoptopenjdk.net/) are required to run or help develop this app.*
 ### From GIT
 #### Initial setup
 ```
 $ git clone https://github.com/pmikova/java-runtime-decompiler.git
 $ cd java-runtime-decompiler
-$ mvn clean install  # will build the runtime decpompiler
-$ mvn clean install -PdownloadPlugins # will build the decmpiler and download the decompiler plugins for future usage to maven repos
-$ mvn clean install -Pimages # on linux, will bundle the plugins and JRD to standalone portable image
+$ mvn clean install  # builds the runtime decpompiler
+$ mvn clean install -PdownloadPlugins # builds the decompiler and downloads the decompiler plugins for future use
+$ mvn clean install -Pimages # on Linux, bundles the plugins and JRD into a standalone portable image
 
-$PLUGINS and $VERIFY_CP variables may help to solve some weird image building issues
+# $PLUGINS and $VERIFY_CP variables may help to solve some weird image building issues.
 ```
 Then `./start.sh` in a *Linux terminal* or `start.bat` in a *Windows CMD* to start the application.
 #### Configuring decompiler agent
@@ -29,10 +29,10 @@ Currently supported decompilers are:
 * [Fernflower](https://github.com/JetBrains/intellij-community/tree/master/plugins/java-decompiler/engine)
 * [Procyon](https://bitbucket.org/mstrobel/procyon/downloads/)
 
-Assemblers/Dissasemblers
+Assemblers/Disassemblers
 * [jasm](https://github.com/openjdk/asmtools)
 * [jcoder](https://github.com/openjdk/asmtools)
-* [javap](https://github.com/openjdk/jdk) (disassmble only)
+* [javap](https://github.com/openjdk/jdk) (disassemble only)
 #### Known issues
 * `mvn clean install` results in `BUILD FAILURE` with the error
 `java.lang.RuntimeException: Unexpected error: java.security.InvalidAlgorithmParameterException: the trustAnchors parameter must be non-empty`
@@ -59,8 +59,8 @@ To return to the Welcome screen, simply unselect the item by holding Control whi
 ### Remote Processes
 The list on the bottom left shows any remote processes.
 Connections to remote processes can be established either by using the *+ button* to the right of the heading, or by going to *Connect → New Connection*.
-### Local FS (file-system)
-Here you can turn runtime decompiler to casual, user friendly jar/folder/file decompiler. You create FS vm by setting up classpath as you are used for JVM.
+### Local FS (file system)
+Here you can turn JRD to casual, user-friendly jar/folder/file decompiler. You create a FS VM by setting up classpath as you are used for JVM.
 ### Loaded Classes
 The middle list contains the classes present in the selected process.
 This list can be reloaded with the *Refresh button* at the top and searched through with the *Search field*.
@@ -69,9 +69,8 @@ The text area on the right shows decompiled bytecode of the selected class of th
 Different results may be achieved with different decompilers; you can select the decompiler from the dropdown menu at the top right.
 ### Overwriting classes
 Using the *Overwrite button* at the top, you can replace the currently selected class' bytecode with your own compiled .class file via a dialog.
+### CLI
+Commandline interface is powerful and allows for bulk processing of VM's, jars and much more...
 
 ___
 ![](https://user-images.githubusercontent.com/47597303/63510098-01977e00-c4de-11e9-8a72-24cec35bbc79.png)
-
-### CLI
-Commandline interface is powerfull and allows you  to bulk process VMs, jars and similarly...
