@@ -232,7 +232,7 @@ public class BytecodeDecompilerView {
         leftMainPanel.add(classesPanel);
 
         srcBin = new JTabbedPane();
-        rightMainPanel.setName("source buffer");
+        rightMainPanel.setName("Source buffer");
         rightMainPanel.add(bytecodeScrollPane);
         rightMainPanel.add(searchCodeField, BorderLayout.NORTH);
         rightBin.setName("Binary buffer");
@@ -253,10 +253,10 @@ public class BytecodeDecompilerView {
         JTextField hexSearch = new JTextField("");
         hexSearch.getDocument().addDocumentListener(new HexSearchDocumentListener(hexSearchEngine, hexSearch, hexSearchType));
         hexSearchControls.add(hexSearch);
-        JButton hexPrev = new JButton("prev");
+        JButton hexPrev = new JButton("Previous");
         hexPrev.addActionListener(new HexSearchActionListener(hexSearchEngine, hexSearch, hexSearchType, HexSearchActionListener.Method.PREV));
         hexSearchControls.add(hexPrev);
-        JButton hexNext = new JButton("next");
+        JButton hexNext = new JButton("Next");
         hexNext.addActionListener(new HexSearchActionListener(hexSearchEngine, hexSearch, hexSearchType, HexSearchActionListener.Method.NEXT));
         hexSearchControls.add(hexNext);
         rightBin.add(hexSearchControls, BorderLayout.SOUTH);
