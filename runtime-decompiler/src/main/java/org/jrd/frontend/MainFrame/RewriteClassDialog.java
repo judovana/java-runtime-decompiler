@@ -379,12 +379,7 @@ public class RewriteClassDialog extends JDialog {
         if (haveCompiler) {
             rc = new RuntimeCompilerConnector.ForeignCompilerWrapper(pm, currentDecompiler);
         } else {
-            try {
-                rc = new io.github.mkoncek.classpathless.impl.Compiler();
-            }catch (IOException ex) {
-                throw  new RuntimeException(ex);
-            }
-
+            rc = new io.github.mkoncek.classpathless.impl.CompilerJavac();
         }
         JDialog compialtionRunningDialog = new JDialog((JFrame) null, "Compiling", true);
         JTextArea compilationLog = new JTextArea();
