@@ -321,7 +321,7 @@ public class Cli {
         if (haveCompiler) {
             rc = new RuntimeCompilerConnector.ForeignCompilerWrapper(pluginManager, decompiler);
         } else {
-            rc = new io.github.mkoncek.classpathless.impl.Compiler();
+            rc = new io.github.mkoncek.classpathless.impl.CompilerJavac();
         }
         IdentifiedSource[] isis = Utils.sourcesToIdentifiedSources(recursive, toCompile);
         Collection<IdentifiedBytecode> result = rc.compileClass(cp, Optional.of(new MessagesListener() {
