@@ -12,12 +12,13 @@ import static org.jrd.backend.data.Directories.getJrdLocation;
 
 public class ExpandableUrl {
 
-    public static class MalformedURLToPath extends RuntimeException{
+    public static class MalformedURLToPath extends RuntimeException {
         public MalformedURLToPath(Throwable cause) {
             super(cause);
         }
     }
-    public static class MalformedMacroExpansion extends RuntimeException{
+
+    public static class MalformedMacroExpansion extends RuntimeException {
         public MalformedMacroExpansion(Throwable cause) {
             super(cause);
         }
@@ -27,8 +28,8 @@ public class ExpandableUrl {
 
     private ExpandableUrl(String s) {
         String path = expandEnvVars(s);
-        if (!new File(path).exists()){
-            if(s.isEmpty()){
+        if (!new File(path).exists()) {
+            if (s.isEmpty()) {
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new FileNotFoundException("Filename empty."));
             } else {
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new FileNotFoundException(path));
@@ -37,12 +38,12 @@ public class ExpandableUrl {
         this.path = s;
     }
 
-    public static ExpandableUrl createFromPath(String path){
+    public static ExpandableUrl createFromPath(String path) {
         return new ExpandableUrl(collapseEnvVars(path));
     }
 
-    public static ExpandableUrl createFromStringUrl(String url) throws MalformedMacroExpansion{
-        if(!url.startsWith("file:")){ //Backward compatibility reasons, prior to 2.0.0 URLs were stored without file protocol prefix in the .json file
+    public static ExpandableUrl createFromStringUrl(String url) throws MalformedMacroExpansion {
+        if (!url.startsWith("file:")) { // Backward compatibility reasons, prior to 2.0.0 URLs were stored without file protocol prefix in the .json file
             url = prependFileProtocol(url);
         }
         try {
@@ -52,8 +53,8 @@ public class ExpandableUrl {
         }
     }
 
-    private static String prependFileProtocol(String url){
-        if(url.startsWith("/")){
+    private static String prependFileProtocol(String url) {
+        if (url.startsWith("/")) {
             return "file:" + url;
         } else {
             return "file:/" + url;
@@ -64,7 +65,7 @@ public class ExpandableUrl {
         return expandEnvVars(path, true);
     }
 
-    static String expandEnvVars(String path, boolean prependSlash){
+    static String expandEnvVars(String path, boolean prependSlash) {
         String pluginDir = unifySlashes(Directories.getXdgJrdBaseDir(), prependSlash);
         String homeDir = unifySlashes(System.getProperty("user.home"), prependSlash);
         String jrdDir = unifySlashes(getJrdLocation(), prependSlash);
@@ -76,7 +77,7 @@ public class ExpandableUrl {
         return path;
     }
 
-    private static String collapseEnvVars(String path){
+    private static String collapseEnvVars(String path) {
         String pluginDir = unifySlashes(Directories.getXdgJrdBaseDir());
         String homeDir = unifySlashes(System.getProperty("user.home"));
         String jrdDir = unifySlashes(getJrdLocation());
@@ -84,7 +85,7 @@ public class ExpandableUrl {
         return collapseEnvVars(unifySlashes(path), homeDir, pluginDir, jrdDir);
     }
 
-    static String collapseEnvVars(String path, String home, String xdgConfigHome, String jrd){
+    static String collapseEnvVars(String path, String home, String xdgConfigHome, String jrd) {
         path = path.replace(jrd, "${JRD}");
         path = path.replace(xdgConfigHome, "${XDG_CONFIG_HOME}");
         path = path.replace(home, "${HOME}");
@@ -92,20 +93,20 @@ public class ExpandableUrl {
         return path;
     }
 
-    public static String unifySlashes(String dir){
+    public static String unifySlashes(String dir) {
         return unifySlashes(dir, true);
     }
 
-    public static String unifySlashes(String dir, boolean prependSlash){
+    public static String unifySlashes(String dir, boolean prependSlash) {
         dir = dir.replaceAll("\\\\", "/");
-        if(prependSlash && isOsWindows() && !dir.startsWith("file") && dir.length() > 0 && dir.charAt(0) != '/' && dir.charAt(0) != '$' ){
+        if (prependSlash && isOsWindows() && !dir.startsWith("file") && dir.length() > 0 && dir.charAt(0) != '/' && dir.charAt(0) != '$') {
             dir = "/" + dir;
         }
 
         return dir;
     }
 
-    public static boolean isOsWindows(){
+    public static boolean isOsWindows() {
         return System.getProperty("os.name").toLowerCase().startsWith("win");
     }
 
@@ -113,7 +114,7 @@ public class ExpandableUrl {
         return new URL("file", "", expandEnvVars(this.path, false));
     }
 
-    public String getRawURL(){
+    public String getRawURL() {
         try {
             return collapseEnvVars(new URL("file", "", expandEnvVars(this.path)).toString());
         } catch (MalformedURLException e) {
@@ -121,7 +122,7 @@ public class ExpandableUrl {
         }
     }
 
-    public String getExpandedPath(){
+    public String getExpandedPath() {
         try {
             return getExpandedURL().getPath();
         } catch (MalformedURLException e) {
@@ -129,11 +130,11 @@ public class ExpandableUrl {
         }
     }
 
-    public String getRawPath(){ //${HOME}/path
+    public String getRawPath() { // ${HOME}/path
         return collapseEnvVars(path);
     }
 
-    public File getFile(){
+    public File getFile() {
         return new File(getExpandedPath());
     }
 

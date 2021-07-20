@@ -55,7 +55,7 @@ public class Config {
 
     public String getAgentExpandedPath() {
         String expandedPath = ExpandableUrl.createFromPath(configMap.get("AGENT_PATH")).getExpandedPath();
-        if(isOsWindows() && expandedPath.charAt(0) == '/') { //Agent attaching fails on Windows when path starts with a slash
+        if(isOsWindows() && expandedPath.length() > 0 && expandedPath.charAt(0) == '/') { // Agent attaching fails on Windows when path starts with a slash
             expandedPath = expandedPath.substring(1);
         }
         return expandedPath;
