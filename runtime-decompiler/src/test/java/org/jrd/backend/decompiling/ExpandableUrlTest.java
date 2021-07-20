@@ -1,12 +1,15 @@
 package org.jrd.backend.decompiling;
 
 import org.jrd.backend.data.Directories;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Paths;
 
 import static org.jrd.backend.data.Directories.getJrdLocation;
 import static org.jrd.backend.decompiling.ExpandableUrl.*;
@@ -25,6 +28,7 @@ class ExpandableUrlTest {
         assertFalse(isOsWindows());
     }
 
+    // env vars
     @Test
     void testCollapseEnvVars() {
         assertEquals("${HOME}", collapseEnvVars("home_path", "home_path", "config_path", "jrd_path"));
@@ -42,6 +46,7 @@ class ExpandableUrlTest {
         assertEquals(unifySlashes(getJrdLocation()), expandEnvVars("${JRD}"));
     }
 
+    // slashes
     @Test
     @EnabledOnOs(OS.WINDOWS)
     void testUnifySlashesOnWindows(){
@@ -64,124 +69,90 @@ class ExpandableUrlTest {
         assertEquals("/longer/path", unifySlashes("/longer\\path"));
     }
 
+    // createFromPath
 
     @Test
     @EnabledOnOs(OS.WINDOWS)
-    void testCreationFromPathOnWindowsFromRealPath() throws MalformedURLException {
-        ExpandableUrl expandableUrl = ExpandableUrl.createFromPath(System.getProperty("user.home"));
-        assertEquals("${HOME}", expandableUrl.getRawPath());
-        assertEquals(unifySlashes(System.getProperty("user.home")), expandableUrl.getExpandedPath());
-        assertEquals("file:${HOME}", expandableUrl.getRawURL());
-        assertEquals(new URL("file:/" + System.getProperty("user.home")), expandableUrl.getExpandedURL());
-    }
-
-    @Test
-    @EnabledOnOs(OS.WINDOWS)
-    void testCreationFromPathOnWindowsFromRealPathWithOneLeadingSlash() throws MalformedURLException {
+    void testCreateFromPathWindowsActualPathLeadingSlash() throws MalformedURLException {
         ExpandableUrl expandableUrl = ExpandableUrl.createFromPath("/" + System.getProperty("user.home"));
+
         assertEquals("${HOME}", expandableUrl.getRawPath());
-        assertEquals(unifySlashes(System.getProperty("user.home")), expandableUrl.getExpandedPath());
+        assertEquals(unifySlashes(System.getProperty("user.home"), false), expandableUrl.getExpandedPath());
         assertEquals("file:${HOME}", expandableUrl.getRawURL());
-        assertEquals(new URL("file:/" + System.getProperty("user.home")), expandableUrl.getExpandedURL());
+        assertEquals(new URL("file:" + System.getProperty("user.home")), expandableUrl.getExpandedURL());
+
+        assertDoesNotThrow(() -> Paths.get(expandableUrl.getExpandedPath()));
     }
 
     @Test
-    @EnabledOnOs(OS.WINDOWS)
-    void testCreationFromPathOnWindowsFromMacroPath() throws MalformedURLException {
-        ExpandableUrl expandableUrl = ExpandableUrl.createFromPath("${HOME}");
-        assertEquals("${HOME}", expandableUrl.getRawPath());
-        assertEquals(unifySlashes(System.getProperty("user.home")), expandableUrl.getExpandedPath());
-        assertEquals("file:${HOME}", expandableUrl.getRawURL());
-        assertEquals(new URL("file:/" + System.getProperty("user.home")), expandableUrl.getExpandedURL());
-    }
-
-
-    @Test
-    @EnabledOnOs(OS.LINUX)
-    void testCreateFromPathOnLinuxFromActualPath() throws MalformedURLException {
+    void testCreateFromPathRealPath() throws MalformedURLException {
         ExpandableUrl expandableUrl = ExpandableUrl.createFromPath(System.getProperty("user.home"));
+
         assertEquals("${HOME}", expandableUrl.getRawPath());
-        assertEquals(System.getProperty("user.home"), expandableUrl.getExpandedPath());
+        assertEquals(unifySlashes(System.getProperty("user.home"), false), expandableUrl.getExpandedPath());
         assertEquals("file:${HOME}", expandableUrl.getRawURL());
         assertEquals(new URL("file:" + System.getProperty("user.home")), expandableUrl.getExpandedURL());
+
+        assertDoesNotThrow(() -> Paths.get(expandableUrl.getExpandedPath()));
     }
 
     @Test
-    @EnabledOnOs(OS.LINUX)
-    void testCreateFromPathOnLinuxFromMacroPath() throws MalformedURLException {
+    void testCreateFromPathMacroPath() throws MalformedURLException {
         ExpandableUrl expandableUrl = ExpandableUrl.createFromPath("${HOME}");
+
         assertEquals("${HOME}", expandableUrl.getRawPath());
-        assertEquals(System.getProperty("user.home"), expandableUrl.getExpandedPath());
+        assertEquals(unifySlashes(System.getProperty("user.home"), false), expandableUrl.getExpandedPath());
         assertEquals("file:${HOME}", expandableUrl.getRawURL());
         assertEquals(new URL("file:" + System.getProperty("user.home")), expandableUrl.getExpandedURL());
+
+        assertDoesNotThrow(() -> Paths.get(expandableUrl.getExpandedPath()));
     }
 
-
+    // createFromStringURL
     @Test
     @EnabledOnOs(OS.WINDOWS)
-    void testCreationFromStringUrlOnWindowsFromRealPathWithNoLeadingSlashes() throws MalformedURLException {
-        ExpandableUrl expandableUrl = ExpandableUrl.createFromStringUrl("file:" + System.getProperty("user.home"));
-        assertEquals("${HOME}", expandableUrl.getRawPath());
-        assertEquals(unifySlashes(System.getProperty("user.home")), expandableUrl.getExpandedPath());
-        assertEquals("file:${HOME}", expandableUrl.getRawURL());
-        assertEquals(new URL("file:/" + System.getProperty("user.home")), expandableUrl.getExpandedURL());
-    }
-
-    @Test
-    @EnabledOnOs(OS.WINDOWS)
-    void testCreationFromStringUrlOnWindowsFromRealPathWithOneLeadingSlash() throws MalformedURLException {
+    void testCreateFromStringUrlWindowsRealPathOneLeadingSlash() throws MalformedURLException {
         ExpandableUrl expandableUrl = ExpandableUrl.createFromStringUrl("file:/" + System.getProperty("user.home"));
+
         assertEquals("${HOME}", expandableUrl.getRawPath());
-        assertEquals(unifySlashes(System.getProperty("user.home")), expandableUrl.getExpandedPath());
+        assertEquals(unifySlashes(System.getProperty("user.home"), false), expandableUrl.getExpandedPath());
         assertEquals("file:${HOME}", expandableUrl.getRawURL());
-        assertEquals(new URL("file:/" + System.getProperty("user.home")), expandableUrl.getExpandedURL());
+        assertEquals(new URL("file:" + System.getProperty("user.home")), expandableUrl.getExpandedURL());
+
+        assertDoesNotThrow(() -> Paths.get(expandableUrl.getExpandedPath()));
     }
 
     @Test
     @EnabledOnOs(OS.WINDOWS)
-    void testCreationFromStringUrlOnWindowsFromRealPathWithThreeLeadingSlashes() throws MalformedURLException {
+    void testCreateFromStringUrlWindowsRealPathThreeLeadingSlashes() throws MalformedURLException {
         ExpandableUrl expandableUrl = ExpandableUrl.createFromStringUrl("file:///" + System.getProperty("user.home"));
-        assertEquals("${HOME}", expandableUrl.getRawPath());
-        assertEquals(unifySlashes(System.getProperty("user.home")), expandableUrl.getExpandedPath());
-        assertEquals("file:${HOME}", expandableUrl.getRawURL());
-        assertEquals(new URL("file:/" + System.getProperty("user.home")), expandableUrl.getExpandedURL());
-    }
 
-    @Test
-    @EnabledOnOs(OS.WINDOWS)
-    void testCreationFromStringUrlOnWindowsFromMacroPathWithNoLeadingSlashes() throws MalformedURLException {
-        ExpandableUrl expandableUrl = ExpandableUrl.createFromStringUrl("file:${HOME}");
         assertEquals("${HOME}", expandableUrl.getRawPath());
-        assertEquals(unifySlashes(System.getProperty("user.home")), expandableUrl.getExpandedPath());
+        assertEquals(unifySlashes(System.getProperty("user.home"), false), expandableUrl.getExpandedPath());
         assertEquals("file:${HOME}", expandableUrl.getRawURL());
-        assertEquals(new URL("file:/" + System.getProperty("user.home")), expandableUrl.getExpandedURL());
-    }
+        assertEquals(new URL("file:" + System.getProperty("user.home")), expandableUrl.getExpandedURL());
 
-    @Test
-    @EnabledOnOs(OS.WINDOWS)
-    void testCreationFromStringUrlOnWindowsFromMacroPathWithTwoLeadingSlashes() throws MalformedURLException {
-        ExpandableUrl expandableUrl = ExpandableUrl.createFromStringUrl("file://${HOME}");
-        assertEquals("${HOME}", expandableUrl.getRawPath());
-        assertEquals(unifySlashes(System.getProperty("user.home")), expandableUrl.getExpandedPath());
-        assertEquals("file:${HOME}", expandableUrl.getRawURL());
-        assertEquals(new URL("file:/" + System.getProperty("user.home")), expandableUrl.getExpandedURL());
+        assertDoesNotThrow(() -> Paths.get(expandableUrl.getExpandedPath()));
     }
 
 
     @Test
-    @EnabledOnOs(OS.LINUX)
-    void testCreationFromStringUrlOnLinuxFromRealPathWithNoLeadingSlashes() throws MalformedURLException {
+    void testCreateFromStringUrlRealPath() throws MalformedURLException {
         ExpandableUrl expandableUrl = ExpandableUrl.createFromStringUrl("file:" + System.getProperty("user.home"));
+
         assertEquals("${HOME}", expandableUrl.getRawPath());
-        assertEquals(System.getProperty("user.home"), expandableUrl.getExpandedPath());
+        assertEquals(unifySlashes(System.getProperty("user.home"), false), expandableUrl.getExpandedPath());
         assertEquals("file:${HOME}", expandableUrl.getRawURL());
         assertEquals(new URL("file:" + System.getProperty("user.home")), expandableUrl.getExpandedURL());
+
+        assertDoesNotThrow(() -> Paths.get(expandableUrl.getExpandedPath()));
     }
 
     @Test
     @EnabledOnOs(OS.LINUX)
-    void testCreationFromStringUrlOnLinuxFromRealPathWithTwoLeadingSlashes() throws MalformedURLException {
+    void testCreateFromStringUrlLinuxRealPathTwoLeadingSlashes() throws MalformedURLException {
         ExpandableUrl expandableUrl = ExpandableUrl.createFromStringUrl("file://" + System.getProperty("user.home"));
+
         assertEquals("${HOME}", expandableUrl.getRawPath());
         assertEquals(System.getProperty("user.home"), expandableUrl.getExpandedPath());
         assertEquals("file:${HOME}", expandableUrl.getRawURL());
@@ -189,22 +160,26 @@ class ExpandableUrlTest {
     }
 
     @Test
-    @EnabledOnOs(OS.LINUX)
-    void testCreationFromStringUrlOnLinuxFromMacroPathWithNoLeadingSlashes() throws MalformedURLException {
+    void testCreateFromStringUrlMacroPath() throws MalformedURLException {
         ExpandableUrl expandableUrl = ExpandableUrl.createFromStringUrl("file:${HOME}");
+
         assertEquals("${HOME}", expandableUrl.getRawPath());
-        assertEquals(System.getProperty("user.home"), expandableUrl.getExpandedPath());
+        assertEquals(unifySlashes(System.getProperty("user.home"), false), expandableUrl.getExpandedPath());
         assertEquals("file:${HOME}", expandableUrl.getRawURL());
         assertEquals(new URL("file:" + System.getProperty("user.home")), expandableUrl.getExpandedURL());
+
+        assertDoesNotThrow(() -> Paths.get(expandableUrl.getExpandedPath()));
     }
 
     @Test
-    @EnabledOnOs(OS.LINUX)
-    void testCreationFromStringUrlOnLinuxFromMacroPathWithTwoLeadingSlashes() throws MalformedURLException {
+    void testCreateFromStringUrlLinuxMacroPathTwoLeadingSlashes() throws MalformedURLException {
         ExpandableUrl expandableUrl = ExpandableUrl.createFromStringUrl("file://${HOME}");
+
         assertEquals("${HOME}", expandableUrl.getRawPath());
-        assertEquals(System.getProperty("user.home"), expandableUrl.getExpandedPath());
+        assertEquals(unifySlashes(System.getProperty("user.home"), false), expandableUrl.getExpandedPath());
         assertEquals("file:${HOME}", expandableUrl.getRawURL());
         assertEquals(new URL("file:" + System.getProperty("user.home")), expandableUrl.getExpandedURL());
+
+        assertDoesNotThrow(() -> Paths.get(expandableUrl.getExpandedPath()));
     }
 }

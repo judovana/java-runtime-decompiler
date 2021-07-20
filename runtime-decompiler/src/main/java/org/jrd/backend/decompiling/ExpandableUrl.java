@@ -47,7 +47,7 @@ public class ExpandableUrl {
             url = prependFileProtocol(url);
         }
         try {
-            return createFromPath(new URL(expandEnvVars(url)).getPath());
+            return createFromPath(new URL(expandEnvVars(url, true)).getPath());
         } catch (MalformedURLException e) {
             throw new MalformedMacroExpansion(e);
         }
@@ -62,9 +62,13 @@ public class ExpandableUrl {
     }
 
     static String expandEnvVars(String path) {
-        String pluginDir = unifySlashes(Directories.getXdgJrdBaseDir());
-        String homeDir = unifySlashes(System.getProperty("user.home"));
-        String jrdDir = unifySlashes(getJrdLocation());
+        return expandEnvVars(path, true);
+    }
+
+    static String expandEnvVars(String path, boolean prependSlash) {
+        String pluginDir = unifySlashes(Directories.getXdgJrdBaseDir(), prependSlash);
+        String homeDir = unifySlashes(System.getProperty("user.home"), prependSlash);
+        String jrdDir = unifySlashes(getJrdLocation(), prependSlash);
 
         path = path.replace("${JRD}", jrdDir);
         path = path.replace("${XDG_CONFIG_HOME}", pluginDir);
@@ -90,8 +94,12 @@ public class ExpandableUrl {
     }
 
     public static String unifySlashes(String dir) {
+        return unifySlashes(dir, true);
+    }
+
+    public static String unifySlashes(String dir, boolean prependSlash) {
         dir = dir.replaceAll("\\\\", "/");
-        if (isOsWindows() && !dir.startsWith("file") && dir.length() > 0 && dir.charAt(0) != '/' && dir.charAt(0) != '$') {
+        if (prependSlash && isOsWindows() && !dir.startsWith("file") && dir.length() > 0 && dir.charAt(0) != '/' && dir.charAt(0) != '$') {
             dir = "/" + dir;
         }
 
@@ -103,7 +111,7 @@ public class ExpandableUrl {
     }
 
     public URL getExpandedURL() throws MalformedURLException {
-        return new URL("file", "", expandEnvVars(this.path));
+        return new URL("file", "", expandEnvVars(this.path, false));
     }
 
     public String getRawURL() {
