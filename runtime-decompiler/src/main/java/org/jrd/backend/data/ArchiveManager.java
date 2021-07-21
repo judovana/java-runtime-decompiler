@@ -27,6 +27,7 @@ public class ArchiveManager {
 
     File c;
     final String tmpdir = System.getProperty("java.io.tmpdir");
+    final String fileSeparator = System.getProperty("file.separator");
     ArrayList<String> currentPathInJars = new ArrayList<>();
     ArchivePathManager pathManager = new ArchivePathManager();
     int currentD = 0;
@@ -113,11 +114,11 @@ public class ArchiveManager {
     public File unpack() throws IOException {
         if (pathManager.isExtracted()) {
             // If file is already extracted, return the extracted one
-            return new File(tmpdir + "/jrd/" + (pathManager.getPathSize() - 2) + "/" + (pathManager.get(pathManager.getPathSize() - 1)));
+            return new File(tmpdir + fileSeparator + "jrd" + fileSeparator + (pathManager.getPathSize() - 2) + fileSeparator + (pathManager.get(pathManager.getPathSize() - 1)));
         }
         // Create my dir in tmpdir
         delete();
-        File f = new File(tmpdir + "/jrd/");
+        File f = new File(tmpdir + fileSeparator + "jrd" + fileSeparator);
         if (f.mkdir()) {
             File ret = recursiveUnpack(c);
             if (ret != null) {
@@ -136,7 +137,7 @@ public class ArchiveManager {
      * @throws IOException
      */
     private File recursiveUnpack(File toUnpack) throws IOException {
-        File destDir = new File(tmpdir + "/jrd/" + currentD);
+        File destDir = new File(tmpdir + fileSeparator + "jrd" + fileSeparator + currentD);
         if (destDir.mkdir()) {
             byte[] buffer = new byte[1024];
             try (ZipInputStream zis = new ZipInputStream(new FileInputStream(toUnpack))) {
@@ -167,11 +168,11 @@ public class ArchiveManager {
         }
         currentD++;
         if (currentD == pathManager.getPathSize() - 1) {
-            return new File(destDir.getAbsolutePath() + "/" + pathManager.get(currentD));
+            return new File(destDir.getAbsolutePath() + fileSeparator + pathManager.get(currentD));
         } else if (currentD == pathManager.getPathSize()) {
             throw new IOException("Unknown exception");
         }
-        return recursiveUnpack(new File(destDir.getAbsolutePath() + "/" + pathManager.get(currentD)));
+        return recursiveUnpack(new File(destDir.getAbsolutePath() + fileSeparator + pathManager.get(currentD)));
     }
 
     /**
@@ -203,11 +204,11 @@ public class ArchiveManager {
         i -= 2;
         for (; i >= 0; i--) {
             // Create new zip that will contain edited files
-            String[] tmp = pathManager.get(i).split("/");
-            String path = tmpdir + "/jrd/" + tmp[tmp.length - 1] + "/";
+            String[] tmp = pathManager.get(i).split(fileSeparator);
+            String path = tmpdir + fileSeparator + "jrd" + fileSeparator + tmp[tmp.length - 1] + fileSeparator;
             FileOutputStream fileStream = new FileOutputStream(path);
             ZipOutputStream zOut = new ZipOutputStream(fileStream);
-            File f2zip = new File(tmpdir + "/jrd/" + (i));
+            File f2zip = new File(tmpdir + fileSeparator + "jrd" + fileSeparator + (i));
             for (File f : f2zip.listFiles()) {
                 recursiveZip(f, f.getName(), zOut);
             }
@@ -216,7 +217,7 @@ public class ArchiveManager {
             fileStream.close();
             // Move it into the temp file if it's not last, so it can be packaged
             if (i > 0) {
-                Files.copy(Path.of(path), Path.of(tmpdir + "/jrd/" + (i - 1) + "/" + pathManager.get(i)), REPLACE_EXISTING);
+                Files.copy(Path.of(path), Path.of(tmpdir + fileSeparator + "jrd" + fileSeparator + (i - 1) + fileSeparator + pathManager.get(i)), REPLACE_EXISTING);
             } else {
                 // It's the last, replace the original
                 Files.copy(Path.of(path), c.toPath(), REPLACE_EXISTING);
@@ -235,8 +236,8 @@ public class ArchiveManager {
      */
     public void recursiveZip(File f2zip, String fName, ZipOutputStream zOut) throws IOException {
         if (f2zip.isDirectory()) {
-            if (!fName.endsWith("/")) {
-                fName += "/";
+            if (!fName.endsWith(fileSeparator)) {
+                fName += fileSeparator;
             }
             zOut.putNextEntry(new ZipEntry(fName));
             zOut.closeEntry();
@@ -265,7 +266,7 @@ public class ArchiveManager {
      */
     public boolean delete() {
         currentD = 0;
-        return deleteRecursive(new File(tmpdir + "/jrd/"));
+        return deleteRecursive(new File(tmpdir + fileSeparator + "jrd" + fileSeparator));
     }
 
     /**
