@@ -4,7 +4,7 @@ import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.ClassesProvider;
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
-import io.github.mkoncek.classpathless.api.InMemoryCompiler;
+import io.github.mkoncek.classpathless.api.ClasspathlessCompiler;
 import io.github.mkoncek.classpathless.api.MessagesListener;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.core.AgentRequestAction;
@@ -317,7 +317,7 @@ public class Cli {
             }
         }
         System.err.println(s);
-        InMemoryCompiler rc;
+        ClasspathlessCompiler rc;
         if (haveCompiler) {
             rc = new RuntimeCompilerConnector.ForeignCompilerWrapper(pluginManager, decompiler);
         } else {

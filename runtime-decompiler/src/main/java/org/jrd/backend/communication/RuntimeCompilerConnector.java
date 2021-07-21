@@ -4,7 +4,7 @@ import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.ClassesProvider;
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
-import io.github.mkoncek.classpathless.api.InMemoryCompiler;
+import io.github.mkoncek.classpathless.api.ClasspathlessCompiler;
 import io.github.mkoncek.classpathless.api.MessagesListener;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.VmDecompilerStatus;
@@ -31,7 +31,7 @@ public class RuntimeCompilerConnector {
 
     private static final boolean slow = true;
 
-    public static class DummyRuntimeCompiler implements InMemoryCompiler {
+    public static class DummyRuntimeCompiler implements ClasspathlessCompiler {
 
         @Override
         public Collection<IdentifiedBytecode> compileClass(ClassesProvider classesProvider, Optional<MessagesListener> messagesListener, IdentifiedSource... identifiedSources) {
@@ -122,7 +122,7 @@ public class RuntimeCompilerConnector {
         }
     }
 
-    public static class ForeignCompilerWrapper implements InMemoryCompiler {
+    public static class ForeignCompilerWrapper implements ClasspathlessCompiler {
         private final PluginManager pluginManager;
         private final DecompilerWrapperInformation currentDecompiler;
 
