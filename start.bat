@@ -106,7 +106,7 @@ set "PROPERTY_PURPOSE=-Djrd.purpose=%PURPOSE%"
 
 rem Concatenate classpath and launch the app
 set CLASSPATH=%TOOLS%;%RSYNTAXTEXTAREA%;%GSON%;%BYTEMAN%;%JRD%;%CPC%
-"%JDK_LOCATION%\bin\java.exe" -Djdk.attach.allowAttachSelf=true %PROPERTY_LOCATION% %PROPERTY_PURPOSE% -cp %CLASSPATH% org.jrd.backend.data.Main
+"%JDK_LOCATION%\bin\java.exe" -Djdk.attach.allowAttachSelf=true %PROPERTY_LOCATION% %PROPERTY_PURPOSE% -cp %CLASSPATH% org.jrd.backend.data.Main %*
 
 if "%PORTABLE_JRD_HOME:~0,2%"=="//" (
   popd
