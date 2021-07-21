@@ -131,25 +131,18 @@ public class FsAgent implements JrdAgent {
                         if (clazz == null) {
                             throw new IOException("Trying to find class but no class is specified");
                         }
-                        ArchiveManager am = new ArchiveManager(c);
+                        ArchiveManager am = ArchiveManager.getInstance();
+                        am.setFile(c);
                         if (am.isClassInFile(clazz)) {
                             if (am.needExtract()) {
                                 File f = am.unpack();
-                                if (cp instanceof WriteingCpOperator) {
-                                    // TODO Implement packaging and cache
-                                    throw new IOException(clazz + " to be implemented");
-                                } else {
-                                    T ret = onEntryOther(f, clazz, op);
-                                    am.delete();
-                                    if (ret != null) {
-                                        return ret;
-                                    }
+                                T ret = onEntryOther(f, clazz, op);
+                                if (op instanceof WriteingCpOperator) {
+                                    am.pack();
                                 }
+                                return ret;
                             } else {
-                                T ret = onEntryOther(c, clazz, op);
-                                if (ret != null) {
-                                    return ret;
-                                }
+                                return onEntryOther(c, clazz, op);
                             }
                         }
                     }
@@ -165,7 +158,7 @@ public class FsAgent implements JrdAgent {
         private T onEntryList(ZipInputStream zipInputStream, String clazz, CpOperator<T> op) throws IOException {
             ZipEntry entry = null;
             while ((entry = zipInputStream.getNextEntry()) != null) {
-                if (ArchiveManager.shouldOpen(new ZipInputStream(zipInputStream))) {
+                if (ArchiveManager.shouldOpen(entry.getName())) {
                     onEntryList(new ZipInputStream(zipInputStream), clazz, op);
                 } else {
                     if (clazz == null) {
@@ -193,7 +186,7 @@ public class FsAgent implements JrdAgent {
                     }
                 }
             }
-            return null;
+            throw new IOException(clazz + " not found on CP");
         }
     }
 

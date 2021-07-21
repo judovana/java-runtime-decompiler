@@ -6,19 +6,32 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
+
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class ArchiveManager {
-    final File c;
+    private static ArchiveManager singleton = null;
+
+    public static ArchiveManager getInstance() {
+        if (singleton == null) {
+            singleton = new ArchiveManager();
+        }
+        return singleton;
+    }
+
+    File c;
     final String tmpdir = System.getProperty("java.io.tmpdir");
     ArrayList<String> currentPathInJars = new ArrayList<>();
+    ArchivePathManager pathManager = new ArchivePathManager();
     int currentD = 0;
 
-    public ArchiveManager(File c) {
-        this.c = c;
-    }
+    public void setFile(File c) {this.c = c;}
 
     /**
      * Finds out whether desired class is contained in <code>c</code>
@@ -28,16 +41,15 @@ public class ArchiveManager {
      * @throws IOException Error while reading streams
      */
     public boolean isClassInFile(String clazz) throws IOException {
-        if (!currentPathInJars.isEmpty()) {
-            currentPathInJars = new ArrayList<>();
-        }
-        currentPathInJars.add(c.getName());
-        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(c))) {
-            boolean ret = findClazz(zis, clazz);
-            if (!ret) {
-                currentPathInJars.remove(c.getName());
-            }
-            return ret;
+        ZipInputStream zis = new ZipInputStream(new FileInputStream(c));
+        if (pathManager.wasFound() && pathManager.getCurrentClazz().equals(clazz)) {
+            return true;
+        } else {
+            delete();
+            pathManager = new ArchivePathManager();
+            pathManager.setClazz(clazz);
+            pathManager.addPathPart(c.getName());
+            return findClazz(zis, clazz);
         }
     }
 
@@ -53,15 +65,16 @@ public class ArchiveManager {
         ZipEntry entry = null;
         while ((entry = zis.getNextEntry()) != null) {
             if (!entry.isDirectory()) {
-                if (shouldOpen(new ZipInputStream(zis))) {
-                    currentPathInJars.add(entry.getName());
+                if (shouldOpen(entry.getName())) {
+                    pathManager.addPathPart(entry.getName());
                     if(findClazz(new ZipInputStream(zis), clazz)) {
                         return true;
                     }
-                    currentPathInJars.remove(entry.getName());
+                    pathManager.removePathPart(entry.getName());
                 } else {
                     String clazzInJar = FsAgent.toClass(entry.getName());
                     if (clazzInJar.equals(clazz)) {
+                        pathManager.setFound();
                         return true;
                     }
                 }
@@ -70,8 +83,16 @@ public class ArchiveManager {
         return false;
     }
 
-    public static boolean shouldOpen(ZipInputStream zis) throws IOException {
-        return zis.getNextEntry() != null;
+    /**
+     * Determines whether this file can be opened with ZipInputStream
+     * @param n Name of the file
+     * @return Whether file can opened with ZipInputStream
+     */
+    public static boolean shouldOpen(String n) throws IOException {
+        /* This way has been selected as there's no other "easier" way of determining if it is an archive.
+         * If you wish to add a format, feel free to PR */
+        String name = n.toLowerCase();
+        return name.endsWith(".zip") || name.endsWith(".jar") || name.endsWith(".war") || name.endsWith(".ear");
     }
 
     /**
@@ -80,7 +101,7 @@ public class ArchiveManager {
      * @return If extraction is necessary
      */
     public boolean needExtract() {
-        return !(currentPathInJars.size() == 1);
+        return !(pathManager.getPathSize() == 1);
     }
 
     /**
@@ -90,10 +111,19 @@ public class ArchiveManager {
      * @throws IOException Error while reading streams
      */
     public File unpack() throws IOException {
+        if (pathManager.isExtracted()) {
+            // If file is already extracted, return the extracted one
+            return new File(tmpdir + "/jrd/" + (pathManager.getPathSize() - 2) + "/" + (pathManager.get(pathManager.getPathSize() - 1)));
+        }
         // Create my dir in tmpdir
+        delete();
         File f = new File(tmpdir + "/jrd/");
         if (f.mkdir()) {
-            return recursiveUnpack(c);
+            File ret = recursiveUnpack(c);
+            if (ret != null) {
+                pathManager.setExtracted();
+            }
+            return ret;
         } else {
             throw new IOException("Couldn't create temp file");
         }
@@ -136,12 +166,12 @@ public class ArchiveManager {
             throw new IOException();
         }
         currentD++;
-        if (currentD == currentPathInJars.size() - 1) {
-            return new File(destDir.getAbsolutePath() + "/" + currentPathInJars.get(currentD));
-        } else if (currentD == currentPathInJars.size()) {
-            throw new IOException("Somehow got past");
+        if (currentD == pathManager.getPathSize() - 1) {
+            return new File(destDir.getAbsolutePath() + "/" + pathManager.get(currentD));
+        } else if (currentD == pathManager.getPathSize()) {
+            throw new IOException("Unknown exception");
         }
-        return recursiveUnpack(new File(destDir.getAbsolutePath() + "/" + currentPathInJars.get(currentD)));
+        return recursiveUnpack(new File(destDir.getAbsolutePath() + "/" + pathManager.get(currentD)));
     }
 
     /**
@@ -165,11 +195,76 @@ public class ArchiveManager {
     }
 
     /**
+     * Packs unpacked files
+     */
+    public void pack() throws IOException {
+        // Go from end to start
+        int i = pathManager.getPathSize();
+        i -= 2;
+        for (; i >= 0; i--) {
+            // Create new zip that will contain edited files
+            String[] tmp = pathManager.get(i).split("/");
+            String path = tmpdir + "/jrd/" + tmp[tmp.length - 1] + "/";
+            FileOutputStream fileStream = new FileOutputStream(path);
+            ZipOutputStream zOut = new ZipOutputStream(fileStream);
+            File f2zip = new File(tmpdir + "/jrd/" + (i));
+            for (File f : f2zip.listFiles()) {
+                recursiveZip(f, f.getName(), zOut);
+            }
+            zOut.finish();
+            zOut.close();
+            fileStream.close();
+            // Move it into the temp file if it's not last, so it can be packaged
+            if (i > 0) {
+                Files.copy(Path.of(path), Path.of(tmpdir + "/jrd/" + (i - 1) + "/" + pathManager.get(i)), REPLACE_EXISTING);
+            } else {
+                // It's the last, replace the original
+                Files.copy(Path.of(path), c.toPath(), REPLACE_EXISTING);
+            }
+            // Delete once it was moved
+            new File(path).delete();
+        }
+    }
+
+    /**
+     * Recursively adds file or files inside folder to archive
+     * @param f2zip File/Folder to be archived
+     * @param fName Name of the file
+     * @param zOut Zip output stream used to output zipped bytes
+     * @throws IOException
+     */
+    public void recursiveZip(File f2zip, String fName, ZipOutputStream zOut) throws IOException {
+        if (f2zip.isDirectory()) {
+            if (!fName.endsWith("/")) {
+                fName += "/";
+            }
+            zOut.putNextEntry(new ZipEntry(fName));
+            zOut.closeEntry();
+            File[] sub = f2zip.listFiles();
+            for (File child : sub) {
+                recursiveZip(child, fName + child.getName(), zOut);
+            }
+            return;
+        }
+        FileInputStream fis = new FileInputStream(f2zip);
+        ZipEntry zEntry = new ZipEntry(fName);
+        zOut.putNextEntry(zEntry);
+        byte[] bytes = new byte[1024];
+        int length;
+        while ((length = fis.read(bytes)) >= 0) {
+            zOut.write(bytes, 0, length);
+        }
+        zOut.closeEntry();
+        fis.close();
+    }
+
+    /**
      * Deletes jrd temporary folder
      *
      * @return whether folder was successfully deleted
      */
     public boolean delete() {
+        currentD = 0;
         return deleteRecursive(new File(tmpdir + "/jrd/"));
     }
 
@@ -186,5 +281,52 @@ public class ArchiveManager {
             }
         }
         return f.delete();
+    }
+
+    private class ArchivePathManager {
+        private String clazz = "";
+        private boolean found = false;
+        private boolean extracted = false;
+        private ArrayList<String> currentPath = new ArrayList<>();
+
+        public boolean wasFound() {
+            return found;
+        }
+
+        public boolean isExtracted() {
+            return extracted;
+        }
+
+        public void setExtracted() {
+            extracted = true;
+        }
+
+        public void setFound() {
+            found = true;
+        }
+
+        public void addPathPart(String str) {
+            currentPath.add(str);
+        }
+
+        public int getPathSize() {
+            return currentPath.size();
+        }
+
+        public String get(int i) {
+            return currentPath.get(i);
+        }
+
+        public void removePathPart(String str) {
+            currentPath.remove(str);
+        }
+
+        public String getCurrentClazz() {
+            return clazz;
+        }
+
+        public void setClazz(String str) {
+            clazz = str;
+        }
     }
 }
