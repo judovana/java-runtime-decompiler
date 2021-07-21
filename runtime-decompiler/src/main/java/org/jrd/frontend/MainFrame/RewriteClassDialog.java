@@ -4,7 +4,7 @@ import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.ClassesProvider;
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
-import io.github.mkoncek.classpathless.api.InMemoryCompiler;
+import io.github.mkoncek.classpathless.api.ClasspathlessCompiler;
 import io.github.mkoncek.classpathless.api.MessagesListener;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.core.DecompilerRequestReceiver;
@@ -375,7 +375,7 @@ public class RewriteClassDialog extends JDialog {
     private static RewriteClassDialog.CompilationWithResult xompileWithGui(VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapperInformation currentDecompiler, boolean haveCompiler,
             IdentifiedSource... sources) {
         ClassesProvider cp = new RuntimeCompilerConnector.JRDClassesProvider(vmInfo, vmManager);
-        InMemoryCompiler rc;
+        ClasspathlessCompiler rc;
         if (haveCompiler) {
             rc = new RuntimeCompilerConnector.ForeignCompilerWrapper(pm, currentDecompiler);
         } else {
@@ -456,7 +456,7 @@ public class RewriteClassDialog extends JDialog {
     }
 
     private static class CompilationWithResult implements Runnable {
-        private final InMemoryCompiler rc;
+        private final ClasspathlessCompiler rc;
         private final ClassesProvider cp;
         private final JTextArea compilationLog;
         private final IdentifiedSource[] sources;
@@ -464,7 +464,7 @@ public class RewriteClassDialog extends JDialog {
         private Collection<IdentifiedBytecode> result;
 
 
-        public CompilationWithResult(InMemoryCompiler rc, ClassesProvider cp, JTextArea compilationLog, IdentifiedSource... sources) {
+        public CompilationWithResult(ClasspathlessCompiler rc, ClassesProvider cp, JTextArea compilationLog, IdentifiedSource... sources) {
             this.rc = rc;
             this.cp = cp;
             this.compilationLog = compilationLog;
