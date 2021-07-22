@@ -329,9 +329,6 @@ public class Cli {
             public void addMessage(Level level, String message) {
                 System.err.println(message);
             }
-            public void addMessage(Level var1, String var2, Object... var3) {
-                addMessage(var1, String.format(var2, var3));
-            }
         }), isis);
         boolean upload = false;
         if (saving.shouldSave()) {
