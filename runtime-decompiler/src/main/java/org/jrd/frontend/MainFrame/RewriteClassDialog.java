@@ -480,9 +480,6 @@ public class RewriteClassDialog extends JDialog {
                         OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, s);
                         compilationLog.setText(compilationLog.getText() + s + "\n");
                     }
-                    public void addMessage(Level var1, String var2, Object... var3) {
-                        addMessage(var1, String.format(var2, var3));
-                    }
                 }), sources);
             } catch (Exception ex) {
                 this.ex = ex;
