@@ -247,6 +247,11 @@ public class PluginConfigurationEditorController {
     }
 
     private void removeWrapper(DecompilerWrapperInformation wrapperInformation) {
+        if (wrapperInformation == null) {
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Attempted Delete operation with no plugin wrapper selected.");
+            return;
+        }
+
         JList wrapperJList = view.getPluginListPanel().getWrapperJList();
         String name = wrapperInformation.toString();
         int dialogResult = JOptionPane.showConfirmDialog(view, "Are you sure you want to remove " +
