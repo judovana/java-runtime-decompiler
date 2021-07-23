@@ -81,9 +81,9 @@ public class PluginManager {
     private void loadConfig(File file) {
         if (file.getName().endsWith(".json")) {
             DecompilerWrapperInformation wrapper;
-            try {
-                wrapper = gson.fromJson(new FileReader(file.getAbsolutePath()), DecompilerWrapperInformation.class);
-            } catch (FileNotFoundException | NullPointerException e) {
+            try (FileReader fileReader = new FileReader(file.getAbsolutePath())){
+                wrapper = gson.fromJson(fileReader, DecompilerWrapperInformation.class);
+            } catch (IOException | NullPointerException e) {
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, e);
                 wrapper = null;
             }
