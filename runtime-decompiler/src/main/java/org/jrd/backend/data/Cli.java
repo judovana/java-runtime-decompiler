@@ -610,36 +610,44 @@ public class Cli {
     }
 
     private void printHelp() {
-        System.out.println(
-                "Allowed are: " + LISTJVMS + " , " + LISTPLUGINS + " , " + LISTCLASSES + ", " + BASE64 + " , " + BYTES + ", " + DECOMPILE + ", " + COMPILE + ", " + VERBOSE + ", " + OVERWRITE + " (+ "
-                        + SAVEAS + " and " + SAVELIKE + ")");
-        System.out.println(VERBOSE + " will set this app to print out all Exceptions and some debugging strings. Then continues ");
-        System.out.println(HELP + "/" + H + " print this help end exit");
-        System.out.println(LISTJVMS + " no arg expected, list available localhost JVMs ");
-        System.out.println(LISTPLUGINS + "  no arg expected, currently configured plugins with theirs status");
-        System.out.println(" ! PUC ! pid xor hostname:port xor class-path of VM. Classpath separator is `" + File.pathSeparator + "`");
-        System.out.println("    ! Dont forget to repalce $ in inner classes as \\$ otherwise it is regex's end of line");
-        System.out.println(LISTCLASSES + "  first arg - PUC of JVM. List its loaded classes. Optionally takes more arguments - filtering regexes");
-        System.out.println(BYTES + "  at least two args - PUC of JVM and class(es)/regex(es) to obtain - will stdout its binary form");
-        System.out.println(BASE64 + " at least  two args - PUC of JVM and class(es)/regex(es) to obtain - will stdout its binary encoded as base64");
-        System.out.println(DECOMPILE + "  at least three args - PUC of JVM and name/file of decompiler config and class(es)/regex(es) to obtain - will stdout/save decompiled class(es)");
-        System.out.println("              you can use special keyword javap, instead of decompiler name, to use javap disassembler.");
-        System.out.println("              You can pass also parameters to it like any other javap, but without space. So e.g. javap-v is equal to call javap -v /tmp/class_you_entered.class");
-        System.out.println(COMPILE + "  compile local file(s) against runtime classapth. Plugin can have its own compiler, eg jasm or jcoder do not require runtime classpath");
-        System.out.println("              mandatory: file(s) to compile");
-        System.out.println("              optional: PUC of runtime classpath, plugin, recursive if sources are in dir(s), if no " + SAVEAS
-                + " is presented, then stdout is used, but will fail if more then one file is result)");
-        System.out.println(
-                "                           -cp <PUC>     -p <plugin>     -r    If the " + SAVEAS + " is pid of existing vm or host:port, the output of compilation will be attempted to be injected ");
-        System.out.println(OVERWRITE + "  three args - PUC of JVM and class to overwrite and file with new bytecode. If file is missing, stdin will be used");
-        System.out.println(SAVEAS + "  can acompany most of above command, and will repalce stdout with file(s) by its " + SAVELIKE + " style");
-        System.out.println(SAVELIKE + "  can acompany " + SAVEAS + " and canbe one of:");
-        System.out.println(
-                "        " + Saving.DIR + "(to save class/in/folder/name.class, default for binaries), " + Saving.FQN + "(to save as fully.qualified.name.java, default for sources) or " + Saving.EXACT
-                        + "(to save as you say, default for everything else)");
-        System.out.println(
-                "Allowed are: " + LISTJVMS + " , " + LISTPLUGINS + " , " + LISTCLASSES + ", " + BASE64 + " , " + BYTES + ", " + DECOMPILE + ", " + COMPILE + ", " + VERBOSE + ", " + OVERWRITE + " (+ "
-                        + SAVEAS + " and " + SAVELIKE + ")");
+        String helpString = "Usage:\n" +
+                "  (./start.sh|start.bat) [" + VERBOSE + "] # launches GUI\n" +
+                "  (./start.sh|start.bat) [" + VERBOSE + "] (" + HELP + "|" + LISTJVMS + "|" + LISTPLUGINS + "|" + OVERWRITE + ")\n" +
+                "  (./start.sh|start.bat) [" + VERBOSE + "] (" + LISTCLASSES + "|" + BYTES + "|" + BASE64 + "|" + COMPILE + "|" + DECOMPILE + ") [" + SAVEAS + " <PATH> [" + SAVELIKE + " <SAVE METHOD>]]\n" +
+                "Available options:\n" +
+                "  " + HELP + ", " + H + "                                         Print this help text.\n" +
+                "  " + VERBOSE + "                                          All exceptions and some debugging strings will be printed to standard error.\n" +
+                "  " + BASE64 + " <PUC> <CLASS REGEX>...               Print Base64 encoded binary form of requested classes of a process.\n" +
+                "  " + BYTES + " <PUC> <CLASS REGEX>...                     Print binary form of requested classes of a process.\n" +
+                "  " + LISTJVMS + "                                         List all local Java processes and their PIDs.\n" +
+                "  " + LISTPLUGINS + "                                      List all currently configured decompiler plugins and their statuses.\n" +
+                "  " + LISTCLASSES + " <PUC> [<CLASS REGEX>...]             List all loaded classes of a process, optionally filtering them.\n" +
+                "                                                    Only '" + SAVELIKE + " " + Saving.EXACT + "' or '" + SAVELIKE + " " + Saving.DEFAULT + "' is allowed.\n" +
+                "  " + COMPILE + " [-p <PLUGIN>] [-cp <PUC>] [-r] <PATH>... Compile local files against runtime classpath, specified by -cp.\n" +
+                "                                                    Use -p to utilize some plugins' (like jasm or jcoder) bundled compilers.\n" +
+                "                                                    Use -r for recursive search if <PATH> is a directory.\n" +
+                "                                                    If the argument of '" + SAVEAS + "' is a valid PID or URL, the compiled code will be attempted to be injected into that process.\n" +
+                "                                                    If multiple PATHs were specified, but no '" + SAVEAS + "', the process fails.\n" +
+                "  " + DECOMPILE + " <PUC> <PLUGIN> <CLASS REGEX>...        Decompile and print classes of a process with the specified decompiler plugin.\n" +
+                "                                                    Javap can be passed options by appending them without spaces: 'javap-v-public ...' executes as 'javap -v -public ...'\n" +
+                "  " + OVERWRITE + " <PUC> <CLASS NAME> [<CLASS FILE>]      Overwrite class of a process with new bytecode. If <CLASS FILE> is not set, standard input is used.\n" +
+                "Saving modifiers:\n" +
+                "  " + SAVEAS + " <PATH>                                    All outputs will be written to PATH instead of to standard output.\n" +
+                "  " + SAVELIKE + " <SAVE METHOD>                           Specify how saving will behave.\n" +
+                "Additional information:\n" +
+                "  All options can be with either one or two leading slashes ('-').\n" +
+                "  When using <CLASS REGEX>, don't forget to escape dollar signs '$' of inner classes to '\\$' , as otherwise they are treated as end-of-line by REGEX.\n" +
+                "  <PUC>, short for PidUrlClasspath, can be one of:\n" +
+                "      - local process PID\n" +
+                "      - remote process URL, in the format of 'hostname:port'\n" +
+                "      - classpath of JAR on the filesystem (classpath separator is '" + File.pathSeparator + "')\n" +
+                "  <SAVE METHOD> can be one of:\n" +
+                "      '" + Saving.DIR + "' - Result will be saved as '<PATH>/fully/qualified/name.class'. Default for .class binaries.\n" +
+                "      '" + Saving.FQN + "' - Result will be saved as '<PATH>/fully.qualified.name.java'. Default for .java sources.\n" +
+                "      '" + Saving.EXACT + "' - Result will be saved exactly to '<PATH>'. Default for everything else.\n" +
+                "      '" + Saving.DEFAULT + "' - Saving uses the defaults mentioned above.\n";
+
+        System.out.print(helpString);
     }
 
     private static String invalidityToString(boolean invalidWrapper) {
