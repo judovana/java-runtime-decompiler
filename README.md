@@ -70,7 +70,8 @@ Different results may be achieved with different decompilers; you can select the
 ### Overwriting classes
 Using the *Overwrite button* at the top, you can replace the currently selected class' bytecode with your own compiled .class file via a dialog.
 ### CLI
-Commandline interface is powerful and allows for bulk processing of VM's, jars and much more...
+Commandline interface is powerful and allows for bulk processing of VM's, jars and much more...\
+Enter `./start.sh --help` in a *Linux terminal* or `start.bat --help` in a *Windows CMD* to get started.
 
 ___
 ![](https://user-images.githubusercontent.com/47597303/63510098-01977e00-c4de-11e9-8a72-24cec35bbc79.png)
