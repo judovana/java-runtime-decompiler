@@ -263,8 +263,9 @@ public class PluginConfigurationEditorController {
         pluginManager.deleteWrapper(wrapperInformation);
         configPanelHashMap.remove(wrapperInformation);
         updateWrapperList(pluginManager.getWrappers());
+
         if (wrapperJList.getModel().getSize() == 0) {
-            view.dispose();
+            view.clearConfigPanel();
             return;
         }
         wrapperJList.setSelectedIndex(0);

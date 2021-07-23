@@ -73,4 +73,12 @@ public class PluginConfigurationEditorView extends JDialog {
         }
         cardLayoutForConfigPanels.show(cardConfigPanel, id);
     }
+
+    public void clearConfigPanel() {
+        assert cardConfigPanel.getComponentCount() == 1;
+
+        cardConfigPanel.removeAll();
+        cardConfigPanel.revalidate();
+        cardConfigPanel.repaint();
+    }
 }
