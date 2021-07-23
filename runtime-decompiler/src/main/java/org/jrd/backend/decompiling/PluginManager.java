@@ -21,6 +21,8 @@ import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
@@ -238,8 +240,17 @@ public class PluginManager {
         wrappers.remove(wrapperInformation);
 
         if (wrapperInformation.getScope().equals("local")) {
-            new File(wrapperInformation.getFileLocation()).delete();
-            new File(flipWrapperExtension(wrapperInformation.getFileLocation())).delete();
+            try {
+                Files.delete(Path.of(wrapperInformation.getFileLocation()));
+            } catch (IOException e) {
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
+            }
+
+            try {
+                Files.delete(Path.of(flipWrapperExtension(wrapperInformation.getFileLocation())));
+            } catch (IOException e) {
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
+            }
         }
     }
 
