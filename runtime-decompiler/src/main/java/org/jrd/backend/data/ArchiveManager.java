@@ -91,6 +91,10 @@ public class ArchiveManager {
      */
     public static boolean shouldOpen(String n) throws IOException {
         /* This way has been selected as there's no other "easier" way of determining if it is an archive.
+           We initially tried to use streams - open a stream over ZipEntry, but because of the way streams work this method is not possible as it will
+           edit the original entry and there's no way of returning back. This caused some branches to be skipped while searching.
+           Also closing stream derived from another stream, will close all streams that are connected, even the parent stream. This was a concern as there might be a lot of
+           streams opened and none of them could be closed until they are all fully searched.
          * If you wish to add a format, feel free to PR */
         String name = n.toLowerCase();
         return name.endsWith(".zip") || name.endsWith(".jar") || name.endsWith(".war") || name.endsWith(".ear");
