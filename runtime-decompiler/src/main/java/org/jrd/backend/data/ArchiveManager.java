@@ -25,14 +25,14 @@ public class ArchiveManager {
         return singleton;
     }
 
-    File c;
+
     final String tmpdir = System.getProperty("java.io.tmpdir");
     final String fileSeparator = System.getProperty("file.separator");
     ArrayList<String> currentPathInJars = new ArrayList<>();
     ArchivePathManager pathManager = new ArchivePathManager();
     int currentD = 0;
 
-    public void setFile(File c) {this.c = c;}
+    //public void setFile(File c) {this.c = c;}
 
     /**
      * Finds out whether desired class is contained in <code>c</code>
@@ -41,7 +41,7 @@ public class ArchiveManager {
      * @return Whether class is in this file
      * @throws IOException Error while reading streams
      */
-    public boolean isClassInFile(String clazz) throws IOException {
+    public boolean isClassInFile(String clazz, File c) throws IOException {
         ZipInputStream zis = new ZipInputStream(new FileInputStream(c));
         if (pathManager.wasFound() && pathManager.getCurrentClazz().equals(clazz)) {
             return true;
@@ -115,7 +115,7 @@ public class ArchiveManager {
      * @return .jar containing desired class
      * @throws IOException Error while reading streams
      */
-    public File unpack() throws IOException {
+    public File unpack(File c) throws IOException {
         if (pathManager.isExtracted()) {
             // If file is already extracted, return the extracted one
             return new File(tmpdir + fileSeparator + "jrd" + fileSeparator + (pathManager.getPathSize() - 2) + fileSeparator + (pathManager.get(pathManager.getPathSize() - 1)));
@@ -202,7 +202,7 @@ public class ArchiveManager {
     /**
      * Packs unpacked files
      */
-    public void pack() throws IOException {
+    public void pack(File c) throws IOException {
         // Go from end to start
         int i = pathManager.getPathSize();
         i -= 2;

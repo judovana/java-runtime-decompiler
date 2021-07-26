@@ -132,13 +132,12 @@ public class FsAgent implements JrdAgent {
                             throw new IOException("Trying to find class but no class is specified");
                         }
                         ArchiveManager am = ArchiveManager.getInstance();
-                        am.setFile(c);
-                        if (am.isClassInFile(clazz)) {
+                        if (am.isClassInFile(clazz, c)) {
                             if (am.needExtract()) {
-                                File f = am.unpack();
+                                File f = am.unpack(c);
                                 T ret = onEntryOther(f, clazz, op);
                                 if (op instanceof WriteingCpOperator) {
-                                    am.pack();
+                                    am.pack(c);
                                 }
                                 return ret;
                             } else {
