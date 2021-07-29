@@ -32,8 +32,6 @@ public class ArchiveManager {
     ArchivePathManager pathManager = new ArchivePathManager();
     int currentD = 0;
 
-    //public void setFile(File c) {this.c = c;}
-
     /**
      * Finds out whether desired class is contained in <code>c</code>
      *
