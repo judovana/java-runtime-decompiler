@@ -18,13 +18,13 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 public class ArchiveManager {
     private static ArchiveManager singleton = null;
 
-    public static ArchiveManager getInstance() {
-        if (singleton == null) {
-            singleton = new ArchiveManager();
-        }
-        return singleton;
+    private static class ArchiveManagerHolder {
+        private static final ArchiveManager INSTANCE = new ArchiveManager();
     }
 
+    public static ArchiveManager getInstance() {
+        return ArchiveManagerHolder.INSTANCE;
+    }
 
     final String tmpdir = System.getProperty("java.io.tmpdir");
     final String fileSeparator = System.getProperty("file.separator");
