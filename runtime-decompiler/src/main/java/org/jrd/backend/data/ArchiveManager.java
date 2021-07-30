@@ -16,7 +16,6 @@ import java.util.zip.ZipOutputStream;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class ArchiveManager {
-    private static ArchiveManager singleton = null;
 
     private static class ArchiveManagerHolder {
         private static final ArchiveManager INSTANCE = new ArchiveManager();
@@ -28,7 +27,6 @@ public class ArchiveManager {
 
     final String tmpdir = System.getProperty("java.io.tmpdir");
     final String fileSeparator = System.getProperty("file.separator");
-    ArrayList<String> currentPathInJars = new ArrayList<>();
     ArchivePathManager pathManager = new ArchivePathManager();
     int currentD = 0;
 
