@@ -1,7 +1,6 @@
 package org.jrd.backend.data;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class ArchiveManagerOptions {
@@ -15,12 +14,7 @@ public class ArchiveManagerOptions {
 	}
 
 	private final List<String> extensions = new ArrayList<>();
-	private final List<String> defaults = Arrays.asList(".zip", ".jar", ".war", ".ear");
-	private boolean defaultsOn = true;
-
-	public void defaultsOn(boolean on) {
-		defaultsOn = on;
-	}
+	private static final List<String> defaults = List.of(".zip", ".jar", ".war", ".ear");
 
 	public void addExtension(String s) {
 		if (s.startsWith(".")) {
@@ -35,11 +29,8 @@ public class ArchiveManagerOptions {
 	}
 
 	public List<String> getExtensions() {
-		if (defaultsOn) {
-			List<String> ret = new ArrayList<>();
-			ret.addAll(extensions);
-			ret.addAll(defaults);
-			return ret;
+		if (extensions.isEmpty()) {
+			return defaults;
 		}
 		return extensions;
 	}
