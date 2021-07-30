@@ -11,12 +11,7 @@ public class ArchiveManagerOptions {
 	}
 
 	public static ArchiveManagerOptions getInstance() {
-		try {
-			return ArchiveManagerOptionsHolder.INSTANCE;
-		} catch (Throwable t) {
-			System.out.println("Error cyka");
-			throw(t);
-		}
+		return ArchiveManagerOptionsHolder.INSTANCE;
 	}
 
 	private final List<String> extensions = new ArrayList<>();
