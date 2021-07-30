@@ -97,7 +97,7 @@ public class ArchiveManager {
         String name = n.toLowerCase();
         String[] tmp = name.split("\\.");
         String extension = "." + tmp[tmp.length - 1];
-        return name.endsWith(".zip") || name.endsWith(".jar") || name.endsWith(".war") || name.endsWith(".ear") || ArchiveManagerOptions.getExtensions().contains(extension);
+        return ArchiveManagerOptions.getInstance().getExtensions().contains(extension);
     }
 
     /**
