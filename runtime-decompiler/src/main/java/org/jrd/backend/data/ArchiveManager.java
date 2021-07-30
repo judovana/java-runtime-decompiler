@@ -93,9 +93,11 @@ public class ArchiveManager {
            edit the original entry and there's no way of returning back. This caused some branches to be skipped while searching.
            Also closing stream derived from another stream, will close all streams that are connected, even the parent stream. This was a concern as there might be a lot of
            streams opened and none of them could be closed until they are all fully searched.
-         * If you wish to add a format, feel free to PR */
+         * Option to add custom extensions will be added */
         String name = n.toLowerCase();
-        return name.endsWith(".zip") || name.endsWith(".jar") || name.endsWith(".war") || name.endsWith(".ear");
+        String[] tmp = name.split("\\.");
+        String extension = "." + tmp[tmp.length - 1];
+        return name.endsWith(".zip") || name.endsWith(".jar") || name.endsWith(".war") || name.endsWith(".ear") || ArchiveManagerOptions.getExtensions().contains(extension);
     }
 
     /**
