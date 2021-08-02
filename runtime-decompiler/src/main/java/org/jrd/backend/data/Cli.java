@@ -222,33 +222,33 @@ public class Cli {
         }
         String jvmStr = args.get(i + 1);
         String classStr = args.get(i + 2);
-            if (newBytecodeFile != null) {
-                FiletoClassValidator.StringAndScore r = FiletoClassValidator.validate(classStr, newBytecodeFile);
-                if (r.score > 0 && r.score < 10) {
-                    System.err.println("WARNING:" + r.message);
-                }
-                if (r.score >= 10) {
-                    System.err.println("ERROR:" + r.message);
-                }
+        if (newBytecodeFile != null) {
+            FiletoClassValidator.StringAndScore r = FiletoClassValidator.validate(classStr, newBytecodeFile);
+            if (r.score > 0 && r.score < 10) {
+                System.err.println("WARNING:" + r.message);
             }
-            VmInfo vmInfo = getVmInfo(jvmStr);
-            String clazz;
-            if (newBytecodeFile == null) {
-                clazz = VmDecompilerInformationController.stdinToBase64();
-            } else {
-                clazz = VmDecompilerInformationController.fileToBase64(newBytecodeFile);
+            if (r.score >= 10) {
+                System.err.println("ERROR:" + r.message);
             }
-            AgentRequestAction request = VmDecompilerInformationController.createRequest(vmInfo,
-                    AgentRequestAction.RequestAction.OVERWRITE,
-                    classStr,
-                    clazz);
-            String response = VmDecompilerInformationController.submitRequest(vmManager, request);
-            if (response.equals("ok")) {
-                System.out.println("Most likely done successfully.");
-            } else {
-                throw new RuntimeException(VmDecompilerInformationController.CLASSES_NOPE);
+        }
+        VmInfo vmInfo = getVmInfo(jvmStr);
+        String clazz;
+        if (newBytecodeFile == null) {
+            clazz = VmDecompilerInformationController.stdinToBase64();
+        } else {
+            clazz = VmDecompilerInformationController.fileToBase64(newBytecodeFile);
+        }
+        AgentRequestAction request = VmDecompilerInformationController.createRequest(vmInfo,
+                AgentRequestAction.RequestAction.OVERWRITE,
+                classStr,
+                clazz);
+        String response = VmDecompilerInformationController.submitRequest(vmManager, request);
+        if (response.equals("ok")) {
+            System.out.println("Most likely done successfully.");
+        } else {
+            throw new RuntimeException(VmDecompilerInformationController.CLASSES_NOPE);
 
-            }
+        }
     }
 
     private void compile(List<String> args, int i) throws Exception {
