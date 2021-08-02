@@ -222,7 +222,6 @@ public class Cli {
         }
         String jvmStr = args.get(i + 1);
         String classStr = args.get(i + 2);
-        try {
             if (newBytecodeFile != null) {
                 FiletoClassValidator.StringAndScore r = FiletoClassValidator.validate(classStr, newBytecodeFile);
                 if (r.score > 0 && r.score < 10) {
@@ -232,7 +231,7 @@ public class Cli {
                     System.err.println("ERROR:" + r.message);
                 }
             }
-            VmInfo vmInfo = vmManager.findVmFromPID(jvmStr);
+            VmInfo vmInfo = getVmInfo(jvmStr);
             String clazz;
             if (newBytecodeFile == null) {
                 clazz = VmDecompilerInformationController.stdinToBase64();
@@ -250,14 +249,6 @@ public class Cli {
                 throw new RuntimeException(VmDecompilerInformationController.CLASSES_NOPE);
 
             }
-        } catch (NumberFormatException e) {
-            try {
-                URL u = new URL(jvmStr);
-                throw new RuntimeException("Remote VM not yet implemented");
-            } catch (MalformedURLException ee) {
-                throw new RuntimeException("Second param was supposed to be PUC", ee);
-            }
-        }
     }
 
     private void compile(List<String> args, int i) throws Exception {
