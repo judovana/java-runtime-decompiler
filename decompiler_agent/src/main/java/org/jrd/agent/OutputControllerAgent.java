@@ -29,7 +29,7 @@ public class OutputControllerAgent {
         } else {
             s = o.toString();
         }
-        System.out.println(s);
+        System.err.println(s);
     }
 
 }

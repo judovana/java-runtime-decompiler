@@ -62,7 +62,7 @@ public class OutputController {
             s = o.toString();
         }
         if (verbose || level == Level.MESSAGE_ALL) {
-            System.out.println(s);
+            System.err.println(s);
             // in headfull print to some gui console?
         }
     }
