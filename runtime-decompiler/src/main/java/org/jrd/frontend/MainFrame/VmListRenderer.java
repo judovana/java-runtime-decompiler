@@ -37,8 +37,7 @@ public class VmListRenderer extends JPanel implements ListCellRenderer {
             name.setText("   " + vminfo.getVmName().split(" ")[0]);
             pid.setText("   PID: " + vminfo.getVmPid());
             this.setToolTipText(BytecodeDecompilerView.styleTooltip() + "NAME: " + vminfo.getVmName().split(" ")[0] + "<br>PID: " + vminfo.getVmPid() + "</html>");
-        }
-        if (vminfo.getType() == VmInfo.Type.REMOTE) {
+        } else if (vminfo.getType() == VmInfo.Type.REMOTE) {
             name.setText("   Hostname: " + vminfo.getVmName());
             pid.setText("   Port: " + vminfo.getVmDecompilerStatus().getListenPort());
             this.setToolTipText(BytecodeDecompilerView.styleTooltip() + "Hostname: " + vminfo.getVmName() + "<br>Port: " + vminfo.getVmDecompilerStatus().getListenPort() + "</html>");
