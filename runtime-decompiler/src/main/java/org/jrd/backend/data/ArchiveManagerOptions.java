@@ -1,6 +1,7 @@
 package org.jrd.backend.data;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ArchiveManagerOptions {
@@ -13,25 +14,32 @@ public class ArchiveManagerOptions {
 		return ArchiveManagerOptionsHolder.INSTANCE;
 	}
 
-	private final List<String> extensions = new ArrayList<>();
+	private List<String> extensions = new ArrayList<>();
 	private static final List<String> defaults = List.of(".zip", ".jar", ".war", ".ear");
 
-	public void addExtension(String s) {
-		if (s.startsWith(".")) {
-			extensions.add(s);
-		} else {
-			extensions.add("." + s);
-		}
-	}
-
-	public void clearExtensions() {
-		extensions.clear();
+	public void setExtension(List<String> s) {
+		extensions = s;
 	}
 
 	public List<String> getExtensions() {
-		if (extensions.isEmpty()) {
-			return defaults;
+		return Collections.unmodifiableList(extensions);
+	}
+
+	public boolean isInner(String n) {
+		String name = n.toLowerCase();
+		if (extensions == null || extensions.isEmpty() || (extensions.size() == 1 && extensions.get(0).trim().isEmpty())) {
+			return oneEnds(defaults, name);
+		} else {
+			return oneEnds(extensions, name);
 		}
-		return extensions;
+	}
+
+	private boolean oneEnds(List<String> suffixes, String name) {
+		for (String suffix : suffixes) {
+			if (name.endsWith(suffix.toLowerCase())) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

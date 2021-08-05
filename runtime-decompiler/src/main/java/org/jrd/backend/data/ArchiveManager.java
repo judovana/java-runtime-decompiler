@@ -92,10 +92,7 @@ public class ArchiveManager {
            Also closing stream derived from another stream, will close all streams that are connected, even the parent stream. This was a concern as there might be a lot of
            streams opened and none of them could be closed until they are all fully searched.
          * Option to add custom extensions will be added */
-        String name = n.toLowerCase();
-        String[] tmp = name.split("\\.");
-        String extension = "." + tmp[tmp.length - 1];
-        return ArchiveManagerOptions.getInstance().getExtensions().contains(extension);
+        return ArchiveManagerOptions.getInstance().isInner(n);
     }
 
     /**
