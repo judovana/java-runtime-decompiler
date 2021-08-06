@@ -1,9 +1,12 @@
 package org.jrd.backend.data;
 
 import java.io.File;
-import java.util.Map;
-import java.util.LinkedHashMap;
+import java.io.IOException;
 import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.jrd.backend.data.Cli.*;
@@ -120,6 +123,10 @@ public class Help {
 
         formatter.printNotesHeading();
         formatter.printNotes();
+    }
+
+    public static void main(String[] args) {
+        printHelpText(new ManPageFormatter());
     }
 
     private interface HelpFormatter {
@@ -244,5 +251,108 @@ public class Help {
         }
     }
 
+    private static class ManPageFormatter implements HelpFormatter {
 
+        String formatWrap(char formatChar, String string) {
+            return "\\f" + formatChar + string + "\\fR";
+        }
+
+        String manFormat(String line) {
+            return line.replace("\\", "\\\\") // escape one more time for man parsing
+                    .replaceAll("<(.*?)>", "<\\\\fI$1\\\\fR>"); // underline <PLACEHOLDERS>
+        }
+
+        @Override
+        public void printTitle() {
+            String buildTimestamp;
+
+            try {
+                buildTimestamp = getJrdAttributes().get().getValue("timestamp").split(" ")[0];
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (NoSuchElementException | IndexOutOfBoundsException e) {
+                buildTimestamp = "?";
+            }
+
+            System.out.println(".TH JRD 1 \"" + buildTimestamp + "\"");
+        }
+
+        @Override
+        public void printName() {
+            System.out.println(".SH NAME");
+            System.out.println("JRD - Java Runtime Decompiler");
+        }
+
+        @Override
+        public void printUsageHeading() {
+            System.out.println(".SH SYNOPSIS");
+        }
+
+        @Override
+        public void printOptionsHeading() {
+            System.out.println(".SH OPTIONS");
+        }
+
+        @Override
+        public void printMainOptionsSubheading() {
+            System.out.println(".SS Standard options");
+        }
+
+        @Override
+        public void printSavingOptionsSubheading() {
+            System.out.println(".SS Saving modifiers");
+        }
+
+        @Override
+        public void printOptions(Map<String, String> map) {
+            for (Map.Entry<String, String> entry : map.entrySet()) {
+                String manPageParagraphs = entry.getValue().replaceAll("\n", "\n\n ");
+
+                System.out.println(
+                        ".HP\n" +
+                        manFormat(entry.getKey()) + "\n " +
+                        manFormat(manPageParagraphs)
+                );
+            }
+        }
+
+        @Override
+        public String optionize(String[] options) {
+            return "(" +
+                    Stream.of(options)
+                        .map(s -> formatWrap('B', s))
+                        .collect(Collectors.joining("|")) +
+                    ")";
+        }
+
+
+        @Override
+        public String launcher() {
+            return "\n" +
+                    // paragraph separation
+                    optionize(new String[] {LAUNCHER_LINUX, LAUNCHER_WINDOWS}) +
+                    " [" + formatWrap('I', VERBOSE) + "] "; // trailing space separates from rest of line
+        }
+
+        @Override
+        public String savingModifiers() {
+            return " [" + formatWrap('I', SAVEAS) + " [" + formatWrap('I', SAVELIKE) + "]]";
+        }
+
+        @Override
+        public void printNotesHeading() {
+            System.out.println(".SH NOTES");
+        }
+
+        @Override
+        public void printNotes() {
+            for (Map.Entry<String, String[]> entry : NOTES.entrySet()) {
+                System.out.println(".HP\n" + manFormat(entry.getKey()) + "\n");
+
+                for (String item : entry.getValue()) {
+                    System.out.println("\\[bu] " + manFormat(item) + "\n"); // unordered list
+                }
+            }
+        }
+    }
 }

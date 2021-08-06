@@ -20,6 +20,7 @@
         <jrd.jdk.arg2>jdk.jdeps,jdk.attach,jdk.hotspot.agent</jrd.jdk.arg2>
         <jrd.jdk.arg3>--add-exports</jrd.jdk.arg3>
         <jrd.jdk.arg4>jdk.jdeps/com.sun.tools.javap=ALL-UNNAMED</jrd.jdk.arg4>
+        <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
     </properties>
 
     <build>
