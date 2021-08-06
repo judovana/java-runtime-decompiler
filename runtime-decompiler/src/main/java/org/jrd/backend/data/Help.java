@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.jrd.backend.data.Cli.*;
-import static org.jrd.backend.decompiling.ExpandableUrl.isOsWindows;
+import static org.jrd.backend.data.Directories.isOsWindows;
 
 public class Help {
 

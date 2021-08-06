@@ -10,7 +10,7 @@ import java.io.File;
 
 import static org.jrd.backend.data.Directories.getJrdLocation;
 import static org.jrd.backend.data.Directories.isPortable;
-import static org.jrd.backend.decompiling.ExpandableUrl.isOsWindows;
+import static org.jrd.backend.data.Directories.isOsWindows;
 import static org.jrd.backend.decompiling.ExpandableUrl.unifySlashes;
 
 public class FileSelectorArrayRow extends JPanel {
