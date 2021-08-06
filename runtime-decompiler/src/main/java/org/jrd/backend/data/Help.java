@@ -55,13 +55,13 @@ public class Help {
     private static final String NOTES_REGEX = "When using <CLASS REGEX>, don't forget to escape dollar signs '$' of inner classes to '\\$', as otherwise they are treated as end-of-line by REGEX.";
     private static final String NOTES_PUC = "<PUC>, short for PidUrlClasspath, can be one of:";
     private static final String NOTES_SAVE = "<SAVE METHOD> can be one of:";
-    private static final String[] NOTES_PUC_ITEMS = new String[] {
+    private static final String[] NOTES_PUC_ITEMS = new String[]{
             "local process PID",
             "remote process URL, in the format of 'hostname:port'",
             "classpath of JAR on the filesystem (classpath separator is '" + File.pathSeparator + "')"
 
     };
-    private static final String[] NOTES_SAVE_ITEMS = new String[] {
+    private static final String[] NOTES_SAVE_ITEMS = new String[]{
             "'" + Saving.DIR + "' - Result will be saved as '<PATH>/fully/qualified/name.class'. Default for .class binaries.",
             "'" + Saving.FQN + "' - Result will be saved as '<PATH>/fully.qualified.name.java'. Default for .java sources.",
             "'" + Saving.EXACT + "' - Result will be saved exactly to '<PATH>'. Default for everything else.",
@@ -104,11 +104,11 @@ public class Help {
     private static final String[] SAVABLE_OPTIONS = {LISTCLASSES, BYTES, BASE64, COMPILE, DECOMPILE};
 
     private static final int LONGEST_FORMAT_LENGTH =
-        Stream.of(ALL_OPTIONS.keySet(), SAVING_OPTIONS.keySet())
-                .flatMap(Collection::stream)
-                .map(String::length)
-                .max(Integer::compare)
-                .orElse(30) + 1; // at least one space between format and text
+            Stream.of(ALL_OPTIONS.keySet(), SAVING_OPTIONS.keySet())
+                    .flatMap(Collection::stream)
+                    .map(String::length)
+                    .max(Integer::compare)
+                    .orElse(30) + 1; // at least one space between format and text
 
     protected static void printHelpText() {
         printHelpText(new CliHelpFormatter());
@@ -167,6 +167,7 @@ public class Help {
 
         /**
          * Joins options together with a pipe and surrounds them in parentheses.
+         *
          * @param options String array containing the individual options
          * @return String in the format of "(opt1|opt2|...)"
          */
@@ -177,7 +178,7 @@ public class Help {
         }
 
         default String[] launchOptions() {
-            return new String[] {
+            return new String[]{
                     "# launches GUI",
                     optionize(UNSAVABLE_OPTIONS),
                     optionize(SAVABLE_OPTIONS) + savingModifiers()
@@ -340,9 +341,8 @@ public class Help {
 
         @Override
         public String launcher() {
-            return "\n" +
-                    // paragraph separation
-                    optionize(new String[] {LAUNCHER_LINUX, LAUNCHER_WINDOWS}) +
+            return "\n" + // paragraph separation
+                    optionize(new String[]{LAUNCHER_LINUX, LAUNCHER_WINDOWS}) +
                     " [" + formatWrap('I', VERBOSE) + "] "; // trailing space separates from rest of line
         }
 
