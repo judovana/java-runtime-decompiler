@@ -32,8 +32,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
@@ -50,6 +55,7 @@ public class Cli {
     private static final String DECOMPILE = "-decompile";
     private static final String COMPILE = "-compile";
     private static final String OVERWRITE = "-overwrite";
+    private static final String VERSION = "-version";
     private static final String HELP = "-help";
     private static final String H = "-h";
 
@@ -129,6 +135,14 @@ public class Cli {
             if (aarg.equals(HELP) || aarg.equals(H)) {
                 printHelp();
                 System.exit(0);
+            }
+            if (aarg.equals(VERSION)) {
+                try {
+                    printVersion();
+                    System.exit(0);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         }
     }
@@ -600,13 +614,30 @@ public class Cli {
         }
     }
 
+    private void printVersion() throws IOException {
+        Enumeration<URL> resources = getClass().getClassLoader().getResources("META-INF/MANIFEST.MF");
+        while (resources.hasMoreElements()) {
+            Manifest manifest = new Manifest(resources.nextElement().openStream());
+            Attributes w = manifest.getAttributes("runtime-decompiler");
+            if (w!=null) {
+                if ("java-runtime-decompiler".equals(w.getValue("groupId")) &&
+                        "runtime-decompiler".equals(w.getValue("artifactId"))) {
+                    System.out.println((w.getValue("groupId")) + " JRD " + w.getValue("version") + " - " + w.getValue("timestamp"));
+                    return;
+                }
+            }
+        }
+    }
+
     private void printHelp() {
         String helpString = "Usage:\n" +
                 "  (./start.sh|start.bat) [" + VERBOSE + "] # launches GUI\n" +
                 "  (./start.sh|start.bat) [" + VERBOSE + "] (" + HELP + "|" + LISTJVMS + "|" + LISTPLUGINS + "|" + OVERWRITE + ")\n" +
-                "  (./start.sh|start.bat) [" + VERBOSE + "] (" + LISTCLASSES + "|" + BYTES + "|" + BASE64 + "|" + COMPILE + "|" + DECOMPILE + ") [" + SAVEAS + " <PATH> [" + SAVELIKE + " <SAVE METHOD>]]\n" +
+                "  (./start.sh|start.bat) [" + VERBOSE + "] (" + LISTCLASSES + "|" + BYTES + "|" + BASE64 + "|" + COMPILE + "|" + DECOMPILE + ") [" + SAVEAS + " <PATH> [" + SAVELIKE
+                + " <SAVE METHOD>]]\n" +
                 "Available options:\n" +
                 "  " + HELP + ", " + H + "                                         Print this help text.\n" +
+                "  " + VERSION +  "                                          Print version.\n" +
                 "  " + VERBOSE + "                                          All exceptions and some debugging strings will be printed to standard error.\n" +
                 "  " + BASE64 + " <PUC> <CLASS REGEX>...               Print Base64 encoded binary form of requested classes of a process.\n" +
                 "  " + BYTES + " <PUC> <CLASS REGEX>...                     Print binary form of requested classes of a process.\n" +

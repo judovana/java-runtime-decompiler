@@ -5,7 +5,7 @@
     <parent>
         <artifactId>java-runtime-decompiler</artifactId>
         <groupId>java-runtime-decompiler</groupId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>5.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -49,6 +49,15 @@
                             <addClasspath>true</addClasspath>
                             <mainClass>${jrd.client.main.class}</mainClass>
                         </manifest>
+                        <manifestSection>
+                            <name>${project.name}</name>
+                            <manifestEntries>
+                                <groupId>${project.groupId}</groupId>
+                                <artifactId>${project.artifactId}</artifactId>
+                                <version>${project.version}</version>
+                                <timestamp>${maven.build.timestamp}</timestamp>
+                            </manifestEntries>
+                        </manifestSection>
                     </archive>
                 </configuration>
             </plugin>
@@ -74,6 +83,15 @@
                                 <manifest>
                                     <mainClass>${jrd.client.main.class}</mainClass>
                                 </manifest>
+                                <manifestSection>
+                                    <name>${project.name}</name>
+                                    <manifestEntries>
+                                        <groupId>${project.groupId}</groupId>
+                                        <artifactId>${project.artifactId}</artifactId>
+                                        <version>${project.version}</version>
+                                        <timestamp>${maven.build.timestamp}</timestamp>
+                                    </manifestEntries>
+                                </manifestSection>
                             </archive>
                         </configuration>
                     </execution>
