@@ -42,33 +42,35 @@ import java.util.jar.Manifest;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
+import static org.jrd.backend.data.Help.printHelpText;
+
 public class Cli {
 
-    public static final String VERBOSE = "-verbose";
-    public static final String SAVEAS = "-saveas";
-    public static final String SAVELIKE = "-savelike";
-    private static final String LISTJVMS = "-listjvms";
-    private static final String LISTPLUGINS = "-listplugins";
-    private static final String LISTCLASSES = "-listclasses";
-    private static final String BASE64 = "-base64bytes";
-    private static final String BYTES = "-bytes";
-    private static final String DECOMPILE = "-decompile";
-    private static final String COMPILE = "-compile";
-    private static final String OVERWRITE = "-overwrite";
-    private static final String VERSION = "-version";
-    private static final String HELP = "-help";
-    private static final String H = "-h";
+    protected static final String VERBOSE = "-verbose";
+    protected static final String SAVEAS = "-saveas";
+    protected static final String SAVELIKE = "-savelike";
+    protected static final String LISTJVMS = "-listjvms";
+    protected static final String LISTPLUGINS = "-listplugins";
+    protected static final String LISTCLASSES = "-listclasses";
+    protected static final String BASE64 = "-base64bytes";
+    protected static final String BYTES = "-bytes";
+    protected static final String DECOMPILE = "-decompile";
+    protected static final String COMPILE = "-compile";
+    protected static final String OVERWRITE = "-overwrite";
+    protected static final String VERSION = "-version";
+    protected static final String HELP = "-help";
+    protected static final String H = "-h";
 
     private final String[] allargs;
     private final VmManager vmManager;
     private final PluginManager pluginManager;
     private Saving saving;
 
-    private static class Saving implements Utils.StatusKeeper {
-        public static final String DEFAULT = "default";
-        public static final String EXACT = "exact";
-        public static final String FQN = "fqn";
-        public static final String DIR = "dir";
+    protected static class Saving implements Utils.StatusKeeper {
+        protected static final String DEFAULT = "default";
+        protected static final String EXACT = "exact";
+        protected static final String FQN = "fqn";
+        protected static final String DIR = "dir";
         private final String as;
         private final String like;
 
@@ -630,46 +632,7 @@ public class Cli {
     }
 
     private void printHelp() {
-        String helpString = "Usage:\n" +
-                "  (./start.sh|start.bat) [" + VERBOSE + "] # launches GUI\n" +
-                "  (./start.sh|start.bat) [" + VERBOSE + "] (" + HELP + "|" + LISTJVMS + "|" + LISTPLUGINS + "|" + OVERWRITE + ")\n" +
-                "  (./start.sh|start.bat) [" + VERBOSE + "] (" + LISTCLASSES + "|" + BYTES + "|" + BASE64 + "|" + COMPILE + "|" + DECOMPILE + ") [" + SAVEAS + " <PATH> [" + SAVELIKE
-                + " <SAVE METHOD>]]\n" +
-                "Available options:\n" +
-                "  " + HELP + ", " + H + "                                         Print this help text.\n" +
-                "  " + VERSION +  "                                          Print version.\n" +
-                "  " + VERBOSE + "                                          All exceptions and some debugging strings will be printed to standard error.\n" +
-                "  " + BASE64 + " <PUC> <CLASS REGEX>...               Print Base64 encoded binary form of requested classes of a process.\n" +
-                "  " + BYTES + " <PUC> <CLASS REGEX>...                     Print binary form of requested classes of a process.\n" +
-                "  " + LISTJVMS + "                                         List all local Java processes and their PIDs.\n" +
-                "  " + LISTPLUGINS + "                                      List all currently configured decompiler plugins and their statuses.\n" +
-                "  " + LISTCLASSES + " <PUC> [<CLASS REGEX>...]             List all loaded classes of a process, optionally filtering them.\n" +
-                "                                                    Only '" + SAVELIKE + " " + Saving.EXACT + "' or '" + SAVELIKE + " " + Saving.DEFAULT + "' is allowed.\n" +
-                "  " + COMPILE + " [-p <PLUGIN>] [-cp <PUC>] [-r] <PATH>... Compile local files against runtime classpath, specified by -cp.\n" +
-                "                                                    Use -p to utilize some plugins' (like jasm or jcoder) bundled compilers.\n" +
-                "                                                    Use -r for recursive search if <PATH> is a directory.\n" +
-                "                                                    If the argument of '" + SAVEAS + "' is a valid PID or URL, the compiled code will be attempted to be injected into that process.\n" +
-                "                                                    If multiple PATHs were specified, but no '" + SAVEAS + "', the process fails.\n" +
-                "  " + DECOMPILE + " <PUC> <PLUGIN> <CLASS REGEX>...        Decompile and print classes of a process with the specified decompiler plugin.\n" +
-                "                                                    Javap can be passed options by appending them without spaces: 'javap-v-public ...' executes as 'javap -v -public ...'\n" +
-                "  " + OVERWRITE + " <PUC> <CLASS NAME> [<CLASS FILE>]      Overwrite class of a process with new bytecode. If <CLASS FILE> is not set, standard input is used.\n" +
-                "Saving modifiers:\n" +
-                "  " + SAVEAS + " <PATH>                                    All outputs will be written to PATH instead of to standard output.\n" +
-                "  " + SAVELIKE + " <SAVE METHOD>                           Specify how saving will behave.\n" +
-                "Additional information:\n" +
-                "  All options can be with either one or two leading slashes ('-').\n" +
-                "  When using <CLASS REGEX>, don't forget to escape dollar signs '$' of inner classes to '\\$' , as otherwise they are treated as end-of-line by REGEX.\n" +
-                "  <PUC>, short for PidUrlClasspath, can be one of:\n" +
-                "      - local process PID\n" +
-                "      - remote process URL, in the format of 'hostname:port'\n" +
-                "      - classpath of JAR on the filesystem (classpath separator is '" + File.pathSeparator + "')\n" +
-                "  <SAVE METHOD> can be one of:\n" +
-                "      '" + Saving.DIR + "' - Result will be saved as '<PATH>/fully/qualified/name.class'. Default for .class binaries.\n" +
-                "      '" + Saving.FQN + "' - Result will be saved as '<PATH>/fully.qualified.name.java'. Default for .java sources.\n" +
-                "      '" + Saving.EXACT + "' - Result will be saved exactly to '<PATH>'. Default for everything else.\n" +
-                "      '" + Saving.DEFAULT + "' - Saving uses the defaults mentioned above.\n";
-
-        System.out.print(helpString);
+        printHelpText();
     }
 
     private static String invalidityToString(boolean invalidWrapper) {
