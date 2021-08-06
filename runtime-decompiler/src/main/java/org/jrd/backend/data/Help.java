@@ -12,6 +12,9 @@ import java.util.stream.Stream;
 import static org.jrd.backend.data.Cli.*;
 import static org.jrd.backend.data.Directories.isOsWindows;
 
+/**
+ * Class for relaying help texts to the user.
+ */
 public class Help {
 
     private static final String HELP_FORMAT = HELP + ", " + H;
@@ -136,6 +139,10 @@ public class Help {
 
         void printUsageHeading();
 
+        /**
+         * Prints each {@link #launchOptions() launch option} prepended with the common {@link #launcher()} String.
+         * Man page formatting doesn't mind the indentation so this is common for both formatters.
+         */
         default void printUsage() {
             for (String launchOption : launchOptions()) {
                 System.out.println(indent(1) + launcher() + launchOption);
@@ -158,9 +165,14 @@ public class Help {
 
         void printOptions(Map<String, String> map);
 
+        /**
+         * Joins options together with a pipe and surrounds them in parentheses.
+         * @param options String array containing the individual options
+         * @return String in the format of "(opt1|opt2|...)"
+         */
         String optionize(String[] options);
 
-        default String indent(int depth) {
+        default String indent(int depth) { // default because ManPageFormatter doesn't use it
             return "  ".repeat(depth);
         }
 
