@@ -616,19 +616,38 @@ public class Cli {
         }
     }
 
-    private void printVersion() throws IOException {
-        Enumeration<URL> resources = getClass().getClassLoader().getResources("META-INF/MANIFEST.MF");
+    protected static Optional<Attributes> getJrdAttributes() throws IOException {
+        Enumeration<URL> resources = Cli.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
+
         while (resources.hasMoreElements()) {
             Manifest manifest = new Manifest(resources.nextElement().openStream());
-            Attributes w = manifest.getAttributes("runtime-decompiler");
-            if (w!=null) {
-                if ("java-runtime-decompiler".equals(w.getValue("groupId")) &&
-                        "runtime-decompiler".equals(w.getValue("artifactId"))) {
-                    System.out.println((w.getValue("groupId")) + " JRD " + w.getValue("version") + " - " + w.getValue("timestamp"));
-                    return;
+            Attributes attributes = manifest.getAttributes("runtime-decompiler");
+
+            if (attributes != null) {
+                if ("java-runtime-decompiler".equals(attributes.getValue("groupId")) &&
+                        "runtime-decompiler".equals(attributes.getValue("artifactId"))) {
+                    return Optional.of(attributes);
                 }
             }
         }
+
+        return Optional.empty();
+    }
+
+    private void printVersion() throws IOException {
+        Optional<Attributes> maybeAttributes = getJrdAttributes();
+
+        if (maybeAttributes.isEmpty()) {
+            System.out.println("JRD - version unknown");
+            return;
+        }
+
+        Attributes attributes = maybeAttributes.get();
+        System.out.println(
+                attributes.getValue("groupId") + " - JRD - " +
+                attributes.getValue("version") + " - " +
+                attributes.getValue("timestamp")
+        );
     }
 
     private void printHelp() {
