@@ -12,6 +12,7 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
 
 import static org.jrd.backend.data.Directories.getJrdLocation;
+import static org.jrd.backend.data.Directories.isOsWindows;
 import static org.jrd.backend.decompiling.ExpandableUrl.*;
 import static org.junit.jupiter.api.Assertions.*;
 

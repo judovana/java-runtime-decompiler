@@ -14,7 +14,7 @@ import java.util.Collections;
 import com.google.gson.Gson;
 import org.jrd.backend.decompiling.ExpandableUrl;
 
-import static org.jrd.backend.decompiling.ExpandableUrl.isOsWindows;
+import static org.jrd.backend.data.Directories.isOsWindows;
 
 
 /**

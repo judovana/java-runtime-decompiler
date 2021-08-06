@@ -9,6 +9,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import static org.jrd.backend.data.Directories.getJrdLocation;
+import static org.jrd.backend.data.Directories.isOsWindows;
 
 public class ExpandableUrl {
 
@@ -104,10 +105,6 @@ public class ExpandableUrl {
         }
 
         return dir;
-    }
-
-    public static boolean isOsWindows() {
-        return System.getProperty("os.name").toLowerCase().startsWith("win");
     }
 
     public URL getExpandedURL() throws MalformedURLException {

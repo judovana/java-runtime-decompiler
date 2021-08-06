@@ -71,4 +71,8 @@ public final class Directories {
         String purpose = System.getProperty("jrd.purpose");
         return "PORTABLE".equals(purpose);
     }
+
+    public static boolean isOsWindows() {
+        return System.getProperty("os.name").toLowerCase().startsWith("win");
+    }
 }
