@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.jar.Attributes;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -277,17 +278,21 @@ public class Help {
 
         @Override
         public void printTitle() {
-            String buildTimestamp;
+            String buildTimestamp, centerTitle;
 
             try {
-                buildTimestamp = getJrdAttributes().get().getValue("timestamp").split(" ")[0];
+                Attributes attributes = getJrdAttributes().get();
+
+                buildTimestamp = attributes.getValue("timestamp").split(" ")[0];
+                centerTitle = attributes.getValue("groupId");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             } catch (NoSuchElementException | IndexOutOfBoundsException e) {
-                buildTimestamp = "?";
+                buildTimestamp = "";
+                centerTitle = ""; // empty == defaults to "General Commands Manual"
             }
 
-            System.out.println(".TH JRD 1 \"" + buildTimestamp + "\"");
+            System.out.println(".TH JRD 1 \"" + buildTimestamp + "\" \"\" " + centerTitle);
         }
 
         @Override
