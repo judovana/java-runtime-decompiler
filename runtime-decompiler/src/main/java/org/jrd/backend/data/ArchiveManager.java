@@ -38,15 +38,16 @@ public class ArchiveManager {
      * @throws IOException Error while reading streams
      */
     public boolean isClassInFile(String clazz, File c) throws IOException {
-        ZipInputStream zis = new ZipInputStream(new FileInputStream(c));
-        if (pathManager.wasFound() && pathManager.getCurrentClazz().equals(clazz)) {
-            return true;
-        } else {
-            delete();
-            pathManager = new ArchivePathManager();
-            pathManager.setClazz(clazz);
-            pathManager.addPathPart(c.getName());
-            return findClazz(zis, clazz);
+        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(c))) {
+            if (pathManager.wasFound() && pathManager.getCurrentClazz().equals(clazz)) {
+                return true;
+            } else {
+                delete();
+                pathManager = new ArchivePathManager();
+                pathManager.setClazz(clazz);
+                pathManager.addPathPart(c.getName());
+                return findClazz(zis, clazz);
+            }
         }
     }
 
