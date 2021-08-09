@@ -14,12 +14,13 @@ $ mvn clean install -Pimages # on Linux, bundles the plugins and JRD into a stan
 
 # $PLUGINS and $VERIFY_CP variables may help to solve some weird image building issues.
 ```
-Then `./start.sh` in a *Linux terminal* or `start.bat` in a *Windows CMD* to start the application.
+Then, in images/target/runtime-decompiler... `./start.sh` in a *Linux terminal* or `start.bat` in a *Windows CMD* to start the application. The usage of top level start.sh/bat is only for development purposes.
+
 #### Configuring decompiler agent
 In order to start using Java-Runtime-Decompiler, you will need to select the Decompiler Agent's path in *Configure → Agent Path*.
-The Decompiler Agent is a built-in project and can usually be found at `./decompiler_agent/target/decompiler-agent-*.jar`.
+The Decompiler Agent is a built-in project and can usually be found at `./decompiler_agent/target/decompiler-agent-*.jar`. The image should have agent preset.
 #### Configuring external decompilers
-Internal *javap* and *javap -v* decompiling tools are available by default.
+Internal *javap* and *javap -v* decompiling tools are available by default. In image, we try to keep bundled as much decompilers as possible bundled.
 
 Additionally, external decompilers are supported and can be configured in *Configure → Plugins*:
 * You can download them using the links below and set them up yourself using the *New* button.
@@ -49,9 +50,8 @@ The Java-Runtime-Decompiler is packed together with Fernflower and Procyon decom
 ```
 dnf install java-runtime-decompiler
 ```
-The resulting installation is fully prconfigured.
+The resulting installation is fully preconfigured.
 
-There is also `dnf copr enable radekmanak/java-runtime-decompiler` for a nightly build, but the specfile may be outdated.
 ## Usage
 ### Local Processes
 The list on the top left shows all currently running processes on the local JVM with the name of their main class and their process ID.
