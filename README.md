@@ -28,6 +28,7 @@ Additionally, external decompilers are supported and can be configured in *Confi
 Currently supported decompilers are:
 * [Fernflower](https://github.com/JetBrains/intellij-community/tree/master/plugins/java-decompiler/engine)
 * [Procyon](https://bitbucket.org/mstrobel/procyon/downloads/)
+* [CFR](https://github.com/leibnitz27/cfr/)
 
 Assemblers/Disassemblers
 * [jasm](https://github.com/openjdk/asmtools)
