@@ -45,6 +45,8 @@ public class PluginManager {
 
     Gson gson;
 
+    public static final String UNDECOMPILABLE_LAMBDA = "$$Lambda";
+
     public PluginManager() {
         loadConfigs();
     }
@@ -95,6 +97,11 @@ public class PluginManager {
         }
     }
 
+    private boolean isDecompilableInnerClass(String baseClass, String currentClass) {
+        return !currentClass.contains(UNDECOMPILABLE_LAMBDA) && (currentClass.startsWith(baseClass + "$") ||
+                        currentClass.startsWith(baseClass.replaceAll("__init$", "") + "$"));
+    }
+
     /**
      * @param wrapper   decompiler used for decompiling
      * @param name      optional name for decompielrs supporting inner classes
@@ -118,7 +125,7 @@ public class PluginManager {
             String[] allClasses = Cli.obtainClasses(vmInfo, vmManager);
             Map<String, byte[]> innerClasses = new HashMap<>();
             for (String clazz : allClasses) {
-                if (clazz.startsWith(name + "$") || clazz.startsWith(name.replaceAll("__init$", "") + "$")) {
+                if (isDecompilableInnerClass(name, clazz)) {
                     innerClasses.put(clazz, Base64.getDecoder().decode(Cli.obtainClass(vmInfo, clazz, vmManager).getLoadedClassBytes()));
                 }
             }
