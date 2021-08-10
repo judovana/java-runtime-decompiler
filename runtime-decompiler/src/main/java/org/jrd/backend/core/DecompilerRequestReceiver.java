@@ -13,6 +13,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+import static org.jrd.backend.decompiling.PluginManager.UNDECOMPILABLE_LAMBDA;
+
 /**
  * This class manages the requests that are put in queue by the controller.
  */
@@ -201,12 +203,13 @@ public class DecompilerRequestReceiver {
                         if (!o1.startsWith("[") && o2.startsWith("[")) {
                             return -1;
                         }
-                        if (o1.contains("$$Lambda") && !o2.contains("$$Lambda")) {
+                        if (o1.contains(UNDECOMPILABLE_LAMBDA) && !o2.contains(UNDECOMPILABLE_LAMBDA)) {
                             return 1;
                         }
-                        if (!o1.contains("$$Lambda") && o2.contains("$$Lambda")) {
+                        if (!o1.contains(UNDECOMPILABLE_LAMBDA) && o2.contains(UNDECOMPILABLE_LAMBDA)) {
                             return -1;
                         }
+
                         return o1.compareTo(o2);
                     }
                 });
