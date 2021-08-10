@@ -175,7 +175,7 @@ public class PluginManager {
                 compiler.run(null, null, null, wrapper.getWrapperURL().getExpandedPath(),
                         "-cp", URLListToCSV(wrapper.getDependencyURLs(), System.getProperty("path.separator")), "-d", System.getProperty("java.io.tmpdir"));
                 // Load wrapper
-                URL tempDirURL = new URL("file://" + System.getProperty("java.io.tmpdir") + "/");
+                URL tempDirURL = new URL("file:" + System.getProperty("java.io.tmpdir") + "/");
                 List<ExpandableUrl> sTemp = new LinkedList(wrapper.getDependencyURLs());
                 List<URL> s = new LinkedList<>();
                 for (ExpandableUrl u : sTemp) {
