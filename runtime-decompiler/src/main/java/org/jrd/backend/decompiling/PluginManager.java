@@ -292,12 +292,14 @@ public class PluginManager {
         int errLevel = compileWrapper(plugin, errStream);
         //cleaning after compilation
         String fileName = plugin.getWrapperURL().getFile().getName();
-        File fileToRemove = new File(System.getProperty("java.io.tmpdir") + "/" + fileName.substring(0, fileName.length() - 4) + "class");
 
-        if (fileToRemove.exists()) {
-            fileToRemove.delete();
+        try {
+            Files.delete(Path.of(System.getProperty("java.io.tmpdir"), fileName.substring(0, fileName.length() - 4) + "class"));
+        } catch (IOException e) {
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, e);
         }
-        return errLevel != 0 ? new String(errStream.toByteArray()) : null;
+
+        return errLevel != 0 ? errStream.toString() : null;
     }
 
     public DecompilerWrapperInformation createWrapper() {
