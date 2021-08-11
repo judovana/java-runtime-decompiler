@@ -127,13 +127,13 @@ public class ArchiveManager {
         if (!f.mkdir() && !f.exists()) {
             throw new IOException("Could not create directory at '" + f.getAbsolutePath() + "'");
         }
-        {
-            File ret = recursiveUnpack(c);
-            if (ret != null) {
-                pathManager.setExtracted();
-            }
-            return ret;
+
+        File ret = recursiveUnpack(c);
+        if (ret != null) {
+            pathManager.setExtracted();
         }
+        return ret;
+
     }
 
     /**
@@ -147,32 +147,32 @@ public class ArchiveManager {
         if (!destDir.mkdir() && !destDir.exists()) {
             throw new IOException("Could not create directory '" + destDir.getAbsolutePath() + "'");
         }
-        {
-            byte[] buffer = new byte[1024];
-            try (ZipInputStream zis = new ZipInputStream(new FileInputStream(toUnpack))) {
-                ZipEntry zipEntry;
-                while ((zipEntry = zis.getNextEntry()) != null) {
-                    File newFile = newFile(destDir, zipEntry);
-                    if (zipEntry.isDirectory()) {
-                        if (!newFile.isDirectory() && !newFile.mkdirs()) {
-                            throw new IOException("Failed to create directory " + newFile);
-                        }
-                    } else {
-                        File parent = newFile.getParentFile();
-                        if (!parent.isDirectory() && !parent.mkdirs()) {
-                            throw new IOException("Failed to create directory " + parent);
-                        }
 
-                        FileOutputStream fout = new FileOutputStream(newFile);
-                        int len;
-                        while ((len = zis.read(buffer)) > 0) {
-                            fout.write(buffer, 0, len);
-                        }
-                        fout.close();
+        byte[] buffer = new byte[1024];
+        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(toUnpack))) {
+            ZipEntry zipEntry;
+            while ((zipEntry = zis.getNextEntry()) != null) {
+                File newFile = newFile(destDir, zipEntry);
+                if (zipEntry.isDirectory()) {
+                    if (!newFile.isDirectory() && !newFile.mkdirs()) {
+                        throw new IOException("Failed to create directory " + newFile);
                     }
+                } else {
+                    File parent = newFile.getParentFile();
+                    if (!parent.isDirectory() && !parent.mkdirs()) {
+                        throw new IOException("Failed to create directory " + parent);
+                    }
+
+                    FileOutputStream fout = new FileOutputStream(newFile);
+                    int len;
+                    while ((len = zis.read(buffer)) > 0) {
+                        fout.write(buffer, 0, len);
+                    }
+                    fout.close();
                 }
             }
         }
+
         currentD++;
         if (currentD == pathManager.getPathSize() - 1) {
             return new File(destDir.getAbsolutePath() + fileSeparator + pathManager.get(currentD));
