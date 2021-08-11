@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -211,7 +212,7 @@ public class ArchiveManager {
         i -= 2;
         for (; i >= 0; i--) {
             // Create new zip that will contain edited files
-            String[] tmp = pathManager.get(i).split(fileSeparator);
+            String[] tmp = pathManager.get(i).split(Pattern.quote(fileSeparator));
             String path = tmpdir + fileSeparator + "jrd" + fileSeparator + tmp[tmp.length - 1] + fileSeparator;
             FileOutputStream fileStream = new FileOutputStream(path);
             ZipOutputStream zOut = new ZipOutputStream(fileStream);
