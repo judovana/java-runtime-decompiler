@@ -257,6 +257,7 @@ public class FsAgent implements JrdAgent {
             try (DataInputStream dis = new DataInputStream(zipFile.getInputStream(ze))) {
                 dis.readFully(data);
             }
+            zipFile.close();
             return Base64.getEncoder().encodeToString(data);
         }
 
