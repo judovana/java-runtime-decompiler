@@ -1,6 +1,7 @@
 package org.jrd.backend.data;
 
 import org.jrd.backend.communication.FsAgent;
+import org.jrd.backend.core.OutputController;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -116,17 +117,22 @@ public class ArchiveManager {
             // If file is already extracted, return the extracted one
             return new File(tmpdir + fileSeparator + "jrd" + fileSeparator + (pathManager.getPathSize() - 2) + fileSeparator + (pathManager.get(pathManager.getPathSize() - 1)));
         }
-        // Create my dir in tmpdir
-        delete();
+
         File f = new File(tmpdir + fileSeparator + "jrd" + fileSeparator);
-        if (f.mkdir()) {
+        if (f.exists() && !delete()) { // do not log if it didn't even exist before
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Could not delete jrd temp directory at '" + f.getAbsolutePath() + "'!");
+        }
+
+        // Create my dir in tmpdir
+        if (!f.mkdir() && !f.exists()) {
+            throw new IOException("Could not create directory at '" + f.getAbsolutePath() + "'");
+        }
+        {
             File ret = recursiveUnpack(c);
             if (ret != null) {
                 pathManager.setExtracted();
             }
             return ret;
-        } else {
-            throw new IOException("Couldn't create temp file");
         }
     }
 
@@ -138,11 +144,14 @@ public class ArchiveManager {
      */
     private File recursiveUnpack(File toUnpack) throws IOException {
         File destDir = new File(tmpdir + fileSeparator + "jrd" + fileSeparator + currentD);
-        if (destDir.mkdir()) {
+        if (!destDir.mkdir() && !destDir.exists()) {
+            throw new IOException("Could not create directory '" + destDir.getAbsolutePath() + "'");
+        }
+        {
             byte[] buffer = new byte[1024];
             try (ZipInputStream zis = new ZipInputStream(new FileInputStream(toUnpack))) {
                 ZipEntry zipEntry;
-                while ((zipEntry = zis.getNextEntry()) != null ) {
+                while ((zipEntry = zis.getNextEntry()) != null) {
                     File newFile = newFile(destDir, zipEntry);
                     if (zipEntry.isDirectory()) {
                         if (!newFile.isDirectory() && !newFile.mkdirs()) {
@@ -163,8 +172,6 @@ public class ArchiveManager {
                     }
                 }
             }
-        } else {
-            throw new IOException();
         }
         currentD++;
         if (currentD == pathManager.getPathSize() - 1) {
@@ -276,12 +283,19 @@ public class ArchiveManager {
      */
     private boolean deleteRecursive(File f) {
         File[] content = f.listFiles();
+
         if (content != null) {
             for (File file: content) {
                 deleteRecursive(file);
             }
         }
-        return f.delete();
+
+        boolean wasDeleted = f.delete();
+        if (!wasDeleted) {
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Could not delete file '" + f.getAbsolutePath() + "'.");
+        }
+
+        return wasDeleted;
     }
 
     private class ArchivePathManager {
