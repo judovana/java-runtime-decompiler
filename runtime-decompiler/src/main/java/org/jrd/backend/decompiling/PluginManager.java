@@ -171,9 +171,7 @@ public class PluginManager {
         } else {
             try {
                 // Compile Wrapper
-                JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-                compiler.run(null, null, null, wrapper.getWrapperURL().getExpandedPath(),
-                        "-cp", URLListToCSV(wrapper.getDependencyURLs(), System.getProperty("path.separator")), "-d", System.getProperty("java.io.tmpdir"));
+                compileWrapper(wrapper, null);
                 // Load wrapper
                 URL tempDirURL = new URL("file:" + System.getProperty("java.io.tmpdir") + "/");
                 List<ExpandableUrl> sTemp = new LinkedList(wrapper.getDependencyURLs());
@@ -271,6 +269,16 @@ public class PluginManager {
         wrapperInformation.setFileLocation(file.getAbsolutePath());
     }
 
+    private int compileWrapper(DecompilerWrapperInformation wrapper, ByteArrayOutputStream errStream) {
+        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+
+        return compiler.run(null, null, errStream,
+                "-d", System.getProperty("java.io.tmpdir"),
+                "-cp", URLListToCSV(wrapper.getDependencyURLs(), System.getProperty("path.separator")),
+                wrapper.getWrapperURL().getExpandedPath()
+        );
+    }
+
     /**
      * Validating the @param plugin using compilation
      *
@@ -278,29 +286,10 @@ public class PluginManager {
      * @return error message or null
      */
     public String validatePlugin(DecompilerWrapperInformation plugin) {
-        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-        //preparing data for the compiler
-        List<ExpandableUrl> dependencyURLs = plugin.getDependencyURLs();
-        ArrayList<String> compileStringA = new ArrayList<>();
-        compileStringA.add("-d");
-        compileStringA.add(System.getProperty("java.io.tmpdir"));
-
-        if (dependencyURLs != null) {
-            compileStringA.add("-cp");
-
-            StringBuilder dependencyS = new StringBuilder();
-            for (ExpandableUrl dependency : dependencyURLs) {
-                dependencyS.append(System.getProperty("path.separator")).append(dependency.getExpandedPath());
-            }
-            compileStringA.add(dependencyS.toString());
-        }
-
-        compileStringA.add(plugin.getWrapperURL().getExpandedPath());
-        String[] compileString = compileStringA.toArray(new String[0]);
         //compiling and getting error from the compiler
         ByteArrayOutputStream errStream = new ByteArrayOutputStream();
 
-        int errLevel = compiler.run(null, null, errStream, compileString);
+        int errLevel = compileWrapper(plugin, errStream);
         //cleaning after compilation
         String fileName = plugin.getWrapperURL().getFile().getName();
         File fileToRemove = new File(System.getProperty("java.io.tmpdir") + "/" + fileName.substring(0, fileName.length() - 4) + "class");
@@ -352,10 +341,15 @@ public class PluginManager {
      * example: (list){URL1,URL2,URL3} -> (String)URL1:URL2:URL3
      */
     private String URLListToCSV(List<ExpandableUrl> list, String delimeter) {
+        if (list == null) {
+            return "";
+        }
+
         String out = "";
         for (ExpandableUrl url : list) {
             out += url.getExpandedPath() + delimeter;
         }
+
         if (out.length() == 0) {
             return out;
         } else {
