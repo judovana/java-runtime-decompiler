@@ -30,6 +30,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static org.jrd.backend.decompiling.ExpandableUrl.prependFileProtocol;
+
 /**
  * Executes manages external decompiler wrapper plugins.
  * Wrapper plugins are stored as .java files along with .json file containing classname, wrapper url and dependencies url.
@@ -173,7 +175,7 @@ public class PluginManager {
                 // Compile Wrapper
                 compileWrapper(wrapper, null);
                 // Load wrapper
-                URL tempDirURL = new URL("file:" + System.getProperty("java.io.tmpdir") + "/");
+                URL tempDirURL = new URL(prependFileProtocol(System.getProperty("java.io.tmpdir")) + "/"); // trailing slash just in case
                 List<ExpandableUrl> sTemp = new LinkedList(wrapper.getDependencyURLs());
                 List<URL> s = new LinkedList<>();
                 for (ExpandableUrl u : sTemp) {

@@ -54,12 +54,8 @@ public class ExpandableUrl {
         }
     }
 
-    private static String prependFileProtocol(String url) {
-        if (url.startsWith("/")) {
-            return "file:" + url;
-        } else {
-            return "file:/" + url;
-        }
+    protected static String prependFileProtocol(String url) {
+        return "file:" + url;
     }
 
     static String expandEnvVars(String path) {
