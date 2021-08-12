@@ -70,9 +70,64 @@ The text area on the right shows decompiled bytecode of the selected class of th
 Different results may be achieved with different decompilers; you can select the decompiler from the dropdown menu at the top right.
 ### Overwriting classes
 Using the *Overwrite button* at the top, you can replace the currently selected class' bytecode with your own compiled .class file via a dialog.
+
+![](https://user-images.githubusercontent.com/47597303/63510098-01977e00-c4de-11e9-8a72-24cec35bbc79.png)
+
 ### CLI
 Commandline interface is powerful and allows for bulk processing of VM's, jars and much more...\
-Enter `./start.sh --help` in a *Linux terminal* or `start.bat --help` in a *Windows CMD* to get started.
 
-___
-![](https://user-images.githubusercontent.com/47597303/63510098-01977e00-c4de-11e9-8a72-24cec35bbc79.png)
+Enter `./start.sh --help` in a *Linux terminal* or `start.bat --help` in a *Windows CMD* to get started.
+Decompile:
+```
+$ ./start.sh  -decompile ~/git/jc/tool/target/tool-1.0.jar  Cfr  '.*'  -saveas /tmp/jc -savelike dir
+INFO:  Decompiling class org/jc/Tool
+INFO:  ... done
+Saved: /tmp/jc/org/jc/Tool.java
+...
+Saved: /tmp/jc/org/jc/impl/InMemoryJavaClassFileObject.java
+INFO:  Decompiling class org/jc/impl/InMemoryJavaSourceFileObject
+INFO:  ... done
+Saved: /tmp/jc/org/jc/impl/InMemoryJavaSourceFileObject.java
+```
+
+Compile:
+```
+$ ./start.sh -compile -cp  ~/git/classpathless-compiler/target/classpathless-compiler-1.0-SNAPSHOT.jar  /tmp/jc/org/terminusbrut/classpathless/impl/DebugPrinter.java -savelike fqn -saveas .
+Default runtime compiler will be used
+Saved: ./org.terminusbrut.classpathless.impl.DebugPrinter.class
+```
+
+Upload:
+```
+$ ./start.sh  -overwrite  ~/git/classpathless-compiler/target/classpathless-compiler-1.0-SNAPSHOT.jar org.terminusbrut.classpathless.impl.DebugPrinter  org.terminusbrut.classpathless.impl.DebugPrinter.class
+WARNING:Class package do not match directories. 
+Most likely done successfully.
+```
+
+Disassemble:
+```
+$ ./start.sh  -decompile ~/git/jc/tool/target/tool-1.0.jar  jasm  '.*'  -saveas /tmp/jc -savelike dir 
+Note: /home/.../plugins/JasmDecompilerWrapper.java uses unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+Saved: /tmp/jc/org/jc/Tool.java
+Saved: /tmp/jc/org/jc/Tool$Arguments.java
+...
+Saved: /tmp/jc/org/jc/impl/InMemoryJavaClassFileObject.java
+Saved: /tmp/jc/org/jc/impl/InMemoryJavaSourceFileObject.java
+```
+
+Assemble:
+```
+$ ./start.sh  -compile  -p jasm   /tmp/jc -r   -saveas /tmp/bin 
+Note: /home/.../plugins/JasmDecompilerWrapper.java uses unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+jasm plugin is delivered with its own compiler!!
+jasm compiler caled with input of: 16
+...
+Saved: /tmp/bin/org/jc/api/MessagesListener.class
+Saved: /tmp/bin/org/jc/impl/Compiler$1.class
+Saved: /tmp/bin/org/jc/impl/InMemoryJavaSourceFileObject.class
+Saved: /tmp/bin/org/jc/api/InMemoryCompiler.class
+```
+
+Dont forget that all operations are same over classapth, remote vm, or process of VM - *runtime* compiler/decompiler!
