@@ -32,11 +32,19 @@ fi
 
 FROM_CP=`mktemp`
 if  [ "x$VERIFY_CP" = "xTRUE" ] ;  then
-  a=`mktemp`
+  a1=`mktemp`
   pushd ../runtime-decompiler
-    mvn dependency:build-classpath  -PdownloadPlugins  -Dmdep.outputFile=$a
-    readonly CP_TO_VERIFY=$(cat $a)
+    mvn dependency:build-classpath  -PdownloadPlugins  -Dmdep.outputFile=$a1
   popd
+  a2=`mktemp`
+  pushd ../images
+    mvn dependency:build-classpath  -PdownloadPlugins  -Dmdep.outputFile=$a2
+  popd
+  a3=`mktemp`
+  pushd ../decompiler_agent
+    mvn dependency:build-classpath  -PdownloadPlugins  -Dmdep.outputFile=$a3
+  popd
+  readonly CP_TO_VERIFY="`cat $a1`:`cat $a2`:`cat $a3`"
 else
   readonly CP_TO_VERIFY=""
 fi
