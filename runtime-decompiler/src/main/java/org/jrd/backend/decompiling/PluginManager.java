@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import static org.jrd.backend.decompiling.ExpandableUrl.prependFileProtocol;
 
@@ -48,6 +49,7 @@ public class PluginManager {
     Gson gson;
 
     public static final String UNDECOMPILABLE_LAMBDA = "$$Lambda";
+    public static final Pattern LAMBDA_FORM = Pattern.compile("java.lang.invoke.LambdaForm\\$.*/.*0x.*");
 
     public PluginManager() {
         loadConfigs();

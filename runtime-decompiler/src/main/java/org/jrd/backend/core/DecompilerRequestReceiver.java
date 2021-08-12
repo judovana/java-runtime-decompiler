@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+import static org.jrd.backend.decompiling.PluginManager.LAMBDA_FORM;
 import static org.jrd.backend.decompiling.PluginManager.UNDECOMPILABLE_LAMBDA;
 
 /**
@@ -207,6 +208,8 @@ public class DecompilerRequestReceiver {
                             return 1;
                         }
                         if (!o1.contains(UNDECOMPILABLE_LAMBDA) && o2.contains(UNDECOMPILABLE_LAMBDA)) {
+                            return -1;
+                        } if (!LAMBDA_FORM.matcher(o1).matches() && LAMBDA_FORM.matcher(o2).matches()) {
                             return -1;
                         }
 
