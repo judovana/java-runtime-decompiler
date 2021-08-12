@@ -209,7 +209,11 @@ public class DecompilerRequestReceiver {
                         }
                         if (!o1.contains(UNDECOMPILABLE_LAMBDA) && o2.contains(UNDECOMPILABLE_LAMBDA)) {
                             return -1;
-                        } if (!LAMBDA_FORM.matcher(o1).matches() && LAMBDA_FORM.matcher(o2).matches()) {
+                        }
+                        if (LAMBDA_FORM.matcher(o1).matches() && !LAMBDA_FORM.matcher(o2).matches()) {
+                            return 1;
+                        }
+                        if (!LAMBDA_FORM.matcher(o1).matches() && LAMBDA_FORM.matcher(o2).matches()) {
                             return -1;
                         }
 
