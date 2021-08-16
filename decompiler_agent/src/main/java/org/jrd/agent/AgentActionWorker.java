@@ -13,6 +13,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -70,8 +71,8 @@ public class AgentActionWorker extends Thread {
             }
             return;
         }
-        BufferedReader inputStream = new BufferedReader(new InputStreamReader(is));
-        BufferedWriter outputStream = new BufferedWriter(new OutputStreamWriter(os));
+        BufferedReader inputStream = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+        BufferedWriter outputStream = new BufferedWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8));
 
         String line = null;
         try {

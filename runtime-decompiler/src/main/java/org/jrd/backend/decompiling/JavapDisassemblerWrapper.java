@@ -1,6 +1,7 @@
 package org.jrd.backend.decompiling;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 public class JavapDisassemblerWrapper {
@@ -15,7 +16,7 @@ public class JavapDisassemblerWrapper {
         try {
             File tempByteFile = bytesToFile(bytecode);
             File tempOutputFile = File.createTempFile("decompile-output", ".java");
-            PrintWriter printWriter = new PrintWriter(tempOutputFile);
+            PrintWriter printWriter = new PrintWriter(tempOutputFile, StandardCharsets.UTF_8);
             StringBuilder OptionsString = new StringBuilder();
             if (options != null){
                 for (String option: options){
@@ -41,6 +42,6 @@ public class JavapDisassemblerWrapper {
     }
 
     private String readStringFromFile(String filePath) throws IOException {
-        return new String(Files.readAllBytes(Paths.get(filePath)));
+        return Files.readString(Paths.get(filePath));
     }
 }

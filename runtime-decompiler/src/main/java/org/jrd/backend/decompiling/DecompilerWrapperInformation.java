@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
@@ -91,7 +92,7 @@ public class DecompilerWrapperInformation {
     }
 
     public void setFullyQualifiedClassName() {
-        try (BufferedReader br = new BufferedReader(new FileReader(wrapperURL.getExpandedPath()))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(wrapperURL.getExpandedPath(), StandardCharsets.UTF_8))) {
             String packageName = "";
             String className = "";
             String line = br.readLine();

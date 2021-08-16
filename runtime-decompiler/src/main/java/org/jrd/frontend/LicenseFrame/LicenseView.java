@@ -8,6 +8,7 @@ import java.awt.*;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 public class LicenseView extends JDialog {
 
@@ -21,7 +22,7 @@ public class LicenseView extends JDialog {
         scrollPane.setBorder(BorderFactory.createCompoundBorder(new EmptyBorder(10, 10, 10, 10), new EtchedBorder()));
 
         InputStream in = getClass().getResourceAsStream("/LICENSE");
-        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
         StringBuilder sb = new StringBuilder();
         reader.lines().forEach(s -> sb.append(s).append('\n'));
         licenseTextArea.setText(sb.toString());

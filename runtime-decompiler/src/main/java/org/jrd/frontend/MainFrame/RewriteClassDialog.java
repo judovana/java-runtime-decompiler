@@ -38,6 +38,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -250,7 +251,7 @@ public class RewriteClassDialog extends JDialog {
         saveSrcBuffer.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                Utils.saveByGui(futureSrcTarget.getText(), namingSource.getSelectedIndex(), ".java", new TextFieldBasedStus(statusCompileCurrentBuffer), origName, origBuffer.getBytes());
+                Utils.saveByGui(futureSrcTarget.getText(), namingSource.getSelectedIndex(), ".java", new TextFieldBasedStus(statusCompileCurrentBuffer), origName, origBuffer.getBytes(StandardCharsets.UTF_8));
 
             }
         });
@@ -346,13 +347,13 @@ public class RewriteClassDialog extends JDialog {
         });
 
         compileAndSave.addActionListener(actionEvent -> {
-            IdentifiedSource currrentIs = new IdentifiedSource(new ClassIdentifier(origName), origBuffer.getBytes());
+            IdentifiedSource currrentIs = new IdentifiedSource(new ClassIdentifier(origName), origBuffer.getBytes(StandardCharsets.UTF_8));
             new SavingCompilerOutputAction(statusCompileCurrentBuffer, vmInfo, vmManager, pluginManager, decompiler, haveCompiler, namingBinary.getSelectedIndex(), futureBinTarget.getText()).run(
                     currrentIs);
         });
 
         compileAndUpload.addActionListener(actionEvent -> {
-            IdentifiedSource currrentIs = new IdentifiedSource(new ClassIdentifier(origName), origBuffer.getBytes());
+            IdentifiedSource currrentIs = new IdentifiedSource(new ClassIdentifier(origName), origBuffer.getBytes(StandardCharsets.UTF_8));
             new UploadingCompilerOutputAction(statusCompileCurrentBuffer, vmInfo, vmManager, pluginManager, decompiler, haveCompiler, namingBinary.getSelectedIndex(), futureBinTarget.getText()).run(
                     currrentIs);
         });

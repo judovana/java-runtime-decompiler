@@ -9,6 +9,7 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 class HexEditorTransferHandler extends TransferHandler {
     private static final long serialVersionUID = 1L;
@@ -67,7 +68,7 @@ class HexEditorTransferHandler extends TransferHandler {
                 final Object data = t.getTransferData(flavor);
                 if (flavor.equals(DataFlavor.stringFlavor)) {
                     final String text = (String) data;
-                    final byte[] bytes = text.getBytes();
+                    final byte[] bytes = text.getBytes(StandardCharsets.UTF_8);
                     e.replaceSelection(bytes);
                 }
             } catch (UnsupportedFlavorException ufe) {
