@@ -27,22 +27,7 @@ import org.jboss.byteman.agent.install.VMInfo;
  */
 public class InstallDecompilerAgentImpl {
 
-    public static void install(String pid, boolean addToBoot, String host, int port, String[] properties)
-            throws IllegalArgumentException, FileNotFoundException,
-            IOException, AttachNotSupportedException,
-            AgentLoadException, AgentInitializationException {
-        install(pid, addToBoot, false, host, port, properties);
-    }
-
     public static void install(String pid, boolean addToBoot, boolean setPolicy, String host, int port, String[] properties)
-            throws IllegalArgumentException, FileNotFoundException,
-            IOException, AttachNotSupportedException,
-            AgentLoadException, AgentInitializationException {
-        install(pid, addToBoot, setPolicy, false, host, port, properties);
-    }
-
- 
-    public static void install(String pid, boolean addToBoot, boolean setPolicy, boolean useModuleLoader, String host, int port, String[] properties)
             throws IllegalArgumentException, FileNotFoundException,
             IOException, AttachNotSupportedException,
             AgentLoadException, AgentInitializationException {
@@ -61,7 +46,7 @@ public class InstallDecompilerAgentImpl {
             }
         }
 
-        InstallDecompilerAgentImpl install = new InstallDecompilerAgentImpl(pid, addToBoot, setPolicy, useModuleLoader, host, port, properties);
+        InstallDecompilerAgentImpl install = new InstallDecompilerAgentImpl(pid, addToBoot, setPolicy, host, port, properties);
         install.locateAgent();
         install.attach();
         install.injectAgent();
@@ -78,7 +63,7 @@ public class InstallDecompilerAgentImpl {
     private Config config = Config.getConfig();
 
     private InstallDecompilerAgentImpl(String pid, boolean addToBoot, boolean setPolicy,
-            boolean useModuleLoader, String host, int port, String[] properties) {
+            String host, int port, String[] properties) {
 
         agentJar = null;
         this.id = pid;

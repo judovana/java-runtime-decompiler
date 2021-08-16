@@ -89,6 +89,7 @@ public class DecompilerRequestReceiver {
         try {
             return Integer.parseInt(intStr);
         } catch (NumberFormatException e) {
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, msg);
             OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
             return NOT_ATTACHED;
         }

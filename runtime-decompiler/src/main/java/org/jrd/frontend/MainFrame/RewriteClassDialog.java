@@ -377,7 +377,7 @@ public class RewriteClassDialog extends JDialog {
         ClassesProvider cp = new RuntimeCompilerConnector.JRDClassesProvider(vmInfo, vmManager);
         ClasspathlessCompiler rc;
         if (haveCompiler) {
-            rc = new RuntimeCompilerConnector.ForeignCompilerWrapper(pm, currentDecompiler);
+            rc = new RuntimeCompilerConnector.ForeignCompilerWrapper(currentDecompiler);
         } else {
             rc = new io.github.mkoncek.classpathless.impl.CompilerJavac();
         }

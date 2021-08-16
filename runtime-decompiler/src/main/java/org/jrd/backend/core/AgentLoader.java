@@ -30,17 +30,16 @@ public class AgentLoader {
 
     /**
      * This method handles the attach of a decompiler agent to given VM.
-     * @param vmId ID of VM to which we attach the agent
      * @param pid PID of the VM
      * @return AgentInfo object, if successful, else null
      */
-    public int attach(String vmId, int pid) {
+    public int attach(int pid) {
         int port = findPort();
         //logger.finest("Attempting to attach decompiler agent for VM '" + pid + "' on port '" + port + "'");
         try {
             String[] installProps = createProperties(port);
             try{  
-            InstallDecompilerAgentImpl.install(Integer.toString(pid), false, "localhost", port, installProps);
+            InstallDecompilerAgentImpl.install(Integer.toString(pid), false, false, "localhost", port, installProps);
                 } catch (IllegalArgumentException | IOException | AttachNotSupportedException | AgentLoadException | AgentInitializationException ex) {
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Attach failed!! Cause: " + ex.getMessage(), ex));
                     return INVALID_PORT;

@@ -90,7 +90,7 @@ public class AgentActionWorker extends Thread {
                         OutputControllerAgent.getLogger().log("AGENT: Received HALT command, Closing socket and exiting.");
                         break;
                     case "CLASSES":
-                        getAllLoadedClasses(inputStream, outputStream);
+                        getAllLoadedClasses(outputStream);
                         break;
                     case "BYTES":
                         sendByteCode(inputStream, outputStream);
@@ -116,7 +116,7 @@ public class AgentActionWorker extends Thread {
         }
     }
 
-    private void getAllLoadedClasses(BufferedReader in, BufferedWriter out) throws IOException {
+    private void getAllLoadedClasses(BufferedWriter out) throws IOException {
         out.write("CLASSES");
         out.newLine();
         LinkedBlockingQueue<String> classNames = new LinkedBlockingQueue<String>(1024);

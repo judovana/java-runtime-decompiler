@@ -318,7 +318,7 @@ public class Cli {
         System.err.println(s);
         ClasspathlessCompiler rc;
         if (haveCompiler) {
-            rc = new RuntimeCompilerConnector.ForeignCompilerWrapper(pluginManager, decompiler);
+            rc = new RuntimeCompilerConnector.ForeignCompilerWrapper(decompiler);
         } else {
             rc = new io.github.mkoncek.classpathless.impl.CompilerJavac();
         }
