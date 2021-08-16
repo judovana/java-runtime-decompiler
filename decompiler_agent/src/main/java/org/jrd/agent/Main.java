@@ -47,8 +47,7 @@ public class Main {
             }
         }
 
-        boolean start = ConnectionDelegator.initialize(hostname, port, p);
-
+        ConnectionDelegator.initialize(hostname, port, p);
     }
 
     /**
