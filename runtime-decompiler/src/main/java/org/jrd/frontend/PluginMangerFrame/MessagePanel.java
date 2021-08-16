@@ -16,8 +16,4 @@ public class MessagePanel extends JPanel{
         jLabel.setText(message);
         this.add(jLabel);
     }
-
-    public JLabel getjLabel() {
-        return jLabel;
-    }
 }

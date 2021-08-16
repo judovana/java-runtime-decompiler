@@ -10,29 +10,15 @@ package org.jrd.backend.core;
 public class VmDecompilerStatus{
 
     private String vmId;
-    private long timestamp;
-
     private String hostname;
     private int listenPort;
     private String[] loadedClassNames;
     private String loadedClassBytes;
-    private String bytesClassName;
 
     public VmDecompilerStatus() {
-        this.bytesClassName = "";
         this.loadedClassBytes = "";
         this.loadedClassNames = new String[]{};
     }
-
-    
-    public String getBytesClassName(){
-        return bytesClassName;
-    }
-    
-    public void setBytesClassName(String bytesClassName){
-        this.bytesClassName = bytesClassName;
-    }
-    
     
     public String getVmId() {
         return vmId;
@@ -61,16 +47,6 @@ public class VmDecompilerStatus{
         return listenPort;
     }
 
-    
-    public void setTimeStamp(long timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public long getTimeStamp() {
-        return timestamp;
-    }
-
-    
     public void setLoadedClassNames(String[] loadedClassNames) {
         this.loadedClassNames = loadedClassNames;
 

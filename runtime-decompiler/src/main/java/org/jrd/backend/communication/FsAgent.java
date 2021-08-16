@@ -94,8 +94,6 @@ public class FsAgent implements JrdAgent {
         T onDirEntry(File dir, File clazz, String fqn) throws IOException;
 
         T onJarEntry(File file, ZipFile zipFile, ZipEntry ze, String fqn) throws IOException;
-
-        T finalizirung();
     }
 
     private static class OperateOnCp<T> {
@@ -148,7 +146,7 @@ public class FsAgent implements JrdAgent {
                 }
             }
             if (clazz == null) {
-                return op.finalizirung();
+                return null;
             }
             throw new IOException(clazz + " not found on CP");
         }
@@ -237,11 +235,6 @@ public class FsAgent implements JrdAgent {
             }
             return null;
         }
-
-        @Override
-        public Void finalizirung() {
-            return null;
-        }
     }
 
     private static class ReadingCpOperator implements CpOperator<String> {
@@ -259,11 +252,6 @@ public class FsAgent implements JrdAgent {
             }
             zipFile.close();
             return Base64.getEncoder().encodeToString(data);
-        }
-
-        @Override
-        public String finalizirung() {
-            return null;
         }
     }
 
@@ -306,11 +294,6 @@ public class FsAgent implements JrdAgent {
         @Override
         public Void onJarEntry(File file, ZipFile zipFile, ZipEntry ze, String fqn) throws IOException {
             addJustClass("/" + ze.getName(), classes, "");
-            return null;
-        }
-
-        @Override
-        public Void finalizirung() {
             return null;
         }
     }

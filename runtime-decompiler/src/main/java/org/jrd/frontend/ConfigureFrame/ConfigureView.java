@@ -19,7 +19,6 @@ import static org.jrd.frontend.PluginMangerFrame.FileSelectorArrayRow.getTextFie
 public class ConfigureView extends JDialog {
 
     private confBrosePanel configureAgentPathPanel;
-    private confBrosePanel configureDecompilerPathPanel;
     private JPanel configureOKCancelPanel;
     private JButton okButton;
     private JButton cancelButton;

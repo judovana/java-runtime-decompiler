@@ -14,8 +14,6 @@ public class ConnectionDelegator extends Thread{
     private ServerSocket theServerSocket;
     private InstrumentationProvider provider;
     private static boolean running;
-    private static String addressGiven;
-    private static Integer portGiven;
 
     private ConnectionDelegator(InstrumentationProvider provider, ServerSocket serverSocket) {
         this.provider = provider;
@@ -36,8 +34,6 @@ public class ConnectionDelegator extends Thread{
      */
     public static synchronized boolean initialize(String hostname, Integer port,
                                                   InstrumentationProvider provider) {
-        ConnectionDelegator.addressGiven = hostname;
-        portGiven = port;
         ServerSocket initServerSocket = null;
         try {
             if (port == null) {

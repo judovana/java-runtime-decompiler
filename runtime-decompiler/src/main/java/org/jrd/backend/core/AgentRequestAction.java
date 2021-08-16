@@ -88,10 +88,6 @@ public class AgentRequestAction {
             }
         }
 
-        int getActionId() {
-            return intVal;
-        }
-
         private String toIntString() {
             return Integer.toString(intVal);
         }

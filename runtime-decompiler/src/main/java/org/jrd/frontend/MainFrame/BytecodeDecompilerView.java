@@ -377,22 +377,6 @@ public class BytecodeDecompilerView {
         this.rewriteActionListener = new RewriteActionListener(worker);
     }
 
-    /**
-     * Creates a warning table in case of error.
-     *
-     * @param msg message
-     */
-    public void handleError(final String msg) {
-        SwingUtilities.invokeLater(new Runnable() {
-
-            @Override
-            public void run() {
-                //JOptionPane.showMessageDialog(getUiComponent().getParent(), msg, " ", JOptionPane.WARNING_MESSAGE);
-            }
-
-        });
-    }
-
     public void refreshComboBox(List<DecompilerWrapperInformation> wrappers) {
         topComboBox.removeAllItems();
         wrappers.forEach(decompilerWrapperInformation -> {

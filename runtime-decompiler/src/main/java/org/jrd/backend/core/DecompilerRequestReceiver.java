@@ -146,9 +146,7 @@ public class DecompilerRequestReceiver {
             VmDecompilerStatus status = new VmDecompilerStatus();
             status.setHostname(hostname);
             status.setListenPort(reply.port);
-            status.setTimeStamp(System.currentTimeMillis());
             status.setVmId(vmId);
-            status.setBytesClassName(className);
             //note, that we have no reply from overwrite. Or better, nothing to do with reply
             vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
 
@@ -166,9 +164,7 @@ public class DecompilerRequestReceiver {
             VmDecompilerStatus status = new VmDecompilerStatus();
             status.setHostname(hostname);
             status.setListenPort(reply.port);
-            status.setTimeStamp(System.currentTimeMillis());
             status.setVmId(vmId);
-            status.setBytesClassName(className);
             status.setLoadedClassBytes(reply.response);
             vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
 
@@ -224,7 +220,6 @@ public class DecompilerRequestReceiver {
             VmDecompilerStatus status = new VmDecompilerStatus();
             status.setHostname(hostname);
             status.setListenPort(reply.port);
-            status.setTimeStamp(System.currentTimeMillis());
             status.setVmId(vmId);
             status.setLoadedClassNames(arrayOfClasses);
             vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);

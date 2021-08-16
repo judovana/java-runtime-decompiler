@@ -33,8 +33,4 @@ public class TextInputPanel extends JPanel {
     public JTextField getTextField() {
         return textField;
     }
-
-    public JLabel getjLabel() {
-        return jLabel;
-    }
 }

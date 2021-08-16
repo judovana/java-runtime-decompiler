@@ -80,11 +80,6 @@ public class Cli {
             }
         }
 
-        public Saving(String as) {
-            this.as = as;
-            this.like = "default";
-        }
-
         public boolean shouldSave() {
             return as != null;
         }
