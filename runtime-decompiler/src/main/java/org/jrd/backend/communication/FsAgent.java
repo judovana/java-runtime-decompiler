@@ -91,9 +91,9 @@ public class FsAgent implements JrdAgent {
     }
 
     private interface CpOperator<T> {
-        T onDirEntry(File dir, File clazz, String fqn) throws IOException;
+        T onDirEntry(File dir, File clazz) throws IOException;
 
-        T onJarEntry(File file, ZipFile zipFile, ZipEntry ze, String fqn) throws IOException;
+        T onJarEntry(File file, ZipFile zipFile, ZipEntry ze) throws IOException;
     }
 
     private static class OperateOnCp<T> {
@@ -109,12 +109,12 @@ public class FsAgent implements JrdAgent {
                     String root = sanitize(c.getAbsolutePath());
                     if (clazz == null) {
                         //no return, search
-                        op.onDirEntry(c, null, null);
+                        op.onDirEntry(c, null);
                     } else {
                         String classOnFs = clazz.replace(".", File.separator) + ".class";
                         File f = new File(root + File.separator + classOnFs);
                         if (f.exists()) {
-                            return op.onDirEntry(c, f, clazz);
+                            return op.onDirEntry(c, f);
                         }
                     }
                 } else {
@@ -159,11 +159,11 @@ public class FsAgent implements JrdAgent {
                     onEntryList(new ZipInputStream(zipInputStream), clazz, op);
                 } else {
                     if (clazz == null) {
-                        op.onJarEntry(null, null, entry, null);
+                        op.onJarEntry(null, null, entry);
                     } else {
                         String clazzInJar = toClass(entry.getName());
                         if (clazzInJar.equals(clazz)) {
-                            return op.onJarEntry(null, null, entry, clazz);
+                            return op.onJarEntry(null, null, entry);
                         }
                     }
                 }
@@ -179,7 +179,7 @@ public class FsAgent implements JrdAgent {
                 if (!ze.isDirectory()) {
                     String clazzInJar = toClass((ze.getName()));
                     if (clazzInJar.equals(clazz)) {
-                        return op.onJarEntry(f, zipFile, ze, clazz);
+                        return op.onJarEntry(f, zipFile, ze);
                     }
                 }
             }
@@ -218,14 +218,14 @@ public class FsAgent implements JrdAgent {
         }
 
         @Override
-        public Void onDirEntry(File dir, File clazz, String fqn) throws IOException {
+        public Void onDirEntry(File dir, File clazz) throws IOException {
             Files.write(clazz.toPath(), Base64.getDecoder().decode(body));
             OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "written " + clazz.getAbsolutePath());
             return null;
         }
 
         @Override
-        public Void onJarEntry(File file, ZipFile zipFile, ZipEntry ze, String fqn) throws IOException {
+        public Void onJarEntry(File file, ZipFile zipFile, ZipEntry ze) throws IOException {
             zipFile.close(); // caused java.nio.file.FileSystemException when closing fs after try-with-resources
 
             try (FileSystem fs = FileSystems.newFileSystem(file.toPath(), null)) {
@@ -239,13 +239,13 @@ public class FsAgent implements JrdAgent {
 
     private static class ReadingCpOperator implements CpOperator<String> {
         @Override
-        public String onDirEntry(File dir, File clazz, String fqn) throws IOException {
+        public String onDirEntry(File dir, File clazz) throws IOException {
             byte[] bytes = Files.readAllBytes(clazz.toPath());
             return Base64.getEncoder().encodeToString(bytes);
         }
 
         @Override
-        public String onJarEntry(File file, ZipFile zipFile, ZipEntry ze, String fqn) throws IOException {
+        public String onJarEntry(File file, ZipFile zipFile, ZipEntry ze) throws IOException {
             byte[] data = new byte[(int) ze.getSize()];
             try (DataInputStream dis = new DataInputStream(zipFile.getInputStream(ze))) {
                 dis.readFully(data);
@@ -263,7 +263,7 @@ public class FsAgent implements JrdAgent {
         }
 
         @Override
-        public Void onDirEntry(File c, File clazz, String fqn) throws IOException {
+        public Void onDirEntry(File c, File clazz) throws IOException {
             Files.walkFileTree(c.toPath(), new FileVisitor<Path>() {
                 @Override
                 public FileVisitResult preVisitDirectory(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
@@ -292,7 +292,7 @@ public class FsAgent implements JrdAgent {
         }
 
         @Override
-        public Void onJarEntry(File file, ZipFile zipFile, ZipEntry ze, String fqn) throws IOException {
+        public Void onJarEntry(File file, ZipFile zipFile, ZipEntry ze) throws IOException {
             addJustClass("/" + ze.getName(), classes, "");
             return null;
         }

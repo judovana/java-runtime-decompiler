@@ -30,20 +30,20 @@ public class FiletoClassValidator implements DocumentListener {
 
     @Override
     public void insertUpdate(DocumentEvent e) {
-        work(e);
+        work();
     }
 
     @Override
     public void removeUpdate(DocumentEvent e) {
-        work(e);
+        work();
     }
 
     @Override
     public void changedUpdate(DocumentEvent e) {
-        work(e);
+        work();
     }
 
-    private void work(DocumentEvent e) {
+    private void work() {
         StringAndScore r = validate(clazz.getText(), file.getText());
         output.setForeground(Color.green);
         if (r.score > 0) {

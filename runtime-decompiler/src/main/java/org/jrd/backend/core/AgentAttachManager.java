@@ -23,7 +23,7 @@ public class AgentAttachManager {
         OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Attaching agent to VM '" + vmPid + "'");
         int attachedPort = AgentLoader.INVALID_PORT;
         try {
-            attachedPort = loader.attach(vmId, vmPid);
+            attachedPort = loader.attach(vmPid);
         } catch (Exception ex) {
             OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
         }

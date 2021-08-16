@@ -65,7 +65,7 @@ public class RuntimeCompilerConnector {
     public static class ForeignCompilerWrapper implements ClasspathlessCompiler {
         private final DecompilerWrapperInformation currentDecompiler;
 
-        public ForeignCompilerWrapper(PluginManager pm, DecompilerWrapperInformation currentDecompiler) {
+        public ForeignCompilerWrapper(DecompilerWrapperInformation currentDecompiler) {
             this.currentDecompiler = currentDecompiler;
         }
 
