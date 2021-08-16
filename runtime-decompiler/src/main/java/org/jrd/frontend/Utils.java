@@ -58,7 +58,6 @@ public class Utils {
     }
 
     public static boolean uploadByGui(VmInfo vmInfo, VmManager vmManager, StatusKeeper status, String clazz, byte[] content) {
-        String name = "???";
         String ss = "Error to upload: ";
         boolean r = true;
         try {

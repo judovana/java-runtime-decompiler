@@ -21,8 +21,6 @@ public class Communicate {
     private Socket commSocket;
     private BufferedReader commInput;
     private BufferedWriter commOutput;
-
-    public static final String DEFAULT_ADDRESS = "localhost";
     //private static final Logger logger = LoggingUtils.getLogger(Communicate.class);
 
     /**

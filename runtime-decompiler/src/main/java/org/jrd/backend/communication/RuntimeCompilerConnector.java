@@ -29,66 +29,6 @@ import java.util.logging.Level;
 
 public class RuntimeCompilerConnector {
 
-    private static final boolean slow = true;
-
-    public static class DummyRuntimeCompiler implements ClasspathlessCompiler {
-
-        @Override
-        public Collection<IdentifiedBytecode> compileClass(ClassesProvider classesProvider, Optional<MessagesListener> messagesListener, IdentifiedSource... identifiedSources) {
-            List<IdentifiedBytecode> results = new ArrayList<>(identifiedSources.length);
-            try {
-                for (IdentifiedSource is : identifiedSources) {
-                    messagesListener.ifPresent(message -> {
-                        message.addMessage(Level.INFO, "Compiling " + is.getClassIdentifier().getFullName() + " of lenght of " + is.getFile().length + " bytes (" + getSrcLengthCatched(is) + " characters)");
-                    });
-                    sleepIfSlow(1000);
-                    for (int x = 0; x < 3; x++) {
-                        messagesListener.ifPresent(message -> message.addMessage(Level.INFO, "Listing classes"));
-                        List<String> l = classesProvider.getClassPathListing();
-                        messagesListener.ifPresent(message -> message.addMessage(Level.INFO, "Listed " + l.size()));
-                        for (int i = 0; i < 3; i++) {
-                            String clname = l.get(new Random().nextInt(l.size() / 2));
-                            messagesListener.ifPresent(message -> message.addMessage(Level.INFO, "Obtaining class: " + clname));
-                            Collection<IdentifiedBytecode> obtained = classesProvider.getClass(new ClassIdentifier(clname));
-                            messagesListener.ifPresent(message -> message.addMessage(Level.INFO, "got " + obtained.size() + " classes: "));
-                            for (IdentifiedBytecode ib : obtained) {
-                                messagesListener.ifPresent(message -> message.addMessage(Level.INFO, ib.getClassIdentifier().getFullName() + " of " + ib.getFile().length + " bytes"));
-                            }
-                            sleepIfSlow(1000);
-                        }
-                        sleepIfSlow(1000);
-                    }
-                    IdentifiedBytecode ib = new IdentifiedBytecode(is.getClassIdentifier(), ("Freshly compiled " + is.getClassIdentifier().getFullName() + " from src of lenght of " + is.getFile().length + " bytes (" + getSrcLengthCatched(is) + " characters) at " + new Date().toString()).getBytes());
-                    messagesListener.ifPresent(message -> message.addMessage(Level.INFO, "Compiled " + ib.getClassIdentifier().getFullName() + " to " + ib.getFile().length + " bytes"));
-                    results.add(ib);
-                }
-                int i = 0;
-                Random r = new Random();
-                while (r.nextBoolean()) {
-                    i++;
-                    String n = "random.inner$class" + i;
-                    IdentifiedBytecode ib = new IdentifiedBytecode(new ClassIdentifier(n), ("Freshly compiled " + n + new Date().toString()).getBytes());
-                    messagesListener.ifPresent(message -> message.addMessage(Level.INFO, "Compiled " + ib.getClassIdentifier().getFullName() + " to " + ib.getFile().length + " bytes"));
-                    results.add(ib);
-                }
-            } catch (InterruptedException ex) {
-                throw new RuntimeException(ex);
-            }
-            return results;
-        }
-
-        private void sleepIfSlow(long i) throws InterruptedException {
-            if (slow) {
-                Thread.sleep(i);
-            }
-        }
-
-    }
-
-    private static int getSrcLengthCatched(IdentifiedSource is) {
-        return is.getSourceCode().length();
-    }
-
     public static class JRDClassesProvider implements ClassesProvider {
         private final VmInfo vmInfo;
         private final VmManager vmManager;
@@ -123,11 +63,9 @@ public class RuntimeCompilerConnector {
     }
 
     public static class ForeignCompilerWrapper implements ClasspathlessCompiler {
-        private final PluginManager pluginManager;
         private final DecompilerWrapperInformation currentDecompiler;
 
         public ForeignCompilerWrapper(PluginManager pm, DecompilerWrapperInformation currentDecompiler) {
-            this.pluginManager = pm;
             this.currentDecompiler = currentDecompiler;
         }
 
