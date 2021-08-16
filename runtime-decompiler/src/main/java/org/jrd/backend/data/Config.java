@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -75,7 +76,7 @@ public class Config {
         File confFile = new File(configFilePath);
         File legacyConfFile = new File(legacyConfigFilePath);
         if (confFile.exists()) {
-            configMap = gson.fromJson(new FileReader(confFile), configMap.getClass());
+            configMap = gson.fromJson(new FileReader(confFile, StandardCharsets.UTF_8), configMap.getClass());
         }else if (legacyConfFile.exists()){
             Files.readAllLines(Paths.get(legacyConfigFilePath)).forEach(s -> {
                 String[] kv = s.split("===");

@@ -21,6 +21,7 @@ import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -87,7 +88,7 @@ public class PluginManager {
     private void loadConfig(File file) {
         if (file.getName().endsWith(".json")) {
             DecompilerWrapperInformation wrapper;
-            try (FileReader fileReader = new FileReader(file.getAbsolutePath())){
+            try (FileReader fileReader = new FileReader(file.getAbsolutePath(), StandardCharsets.UTF_8)){
                 wrapper = gson.fromJson(fileReader, DecompilerWrapperInformation.class);
             } catch (IOException | NullPointerException e) {
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, e);
@@ -303,7 +304,7 @@ public class PluginManager {
             OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, e);
         }
 
-        return errLevel != 0 ? errStream.toString() : null;
+        return errLevel != 0 ? new String(errStream.toByteArray(), StandardCharsets.UTF_8) : null;
     }
 
     public DecompilerWrapperInformation createWrapper() {
@@ -330,7 +331,7 @@ public class PluginManager {
         if (wrapper.getScope().equals("local")) {
             createUserPluginDir();
         }
-        try (PrintWriter out = new PrintWriter(wrapper.getFileLocation())) {
+        try (PrintWriter out = new PrintWriter(wrapper.getFileLocation(), StandardCharsets.UTF_8)) {
             out.println(json);
         }
     }

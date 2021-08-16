@@ -27,6 +27,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -375,7 +376,7 @@ public class Cli {
     public static String guessName(byte[] bytes) throws IOException {
         String pkg = null;
         String clazz = null;
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(bytes)))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(bytes), StandardCharsets.UTF_8))) {
             while (true) {
                 if (clazz != null && pkg != null) {
                     return pkg + "." + clazz; //this return should be most likely everywhere inline
@@ -563,7 +564,7 @@ public class Cli {
         List<String> classes = obtainFilteredClasses(vmInfo, vmManager, filter);
         if (saving.shouldSave()) {
             if (saving.like.equals(Saving.DEFAULT) || saving.like.equals(Saving.EXACT)) {
-                try (BufferedWriter bw = new BufferedWriter((new OutputStreamWriter(new FileOutputStream(new File(saving.as)))))) {
+                try (BufferedWriter bw = new BufferedWriter((new OutputStreamWriter(new FileOutputStream(saving.as), StandardCharsets.UTF_8)))) {
                     for (String clazz : classes) {
                         bw.write(clazz);
                         bw.newLine();

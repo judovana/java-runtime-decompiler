@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 
 /**
  * This class opens a socket and contain methods for read and write to socket
@@ -62,8 +63,8 @@ public class Communicate {
             return;
         }
 
-        this.commInput = new BufferedReader(new InputStreamReader(is));
-        this.commOutput = new BufferedWriter(new OutputStreamWriter(os));
+        this.commInput = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+        this.commOutput = new BufferedWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8));
 
         return;
     }
