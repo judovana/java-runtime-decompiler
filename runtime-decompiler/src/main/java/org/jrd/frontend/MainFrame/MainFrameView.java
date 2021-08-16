@@ -53,10 +53,6 @@ public class MainFrameView {
     private JMenuItem jMenuItemUsage;
     private JMenuItem jMenuItemLicense;
 
-    private JDialog configureDialog;
-    private JDialog licenseDialog;
-    private JDialog aboutDialog;
-
     private ActionListener vmChangingListener;
     private ActionListener newConnectionDialogListener;
     private ActionListener newFsVmDialogListener;
@@ -247,7 +243,7 @@ public class MainFrameView {
         jMenuConfig = new JMenu("Configure");
         jMenuItemConfigure = new JMenuItem("Decompiler Agent");
         jMenuItemConfigure.addActionListener(actionEvent -> {
-            configureDialog = new ConfigureView(this);
+            new ConfigureView(this);
         });
         jMenuConfig.add(jMenuItemConfigure);
         jMenuPluginEditor = new JMenuItem("Plugins");
@@ -260,7 +256,7 @@ public class MainFrameView {
         jMenuHelp = new JMenu("Help");
         jMenuItemAbout = new JMenuItem("About");
         jMenuItemAbout.addActionListener(actionEvent -> {
-            aboutDialog = new AboutView(this);
+            new AboutView(this);
         });
         jMenuItemUsage = new JMenuItem("Usage");
         jMenuItemUsage.addActionListener(actionEvent -> {
@@ -270,7 +266,7 @@ public class MainFrameView {
         });
         jMenuItemLicense = new JMenuItem("License");
         jMenuItemLicense.addActionListener(actionEvent -> {
-            licenseDialog = new LicenseView(this);
+            new LicenseView(this);
         });
         jMenuHelp.add(jMenuItemAbout);
         jMenuHelp.add(jMenuItemUsage);

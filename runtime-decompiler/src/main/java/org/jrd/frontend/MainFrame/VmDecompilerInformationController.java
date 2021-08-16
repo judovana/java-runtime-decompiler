@@ -40,8 +40,6 @@ public class VmDecompilerInformationController {
     private PluginConfigurationEditorView pluginConfigurationEditorView;
     private PluginConfigurationEditorController pluginConfigurationEditorController;
     private LoadingDialog loadingDialog;
-    private NewConnectionController newConnectionController;
-    private NewFsVmController newFsVmController;
     private VmManager vmManager;
     private VmInfo vmInfo;
     private PluginManager pluginManager;
@@ -84,13 +82,13 @@ public class VmDecompilerInformationController {
 
     private void createNewConnectionDialog() {
         newConnectionDialog = new NewConnectionView(mainFrameView);
-        newConnectionController = new NewConnectionController(newConnectionDialog, vmManager);
+        new NewConnectionController(newConnectionDialog, vmManager);
         newConnectionDialog.setVisible(true);
     }
 
     private void createNewFsVMDialog() {
         newFsVmDialog = new NewFsVmView(mainFrameView);
-        newFsVmController = new NewFsVmController(newFsVmDialog, vmManager);
+        new NewFsVmController(newFsVmDialog, vmManager);
         newFsVmDialog.setVisible(true);
     }
 

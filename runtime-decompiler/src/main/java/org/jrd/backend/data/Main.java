@@ -16,7 +16,7 @@ public class Main {
         if (cli.isGui()) {
             setLookAndFeel();
             MainFrameView mainView = new MainFrameView();
-            VmDecompilerInformationController controller = new VmDecompilerInformationController(mainView, model);
+            new VmDecompilerInformationController(mainView, model);
         } else {
             cli.consumeCli();
         }

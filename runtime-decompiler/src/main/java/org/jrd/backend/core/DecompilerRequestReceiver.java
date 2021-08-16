@@ -234,7 +234,7 @@ public class DecompilerRequestReceiver {
 
     private String getHaltAction(String hostname, int listenPort, String vmId, int vmPid) {
         try {
-            ResponseWithPort reply = getResponse(hostname, listenPort, vmId, vmPid, "HALT");
+            getResponse(hostname, listenPort, vmId, vmPid, "HALT");
         } catch (Exception e) {
             OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Exception when calling halt action", e));
         } finally {
