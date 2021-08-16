@@ -27,9 +27,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Utils {
-    public static int FULLY_QUALIFIED_NAME = 0;
-    public static int SRC_SUBDIRS_NAME = 1;
-    public static int CUSTOM_NAME = 2;
+    public static final int FULLY_QUALIFIED_NAME = 0;
+    public static final int SRC_SUBDIRS_NAME = 1;
+    public static final int CUSTOM_NAME = 2;
 
     public static interface StatusKeeper {
         public void setText(String s);

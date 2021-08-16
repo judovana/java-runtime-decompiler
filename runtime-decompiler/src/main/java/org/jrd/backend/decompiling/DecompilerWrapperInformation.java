@@ -232,7 +232,7 @@ public class DecompilerWrapperInformation {
         }
     }
 
-    public static String LOCAL_SCOPE = "local";
+    public static final String LOCAL_SCOPE = "local";
 
     public String getScope() {
         String scope = "unknown";
