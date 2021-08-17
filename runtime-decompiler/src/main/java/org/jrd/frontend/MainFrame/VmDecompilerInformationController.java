@@ -149,6 +149,12 @@ public class VmDecompilerInformationController {
             case "localVmList":
                 mainFrameView.clearRemoteListSelection();
                 break;
+            case "localFsVmList":
+                mainFrameView.clearLocalListSelection();
+                mainFrameView.clearRemoteListSelection();
+                break;
+            default:
+                throw new RuntimeException("Unknown list requested cleaning.");
         }
     }
 
@@ -316,6 +322,7 @@ public class VmDecompilerInformationController {
         } else {
             switch (action) {
                 case CLASSES:
+                case HALT:
                     request = AgentRequestAction.create(vmInfo, hostname, listenPort, action);
                     break;
                 case BYTES:
@@ -328,9 +335,6 @@ public class VmDecompilerInformationController {
                     } catch (Exception ex) {
                         throw new RuntimeException(ex);
                     }
-                    break;
-                case HALT:
-                    request = AgentRequestAction.create(vmInfo, hostname, listenPort, action);
                     break;
                 default:
                     throw new AssertionError("Unknown action: " + action);
