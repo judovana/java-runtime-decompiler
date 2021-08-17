@@ -18,7 +18,7 @@ import static org.jrd.frontend.PluginMangerFrame.FileSelectorArrayRow.getTextFie
 
 public class ConfigureView extends JDialog {
 
-    private confBrosePanel configureAgentPathPanel;
+    private ConfigureBrowsePanel configureAgentPathPanel;
     private JPanel configureOKCancelPanel;
     private JButton okButton;
     private JButton cancelButton;
@@ -28,18 +28,18 @@ public class ConfigureView extends JDialog {
 
     JPanel mainPanel;
 
-    public class confBrosePanel extends JPanel {
+    public class ConfigureBrowsePanel extends JPanel {
 
         public JTextField textField;
         public JLabel label;
         public JButton browseButton;
         public JFileChooser chooser;
 
-        confBrosePanel(String label) {
+        ConfigureBrowsePanel(String label) {
             this(label, "Browse");
         }
 
-        confBrosePanel(String label, String ButtonLabel) {
+        ConfigureBrowsePanel(String label, String ButtonLabel) {
 
             this.textField = new JTextField();
             this.textField.setToolTipText(BytecodeDecompilerView.styleTooltip() + "Select a path to the Decompiler Agent.<br />" +
@@ -83,7 +83,7 @@ public class ConfigureView extends JDialog {
 
 
     public ConfigureView(MainFrameView mainFrameView) {
-        configureAgentPathPanel = new confBrosePanel("Decompiler Agent path");
+        configureAgentPathPanel = new ConfigureBrowsePanel("Decompiler Agent path");
         configureAgentPathPanel.textField.setText(config.getAgentRawPath());
         configureAgentPathPanel.browseButton.addActionListener(actionEvent -> {
             int returnVar = configureAgentPathPanel.chooser.showOpenDialog(configureAgentPathPanel);

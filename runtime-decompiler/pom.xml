@@ -238,7 +238,7 @@
             </properties>
             <dependencies>
 <!--for jdk8 we needs tools.jar, for jdk11 we must not hav it,
-    surprsingly, by not having it declared, makes it work for both jdk8 and jdk11 -->
+    surprisingly, by not having it declared, makes it work for both jdk8 and jdk11 -->
 <!--                <dependency>
                     <groupId>com.sun</groupId>
                     <artifactId>tools</artifactId>

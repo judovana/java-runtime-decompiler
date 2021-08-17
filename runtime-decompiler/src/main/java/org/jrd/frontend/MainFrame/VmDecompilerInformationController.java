@@ -28,7 +28,7 @@ import java.util.Base64;
 import java.util.Comparator;
 
 /**
- * This class provides Action listeners and result proccreateRequestessing for
+ * This class provides Action listeners and request handling for
  * the GUI.
  */
 public class VmDecompilerInformationController {
@@ -44,7 +44,7 @@ public class VmDecompilerInformationController {
     private VmInfo vmInfo;
     private PluginManager pluginManager;
 
-    //hte createRequest is ussing array of strings on input. Those are most common, usually shared indexes
+    // createRequest() uses array of strings on input. Those are most common, usually shared indexes
     public static final int CLASS_NAME = 0;
     public static final int CLASS_BODY = 1;
 
@@ -92,7 +92,7 @@ public class VmDecompilerInformationController {
         newFsVmDialog.setVisible(true);
     }
 
-    public class vmArrayList<T> extends ArrayList<VmInfo> {
+    public class VmArrayList<T> extends ArrayList<VmInfo> {
         @Override
         public boolean add(VmInfo vmInfo) {
             super.add(vmInfo);
@@ -102,9 +102,9 @@ public class VmDecompilerInformationController {
     }
 
     private void updateVmLists() {
-        ArrayList<VmInfo> localVms = new vmArrayList<>();
-        ArrayList<VmInfo> remoteVms = new vmArrayList<>();
-        ArrayList<VmInfo> fsVms = new vmArrayList<>();
+        ArrayList<VmInfo> localVms = new VmArrayList<>();
+        ArrayList<VmInfo> remoteVms = new VmArrayList<>();
+        ArrayList<VmInfo> fsVms = new VmArrayList<>();
 
         vmManager.getVmInfoSet().forEach(info -> {
             if (info.getType() == VmInfo.Type.LOCAL) {
@@ -228,7 +228,7 @@ public class VmDecompilerInformationController {
         String bytesInString = vmStatus.getLoadedClassBytes();
         byte[] bytes = Base64.getDecoder().decode(bytesInString);
         try {
-            decompiledClass = pluginManager.decompile(bytecodeDecompilerView.getSelecteddecompilerWrapperInformation(),name,  bytes, null, vmInfo, vmManager);
+            decompiledClass = pluginManager.decompile(bytecodeDecompilerView.getSelectedDecompilerWrapperInformation(),name,  bytes, null, vmInfo, vmManager);
         } catch (Exception e) {
             OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
         }
@@ -245,7 +245,7 @@ public class VmDecompilerInformationController {
 
             final RewriteClassDialog rewriteClassDialog = new RewriteClassDialog(name, lastLoaded, buffer, binBuffer, vmInfo, vmManager, pluginManager, selectedDecompiler, supperSelect);
             rewriteClassDialog.setVisible(true);
-            lastLoaded.lastManualUplaod = rewriteClassDialog.getManualUploadPath();
+            lastLoaded.lastManualUpload = rewriteClassDialog.getManualUploadPath();
             lastLoaded.lastSaveSrc = rewriteClassDialog.getSaveSrcPath();
             lastLoaded.lastSaveBin = rewriteClassDialog.getSaveBinPath();
             lastLoaded.filesToCompile = rewriteClassDialog.getFilesToCompile();

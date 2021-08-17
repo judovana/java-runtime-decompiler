@@ -14,7 +14,6 @@ import javax.tools.ToolProvider;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -24,7 +23,6 @@ import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -79,7 +77,7 @@ public class PluginManager {
         }
 
         wrappers.add(DecompilerWrapperInformation.getJavap());
-        wrappers.add(DecompilerWrapperInformation.getJavapv());
+        wrappers.add(DecompilerWrapperInformation.getJavapVerbose());
     }
 
     /**
@@ -109,13 +107,13 @@ public class PluginManager {
 
     /**
      * @param wrapper   decompiler used for decompiling
-     * @param name      optional name for decompielrs supporting inner classes
+     * @param name      optional name for decompilers supporting inner classes
      * @param bytecode  bytecode to be decompiled
      * @param options   decompile options
-     * @param vmInfo    otional vminfo to find inner classes
-     * @param vmManager otional vmmanager to find inner classes
+     * @param vmInfo    optional vmInfo to find inner classes
+     * @param vmManager optional vmManager to find inner classes
      * @return Decompiled bytecode or exception String
-     * @throws Exception exception String
+     * @throws Exception the exception String
      */
     public synchronized String decompile(DecompilerWrapperInformation wrapper, String name, byte[] bytecode, String[] options, VmInfo vmInfo, VmManager vmManager) throws Exception {
         if (wrapper == null) {
@@ -146,7 +144,7 @@ public class PluginManager {
         if (wrapper == null) {
             throw new RuntimeException("No valid decompiler selected. Current-Buffer may not be usable");
         }
-        if (!wrapper.haveDecompilerMethod()) { //compile method may remian null
+        if (!wrapper.haveDecompilerMethod()) { //compile method may remain null
             InitializeWrapper(wrapper);
         }
         if (wrapper.getName().equals(DecompilerWrapperInformation.JAVAP_NAME) || wrapper.getName().equals(DecompilerWrapperInformation.JAVAP_VERBOSE_NAME)) {
@@ -198,12 +196,12 @@ public class PluginManager {
                 try {
                     wrapper.setDecompileMethodNoInners(DecompilerClass.getMethod("decompile", byte[].class, String[].class));
                 } catch (Exception e) {
-                    OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "No custom deompile method (without inner classes): " + e.getMessage());
+                    OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "No custom decompile method (without inner classes): " + e.getMessage());
                 }
                 try {
                     wrapper.setDecompileMethodWithInners(DecompilerClass.getMethod("decompile", String.class, byte[].class, Map.class, String[].class));
                 } catch (Exception e) {
-                    OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "No custom compile method (with inner classes): " + e.getMessage());
+                    OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "No custom decompile method (with inner classes): " + e.getMessage());
                 }
                 if (!wrapper.haveDecompilerMethod()) {
                     throw new InstantiationException("Decompiler " + wrapper.getName() + " do not have decompile method(s)");
@@ -347,14 +345,14 @@ public class PluginManager {
      * Converts list of URLs to CSV String<br>
      * example: (list){URL1,URL2,URL3} -> (String)URL1:URL2:URL3
      */
-    private String URLListToCSV(List<ExpandableUrl> list, String delimeter) {
+    private String URLListToCSV(List<ExpandableUrl> list, String delimiter) {
         if (list == null) {
             return "";
         }
 
         String out = "";
         for (ExpandableUrl url : list) {
-            out += url.getExpandedPath() + delimeter;
+            out += url.getExpandedPath() + delimiter;
         }
 
         if (out.length() == 0) {

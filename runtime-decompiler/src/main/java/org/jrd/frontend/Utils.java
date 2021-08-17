@@ -61,8 +61,8 @@ public class Utils {
         String ss = "Error to upload: ";
         boolean r = true;
         try {
-            String respomse = uploadBytecode(clazz, vmManager, vmInfo, content);
-            if (respomse.equals(DecompilerRequestReceiver.ERROR_RESPONSE)) {
+            String response = uploadBytecode(clazz, vmManager, vmInfo, content);
+            if (response.equals(DecompilerRequestReceiver.ERROR_RESPONSE)) {
                 throw new Exception("Agent returned error");
             }
             ss = "uploaded: ";
@@ -74,15 +74,15 @@ public class Utils {
         return r;
     }
 
-    public static String cheatName(String base, int selectedIndex, String suffix, String fullyClasifiedName) {
+    public static String cheatName(String base, int selectedIndex, String suffix, String fullyClassifiedName) {
         if (selectedIndex == CUSTOM_NAME) {
             return base;
         }
         if (selectedIndex == FULLY_QUALIFIED_NAME) {
-            return base + "/" + fullyClasifiedName + suffix;
+            return base + "/" + fullyClassifiedName + suffix;
         }
         if (selectedIndex == SRC_SUBDIRS_NAME) {
-            return base + "/" + fullyClasifiedName.replaceAll("\\.", "/") + suffix;
+            return base + "/" + fullyClassifiedName.replaceAll("\\.", "/") + suffix;
         }
         throw new RuntimeException("Unknown name target " + selectedIndex);
     }
@@ -97,14 +97,14 @@ public class Utils {
     public static String guessClass(String src) throws IOException {
         return Cli.guessName(Files.readAllBytes(new File(src).toPath()));
     }
-    public static IdentifiedSource[] sourcesToIdentifiedSources(boolean recursive, List<File> srcs) throws IOException {
-        return sourcesToIdentifiedSources(recursive, srcs.stream().map(x -> x.getAbsolutePath()).toArray(String[]::new));
+    public static IdentifiedSource[] sourcesToIdentifiedSources(boolean recursive, List<File> sources) throws IOException {
+        return sourcesToIdentifiedSources(recursive, sources.stream().map(x -> x.getAbsolutePath()).toArray(String[]::new));
     }
 
-    public static IdentifiedSource[] sourcesToIdentifiedSources(boolean recursive, String... srcs) throws IOException {
-        List<IdentifiedSource> loaded = new ArrayList<>(srcs.length);
-        for (int i = 0; i < srcs.length; i++) {
-            File f = new File(srcs[i]);
+    public static IdentifiedSource[] sourcesToIdentifiedSources(boolean recursive, String... sources) throws IOException {
+        List<IdentifiedSource> loaded = new ArrayList<>(sources.length);
+        for (int i = 0; i < sources.length; i++) {
+            File f = new File(sources[i]);
             if (f.isDirectory()) {
                 if (recursive) {
                     Files.walkFileTree(f.toPath(), new FileVisitor<Path>() {

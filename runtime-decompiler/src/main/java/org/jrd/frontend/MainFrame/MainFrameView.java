@@ -83,7 +83,7 @@ public class MainFrameView {
         /**
          * Custom JList that disables selection with mouse drag.
          */
-        class UndragableJList extends JList {
+        class UndraggableJList extends JList {
             @Override
             protected void processMouseMotionEvent(MouseEvent e) {
                 if (MouseEvent.MOUSE_DRAGGED != e.getID()) {
@@ -93,7 +93,7 @@ public class MainFrameView {
         }
 
         // mainFrame, mainPanel, westPanel, localVmPanel. localVmList, localVmScrollPane, localVmLabelPanel
-        localVmList = new UndragableJList();
+        localVmList = new UndraggableJList();
         localVmList.setName("localVmList");
         localVmList.setFixedCellHeight(80);
         localVmList.setCellRenderer(new VmListRenderer());
@@ -133,7 +133,7 @@ public class MainFrameView {
         remoteVmLabelPanel.add(new JLabel("    Remote Processes", SwingConstants.CENTER), BorderLayout.CENTER);
         remoteVmLabelPanel.add(remoteConnectionButton, BorderLayout.EAST);
         // remoteVmLabelPanel end
-        remoteVmList = new UndragableJList();
+        remoteVmList = new UndraggableJList();
         remoteVmList.setName("remoteVmList");
         remoteVmList.setFixedCellHeight(80);
         remoteVmList.setCellRenderer(new VmListRenderer());
@@ -157,7 +157,7 @@ public class MainFrameView {
         remoteVmPanel.add(remoteVmScrollPane, BorderLayout.CENTER);
         // remoteVmPanel End
 
-        localFsVmList = new UndragableJList();
+        localFsVmList = new UndraggableJList();
         localFsVmList.setName("localFsVmList");
         localFsVmList.setFixedCellHeight(80);
         localFsVmList.setCellRenderer(new VmListRenderer());
@@ -209,7 +209,7 @@ public class MainFrameView {
                 "Currently supported decompilers are: Fernflower, Procyon, jasm.\n" +
                 "\n" +
                 "JRD is dangerous program, and as it allows you to overwrite classes in running JVM. By doing so, you can break the JVM .\n" +
-                "Use with caution.  jdk9+ is not allwoed to attach by default. Run JVM with -Djdk.attach.allowAttachSelf=true.\n");
+                "Use with caution.  jdk9+ is not allowed to attach by default. Run JVM with -Djdk.attach.allowAttachSelf=true.\n");
         welcomeJTextArea.setFont(new Font(welcomeJTextArea.getFont().getFontName(), welcomeJTextArea.getFont().getStyle(), 20));
         welcomeJTextArea.setLineWrap(true);
         welcomeJTextArea.setWrapStyleWord(true);
@@ -293,7 +293,7 @@ public class MainFrameView {
         // mainFrame End
 
 
-        // Tell server to shutdown before exiting
+        // Tell server to shut down before exiting
         mainFrame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {

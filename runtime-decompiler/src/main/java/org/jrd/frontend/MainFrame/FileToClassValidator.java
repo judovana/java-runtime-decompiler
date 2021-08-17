@@ -16,13 +16,13 @@ import javax.swing.event.DocumentListener;
  *
  * @author jvanek
  */
-public class FiletoClassValidator implements DocumentListener {
+public class FileToClassValidator implements DocumentListener {
 
     private final JLabel output;
     private final JTextField file;
     private final JTextField clazz;
 
-    public FiletoClassValidator(JLabel validation, JTextField filePath, JTextField className) {
+    public FileToClassValidator(JLabel validation, JTextField filePath, JTextField className) {
         this.output = validation;
         this.file = filePath;
         this.clazz = className;
@@ -73,7 +73,7 @@ public class FiletoClassValidator implements DocumentListener {
             score += 10;
             message.append("File name and class name do not match! ");
         }
-        //skippping name
+        //skipping name
         int i1 = pathHunks.length - 1;
         int i2 = classHunks.length - 1;
         while (true) {

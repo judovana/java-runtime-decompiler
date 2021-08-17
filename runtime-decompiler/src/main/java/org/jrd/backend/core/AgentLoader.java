@@ -29,7 +29,7 @@ public class AgentLoader {
     }
 
     /**
-     * This method handles the attach of a decompiler agent to given VM.
+     * This method handles the attachment of a decompiler agent to given VM.
      * @param pid PID of the VM
      * @return AgentInfo object, if successful, else null
      */

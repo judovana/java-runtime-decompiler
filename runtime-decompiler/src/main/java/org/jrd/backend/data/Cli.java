@@ -12,7 +12,7 @@ import org.jrd.backend.core.OutputController;
 import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 import org.jrd.backend.decompiling.PluginManager;
-import org.jrd.frontend.MainFrame.FiletoClassValidator;
+import org.jrd.frontend.MainFrame.FileToClassValidator;
 import org.jrd.frontend.MainFrame.VmDecompilerInformationController;
 import org.jrd.frontend.NewFsVmFrame.NewFsVmController;
 import org.jrd.frontend.Utils;
@@ -45,11 +45,11 @@ import static org.jrd.backend.data.Help.printHelpText;
 public class Cli {
 
     protected static final String VERBOSE = "-verbose";
-    protected static final String SAVEAS = "-saveas";
-    protected static final String SAVELIKE = "-savelike";
-    protected static final String LISTJVMS = "-listjvms";
-    protected static final String LISTPLUGINS = "-listplugins";
-    protected static final String LISTCLASSES = "-listclasses";
+    protected static final String SAVE_AS = "-saveas";
+    protected static final String SAVE_LIKE = "-savelike";
+    protected static final String LIST_JVMS = "-listjvms";
+    protected static final String LIST_PLUGINS = "-listplugins";
+    protected static final String LIST_CLASSES = "-listclasses";
     protected static final String BASE64 = "-base64bytes";
     protected static final String BYTES = "-bytes";
     protected static final String DECOMPILE = "-decompile";
@@ -59,7 +59,7 @@ public class Cli {
     protected static final String HELP = "-help";
     protected static final String H = "-h";
 
-    private final String[] allargs;
+    private final String[] allArgs;
     private final VmManager vmManager;
     private final PluginManager pluginManager;
     private Saving saving;
@@ -116,22 +116,22 @@ public class Cli {
                     }
                     return Utils.CUSTOM_NAME;
                 default:
-                    throw new RuntimeException("Unknown savng typr: " + like + ". Allowed are: " + FQN + "," + DIR + "," + EXACT);
+                    throw new RuntimeException("Unknown saving type: " + like + ". Allowed are: " + FQN + "," + DIR + "," + EXACT);
             }
         }
     }
 
     public Cli(String[] orig, Model model) {
-        this.allargs = orig;
+        this.allArgs = orig;
         this.vmManager = model.getVmManager();
         this.pluginManager = model.getPluginManager();
-        for (String arg : allargs) {
-            String aarg = cleanParameter(arg);
-            if (aarg.equals(HELP) || aarg.equals(H)) {
+        for (String arg : allArgs) {
+            String cleanedArg = cleanParameter(arg);
+            if (cleanedArg.equals(HELP) || cleanedArg.equals(H)) {
                 printHelp();
                 System.exit(0);
             }
-            if (aarg.equals(VERSION)) {
+            if (cleanedArg.equals(VERSION)) {
                 try {
                     printVersion();
                     System.exit(0);
@@ -147,9 +147,9 @@ public class Cli {
     }
 
     public boolean shouldBeVerbose() {
-        for (String arg : allargs) {
-            String aarg = cleanParameter(arg);
-            if (aarg.equals(VERBOSE)) {
+        for (String arg : allArgs) {
+            String cleanedArg = cleanParameter(arg);
+            if (cleanedArg.equals(VERBOSE)) {
                 return true;
             }
         }
@@ -161,25 +161,25 @@ public class Cli {
     }
 
     private List<String> prefilterArgs() {
-        List<String> args = new ArrayList(allargs.length);
-        String saveas = null;
-        String savelike = null;
-        for (int i = 0; i < allargs.length; i++) {
-            String arg = allargs[i];
-            String aarg = cleanParameter(arg);
-            if (aarg.equals(VERBOSE)) {
-                //alread processed
-            } else if (aarg.equals(SAVEAS)) {
-                saveas = allargs[i + 1];
+        List<String> args = new ArrayList(allArgs.length);
+        String saveAs = null;
+        String saveLike = null;
+        for (int i = 0; i < allArgs.length; i++) {
+            String arg = allArgs[i];
+            String cleanedArg = cleanParameter(arg);
+            if (cleanedArg.equals(VERBOSE)) {
+                //already processed
+            } else if (cleanedArg.equals(SAVE_AS)) {
+                saveAs = allArgs[i + 1];
                 i++;
-            } else if (aarg.equals(SAVELIKE)) {
-                savelike = allargs[i + 1];
+            } else if (cleanedArg.equals(SAVE_LIKE)) {
+                saveLike = allArgs[i + 1];
                 i++;
             } else {
                 args.add(arg);
             }
         }
-        this.saving = new Saving(saveas, savelike);
+        this.saving = new Saving(saveAs, saveLike);
         return args;
     }
 
@@ -188,14 +188,14 @@ public class Cli {
         for (int i = 0; i < args.size(); i++) {
             String arg = args.get(i);
             arg = cleanParameter(arg);
-            if (arg.equals(LISTJVMS)) {
-                listJvms(args);
+            if (arg.equals(LIST_JVMS)) {
+                listJVMs(args);
                 break;
             }
-            if (arg.equals(LISTPLUGINS)) {
+            if (arg.equals(LIST_PLUGINS)) {
                 listPlugins(args);
                 break;
-            } else if (arg.equals(LISTCLASSES)) {
+            } else if (arg.equals(LIST_CLASSES)) {
                 listClasses(args, i);
                 break;
             } else if (arg.equals(BYTES) || arg.equals(BASE64)) {
@@ -232,7 +232,7 @@ public class Cli {
         String jvmStr = args.get(i + 1);
         String classStr = args.get(i + 2);
         if (newBytecodeFile != null) {
-            FiletoClassValidator.StringAndScore r = FiletoClassValidator.validate(classStr, newBytecodeFile);
+            FileToClassValidator.StringAndScore r = FileToClassValidator.validate(classStr, newBytecodeFile);
             if (r.score > 0 && r.score < 10) {
                 System.err.println("WARNING:" + r.message);
             }
@@ -365,7 +365,7 @@ public class Cli {
             }
         } else {
             if (!saving.shouldSave() && result.size() > 1) {
-                throw new RuntimeException("more then one file is output of compilation, but yuo have stdout enabled. Use " + SAVEAS + " and friends to save the output of compilation");
+                throw new RuntimeException("more then one file is output of compilation, but yuo have stdout enabled. Use " + SAVE_AS + " and friends to save the output of compilation");
             }
             for (IdentifiedBytecode ib : result) {
                 outOrSave(ib.getClassIdentifier().getFullName(), ".class", ib.getFile(), true);
@@ -400,10 +400,10 @@ public class Cli {
                     for (int i = 0; i < keys.length; i++) {
                         String key = keys[i];
                         if (key.equals("0xCAFEBABE")) {
-                            return clazz.replace("/", "."); //jcod's disasm uses / instead of and have fully qulified class name as class name
+                            return clazz.replace("/", "."); //jcoder's disassembler uses / instead of and has fully qualified class name as class name
                         }
                         if (key.equals("package")) {
-                            pkg = keys[i + 1].replace("/", "."); //jasm's disasm uses / instead of .
+                            pkg = keys[i + 1].replace("/", "."); //jasm's disassembler uses / instead of .
                         }
                         if (key.equals("class") || key.equals("interface") || key.equals("enum")) {
                             clazz = keys[i + 1];
@@ -427,8 +427,8 @@ public class Cli {
         int total = 0;
         for (int y = 3; y < args.size(); y++) {
             String clazzRegex = args.get(y);
-            List<String> clazzes = obtainFilteredClasses(vmInfo, vmManager, Arrays.asList(Pattern.compile(clazzRegex)));
-            for (String classStr : clazzes) {
+            List<String> classes = obtainFilteredClasses(vmInfo, vmManager, Arrays.asList(Pattern.compile(clazzRegex)));
+            for (String classStr : classes) {
                 total++;
                 VmDecompilerStatus result = obtainClass(vmInfo, classStr, vmManager);
                 byte[] bytes = Base64.getDecoder().decode(result.getLoadedClassBytes());
@@ -514,8 +514,8 @@ public class Cli {
         int total = 0;
         for (int y = 2; y < args.size(); y++) {
             String clazzRegex = args.get(y);
-            List<String> clazzes = obtainFilteredClasses(vmInfo, vmManager, Arrays.asList(Pattern.compile(clazzRegex)));
-            for (String classStr : clazzes) {
+            List<String> classes = obtainFilteredClasses(vmInfo, vmManager, Arrays.asList(Pattern.compile(clazzRegex)));
+            for (String classStr : classes) {
                 total++;
                 VmDecompilerStatus result = obtainClass(vmInfo, classStr, vmManager);
                 if (bytes) {
@@ -535,7 +535,7 @@ public class Cli {
 
     private void listClasses(List<String> args, int i) throws IOException {
         if (args.size() < 2) {
-            throw new RuntimeException(LISTCLASSES + " expect at least one argument - PUC. Second, optional is list of filtering regexes");
+            throw new RuntimeException(LIST_CLASSES + " expect at least one argument - PUC. Second, optional is list of filtering regexes");
         }
         String param = args.get(i + 1);
         List<Pattern> filter = new ArrayList<>(args.size() - 1);
@@ -591,7 +591,7 @@ public class Cli {
 
     private void listPlugins(List<String> args) {
         if (args.size() != 1) {
-            throw new RuntimeException(LISTPLUGINS + " does not expect argument");
+            throw new RuntimeException(LIST_PLUGINS + " does not expect argument");
         }
         PluginManager pm = new PluginManager();
         List<DecompilerWrapperInformation> wrappers = pm.getWrappers();
@@ -600,9 +600,9 @@ public class Cli {
         }
     }
 
-    private void listJvms(List<String> args) {
+    private void listJVMs(List<String> args) {
         if (args.size() != 1) {
-            throw new RuntimeException(LISTJVMS + " does not expect argument");
+            throw new RuntimeException(LIST_JVMS + " does not expect argument");
         }
         for (VmInfo vmInfo : vmManager.getVmInfoSet()) {
             System.out.println(vmInfo.getVmPid() + " " + vmInfo.getVmName());
@@ -722,7 +722,7 @@ public class Cli {
                 vmInfo = vmManager.findVmFromPID(param);
                 break;
             case FS:
-                vmInfo = vmManager.createFsVM(NewFsVmController.cpToFilesCatched(param), null);
+                vmInfo = vmManager.createFsVM(NewFsVmController.cpToFilesCaught(param), null);
                 break;
             case REMOTE:
                 vmInfo = vmManager.createRemoteVM(param.split(":")[0], Integer.valueOf(param.split(":")[1]));
@@ -734,10 +734,10 @@ public class Cli {
     }
 
     static class VersionFromManifest {
-        private static final String EXPECTED_GROUPID = "java-runtime-decompiler";
-        private static final String EXPECTED_ARTIFACTID = "runtime-decompiler";
-        private static final String GROUPID = "groupId";
-        private static final String ARTIFACTID = "artifactId";
+        private static final String EXPECTED_GROUP_ID = "java-runtime-decompiler";
+        private static final String EXPECTED_ARTIFACT_ID = "runtime-decompiler";
+        private static final String GROUP_ID = "groupId";
+        private static final String ARTIFACT_ID = "artifactId";
         private static final String VERSION = "version";
         private static final String TIMESTAMP = "timestamp";
         private final Attributes attributes;
@@ -749,22 +749,22 @@ public class Cli {
             }
 
             public String getGroup() {
-                return "group.nofound";
+                return "group.notfound";
             }
 
             public String getVersion() {
-                return "version.nofound";
+                return "version.notfound";
             }
 
             public String getTimestamp() {
-                return "buildtime.nofound";
+                return "build_time.notfound";
             }
 
         }
 
         public static boolean isOurManifest(Attributes attributes) {
-            return (EXPECTED_GROUPID.equals(attributes.getValue(GROUPID)) &&
-                    EXPECTED_ARTIFACTID.equals(attributes.getValue(ARTIFACTID)));
+            return (EXPECTED_GROUP_ID.equals(attributes.getValue(GROUP_ID)) &&
+                    EXPECTED_ARTIFACT_ID.equals(attributes.getValue(ARTIFACT_ID)));
         }
 
         public VersionFromManifest(Attributes attributes) {
@@ -772,7 +772,7 @@ public class Cli {
         }
 
         public String getGroup() {
-            return attributes.getValue(GROUPID);
+            return attributes.getValue(GROUP_ID);
         }
 
         public String getVersion() {

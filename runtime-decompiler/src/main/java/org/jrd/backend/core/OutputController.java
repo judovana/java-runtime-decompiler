@@ -56,14 +56,14 @@ public class OutputController {
             if (verbose || level == Level.MESSAGE_ALL) {
                 ((Throwable) o).printStackTrace();
             }
-            //in headfull show errordialog? To disturbing? Add shownexttime checkbox? just notification(soudns best considering the nature of exceptions)?
+            // show gui error dialog? To disturbing? Add shownexttime checkbox? just notification(sounds best considering the nature of exceptions)?
             return;
         } else {
             s = o.toString();
         }
         if (verbose || level == Level.MESSAGE_ALL) {
             System.err.println(s);
-            // in headfull print to some gui console?
+            // print to some gui console?
         }
     }
 

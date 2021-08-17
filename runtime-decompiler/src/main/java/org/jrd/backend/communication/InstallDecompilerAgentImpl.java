@@ -16,13 +16,13 @@ import java.util.jar.JarFile;
 import org.jboss.byteman.agent.install.VMInfo;
 
 /**
- * This is byteman's install library copied, with small modifications. This is
+ * This is Byteman's install library copied, with small modifications. This is
  * done with permission of Andrew Dinn, author of Byteman. For the original
  * source of this code, please follow links below:
  * http://byteman.jboss.org/  -- official page
  * https://github.com/bytemanproject/byteman -- git repository
  *
- * This is a provisional solution for the attach, while I am trying to create
+ * This is a provisional solution for the attachment, while I am trying to create
  * an abstract library to share some functionality.
  */
 public class InstallDecompilerAgentImpl {
@@ -99,8 +99,8 @@ public class InstallDecompilerAgentImpl {
             vm = VirtualMachine.attach(Integer.toString(pid));
         } else {
             // try to search for this VM with an exact match
-            List<VirtualMachineDescriptor> vmds = VirtualMachine.list();
-            for (VirtualMachineDescriptor vmd : vmds) {
+            List<VirtualMachineDescriptor> descriptors = VirtualMachine.list();
+            for (VirtualMachineDescriptor vmd : descriptors) {
                 String displayName = vmd.displayName();
                 int spacePos = displayName.indexOf(' ');
                 if (spacePos > 0) {
@@ -113,8 +113,8 @@ public class InstallDecompilerAgentImpl {
             }
             // hmm, ok, lets see if we can find a trailing match e.g. if the displayName
             // is org.jboss.Main we will accept jboss.Main or Main
-            for (VirtualMachineDescriptor vmd : vmds) {
-                String displayName = vmd.displayName();
+            for (VirtualMachineDescriptor descriptor : descriptors) {
+                String displayName = descriptor.displayName();
                 int spacePos = displayName.indexOf(' ');
                 if (spacePos > 0) {
                     displayName = displayName.substring(0, spacePos);
@@ -125,7 +125,7 @@ public class InstallDecompilerAgentImpl {
                     int idx = displayName.length() - (id.length() + 1);
                     if (displayName.charAt(idx) == '.') {
                         // yes it's a match
-                        vm = VirtualMachine.attach(vmd);
+                        vm = VirtualMachine.attach(descriptor);
                         return;
                     }
                 }

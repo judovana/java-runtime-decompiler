@@ -34,7 +34,7 @@ public class FileSelectorArrayPanel extends JPanel {
         this.add(fileSelectorArrayAddRow, gbc);
         gbc.gridy = 0;
 
-        // Always have a least one row.
+        // Always have at least one row.
         addRow("", false);
         first = true;
     }
