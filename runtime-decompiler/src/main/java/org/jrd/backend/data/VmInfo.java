@@ -1,5 +1,6 @@
 package org.jrd.backend.data;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jrd.backend.core.OutputController;
 import org.jrd.backend.core.VmDecompilerStatus;
 
@@ -92,6 +93,11 @@ public class VmInfo {
     public void setType(Type local) {
         this.type = local;
     }
+
+    @SuppressFBWarnings(
+            value = "NP_LOAD_OF_KNOWN_NULL_VALUE",
+            justification = "Classpath is only used for FS VMs, in other cases getCp() does not get called, thus null is permissible."
+    )
     public void setCp(List<File> cp) {
         if (cp == null){
             this.cp = cp;
