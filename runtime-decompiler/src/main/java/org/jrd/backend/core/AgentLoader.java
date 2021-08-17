@@ -75,7 +75,7 @@ public class AgentLoader {
 
     private String[] createProperties(int port) throws IOException {
         List<String> properties = new ArrayList<>();
-        String agentPortProperty = AGENT_PORT_PROPERTY + "=" + Integer.valueOf(port).toString();
+        String agentPortProperty = AGENT_PORT_PROPERTY + "=" + port;
         properties.add(agentPortProperty);
         return properties.toArray(new String[]{});
     }
