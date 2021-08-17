@@ -1,11 +1,9 @@
 package org.jrd.backend.data;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -280,13 +278,9 @@ public class Help {
             String buildTimestamp, centerTitle;
 
             try {
-                Cli.VersionFromManifest attributes = getJrdAttributes().get();
-
-                buildTimestamp = attributes.getTimestamp().split(" ")[0];
-                centerTitle = attributes.getGroup();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            } catch (NoSuchElementException | IndexOutOfBoundsException e) {
+                buildTimestamp = MetadataProperties.getInstance().getTimestamp().split(" ")[0];
+                centerTitle = MetadataProperties.getInstance().getGroup();
+            } catch (IndexOutOfBoundsException e) {
                 buildTimestamp = "";
                 centerTitle = ""; // empty == defaults to "General Commands Manual"
             }

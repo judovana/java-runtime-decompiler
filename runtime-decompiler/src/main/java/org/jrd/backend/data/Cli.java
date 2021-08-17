@@ -25,18 +25,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Optional;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
@@ -132,12 +128,8 @@ public class Cli {
                 System.exit(0);
             }
             if (cleanedArg.equals(VERSION)) {
-                try {
-                    printVersion();
-                    System.exit(0);
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
+                printVersion();
+                System.exit(0);
             }
         }
     }
@@ -609,31 +601,8 @@ public class Cli {
         }
     }
 
-    protected static Optional<VersionFromManifest> getJrdAttributes() throws IOException {
-        Enumeration<URL> resources = Cli.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
-
-        while (resources.hasMoreElements()) {
-            Manifest manifest = new Manifest(resources.nextElement().openStream());
-            Attributes attributes = manifest.getAttributes("runtime-decompiler");
-
-            if (attributes != null) {
-                if (VersionFromManifest.isOurManifest(attributes)) {
-                    return Optional.of(new VersionFromManifest(attributes));
-                }
-            }
-        }
-
-        return Optional.empty();
-    }
-
-    private void printVersion() throws IOException {
-        Optional<VersionFromManifest> maybeAttributes = getJrdAttributes();
-
-        if (maybeAttributes.isEmpty()) {
-            System.out.println(new VersionFromManifest.NoManifestFound().toString());
-        } else {
-            System.out.println(maybeAttributes.get().toString());
-        }
+    private void printVersion() {
+        System.out.println(MetadataProperties.getInstance());
     }
 
     private void printHelp() {
@@ -731,60 +700,5 @@ public class Cli {
                 throw new RuntimeException("Unknown VmInfo.Type.");
         }
         return vmInfo;
-    }
-
-    static class VersionFromManifest {
-        private static final String EXPECTED_GROUP_ID = "java-runtime-decompiler";
-        private static final String EXPECTED_ARTIFACT_ID = "runtime-decompiler";
-        private static final String GROUP_ID = "groupId";
-        private static final String ARTIFACT_ID = "artifactId";
-        private static final String VERSION = "version";
-        private static final String TIMESTAMP = "timestamp";
-        private final Attributes attributes;
-
-        private  static class NoManifestFound extends  VersionFromManifest {
-
-            public NoManifestFound() {
-                super(null);
-            }
-
-            public String getGroup() {
-                return "group.notfound";
-            }
-
-            public String getVersion() {
-                return "version.notfound";
-            }
-
-            public String getTimestamp() {
-                return "build_time.notfound";
-            }
-
-        }
-
-        public static boolean isOurManifest(Attributes attributes) {
-            return (EXPECTED_GROUP_ID.equals(attributes.getValue(GROUP_ID)) &&
-                    EXPECTED_ARTIFACT_ID.equals(attributes.getValue(ARTIFACT_ID)));
-        }
-
-        public VersionFromManifest(Attributes attributes) {
-            this.attributes = attributes;
-        }
-
-        public String getGroup() {
-            return attributes.getValue(GROUP_ID);
-        }
-
-        public String getVersion() {
-            return attributes.getValue(VERSION);
-        }
-
-        public String getTimestamp() {
-            return attributes.getValue(TIMESTAMP);
-        }
-
-        public String toString() {
-            return getGroup() + " - JRD - " + getVersion() + " - " + getTimestamp();
-        }
     }
 }

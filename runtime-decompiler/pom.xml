@@ -50,15 +50,6 @@
                             <addClasspath>true</addClasspath>
                             <mainClass>${jrd.client.main.class}</mainClass>
                         </manifest>
-                        <manifestSection>
-                            <name>${project.name}</name>
-                            <manifestEntries>
-                                <groupId>${project.groupId}</groupId>
-                                <artifactId>${project.artifactId}</artifactId>
-                                <version>${project.version}</version>
-                                <timestamp>${maven.build.timestamp}</timestamp>
-                            </manifestEntries>
-                        </manifestSection>
                     </archive>
                 </configuration>
             </plugin>
@@ -84,15 +75,6 @@
                                 <manifest>
                                     <mainClass>${jrd.client.main.class}</mainClass>
                                 </manifest>
-                                <manifestSection>
-                                    <name>${project.name}</name>
-                                    <manifestEntries>
-                                        <groupId>${project.groupId}</groupId>
-                                        <artifactId>${project.artifactId}</artifactId>
-                                        <version>${project.version}</version>
-                                        <timestamp>${maven.build.timestamp}</timestamp>
-                                    </manifestEntries>
-                                </manifestSection>
                             </archive>
                         </configuration>
                     </execution>
