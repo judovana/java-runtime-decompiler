@@ -21,7 +21,7 @@ import static org.jrd.backend.decompiling.PluginManager.UNDECOMPILABLE_LAMBDA;
  */
 public class DecompilerRequestReceiver {
 
-    //private static final Logger logger = LoggingUtils.getLogger(DecompilerRequestReciever.class);
+    //private static final Logger logger = LoggingUtils.getLogger(DecompilerRequestReceiver.class);
 
     private final AgentAttachManager attachManager;
     private VmManager vmManager;

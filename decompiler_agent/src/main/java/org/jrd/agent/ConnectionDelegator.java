@@ -9,7 +9,7 @@ public class ConnectionDelegator extends Thread{
 
     private static ConnectionDelegator connectionDelegator;
     public static final int DEFAULT_PORT = 5395;
-    public static final String DEFAULT_ADRESS = "localhost";
+    public static final String DEFAULT_ADDRESS = "localhost";
 
     private ServerSocket theServerSocket;
     private InstrumentationProvider provider;
@@ -40,7 +40,7 @@ public class ConnectionDelegator extends Thread{
                 port = DEFAULT_PORT;
             }
             if (hostname == null) {
-                hostname = DEFAULT_ADRESS;
+                hostname = DEFAULT_ADDRESS;
             }
             initServerSocket = new ServerSocket();
             initServerSocket.bind(new InetSocketAddress(hostname, port));

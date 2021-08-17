@@ -1,7 +1,7 @@
 package org.jrd.frontend.MainFrame;
 
 public class LatestPaths {
-    public String lastManualUplaod ; //origianlly lastLoad
+    public String lastManualUpload; //originally lastLoad
     public String lastSaveSrc;
     public String lastSaveBin;
     public String filesToCompile;
@@ -9,7 +9,7 @@ public class LatestPaths {
     public String outputBinaries;
 
     public LatestPaths() {
-        lastManualUplaod = System.getProperty("user.home");
+        lastManualUpload = System.getProperty("user.home");
         lastSaveSrc = System.getProperty("user.home");
         lastSaveBin = System.getProperty("user.home");
         filesToCompile = System.getProperty("user.home");

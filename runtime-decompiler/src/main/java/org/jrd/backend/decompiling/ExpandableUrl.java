@@ -56,9 +56,9 @@ public class ExpandableUrl {
 
     /**
      * There were many differences in file protocol handling
-     * between jdk8 and jdk11. Especially on windows, Where
+     * between jdk8 and jdk11. Especially on Windows, Where
      * redundant / could auto point to C:\ or simply kill the path
-     * Although this method shoul be of signature URL:(File),
+     * Although this method should be of signature URL:(File),
      * it was left as String String, as the slashes are making us mad
      * @param url
      * @return

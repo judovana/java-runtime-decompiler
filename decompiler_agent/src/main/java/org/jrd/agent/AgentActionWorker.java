@@ -97,7 +97,7 @@ public class AgentActionWorker extends Thread {
                         sendByteCode(inputStream, outputStream);
                         break;
                     case "OVERWRITE":
-                        recieveByteCode(inputStream, outputStream);
+                        receiveByteCode(inputStream, outputStream);
                         break;
                     default:
                         outputStream.write("ERROR\n");
@@ -106,13 +106,13 @@ public class AgentActionWorker extends Thread {
                 }
             }
         } catch (IOException e) {
-            OutputControllerAgent.getLogger().log(new RuntimeException("Exception occured while trying to process the request:", e));
+            OutputControllerAgent.getLogger().log(new RuntimeException("Exception occurred while trying to process the request:", e));
 
         } finally {
             try {
                 socket.close();
             } catch (IOException e) {
-                OutputControllerAgent.getLogger().log(new RuntimeException("Exception occured while trying to close the socket:", e));
+                OutputControllerAgent.getLogger().log(new RuntimeException("Exception occurred while trying to close the socket:", e));
             }
         }
     }
@@ -164,7 +164,7 @@ public class AgentActionWorker extends Thread {
         out.flush();
     }
     
-    private void recieveByteCode(BufferedReader in, BufferedWriter out) throws IOException {
+    private void receiveByteCode(BufferedReader in, BufferedWriter out) throws IOException {
         String className = in.readLine();
         if (className == null) {
             out.write("ERROR\n");

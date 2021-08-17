@@ -66,10 +66,10 @@ public class DecompilerWrapperInformation {
         return javap;
     }
 
-    public static DecompilerWrapperInformation getJavapv() {
-        DecompilerWrapperInformation javapv = new DecompilerWrapperInformation();
-        javapv.setName(JAVAP_VERBOSE_NAME);
-        return javapv;
+    public static DecompilerWrapperInformation getJavapVerbose() {
+        DecompilerWrapperInformation javapVerbose = new DecompilerWrapperInformation();
+        javapVerbose.setName(JAVAP_VERBOSE_NAME);
+        return javapVerbose;
     }
 
     public String getFileLocation() {

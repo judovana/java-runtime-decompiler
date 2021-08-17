@@ -27,7 +27,7 @@ class HexTable extends JTable {
     private HexTableModel model;
     int leadSelectionIndex;
     int anchorSelectionIndex;
-    private static final Color ANTERNATING_CELL_COLOR;
+    private static final Color ALTERNATING_CELL_COLOR;
 
     public HexTable(final HexEditor hexEditor, final HexTableModel model) {
         super(model);
@@ -310,7 +310,7 @@ class HexTable extends JTable {
     }
 
     static {
-        ANTERNATING_CELL_COLOR = new Color(240, 240, 240);
+        ALTERNATING_CELL_COLOR = new Color(240, 240, 240);
     }
 
     private static class CellEditor extends DefaultCellEditor implements FocusListener {
@@ -371,10 +371,10 @@ class HexTable extends JTable {
                     this.highlight.setLocation(start, end);
                 }
                 final boolean colorBG = HexTable.this.hexEditor.getAlternateRowBG() && (row & 0x1) > 0;
-                this.setBackground(colorBG ? HexTable.ANTERNATING_CELL_COLOR : table.getBackground());
+                this.setBackground(colorBG ? HexTable.ALTERNATING_CELL_COLOR : table.getBackground());
             } else if (!selected) {
                 if ((HexTable.this.hexEditor.getAlternateRowBG() && (row & 0x1) > 0) ^ (HexTable.this.hexEditor.getAlternateColumnBG() && (column & 0x1) > 0)) {
-                    this.setBackground(HexTable.ANTERNATING_CELL_COLOR);
+                    this.setBackground(HexTable.ALTERNATING_CELL_COLOR);
                 } else {
                     this.setBackground(table.getBackground());
                 }

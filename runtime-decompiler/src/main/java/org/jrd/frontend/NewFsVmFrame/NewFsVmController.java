@@ -38,7 +38,7 @@ public class NewFsVmController {
         newConnectionView.dispose();
     }
 
-    public static List<File> cpToFilesCatched(String input) {
+    public static List<File> cpToFilesCaught(String input) {
         try {
             return cpToFiles(input);
         } catch (ProbablyNotClassPathElementException ex) {

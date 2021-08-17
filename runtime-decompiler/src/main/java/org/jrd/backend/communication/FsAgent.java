@@ -68,7 +68,7 @@ public class FsAgent implements JrdAgent {
     private Void uploadByteCode(String request) {
         String[] clazz = request.split("\\s+");
         try {
-            return new OperateOnCp<Void>(cp).operatetOnCp(clazz[1], new WriteingCpOperator(clazz[2]));
+            return new OperateOnCp<Void>(cp).operateOnCp(clazz[1], new WritingCpOperator(clazz[2]));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -77,7 +77,7 @@ public class FsAgent implements JrdAgent {
     private String sendByteCode(String request) {
         String[] clazz = request.split("\\s+");
         try {
-            String s = new OperateOnCp<String>(cp).operatetOnCp(clazz[1], new ReadingCpOperator());
+            String s = new OperateOnCp<String>(cp).operateOnCp(clazz[1], new ReadingCpOperator());
             return s;
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -86,7 +86,7 @@ public class FsAgent implements JrdAgent {
 
     private String readClasses() throws IOException {
         List<String> classes = new ArrayList<>();
-        new OperateOnCp<Void>(cp).operatetOnCp(null, new ListingCpOperator(classes));
+        new OperateOnCp<Void>(cp).operateOnCp(null, new ListingCpOperator(classes));
         return classes.stream().collect(Collectors.joining(";"));
     }
 
@@ -103,7 +103,7 @@ public class FsAgent implements JrdAgent {
             this.cp = cp;
         }
 
-        private T operatetOnCp(String clazz, CpOperator<T> op) throws IOException {
+        private T operateOnCp(String clazz, CpOperator<T> op) throws IOException {
             for (File c : cp) {
                 if (c.isDirectory()) {
                     String root = sanitize(c.getAbsolutePath());
@@ -134,7 +134,7 @@ public class FsAgent implements JrdAgent {
                             if (am.needExtract()) {
                                 File f = am.unpack(c);
                                 T ret = onEntryOther(f, clazz, op);
-                                if (op instanceof WriteingCpOperator) {
+                                if (op instanceof WritingCpOperator) {
                                     am.pack(c);
                                 }
                                 return ret;
@@ -210,10 +210,10 @@ public class FsAgent implements JrdAgent {
         return s;
     }
 
-    private static class WriteingCpOperator implements CpOperator<Void> {
+    private static class WritingCpOperator implements CpOperator<Void> {
         private final String body;
 
-        public WriteingCpOperator(String body) {
+        public WritingCpOperator(String body) {
             this.body = body;
         }
 

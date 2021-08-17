@@ -51,7 +51,7 @@ public class BytecodeDecompilerView {
     private JPanel rightMainPanel;
     private JPanel rightBin;
     private JScrollPane leftScrollPanel;
-    private JList<String> filteredClassesJlist;
+    private JList<String> filteredClassesJList;
     private RTextScrollPane bytecodeScrollPane;
     private RSyntaxTextArea bytecodeSyntaxTextArea;
     private HexEditor hex;
@@ -122,24 +122,24 @@ public class BytecodeDecompilerView {
 
         classesPanel.add(classesSortField, BorderLayout.NORTH);
 
-        filteredClassesJlist = new JList<>();
-        filteredClassesJlist.setFixedCellHeight(20);
-        filteredClassesJlist.addMouseListener(new MouseAdapter() {
+        filteredClassesJList = new JList<>();
+        filteredClassesJList.setFixedCellHeight(20);
+        filteredClassesJList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                final String name = filteredClassesJlist.getSelectedValue();
-                if (name != null || filteredClassesJlist.getSelectedIndex() != -1) {
+                final String name = filteredClassesJList.getSelectedValue();
+                if (name != null || filteredClassesJList.getSelectedIndex() != -1) {
                     classWorker(name);
                 }
             }
         });
 
-        filteredClassesJlist.addKeyListener(new KeyAdapter() {
+        filteredClassesJList.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_PAGE_UP || e.getKeyCode() == KeyEvent.VK_PAGE_DOWN || e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    final String name = filteredClassesJlist.getSelectedValue();
-                    if (name != null || filteredClassesJlist.getSelectedIndex() != -1) {
+                    final String name = filteredClassesJList.getSelectedValue();
+                    if (name != null || filteredClassesJList.getSelectedIndex() != -1) {
                         classWorker(name);
                     }
                 }
@@ -150,7 +150,7 @@ public class BytecodeDecompilerView {
         overwriteButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                final String name = filteredClassesJlist.getSelectedValue();
+                final String name = filteredClassesJList.getSelectedValue();
                 new SwingWorker<Void, Void>() {
                     @Override
                     protected Void doInBackground() throws Exception {
@@ -191,8 +191,8 @@ public class BytecodeDecompilerView {
         topComboBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                if (filteredClassesJlist.getSelectedIndex() != -1) {
-                    ActionEvent event = new ActionEvent(this, 1, filteredClassesJlist.getSelectedValue());
+                if (filteredClassesJList.getSelectedIndex() != -1) {
+                    ActionEvent event = new ActionEvent(this, 1, filteredClassesJList.getSelectedValue());
                     bytesActionListener.actionPerformed(event);
                 }
             }
@@ -225,7 +225,7 @@ public class BytecodeDecompilerView {
         topButtonPanel.add(overwriteButton);
         topButtonPanel.add(topComboBox, BorderLayout.EAST);
 
-        leftScrollPanel = new JScrollPane(filteredClassesJlist);
+        leftScrollPanel = new JScrollPane(filteredClassesJList);
         leftScrollPanel.getVerticalScrollBar().setUnitIncrement(20);
 
         classesPanel.add(leftScrollPanel);
@@ -297,22 +297,22 @@ public class BytecodeDecompilerView {
             Pattern p = Pattern.compile(filter);
             classesSortField.setForeground(classesSortFieldColor);
             classesSortField.repaint();
-            for (String classe : classes) {
-                Matcher m = p.matcher(classe);
+            for (String clazz : classes) {
+                Matcher m = p.matcher(clazz);
                 if (m.matches()) {
-                    filtered.add(classe);
+                    filtered.add(clazz);
                 }
             }
         }catch(Exception ex){
             classesSortField.setForeground(Color.red);
             classesSortField.repaint();
-            for (String classe : classes) {
-                if (!classe.contains(filter)) {
-                    filtered.add(classe);
+            for (String clazz : classes) {
+                if (!clazz.contains(filter)) {
+                    filtered.add(clazz);
                 }
             }
         }
-        filteredClassesJlist.setListData(filtered.toArray(new String[filtered.size()]));
+        filteredClassesJList.setListData(filtered.toArray(new String[filtered.size()]));
 
     }
 
@@ -369,7 +369,7 @@ public class BytecodeDecompilerView {
 
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
-            worker.rewriteClass(getSelecteddecompilerWrapperInformation(), BytecodeDecompilerView.this.lastDecompiledClass, BytecodeDecompilerView.this.bytecodeSyntaxTextArea.getText(), BytecodeDecompilerView.this.hex.get(), srcBin.getSelectedIndex());
+            worker.rewriteClass(getSelectedDecompilerWrapperInformation(), BytecodeDecompilerView.this.lastDecompiledClass, BytecodeDecompilerView.this.bytecodeSyntaxTextArea.getText(), BytecodeDecompilerView.this.hex.get(), srcBin.getSelectedIndex());
         }
     }
 
@@ -386,7 +386,7 @@ public class BytecodeDecompilerView {
         });
     }
 
-    public DecompilerWrapperInformation getSelecteddecompilerWrapperInformation() {
+    public DecompilerWrapperInformation getSelectedDecompilerWrapperInformation() {
         return (DecompilerWrapperInformation) topComboBox.getSelectedItem();
     }
 

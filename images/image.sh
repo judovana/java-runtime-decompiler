@@ -49,7 +49,7 @@ else
   readonly CP_TO_VERIFY=""
 fi
 
-function verifyonCp() {
+function verifyOnCp() {
   local file="$1"
   echo "checking: $file against the classpath" 1>&2
   IFS_BACKUP="$IFS"
@@ -82,7 +82,7 @@ TARGET_DIR="$SCRIPT_DIR/images/target"
 IMAGE_DIR="$TARGET_DIR/image"
 LIB_DIR="$IMAGE_DIR/libs"
 DEPS_DIR="$LIB_DIR/deps"
-DECOMPS="$LIB_DIR/decompilers"
+DECOMPILERS="$LIB_DIR/decompilers"
 CONFIG="$IMAGE_DIR/config"
 AGENT_CONF="$CONFIG/conf"
 PLUGINS_CONF="$CONFIG/plugins"
@@ -92,7 +92,7 @@ mkdir "$TARGET_DIR"
 mkdir "$IMAGE_DIR"
 mkdir "$LIB_DIR"
 mkdir "$DEPS_DIR"
-mkdir "$DECOMPS"
+mkdir "$DECOMPILERS"
 mkdir "$CONFIG"
 mkdir "$AGENT_CONF"
 mkdir "$PLUGINS_CONF"
@@ -125,7 +125,7 @@ function modifyAndCopyWrappers() {
 
   if  [ "x$VERIFY_CP" = "xTRUE" ] ;  then
     for jar in `cat  "temp/plugins/${name}DecompilerWrapper.json" | jq -r ".DependencyURL[]"` ; do
-      verifyonCp "$jar"
+      verifyOnCp "$jar"
     done
   fi
 
@@ -135,7 +135,7 @@ function modifyAndCopyWrappers() {
 # if PLUGINS=TRUE && mvn install -PdownloadPlugins was run, and you really want them to include plugins in images
 if [ "x$PLUGINS" == "xTRUE" ] ; then
   for dec in procyon fernflower jasm jcoder cfr; do
-    mkdir "$DECOMPS/$dec"
+    mkdir "$DECOMPILERS/$dec"
     if [ "x$dec" == "xjasm" -o "x$dec" == "xjcoder" ] ; then
       lname=asmtools
     else
@@ -145,12 +145,12 @@ if [ "x$PLUGINS" == "xTRUE" ] ; then
     # TODO, read dependencies from pom even with versions, and maybe check them against the jsons
     jars=`find $MVN_SOURCE | grep -e $lname | grep \.jar$`
     for jar in $jars ; do
-      cp "$jar" "$DECOMPS/$dec"
+      cp "$jar" "$DECOMPILERS/$dec"
     done
     modifyAndCopyWrappers $dec
-    rmdir "$DECOMPS/$dec" 2>/dev/null || true
+    rmdir "$DECOMPILERS/$dec" 2>/dev/null || true
   done
-  rmdir "$DECOMPS" 2>/dev/null || true
+  rmdir "$DECOMPILERS" 2>/dev/null || true
   SUFFIX="-with-decompilers"
 fi
 

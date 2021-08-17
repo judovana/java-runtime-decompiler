@@ -135,7 +135,7 @@ public class Communicate {
             return "OK";
         }
         
-        OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Unknow header of " + initLine);
+        OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Unknown header of " + initLine);
         return "ERROR";
     }
 

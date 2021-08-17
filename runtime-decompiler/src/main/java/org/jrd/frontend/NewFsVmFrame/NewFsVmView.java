@@ -43,9 +43,9 @@ public class NewFsVmView extends JDialog {
             gbc.anchor = GridBagConstraints.WEST;
             gbc.fill = GridBagConstraints.BOTH;
             gbc.gridx = 1;
-            textAndName.add(new JLabel("class-path"), gbc);
+            textAndName.add(new JLabel("Classpath"), gbc);
             gbc.gridx = 3;
-            textAndName.add(new JLabel("optinal name"), gbc);
+            textAndName.add(new JLabel("Optional name"), gbc);
             gbc.gridx = 0;
             gbc.gridy = 1;
             textAndName.add(Box.createHorizontalStrut(20), gbc);
@@ -62,8 +62,8 @@ public class NewFsVmView extends JDialog {
             textAndName.setPreferredSize(new Dimension(0, 100));
             this.setLayout(new BorderLayout());
             this.add(textAndName);
-            JPanel seelctButonPane = new JPanel(new GridBagLayout());
-            seelctButonPane.add(selectCpButton);
+            JPanel selectButtonPane = new JPanel(new GridBagLayout());
+            selectButtonPane.add(selectCpButton);
             selectCpButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent actionEvent) {
@@ -85,7 +85,7 @@ public class NewFsVmView extends JDialog {
                     }
                 }
             });
-            this.add(seelctButonPane, BorderLayout.WEST);
+            this.add(selectButtonPane, BorderLayout.WEST);
         }
     }
 

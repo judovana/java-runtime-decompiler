@@ -7,9 +7,9 @@ import org.jrd.frontend.MainFrame.VmDecompilerInformationController;
 public class Main {
 
 
-    public static void main(String[] allargs) throws Exception {
+    public static void main(String[] allArgs) throws Exception {
         Model model = new Model();
-        Cli cli = new Cli(allargs, model);
+        Cli cli = new Cli(allArgs, model);
         if (cli.shouldBeVerbose()){
             OutputController.getLogger().setVerbose();
         }

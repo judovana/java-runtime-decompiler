@@ -26,7 +26,7 @@ public class HexTableModel extends AbstractTableModel {
     private String[] columnNames;
     private byte[] bitBuf;
     private char[] dumpColBuf;
-    private String[] byteStrVals;
+    private String[] byteStringValues;
 
     public HexTableModel(final HexEditor editor) {
         this.bitBuf = new byte[16];
@@ -40,9 +40,9 @@ public class HexTableModel extends AbstractTableModel {
         }
         this.columnNames[16] = "ASCII Dump";
         Arrays.fill(this.dumpColBuf = new char[16], ' ');
-        this.byteStrVals = new String[256];
-        for (int i = 0; i < this.byteStrVals.length; ++i) {
-            this.byteStrVals[i] = Integer.toHexString(i);
+        this.byteStringValues = new String[256];
+        for (int i = 0; i < this.byteStringValues.length; ++i) {
+            this.byteStringValues[i] = Integer.toHexString(i);
         }
     }
 
@@ -74,7 +74,7 @@ public class HexTableModel extends AbstractTableModel {
     public Object getValueAt(final int row, final int col) {
         if (col != this.bytesPerRow) {
             final int pos = this.editor.cellToOffset(row, col);
-            return (pos == -1) ? "" : this.byteStrVals[this.doc.getByte(pos) & 0xFF];
+            return (pos == -1) ? "" : this.byteStringValues[this.doc.getByte(pos) & 0xFF];
         }
         final int pos = this.editor.cellToOffset(row, 0);
         if (pos == -1) {

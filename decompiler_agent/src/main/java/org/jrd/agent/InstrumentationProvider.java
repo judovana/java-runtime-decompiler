@@ -60,7 +60,7 @@ public class InstrumentationProvider {
      *
      * @param className name of class we want to get
      * @return bytecode of given class
-     * @throws UnmodifiableClassException if the class can not be retransformed
+     * @throws UnmodifiableClassException if the class can not be re-transformed
      */
     public byte[] findClassBody(String className) throws UnmodifiableClassException {
         return getClassBody(findClass(className));
@@ -69,9 +69,9 @@ public class InstrumentationProvider {
 
     private Class findClass(String className) {
         Class[] classes = instrumentation.getAllLoadedClasses();
-        for (Class classe : classes) {
-            if (classe.getName().equals(className)) {
-                return classe;
+        for (Class clazz : classes) {
+            if (clazz.getName().equals(className)) {
+                return clazz;
             }
         }
         throw new RuntimeException("Class " + className + " not found in loaded classes.");
