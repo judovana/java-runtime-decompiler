@@ -35,9 +35,11 @@ public class JavapDisassemblerWrapper {
     private File bytesToFile(byte[] bytes) throws IOException {
         File tempFile = File.createTempFile("temporary-byte-file", ".class");
         tempFile.deleteOnExit();
-        FileOutputStream fos = new FileOutputStream(tempFile.getCanonicalPath());
-        fos.write(bytes);
-        fos.close();
+
+        try (FileOutputStream fos = new FileOutputStream(tempFile.getCanonicalPath())) {
+            fos.write(bytes);
+        }
+
         return tempFile;
     }
 
