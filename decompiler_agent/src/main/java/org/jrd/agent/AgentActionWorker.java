@@ -192,7 +192,6 @@ public class AgentActionWorker extends Thread {
         out.write("GOODBYE");
         out.flush();
         socket.close();
-        ConnectionDelegator.gracefulShutdown();
+        ConnectionDelegator.getConnectionDelegator().gracefulShutdown();
     }
-
 }
