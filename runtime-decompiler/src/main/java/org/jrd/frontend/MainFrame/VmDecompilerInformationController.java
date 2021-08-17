@@ -320,27 +320,27 @@ public class VmDecompilerInformationController {
         if (null == action) {
             throw new AssertionError("Unknown null action");
         }
-        {
-            switch (action) {
-                case CLASSES:
-                case HALT:
-                    request = AgentRequestAction.create(vmInfo, hostname, listenPort, action);
-                    break;
-                case BYTES:
-                    request = AgentRequestAction.create(vmInfo, hostname, listenPort, action, commands[CLASS_NAME]);
-                    break;
-                case OVERWRITE:
-                    try {
-                        request = AgentRequestAction.create(vmInfo, hostname, listenPort, action,
-                                commands[CLASS_NAME], commands[CLASS_BODY]);
-                    } catch (Exception ex) {
-                        throw new RuntimeException(ex);
-                    }
-                    break;
-                default:
-                    throw new AssertionError("Unknown action: " + action);
-            }
+
+        switch (action) {
+            case CLASSES:
+            case HALT:
+                request = AgentRequestAction.create(vmInfo, hostname, listenPort, action);
+                break;
+            case BYTES:
+                request = AgentRequestAction.create(vmInfo, hostname, listenPort, action, commands[CLASS_NAME]);
+                break;
+            case OVERWRITE:
+                try {
+                    request = AgentRequestAction.create(vmInfo, hostname, listenPort, action,
+                            commands[CLASS_NAME], commands[CLASS_BODY]);
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+                break;
+            default:
+                throw new AssertionError("Unknown action: " + action);
         }
+        
         return request;
     }
 
