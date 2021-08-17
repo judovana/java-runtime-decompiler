@@ -1,6 +1,7 @@
 package org.jrd.backend.core;
 
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jrd.backend.communication.CallDecompilerAgent;
 import org.jrd.backend.communication.FsAgent;
 import org.jrd.backend.communication.JrdAgent;
@@ -184,6 +185,10 @@ public class DecompilerRequestReceiver {
             String[] arrayOfClasses = parseClasses(reply.response);
             if (arrayOfClasses != null) {
                 Arrays.sort(arrayOfClasses, new Comparator<String>() {
+                    @SuppressFBWarnings(
+                            value = "NP_NULL_ON_SOME_PATH_MIGHT_BE_INFEASIBLE",
+                            justification = "SpotBugs false reports possible NP dereference, even though both o1 & o2 are tested for nullness. "
+                    )
                     @Override
                     public int compare(String o1, String o2) {
                         if (o1 == null && o2 == null) {

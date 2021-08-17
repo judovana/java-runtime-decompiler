@@ -165,41 +165,29 @@ public class PluginConfigurationEditorController {
                 options[1]);
     }
 
-    private void copyWrappers(URL wrapperURL, String wrapperFilename) throws IOException {
-        InputStream is = null;
-        OutputStream os = null;
+    private static void copyBetweenStreams(URL wrapperJsonUrl, String wrapperFilename) throws IOException {
+        try (
+                InputStream is = wrapperJsonUrl.openStream();
+                OutputStream os = new FileOutputStream(Directories.getPluginDirectory() + File.separator + wrapperFilename);
+        ) {
+            byte[] buffer = new byte[1024];
+            int length;
 
+            while ((length = is.read(buffer)) > 0) {
+                os.write(buffer, 0, length);
+            }
+        }
+    }
+
+    private void copyWrappers(URL wrapperURL, String wrapperFilename) throws IOException {
         createUserPluginDir();
 
-        try {
-            is = wrapperURL.openStream();
-            os = new FileOutputStream(Directories.getPluginDirectory() + File.separator + wrapperFilename);
-            byte[] buffer = new byte[1024];
-            int length;
+        copyBetweenStreams(wrapperURL, wrapperFilename);
 
-            while ((length = is.read(buffer)) > 0) {
-                os.write(buffer, 0, length);
-            }
-        } finally {
-            is.close();
-            os.close();
-        }
-
-        URL javaComplement = new URL(flipWrapperExtension(wrapperURL.toString()));
+        URL javaComplementUrl = new URL(flipWrapperExtension(wrapperURL.toString()));
         String javaComplementName = flipWrapperExtension(wrapperFilename);
-        try {
-            is = javaComplement.openStream();
-            os = new FileOutputStream(Directories.getPluginDirectory() + File.separator + javaComplementName);
-            byte[] buffer = new byte[1024];
-            int length;
 
-            while ((length = is.read(buffer)) > 0) {
-                os.write(buffer, 0, length);
-            }
-        } finally {
-            is.close();
-            os.close();
-        }
+        copyBetweenStreams(javaComplementUrl, javaComplementName);
     }
 
     void onPluginJListChange(){

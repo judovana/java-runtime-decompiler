@@ -340,7 +340,7 @@ public class VmDecompilerInformationController {
             default:
                 throw new AssertionError("Unknown action: " + action);
         }
-        
+
         return request;
     }
 

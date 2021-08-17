@@ -217,9 +217,14 @@ public class ArchiveManager {
             FileOutputStream fileStream = new FileOutputStream(path);
             ZipOutputStream zOut = new ZipOutputStream(fileStream);
             File f2zip = new File(tmpdir + fileSeparator + "jrd" + fileSeparator + (i));
-            for (File f : f2zip.listFiles()) {
-                recursiveZip(f, f.getName(), zOut);
+            File[] children = f2zip.listFiles();
+
+            if (children != null) {
+                for (File f : children) {
+                    recursiveZip(f, f.getName(), zOut);
+                }
             }
+
             zOut.finish();
             zOut.close();
             fileStream.close();
@@ -249,10 +254,15 @@ public class ArchiveManager {
             }
             zOut.putNextEntry(new ZipEntry(fName));
             zOut.closeEntry();
-            File[] sub = f2zip.listFiles();
-            for (File child : sub) {
-                recursiveZip(child, fName + child.getName(), zOut);
+
+            File[] children = f2zip.listFiles();
+
+            if (children != null) {
+                for (File child : children) {
+                    recursiveZip(child, fName + child.getName(), zOut);
+                }
             }
+
             return;
         }
         FileInputStream fis = new FileInputStream(f2zip);
