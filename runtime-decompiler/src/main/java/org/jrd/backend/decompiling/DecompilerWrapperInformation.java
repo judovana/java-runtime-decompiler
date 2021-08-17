@@ -92,10 +92,19 @@ public class DecompilerWrapperInformation {
     }
 
     public void setFullyQualifiedClassName() {
-        try (BufferedReader br = new BufferedReader(new FileReader(wrapperURL.getExpandedPath(), StandardCharsets.UTF_8))) {
+        String wrapperPath = wrapperURL.getExpandedPath();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(wrapperPath, StandardCharsets.UTF_8))) {
             String packageName = "";
             String className = "";
             String line = br.readLine();
+
+            if (line == null) {
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Wrapper '" + wrapperPath + "' is empty!");
+                invalidWrapper = true;
+                return;
+            }
+
             // Check first line for package name
             if (line.startsWith("package ")) {
                 packageName = line.replace(";", ".").split(" ")[1];
