@@ -694,7 +694,7 @@ public class Cli {
                 vmInfo = vmManager.createFsVM(NewFsVmController.cpToFilesCaught(param), null);
                 break;
             case REMOTE:
-                vmInfo = vmManager.createRemoteVM(param.split(":")[0], Integer.valueOf(param.split(":")[1]));
+                vmInfo = vmManager.createRemoteVM(param.split(":")[0], Integer.parseInt(param.split(":")[1]));
                 break;
             default:
                 throw new RuntimeException("Unknown VmInfo.Type.");

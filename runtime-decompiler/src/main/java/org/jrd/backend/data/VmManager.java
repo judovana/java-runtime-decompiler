@@ -109,7 +109,7 @@ public class VmManager{
     }
 
     public VmInfo findVmFromPID(String param) {
-        int pid = Integer.valueOf(param);
+        int pid = Integer.parseInt(param);
         for (VmInfo vmInfo : vmInfoSet) {
             if (vmInfo.getVmPid() == pid) {
                 return vmInfo;

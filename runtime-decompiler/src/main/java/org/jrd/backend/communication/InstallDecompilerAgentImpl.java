@@ -92,7 +92,7 @@ public class InstallDecompilerAgentImpl {
 
         if (id.matches("[0-9]+")) {
             // integer process id
-            int pid = Integer.valueOf(id);
+            int pid = Integer.parseInt(id);
             if (pid <= 0) {
                 throw new IllegalArgumentException("Install : invalid pid " + id);
             }
