@@ -265,16 +265,19 @@ public class ArchiveManager {
 
             return;
         }
-        FileInputStream fis = new FileInputStream(f2zip);
-        ZipEntry zEntry = new ZipEntry(fName);
-        zOut.putNextEntry(zEntry);
-        byte[] bytes = new byte[1024];
-        int length;
-        while ((length = fis.read(bytes)) >= 0) {
-            zOut.write(bytes, 0, length);
+
+        try (FileInputStream fis = new FileInputStream(f2zip);) {
+            ZipEntry zEntry = new ZipEntry(fName);
+            zOut.putNextEntry(zEntry);
+            byte[] bytes = new byte[1024];
+            int length;
+
+            while ((length = fis.read(bytes)) >= 0) {
+                zOut.write(bytes, 0, length);
+            }
+
+            zOut.closeEntry();
         }
-        zOut.closeEntry();
-        fis.close();
     }
 
     /**

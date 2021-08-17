@@ -76,7 +76,9 @@ public class Config {
         File confFile = new File(configFilePath);
         File legacyConfFile = new File(legacyConfigFilePath);
         if (confFile.exists()) {
-            configMap = gson.fromJson(new FileReader(confFile, StandardCharsets.UTF_8), configMap.getClass());
+            try (FileReader reader = new FileReader(confFile, StandardCharsets.UTF_8)){
+                configMap = gson.fromJson(reader, configMap.getClass());
+            }
         }else if (legacyConfFile.exists()){
             Files.readAllLines(Paths.get(legacyConfigFilePath)).forEach(s -> {
                 String[] kv = s.split("===");

@@ -1,11 +1,13 @@
 package org.jrd.frontend.LicenseFrame;
 
+import org.jrd.backend.core.OutputController;
 import org.jrd.frontend.MainFrame.MainFrameView;
 
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -22,9 +24,14 @@ public class LicenseView extends JDialog {
         scrollPane.setBorder(BorderFactory.createCompoundBorder(new EmptyBorder(10, 10, 10, 10), new EtchedBorder()));
 
         InputStream in = getClass().getResourceAsStream("/LICENSE");
-        BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
         StringBuilder sb = new StringBuilder();
-        reader.lines().forEach(s -> sb.append(s).append('\n'));
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
+            reader.lines().forEach(s -> sb.append(s).append('\n'));
+        } catch (IOException e) {
+            sb.append("Unable to read LICENSE file.");
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, sb.toString());
+        }
+
         licenseTextArea.setText(sb.toString());
         licenseTextArea.setEditable(false);
         licenseTextArea.setCaretPosition(0);
