@@ -318,8 +318,9 @@ public class VmDecompilerInformationController {
 
         AgentRequestAction request;
         if (null == action) {
-            throw new AssertionError("Unknown action: " + action);
-        } else {
+            throw new AssertionError("Unknown null action");
+        }
+        {
             switch (action) {
                 case CLASSES:
                 case HALT:
