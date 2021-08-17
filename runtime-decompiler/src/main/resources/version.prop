@@ -1,1 +1,3 @@
 version=${project.version}
+timestamp=${maven.build.timestamp}
+groupId=${project.groupId}

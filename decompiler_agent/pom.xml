@@ -50,15 +50,6 @@
                             <Can-Redefine-Classes>true</Can-Redefine-Classes>
                             <Can-Retransform-Classes>true</Can-Retransform-Classes>
                         </manifestEntries>
-                        <manifestSection>
-                            <name>${project.name}</name>
-                            <manifestEntries>
-                                <groupId>${project.groupId}</groupId>
-                                <artifactId>${project.artifactId}</artifactId>
-                                <version>${project.version}</version>
-                                <timestamp>${maven.build.timestamp}</timestamp>
-                            </manifestEntries>
-                        </manifestSection>
                     </archive>
                 </configuration>
             </plugin>
