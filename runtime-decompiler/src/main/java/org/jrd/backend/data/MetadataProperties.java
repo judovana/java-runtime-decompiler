@@ -9,6 +9,7 @@ import java.util.Properties;
 public class MetadataProperties {
     private final Properties properties;
 
+    private static final String PROPERTY_FILE_RESOURCE = "/metadata.prop";
     private static final String GROUP_ID_KEY = "groupId";
     private static final String VERSION_KEY = "version";
     private static final String TIMESTAMP_KEY = "timestamp";
@@ -20,10 +21,10 @@ public class MetadataProperties {
     private MetadataProperties() {
         properties = new java.util.Properties();
 
-        try (InputStream stream = getClass().getResourceAsStream("/version.prop")) {
+        try (InputStream stream = getClass().getResourceAsStream(PROPERTY_FILE_RESOURCE)) {
             properties.load(stream);
         } catch (IOException e) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Unable to read property file.");
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Unable to read property file '" + PROPERTY_FILE_RESOURCE + "'.");
         }
     }
 
