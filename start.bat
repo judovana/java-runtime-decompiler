@@ -89,7 +89,7 @@ for /f "delims=" %%i in ('dir *rsyntaxtextarea-*.jar /B /S') do set RSYNTAXTEXTA
 for /f "delims=" %%i in ('dir *gson-*.jar /B /S') do set GSON=%%i
 for /f "delims=" %%i in ('dir *byteman-install-*.jar /B /S') do set BYTEMAN=%%i
 for /f "delims=" %%i in ('dir *runtime-decompiler-*.jar /B /S') do set JRD=%%i
-for /f "delims=" %%i in ('dir *classpathless-compiler-*.jar /B /S') do set CPC=%%i
+for /f "delims=" %%i in ('dir *classpathless-compiler-*.jar /B /S') do set CPLC=%%i
 
 popd
 
@@ -105,7 +105,7 @@ rem Create environment variable pointing to script's location
 set "PROPERTY_PURPOSE=-Djrd.purpose=%PURPOSE%"
 
 rem Concatenate classpath and launch the app
-set CLASSPATH=%TOOLS%;%RSYNTAXTEXTAREA%;%GSON%;%BYTEMAN%;%JRD%;%CPC%
+set CLASSPATH=%TOOLS%;%RSYNTAXTEXTAREA%;%GSON%;%BYTEMAN%;%JRD%;%CPLC%
 "%JDK_LOCATION%\bin\java.exe" -Djdk.attach.allowAttachSelf=true %PROPERTY_LOCATION% %PROPERTY_PURPOSE% -cp %CLASSPATH% org.jrd.backend.data.Main %*
 
 if "%PORTABLE_JRD_HOME:~0,2%"=="//" (
