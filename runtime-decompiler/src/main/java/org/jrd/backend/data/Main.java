@@ -1,8 +1,8 @@
 package org.jrd.backend.data;
 
 import org.jrd.backend.core.OutputController;
-import org.jrd.frontend.MainFrame.MainFrameView;
-import org.jrd.frontend.MainFrame.VmDecompilerInformationController;
+import org.jrd.frontend.frame.main.MainFrameView;
+import org.jrd.frontend.frame.main.VmDecompilerInformationController;
 
 public class Main {
 

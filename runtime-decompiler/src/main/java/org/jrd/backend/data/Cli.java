@@ -12,9 +12,9 @@ import org.jrd.backend.core.OutputController;
 import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 import org.jrd.backend.decompiling.PluginManager;
-import org.jrd.frontend.MainFrame.FileToClassValidator;
-import org.jrd.frontend.MainFrame.VmDecompilerInformationController;
-import org.jrd.frontend.NewFsVmFrame.NewFsVmController;
+import org.jrd.frontend.frame.main.FileToClassValidator;
+import org.jrd.frontend.frame.main.VmDecompilerInformationController;
+import org.jrd.frontend.frame.filesystem.NewFsVmController;
 import org.jrd.frontend.Utils;
 
 import java.io.BufferedReader;
