@@ -12,21 +12,16 @@ import org.jrd.backend.data.Cli;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
-import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.MainFrame.VmDecompilerInformationController;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
-import java.util.logging.Level;
 
 public class RuntimeCompilerConnector {
 

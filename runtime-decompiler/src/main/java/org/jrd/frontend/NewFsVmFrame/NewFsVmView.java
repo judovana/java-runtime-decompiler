@@ -8,8 +8,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 public class NewFsVmView extends JDialog {
 

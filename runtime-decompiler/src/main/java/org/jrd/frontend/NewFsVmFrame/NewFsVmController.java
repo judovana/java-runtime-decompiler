@@ -1,6 +1,5 @@
 package org.jrd.frontend.NewFsVmFrame;
 
-import org.jrd.backend.data.Cli;
 import org.jrd.backend.data.VmManager;
 
 import javax.swing.JOptionPane;
