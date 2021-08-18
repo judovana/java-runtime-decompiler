@@ -1,19 +1,12 @@
 package org.jrd.frontend;
 
 import io.github.mkoncek.classpathless.api.ClassIdentifier;
-import io.github.mkoncek.classpathless.api.ClassesProvider;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
-import io.github.mkoncek.classpathless.api.ClasspathlessCompiler;
-import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.DecompilerRequestReceiver;
-import org.jrd.backend.core.OutputController;
 import org.jrd.backend.data.Cli;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
-import org.jrd.backend.decompiling.DecompilerWrapperInformation;
-import org.jrd.backend.decompiling.PluginManager;
-import org.jrd.frontend.MainFrame.RewriteClassDialog;
 import org.jrd.frontend.MainFrame.VmDecompilerInformationController;
 
 import java.io.File;

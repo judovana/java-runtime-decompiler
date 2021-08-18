@@ -1,6 +1,5 @@
 package org.fife.ui.hex.event;
 
-import org.fife.ui.hex.swing.HexEditor;
 import org.fife.ui.hex.swing.HexSearch;
 import org.jrd.backend.core.OutputController;
 

@@ -1,6 +1,5 @@
 package org.jrd.backend.communication;
 
-import org.jrd.backend.core.OutputController;
 import org.jrd.backend.data.Config;
 
 import com.sun.tools.attach.AgentInitializationException;
@@ -8,12 +7,9 @@ import com.sun.tools.attach.AgentLoadException;
 import com.sun.tools.attach.AttachNotSupportedException;
 import com.sun.tools.attach.VirtualMachine;
 import com.sun.tools.attach.VirtualMachineDescriptor;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
-import java.util.jar.JarFile;
-import org.jboss.byteman.agent.install.VMInfo;
 
 /**
  * This is Byteman's install library copied, with small modifications. This is
