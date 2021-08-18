@@ -25,7 +25,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -463,7 +462,7 @@ public class Cli {
     }
 
     private boolean outOrSave(String name, String suffix, String s) throws IOException {
-        return outOrSave(name, suffix, s.getBytes(Charset.forName("utf-8")), false);
+        return outOrSave(name, suffix, s.getBytes(StandardCharsets.UTF_8), false);
     }
 
     private boolean outOrSave(String name, String suffix, byte[] body, boolean forceBin) throws IOException {
@@ -473,7 +472,7 @@ public class Cli {
             if (forceBin) {
                 System.out.write(body);
             } else {
-                System.out.println(new String(body, "utf-8"));
+                System.out.println(new String(body, StandardCharsets.UTF_8));
             }
             return true;
         }
