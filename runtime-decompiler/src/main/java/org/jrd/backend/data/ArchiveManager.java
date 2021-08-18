@@ -312,7 +312,7 @@ public class ArchiveManager {
         return wasDeleted;
     }
 
-    private class ArchivePathManager {
+    private static class ArchivePathManager {
         private String clazz = "";
         private boolean found = false;
         private boolean extracted = false;

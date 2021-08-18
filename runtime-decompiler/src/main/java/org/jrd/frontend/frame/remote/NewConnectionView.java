@@ -18,14 +18,12 @@ public class NewConnectionView extends JDialog{
 
     private ActionListener addButtonListener;
 
-    public class HostnamePortInputPanel extends JPanel{
+    public static class HostnamePortInputPanel extends JPanel{
 
         JTextField hostnameTextField;
         JTextField portTextField;
 
-
         HostnamePortInputPanel(){
-
             this.hostnameTextField = new JTextField();
             this.portTextField = new JTextField();
             this.portTextField.setPreferredSize(new Dimension(90,0));
