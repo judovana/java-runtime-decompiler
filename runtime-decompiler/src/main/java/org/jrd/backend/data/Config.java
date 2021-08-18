@@ -6,7 +6,6 @@ import org.jrd.backend.core.OutputController;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -97,7 +96,8 @@ public class Config {
         if (!confFile.exists()) {
             confFile.createNewFile();
         }
-        Files.write(Paths.get(configFilePath), Collections.singleton(gson.toJson(configMap)), Charset.forName("UTF-8"));
+
+        Files.write(Paths.get(configFilePath), Collections.singleton(gson.toJson(configMap)), StandardCharsets.UTF_8);
     }
 
 }
