@@ -7,7 +7,7 @@ import org.jrd.backend.core.DecompilerRequestReceiver;
 import org.jrd.backend.data.Cli;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
-import org.jrd.frontend.MainFrame.VmDecompilerInformationController;
+import org.jrd.frontend.frame.main.VmDecompilerInformationController;
 
 import java.io.File;
 import java.io.IOException;

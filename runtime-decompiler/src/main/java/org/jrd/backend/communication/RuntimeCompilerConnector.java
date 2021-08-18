@@ -12,7 +12,7 @@ import org.jrd.backend.data.Cli;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
-import org.jrd.frontend.MainFrame.VmDecompilerInformationController;
+import org.jrd.frontend.frame.main.VmDecompilerInformationController;
 
 import java.util.ArrayList;
 import java.util.Arrays;
