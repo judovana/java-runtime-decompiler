@@ -114,7 +114,7 @@ public class DecompilerRequestReceiver {
         return actualListenPort;
     }
 
-    private class ResponseWithPort {
+    private static class ResponseWithPort {
         private final String response;
         private final int port;
 

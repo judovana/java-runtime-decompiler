@@ -92,7 +92,7 @@ public class VmDecompilerInformationController {
         newFsVmDialog.setVisible(true);
     }
 
-    public class VmArrayList<T> extends ArrayList<VmInfo> {
+    public static class VmArrayList<T> extends ArrayList<VmInfo> {
         @Override
         public boolean add(VmInfo vmInfo) {
             super.add(vmInfo);

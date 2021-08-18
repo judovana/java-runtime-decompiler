@@ -28,7 +28,7 @@ public class ConfigureView extends JDialog {
 
     JPanel mainPanel;
 
-    public class ConfigureBrowsePanel extends JPanel {
+    public static class ConfigureBrowsePanel extends JPanel {
 
         public JTextField textField;
         public JLabel label;
