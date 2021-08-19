@@ -28,6 +28,7 @@ import java.awt.event.MouseEvent;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -322,7 +323,7 @@ public class BytecodeDecompilerView {
      * @param classesToReload String[] classesToReload.
      */
     public void reloadClassList(String[] classesToReload) {
-        classes = classesToReload;
+        classes = Arrays.copyOf(classesToReload, classesToReload.length);
         SwingUtilities.invokeLater(() -> updateClassList());
     }
 

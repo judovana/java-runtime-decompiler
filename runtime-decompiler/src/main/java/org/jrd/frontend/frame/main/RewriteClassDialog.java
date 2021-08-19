@@ -38,6 +38,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -127,7 +128,7 @@ public class RewriteClassDialog extends JDialog {
 
         this.origName = name;
         this.origBuffer = currentBuffer;
-        this.origBin = cBinBuffer;
+        this.origBin = Arrays.copyOf(cBinBuffer, cBinBuffer.length);
         this.vmInfo = vmInfo;
         this.vmManager = vmManager;
 
