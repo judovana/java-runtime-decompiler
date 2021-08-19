@@ -54,10 +54,11 @@ public class Cli {
     protected static final String HELP = "-help";
     protected static final String H = "-h";
 
-    private final String[] allArgs;
+    private final List<String> filteredArgs;
     private final VmManager vmManager;
     private final PluginManager pluginManager;
     private Saving saving;
+    private boolean isVerbose;
 
     protected static class Saving implements Utils.StatusKeeper {
         protected static final String DEFAULT = "default";
@@ -117,111 +118,109 @@ public class Cli {
     }
 
     public Cli(String[] orig, Model model) {
-        this.allArgs = orig;
+        this.filteredArgs = prefilterArgs(orig);
         this.vmManager = model.getVmManager();
         this.pluginManager = model.getPluginManager();
-        for (String arg : allArgs) {
-            String cleanedArg = cleanParameter(arg);
-            if (cleanedArg.equals(HELP) || cleanedArg.equals(H)) {
-                printHelp();
-                System.exit(0);
-            }
-            if (cleanedArg.equals(VERSION)) {
-                printVersion();
-                System.exit(0);
-            }
-        }
     }
 
     private static String cleanParameter(String param) {
-        return param.replaceAll("^--*", "-").toLowerCase();
+        if (param.startsWith("-")) {
+            return param.replaceAll("^--*", "-").toLowerCase();
+        }
+
+        return param; // do not make regexes and filenames lowercase
     }
 
     public boolean shouldBeVerbose() {
-        for (String arg : allArgs) {
-            String cleanedArg = cleanParameter(arg);
-            if (cleanedArg.equals(VERBOSE)) {
-                return true;
-            }
-        }
-        return false;
+        return isVerbose;
     }
 
     public boolean isGui() {
-        return prefilterArgs().isEmpty();
+        return filteredArgs.isEmpty();
     }
 
-    private List<String> prefilterArgs() {
-        List<String> args = new ArrayList(allArgs.length);
+    private List<String> prefilterArgs(String[] originalArgs) {
+        List<String> args = new ArrayList<>(originalArgs.length);
         String saveAs = null;
         String saveLike = null;
-        for (int i = 0; i < allArgs.length; i++) {
-            String arg = allArgs[i];
+
+        for (int i = 0; i < originalArgs.length; i++) {
+            String arg = originalArgs[i];
             String cleanedArg = cleanParameter(arg);
+
             if (cleanedArg.equals(VERBOSE)) {
-                //already processed
+                isVerbose = true;
             } else if (cleanedArg.equals(SAVE_AS)) {
-                saveAs = allArgs[i + 1];
+                saveAs = originalArgs[i + 1];
                 i++;
             } else if (cleanedArg.equals(SAVE_LIKE)) {
-                saveLike = allArgs[i + 1];
+                saveLike = originalArgs[i + 1];
                 i++;
             } else {
                 args.add(arg);
             }
         }
+
         this.saving = new Saving(saveAs, saveLike);
         return args;
     }
 
     public void consumeCli() throws Exception {
-        List<String> args = prefilterArgs();
-        for (int i = 0; i < args.size(); i++) {
-            String arg = args.get(i);
-            arg = cleanParameter(arg);
-            if (arg.equals(LIST_JVMS)) {
-                listJVMs(args);
+        if (filteredArgs.isEmpty()) { // impossible in org.jrd.backend.Main#Main() control flow, but possible in tests
+            return;
+        }
+
+        String operation = cleanParameter(filteredArgs.get(0));
+        switch (operation) {
+            case LIST_JVMS:
+                listJVMs();
                 break;
-            }
-            if (arg.equals(LIST_PLUGINS)) {
-                listPlugins(args);
+            case LIST_PLUGINS:
+                listPlugins();
                 break;
-            } else if (arg.equals(LIST_CLASSES)) {
-                listClasses(args, i);
+            case LIST_CLASSES:
+                listClasses();
                 break;
-            } else if (arg.equals(BYTES) || arg.equals(BASE64)) {
-                boolean bytes = arg.equals(BYTES);
-                printBytes(args, i, bytes);
+            case BYTES:
+            case BASE64:
+                boolean bytes = operation.equals(BYTES);
+                printBytes(bytes);
                 break;
-            } else if (arg.equals(DECOMPILE)) {
-                decompile(args, i);
+            case DECOMPILE:
+                decompile();
                 break;
-            } else if (arg.equals(COMPILE)) {
-                compile(args, i);
+            case COMPILE:
+                compile();
                 break;
-            } else if (arg.equals(OVERWRITE)) {
-                overwrite(args, i);
+            case OVERWRITE:
+                overwrite();
                 break;
-            } else {
+            case HELP:
+            case H:
                 printHelp();
-                throw new RuntimeException("Unknown commandline switch " + arg);
-            }
+                break;
+            case VERSION:
+                printVersion();
+                break;
+            default:
+                printHelp();
+                throw new RuntimeException("Unknown commandline switch " + operation);
         }
     }
 
-    private void overwrite(List<String> args, int i) throws Exception {
+    private void overwrite() throws Exception {
         String newBytecodeFile;
-        if (args.size() == 3) {
+        if (filteredArgs.size() == 3) {
             System.err.println("reading class from std.in");
             newBytecodeFile = null;
         } else {
-            if (args.size() != 4) {
+            if (filteredArgs.size() != 4) {
                 throw new RuntimeException(OVERWRITE + "  three args - PUC of JVM and class to overwrite and file with new bytecode");
             }
-            newBytecodeFile = args.get(i + 3);
+            newBytecodeFile = filteredArgs.get(3);
         }
-        String jvmStr = args.get(i + 1);
-        String classStr = args.get(i + 2);
+        String jvmStr = filteredArgs.get(1);
+        String classStr = filteredArgs.get(2);
         if (newBytecodeFile != null) {
             FileToClassValidator.StringAndScore r = FileToClassValidator.validate(classStr, newBytecodeFile);
             if (r.score > 0 && r.score < 10) {
@@ -251,8 +250,8 @@ public class Cli {
         }
     }
 
-    private void compile(List<String> args, int i) throws Exception {
-        if (args.size() < 2) {
+    private void compile() throws Exception {
+        if (filteredArgs.size() < 2) {
             throw new RuntimeException(COMPILE + " expects at least one file to compile");
         }
         String cpPidUrl = null;
@@ -260,13 +259,13 @@ public class Cli {
         boolean haveCompiler = false;
         boolean recursive = false;
         List<File> toCompile = new ArrayList<>(1);
-        for (int x = i + 1; x < args.size(); x++) {
-            String arg = args.get(x);
+        for (int x = 1; x < filteredArgs.size(); x++) {
+            String arg = filteredArgs.get(x);
             if (arg.equals("-p")) {
-                customCompiler = args.get(x + 1);
+                customCompiler = filteredArgs.get(x + 1);
                 x++;
             } else if (arg.equals("-cp")) {
-                cpPidUrl = args.get(x + 1);
+                cpPidUrl = filteredArgs.get(x + 1);
                 x++;
             } else if (arg.equals("-r")) {
                 recursive = true;
@@ -405,19 +404,19 @@ public class Cli {
         }
     }
 
-    private void decompile(List<String> args, int i) throws Exception {
-        if (args.size() < 4) {
+    private void decompile() throws Exception {
+        if (filteredArgs.size() < 4) {
             throw new RuntimeException(
                     DECOMPILE
                             + " at least three arguments - PUC of JVM,  decompiler name (as set-up) or decompiler json file, or javap(see help) followed by fully classified class name(s)/regex(es)");
         }
-        String jvmStr = args.get(i + 1);
-        String decompilerName = args.get(i + 2);
+        String jvmStr = filteredArgs.get(1);
+        String decompilerName = filteredArgs.get(2);
         VmInfo vmInfo = getVmInfo(jvmStr);
         int failures = 0;
         int total = 0;
-        for (int y = 3; y < args.size(); y++) {
-            String clazzRegex = args.get(y);
+        for (int i = 3; i < filteredArgs.size(); i++) {
+            String clazzRegex = filteredArgs.get(i);
             List<String> classes = obtainFilteredClasses(vmInfo, vmManager, Arrays.asList(Pattern.compile(clazzRegex)));
             for (String classStr : classes) {
                 total++;
@@ -495,16 +494,16 @@ public class Cli {
         return decompiler;
     }
 
-    private void printBytes(List<String> args, int i, boolean bytes) throws Exception {
-        if (args.size() < 3) {
+    private void printBytes(boolean bytes) throws Exception {
+        if (filteredArgs.size() < 3) {
             throw new RuntimeException(BYTES + " and " + BASE64 + " expect at least two arguments - PUC of JVM and fully classified class name(s)/regex(es)");
         }
-        String jvmStr = args.get(i + 1);
+        String jvmStr = filteredArgs.get(1);
         VmInfo vmInfo = getVmInfo(jvmStr);
         int failures = 0;
         int total = 0;
-        for (int y = 2; y < args.size(); y++) {
-            String clazzRegex = args.get(y);
+        for (int i = 2; i < filteredArgs.size(); i++) {
+            String clazzRegex = filteredArgs.get(i);
             List<String> classes = obtainFilteredClasses(vmInfo, vmManager, Arrays.asList(Pattern.compile(clazzRegex)));
             for (String classStr : classes) {
                 total++;
@@ -524,14 +523,14 @@ public class Cli {
         returnNonzero(failures, total);
     }
 
-    private void listClasses(List<String> args, int i) throws IOException {
-        if (args.size() < 2) {
+    private void listClasses() throws IOException {
+        if (filteredArgs.size() < 2) {
             throw new RuntimeException(LIST_CLASSES + " expect at least one argument - PUC. Second, optional is list of filtering regexes");
         }
-        String param = args.get(i + 1);
-        List<Pattern> filter = new ArrayList<>(args.size() - 1);
-        for (int x = 2; x < args.size(); x++) {
-            filter.add(Pattern.compile(args.get(x)));
+        String param = filteredArgs.get(1);
+        List<Pattern> filter = new ArrayList<>(filteredArgs.size() - 1);
+        for (int i = 2; i < filteredArgs.size(); i++) {
+            filter.add(Pattern.compile(filteredArgs.get(i)));
         }
         if (filter.isEmpty()) {
             filter.add(Pattern.compile(".*"));
@@ -580,8 +579,8 @@ public class Cli {
         return false;
     }
 
-    private void listPlugins(List<String> args) {
-        if (args.size() != 1) {
+    private void listPlugins() {
+        if (filteredArgs.size() != 1) {
             throw new RuntimeException(LIST_PLUGINS + " does not expect argument");
         }
         PluginManager pm = new PluginManager();
@@ -591,8 +590,8 @@ public class Cli {
         }
     }
 
-    private void listJVMs(List<String> args) {
-        if (args.size() != 1) {
+    private void listJVMs() {
+        if (filteredArgs.size() != 1) {
             throw new RuntimeException(LIST_JVMS + " does not expect argument");
         }
         for (VmInfo vmInfo : vmManager.getVmInfoSet()) {
