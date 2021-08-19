@@ -1,6 +1,7 @@
 package org.jrd.backend.core;
 
 
+import java.util.Arrays;
 
 /**
  * This class stores all information about the state of decompiler plugin on 
@@ -48,10 +49,9 @@ public class VmDecompilerStatus{
     }
 
     public void setLoadedClassNames(String[] loadedClassNames) {
-        this.loadedClassNames = loadedClassNames;
+        this.loadedClassNames = Arrays.copyOf(loadedClassNames, loadedClassNames.length);
 
     }
-
     
     public String getLoadedClassBytes() {
         return loadedClassBytes;
@@ -59,7 +59,7 @@ public class VmDecompilerStatus{
 
     
     public String[] getLoadedClassNames() {
-        return loadedClassNames;
+        return Arrays.copyOf(loadedClassNames, loadedClassNames.length);
     }
 
     
