@@ -15,19 +15,19 @@ import static org.jrd.backend.data.Directories.isOsWindows;
  */
 public class Help {
 
-    private static final String HELP_FORMAT = HELP + ", " + H;
-    private static final String VERBOSE_FORMAT = VERBOSE;
-    private static final String VERSION_FORMAT = VERSION;
-    private static final String BASE64_FORMAT = BASE64 + " <PUC> <CLASS REGEX>...";
-    private static final String BYTES_FORMAT = BYTES + " <PUC> <CLASS REGEX>...";
-    private static final String LIST_JVMS_FORMAT = LIST_JVMS;
-    private static final String LIST_PLUGINS_FORMAT = LIST_PLUGINS;
-    private static final String LIST_CLASSES_FORMAT = LIST_CLASSES + " <PUC> [<CLASS REGEX>...]";
-    private static final String COMPILE_FORMAT = COMPILE + " [-p <PLUGIN>] [-cp <PUC>] [-r] <PATH>...";
-    private static final String DECOMPILE_FORMAT = DECOMPILE + " <PUC> <PLUGIN> <CLASS REGEX>...";
-    private static final String OVERWRITE_FORMAT = OVERWRITE + " <PUC> <CLASS NAME> [<CLASS FILE>]";
-    private static final String SAVE_AS_FORMAT = SAVE_AS + " <PATH>";
-    private static final String SAVE_LIKE_FORMAT = SAVE_LIKE + " <SAVE METHOD>";
+    static final String HELP_FORMAT = HELP + ", " + H;
+    static final String VERBOSE_FORMAT = VERBOSE;
+    static final String VERSION_FORMAT = VERSION;
+    static final String BASE64_FORMAT = BASE64 + " <PUC> <CLASS REGEX>...";
+    static final String BYTES_FORMAT = BYTES + " <PUC> <CLASS REGEX>...";
+    static final String LIST_JVMS_FORMAT = LIST_JVMS;
+    static final String LIST_PLUGINS_FORMAT = LIST_PLUGINS;
+    static final String LIST_CLASSES_FORMAT = LIST_CLASSES + " <PUC> [<CLASS REGEX>...]";
+    static final String COMPILE_FORMAT = COMPILE + " [-p <PLUGIN>] [-cp <PUC>] [-r] <PATH>...";
+    static final String DECOMPILE_FORMAT = DECOMPILE + " <PUC> <PLUGIN> <CLASS REGEX>...";
+    static final String OVERWRITE_FORMAT = OVERWRITE + " <PUC> <CLASS NAME> [<CLASS FILE>]";
+    static final String SAVE_AS_FORMAT = SAVE_AS + " <PATH>";
+    static final String SAVE_LIKE_FORMAT = SAVE_LIKE + " <SAVE METHOD>";
 
     private static final String HELP_TEXT = "Print this help text.";
     private static final String VERBOSE_TEXT = "All exceptions and some debugging strings will be printed to standard error.";
@@ -69,8 +69,8 @@ public class Help {
     private static final String LAUNCHER_LINUX = "./start.sh";
     private static final String LAUNCHER_WINDOWS = "start.bat";
 
-    private static final Map<String, String> ALL_OPTIONS;
-    private static final Map<String, String> SAVING_OPTIONS;
+    static final Map<String, String> ALL_OPTIONS;
+    static final Map<String, String> SAVING_OPTIONS;
     private static final Map<String, String[]> NOTES;
 
     static {

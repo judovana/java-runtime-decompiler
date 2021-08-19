@@ -682,7 +682,7 @@ public class Cli {
         throw new RuntimeException("Unable to determine " + input + " as Pid xor host:port xor classpath");
     }
 
-    private VmInfo getVmInfo(String param) {
+    VmInfo getVmInfo(String param) {
         VmInfo.Type puc = guessType(param);
         VmInfo vmInfo;
         switch (puc) {

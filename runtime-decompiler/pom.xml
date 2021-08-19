@@ -85,6 +85,9 @@
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.22.0</version>
+                <configuration>
+                    <argLine>-Djrd.location=${project.parent.basedir}</argLine>
+                </configuration>
             </plugin>
         </plugins>
         <resources>
