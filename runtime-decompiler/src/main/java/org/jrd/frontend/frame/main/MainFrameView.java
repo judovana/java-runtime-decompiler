@@ -328,10 +328,7 @@ public class MainFrameView {
         ActionEvent event = new ActionEvent(this, 0, null);
         if (null != haltAgentListener) {
             haltAgentListener.actionPerformed(event);
-        } else {
-            System.exit(0);
         }
-
     }
 
     void setCreateNewConnectionDialogListener(ActionListener listener) {
