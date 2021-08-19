@@ -352,9 +352,10 @@ public class CliTest {
         assertEqualsWithTolerance(jrdDisassembled, javapDisassembled, 0.8); // JRD javap has additional debug comment lines + header is different
     }
 
+    @SuppressWarnings("unchecked") // field reflection
     @Test
     void testArgumentCleaning() throws Exception {
-        Field field = Cli.class.getDeclaredField("allArgs"); // changing access modifier of filteredArgs for this test is not justifiable
+        Field field = Cli.class.getDeclaredField("filteredArgs"); // changing access modifier of filteredArgs for this test is not justifiable
         field.setAccessible(true);
 
         // nothing gets cleaned
@@ -362,7 +363,7 @@ public class CliTest {
         cli = new Cli(args, model);
         cli.consumeCli();
 
-        String[] filteredArgs = (String[]) field.get(cli);
+        String[] filteredArgs = ((List<String>) field.get(cli)).toArray(new String[0]);
         assertArrayEquals(args, filteredArgs);
 
         // only operation gets cleaned, but is still valid
@@ -370,7 +371,7 @@ public class CliTest {
         cli = new Cli(args, model);
         cli.consumeCli();
 
-        filteredArgs = (String[]) field.get(cli);
+        filteredArgs = ((List<String>) field.get(cli)).toArray(new String[0]);
         assertArrayEquals(args, filteredArgs);
     }
 
