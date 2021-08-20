@@ -25,11 +25,11 @@ import java.util.Optional;
 
 public class RuntimeCompilerConnector {
 
-    public static class JRDClassesProvider implements ClassesProvider {
+    public static class JrdClassesProvider implements ClassesProvider {
         private final VmInfo vmInfo;
         private final VmManager vmManager;
 
-        public JRDClassesProvider(VmInfo vmInfo, VmManager vmManager) {
+        public JrdClassesProvider(VmInfo vmInfo, VmManager vmManager) {
             this.vmInfo = vmInfo;
             this.vmManager = vmManager;
         }
