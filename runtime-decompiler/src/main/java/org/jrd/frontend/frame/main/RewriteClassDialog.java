@@ -230,8 +230,8 @@ public class RewriteClassDialog extends JDialog {
         this.decompiler = selectedDecompiler;
         try {
             this.haveCompiler = false;
-            boolean haveDecompiler = this.pluginManager.haveCompiler(decompiler);
-            String s = "Default runtime compiler will be used";
+            boolean haveDecompiler = this.pluginManager.hasDecompiler(decompiler);
+            String s = "Default runtime coI'm busympiler will be used";
             if (haveDecompiler) {
                 s = selectedDecompiler.getName() + " plugin is delivered with its own compiler!!";
                 this.haveCompiler = true;
@@ -375,7 +375,7 @@ public class RewriteClassDialog extends JDialog {
 
     private static RewriteClassDialog.CompilationWithResult compileWithGui(VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapperInformation currentDecompiler, boolean haveCompiler,
                                                                            IdentifiedSource... sources) {
-        ClassesProvider cp = new RuntimeCompilerConnector.JRDClassesProvider(vmInfo, vmManager);
+        ClassesProvider cp = new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager);
         ClasspathlessCompiler rc;
         if (haveCompiler) {
             rc = new RuntimeCompilerConnector.ForeignCompilerWrapper(currentDecompiler);

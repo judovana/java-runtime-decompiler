@@ -140,7 +140,7 @@ public class PluginManager {
         }
     }
 
-    public synchronized boolean haveCompiler(DecompilerWrapperInformation wrapper) throws Exception {
+    public synchronized boolean hasDecompiler(DecompilerWrapperInformation wrapper) throws Exception {
         if (wrapper == null) {
             throw new RuntimeException("No valid decompiler selected. Current-Buffer may not be usable");
         }

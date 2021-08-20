@@ -264,6 +264,10 @@ public class DecompilerWrapperInformation {
         return scope;
     }
 
+    public boolean isLocal() {
+        return getScope().equals(LOCAL_SCOPE);
+    }
+
     @Override
     public String toString() {
         return getName() + " [" + getScope() + "]";
