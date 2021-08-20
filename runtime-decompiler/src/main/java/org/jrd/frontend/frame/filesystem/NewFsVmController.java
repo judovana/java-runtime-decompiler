@@ -22,17 +22,15 @@ public class NewFsVmController {
     private void addFsVm() {
         String cp = newConnectionView.getCP();
         String name = newConnectionView.getNameHelper();
-        if (cp.isEmpty()) {
-            JOptionPane.showMessageDialog(newConnectionView, "CP is Empty.", " ", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
         List<File> r;
+
         try {
             r = cpToFiles(cp);
-        } catch (ProbablyNotClassPathElementException ccp) {
-            JOptionPane.showMessageDialog(newConnectionView, ccp + " does not exists", " ", JOptionPane.WARNING_MESSAGE);
+        } catch (InvalidClasspathException e) {
+            JOptionPane.showMessageDialog(newConnectionView, e.getMessage(), "Unable to create FS VM", JOptionPane.WARNING_MESSAGE);
             return;
         }
+
         vmManager.createFsVM(r, name);
         newConnectionView.dispose();
     }
@@ -40,35 +38,39 @@ public class NewFsVmController {
     public static List<File> cpToFilesCaught(String input) {
         try {
             return cpToFiles(input);
-        } catch (ProbablyNotClassPathElementException ex) {
+        } catch (InvalidClasspathException ex) {
             throw new RuntimeException(ex);
         }
     }
 
-    public static List<File> cpToFiles(String input) throws ProbablyNotClassPathElementException {
-        String[] cpElements = input.split(File.pathSeparator);
-        if (cpElements.length == 0) {
-            throw new ProbablyNotClassPathElementException("Second param was supposed to be PUC");
+    public static List<File> cpToFiles(String input) throws InvalidClasspathException {
+        String[] classpathElements = input.split(File.pathSeparator);
+
+        if (classpathElements.length == 0) {
+            throw new InvalidClasspathException("Classpath is empty.");
         }
-        List<File> cp = new ArrayList<>(cpElements.length);
-        for (String cpe : cpElements) {
-            File f = new File(cpe);
-            if (!f.exists()) {
-                throw new ProbablyNotClassPathElementException(f.toString() + " does not exists");
+
+        List<File> classpathList = new ArrayList<>(classpathElements.length);
+        for (String element : classpathElements) {
+            File file = new File(element);
+
+            if (!file.exists()) {
+                throw new InvalidClasspathException("File '" + file.getAbsolutePath() + "' does not exist.");
             } else {
-                cp.add(f);
+                classpathList.add(file);
             }
         }
-        return cp;
+
+        return classpathList;
     }
 
 
-    public static class ProbablyNotClassPathElementException extends Exception {
-        public ProbablyNotClassPathElementException(String s, Throwable cause) {
+    public static class InvalidClasspathException extends Exception {
+        public InvalidClasspathException(String s, Throwable cause) {
             super(s, cause);
         }
 
-        public ProbablyNotClassPathElementException(String s) {
+        public InvalidClasspathException(String s) {
             super(s);
         }
 

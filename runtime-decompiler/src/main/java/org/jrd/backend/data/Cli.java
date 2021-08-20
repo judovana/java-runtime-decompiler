@@ -670,7 +670,7 @@ public class Cli {
             OutputController.getLogger().log("Interpreting " + input + " as FS VM classpath.");
 
             return VmInfo.Type.FS;
-        } catch (NewFsVmController.ProbablyNotClassPathElementException e) {
+        } catch (NewFsVmController.InvalidClasspathException e) {
             OutputController.getLogger().log("Interpretation of '" + input + "' as FS VM classpath. failed. Cause: " + e.getMessage());
         }
 
