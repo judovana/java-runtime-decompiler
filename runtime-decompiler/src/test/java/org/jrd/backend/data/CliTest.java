@@ -4,6 +4,7 @@ import org.jrd.backend.core.AgentRequestAction;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -217,21 +218,29 @@ public class CliTest {
         assertThrows(RuntimeException.class, () -> cli.consumeCli());
     }
 
-    @Test
-    void testListJvms() throws Exception {
+    private List<String> queryJvmList() throws Exception {
         args = new String[]{LIST_JVMS};
         cli = new Cli(args, model);
 
         cli.consumeCli();
         String jvms = streams.getOut();
 
-        List<String> result = new ArrayList<>();
+        List<String> pids = new ArrayList<>(); // previous test's dummy termination can take time to propagate, hence List.contains
         Matcher m = TestingDummyHelper.JVM_LIST_REGEX.matcher(jvms);
         while (m.find()) {
-            result.add(m.group(1));
+            pids.add(m.group(1));
         }
 
-        assertTrue(result.contains(String.valueOf(dummy.getPid())));
+        return pids;
+    }
+
+    @SuppressWarnings("JUnitTestMethodWithNoAssertions")
+    @Test
+    @Timeout(10)
+    void testListJvms() throws Exception {
+        while(!queryJvmList().contains(String.valueOf(dummy.getPid()))) {
+            Thread.sleep(5000); // vmManager only refreshes vmList every 5 seconds
+        }
     }
 
     @Test
