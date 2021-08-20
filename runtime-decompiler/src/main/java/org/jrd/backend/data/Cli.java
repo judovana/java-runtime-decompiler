@@ -5,7 +5,6 @@ import io.github.mkoncek.classpathless.api.ClassesProvider;
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
 import io.github.mkoncek.classpathless.api.ClasspathlessCompiler;
-import io.github.mkoncek.classpathless.api.MessagesListener;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.OutputController;
@@ -32,9 +31,13 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Level;
 import java.util.regex.Pattern;
 
+import static org.jrd.backend.data.Help.LIST_CLASSES_FORMAT;
+import static org.jrd.backend.data.Help.BYTES_FORMAT;
+import static org.jrd.backend.data.Help.BASE64_FORMAT;
+import static org.jrd.backend.data.Help.DECOMPILE_FORMAT;
+import static org.jrd.backend.data.Help.OVERWRITE_FORMAT;
 import static org.jrd.backend.data.Help.printHelpText;
 
 public class Cli {
@@ -204,18 +207,18 @@ public class Cli {
                 break;
             default:
                 printHelp();
-                throw new RuntimeException("Unknown commandline switch " + operation);
+                throw new IllegalArgumentException("Unknown commandline argument '" + operation + "'.");
         }
     }
 
     private void overwrite() throws Exception {
         String newBytecodeFile;
         if (filteredArgs.size() == 3) {
-            System.err.println("reading class from std.in");
+            OutputController.getLogger().log("Reading class for overwrite from stdin.");
             newBytecodeFile = null;
         } else {
             if (filteredArgs.size() != 4) {
-                throw new RuntimeException(OVERWRITE + "  three args - PUC of JVM and class to overwrite and file with new bytecode");
+                throw new IllegalArgumentException("Incorrect argument count! Please use '" + OVERWRITE_FORMAT + "'.");
             }
             newBytecodeFile = filteredArgs.get(3);
         }
@@ -224,10 +227,10 @@ public class Cli {
         if (newBytecodeFile != null) {
             FileToClassValidator.StringAndScore r = FileToClassValidator.validate(classStr, newBytecodeFile);
             if (r.score > 0 && r.score < 10) {
-                System.err.println("WARNING:" + r.message);
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "WARNING: " + r.message);
             }
             if (r.score >= 10) {
-                System.err.println("ERROR:" + r.message);
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "ERROR: " + r.message);
             }
         }
         VmInfo vmInfo = getVmInfo(jvmStr);
@@ -252,11 +255,10 @@ public class Cli {
 
     private void compile() throws Exception {
         if (filteredArgs.size() < 2) {
-            throw new RuntimeException(COMPILE + " expects at least one file to compile");
+            throw new IllegalArgumentException("Expected at least one file for compile.");
         }
         String cpPidUrl = null;
         String customCompiler = null;
-        boolean haveCompiler = false;
         boolean recursive = false;
         List<File> toCompile = new ArrayList<>(1);
         for (int x = 1; x < filteredArgs.size(); x++) {
@@ -294,19 +296,19 @@ public class Cli {
             cp = new RuntimeCompilerConnector.JRDClassesProvider(vmInfo, vmManager);
         }
         DecompilerWrapperInformation decompiler = null;
-        String s = "Default runtime compiler will be used";
-        if (customCompiler == null) {
-            haveCompiler = false;
-        } else {
+        boolean haveCompiler = false;
+        String compilerLogMessage = "Default runtime compiler will be used for overwrite.";
+
+        if (customCompiler != null) {
             decompiler = findDecompiler(customCompiler, pluginManager);
-            haveCompiler = false;
-            boolean pluginsDecompiler = this.pluginManager.haveCompiler(decompiler);
-            if (pluginsDecompiler) {
-                s = customCompiler + " plugin is delivered with its own compiler!!";
+
+            if (pluginManager.haveCompiler(decompiler)) {
+                compilerLogMessage = customCompiler + "'s bundled compiler will be used for overwrite.";
                 haveCompiler = true;
             }
         }
-        System.err.println(s);
+        OutputController.getLogger().log(compilerLogMessage);
+
         ClasspathlessCompiler rc;
         if (haveCompiler) {
             rc = new RuntimeCompilerConnector.ForeignCompilerWrapper(decompiler);
@@ -314,12 +316,12 @@ public class Cli {
             rc = new io.github.mkoncek.classpathless.impl.CompilerJavac();
         }
         IdentifiedSource[] isis = Utils.sourcesToIdentifiedSources(recursive, toCompile);
-        Collection<IdentifiedBytecode> result = rc.compileClass(cp, Optional.of(new MessagesListener() {
-            @Override
-            public void addMessage(Level level, String message) {
-                System.err.println(message);
-            }
-        }), isis);
+        Collection<IdentifiedBytecode> result = rc.compileClass(
+                cp,
+                Optional.of((level, message) -> OutputController.getLogger().log(message)),
+                isis
+        );
+
         boolean upload = false;
         if (saving.shouldSave()) {
             try {
@@ -335,27 +337,29 @@ public class Cli {
             VmInfo target = getVmInfo(saving.as);
             int f = 0;
             for (IdentifiedBytecode ib : result) {
-                System.out.println("Uploading " + ib.getClassIdentifier().getFullName());
+                String className = ib.getClassIdentifier().getFullName();
+                OutputController.getLogger().log("Uploading class '" + className + "'.");
+
                 AgentRequestAction request = VmDecompilerInformationController.createRequest(target,
                         AgentRequestAction.RequestAction.OVERWRITE,
                         ib.getClassIdentifier().getFullName(),
                         Base64.getEncoder().encodeToString(ib.getFile()));
                 String response = VmDecompilerInformationController.submitRequest(vmManager, request);
                 if (response.equals("ok")) {
-                    System.out.println("    Most likely done successfully.");
+                    OutputController.getLogger().log("Successfully uploaded class '" + className + "'.");
                 } else {
                     f++;
-                    System.out.println("    failed");
+                    OutputController.getLogger().log("Failed to upload class '" + className + "'.");
                 }
             }
             if (f > 0) {
-                throw new RuntimeException("Not uploaded " + f + " classes of total " + result.size());
+                throw new RuntimeException("Failed to upload " + f + " classes out of " + result.size() + " total.");
             } else {
-                System.out.println("Done all " + result.size() + " classes");
+                OutputController.getLogger().log("Successfully uploaded all " + result.size() + " classes.");
             }
         } else {
             if (!saving.shouldSave() && result.size() > 1) {
-                throw new RuntimeException("more then one file is output of compilation, but yuo have stdout enabled. Use " + SAVE_AS + " and friends to save the output of compilation");
+                throw new IllegalArgumentException("Unable to print multiple classes to stdout. Either use saving modifiers or compile one class at a time.");
             }
             for (IdentifiedBytecode ib : result) {
                 outOrSave(ib.getClassIdentifier().getFullName(), ".class", ib.getFile(), true);
@@ -374,11 +378,11 @@ public class Cli {
                 String s = br.readLine();
                 if (s == null) {
                     if (pkg == null && clazz == null) {
-                        throw new RuntimeException("pkg.and.class.not.found");
+                        throw new RuntimeException("Neither package nor class was found.");
                     } else if (pkg == null) {
-                        throw new RuntimeException("pkg.not.found.for." + clazz);
+                        throw new RuntimeException("Package not found for class '" + clazz + "'.");
                     } else if (clazz == null) {
-                        throw new RuntimeException(pkg + ".lost.its.class");
+                        throw new RuntimeException("Class not found for package '" + pkg + "'.");
                     } else {
                         return pkg + "." + clazz;
                     }
@@ -406,9 +410,7 @@ public class Cli {
 
     private void decompile() throws Exception {
         if (filteredArgs.size() < 4) {
-            throw new RuntimeException(
-                    DECOMPILE
-                            + " at least three arguments - PUC of JVM,  decompiler name (as set-up) or decompiler json file, or javap(see help) followed by fully classified class name(s)/regex(es)");
+            throw new IllegalArgumentException("Incorrect argument count! Please use '" + DECOMPILE_FORMAT + "'.");
         }
         String jvmStr = filteredArgs.get(1);
         String decompilerName = filteredArgs.get(2);
@@ -423,7 +425,7 @@ public class Cli {
                 VmDecompilerStatus result = obtainClass(vmInfo, classStr, vmManager);
                 byte[] bytes = Base64.getDecoder().decode(result.getLoadedClassBytes());
                 if (new File(decompilerName).exists() && decompilerName.toLowerCase().endsWith(".json")) {
-                    throw new RuntimeException("Plugins loading directly from file is not implemented yet.");
+                    throw new RuntimeException("Plugin loading directly from file is not implemented.");
                 }
                 if (decompilerName.startsWith(DecompilerWrapperInformation.JAVAP_NAME)) {
                     String[] split_name = decompilerName.split("-");
@@ -443,7 +445,7 @@ public class Cli {
                             failures++;
                         }
                     } else {
-                        throw new RuntimeException("Decompiler " + decompilerName + " not found");
+                        throw new RuntimeException("Decompiler '" + decompilerName + "' not found");
                     }
                 }
             }
@@ -451,12 +453,12 @@ public class Cli {
         returnNonzero(failures, total);
     }
 
-    private void returnNonzero(int failures, int total) throws Exception {
+    private void returnNonzero(int failures, int total) {
         if (total == 0) {
-            throw new Exception("No class found!");
+            throw new RuntimeException("No class found to save.");
         }
         if (failures > 0) {
-            throw new Exception(failures + " saving failed");
+            throw new RuntimeException("Failed to save " + failures + "classes.");
         }
     }
 
@@ -496,7 +498,7 @@ public class Cli {
 
     private void printBytes(boolean bytes) throws Exception {
         if (filteredArgs.size() < 3) {
-            throw new RuntimeException(BYTES + " and " + BASE64 + " expect at least two arguments - PUC of JVM and fully classified class name(s)/regex(es)");
+            throw new IllegalArgumentException("Incorrect argument count! Please use '" + (bytes ? BYTES_FORMAT : BASE64_FORMAT) + "'.");
         }
         String jvmStr = filteredArgs.get(1);
         VmInfo vmInfo = getVmInfo(jvmStr);
@@ -525,7 +527,7 @@ public class Cli {
 
     private void listClasses() throws IOException {
         if (filteredArgs.size() < 2) {
-            throw new RuntimeException(LIST_CLASSES + " expect at least one argument - PUC. Second, optional is list of filtering regexes");
+            throw new IllegalArgumentException("Incorrect argument count! Please use '" + LIST_CLASSES_FORMAT + "'.");
         }
         String param = filteredArgs.get(1);
         List<Pattern> filter = new ArrayList<>(filteredArgs.size() - 1);
@@ -561,7 +563,7 @@ public class Cli {
                     }
                 }
             } else {
-                throw new RuntimeException("Only " + Saving.DEFAULT + " and " + Saving.EXACT + "allowed for saving list of classes");
+                throw new RuntimeException("Only '" + Saving.DEFAULT + "' and '" + Saving.EXACT + "' are allowed for class listing saving.");
             }
         } else {
             for (String clazz : classes) {
@@ -581,7 +583,7 @@ public class Cli {
 
     private void listPlugins() {
         if (filteredArgs.size() != 1) {
-            throw new RuntimeException(LIST_PLUGINS + " does not expect argument");
+            throw new RuntimeException(LIST_PLUGINS + " does not expect arguments.");
         }
         PluginManager pm = new PluginManager();
         List<DecompilerWrapperInformation> wrappers = pm.getWrappers();
@@ -592,7 +594,7 @@ public class Cli {
 
     private void listJVMs() {
         if (filteredArgs.size() != 1) {
-            throw new RuntimeException(LIST_JVMS + " does not expect argument");
+            throw new RuntimeException(LIST_JVMS + " does not expect arguments.");
         }
         for (VmInfo vmInfo : vmManager.getVmInfoSet()) {
             System.out.println(vmInfo.getVmPid() + " " + vmInfo.getVmName());
@@ -639,46 +641,40 @@ public class Cli {
 
     private VmInfo.Type guessType(String input) {
         if (input == null || input.trim().isEmpty()) {
-            throw new RuntimeException("No input to check P(pid) xor U(host:port) xor C(classpath) from.");
+            throw new RuntimeException("Unable to interpret PUC because it is empty.");
         }
         try {
             Integer.valueOf(input);
-            if (OutputController.getLogger().isVerbose()) {
-                System.err.println("Using " + input + " as pid. For files/folders of number try ./number format");
-            }
+            OutputController.getLogger().log("Interpreting '" + input + "' as PID. To use numbers as filenames, try './" + input + "'.");
+
             return VmInfo.Type.LOCAL;
-        } catch (NumberFormatException eee) {
-            if (OutputController.getLogger().isVerbose()) {
-                eee.printStackTrace();
-            }
-            try {
-                if (input.split(":").length == 2) {
-                    Integer.valueOf(input.split(":")[1]);
-                    if (OutputController.getLogger().isVerbose()) {
-                        System.err.println("Using " + input + " as host:port. For files/folders of number try ./number format");
-                    }
-                    return VmInfo.Type.REMOTE;
-                } else {
-                    throw new NumberFormatException("it is not host:number format");
-                }
-            } catch (NumberFormatException ee) {
-                if (OutputController.getLogger().isVerbose()) {
-                    ee.printStackTrace();
-                }
-                try {
-                    NewFsVmController.cpToFiles(input);
-                    if (OutputController.getLogger().isVerbose()) {
-                        System.err.println("Using " + input + " as host:port. For files/folders of number try ./number format");
-                    }
-                    return VmInfo.Type.FS;
-                } catch (NewFsVmController.ProbablyNotClassPathElementException e) {
-                    if (OutputController.getLogger().isVerbose()) {
-                        e.printStackTrace();
-                    }
-                }
-            }
+        } catch (NumberFormatException e) {
+            OutputController.getLogger().log("Interpretation of '" + input + "' as PID failed because it is not a number.");
         }
-        throw new RuntimeException("Unable to determine " + input + " as Pid xor host:port xor classpath");
+
+        try {
+            if (input.split(":").length == 2) {
+                Integer.valueOf(input.split(":")[1]);
+                OutputController.getLogger().log("Interpreting '" + input + "' as hostname:port. To use colons as filenames, try './" + input + "'.");
+
+                return VmInfo.Type.REMOTE;
+            } else {
+                OutputController.getLogger().log("Interpretation of '" + input + "' as hostname:port failed because it cannot be correctly split on ':'.");
+            }
+        } catch (NumberFormatException e) {
+            OutputController.getLogger().log("Interpretation of '" + input + "' as hostname:port failed because port is not a number.");
+        }
+
+        try {
+            NewFsVmController.cpToFiles(input);
+            OutputController.getLogger().log("Interpreting " + input + " as FS VM classpath.");
+
+            return VmInfo.Type.FS;
+        } catch (NewFsVmController.ProbablyNotClassPathElementException e) {
+            OutputController.getLogger().log("Interpretation of '" + input + "' as FS VM classpath. failed. Cause: " + e.getMessage());
+        }
+
+        throw new RuntimeException("Unable to interpret '" + input + "' as any component of PUC.");
     }
 
     VmInfo getVmInfo(String param) {
