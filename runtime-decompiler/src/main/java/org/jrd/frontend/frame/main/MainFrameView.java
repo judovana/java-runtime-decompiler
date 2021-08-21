@@ -70,6 +70,8 @@ public class MainFrameView {
     private ActionListener haltAgentListener;
 
     private static final Dimension BUTTON_SIZE = new Dimension(35, 35);
+    private static final String WELCOME_CARD = "welcomePanel";
+    private static final String DECOMPILER_CARD = "decompilerView";
 
     public JFrame getMainFrame() {
         return mainFrame;
@@ -261,8 +263,8 @@ public class MainFrameView {
 
         cardLayout = new CardLayout();
         centerPanel = new JPanel(cardLayout);
-        centerPanel.add(welcomePanel, "welcomePanel");
-        centerPanel.add(bytecodeDecompilerView.getBytecodeDecompilerPanel(), "decompilerView");
+        centerPanel.add(welcomePanel, WELCOME_CARD);
+        centerPanel.add(bytecodeDecompilerView.getBytecodeDecompilerPanel(), DECOMPILER_CARD);
         // centerPanel End
 
 
@@ -358,9 +360,9 @@ public class MainFrameView {
      */
     void switchPanel(boolean isVmSelected) {
         if (isVmSelected) {
-            cardLayout.show(centerPanel, "decompilerView");
+            cardLayout.show(centerPanel, DECOMPILER_CARD);
         } else {
-            cardLayout.show(centerPanel, "welcomePanel");
+            cardLayout.show(centerPanel, WELCOME_CARD);
         }
     }
 
