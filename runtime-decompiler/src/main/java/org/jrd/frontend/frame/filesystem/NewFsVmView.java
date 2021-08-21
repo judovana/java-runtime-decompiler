@@ -3,6 +3,7 @@ package org.jrd.frontend.frame.filesystem;
 import org.jrd.frontend.frame.main.MainFrameView;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -29,39 +30,46 @@ public class NewFsVmView extends JDialog {
         JButton selectCpButton;
         JPanel textAndName;
 
+        int padding = 10;
+
         CpNamePanel() {
             this.selectCpButton = new JButton("...");
+            this.selectCpButton.setPreferredSize(new Dimension(30, 30));
             this.cpTextField = new JTextField();
             this.nameTextField = new JTextField();
             this.nameTextField.setPreferredSize(new Dimension(90, 0));
             this.textAndName = new JPanel();
 
             textAndName.setLayout(new GridBagLayout());
+            textAndName.setBorder(new EmptyBorder(padding, padding, padding, padding));
+
             GridBagConstraints gbc = new GridBagConstraints();
             gbc.anchor = GridBagConstraints.WEST;
             gbc.fill = GridBagConstraints.BOTH;
-            gbc.gridx = 1;
+            gbc.gridx = 2;
             textAndName.add(new JLabel("Classpath"), gbc);
-            gbc.gridx = 3;
+            gbc.gridx = 4;
             textAndName.add(new JLabel("Optional name"), gbc);
-            gbc.gridx = 0;
             gbc.gridy = 1;
-            textAndName.add(Box.createHorizontalStrut(20), gbc);
-            gbc.weightx = 1;
+            gbc.gridx = 0;
+            gbc.weightx = 0;
+            gbc.weighty = 0;
+            textAndName.add(selectCpButton, gbc);
             gbc.gridx = 1;
+            textAndName.add(Box.createHorizontalStrut(padding), gbc);
+            gbc.weightx = 1;
+            gbc.gridx = 2;
             textAndName.add(cpTextField, gbc);
             gbc.weightx = 0;
-            gbc.gridx = 2;
-            textAndName.add(Box.createHorizontalStrut(20), gbc);
             gbc.gridx = 3;
-            textAndName.add(nameTextField, gbc);
+            textAndName.add(Box.createHorizontalStrut(padding), gbc);
             gbc.gridx = 4;
-            textAndName.add(Box.createHorizontalStrut(20), gbc);
+            textAndName.add(nameTextField, gbc);
+
             textAndName.setPreferredSize(new Dimension(0, 100));
+
             this.setLayout(new BorderLayout());
-            this.add(textAndName);
-            JPanel selectButtonPane = new JPanel(new GridBagLayout());
-            selectButtonPane.add(selectCpButton);
+            this.add(textAndName, BorderLayout.CENTER);
             selectCpButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent actionEvent) {
@@ -83,7 +91,6 @@ public class NewFsVmView extends JDialog {
                     }
                 }
             });
-            this.add(selectButtonPane, BorderLayout.WEST);
         }
     }
 
@@ -150,7 +157,7 @@ public class NewFsVmView extends JDialog {
         mainPanel.add(configureOKCancelPanel, gbc);
 
 
-        this.setTitle("New filesystem `VM`");
+        this.setTitle("New filesystem VM");
         this.setSize(new Dimension(400, 220));
         this.setMinimumSize(new Dimension(250, 220));
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
