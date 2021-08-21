@@ -110,6 +110,10 @@ public class VmInfo {
         return cp;
     }
 
+    private String getCpString() {
+        return cp.stream().map(File::getAbsolutePath).collect(Collectors.joining(File.pathSeparator));
+    }
+
     public String nameOrCp() {
         if (cp == null) {
             return getVmName();
@@ -117,8 +121,16 @@ public class VmInfo {
             if (getVmName() != null && !getVmName().trim().isEmpty()){
                 return getVmName();
             } else {
-              return cp.stream().map(a -> a.getAbsolutePath()).collect(Collectors.joining(File.pathSeparator));
+                return getCpString();
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "%s %s (type %s",
+                vmId, vmName, type
+        ) + (type == Type.FS ? ", classpath: " + getCpString() : "" ) + ")";
     }
 }
