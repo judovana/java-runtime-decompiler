@@ -119,8 +119,8 @@ public class MainFrameView {
                 ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         // localVmScrollPane End
-        localVmLabelPanel = new JPanel();
-        localVmLabelPanel.add(new JLabel("Local Processes", SwingConstants.CENTER));
+        localVmLabelPanel = new JPanel(new BorderLayout());
+        localVmLabelPanel.add(new JLabel("Local Processes", SwingConstants.CENTER), BorderLayout.CENTER);
         // localVmLabelPanel End
         localVmPanel = new JPanel(new BorderLayout());
         localVmPanel.setName("Local VMs");
@@ -148,7 +148,7 @@ public class MainFrameView {
 
         // remoteConnectionButton End
         remoteVmLabelPanel = new JPanel(new BorderLayout());
-        remoteVmLabelPanel.add(new JLabel("    Remote Processes", SwingConstants.CENTER), BorderLayout.CENTER);
+        remoteVmLabelPanel.add(new JLabel("Remote Processes", SwingConstants.CENTER), BorderLayout.CENTER);
         remoteVmLabelPanel.add(remoteVmButtonPanel, BorderLayout.EAST);
         // remoteVmLabelPanel end
         remoteVmList = new UndraggableJList();
@@ -210,12 +210,15 @@ public class MainFrameView {
 
         localFsLabelPanel = new JPanel(new BorderLayout());
         localFsLabelPanel.add(localFsButtonPanel, BorderLayout.EAST);
-        localFsLabelPanel.add(new JLabel("    Local filesystem CP elements", SwingConstants.CENTER), BorderLayout.CENTER);
+        localFsLabelPanel.add(new JLabel("Local Filesystem Classpath Elements", SwingConstants.CENTER), BorderLayout.CENTER);
         localFsPanel = new JPanel(new BorderLayout());
         localFsPanel.setName("Local FS");
         localFsPanel.add(localFsLabelPanel, BorderLayout.NORTH);
         localFsPanel.add(localFsScrollPane, BorderLayout.CENTER);
         // localFsPanel End
+
+        // copy preferred height size from a panel with buttons
+        localVmLabelPanel.setPreferredSize(localFsLabelPanel.getPreferredSize());
 
         vmsPanel = new JTabbedPane();
         vmsPanel.setBorder(new EtchedBorder());
