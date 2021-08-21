@@ -9,14 +9,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This class is used for creating/removing/updating information about available Java Virtual Machines.
  */
 public class VmManager{
-
-    private static AtomicInteger FsVmCounter = new AtomicInteger();
 
     private HashSet<VmInfo> vmInfoSet;
     Set<ActionListener> actionListeners = new HashSet<>();
@@ -95,7 +92,7 @@ public class VmManager{
     }
 
     public VmInfo createFsVM(List<File> cp, String name){
-        int pid = FsVmCounter.addAndGet(-1);
+        int pid = getNextAvailableFsVmPid();
         VmInfo vmInfo = new VmInfo(""+pid, pid, name, VmInfo.Type.FS, cp);
         VmDecompilerStatus status = new VmDecompilerStatus();
         status.setVmId(""+pid);
@@ -106,6 +103,23 @@ public class VmManager{
         setChanged();
         notifyListeners();
         return vmInfo;
+    }
+
+    private int getNextAvailableFsVmPid() {
+        return vmInfoSet.stream()
+                .filter(vmInfo -> vmInfo.getType().equals(VmInfo.Type.FS))
+                .map(VmInfo::getVmPid)
+                .min(Comparator.naturalOrder())
+                .orElse(0) - 1;
+    }
+
+    public boolean removeVm(VmInfo target) {
+        boolean removed = vmInfoSet.remove(target);
+
+        setChanged();
+        notifyListeners();
+
+        return removed;
     }
 
     public VmInfo findVmFromPID(String param) {

@@ -60,6 +60,7 @@ public class VmDecompilerInformationController {
 
         mainFrameView.setCreateNewConnectionDialogListener(e -> createNewConnectionDialog());
         mainFrameView.setNewFsVmDialogListener(e -> createNewFsVMDialog());
+        mainFrameView.setRemoveVmDialogListener(this::removeVmDialog);
         bytecodeDecompilerView.setClassesActionListener(e -> loadClassNames());
         bytecodeDecompilerView.setBytesActionListener(e -> loadClassBytecode(e.getActionCommand()));
         bytecodeDecompilerView.setRewriteActionListener(new ClassRewriter());
@@ -90,6 +91,32 @@ public class VmDecompilerInformationController {
         newFsVmDialog = new NewFsVmView(mainFrameView);
         new NewFsVmController(newFsVmDialog, vmManager);
         newFsVmDialog.setVisible(true);
+    }
+
+    @SuppressWarnings("unchecked") // event.getSource() is always of type JList<VmInfo>
+    private void removeVmDialog(ActionEvent event) {
+        String vmType = event.getActionCommand();
+        JList<VmInfo> sourceList = (JList<VmInfo>) event.getSource();
+        VmInfo selectedVm = sourceList.getSelectedValue();
+
+        if (selectedVm == null) {
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Attempted to remove " + vmType + " with none selected.");
+            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), "No " + vmType + " selected.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        int dialogResult = JOptionPane.showConfirmDialog(mainFrameView.getMainFrame(), "Are you sure you want to remove this " + vmType + "?", "Warning", JOptionPane.OK_CANCEL_OPTION);
+
+        if (dialogResult == JOptionPane.CANCEL_OPTION) {
+            return;
+        }
+
+        if (!vmManager.removeVm(selectedVm)) {
+            String removeFailMessage = "Failed to remove VM: " + selectedVm;
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, removeFailMessage);
+            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), removeFailMessage, "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        cleanup();
     }
 
     public static class VmArrayList<T> extends ArrayList<VmInfo> {
@@ -162,7 +189,7 @@ public class VmDecompilerInformationController {
         SwingUtilities.invokeLater(() -> {
             loadingDialog = new LoadingDialog();
             loadingDialog.setAbortActionListener(e
-                    -> abortAndCleanup());
+                    -> abortClassLoading());
             loadingDialog.setVisible(true);
         });
     }
@@ -178,11 +205,16 @@ public class VmDecompilerInformationController {
 
     }
 
-    private void abortAndCleanup() {
+    private void cleanup() {
         mainFrameView.switchPanel(false);
         mainFrameView.getBytecodeDecompilerView().reloadClassList(new String[0]);
         mainFrameView.getBytecodeDecompilerView().reloadTextField("", "", new byte[16]);
         haltAgent();
+    }
+
+    private void abortClassLoading() {
+        cleanup();
+
         updateVmLists();
         mainFrameView.clearLocalListSelection();
         mainFrameView.clearRemoteListSelection();
