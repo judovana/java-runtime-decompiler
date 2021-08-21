@@ -729,7 +729,7 @@ public class Cli {
             case LOCAL:
                 return vmManager.findVmFromPID(param);
             case FS:
-                return vmManager.createFsVM(NewFsVmController.cpToFilesCaught(param), null);
+                return vmManager.createFsVM(NewFsVmController.cpToFilesCaught(param), null, false);
             case REMOTE:
                 String[] hostnamePort = param.split(":");
                 return vmManager.createRemoteVM(hostnamePort[0], Integer.parseInt(hostnamePort[1]));

@@ -4,7 +4,14 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jrd.backend.core.OutputController;
 import org.jrd.backend.core.VmDecompilerStatus;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -13,13 +20,15 @@ import java.util.stream.Collectors;
 /**
  * Stores information about Available Virtual Machine.
  */
-public class VmInfo {
+public class VmInfo implements Serializable {
 
-    public static enum  Type{
+    public static enum Type {
         LOCAL, REMOTE, FS
     }
 
-    private VmDecompilerStatus vmDecompilerStatus;
+    private static final long serialVersionUID = 111L;
+
+    private transient VmDecompilerStatus vmDecompilerStatus;
     private String vmId;
     private int vmPid;
     private String vmName;
@@ -67,7 +76,7 @@ public class VmInfo {
         return vmId;
     }
 
-    private void setVmId(String vmId) {
+    public void setVmId(String vmId) {
         this.vmId = vmId;
     }
 
@@ -155,5 +164,25 @@ public class VmInfo {
     @Override
     public int hashCode() {
         return Objects.hash(vmId, vmPid, vmName, type, cp);
+    }
+
+    private byte[] serialize() throws IOException {
+        try (
+                ByteArrayOutputStream bo = new ByteArrayOutputStream(1024);
+                ObjectOutputStream so = new ObjectOutputStream(bo)
+        ) {
+            so.writeObject(this);
+            so.flush();
+            return bo.toByteArray();
+        }
+    }
+
+    String base64Serialize() throws IOException {
+        return Base64.getEncoder().encodeToString(serialize());
+    }
+
+    static VmInfo base64Deserialize(String base64Representation) throws IOException, ClassNotFoundException {
+        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(Base64.getDecoder().decode(base64Representation)));
+        return (VmInfo) ois.readObject();
     }
 }
