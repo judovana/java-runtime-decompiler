@@ -28,12 +28,16 @@ public class MainFrameView {
     private JList<VmInfo> localVmList;
     private JPanel remoteVmPanel;
     private JPanel remoteVmLabelPanel;
+    private JPanel remoteVmButtonPanel;
     private JButton remoteConnectionButton;
+    private JButton remoteConnectionRemoveButton;
     private JScrollPane remoteVmScrollPane;
     private JList<VmInfo> remoteVmList;
     private JPanel localFsPanel;
     private JPanel localFsLabelPanel;
+    private JPanel localFsButtonPanel;
     private JButton localFsButton;
+    private JButton localFsRemoveButton;
     private JScrollPane localFsScrollPane;
     private JList<VmInfo> localFsVmList;
     private CardLayout cardLayout;
@@ -56,8 +60,8 @@ public class MainFrameView {
     private ActionListener vmChangingListener;
     private ActionListener newConnectionDialogListener;
     private ActionListener newFsVmDialogListener;
+    private ActionListener removeVmDialogListener;
     private ActionListener pluginConfigurationEditorListener;
-
     private ActionListener haltAgentListener;
 
     public JFrame getMainFrame() {
@@ -128,10 +132,22 @@ public class MainFrameView {
             newConnectionDialogListener.actionPerformed(actionEvent);
         });
         remoteConnectionButton.setMargin(new Insets(5, 9, 5, 9));
+
+        remoteConnectionRemoveButton = new JButton("-");
+        remoteConnectionRemoveButton.addActionListener(actionEvent -> {
+            ActionEvent event = new ActionEvent(remoteVmList, 0, "remote VM");
+            removeVmDialogListener.actionPerformed(event);
+        });
+        remoteConnectionRemoveButton.setMargin(new Insets(5, 9, 5, 9));
+
+        remoteVmButtonPanel = new JPanel();
+        remoteVmButtonPanel.add(remoteConnectionRemoveButton);
+        remoteVmButtonPanel.add(remoteConnectionButton);
+
         // remoteConnectionButton End
         remoteVmLabelPanel = new JPanel(new BorderLayout());
         remoteVmLabelPanel.add(new JLabel("    Remote Processes", SwingConstants.CENTER), BorderLayout.CENTER);
-        remoteVmLabelPanel.add(remoteConnectionButton, BorderLayout.EAST);
+        remoteVmLabelPanel.add(remoteVmButtonPanel, BorderLayout.EAST);
         // remoteVmLabelPanel end
         remoteVmList = new UndraggableJList();
         remoteVmList.setName("remoteVmList");
@@ -176,12 +192,22 @@ public class MainFrameView {
                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
         localFsButton = new JButton("+");
-        localFsButton.addActionListener(actionEvent -> {
-            newFsVmDialogListener.actionPerformed(actionEvent);
-        });
+        localFsButton.addActionListener(actionEvent -> newFsVmDialogListener.actionPerformed(actionEvent));
         localFsButton.setMargin(new Insets(5, 9, 5, 9));
+
+        localFsRemoveButton = new JButton("-");
+        localFsRemoveButton.addActionListener(actionEvent -> {
+            ActionEvent event = new ActionEvent(localFsVmList, 0, "FS VM");
+            removeVmDialogListener.actionPerformed(event);
+        });
+        localFsRemoveButton.setMargin(new Insets(5, 9, 5, 9));
+
+        localFsButtonPanel = new JPanel();
+        localFsButtonPanel.add(localFsRemoveButton);
+        localFsButtonPanel.add(localFsButton);
+
         localFsLabelPanel = new JPanel(new BorderLayout());
-        localFsLabelPanel.add(localFsButton, BorderLayout.EAST);
+        localFsLabelPanel.add(localFsButtonPanel, BorderLayout.EAST);
         localFsLabelPanel.add(new JLabel("    Local filesystem CP elements", SwingConstants.CENTER), BorderLayout.CENTER);
         localFsPanel = new JPanel(new BorderLayout());
         localFsPanel.setName("Local FS");
@@ -339,6 +365,10 @@ public class MainFrameView {
         this.newFsVmDialogListener = newFsVmDialogListener;
     }
 
+    public void setRemoveVmDialogListener(ActionListener removeFsVmDialogListener) {
+        this.removeVmDialogListener = removeFsVmDialogListener;
+    }
+
     public void setPluginConfigurationEditorListener(ActionListener pluginConfigurationEditorListener) {
         this.pluginConfigurationEditorListener = pluginConfigurationEditorListener;
     }
@@ -359,7 +389,7 @@ public class MainFrameView {
         VmInfo selectedValue = vmList.getSelectedValue();
         vmList.setListData(vmInfos);
         if (selectedValue != null) {
-            vmList.setSelectedValue(selectedValue, true);
+            vmList.setSelectedValue(selectedValue, true); // if !vmList.contains(selectedValue), e.g. after removal, selection gets cleared
         }
     }
 }
