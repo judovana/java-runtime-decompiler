@@ -21,7 +21,7 @@ public class MainFrameView {
 
     private JFrame mainFrame;
         private JPanel mainPanel;
-            private JTabbedPane vmsPanel;
+            private JTabbedPane tabbedPane;
                 private JPanel localVmPanel;
                     private JPanel localVmLabelPanel;
                     private JScrollPane localVmScrollPane;
@@ -30,18 +30,18 @@ public class MainFrameView {
                 private JPanel remoteVmPanel;
                     private JPanel remoteVmLabelPanel;
                         private JPanel remoteVmButtonPanel;
-                            private JButton remoteConnectionButton;
-                            private JButton remoteConnectionRemoveButton;
+                            private JButton remoteVmAddButton;
+                            private JButton remoteVmRemoveButton;
                     private JScrollPane remoteVmScrollPane;
                         private JList<VmInfo> remoteVmList;
 
-                private JPanel localFsPanel;
-                    private JPanel localFsLabelPanel;
-                        private JPanel localFsButtonPanel;
-                            private JButton localFsButton;
-                            private JButton localFsRemoveButton;
-                    private JScrollPane localFsScrollPane;
-                        private JList<VmInfo> localFsVmList;
+                private JPanel fsVmPanel;
+                    private JPanel fsVmLabelPanel;
+                        private JPanel fsVmButtonPanel;
+                            private JButton fsVmAddButton;
+                            private JButton fsVmRemoveButton;
+                    private JScrollPane fsVmScrollPane;
+                        private JList<VmInfo> fsVmList;
 
             private JPanel centerPanel;
                 private JPanel welcomePanel;
@@ -137,22 +137,22 @@ public class MainFrameView {
         // localVmPanel End
 
         // remoteVmPanel, remoteVmScrollPane, remoteVmLabelPanel, remoteConnectionButton
-        remoteConnectionButton = new JButton("+");
-        remoteConnectionButton.addActionListener(actionEvent -> {
+        remoteVmAddButton = new JButton("+");
+        remoteVmAddButton.addActionListener(actionEvent -> {
             newConnectionDialogListener.actionPerformed(actionEvent);
         });
-        remoteConnectionButton.setPreferredSize(BUTTON_SIZE);
+        remoteVmAddButton.setPreferredSize(BUTTON_SIZE);
 
-        remoteConnectionRemoveButton = new JButton("-");
-        remoteConnectionRemoveButton.addActionListener(actionEvent -> {
+        remoteVmRemoveButton = new JButton("-");
+        remoteVmRemoveButton.addActionListener(actionEvent -> {
             ActionEvent event = new ActionEvent(remoteVmList, 0, "remote VM");
             removeVmDialogListener.actionPerformed(event);
         });
-        remoteConnectionRemoveButton.setPreferredSize(BUTTON_SIZE);
+        remoteVmRemoveButton.setPreferredSize(BUTTON_SIZE);
 
         remoteVmButtonPanel = new JPanel();
-        remoteVmButtonPanel.add(remoteConnectionRemoveButton);
-        remoteVmButtonPanel.add(remoteConnectionButton);
+        remoteVmButtonPanel.add(remoteVmRemoveButton);
+        remoteVmButtonPanel.add(remoteVmAddButton);
 
         // remoteConnectionButton End
         remoteVmLabelPanel = new JPanel(new BorderLayout());
@@ -183,57 +183,57 @@ public class MainFrameView {
         remoteVmPanel.add(remoteVmScrollPane, BorderLayout.CENTER);
         // remoteVmPanel End
 
-        localFsVmList = new UndraggableJList();
-        localFsVmList.setName("localFsVmList");
-        localFsVmList.setFixedCellHeight(80);
-        localFsVmList.setCellRenderer(new VmListRenderer());
-        localFsVmList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        localFsVmList.addMouseListener(new MouseAdapter() {
+        fsVmList = new UndraggableJList();
+        fsVmList.setName("localFsVmList");
+        fsVmList.setFixedCellHeight(80);
+        fsVmList.setCellRenderer(new VmListRenderer());
+        fsVmList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        fsVmList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
                 if (mouseEvent.getButton() == MouseEvent.BUTTON1) {
-                    ActionEvent event = new ActionEvent(localFsVmList, 0, null);
+                    ActionEvent event = new ActionEvent(fsVmList, 0, null);
                     vmChangingListener.actionPerformed(event);
                 }
             }
         });
-        localFsScrollPane = new JScrollPane(localFsVmList,
+        fsVmScrollPane = new JScrollPane(fsVmList,
                 ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
-        localFsButton = new JButton("+");
-        localFsButton.addActionListener(actionEvent -> newFsVmDialogListener.actionPerformed(actionEvent));
-        localFsButton.setPreferredSize(BUTTON_SIZE);
+        fsVmAddButton = new JButton("+");
+        fsVmAddButton.addActionListener(actionEvent -> newFsVmDialogListener.actionPerformed(actionEvent));
+        fsVmAddButton.setPreferredSize(BUTTON_SIZE);
 
-        localFsRemoveButton = new JButton("-");
-        localFsRemoveButton.addActionListener(actionEvent -> {
-            ActionEvent event = new ActionEvent(localFsVmList, 0, "FS VM");
+        fsVmRemoveButton = new JButton("-");
+        fsVmRemoveButton.addActionListener(actionEvent -> {
+            ActionEvent event = new ActionEvent(fsVmList, 0, "FS VM");
             removeVmDialogListener.actionPerformed(event);
         });
-        localFsRemoveButton.setPreferredSize(BUTTON_SIZE);
+        fsVmRemoveButton.setPreferredSize(BUTTON_SIZE);
 
-        localFsButtonPanel = new JPanel();
-        localFsButtonPanel.add(localFsRemoveButton);
-        localFsButtonPanel.add(localFsButton);
+        fsVmButtonPanel = new JPanel();
+        fsVmButtonPanel.add(fsVmRemoveButton);
+        fsVmButtonPanel.add(fsVmAddButton);
 
-        localFsLabelPanel = new JPanel(new BorderLayout());
-        localFsLabelPanel.add(localFsButtonPanel, BorderLayout.EAST);
-        localFsLabelPanel.add(new JLabel("Local Filesystem Classpath Elements", SwingConstants.CENTER), BorderLayout.CENTER);
-        localFsPanel = new JPanel(new BorderLayout());
-        localFsPanel.setName("Local FS");
-        localFsPanel.add(localFsLabelPanel, BorderLayout.NORTH);
-        localFsPanel.add(localFsScrollPane, BorderLayout.CENTER);
+        fsVmLabelPanel = new JPanel(new BorderLayout());
+        fsVmLabelPanel.add(fsVmButtonPanel, BorderLayout.EAST);
+        fsVmLabelPanel.add(new JLabel("Local Filesystem Classpath Elements", SwingConstants.CENTER), BorderLayout.CENTER);
+        fsVmPanel = new JPanel(new BorderLayout());
+        fsVmPanel.setName("Local FS");
+        fsVmPanel.add(fsVmLabelPanel, BorderLayout.NORTH);
+        fsVmPanel.add(fsVmScrollPane, BorderLayout.CENTER);
         // localFsPanel End
 
         // copy preferred height size from a panel with buttons
-        localVmLabelPanel.setPreferredSize(localFsLabelPanel.getPreferredSize());
+        localVmLabelPanel.setPreferredSize(fsVmLabelPanel.getPreferredSize());
 
-        vmsPanel = new JTabbedPane();
-        vmsPanel.setBorder(new EtchedBorder());
-        vmsPanel.add(localVmPanel);
-        vmsPanel.add(remoteVmPanel);
-        vmsPanel.add(localFsPanel);
-        vmsPanel.setPreferredSize(new Dimension(400, 0));
+        tabbedPane = new JTabbedPane();
+        tabbedPane.setBorder(new EtchedBorder());
+        tabbedPane.add(localVmPanel);
+        tabbedPane.add(remoteVmPanel);
+        tabbedPane.add(fsVmPanel);
+        tabbedPane.setPreferredSize(new Dimension(400, 0));
         //westPanel End
 
         // centerPanel, welcomePanel
@@ -266,7 +266,7 @@ public class MainFrameView {
 
 
         mainPanel = new JPanel(new BorderLayout());
-        mainPanel.add(vmsPanel, BorderLayout.WEST);
+        mainPanel.add(tabbedPane, BorderLayout.WEST);
         mainPanel.add(centerPanel, BorderLayout.CENTER);
         // mainPanel end
 
@@ -370,7 +370,7 @@ public class MainFrameView {
         }
     }
 
-    void setCreateNewConnectionDialogListener(ActionListener listener) {
+    void setNewConnectionDialogListener(ActionListener listener) {
         this.newConnectionDialogListener = listener;
     }
 
@@ -378,8 +378,8 @@ public class MainFrameView {
         this.newFsVmDialogListener = newFsVmDialogListener;
     }
 
-    public void setRemoveVmDialogListener(ActionListener removeFsVmDialogListener) {
-        this.removeVmDialogListener = removeFsVmDialogListener;
+    public void setRemoveVmDialogListener(ActionListener removeVmDialogListener) {
+        this.removeVmDialogListener = removeVmDialogListener;
     }
 
     public void setPluginConfigurationEditorListener(ActionListener pluginConfigurationEditorListener) {
@@ -395,7 +395,7 @@ public class MainFrameView {
     }
 
     void setFsVmList(VmInfo[] vmInfos) {
-        setVmList(localFsVmList, vmInfos);
+        setVmList(fsVmList, vmInfos);
     }
 
     private void setVmList(JList<VmInfo> vmList, VmInfo[] vmInfos) {
