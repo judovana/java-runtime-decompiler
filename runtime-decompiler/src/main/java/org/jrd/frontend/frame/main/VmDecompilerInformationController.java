@@ -58,7 +58,7 @@ public class VmDecompilerInformationController {
 
         vmManager.subscribeToVMChange(e -> updateVmLists());
 
-        mainFrameView.setCreateNewConnectionDialogListener(e -> createNewConnectionDialog());
+        mainFrameView.setNewConnectionDialogListener(e -> createNewConnectionDialog());
         mainFrameView.setNewFsVmDialogListener(e -> createNewFsVMDialog());
         mainFrameView.setRemoveVmDialogListener(this::removeVmDialog);
         bytecodeDecompilerView.setClassesActionListener(e -> loadClassNames());
