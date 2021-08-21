@@ -82,21 +82,25 @@ public class MainFrameView {
         vmChangingListener = listener;
     }
 
-    public MainFrameView() {
-
-        bytecodeDecompilerView = new BytecodeDecompilerView();
-
-        /**
-         * Custom JList that disables selection with mouse drag.
-         */
-        class UndraggableJList extends JList {
-            @Override
-            protected void processMouseMotionEvent(MouseEvent e) {
-                if (MouseEvent.MOUSE_DRAGGED != e.getID()) {
-                    super.processMouseMotionEvent(e);
-                }
+    /**
+     * Custom JList that disables selection with mouse drag.
+     */
+    private static class UndraggableJList extends JList<VmInfo> {
+        @Override
+        protected void processMouseMotionEvent(MouseEvent e) {
+            if (MouseEvent.MOUSE_DRAGGED != e.getID()) {
+                super.processMouseMotionEvent(e);
             }
         }
+
+        @Override
+        public String toString() {
+            return getName() + " - size " + getModel().getSize();
+        }
+    }
+
+    public MainFrameView() {
+        bytecodeDecompilerView = new BytecodeDecompilerView();
 
         // mainFrame, mainPanel, westPanel, localVmPanel. localVmList, localVmScrollPane, localVmLabelPanel
         localVmList = new UndraggableJList();
