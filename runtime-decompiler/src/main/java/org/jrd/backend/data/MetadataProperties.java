@@ -13,6 +13,7 @@ public class MetadataProperties {
     private static final String GROUP_ID_KEY = "groupId";
     private static final String VERSION_KEY = "version";
     private static final String TIMESTAMP_KEY = "timestamp";
+    private static final String NAME_KEY = "name";
 
     private static class PropertiesHolder {
         private static final MetadataProperties INSTANCE = new MetadataProperties();
@@ -42,6 +43,10 @@ public class MetadataProperties {
 
     public String getTimestamp() {
         return properties.getProperty(TIMESTAMP_KEY, "build.timestamp.notfound");
+    }
+
+    public String getName() {
+        return properties.getProperty(NAME_KEY, "Runtime-Decompiler");
     }
 
     @Override
