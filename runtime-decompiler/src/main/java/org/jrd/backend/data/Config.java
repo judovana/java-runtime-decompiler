@@ -98,6 +98,20 @@ public class Config {
         getOrCreateSavedFsVms().add(vmInfo.base64Serialize());
     }
 
+    public boolean isSavedFsVm(VmInfo vmInfo) {
+        try {
+            return getOrCreateSavedFsVms().contains(vmInfo.base64Serialize());
+        } catch (IOException e) {
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Unable to determine if '" + vmInfo + "' is saved. Cause:");
+            OutputController.getLogger().log(e);
+            return false;
+        }
+    }
+
+    public void removeSavedFsVm(VmInfo vmInfo) throws IOException {
+        getOrCreateSavedFsVms().remove(vmInfo.base64Serialize());
+    }
+
     private void loadConfigFile() throws IOException {
         configMap = new HashMap<>();
         configMap.put(AGENT_PATH_KEY, "");
