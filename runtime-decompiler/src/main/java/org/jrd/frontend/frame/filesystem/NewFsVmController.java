@@ -22,6 +22,7 @@ public class NewFsVmController {
     private void addFsVm() {
         String cp = newConnectionView.getCP();
         String name = newConnectionView.getNameHelper();
+        boolean shouldBeSaved = newConnectionView.shouldBeSaved();
         List<File> r;
 
         try {
@@ -31,7 +32,7 @@ public class NewFsVmController {
             return;
         }
 
-        vmManager.createFsVM(r, name);
+        vmManager.createFsVM(r, name, shouldBeSaved);
         newConnectionView.dispose();
     }
 

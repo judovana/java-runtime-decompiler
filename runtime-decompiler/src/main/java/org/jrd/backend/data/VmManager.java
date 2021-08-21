@@ -8,7 +8,9 @@ import com.sun.tools.attach.VirtualMachineDescriptor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This class is used for creating/removing/updating information about available Java Virtual Machines.
@@ -22,7 +24,7 @@ public class VmManager{
     public VmManager() {
         this.vmInfoSet = new HashSet<>();
         updateLocalVMs();
-
+        loadSavedFsVms();
 
         Thread VMUpdateThread = new Thread(() -> {
             while (true){
@@ -37,6 +39,33 @@ public class VmManager{
         VMUpdateThread.setDaemon(true);
         VMUpdateThread.start();
 
+    }
+
+    private void loadSavedFsVms() {
+        List<VmInfo> savedFsVms;
+        try {
+            savedFsVms = Config.getConfig().getSavedFsVms();
+        } catch (IOException | ClassNotFoundException e) {
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Failed to load saved FS VMs. Cause: ");
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
+            return;
+        }
+
+        if (savedFsVms.isEmpty()) {
+            OutputController.getLogger().log("No saved FS VMs to load.");
+            return;
+        }
+
+        // re-adjust IDs for saved VMs to be at the top of the list
+        for (VmInfo savedFsVm : savedFsVms) {
+            savedFsVm.setVmPid(getNextAvailableFsVmPid());
+            savedFsVm.setVmId(String.valueOf(getNextAvailableFsVmPid()));
+
+            vmInfoSet.add(savedFsVm);
+        }
+
+        setChanged();
+        notifyListeners();
     }
 
     /**
@@ -91,7 +120,8 @@ public class VmManager{
         return vmInfo;
     }
 
-    public VmInfo createFsVM(List<File> cp, String name){
+
+    public VmInfo createFsVM(List<File> cp, String name, boolean shouldBeSaved) {
         int pid = getNextAvailableFsVmPid();
         VmInfo vmInfo = new VmInfo(""+pid, pid, name, VmInfo.Type.FS, cp);
         VmDecompilerStatus status = new VmDecompilerStatus();
@@ -100,6 +130,17 @@ public class VmManager{
         status.setListenPort(pid);
         vmInfo.setVmDecompilerStatus(status);
         vmInfoSet.add(vmInfo);
+
+        if (shouldBeSaved) {
+            try {
+                Config.getConfig().addSavedFsVm(vmInfo);
+                Config.getConfig().saveConfigFile();
+            } catch (IOException e) {
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Failed to save FS VM '" + vmInfo + "'.");
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
+            }
+        }
+
         setChanged();
         notifyListeners();
         return vmInfo;
