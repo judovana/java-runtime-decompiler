@@ -1,5 +1,6 @@
 package org.jrd.frontend.frame.main;
 
+import org.jrd.backend.data.MetadataProperties;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.frontend.frame.about.AboutView;
 import org.jrd.frontend.frame.agent.ConfigureView;
@@ -321,7 +322,7 @@ public class MainFrameView {
 
         mainFrame = new JFrame();
         mainFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        mainFrame.setTitle("Runtime-Decompiler");
+        mainFrame.setTitle(MetadataProperties.getInstance().getName());
         mainFrame.setSize(1280, 720);
         mainFrame.setMinimumSize(new Dimension(700, 340));
         mainFrame.setLayout(new BorderLayout());
