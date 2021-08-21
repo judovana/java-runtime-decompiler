@@ -5,6 +5,7 @@ import org.jrd.backend.core.AgentRequestAction.RequestAction;
 import org.jrd.backend.core.DecompilerRequestReceiver;
 import org.jrd.backend.core.OutputController;
 import org.jrd.backend.core.VmDecompilerStatus;
+import org.jrd.backend.data.Config;
 import org.jrd.backend.data.Model;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
@@ -105,8 +106,13 @@ public class VmDecompilerInformationController {
             return;
         }
 
-        int dialogResult = JOptionPane.showConfirmDialog(mainFrameView.getMainFrame(), "Are you sure you want to remove this " + vmType + "?", "Warning", JOptionPane.OK_CANCEL_OPTION);
+        boolean isSavedFsVm = selectedVm.getType() == VmInfo.Type.FS && Config.getConfig().isSavedFsVm(selectedVm);
+        String confirmMessage = "Are you sure you want to remove this " + vmType + "?";
+        if (isSavedFsVm) {
+            confirmMessage += "\nRemoving it will also no longer keep it saved between JRD instances.";
+        }
 
+        int dialogResult = JOptionPane.showConfirmDialog(mainFrameView.getMainFrame(), confirmMessage, "Warning", JOptionPane.OK_CANCEL_OPTION);
         if (dialogResult == JOptionPane.CANCEL_OPTION) {
             return;
         }
@@ -116,6 +122,17 @@ public class VmDecompilerInformationController {
             OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, removeFailMessage);
             JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), removeFailMessage, "Error", JOptionPane.ERROR_MESSAGE);
         }
+
+        if (isSavedFsVm) {
+            try {
+                Config.getConfig().removeSavedFsVm(selectedVm);
+                Config.getConfig().saveConfigFile();
+            } catch (IOException e) {
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Unable to tag '" + vmInfo + "' as no longer to be saved. Cause:");
+                OutputController.getLogger().log(e);
+            }
+        }
+
         cleanup();
     }
 
