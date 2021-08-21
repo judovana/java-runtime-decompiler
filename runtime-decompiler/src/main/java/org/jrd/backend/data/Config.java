@@ -22,12 +22,14 @@ import static org.jrd.backend.data.Directories.isOsWindows;
  */
 public class Config {
 
-    private static Config config;
     private final Gson gson;
     private HashMap<String, String> configMap;
     private String configFilePath;
     private String legacyConfigFilePath;
 
+    private static class ConfigHolder {
+        private static final Config INSTANCE = new Config();
+    }
 
     private Config() {
         String parentDir = Directories.getConfigDirectory();
@@ -42,11 +44,8 @@ public class Config {
         }
     }
 
-    public static synchronized Config getConfig() {
-        if (config == null) {
-            config = new Config();
-        }
-        return config;
+    public static Config getConfig() {
+        return ConfigHolder.INSTANCE;
     }
 
     public String getAgentRawPath() {
