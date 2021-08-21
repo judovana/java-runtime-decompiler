@@ -29,6 +29,7 @@ public class NewFsVmView extends JDialog {
         JTextField nameTextField;
         JButton selectCpButton;
         JPanel textAndName;
+        JCheckBox keepFsVmCheckbox;
 
         int padding = 10;
 
@@ -39,6 +40,7 @@ public class NewFsVmView extends JDialog {
             this.nameTextField = new JTextField();
             this.nameTextField.setPreferredSize(new Dimension(90, 0));
             this.textAndName = new JPanel();
+            this.keepFsVmCheckbox = new JCheckBox("Keep this FS VM saved after closing JRD");
 
             textAndName.setLayout(new GridBagLayout());
             textAndName.setBorder(new EmptyBorder(padding, padding, padding, padding));
@@ -65,8 +67,15 @@ public class NewFsVmView extends JDialog {
             textAndName.add(Box.createHorizontalStrut(padding), gbc);
             gbc.gridx = 4;
             textAndName.add(nameTextField, gbc);
+            gbc.gridy = 2;
+            gbc.gridx = 0;
+            textAndName.add(Box.createVerticalStrut(padding), gbc);
+            gbc.gridy = 3;
+            gbc.gridx = 0;
+            gbc.gridwidth = GridBagConstraints.REMAINDER;
+            textAndName.add(keepFsVmCheckbox, gbc);
 
-            textAndName.setPreferredSize(new Dimension(0, 100));
+            textAndName.setPreferredSize(new Dimension(0, 125));
 
             this.setLayout(new BorderLayout());
             this.add(textAndName, BorderLayout.CENTER);
@@ -173,6 +182,10 @@ public class NewFsVmView extends JDialog {
 
     String getNameHelper() throws NumberFormatException {
         return mCpNamePanel.nameTextField.getText();
+    }
+
+    boolean shouldBeSaved() {
+        return mCpNamePanel.keepFsVmCheckbox.isSelected();
     }
 
     void setAddButtonListener(ActionListener addButtonListener) {
