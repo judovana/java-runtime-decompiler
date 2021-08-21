@@ -7,6 +7,7 @@ import org.jrd.backend.core.VmDecompilerStatus;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -132,5 +133,27 @@ public class VmInfo {
                 "%s %s (type %s",
                 vmId, vmName, type
         ) + (type == Type.FS ? ", classpath: " + getCpString() : "" ) + ")";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        VmInfo vmInfo = (VmInfo) o;
+        return vmPid == vmInfo.vmPid &&
+                Objects.equals(vmId, vmInfo.vmId) &&
+                Objects.equals(vmName, vmInfo.vmName) &&
+                type == vmInfo.type &&
+                Objects.equals(cp, vmInfo.cp);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(vmId, vmPid, vmName, type, cp);
     }
 }
