@@ -86,6 +86,8 @@ public class VmDecompilerInformationController {
         newConnectionDialog = new NewConnectionView(mainFrameView);
         new NewConnectionController(newConnectionDialog, vmManager);
         newConnectionDialog.setVisible(true);
+
+        mainFrameView.switchTabsToRemoteVms(); // for JMenuItem ActionEvent origin
     }
 
     private void createNewFsVMDialog() {

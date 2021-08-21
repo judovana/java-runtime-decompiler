@@ -408,4 +408,8 @@ public class MainFrameView {
             vmList.setSelectedValue(selectedValue, true); // if !vmList.contains(selectedValue), e.g. after removal, selection gets cleared
         }
     }
+
+    protected void switchTabsToRemoteVms() {
+        this.tabbedPane.setSelectedComponent(remoteVmPanel);
+    }
 }
