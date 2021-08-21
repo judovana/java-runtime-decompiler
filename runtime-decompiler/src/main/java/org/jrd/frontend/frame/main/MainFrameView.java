@@ -20,42 +20,46 @@ import static org.jrd.backend.data.Directories.isPortable;
 public class MainFrameView {
 
     private JFrame mainFrame;
-    private JPanel mainPanel;
-    private JTabbedPane vmsPanel;
-    private JPanel localVmPanel;
-    private JScrollPane localVmScrollPane;
-    private JPanel localVmLabelPanel;
-    private JList<VmInfo> localVmList;
-    private JPanel remoteVmPanel;
-    private JPanel remoteVmLabelPanel;
-    private JPanel remoteVmButtonPanel;
-    private JButton remoteConnectionButton;
-    private JButton remoteConnectionRemoveButton;
-    private JScrollPane remoteVmScrollPane;
-    private JList<VmInfo> remoteVmList;
-    private JPanel localFsPanel;
-    private JPanel localFsLabelPanel;
-    private JPanel localFsButtonPanel;
-    private JButton localFsButton;
-    private JButton localFsRemoveButton;
-    private JScrollPane localFsScrollPane;
-    private JList<VmInfo> localFsVmList;
-    private CardLayout cardLayout;
-    private JPanel centerPanel;
-    private JPanel welcomePanel;
-    private JTextArea welcomeJTextArea;
-    private BytecodeDecompilerView bytecodeDecompilerView;
+        private JPanel mainPanel;
+            private JTabbedPane vmsPanel;
+                private JPanel localVmPanel;
+                    private JPanel localVmLabelPanel;
+                    private JScrollPane localVmScrollPane;
+                        private JList<VmInfo> localVmList;
+
+                private JPanel remoteVmPanel;
+                    private JPanel remoteVmLabelPanel;
+                        private JPanel remoteVmButtonPanel;
+                            private JButton remoteConnectionButton;
+                            private JButton remoteConnectionRemoveButton;
+                    private JScrollPane remoteVmScrollPane;
+                        private JList<VmInfo> remoteVmList;
+
+                private JPanel localFsPanel;
+                    private JPanel localFsLabelPanel;
+                        private JPanel localFsButtonPanel;
+                            private JButton localFsButton;
+                            private JButton localFsRemoveButton;
+                    private JScrollPane localFsScrollPane;
+                        private JList<VmInfo> localFsVmList;
+
+            private JPanel centerPanel;
+                private JPanel welcomePanel;
+                    private JTextArea welcomeJTextArea;
+                private BytecodeDecompilerView bytecodeDecompilerView;
+
+                private CardLayout cardLayout;
 
     private JMenuBar menuBar;
-    private JMenu jMenuConnect;
-    private JMenuItem jMenuItemNewConnection;
-    private JMenu jMenuConfig;
-    private JMenuItem jMenuItemConfigure;
-    private JMenuItem jMenuPluginEditor;
-    private JMenu jMenuHelp;
-    private JMenuItem jMenuItemAbout;
-    private JMenuItem jMenuItemUsage;
-    private JMenuItem jMenuItemLicense;
+        private JMenu jMenuConnect;
+            private JMenuItem jMenuItemNewConnection;
+        private JMenu jMenuConfig;
+            private JMenuItem jMenuItemConfigure;
+            private JMenuItem jMenuPluginEditor;
+        private JMenu jMenuHelp;
+            private JMenuItem jMenuItemAbout;
+            private JMenuItem jMenuItemUsage;
+            private JMenuItem jMenuItemLicense;
 
     private ActionListener vmChangingListener;
     private ActionListener newConnectionDialogListener;
