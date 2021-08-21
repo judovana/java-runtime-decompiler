@@ -120,20 +120,12 @@ public class VmInfo implements Serializable {
         return cp;
     }
 
-    private String getCpString() {
+    public String getCpString() {
         return cp.stream().map(File::getAbsolutePath).collect(Collectors.joining(File.pathSeparator));
     }
 
-    public String nameOrCp() {
-        if (cp == null) {
-            return getVmName();
-        } else {
-            if (getVmName() != null && !getVmName().trim().isEmpty()){
-                return getVmName();
-            } else {
-                return getCpString();
-            }
-        }
+    public boolean hasName() {
+        return getVmName() != null && !getVmName().trim().isEmpty();
     }
 
     @Override
