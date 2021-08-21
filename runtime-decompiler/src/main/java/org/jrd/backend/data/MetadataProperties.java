@@ -5,10 +5,12 @@ import org.jrd.backend.core.OutputController;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 public class MetadataProperties {
     private final Properties properties;
 
+    private static final Pattern UNPROPAGATED_VALUE = Pattern.compile("\\$\\{.*}");
     private static final String PROPERTY_FILE_RESOURCE = "/metadata.prop";
     private static final String GROUP_ID_KEY = "groupId";
     private static final String VERSION_KEY = "version";
@@ -20,7 +22,7 @@ public class MetadataProperties {
     }
 
     private MetadataProperties() {
-        properties = new java.util.Properties();
+        properties = new FromFileProperties(UNPROPAGATED_VALUE);
 
         try (InputStream stream = getClass().getResourceAsStream(PROPERTY_FILE_RESOURCE)) {
             properties.load(stream);
@@ -52,5 +54,29 @@ public class MetadataProperties {
     @Override
     public String toString() {
         return String.join(" - ", getGroup(), "JRD", getVersion(), getTimestamp());
+    }
+
+    /**
+     * Properties that also use the default value passed to {@link Properties#getProperty(String, String) getProperty()}
+     * if the property was found, but matched the regex passed at initialization.
+     */
+    private static class FromFileProperties extends Properties {
+        private final Pattern unpropagatedValuePattern;
+
+        public FromFileProperties(Pattern pattern) {
+            super();
+            this.unpropagatedValuePattern = pattern;
+        }
+
+        @Override
+        public String getProperty(String key, String defaultValue) {
+            String value = super.getProperty(key, defaultValue);
+
+            if (unpropagatedValuePattern.matcher(value).matches()) {
+                return defaultValue;
+            }
+
+            return value;
+        }
     }
 }
