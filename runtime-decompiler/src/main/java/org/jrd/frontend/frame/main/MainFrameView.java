@@ -64,6 +64,8 @@ public class MainFrameView {
     private ActionListener pluginConfigurationEditorListener;
     private ActionListener haltAgentListener;
 
+    private static final Dimension BUTTON_SIZE = new Dimension(35, 35);
+
     public JFrame getMainFrame() {
         return mainFrame;
     }
@@ -131,14 +133,14 @@ public class MainFrameView {
         remoteConnectionButton.addActionListener(actionEvent -> {
             newConnectionDialogListener.actionPerformed(actionEvent);
         });
-        remoteConnectionButton.setMargin(new Insets(5, 9, 5, 9));
+        remoteConnectionButton.setPreferredSize(BUTTON_SIZE);
 
         remoteConnectionRemoveButton = new JButton("-");
         remoteConnectionRemoveButton.addActionListener(actionEvent -> {
             ActionEvent event = new ActionEvent(remoteVmList, 0, "remote VM");
             removeVmDialogListener.actionPerformed(event);
         });
-        remoteConnectionRemoveButton.setMargin(new Insets(5, 9, 5, 9));
+        remoteConnectionRemoveButton.setPreferredSize(BUTTON_SIZE);
 
         remoteVmButtonPanel = new JPanel();
         remoteVmButtonPanel.add(remoteConnectionRemoveButton);
@@ -193,14 +195,14 @@ public class MainFrameView {
 
         localFsButton = new JButton("+");
         localFsButton.addActionListener(actionEvent -> newFsVmDialogListener.actionPerformed(actionEvent));
-        localFsButton.setMargin(new Insets(5, 9, 5, 9));
+        localFsButton.setPreferredSize(BUTTON_SIZE);
 
         localFsRemoveButton = new JButton("-");
         localFsRemoveButton.addActionListener(actionEvent -> {
             ActionEvent event = new ActionEvent(localFsVmList, 0, "FS VM");
             removeVmDialogListener.actionPerformed(event);
         });
-        localFsRemoveButton.setMargin(new Insets(5, 9, 5, 9));
+        localFsRemoveButton.setPreferredSize(BUTTON_SIZE);
 
         localFsButtonPanel = new JPanel();
         localFsButtonPanel.add(localFsRemoveButton);
