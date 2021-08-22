@@ -402,10 +402,11 @@ public class BytecodeDecompilerView {
     private void searchCode() {
         SearchContext context = new SearchContext();
         String match = bytecodeSearchField.getText();
+
         context.setSearchFor(match);
         context.setWholeWord(false);
         SearchEngine.markAll(bytecodeSyntaxTextArea, context);
-        int line = SearchEngine.getNextMatchPos(match, bytecodeSyntaxTextArea.getText(), true, true, false);
+        int line = SearchEngine.find(bytecodeSyntaxTextArea, context).getMatchRange().getStartOffset();
         if (line >= 0) {
             bytecodeSyntaxTextArea.setCaretPosition(line);
         }
