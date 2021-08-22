@@ -109,13 +109,24 @@ public class VmManager{
     }
 
     public VmInfo findVmFromPID(String param) {
+        VmInfo result = findVmFromPIDNoException(param);
+
+        if (result == null) {
+            throw new RuntimeException("VM with pid of " + param + " not found");
+        }
+
+        return result;
+    }
+
+    public VmInfo findVmFromPIDNoException(String param) {
         int pid = Integer.parseInt(param);
         for (VmInfo vmInfo : vmInfoSet) {
             if (vmInfo.getVmPid() == pid) {
                 return vmInfo;
             }
         }
-        throw new RuntimeException("VM with pid of " + pid + " not found");
+
+        return null;
     }
 
     public VmInfo getVmInfoByID(String VmId){
