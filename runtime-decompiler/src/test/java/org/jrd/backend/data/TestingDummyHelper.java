@@ -116,8 +116,8 @@ class TestingDummyHelper {
         return process.isAlive();
     }
 
-    long getPid() {
-        return process.pid();
+    String getPid() {
+        return Long.toString(process.pid());
     }
 
     static class TestingDummyException extends Exception {
