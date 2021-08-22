@@ -51,9 +51,9 @@ public class BytecodeDecompilerView {
 
             private final JTabbedPane buffers;
                 private JPanel sourceBuffer;
-                    private JTextField bytecodeSearchField;
                     private RTextScrollPane bytecodeScrollPane;
                         private RSyntaxTextArea bytecodeSyntaxTextArea;
+                    private JPanel bytecodeSearchControls;
                 private JPanel binaryBuffer;
                     private JPanel hexControls;
                     private HexEditor hex;
@@ -65,6 +65,8 @@ public class BytecodeDecompilerView {
 
     private String[] loadedClasses;
     private String lastDecompiledClass = "";
+
+    private SearchContext searchContext;
 
     private boolean splitPaneFirstResize = true;
 
@@ -106,23 +108,7 @@ public class BytecodeDecompilerView {
             }
         });
 
-        bytecodeSearchField = new JTextField();
-        bytecodeSearchField.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent documentEvent) {
-                searchCode();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent documentEvent) {
-                searchCode();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent documentEvent) {
-                searchCode();
-            }
-        });
+        bytecodeSearchControls = SearchControlsPanel.createBytecodeControls(this);
 
         classesPanel.add(classesSortField, BorderLayout.NORTH);
 
@@ -238,7 +224,7 @@ public class BytecodeDecompilerView {
         buffers = new JTabbedPane();
         sourceBuffer.setName("Source buffer");
         sourceBuffer.add(bytecodeScrollPane);
-        sourceBuffer.add(bytecodeSearchField, BorderLayout.NORTH);
+        sourceBuffer.add(bytecodeSearchControls, BorderLayout.SOUTH);
         binaryBuffer.setName("Binary buffer");
         binaryBuffer.add(hex);
         binaryBuffer.add(hexControls, BorderLayout.NORTH);
@@ -317,6 +303,35 @@ public class BytecodeDecompilerView {
             controls.searchField.getDocument().addDocumentListener(new HexSearchDocumentListener(hexSearchEngine, controls.searchField, hexSearchType));
             controls.previousButton.addActionListener(new HexSearchActionListener(hexSearchEngine, controls.searchField, hexSearchType, HexSearchActionListener.Method.PREV));
             controls.nextButton.addActionListener(new HexSearchActionListener(hexSearchEngine, controls.searchField, hexSearchType, HexSearchActionListener.Method.NEXT));
+
+            return controls;
+        }
+
+        public static SearchControlsPanel createBytecodeControls(BytecodeDecompilerView parent) {
+            SearchControlsPanel controls = new SearchControlsPanel(null);
+
+            controls.searchField.getDocument().addDocumentListener(new DocumentListener() {
+                @Override
+                public void insertUpdate(DocumentEvent documentEvent) {
+                    invokeSearch();
+                }
+
+                @Override
+                public void removeUpdate(DocumentEvent documentEvent) {
+                    invokeSearch();
+                }
+
+                @Override
+                public void changedUpdate(DocumentEvent documentEvent) {
+                    invokeSearch();
+                }
+
+                private void invokeSearch() {
+                    SwingUtilities.invokeLater(() -> parent.initialSearchBytecode(controls.searchField.getText()));
+                }
+            });
+            controls.previousButton.addActionListener(e -> parent.searchBytecode(false));
+            controls.nextButton.addActionListener(e -> parent.searchBytecode(true));
 
             return controls;
         }
@@ -431,23 +446,25 @@ public class BytecodeDecompilerView {
         return (DecompilerWrapperInformation) pluginComboBox.getSelectedItem();
     }
 
-    /**
-     * Search string in decompiled code
-     */
-    private void searchCode() {
-        SearchContext context = new SearchContext();
-        String match = bytecodeSearchField.getText();
+    private void initialSearchBytecode(String query) {
+        searchContext = new SearchContext();
 
-        context.setSearchFor(match);
-        context.setWholeWord(false);
-        SearchEngine.markAll(bytecodeSyntaxTextArea, context);
-        if (!match.isEmpty()) {
-            int line = SearchEngine.find(bytecodeSyntaxTextArea, context).getMatchRange().getStartOffset();
+        searchContext.setSearchFor(query);
+        searchContext.setWholeWord(false);
+        searchContext.setSearchWrap(true);
 
-            if (line >= 0) {
-                bytecodeSyntaxTextArea.setCaretPosition(line);
-            }
-        }
+        deselectBytecodeSyntaxArea(); // avoid jumping to next location while typing one char at a time
+        searchBytecode(true);
+    }
+
+    private void searchBytecode(boolean forward) {
+        searchContext.setSearchForward(forward);
+        SearchEngine.find(bytecodeSyntaxTextArea, searchContext);
+    }
+
+    private void deselectBytecodeSyntaxArea() {
+        int newDot = bytecodeSyntaxTextArea.getSelectionStart();
+        bytecodeSyntaxTextArea.select(newDot, newDot);
     }
 
     private void classWorker(String name) {
