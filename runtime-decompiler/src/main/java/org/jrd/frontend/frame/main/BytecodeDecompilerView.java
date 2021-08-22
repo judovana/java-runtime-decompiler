@@ -38,30 +38,33 @@ import java.util.regex.Pattern;
  */
 public class BytecodeDecompilerView {
 
-    private JPanel BytecodeDecompilerPanel;
+    private JPanel bytecodeDecompilerPanel;
+        private JPanel topButtonPanel;
+            private JComboBox<DecompilerWrapperInformation> pluginComboBox;
+        private JSplitPane splitPane;
+            private JPanel classes;
+                private JTextField classesSortField;
+                    private final Color classesSortFieldColor;
+                private JPanel classesPanel;
+                    private JScrollPane classesScrollPane;
+                        private JList<String> filteredClassesJList;
 
-    private final JTabbedPane srcBin;
+            private final JTabbedPane buffers;
+                private JPanel sourceBuffer;
+                    private JTextField bytecodeSearchField;
+                    private RTextScrollPane bytecodeScrollPane;
+                        private RSyntaxTextArea bytecodeSyntaxTextArea;
+                private JPanel binaryBuffer;
+                    private JPanel hexControls;
+                    private HexEditor hex;
+                    private JPanel hexSearchControls;
 
-    private JSplitPane splitPane;
-    private JPanel leftMainPanel;
-    private JTextField classesSortField;
-    private final Color classesSortFieldColor;
-    private JTextField searchCodeField;
-    private JComboBox topComboBox;
-    private JPanel classesPanel;
-    private JPanel rightMainPanel;
-    private JPanel rightBin;
-    private JScrollPane leftScrollPanel;
-    private JList<String> filteredClassesJList;
-    private RTextScrollPane bytecodeScrollPane;
-    private RSyntaxTextArea bytecodeSyntaxTextArea;
-    private HexEditor hex;
-    private JPanel hexControls;
-    private String lastDecompiledClass = "";
     private ActionListener bytesActionListener;
     private ActionListener classesActionListener;
     private RewriteActionListener rewriteActionListener;
-    private String[] classes;
+
+    private String[] loadedClasses;
+    private String lastDecompiledClass = "";
 
     private boolean splitPaneFirstResize = true;
 
@@ -72,13 +75,13 @@ public class BytecodeDecompilerView {
      */
 
     public JPanel getBytecodeDecompilerPanel() {
-        return BytecodeDecompilerPanel;
+        return bytecodeDecompilerPanel;
     }
 
 
     public BytecodeDecompilerView() {
 
-        BytecodeDecompilerPanel = new JPanel(new BorderLayout());
+        bytecodeDecompilerPanel = new JPanel(new BorderLayout());
 
         classesPanel = new JPanel(new BorderLayout());
 
@@ -103,8 +106,8 @@ public class BytecodeDecompilerView {
             }
         });
 
-        searchCodeField = new JTextField();
-        searchCodeField.getDocument().addDocumentListener(new DocumentListener() {
+        bytecodeSearchField = new JTextField();
+        bytecodeSearchField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent documentEvent) {
                 searchCode();
@@ -188,8 +191,8 @@ public class BytecodeDecompilerView {
             }
         });
 
-        topComboBox = new JComboBox<DecompilerWrapperInformation>();
-        topComboBox.addActionListener(new ActionListener() {
+        pluginComboBox = new JComboBox<DecompilerWrapperInformation>();
+        pluginComboBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 if (filteredClassesJList.getSelectedIndex() != -1) {
@@ -207,38 +210,38 @@ public class BytecodeDecompilerView {
         hex = new HexEditor();
         hexControls = new JPanel();
 
-        leftMainPanel = new JPanel();
-        leftMainPanel.setLayout(new BorderLayout());
-        leftMainPanel.setBorder(new EtchedBorder());
+        classes = new JPanel();
+        classes.setLayout(new BorderLayout());
+        classes.setBorder(new EtchedBorder());
 
-        rightMainPanel = new JPanel();
-        rightMainPanel.setLayout(new BorderLayout());
-        rightMainPanel.setBorder(new EtchedBorder());
+        sourceBuffer = new JPanel();
+        sourceBuffer.setLayout(new BorderLayout());
+        sourceBuffer.setBorder(new EtchedBorder());
 
-        rightBin = new JPanel();
-        rightBin.setLayout(new BorderLayout());
-        rightBin.setBorder(new EtchedBorder());
+        binaryBuffer = new JPanel();
+        binaryBuffer.setLayout(new BorderLayout());
+        binaryBuffer.setBorder(new EtchedBorder());
 
-        JPanel topButtonPanel = new JPanel();
+        topButtonPanel = new JPanel();
 
         topButtonPanel.setLayout(new BorderLayout());
         topButtonPanel.add(topButton, BorderLayout.WEST);
         topButtonPanel.add(overwriteButton);
-        topButtonPanel.add(topComboBox, BorderLayout.EAST);
+        topButtonPanel.add(pluginComboBox, BorderLayout.EAST);
 
-        leftScrollPanel = new JScrollPane(filteredClassesJList);
-        leftScrollPanel.getVerticalScrollBar().setUnitIncrement(20);
+        classesScrollPane = new JScrollPane(filteredClassesJList);
+        classesScrollPane.getVerticalScrollBar().setUnitIncrement(20);
 
-        classesPanel.add(leftScrollPanel);
-        leftMainPanel.add(classesPanel);
+        classesPanel.add(classesScrollPane);
+        classes.add(classesPanel);
 
-        srcBin = new JTabbedPane();
-        rightMainPanel.setName("Source buffer");
-        rightMainPanel.add(bytecodeScrollPane);
-        rightMainPanel.add(searchCodeField, BorderLayout.NORTH);
-        rightBin.setName("Binary buffer");
-        rightBin.add(hex);
-        rightBin.add(hexControls, BorderLayout.NORTH);
+        buffers = new JTabbedPane();
+        sourceBuffer.setName("Source buffer");
+        sourceBuffer.add(bytecodeScrollPane);
+        sourceBuffer.add(bytecodeSearchField, BorderLayout.NORTH);
+        binaryBuffer.setName("Binary buffer");
+        binaryBuffer.add(hex);
+        binaryBuffer.add(hexControls, BorderLayout.NORTH);
         hexControls.setLayout(new GridLayout(1, 2));
         JButton undo = new JButton("Undo");
         hexControls.add(undo);
@@ -247,7 +250,7 @@ public class BytecodeDecompilerView {
         undo.addActionListener(actionEvent -> hex.undo());
         redo.addActionListener(actionEvent -> hex.redo());
 
-        JPanel hexSearchControls = new JPanel(new GridLayout(1, 4));
+        hexSearchControls = new JPanel(new GridLayout(1, 4));
         HexSearch hexSearchEngine = new HexSearch(hex);
         JComboBox<HexSearch.HexSearchOptions> hexSearchType = new JComboBox<HexSearch.HexSearchOptions>(HexSearch.HexSearchOptions.values());
         hexSearchControls.add(hexSearchType);
@@ -260,12 +263,12 @@ public class BytecodeDecompilerView {
         JButton hexNext = new JButton("Next");
         hexNext.addActionListener(new HexSearchActionListener(hexSearchEngine, hexSearch, hexSearchType, HexSearchActionListener.Method.NEXT));
         hexSearchControls.add(hexNext);
-        rightBin.add(hexSearchControls, BorderLayout.SOUTH);
+        binaryBuffer.add(hexSearchControls, BorderLayout.SOUTH);
 
-        srcBin.add(rightMainPanel);
-        srcBin.add(rightBin);
+        buffers.add(sourceBuffer);
+        buffers.add(binaryBuffer);
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-                leftMainPanel, srcBin);
+                classes, buffers);
 
         splitPane.addComponentListener(new ComponentAdapter() {
             @Override
@@ -277,10 +280,10 @@ public class BytecodeDecompilerView {
             }
         });
 
-        BytecodeDecompilerPanel.add(topButtonPanel, BorderLayout.NORTH);
-        BytecodeDecompilerPanel.add(splitPane, BorderLayout.CENTER);
+        bytecodeDecompilerPanel.add(topButtonPanel, BorderLayout.NORTH);
+        bytecodeDecompilerPanel.add(splitPane, BorderLayout.CENTER);
 
-        BytecodeDecompilerPanel.setVisible(true);
+        bytecodeDecompilerPanel.setVisible(true);
 
     }
 
@@ -298,7 +301,7 @@ public class BytecodeDecompilerView {
             Pattern p = Pattern.compile(filter);
             classesSortField.setForeground(classesSortFieldColor);
             classesSortField.repaint();
-            for (String clazz : classes) {
+            for (String clazz : loadedClasses) {
                 Matcher m = p.matcher(clazz);
                 if (m.matches()) {
                     filtered.add(clazz);
@@ -307,7 +310,7 @@ public class BytecodeDecompilerView {
         }catch(Exception ex){
             classesSortField.setForeground(Color.red);
             classesSortField.repaint();
-            for (String clazz : classes) {
+            for (String clazz : loadedClasses) {
                 if (!clazz.contains(filter)) {
                     filtered.add(clazz);
                 }
@@ -323,7 +326,7 @@ public class BytecodeDecompilerView {
      * @param classesToReload String[] classesToReload.
      */
     public void reloadClassList(String[] classesToReload) {
-        classes = Arrays.copyOf(classesToReload, classesToReload.length);
+        loadedClasses = Arrays.copyOf(classesToReload, classesToReload.length);
         SwingUtilities.invokeLater(() -> updateClassList());
     }
 
@@ -370,7 +373,7 @@ public class BytecodeDecompilerView {
 
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
-            worker.rewriteClass(getSelectedDecompilerWrapperInformation(), BytecodeDecompilerView.this.lastDecompiledClass, BytecodeDecompilerView.this.bytecodeSyntaxTextArea.getText(), BytecodeDecompilerView.this.hex.get(), srcBin.getSelectedIndex());
+            worker.rewriteClass(getSelectedDecompilerWrapperInformation(), BytecodeDecompilerView.this.lastDecompiledClass, BytecodeDecompilerView.this.bytecodeSyntaxTextArea.getText(), BytecodeDecompilerView.this.hex.get(), buffers.getSelectedIndex());
         }
     }
 
@@ -379,16 +382,16 @@ public class BytecodeDecompilerView {
     }
 
     public void refreshComboBox(List<DecompilerWrapperInformation> wrappers) {
-        topComboBox.removeAllItems();
+        pluginComboBox.removeAllItems();
         wrappers.forEach(decompilerWrapperInformation -> {
             if (!decompilerWrapperInformation.isInvalidWrapper()) {
-                topComboBox.addItem(decompilerWrapperInformation);
+                pluginComboBox.addItem(decompilerWrapperInformation);
             }
         });
     }
 
     public DecompilerWrapperInformation getSelectedDecompilerWrapperInformation() {
-        return (DecompilerWrapperInformation) topComboBox.getSelectedItem();
+        return (DecompilerWrapperInformation) pluginComboBox.getSelectedItem();
     }
 
     /**
@@ -396,7 +399,7 @@ public class BytecodeDecompilerView {
      */
     private void searchCode() {
         SearchContext context = new SearchContext();
-        String match = searchCodeField.getText();
+        String match = bytecodeSearchField.getText();
         context.setSearchFor(match);
         context.setWholeWord(false);
         SearchEngine.markAll(bytecodeSyntaxTextArea, context);
