@@ -25,6 +25,8 @@ public class MainFrameView {
             private JTabbedPane tabbedPane;
                 private JPanel localVmPanel;
                     private JPanel localVmLabelPanel;
+                        private JPanel localVmButtonPanel;
+                            private JButton localVmRefreshButton;
                     private JScrollPane localVmScrollPane;
                         private JList<VmInfo> localVmList;
 
@@ -63,6 +65,7 @@ public class MainFrameView {
             private JMenuItem jMenuItemLicense;
 
     private ActionListener vmChangingListener;
+    private ActionListener refreshLocalVmsListener;
     private ActionListener newConnectionDialogListener;
     private ActionListener newFsVmDialogListener;
     private ActionListener removeVmDialogListener;
@@ -126,12 +129,27 @@ public class MainFrameView {
             }
         });
         //localVmList End
+
+        localVmRefreshButton = new JButton("\u21BB");
+        localVmRefreshButton.addActionListener(actionEvent -> {
+            refreshLocalVmsListener.actionPerformed(actionEvent);
+        });
+        // make text fit
+        localVmRefreshButton.setBorder(null);
+        localVmRefreshButton.setMargin(new Insets(0, 0, 0, 0));
+        localVmRefreshButton.setPreferredSize(BUTTON_SIZE);
+
+        localVmButtonPanel = new JPanel();
+        localVmButtonPanel.add(localVmRefreshButton);
+
         localVmScrollPane = new JScrollPane(localVmList,
                 ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         // localVmScrollPane End
         localVmLabelPanel = new JPanel(new BorderLayout());
         localVmLabelPanel.add(new JLabel("Local Processes", SwingConstants.CENTER), BorderLayout.CENTER);
+        localVmLabelPanel.add(localVmButtonPanel, BorderLayout.EAST);
+
         // localVmLabelPanel End
         localVmPanel = new JPanel(new BorderLayout());
         localVmPanel.setName("Local VMs");
@@ -371,6 +389,11 @@ public class MainFrameView {
         if (null != haltAgentListener) {
             haltAgentListener.actionPerformed(event);
         }
+    }
+
+
+    public void setRefreshLocalVmsListener(ActionListener listener) {
+        this.refreshLocalVmsListener = listener;
     }
 
     void setNewConnectionDialogListener(ActionListener listener) {
