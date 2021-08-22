@@ -346,6 +346,8 @@ public class BytecodeDecompilerView {
 
     private void setDecompiledClass(String name, String data, byte[] source) {
         bytecodeSyntaxTextArea.setText(data);
+        bytecodeSyntaxTextArea.setCaretPosition(0);
+
         try {
             hex.open(new ByteArrayInputStream(source));
         } catch (IOException ex) {
