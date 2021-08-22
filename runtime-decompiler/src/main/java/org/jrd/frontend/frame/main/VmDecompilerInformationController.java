@@ -58,6 +58,7 @@ public class VmDecompilerInformationController {
 
         vmManager.subscribeToVMChange(e -> updateVmLists());
 
+        mainFrameView.setRefreshLocalVmsListener(e -> vmManager.updateLocalVMs());
         mainFrameView.setNewConnectionDialogListener(e -> createNewConnectionDialog());
         mainFrameView.setNewFsVmDialogListener(e -> createNewFsVMDialog());
         mainFrameView.setRemoveVmDialogListener(this::removeVmDialog);
