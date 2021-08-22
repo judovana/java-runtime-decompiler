@@ -13,6 +13,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -35,6 +36,11 @@ public class VmInfo implements Serializable {
     private Type type;
     private java.util.List<File> cp;
 
+    private static final Comparator<VmInfo> HOSTNAME_COMPARATOR = Comparator.comparing(info -> info.getVmDecompilerStatus().getHostname(), String::compareTo);
+    private static final Comparator<VmInfo> PORT_COMPARATOR = Comparator.comparingInt(info -> info.getVmDecompilerStatus().getListenPort());
+    public static final Comparator<VmInfo> LOCAL_VM_COMPARATOR = Comparator.comparingInt(VmInfo::getVmPid);
+    public static final Comparator<VmInfo> REMOTE_VM_COMPARATOR = HOSTNAME_COMPARATOR.thenComparing(PORT_COMPARATOR);
+    public static final Comparator<VmInfo> FS_VM_COMPARATOR = LOCAL_VM_COMPARATOR.reversed();
 
     /**
      * Stores information about Available Virtual Machine.
