@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Comparator;
 
 /**
  * This class provides Action listeners and request handling for
@@ -138,19 +137,10 @@ public class VmDecompilerInformationController {
         cleanup();
     }
 
-    public static class VmArrayList<T> extends ArrayList<VmInfo> {
-        @Override
-        public boolean add(VmInfo vmInfo) {
-            super.add(vmInfo);
-            this.sort(Comparator.comparingInt(VmInfo::getVmPid));
-            return true;
-        }
-    }
-
     private void updateVmLists() {
-        ArrayList<VmInfo> localVms = new VmArrayList<>();
-        ArrayList<VmInfo> remoteVms = new VmArrayList<>();
-        ArrayList<VmInfo> fsVms = new VmArrayList<>();
+        ArrayList<VmInfo> localVms = new ArrayList<>();
+        ArrayList<VmInfo> remoteVms = new ArrayList<>();
+        ArrayList<VmInfo> fsVms = new ArrayList<>();
 
         vmManager.getVmInfoSet().forEach(info -> {
             if (info.getType() == VmInfo.Type.LOCAL) {
@@ -161,6 +151,11 @@ public class VmDecompilerInformationController {
                 fsVms.add(info);
             }
         });
+
+        localVms.sort(VmInfo.LOCAL_VM_COMPARATOR);
+        remoteVms.sort(VmInfo.REMOTE_VM_COMPARATOR);
+        fsVms.sort(VmInfo.FS_VM_COMPARATOR);
+
         mainFrameView.setLocalVmList(localVms.toArray(new VmInfo[0]));
         mainFrameView.setRemoteVmList(remoteVms.toArray(new VmInfo[0]));
         mainFrameView.setFsVmList(fsVms.toArray(new VmInfo[0]));
