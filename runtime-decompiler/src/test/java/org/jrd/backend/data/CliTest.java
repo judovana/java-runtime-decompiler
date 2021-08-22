@@ -40,10 +40,9 @@ public class CliTest {
 
     private static final String UNKNOWN_FLAG = "--zyxwvutsrqponmlqjihgfedcba";
 
+    @Timeout(5)
     @BeforeEach
-    void setup() {
-        streams.captureStreams(true);
-
+    void setup() throws InterruptedException {
         try {
             dummy = new TestingDummyHelper()
                     .write()
@@ -55,6 +54,12 @@ public class CliTest {
         assertTrue(dummy.isAlive());
 
         model = new Model(); // must be below dummy process execution to be aware of it during VmManager instantiation
+        while (model.getVmManager().findVmFromPIDNoException(String.valueOf(dummy.getPid())) == null) {
+            Thread.sleep(100);
+            model.getVmManager().updateLocalVMs();
+        }
+
+        streams.captureStreams(true);
     }
 
     @AfterEach
@@ -69,8 +74,6 @@ public class CliTest {
 
         assertTrue(dummy.isAlive());
         dummy.terminate();
-        Thread.sleep(200); // termination does not propagate fast enough
-        assertFalse(dummy.isAlive(), "Pid is " + dummy.getPid());
     }
 
     private String prependSlashes(String original, int count) {
