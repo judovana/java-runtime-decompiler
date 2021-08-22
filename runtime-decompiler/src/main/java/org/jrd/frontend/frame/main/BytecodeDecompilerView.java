@@ -406,9 +406,12 @@ public class BytecodeDecompilerView {
         context.setSearchFor(match);
         context.setWholeWord(false);
         SearchEngine.markAll(bytecodeSyntaxTextArea, context);
-        int line = SearchEngine.find(bytecodeSyntaxTextArea, context).getMatchRange().getStartOffset();
-        if (line >= 0) {
-            bytecodeSyntaxTextArea.setCaretPosition(line);
+        if (!match.isEmpty()) {
+            int line = SearchEngine.find(bytecodeSyntaxTextArea, context).getMatchRange().getStartOffset();
+
+            if (line >= 0) {
+                bytecodeSyntaxTextArea.setCaretPosition(line);
+            }
         }
     }
 
