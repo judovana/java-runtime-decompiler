@@ -250,19 +250,8 @@ public class BytecodeDecompilerView {
         undo.addActionListener(actionEvent -> hex.undo());
         redo.addActionListener(actionEvent -> hex.redo());
 
-        hexSearchControls = new JPanel(new GridLayout(1, 4));
-        HexSearch hexSearchEngine = new HexSearch(hex);
-        JComboBox<HexSearch.HexSearchOptions> hexSearchType = new JComboBox<HexSearch.HexSearchOptions>(HexSearch.HexSearchOptions.values());
-        hexSearchControls.add(hexSearchType);
-        JTextField hexSearch = new JTextField("");
-        hexSearch.getDocument().addDocumentListener(new HexSearchDocumentListener(hexSearchEngine, hexSearch, hexSearchType));
-        hexSearchControls.add(hexSearch);
-        JButton hexPrev = new JButton("Previous");
-        hexPrev.addActionListener(new HexSearchActionListener(hexSearchEngine, hexSearch, hexSearchType, HexSearchActionListener.Method.PREV));
-        hexSearchControls.add(hexPrev);
-        JButton hexNext = new JButton("Next");
-        hexNext.addActionListener(new HexSearchActionListener(hexSearchEngine, hexSearch, hexSearchType, HexSearchActionListener.Method.NEXT));
-        hexSearchControls.add(hexNext);
+        hexSearchControls = SearchControlsPanel.createHexControls(hex);
+
         binaryBuffer.add(hexSearchControls, BorderLayout.SOUTH);
 
         buffers.add(sourceBuffer);
@@ -285,6 +274,52 @@ public class BytecodeDecompilerView {
 
         bytecodeDecompilerPanel.setVisible(true);
 
+    }
+
+    private static class SearchControlsPanel extends JPanel {
+        private final JTextField searchField = new JTextField("");
+        private final JButton previousButton = new JButton("Previous");
+        private final JButton nextButton = new JButton("Next");
+
+        private SearchControlsPanel(JComboBox<HexSearch.HexSearchOptions> comboBox) {
+            super(new GridBagLayout());
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.fill = GridBagConstraints.BOTH;
+            gbc.insets = new Insets(3,3,3,3);
+
+            if (comboBox == null) {
+                gbc.gridwidth = 2;
+            } else {
+                gbc.gridx = 1;
+                gbc.weightx = 0.1;
+                this.add(comboBox, gbc);
+            }
+
+            gbc.gridx = 0;
+            gbc.weightx = 1;
+            this.add(searchField, gbc);
+
+            gbc.gridwidth = 1;
+            gbc.gridx = 2;
+            gbc.weightx = 0;
+            this.add(previousButton, gbc);
+
+            gbc.gridx = 3;
+            this.add(nextButton, gbc);
+        }
+
+        public static SearchControlsPanel createHexControls(HexEditor hex) {
+            HexSearch hexSearchEngine = new HexSearch(hex);
+            JComboBox<HexSearch.HexSearchOptions> hexSearchType = new JComboBox<>(HexSearch.HexSearchOptions.values());
+
+            SearchControlsPanel controls = new SearchControlsPanel(hexSearchType);
+
+            controls.searchField.getDocument().addDocumentListener(new HexSearchDocumentListener(hexSearchEngine, controls.searchField, hexSearchType));
+            controls.previousButton.addActionListener(new HexSearchActionListener(hexSearchEngine, controls.searchField, hexSearchType, HexSearchActionListener.Method.PREV));
+            controls.nextButton.addActionListener(new HexSearchActionListener(hexSearchEngine, controls.searchField, hexSearchType, HexSearchActionListener.Method.NEXT));
+
+            return controls;
+        }
     }
 
     public static String styleTooltip() {
