@@ -54,7 +54,7 @@ public class CliTest {
         assertTrue(dummy.isAlive());
 
         model = new Model(); // must be below dummy process execution to be aware of it during VmManager instantiation
-        while (model.getVmManager().findVmFromPIDNoException(String.valueOf(dummy.getPid())) == null) {
+        while (model.getVmManager().findVmFromPIDNoException(dummy.getPid()) == null) {
             Thread.sleep(100);
             model.getVmManager().updateLocalVMs();
         }
@@ -68,7 +68,7 @@ public class CliTest {
 
         assertTrue(dummy.isAlive());
         // halt agent, otherwise an open socket prevents termination of dummy process
-        AgentRequestAction request = createRequest(cli.getVmInfo(String.valueOf(dummy.getPid())), AgentRequestAction.RequestAction.HALT, "");
+        AgentRequestAction request = createRequest(cli.getVmInfo(dummy.getPid()), AgentRequestAction.RequestAction.HALT, "");
         String response = submitRequest(model.getVmManager(), request);
         assertEquals("ok", response);
 
@@ -143,7 +143,7 @@ public class CliTest {
     private String processFormatDefault(String original) {
         return processFormat(
                 original,
-                String.valueOf(dummy.getPid()),
+                dummy.getPid(),
                 new String[]{TestingDummyHelper.CLASS_REGEX},
                 TestingDummyHelper.CLASS_NAME,
                 TestingDummyHelper.DOT_CLASS_PATH,
@@ -241,7 +241,7 @@ public class CliTest {
     @Test
     @Timeout(10)
     void testListJvms() throws Exception {
-        while(!queryJvmList().contains(String.valueOf(dummy.getPid()))) {
+        while(!queryJvmList().contains(dummy.getPid())) {
             Thread.sleep(5000); // vmManager only refreshes vmList every 5 seconds
         }
     }
@@ -249,7 +249,7 @@ public class CliTest {
     @Test
     void testListClasses() throws Exception {
         // no regex
-        args = new String[]{VERBOSE, LIST_CLASSES, String.valueOf(dummy.getPid())};
+        args = new String[]{VERBOSE, LIST_CLASSES, dummy.getPid()};
         cli = new Cli(args, model);
 
         cli.consumeCli();
@@ -261,7 +261,7 @@ public class CliTest {
         }
 
         // all regex
-        args = new String[]{LIST_CLASSES, String.valueOf(dummy.getPid()), ".*"};
+        args = new String[]{LIST_CLASSES, dummy.getPid(), ".*"};
         cli = new Cli(args, model);
 
         cli.consumeCli();
@@ -279,7 +279,7 @@ public class CliTest {
         ); // exact class list differs between dummy process executions
 
         // specific regex
-        args = new String[]{LIST_CLASSES, String.valueOf(dummy.getPid()), TestingDummyHelper.CLASS_NAME};
+        args = new String[]{LIST_CLASSES, dummy.getPid(), TestingDummyHelper.CLASS_NAME};
         cli = new Cli(args, model);
 
         cli.consumeCli();
@@ -308,7 +308,7 @@ public class CliTest {
 
     @Test
     void testBytes() throws Exception {
-        args = new String[]{BYTES, String.valueOf(dummy.getPid()), TestingDummyHelper.CLASS_REGEX};
+        args = new String[]{BYTES, dummy.getPid(), TestingDummyHelper.CLASS_REGEX};
         cli = new Cli(args, model);
 
         cli.consumeCli();
@@ -321,7 +321,7 @@ public class CliTest {
 
     @Test
     void testBase64Bytes() throws Exception {
-        args = new String[]{BASE64, String.valueOf(dummy.getPid()), TestingDummyHelper.CLASS_REGEX};
+        args = new String[]{BASE64, dummy.getPid(), TestingDummyHelper.CLASS_REGEX};
         cli = new Cli(args, model);
 
         cli.consumeCli();
@@ -335,13 +335,13 @@ public class CliTest {
 
     @Test
     void testBytesAndBase64BytesEqual() throws Exception {
-        args = new String[]{BYTES, String.valueOf(dummy.getPid()), TestingDummyHelper.CLASS_REGEX};
+        args = new String[]{BYTES, dummy.getPid(), TestingDummyHelper.CLASS_REGEX};
         cli = new Cli(args, model);
 
         cli.consumeCli();
         byte[] bytes = streams.getOutBytes();
 
-        args = new String[]{BASE64, String.valueOf(dummy.getPid()), TestingDummyHelper.CLASS_REGEX};
+        args = new String[]{BASE64, dummy.getPid(), TestingDummyHelper.CLASS_REGEX};
         cli = new Cli(args, model);
 
         cli.consumeCli();
@@ -354,7 +354,7 @@ public class CliTest {
     @ParameterizedTest
     @ValueSource(strings = {"", "-v"})
     void testDecompileJavap(String option) throws Exception {
-        args = new String[]{DECOMPILE, String.valueOf(dummy.getPid()), "javap" + option , TestingDummyHelper.CLASS_REGEX};
+        args = new String[]{DECOMPILE, dummy.getPid(), "javap" + option , TestingDummyHelper.CLASS_REGEX};
         cli = new Cli(args, model);
 
         cli.consumeCli();
@@ -371,7 +371,7 @@ public class CliTest {
         field.setAccessible(true);
 
         // nothing gets cleaned
-        args = new String[]{LIST_CLASSES, String.valueOf(dummy.getPid()), "--"}; // weird regex, but should not get cleaned
+        args = new String[]{LIST_CLASSES, dummy.getPid(), "--"}; // weird regex, but should not get cleaned
         cli = new Cli(args, model);
         cli.consumeCli();
 
@@ -379,7 +379,7 @@ public class CliTest {
         assertArrayEquals(args, filteredArgs);
 
         // only operation gets cleaned, but is still valid
-        args = new String[]{twoSlashes(LIST_CLASSES), String.valueOf(dummy.getPid()), "--"};
+        args = new String[]{twoSlashes(LIST_CLASSES), dummy.getPid(), "--"};
         cli = new Cli(args, model);
         cli.consumeCli();
 
