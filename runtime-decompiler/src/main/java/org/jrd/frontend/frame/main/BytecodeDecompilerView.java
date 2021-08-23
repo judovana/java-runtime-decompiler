@@ -9,6 +9,7 @@ import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
+import org.fife.ui.rtextarea.SearchResult;
 import org.jrd.backend.core.OutputController;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 
@@ -53,7 +54,7 @@ public class BytecodeDecompilerView {
                 private JPanel sourceBuffer;
                     private RTextScrollPane bytecodeScrollPane;
                         private RSyntaxTextArea bytecodeSyntaxTextArea;
-                    private JPanel bytecodeSearchControls;
+                    private SearchControlsPanel bytecodeSearchControls;
                 private JPanel binaryBuffer;
                     private JPanel hexControls;
                     private HexEditor hex;
@@ -266,9 +267,20 @@ public class BytecodeDecompilerView {
         private final JTextField searchField = new JTextField("");
         private final JButton previousButton = new JButton("Previous");
         private final JButton nextButton = new JButton("Next");
+        private final Color originalSearchFieldColor = searchField.getForeground();
+
+        private final ActionListener wasNotFoundActionListener;
 
         private SearchControlsPanel(JComboBox<HexSearch.HexSearchOptions> comboBox) {
             super(new GridBagLayout());
+
+            Timer wasNotFoundTimer = new Timer(250, (ActionEvent e) -> searchField.setForeground(originalSearchFieldColor));
+            wasNotFoundTimer.setRepeats(false);
+            wasNotFoundActionListener = e -> {
+                searchField.setForeground(Color.RED);
+                wasNotFoundTimer.start();
+            };
+
             GridBagConstraints gbc = new GridBagConstraints();
             gbc.fill = GridBagConstraints.BOTH;
             gbc.insets = new Insets(3,3,3,3);
@@ -300,7 +312,7 @@ public class BytecodeDecompilerView {
 
             SearchControlsPanel controls = new SearchControlsPanel(hexSearchType);
 
-            controls.searchField.getDocument().addDocumentListener(new HexSearchDocumentListener(hexSearchEngine, controls.searchField, hexSearchType));
+            controls.searchField.getDocument().addDocumentListener(new HexSearchDocumentListener(hexSearchEngine, controls.searchField, hexSearchType, controls.wasNotFoundActionListener));
             controls.previousButton.addActionListener(new HexSearchActionListener(hexSearchEngine, controls.searchField, hexSearchType, HexSearchActionListener.Method.PREV));
             controls.nextButton.addActionListener(new HexSearchActionListener(hexSearchEngine, controls.searchField, hexSearchType, HexSearchActionListener.Method.NEXT));
 
@@ -334,6 +346,10 @@ public class BytecodeDecompilerView {
             controls.nextButton.addActionListener(e -> parent.searchBytecode(true));
 
             return controls;
+        }
+
+        public void fireWasNotFoundAction() {
+            wasNotFoundActionListener.actionPerformed(null);
         }
     }
 
@@ -459,7 +475,11 @@ public class BytecodeDecompilerView {
 
     private void searchBytecode(boolean forward) {
         searchContext.setSearchForward(forward);
-        SearchEngine.find(bytecodeSyntaxTextArea, searchContext);
+        SearchResult result = SearchEngine.find(bytecodeSyntaxTextArea, searchContext);
+
+        if (!result.wasFound()) {
+            bytecodeSearchControls.fireWasNotFoundAction();
+        }
     }
 
     private void deselectBytecodeSyntaxArea() {
