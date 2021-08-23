@@ -348,9 +348,11 @@ public class BytecodeDecompilerView {
 
             SearchControlsPanel controls = new SearchControlsPanel(hexSearchType);
 
-            controls.searchField.getDocument().addDocumentListener(new HexSearchDocumentListener(hexSearchEngine, controls.searchField, hexSearchType, controls.wasNotFoundActionListener));
+            DocumentListener hexSearchDocumentListener = new HexSearchDocumentListener(hexSearchEngine, controls.searchField, hexSearchType, controls.wasNotFoundActionListener);
+            controls.searchField.getDocument().addDocumentListener(hexSearchDocumentListener);
             controls.previousButton.addActionListener(new HexSearchActionListener(hexSearchEngine, controls.searchField, hexSearchType, HexSearchActionListener.Method.PREV));
             controls.nextButton.addActionListener(new HexSearchActionListener(hexSearchEngine, controls.searchField, hexSearchType, HexSearchActionListener.Method.NEXT));
+            hexSearchType.addActionListener(event -> hexSearchDocumentListener.changedUpdate(null));
 
             return controls;
         }
