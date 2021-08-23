@@ -17,6 +17,7 @@ import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.undo.UndoManager;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -111,6 +112,9 @@ public class BytecodeDecompilerView {
                 updateClassList();
             }
         });
+        UndoRedoKeyAdapter classesSortFieldKeyAdapter = new UndoRedoKeyAdapter();
+        classesSortField.getDocument().addUndoableEditListener(classesSortFieldKeyAdapter.getUndoManager());
+        classesSortField.addKeyListener(classesSortFieldKeyAdapter);
 
         bytecodeSearchControls = SearchControlsPanel.createBytecodeControls(this);
 
@@ -266,6 +270,25 @@ public class BytecodeDecompilerView {
 
     }
 
+    private static class UndoRedoKeyAdapter extends KeyAdapter {
+        UndoManager undoManager = new UndoManager();
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+            if (e.getModifiersEx() == KeyEvent.CTRL_DOWN_MASK) {
+                if (e.getKeyCode() == KeyEvent.VK_Z && undoManager.canUndo()) {
+                    undoManager.undo();
+                } else if (e.getKeyCode() == KeyEvent.VK_Y && undoManager.canRedo()) {
+                    undoManager.redo();
+                }
+            }
+        }
+
+        public UndoManager getUndoManager() {
+            return undoManager;
+        }
+    }
+
     private static class SearchControlsPanel extends JPanel {
         private final JTextField searchField = new JTextField("");
         private final JButton previousButton = new JButton("Previous");
@@ -283,6 +306,10 @@ public class BytecodeDecompilerView {
                 searchField.setForeground(Color.RED);
                 wasNotFoundTimer.start();
             };
+
+            UndoRedoKeyAdapter keyAdapter = new UndoRedoKeyAdapter();
+            searchField.getDocument().addUndoableEditListener(keyAdapter.getUndoManager());
+            searchField.addKeyListener(keyAdapter);
 
             GridBagConstraints gbc = new GridBagConstraints();
             gbc.fill = GridBagConstraints.BOTH;
