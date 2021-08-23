@@ -90,7 +90,10 @@ public class BytecodeDecompilerView {
 
         classesSortField = new JTextField(".*");
         classesSortFieldColor = classesSortField.getForeground();
-        classesSortField.setToolTipText(styleTooltip() + "Use regular expression; eg com.*. <br/>Dont forget to escape $ as \\$ otherwise it is end of line.<br/>Nothing shown? Try.*pkg.* or .*SomeClass.*<br/>Search java pattern for help<br/>For negation use ^(?!.*bar).*$  for or use | note, that or and negation do not like each other. Escape character is \\" +
+        classesSortField.setToolTipText(styleTooltip() + "Search for classes using regular expressions.<br/>" +
+                "Look for specific classes or packages using '.*SomeClass.*' or '.*some.package.*'<br/>" +
+                "Don't forget to escape dollar signs '$' of inner classes to '\\$'.<br/>" +
+                "For negation use the negative lookahead '^(?!.*unwanted).*$' syntax." +
                 "</div><html>");
         classesSortField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -309,6 +312,12 @@ public class BytecodeDecompilerView {
         public static SearchControlsPanel createHexControls(HexEditor hex) {
             HexSearch hexSearchEngine = new HexSearch(hex);
             JComboBox<HexSearch.HexSearchOptions> hexSearchType = new JComboBox<>(HexSearch.HexSearchOptions.values());
+            hexSearchType.setToolTipText(styleTooltip() +
+                    "Set search type:<br/>" +
+                    " - " + HexSearch.HexSearchOptions.HEX + ": Space-delimited hexadecimal bytes, e.g. '6A 72 64'.<br/>" +
+                    " - " + HexSearch.HexSearchOptions.INT + ": Space-delimited integers, e.g. '106 114 100'.<br/>" +
+                    " - " + HexSearch.HexSearchOptions.TEXT + ": Strings, e.g. 'jrd'.</div><html>"
+            );
 
             SearchControlsPanel controls = new SearchControlsPanel(hexSearchType);
 
