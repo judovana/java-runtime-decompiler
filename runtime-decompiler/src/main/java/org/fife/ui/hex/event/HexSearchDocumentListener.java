@@ -6,17 +6,24 @@ import org.jrd.backend.core.OutputController;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import java.awt.event.ActionListener;
 
 public class HexSearchDocumentListener implements DocumentListener {
 
     private final HexSearch hexSearchEngine;
     private final JTextField hexSearch;
     private final JComboBox<HexSearch.HexSearchOptions> hexSearchType;
+    private ActionListener wasNotFoundListener = null;
 
     public HexSearchDocumentListener(HexSearch hexSearchEngine, JTextField hexSearch, JComboBox<HexSearch.HexSearchOptions> hexSearchType) {
         this.hexSearchEngine = hexSearchEngine;
         this.hexSearch = hexSearch;
         this.hexSearchType = hexSearchType;
+    }
+
+    public HexSearchDocumentListener(HexSearch hexSearchEngine, JTextField hexSearch, JComboBox<HexSearch.HexSearchOptions> hexSearchType, ActionListener wasNotFoundListener) {
+        this(hexSearchEngine, hexSearch, hexSearchType);
+        this.wasNotFoundListener = wasNotFoundListener;
     }
 
     @Override
@@ -36,7 +43,11 @@ public class HexSearchDocumentListener implements DocumentListener {
 
     private void find() {
         try {
-            hexSearchEngine.searchHexCode(hexSearch.getText(), (HexSearch.HexSearchOptions) hexSearchType.getSelectedItem());
+            boolean wasFound = hexSearchEngine.searchHexCode(hexSearch.getText(), (HexSearch.HexSearchOptions) hexSearchType.getSelectedItem());
+
+            if (!wasFound && wasNotFoundListener != null) {
+                wasNotFoundListener.actionPerformed(null);
+            }
         } catch (Exception e) {
             OutputController.getLogger().log(e);
         }
