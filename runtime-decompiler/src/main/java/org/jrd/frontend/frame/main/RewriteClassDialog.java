@@ -9,6 +9,7 @@ import io.github.mkoncek.classpathless.api.MessagesListener;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.core.DecompilerRequestReceiver;
 import org.jrd.backend.core.OutputController;
+import org.jrd.backend.data.Config;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
@@ -380,7 +381,10 @@ public class RewriteClassDialog extends JDialog {
         if (haveCompiler) {
             rc = new RuntimeCompilerConnector.ForeignCompilerWrapper(currentDecompiler);
         } else {
-            rc = new io.github.mkoncek.classpathless.impl.CompilerJavac();
+            boolean useHostClasses = Config.getConfig().doUseHostSystemClasses();
+            ClasspathlessCompiler.Arguments arguments = new ClasspathlessCompiler.Arguments().useHostJavaClasses(useHostClasses);
+
+            rc = new io.github.mkoncek.classpathless.impl.CompilerJavac(arguments);
         }
         JDialog compilationRunningDialog = new JDialog((JFrame) null, "Compiling", true);
         JTextArea compilationLog = new JTextArea();

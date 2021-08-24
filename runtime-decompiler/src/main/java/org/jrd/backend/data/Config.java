@@ -33,6 +33,7 @@ public class Config {
 
     private static final String AGENT_PATH_KEY = "AGENT_PATH";
     private static final String SAVED_FS_VMS_KEY = "FS_VMS";
+    private static final String USE_HOST_SYSTEM_CLASSES_KEY = "USE_HOST_SYSTEM_CLASSES";
 
     private static class ConfigHolder {
         private static final Config INSTANCE = new Config();
@@ -96,6 +97,14 @@ public class Config {
 
     public void addSavedFsVm(VmInfo vmInfo) throws IOException {
         getOrCreateSavedFsVms().add(vmInfo.base64Serialize());
+    }
+
+    public void setUseHostSystemClasses(boolean useHostJavaClasses) {
+        configMap.put(USE_HOST_SYSTEM_CLASSES_KEY, useHostJavaClasses);
+    }
+
+    public boolean doUseHostSystemClasses() {
+        return (boolean) configMap.getOrDefault(USE_HOST_SYSTEM_CLASSES_KEY, true);
     }
 
     public boolean isSavedFsVm(VmInfo vmInfo) {
