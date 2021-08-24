@@ -31,9 +31,12 @@ public class ConfigureView extends JDialog {
         public JTextField agentPathTextField;
         public JLabel agentPathLabel;
         public JButton browseButton;
+        public JLabel checkBoxSettings;
+        public JCheckBox useHostSystemClassesCheckBox;
+
         public JFileChooser chooser;
 
-        ConfigurePanel(String initialAgentPath) {
+        ConfigurePanel(String initialAgentPath, boolean initialUseHostSystemClasses) {
 
             this.agentPathTextField = new JTextField();
             this.agentPathTextField.setToolTipText(BytecodeDecompilerView.styleTooltip() + "Select a path to the Decompiler Agent.<br />" +
@@ -43,6 +46,12 @@ public class ConfigureView extends JDialog {
 
             this.agentPathLabel = new JLabel("Decompiler Agent path");
             this.browseButton = new JButton("Browse");
+
+            this.checkBoxSettings = new JLabel("Settings");
+            this.useHostSystemClassesCheckBox = new JCheckBox(
+                    "Use host system classes during compilation phase of class overwrite",
+                    initialUseHostSystemClasses
+            );
 
             chooser = new JFileChooser();
             File dir;
@@ -79,13 +88,27 @@ public class ConfigureView extends JDialog {
             gbc.gridx = 4;
             this.add(Box.createHorizontalStrut(20), gbc);
 
-            this.setPreferredSize(new Dimension(0, 120));
+            gbc.gridx = 0;
+            gbc.gridy = 2;
+            this.add(Box.createVerticalStrut(20), gbc);
+
+            gbc.gridx = 1;
+            gbc.gridy = 3;
+            this.add(checkBoxSettings, gbc);
+
+            gbc.gridx = 0;
+            gbc.gridy = 4;
+            this.add(Box.createHorizontalStrut(20), gbc);
+
+            gbc.gridx = 1;
+            this.add(useHostSystemClassesCheckBox, gbc);
+
+            this.setPreferredSize(new Dimension(0, 150));
         }
     }
 
-
     public ConfigureView(MainFrameView mainFrameView) {
-        configurePanel = new ConfigurePanel(config.getAgentRawPath());
+        configurePanel = new ConfigurePanel(config.getAgentRawPath(), config.doUseHostSystemClasses());
         configurePanel.browseButton.addActionListener(actionEvent -> {
             int dialogResult = configurePanel.chooser.showOpenDialog(configurePanel);
             if (dialogResult == JFileChooser.APPROVE_OPTION) {
@@ -96,6 +119,8 @@ public class ConfigureView extends JDialog {
         okButton = new JButton("OK");
         okButton.addActionListener(actionEvent -> {
             config.setAgentPath(configurePanel.agentPathTextField.getText());
+            config.setUseHostSystemClasses(configurePanel.useHostSystemClassesCheckBox.isSelected());
+
             try {
                 config.saveConfigFile();
             } catch (IOException e) {
