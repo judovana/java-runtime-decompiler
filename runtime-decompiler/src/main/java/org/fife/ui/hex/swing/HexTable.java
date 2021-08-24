@@ -38,6 +38,7 @@ class HexTable extends JTable {
         this.setFont(new Font("Monospaced", 0, 14));
         this.setCellSelectionEnabled(true);
         this.setSelectionMode(1);
+        this.setSurrendersFocusOnKeystroke(true);
         this.setDefaultEditor(Object.class, new CellEditor());
         this.setDefaultRenderer(Object.class, new CellRenderer());
         this.getTableHeader().setReorderingAllowed(false);
@@ -191,7 +192,7 @@ class HexTable extends JTable {
 
     @Override
     protected void processKeyEvent(final KeyEvent e) {
-        if (e.getID() == 401) {
+        if (e.getID() == KeyEvent.KEY_PRESSED) {
             switch (e.getKeyCode()) {
                 case 37: {
                     final boolean extend = e.isShiftDown();
@@ -252,8 +253,25 @@ class HexTable extends JTable {
                     e.consume();
                     break;
                 }
+                case KeyEvent.VK_SPACE:
+                case KeyEvent.VK_ENTER:
+                    final int row = anchorSelectionIndex / 16;
+                    final int col = anchorSelectionIndex % 16;
+
+                    this.editCellAt(row, col);
+
+                    e.consume();
+                    break;
+            }
+        } else if (e.getID() == KeyEvent.KEY_TYPED) {
+            switch (e.getKeyChar()) {
+                case ' ':
+                case '\n':
+                    e.consume(); // disregard KEY_TYPED after KEY_PRESSED
+                    break;
             }
         }
+
         super.processKeyEvent(e);
     }
 
