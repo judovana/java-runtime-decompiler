@@ -327,6 +327,10 @@ public class BytecodeDecompilerView {
             gbc.weightx = 1;
             this.add(searchField, gbc);
 
+            Dimension fixedButtonSize = new Dimension(previousButton.getPreferredSize().width, searchField.getPreferredSize().height);
+            previousButton.setPreferredSize(fixedButtonSize);
+            nextButton.setPreferredSize(fixedButtonSize);
+
             gbc.gridwidth = 1;
             gbc.gridx = 2;
             gbc.weightx = 0;
