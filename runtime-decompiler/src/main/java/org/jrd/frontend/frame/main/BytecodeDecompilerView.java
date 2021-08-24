@@ -297,7 +297,7 @@ public class BytecodeDecompilerView {
 
         private final ActionListener wasNotFoundActionListener;
 
-        private SearchControlsPanel(JComboBox<HexSearch.HexSearchOptions> comboBox) {
+        private SearchControlsPanel(Component optionsComponent) {
             super(new GridBagLayout());
 
             Timer wasNotFoundTimer = new Timer(250, (ActionEvent e) -> searchField.setForeground(originalSearchFieldColor));
@@ -313,25 +313,22 @@ public class BytecodeDecompilerView {
 
             GridBagConstraints gbc = new GridBagConstraints();
             gbc.fill = GridBagConstraints.BOTH;
+            gbc.anchor = GridBagConstraints.WEST;
             gbc.insets = new Insets(3,3,3,3);
-
-            if (comboBox == null) {
-                gbc.gridwidth = 2;
-            } else {
-                gbc.gridx = 1;
-                gbc.weightx = 0.1;
-                this.add(comboBox, gbc);
-            }
 
             gbc.gridx = 0;
             gbc.weightx = 1;
             this.add(searchField, gbc);
 
+            gbc.gridwidth = 1;
+            gbc.gridx = 1;
+            gbc.weightx = 0;
+            this.add(optionsComponent, gbc);
+
             Dimension fixedButtonSize = new Dimension(previousButton.getPreferredSize().width, searchField.getPreferredSize().height);
             previousButton.setPreferredSize(fixedButtonSize);
             nextButton.setPreferredSize(fixedButtonSize);
 
-            gbc.gridwidth = 1;
             gbc.gridx = 2;
             gbc.weightx = 0;
             this.add(previousButton, gbc);
@@ -349,6 +346,7 @@ public class BytecodeDecompilerView {
                     " - " + HexSearch.HexSearchOptions.INT + ": Space-delimited integers, e.g. '106 114 100'.<br/>" +
                     " - " + HexSearch.HexSearchOptions.TEXT + ": Strings, e.g. 'jrd'.</div><html>"
             );
+            hexSearchType.setPrototypeDisplayValue(HexSearch.HexSearchOptions.TEXT);
 
             SearchControlsPanel controls = new SearchControlsPanel(hexSearchType);
 
@@ -362,9 +360,12 @@ public class BytecodeDecompilerView {
         }
 
         public static SearchControlsPanel createBytecodeControls(BytecodeDecompilerView parent) {
-            SearchControlsPanel controls = new SearchControlsPanel(null);
+            final JCheckBox regexCheckBox = new JCheckBox("Regex");
+            regexCheckBox.setIconTextGap(3);
 
-            controls.searchField.getDocument().addDocumentListener(new DocumentListener() {
+            SearchControlsPanel controls = new SearchControlsPanel(regexCheckBox);
+
+            DocumentListener listener = new DocumentListener() {
                 @Override
                 public void insertUpdate(DocumentEvent documentEvent) {
                     invokeSearch();
@@ -381,9 +382,12 @@ public class BytecodeDecompilerView {
                 }
 
                 private void invokeSearch() {
-                    SwingUtilities.invokeLater(() -> parent.initialSearchBytecode(controls.searchField.getText()));
+                    SwingUtilities.invokeLater(() -> parent.initialSearchBytecode(controls.searchField.getText(), regexCheckBox.isSelected()));
                 }
-            });
+            };
+            regexCheckBox.addActionListener(actionEvent -> listener.changedUpdate(null));
+
+            controls.searchField.getDocument().addDocumentListener(listener);
             controls.previousButton.addActionListener(e -> parent.searchBytecode(false));
             controls.nextButton.addActionListener(e -> parent.searchBytecode(true));
 
@@ -504,12 +508,13 @@ public class BytecodeDecompilerView {
         return (DecompilerWrapperInformation) pluginComboBox.getSelectedItem();
     }
 
-    private void initialSearchBytecode(String query) {
+    private void initialSearchBytecode(String query, boolean isRegex) {
         searchContext = new SearchContext();
 
         searchContext.setSearchFor(query);
         searchContext.setWholeWord(false);
         searchContext.setSearchWrap(true);
+        searchContext.setRegularExpression(isRegex);
 
         deselectBytecodeSyntaxArea(); // avoid jumping to next location while typing one char at a time
         searchBytecode(true);
