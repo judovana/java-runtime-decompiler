@@ -76,7 +76,7 @@ public class PluginConfigurationEditorController {
         view.getPluginListPanel().getWrapperJList().setSelectedIndex(0);
     }
 
-    private List<URL> getWrappersFromClasspath(){
+    public static List<URL> getWrappersFromClasspath(){
         String classpath = System.getProperty("java.class.path");
         String[] classpathEntries = classpath.split(File.pathSeparator);
         List<URL> jsonFiles = new ArrayList<>();
@@ -127,9 +127,9 @@ public class PluginConfigurationEditorController {
                 availableDecompilerNames.toArray(),
                 availableDecompilerNames.toArray()[0]);
 
-        if(selected != null){ // null if the user cancels
+        if (selected != null) { // null if the user cancels
             URL selectedURL = availableDecompilers.get(availableDecompilerNames.indexOf(selected.toString()));
-            String selectedFilename = selectedURL.toString().substring(selectedURL.toString().lastIndexOf("/") + 1);
+            String selectedFilename = filenameFromUrl(selectedURL);
 
             if(new File(Directories.getPluginDirectory() + File.separator + selectedFilename).exists()){
                 if(confirmWrapperOverwrite() != JOptionPane.OK_OPTION){
@@ -137,12 +137,7 @@ public class PluginConfigurationEditorController {
                 }
             }
 
-            try {
-                copyWrappers(selectedURL, selectedFilename);
-            } catch (IOException e) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
-                return;
-            }
+            importOnePlugin(selectedURL, selectedFilename);
 
             configPanelHashMap.clear();
             pluginManager.loadConfigs();
@@ -154,6 +149,18 @@ public class PluginConfigurationEditorController {
                     break;
                 }
             }
+        }
+    }
+
+    public static String filenameFromUrl(URL url) {
+        return url.toString().substring(url.toString().lastIndexOf("/") + 1);
+    }
+
+    public static void importOnePlugin(URL selectedURL, String selectedFilename) {
+        try {
+            copyWrappers(selectedURL, selectedFilename);
+        } catch (IOException e) {
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
         }
     }
 
@@ -184,7 +191,7 @@ public class PluginConfigurationEditorController {
         }
     }
 
-    private void copyWrappers(URL wrapperURL, String wrapperFilename) throws IOException {
+    private static void copyWrappers(URL wrapperURL, String wrapperFilename) throws IOException {
         createUserPluginDir();
 
         copyBetweenStreams(wrapperURL, wrapperFilename);
