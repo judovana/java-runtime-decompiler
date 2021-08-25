@@ -51,33 +51,43 @@ public class PluginManager {
     public static final Pattern LAMBDA_FORM = Pattern.compile("java.lang.invoke.LambdaForm\\$.*/.*0x.*");
 
     public PluginManager() {
+        wrappers = new LinkedList<>();
+
+        gson = new GsonBuilder()
+                .registerTypeAdapter(DecompilerWrapperInformation.class, new DecompilerWrapperInformationDeserializer())
+                .create();
+
         loadConfigs();
+
+        // add javap "internal" disassemblers to the bottom
+        wrappers.add(DecompilerWrapperInformation.getJavap());
+        wrappers.add(DecompilerWrapperInformation.getJavapVerbose());
     }
 
     /**
      * Searches plugin configuration locations and calls loadConfig(file) on files.
      */
     public void loadConfigs() {
-        wrappers = new LinkedList<>();
         // keep all three locations - for default system scope, user shared scope and user-only scope
-        String[] configLocations = new String[]{"/etc/java-runtime-decompiler/plugins/"
-                , "/usr/share/java/java-runtime-decompiler/plugins"
-                , Directories.getPluginDirectory()};
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(DecompilerWrapperInformation.class, new DecompilerWrapperInformationDeserializer());
-        gson = gsonBuilder.create();
-        for (String location : configLocations) {
-            File[] files = new File(location).listFiles();
-            if (files == null) {
-                continue;
-            }
-            for (File file : files) {
-                loadConfig(file);
-            }
-        }
+        String[] configLocations = new String[]{
+                "/etc/java-runtime-decompiler/plugins/",
+                "/usr/share/java/java-runtime-decompiler/plugins",
+                Directories.getPluginDirectory()
+        };
 
-        wrappers.add(DecompilerWrapperInformation.getJavap());
-        wrappers.add(DecompilerWrapperInformation.getJavapVerbose());
+        for (String location : configLocations) {
+            loadConfigsFromLocation(location);
+        }
+    }
+
+    private void loadConfigsFromLocation(String location) {
+        File[] files = new File(location).listFiles();
+        if (files == null) {
+            return;
+        }
+        for (File file : files) {
+            loadConfig(file);
+        }
     }
 
     /**
