@@ -8,6 +8,7 @@ import org.jrd.backend.data.Cli;
 import org.jrd.backend.data.Directories;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
+import org.jrd.frontend.frame.plugins.PluginConfigurationEditorController;
 
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
@@ -59,6 +60,19 @@ public class PluginManager {
                 .create();
 
         loadConfigs();
+
+        if (wrappers.isEmpty()) { // no wrappers found anywhere == fresh installation
+            List<URL> classpathWrappers = PluginConfigurationEditorController.getWrappersFromClasspath();
+
+            for (URL pluginUrl : classpathWrappers) {
+                PluginConfigurationEditorController.importOnePlugin(
+                        pluginUrl,
+                        PluginConfigurationEditorController.filenameFromUrl(pluginUrl)
+                );
+            }
+
+            loadConfigsFromLocation(Directories.getPluginDirectory());
+        }
 
         wrappers.add(DecompilerWrapperInformation.getJavap());
         wrappers.add(DecompilerWrapperInformation.getJavapVerbose());

@@ -174,12 +174,16 @@
             <version>5.5.0</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <profiles>
         <profile>
             <id>downloadPlugins</id>
+
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+
             <dependencies>
                 <dependency>
                     <groupId>org.bitbucket.mstrobel</groupId>
@@ -206,6 +210,7 @@
                     <groupId>org.benf</groupId>
                     <artifactId>cfr</artifactId>
                     <version>0.151</version>
+                    <scope>provided</scope>
                 </dependency>
             </dependencies>
         </profile>
