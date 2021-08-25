@@ -82,12 +82,17 @@ public class PluginConfigurationEditorController {
         List<URL> jsonFiles = new ArrayList<>();
 
         for(String entry : classpathEntries) {
+            File entryFile = new File(entry);
+            if (!entryFile.exists()) {
+                continue;
+            }
+
             try {
                 Listable listable;
                 if(entry.endsWith(".jar")){
-                    listable = new Zip(new File(entry));
+                    listable = new Zip(entryFile);
                 } else {
-                    listable = new Directory(new File(entry));
+                    listable = new Directory(entryFile);
                 }
                 jsonFiles.addAll(listable.listChildren());
 
