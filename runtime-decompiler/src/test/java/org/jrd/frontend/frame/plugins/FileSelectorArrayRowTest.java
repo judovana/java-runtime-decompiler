@@ -10,12 +10,10 @@ import org.junit.jupiter.api.condition.OS;
 import java.io.File;
 import java.nio.file.Paths;
 
-import static org.jrd.backend.decompiling.PluginManager.createUserPluginDir;
-
 class FileSelectorArrayRowTest {
     @BeforeAll
     static void setup(){
-        createUserPluginDir();
+        Directories.createPluginDirectory();
     }
 
     @Test

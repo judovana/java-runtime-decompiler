@@ -8,7 +8,6 @@ import org.jrd.backend.data.Cli;
 import org.jrd.backend.data.Directories;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
-import org.jrd.frontend.frame.plugins.PluginConfigurationEditorController;
 
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
@@ -62,12 +61,12 @@ public class PluginManager {
         loadConfigs();
 
         if (wrappers.isEmpty()) { // no wrappers found anywhere == fresh installation
-            List<URL> classpathWrappers = PluginConfigurationEditorController.getWrappersFromClasspath();
+            List<URL> classpathWrappers = ImportUtils.getWrappersFromClasspath();
 
             for (URL pluginUrl : classpathWrappers) {
-                PluginConfigurationEditorController.importOnePlugin(
+                ImportUtils.importOnePlugin(
                         pluginUrl,
-                        PluginConfigurationEditorController.filenameFromUrl(pluginUrl)
+                        ImportUtils.filenameFromUrl(pluginUrl)
                 );
             }
 
@@ -283,7 +282,7 @@ public class PluginManager {
             }
 
             try {
-                Files.delete(Path.of(flipWrapperExtension(wrapperInformation.getFileLocation())));
+                Files.delete(Path.of(ImportUtils.flipWrapperExtension(wrapperInformation.getFileLocation())));
             } catch (IOException e) {
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
             }
@@ -337,7 +336,7 @@ public class PluginManager {
         DecompilerWrapperInformation newWrapper = new DecompilerWrapperInformation();
         newWrapper.setName("unnamed");
         setLocationForNewWrapper(newWrapper);
-        createUserPluginDir();
+        Directories.createPluginDirectory();
         File plugin_json_file = new File(newWrapper.getFileLocation());
         try {
             plugin_json_file.createNewFile();
@@ -358,7 +357,7 @@ public class PluginManager {
         final Gson gson = gsonBuilder.create();
         final String json = gson.toJson(wrapper);
         if (wrapper.getScope().equals("local")) {
-            createUserPluginDir();
+            Directories.createPluginDirectory();
         }
         try (PrintWriter out = new PrintWriter(wrapper.getFileLocation(), StandardCharsets.UTF_8)) {
             out.println(json);
@@ -370,13 +369,6 @@ public class PluginManager {
                 Comparator.comparing(DecompilerWrapperInformation::getScope).reversed() // reversed so that javap is always the bottom
                         .thenComparing(DecompilerWrapperInformation::getName)
         );
-    }
-
-    public static void createUserPluginDir() {
-        File pluginDir = new File(Directories.getPluginDirectory());
-        if (!pluginDir.exists()) {
-            pluginDir.mkdirs();
-        }
     }
 
     /**
@@ -400,14 +392,4 @@ public class PluginManager {
         }
     }
 
-    public static String flipWrapperExtension(String filePath) {
-        if (filePath.endsWith(".json")) {
-            return filePath.replace(".json", ".java");
-        } else if (filePath.endsWith(".java")) {
-            return filePath.replace(".java", ".json");
-        } else {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Incorrect plugin wrapper path: " + filePath));
-            return filePath;
-        }
-    }
 }
