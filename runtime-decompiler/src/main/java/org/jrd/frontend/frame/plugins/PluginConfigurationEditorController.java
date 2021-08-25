@@ -3,10 +3,8 @@ package org.jrd.frontend.frame.plugins;
 import org.jrd.backend.core.OutputController;
 import org.jrd.backend.data.Directories;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
+import org.jrd.backend.decompiling.ImportUtils;
 import org.jrd.backend.decompiling.PluginManager;
-import org.jrd.frontend.frame.plugins.embedded.Directory;
-import org.jrd.frontend.frame.plugins.embedded.Listable;
-import org.jrd.frontend.frame.plugins.embedded.Zip;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -15,9 +13,6 @@ import java.io.*;
 import java.net.*;
 import java.nio.file.*;
 import java.util.*;
-
-import static org.jrd.backend.decompiling.PluginManager.createUserPluginDir;
-import static org.jrd.backend.decompiling.PluginManager.flipWrapperExtension;
 
 public class PluginConfigurationEditorController {
 
@@ -76,40 +71,13 @@ public class PluginConfigurationEditorController {
         view.getPluginListPanel().getWrapperJList().setSelectedIndex(0);
     }
 
-    public static List<URL> getWrappersFromClasspath(){
-        String classpath = System.getProperty("java.class.path");
-        String[] classpathEntries = classpath.split(File.pathSeparator);
-        List<URL> jsonFiles = new ArrayList<>();
-
-        for(String entry : classpathEntries) {
-            File entryFile = new File(entry);
-            if (!entryFile.exists()) {
-                continue;
-            }
-
-            try {
-                Listable listable;
-                if(entry.endsWith(".jar")){
-                    listable = new Zip(entryFile);
-                } else {
-                    listable = new Directory(entryFile);
-                }
-                jsonFiles.addAll(listable.listChildren());
-
-            } catch (IOException e) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
-            }
-        }
-        return jsonFiles;
-    }
-
     private void openImportDialog(){
-        List<URL> availableDecompilers = getWrappersFromClasspath();
+        List<URL> availableDecompilers = ImportUtils.getWrappersFromClasspath();
         ArrayList<String> availableDecompilerNames = new ArrayList<>();
 
         for(URL url : availableDecompilers){
             try {
-                URL javaWrapperComplement = new URL(flipWrapperExtension(url.toString()));
+                URL javaWrapperComplement = new URL(ImportUtils.flipWrapperExtension(url.toString()));
                 if (javaWrapperComplement.openStream() != null){
                     availableDecompilerNames.add(url.toString().substring(url.toString().lastIndexOf("/") + 1));
                 }
@@ -129,7 +97,7 @@ public class PluginConfigurationEditorController {
 
         if (selected != null) { // null if the user cancels
             URL selectedURL = availableDecompilers.get(availableDecompilerNames.indexOf(selected.toString()));
-            String selectedFilename = filenameFromUrl(selectedURL);
+            String selectedFilename = ImportUtils.filenameFromUrl(selectedURL);
 
             if(new File(Directories.getPluginDirectory() + File.separator + selectedFilename).exists()){
                 if(confirmWrapperOverwrite() != JOptionPane.OK_OPTION){
@@ -137,7 +105,7 @@ public class PluginConfigurationEditorController {
                 }
             }
 
-            importOnePlugin(selectedURL, selectedFilename);
+            ImportUtils.importOnePlugin(selectedURL, selectedFilename);
 
             configPanelHashMap.clear();
             pluginManager.loadConfigs();
@@ -152,18 +120,6 @@ public class PluginConfigurationEditorController {
         }
     }
 
-    public static String filenameFromUrl(URL url) {
-        return url.toString().substring(url.toString().lastIndexOf("/") + 1);
-    }
-
-    public static void importOnePlugin(URL selectedURL, String selectedFilename) {
-        try {
-            copyWrappers(selectedURL, selectedFilename);
-        } catch (IOException e) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
-        }
-    }
-
     private int confirmWrapperOverwrite(){
         String[] options = {"Yes", "No"};
         return JOptionPane.showOptionDialog(this.view,
@@ -175,31 +131,6 @@ public class PluginConfigurationEditorController {
                 null,
                 options,
                 options[1]);
-    }
-
-    private static void copyBetweenStreams(URL wrapperJsonUrl, String wrapperFilename) throws IOException {
-        try (
-                InputStream is = wrapperJsonUrl.openStream();
-                OutputStream os = new FileOutputStream(Directories.getPluginDirectory() + File.separator + wrapperFilename);
-        ) {
-            byte[] buffer = new byte[1024];
-            int length;
-
-            while ((length = is.read(buffer)) > 0) {
-                os.write(buffer, 0, length);
-            }
-        }
-    }
-
-    private static void copyWrappers(URL wrapperURL, String wrapperFilename) throws IOException {
-        createUserPluginDir();
-
-        copyBetweenStreams(wrapperURL, wrapperFilename);
-
-        URL javaComplementUrl = new URL(flipWrapperExtension(wrapperURL.toString()));
-        String javaComplementName = flipWrapperExtension(wrapperFilename);
-
-        copyBetweenStreams(javaComplementUrl, javaComplementName);
     }
 
     void onPluginJListChange(){
