@@ -24,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Base64;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -59,9 +60,10 @@ public class PluginManager {
 
         loadConfigs();
 
-        // add javap "internal" disassemblers to the bottom
         wrappers.add(DecompilerWrapperInformation.getJavap());
         wrappers.add(DecompilerWrapperInformation.getJavapVerbose());
+
+        sortWrappers();
     }
 
     /**
@@ -250,8 +252,10 @@ public class PluginManager {
             File oldWrapperFile = new File(oldWrapper.getFileLocation());
             oldWrapperFile.delete();
         }
-        wrappers.add(newWrapper);
+
         wrappers.remove(oldWrapper);
+        wrappers.add(newWrapper);
+        sortWrappers();
     }
 
     public void deleteWrapper(DecompilerWrapperInformation wrapperInformation) {
@@ -326,7 +330,10 @@ public class PluginManager {
         } catch (IOException e) {
             OutputController.getLogger().log("Plugin wrapper json configuration file could not be loaded");
         }
+
         wrappers.add(newWrapper);
+        sortWrappers();
+
         return newWrapper;
     }
 
@@ -342,6 +349,13 @@ public class PluginManager {
         try (PrintWriter out = new PrintWriter(wrapper.getFileLocation(), StandardCharsets.UTF_8)) {
             out.println(json);
         }
+    }
+
+    private void sortWrappers() {
+        wrappers.sort(
+                Comparator.comparing(DecompilerWrapperInformation::getScope).reversed() // reversed so that javap is always the bottom
+                        .thenComparing(DecompilerWrapperInformation::getName)
+        );
     }
 
     public static void createUserPluginDir() {
