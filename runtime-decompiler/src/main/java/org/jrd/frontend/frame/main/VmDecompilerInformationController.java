@@ -291,7 +291,9 @@ public class VmDecompilerInformationController {
                 name = "???";
 
             final RewriteClassDialog rewriteClassDialog = new RewriteClassDialog(name, lastLoaded, buffer, binBuffer, vmInfo, vmManager, pluginManager, selectedDecompiler, supperSelect);
+            ScreenFinder.centerWindowsToCurrentScreen(rewriteClassDialog);
             rewriteClassDialog.setVisible(true);
+
             lastLoaded.lastManualUpload = rewriteClassDialog.getManualUploadPath();
             lastLoaded.lastSaveSrc = rewriteClassDialog.getSaveSrcPath();
             lastLoaded.lastSaveBin = rewriteClassDialog.getSaveBinPath();
