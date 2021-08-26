@@ -41,25 +41,28 @@ import java.util.regex.Pattern;
 public class BytecodeDecompilerView {
 
     private JPanel bytecodeDecompilerPanel;
-        private JPanel topButtonPanel;
-            private JComboBox<DecompilerWrapperInformation> pluginComboBox;
         private JSplitPane splitPane;
             private JPanel classes;
-                private JTextField classesSortField;
-                    private final Color classesSortFieldColor;
+                private JPanel classesToolBar;
+                    private JButton reloadClassesButton;
+                    private JTextField classesSortField;
+                        private final Color classesSortFieldColor;
                 private JPanel classesPanel;
                     private JScrollPane classesScrollPane;
                         private JList<String> filteredClassesJList;
-
-            private final JTabbedPane buffers;
-                private JPanel sourceBuffer;
-                    private RTextScrollPane bytecodeScrollPane;
-                        private RSyntaxTextArea bytecodeSyntaxTextArea;
-                    private SearchControlsPanel bytecodeSearchControls;
-                private JPanel binaryBuffer;
-                    private JPanel hexControls;
-                    private HexEditor hex;
-                    private JPanel hexSearchControls;
+            private JPanel buffersPanel;
+                private JPanel buffersToolBar;
+                    private JButton overwriteButton;
+                    private JComboBox<DecompilerWrapperInformation> pluginComboBox;
+                private final JTabbedPane buffers;
+                    private JPanel sourceBuffer;
+                        private RTextScrollPane bytecodeScrollPane;
+                            private RSyntaxTextArea bytecodeSyntaxTextArea;
+                        private SearchControlsPanel bytecodeSearchControls;
+                    private JPanel binaryBuffer;
+                        private JPanel hexControls;
+                        private HexEditor hex;
+                        private JPanel hexSearchControls;
 
     private ActionListener bytesActionListener;
     private ActionListener classesActionListener;
@@ -144,7 +147,7 @@ public class BytecodeDecompilerView {
             }
         });
 
-        JButton overwriteButton = new JButton("Overwrite class");
+        overwriteButton = new JButton("Overwrite class");
         overwriteButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -163,9 +166,10 @@ public class BytecodeDecompilerView {
                 }.execute();
             }
         });
+        overwriteButton.setPreferredSize(buttonSizeBasedOnTextField(overwriteButton, classesSortField));
 
-        JButton topButton = new JButton("Refresh loaded classes list");
-        topButton.addActionListener(new ActionListener() {
+        reloadClassesButton = new JButton("Reload classes");
+        reloadClassesButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 new SwingWorker<Void, Void>() {
@@ -184,6 +188,21 @@ public class BytecodeDecompilerView {
                 }.execute();
             }
         });
+        reloadClassesButton.setPreferredSize(buttonSizeBasedOnTextField(reloadClassesButton, classesSortField));
+
+        classesToolBar = new JPanel(new GridBagLayout());
+        classesToolBar.setBorder(new EtchedBorder());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(3, 3, 3, 3);
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.anchor = GridBagConstraints.WEST;
+
+        gbc.weightx = 0;
+        classesToolBar.add(reloadClassesButton, gbc);
+
+        gbc.gridx = 1;
+        gbc.weightx = 1;
+        classesToolBar.add(classesSortField, gbc);
 
         pluginComboBox = new JComboBox<DecompilerWrapperInformation>();
         pluginComboBox.addActionListener(new ActionListener() {
@@ -216,17 +235,26 @@ public class BytecodeDecompilerView {
         binaryBuffer.setLayout(new BorderLayout());
         binaryBuffer.setBorder(new EtchedBorder());
 
-        topButtonPanel = new JPanel();
+        buffersToolBar = new JPanel(new GridBagLayout());
+        buffersToolBar.setBorder(new EtchedBorder());
+        gbc = new GridBagConstraints();
+        gbc.insets = new Insets(3, 3, 3, 3);
 
-        topButtonPanel.setLayout(new BorderLayout());
-        topButtonPanel.add(topButton, BorderLayout.WEST);
-        topButtonPanel.add(overwriteButton);
-        topButtonPanel.add(pluginComboBox, BorderLayout.EAST);
+        gbc.weightx = 1;
+        buffersToolBar.add(Box.createHorizontalGlue(), gbc);
+
+        gbc.weightx = 0;
+        gbc.gridx = 1;
+        buffersToolBar.add(overwriteButton, gbc);
+
+        gbc.gridx = 2;
+        buffersToolBar.add(pluginComboBox, gbc);
 
         classesScrollPane = new JScrollPane(filteredClassesJList);
         classesScrollPane.getVerticalScrollBar().setUnitIncrement(20);
 
-        classesPanel.add(classesScrollPane);
+        classesPanel.add(classesToolBar, BorderLayout.NORTH);
+        classesPanel.add(classesScrollPane, BorderLayout.CENTER);
         classes.add(classesPanel);
 
         buffers = new JTabbedPane();
@@ -250,8 +278,14 @@ public class BytecodeDecompilerView {
 
         buffers.add(sourceBuffer);
         buffers.add(binaryBuffer);
+
+        buffersPanel = new JPanel(new BorderLayout());
+        buffersPanel.setBorder(new EtchedBorder());
+        buffersPanel.add(buffersToolBar, BorderLayout.NORTH);
+        buffersPanel.add(buffers, BorderLayout.CENTER);
+
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-                classes, buffers);
+                classes, buffersPanel);
 
         splitPane.addComponentListener(new ComponentAdapter() {
             @Override
@@ -263,7 +297,6 @@ public class BytecodeDecompilerView {
             }
         });
 
-        bytecodeDecompilerPanel.add(topButtonPanel, BorderLayout.NORTH);
         bytecodeDecompilerPanel.add(splitPane, BorderLayout.CENTER);
 
         bytecodeDecompilerPanel.setVisible(true);
@@ -325,7 +358,7 @@ public class BytecodeDecompilerView {
             gbc.weightx = 0;
             this.add(optionsComponent, gbc);
 
-            Dimension fixedButtonSize = new Dimension(previousButton.getPreferredSize().width, searchField.getPreferredSize().height);
+            Dimension fixedButtonSize = buttonSizeBasedOnTextField(previousButton, searchField);
             previousButton.setPreferredSize(fixedButtonSize);
             nextButton.setPreferredSize(fixedButtonSize);
 
@@ -532,6 +565,10 @@ public class BytecodeDecompilerView {
     private void deselectBytecodeSyntaxArea() {
         int newDot = bytecodeSyntaxTextArea.getSelectionStart();
         bytecodeSyntaxTextArea.select(newDot, newDot);
+    }
+
+    public static Dimension buttonSizeBasedOnTextField(JButton originalButton, JTextField referenceTextField) {
+        return new Dimension(originalButton.getPreferredSize().width, referenceTextField.getPreferredSize().height);
     }
 
     private void classWorker(String name) {
