@@ -110,7 +110,6 @@ public class MainFrameView {
     }
 
     public MainFrameView() {
-        bytecodeDecompilerView = new BytecodeDecompilerView();
 
         // mainFrame, mainPanel, westPanel, localVmPanel. localVmList, localVmScrollPane, localVmLabelPanel
         localVmList = new UndraggableJList();
@@ -279,6 +278,9 @@ public class MainFrameView {
         welcomePanel.add(welcomeJTextArea);
         // welcomePanel End
 
+        mainFrame = new JFrame();
+        bytecodeDecompilerView = new BytecodeDecompilerView(mainFrame);
+
         cardLayout = new CardLayout();
         centerPanel = new JPanel(cardLayout);
         centerPanel.add(welcomePanel, WELCOME_CARD);
@@ -340,7 +342,6 @@ public class MainFrameView {
         // menuBar end
 
 
-        mainFrame = new JFrame();
         mainFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         mainFrame.setTitle(MetadataProperties.getInstance().getName());
         mainFrame.setSize(1280, 720);

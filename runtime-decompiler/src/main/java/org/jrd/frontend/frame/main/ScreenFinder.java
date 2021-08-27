@@ -69,6 +69,13 @@ public class ScreenFinder {
                 bounds.y + (bounds.height - w.getHeight())/2);
     }
 
+    public static void moveWindowNextTo(Window baseWindow, Window movedWindow) {
+        movedWindow.setLocation(
+                baseWindow.getX() + baseWindow.getWidth(),
+                baseWindow.getY()
+        );
+    }
+
     private static GraphicsDevice getScreenOnCoords(final Point point) {
         final GraphicsEnvironment e = GraphicsEnvironment.getLocalGraphicsEnvironment();
         final GraphicsDevice[] devices = e.getScreenDevices();
