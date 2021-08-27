@@ -344,7 +344,7 @@ public class MainFrameView {
 
         mainFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         mainFrame.setTitle(MetadataProperties.getInstance().getName());
-        mainFrame.setSize(1280, 720);
+        mainFrame.setSize(1366, 768);
         mainFrame.setMinimumSize(new Dimension(700, 340));
         mainFrame.setLayout(new BorderLayout());
         ScreenFinder.centerWindowsToCurrentScreen(mainFrame);
