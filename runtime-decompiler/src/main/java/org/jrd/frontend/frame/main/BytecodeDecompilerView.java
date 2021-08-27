@@ -27,6 +27,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -52,6 +54,7 @@ public class BytecodeDecompilerView {
                         private JList<String> filteredClassesJList;
             private JPanel buffersPanel;
                 private JPanel buffersToolBar;
+                    private JButton detachButton;
                     private JButton overwriteButton;
                     private JComboBox<DecompilerWrapperInformation> pluginComboBox;
                 private final JTabbedPane buffers;
@@ -75,6 +78,12 @@ public class BytecodeDecompilerView {
 
     private boolean splitPaneFirstResize = true;
 
+    private final JFrame mainFrame;
+    private JFrame detachedBytecodeFrame;
+
+    private static final String DETACH_BUTTON_TEXT = "Detach";
+    private static final String ATTACH_BUTTON_TEXT = "Attach";
+
     /**
      * Constructor creates the graphics and adds the action listeners.
      *
@@ -86,7 +95,8 @@ public class BytecodeDecompilerView {
     }
 
 
-    public BytecodeDecompilerView() {
+    public BytecodeDecompilerView(JFrame mainFrameReference) {
+        mainFrame = mainFrameReference;
 
         bytecodeDecompilerPanel = new JPanel(new BorderLayout());
 
@@ -146,6 +156,10 @@ public class BytecodeDecompilerView {
                 }
             }
         });
+
+        detachButton = new JButton(DETACH_BUTTON_TEXT);
+        detachButton.addActionListener(e -> handleBuffersDetaching());
+        detachButton.setPreferredSize(buttonSizeBasedOnTextField(detachButton, classesSortField));
 
         overwriteButton = new JButton("Overwrite class");
         overwriteButton.addActionListener(new ActionListener() {
@@ -245,9 +259,12 @@ public class BytecodeDecompilerView {
 
         gbc.weightx = 0;
         gbc.gridx = 1;
-        buffersToolBar.add(overwriteButton, gbc);
+        buffersToolBar.add(detachButton, gbc);
 
         gbc.gridx = 2;
+        buffersToolBar.add(overwriteButton, gbc);
+
+        gbc.gridx = 3;
         buffersToolBar.add(pluginComboBox, gbc);
 
         classesScrollPane = new JScrollPane(filteredClassesJList);
@@ -430,6 +447,45 @@ public class BytecodeDecompilerView {
         public void fireWasNotFoundAction() {
             wasNotFoundActionListener.actionPerformed(null);
         }
+    }
+
+
+    private boolean shouldAttach() {
+        return detachButton.getText().equals(ATTACH_BUTTON_TEXT);
+    }
+
+    private void handleBuffersDetaching() {
+        if (shouldAttach()) {
+            detachedBytecodeFrame.dispatchEvent(new WindowEvent(detachedBytecodeFrame, WindowEvent.WINDOW_CLOSING));
+            return;
+        }
+
+        detachedBytecodeFrame = new JFrame("Bytecode");
+
+        detachButton.setText(ATTACH_BUTTON_TEXT);
+        splitPane.remove(buffersPanel);
+        splitPane.setEnabled(false); // disable slider of the now one-item split pane
+        detachedBytecodeFrame.add(buffersPanel);
+
+        detachedBytecodeFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        detachedBytecodeFrame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                super.windowClosing(e);
+
+                mainFrame.setSize(mainFrame.getWidth() + buffersPanel.getWidth(), mainFrame.getHeight());
+                detachButton.setText(DETACH_BUTTON_TEXT);
+
+                splitPane.setEnabled(true);
+                splitPane.add(buffersPanel);
+                splitPane.setDividerLocation(0.5);
+            }
+        });
+
+        detachedBytecodeFrame.setSize(buffersPanel.getWidth(), mainFrame.getHeight());
+        mainFrame.setSize(mainFrame.getWidth() - buffersPanel.getWidth(), mainFrame.getHeight());
+        ScreenFinder.moveWindowNextTo(mainFrame, detachedBytecodeFrame);
+        detachedBytecodeFrame.setVisible(true);
     }
 
     public static String styleTooltip() {
