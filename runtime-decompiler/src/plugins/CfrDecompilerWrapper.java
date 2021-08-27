@@ -34,7 +34,7 @@ public class CfrDecompilerWrapper {
         out.mkdir();
         out.deleteOnExit();
         File mainFile = bytesToFile(classToFile(base, name), bytecode);
-        String[] args = new String[innerClasses.entrySet().size()+3];
+        String[] args = new String[innerClasses.entrySet().size()+5];
         int i = 0;
         args[i] = mainFile.getAbsolutePath();
         for(Map.Entry<String, byte[]> item: innerClasses.entrySet()){
@@ -46,6 +46,11 @@ public class CfrDecompilerWrapper {
         args[i] = "--outputpath";
         i++;
         args[i] = out.getAbsolutePath();
+        i++;
+        args[i] = "--skipbatchinnerclasses";
+        i++;
+        args[i] = "false";
+
         File decompiledFile = null;
         String decompiledString;
         try {
