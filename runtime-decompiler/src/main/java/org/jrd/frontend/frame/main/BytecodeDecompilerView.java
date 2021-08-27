@@ -54,6 +54,8 @@ public class BytecodeDecompilerView {
                         private JList<String> filteredClassesJList;
             private JPanel buffersPanel;
                 private JPanel buffersToolBar;
+                    private JButton undoButton;
+                    private JButton redoButton;
                     private JButton detachButton;
                     private JButton overwriteButton;
                     private JComboBox<DecompilerWrapperInformation> pluginComboBox;
@@ -63,7 +65,6 @@ public class BytecodeDecompilerView {
                             private RSyntaxTextArea bytecodeSyntaxTextArea;
                         private SearchControlsPanel bytecodeSearchControls;
                     private JPanel binaryBuffer;
-                        private JPanel hexControls;
                         private HexEditor hex;
                         private JPanel hexSearchControls;
 
@@ -81,6 +82,7 @@ public class BytecodeDecompilerView {
     private final JFrame mainFrame;
     private JFrame detachedBytecodeFrame;
 
+    private static final Insets PANEL_INSETS = new Insets(3, 3, 3, 3);
     private static final String DETACH_BUTTON_TEXT = "Detach";
     private static final String ATTACH_BUTTON_TEXT = "Attach";
 
@@ -204,10 +206,31 @@ public class BytecodeDecompilerView {
         });
         reloadClassesButton.setPreferredSize(buttonSizeBasedOnTextField(reloadClassesButton, classesSortField));
 
+        buffers = new JTabbedPane();
+        undoButton = new JButton("Undo");
+        undoButton.addActionListener(actionEvent -> {
+            if (isSourceBufferVisible()) {
+                bytecodeSyntaxTextArea.undoLastAction();
+            } else {
+                hex.undo();
+            }
+        });
+        undoButton.setPreferredSize(buttonSizeBasedOnTextField(undoButton, classesSortField));
+
+        redoButton = new JButton("Redo");
+        redoButton.addActionListener(actionEvent -> {
+            if (isSourceBufferVisible()) {
+                bytecodeSyntaxTextArea.redoLastAction();
+            } else {
+                hex.redo();
+            }
+        });
+        redoButton.setPreferredSize(buttonSizeBasedOnTextField(redoButton, classesSortField));
+
         classesToolBar = new JPanel(new GridBagLayout());
         classesToolBar.setBorder(new EtchedBorder());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(3, 3, 3, 3);
+        gbc.insets = PANEL_INSETS;
         gbc.fill = GridBagConstraints.BOTH;
         gbc.anchor = GridBagConstraints.WEST;
 
@@ -235,7 +258,6 @@ public class BytecodeDecompilerView {
         bytecodeScrollPane = new RTextScrollPane(bytecodeSyntaxTextArea);
 
         hex = new HexEditor();
-        hexControls = new JPanel();
 
         classes = new JPanel();
         classes.setLayout(new BorderLayout());
@@ -252,19 +274,27 @@ public class BytecodeDecompilerView {
         buffersToolBar = new JPanel(new GridBagLayout());
         buffersToolBar.setBorder(new EtchedBorder());
         gbc = new GridBagConstraints();
-        gbc.insets = new Insets(3, 3, 3, 3);
+        gbc.insets = PANEL_INSETS;
+        gbc.weightx = 0;
+        buffersToolBar.add(undoButton, gbc);
+
+        gbc.gridx = 1;
+        buffersToolBar.add(redoButton, gbc);
 
         gbc.weightx = 1;
+        gbc.insets = new Insets(0, 0, 0, 0); // prevent double padding when no glue is utilized
+        gbc.gridx = 2;
         buffersToolBar.add(Box.createHorizontalGlue(), gbc);
 
+        gbc.insets = PANEL_INSETS;
         gbc.weightx = 0;
-        gbc.gridx = 1;
+        gbc.gridx = 3;
         buffersToolBar.add(detachButton, gbc);
 
-        gbc.gridx = 2;
+        gbc.gridx = 4;
         buffersToolBar.add(overwriteButton, gbc);
 
-        gbc.gridx = 3;
+        gbc.gridx = 5;
         buffersToolBar.add(pluginComboBox, gbc);
 
         classesScrollPane = new JScrollPane(filteredClassesJList);
@@ -274,20 +304,11 @@ public class BytecodeDecompilerView {
         classesPanel.add(classesScrollPane, BorderLayout.CENTER);
         classes.add(classesPanel);
 
-        buffers = new JTabbedPane();
         sourceBuffer.setName("Source buffer");
         sourceBuffer.add(bytecodeScrollPane);
         sourceBuffer.add(bytecodeSearchControls, BorderLayout.SOUTH);
         binaryBuffer.setName("Binary buffer");
         binaryBuffer.add(hex);
-        binaryBuffer.add(hexControls, BorderLayout.NORTH);
-        hexControls.setLayout(new GridLayout(1, 2));
-        JButton undo = new JButton("Undo");
-        hexControls.add(undo);
-        JButton redo = new JButton("Redo");
-        hexControls.add(redo);
-        undo.addActionListener(actionEvent -> hex.undo());
-        redo.addActionListener(actionEvent -> hex.redo());
 
         hexSearchControls = SearchControlsPanel.createHexControls(hex);
 
@@ -454,6 +475,10 @@ public class BytecodeDecompilerView {
         return detachButton.getText().equals(ATTACH_BUTTON_TEXT);
     }
 
+    private boolean isSourceBufferVisible() {
+        return buffers.getSelectedComponent().equals(sourceBuffer);
+    }
+
     private void handleBuffersDetaching() {
         if (shouldAttach()) {
             detachedBytecodeFrame.dispatchEvent(new WindowEvent(detachedBytecodeFrame, WindowEvent.WINDOW_CLOSING));
@@ -547,6 +572,7 @@ public class BytecodeDecompilerView {
 
     private void setDecompiledClass(String name, String data, byte[] source) {
         bytecodeSyntaxTextArea.setText(data);
+        bytecodeSyntaxTextArea.discardAllEdits(); // makes the bytecode upload not undoable
         bytecodeSyntaxTextArea.setCaretPosition(0);
 
         try {
