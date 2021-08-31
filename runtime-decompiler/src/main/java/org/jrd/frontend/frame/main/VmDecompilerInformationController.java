@@ -210,14 +210,8 @@ public class VmDecompilerInformationController {
     }
 
     private void hideLoadingDialog() {
-        // Avoid race-conditions by keeping dialog open for 100ms.
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
-        }
-        loadingDialog.setVisible(false);
-
+        // Avoid race-conditions by queueing closing after opening
+        SwingUtilities.invokeLater(() -> loadingDialog.dispose());
     }
 
     private void cleanup() {
