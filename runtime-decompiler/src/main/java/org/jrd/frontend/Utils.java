@@ -1,20 +1,13 @@
 package org.jrd.frontend;
 
 import io.github.mkoncek.classpathless.api.ClassIdentifier;
-import io.github.mkoncek.classpathless.api.ClassesProvider;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
-import io.github.mkoncek.classpathless.api.ClasspathlessCompiler;
-import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.DecompilerRequestReceiver;
-import org.jrd.backend.core.OutputController;
 import org.jrd.backend.data.Cli;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
-import org.jrd.backend.decompiling.DecompilerWrapperInformation;
-import org.jrd.backend.decompiling.PluginManager;
-import org.jrd.frontend.MainFrame.RewriteClassDialog;
-import org.jrd.frontend.MainFrame.VmDecompilerInformationController;
+import org.jrd.frontend.frame.main.VmDecompilerInformationController;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,9 +20,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Utils {
-    public static int FULLY_QUALIFIED_NAME = 0;
-    public static int SRC_SUBDIRS_NAME = 1;
-    public static int CUSTOM_NAME = 2;
+    public static final int FULLY_QUALIFIED_NAME = 0;
+    public static final int SRC_SUBDIRS_NAME = 1;
+    public static final int CUSTOM_NAME = 2;
 
     public static interface StatusKeeper {
         public void setText(String s);
@@ -58,12 +51,11 @@ public class Utils {
     }
 
     public static boolean uploadByGui(VmInfo vmInfo, VmManager vmManager, StatusKeeper status, String clazz, byte[] content) {
-        String name = "???";
         String ss = "Error to upload: ";
         boolean r = true;
         try {
-            String respomse = uploadBytecode(clazz, vmManager, vmInfo, content);
-            if (respomse.equals(DecompilerRequestReceiver.ERROR_RESPONSE)) {
+            String response = uploadBytecode(clazz, vmManager, vmInfo, content);
+            if (response.equals(DecompilerRequestReceiver.ERROR_RESPONSE)) {
                 throw new Exception("Agent returned error");
             }
             ss = "uploaded: ";
@@ -75,15 +67,15 @@ public class Utils {
         return r;
     }
 
-    public static String cheatName(String base, int selectedIndex, String suffix, String fullyClasifiedName) {
+    public static String cheatName(String base, int selectedIndex, String suffix, String fullyClassifiedName) {
         if (selectedIndex == CUSTOM_NAME) {
             return base;
         }
         if (selectedIndex == FULLY_QUALIFIED_NAME) {
-            return base + "/" + fullyClasifiedName + suffix;
+            return base + "/" + fullyClassifiedName + suffix;
         }
         if (selectedIndex == SRC_SUBDIRS_NAME) {
-            return base + "/" + fullyClasifiedName.replaceAll("\\.", "/") + suffix;
+            return base + "/" + fullyClassifiedName.replaceAll("\\.", "/") + suffix;
         }
         throw new RuntimeException("Unknown name target " + selectedIndex);
     }
@@ -98,14 +90,14 @@ public class Utils {
     public static String guessClass(String src) throws IOException {
         return Cli.guessName(Files.readAllBytes(new File(src).toPath()));
     }
-    public static IdentifiedSource[] sourcesToIdentifiedSources(boolean recursive, List<File> srcs) throws IOException {
-        return sourcesToIdentifiedSources(recursive, srcs.stream().map(x -> x.getAbsolutePath()).toArray(String[]::new));
+    public static IdentifiedSource[] sourcesToIdentifiedSources(boolean recursive, List<File> sources) throws IOException {
+        return sourcesToIdentifiedSources(recursive, sources.stream().map(x -> x.getAbsolutePath()).toArray(String[]::new));
     }
 
-    public static IdentifiedSource[] sourcesToIdentifiedSources(boolean recursive, String... srcs) throws IOException {
-        List<IdentifiedSource> loaded = new ArrayList<>(srcs.length);
-        for (int i = 0; i < srcs.length; i++) {
-            File f = new File(srcs[i]);
+    public static IdentifiedSource[] sourcesToIdentifiedSources(boolean recursive, String... sources) throws IOException {
+        List<IdentifiedSource> loaded = new ArrayList<>(sources.length);
+        for (int i = 0; i < sources.length; i++) {
+            File f = new File(sources[i]);
             if (f.isDirectory()) {
                 if (recursive) {
                     Files.walkFileTree(f.toPath(), new FileVisitor<Path>() {
@@ -140,7 +132,4 @@ public class Utils {
         }
         return loaded.toArray(new IdentifiedSource[0]);
     }
-
-    ;
-
 }

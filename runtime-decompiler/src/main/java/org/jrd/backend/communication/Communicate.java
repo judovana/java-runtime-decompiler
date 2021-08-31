@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 
 /**
  * This class opens a socket and contain methods for read and write to socket
@@ -21,8 +22,6 @@ public class Communicate {
     private Socket commSocket;
     private BufferedReader commInput;
     private BufferedWriter commOutput;
-
-    public static final String DEFAULT_ADDRESS = "localhost";
     //private static final Logger logger = LoggingUtils.getLogger(Communicate.class);
 
     /**
@@ -64,8 +63,8 @@ public class Communicate {
             return;
         }
 
-        this.commInput = new BufferedReader(new InputStreamReader(is));
-        this.commOutput = new BufferedWriter(new OutputStreamWriter(os));
+        this.commInput = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+        this.commOutput = new BufferedWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8));
 
         return;
     }
@@ -85,14 +84,26 @@ public class Communicate {
         }
     }
 
+    private String trimReadLine() throws IOException {
+        String line = this.commInput.readLine();
+
+        if (line == null) {
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Agent returned null response."));
+            return "ERROR";
+        }
+
+        return line.trim();
+    }
+
     /**
      * Method that reads agent's response.
      * @return "ERROR" in case of fail or corresponding bytes or class names
      */
     public String readResponse(){
         String initLine;
+
         try {
-            initLine = this.commInput.readLine().trim();
+            initLine = trimReadLine();
         } catch (IOException ex) {
             OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, ex);
             return "ERROR";
@@ -103,10 +114,10 @@ public class Communicate {
             return "ERROR";
        } else if (initLine.equals("BYTES")) {
             try {
-                String s = this.commInput.readLine();
-                s = s.trim();
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Agent returned bytes: "+s);
-                return s;
+                String bytes = trimReadLine();
+
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Agent returned bytes: "+ bytes);
+                return bytes;
             } catch (IOException ex) {
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, ex);
             }
@@ -136,7 +147,7 @@ public class Communicate {
             return "OK";
         }
         
-        OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Unknow header of " + initLine);
+        OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Unknown header of " + initLine);
         return "ERROR";
     }
 

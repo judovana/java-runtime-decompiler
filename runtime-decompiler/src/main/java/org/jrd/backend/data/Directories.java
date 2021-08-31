@@ -75,4 +75,11 @@ public final class Directories {
     public static boolean isOsWindows() {
         return System.getProperty("os.name").toLowerCase().startsWith("win");
     }
+
+    public static void createPluginDirectory() {
+        File pluginDir = new File(getPluginDirectory());
+        if (!pluginDir.exists()) {
+            pluginDir.mkdirs();
+        }
+    }
 }

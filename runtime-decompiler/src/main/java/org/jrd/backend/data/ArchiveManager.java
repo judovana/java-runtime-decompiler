@@ -86,12 +86,12 @@ public class ArchiveManager {
     /**
      * Determines whether this file can be opened with ZipInputStream
      * @param n Name of the file
-     * @return Whether file can opened with ZipInputStream
+     * @return Whether file can be opened with ZipInputStream
      */
     public static boolean shouldOpen(String n) throws IOException {
         /* This way has been selected as there's no other "easier" way of determining if it is an archive.
            We initially tried to use streams - open a stream over ZipEntry, but because of the way streams work this method is not possible as it will
-           edit the original entry and there's no way of returning back. This caused some branches to be skipped while searching.
+           edit the original entry and there's no way of returning. This caused some branches to be skipped while searching.
            Also closing stream derived from another stream, will close all streams that are connected, even the parent stream. This was a concern as there might be a lot of
            streams opened and none of them could be closed until they are all fully searched.
          * Option to add custom extensions will be added */
@@ -164,12 +164,12 @@ public class ArchiveManager {
                         throw new IOException("Failed to create directory " + parent);
                     }
 
-                    FileOutputStream fout = new FileOutputStream(newFile);
+                    FileOutputStream outputStream = new FileOutputStream(newFile);
                     int len;
                     while ((len = zis.read(buffer)) > 0) {
-                        fout.write(buffer, 0, len);
+                        outputStream.write(buffer, 0, len);
                     }
-                    fout.close();
+                    outputStream.close();
                 }
             }
         }
@@ -217,9 +217,14 @@ public class ArchiveManager {
             FileOutputStream fileStream = new FileOutputStream(path);
             ZipOutputStream zOut = new ZipOutputStream(fileStream);
             File f2zip = new File(tmpdir + fileSeparator + "jrd" + fileSeparator + (i));
-            for (File f : f2zip.listFiles()) {
-                recursiveZip(f, f.getName(), zOut);
+            File[] children = f2zip.listFiles();
+
+            if (children != null) {
+                for (File f : children) {
+                    recursiveZip(f, f.getName(), zOut);
+                }
             }
+
             zOut.finish();
             zOut.close();
             fileStream.close();
@@ -249,22 +254,30 @@ public class ArchiveManager {
             }
             zOut.putNextEntry(new ZipEntry(fName));
             zOut.closeEntry();
-            File[] sub = f2zip.listFiles();
-            for (File child : sub) {
-                recursiveZip(child, fName + child.getName(), zOut);
+
+            File[] children = f2zip.listFiles();
+
+            if (children != null) {
+                for (File child : children) {
+                    recursiveZip(child, fName + child.getName(), zOut);
+                }
             }
+
             return;
         }
-        FileInputStream fis = new FileInputStream(f2zip);
-        ZipEntry zEntry = new ZipEntry(fName);
-        zOut.putNextEntry(zEntry);
-        byte[] bytes = new byte[1024];
-        int length;
-        while ((length = fis.read(bytes)) >= 0) {
-            zOut.write(bytes, 0, length);
+
+        try (FileInputStream fis = new FileInputStream(f2zip);) {
+            ZipEntry zEntry = new ZipEntry(fName);
+            zOut.putNextEntry(zEntry);
+            byte[] bytes = new byte[1024];
+            int length;
+
+            while ((length = fis.read(bytes)) >= 0) {
+                zOut.write(bytes, 0, length);
+            }
+
+            zOut.closeEntry();
         }
-        zOut.closeEntry();
-        fis.close();
     }
 
     /**
@@ -280,7 +293,7 @@ public class ArchiveManager {
     /**
      * Deletes all nested files and directories, so the root can be deleted
      * @param f Directory to be deleted
-     * @return Whether directory was delted
+     * @return Whether directory was deleted
      */
     private boolean deleteRecursive(File f) {
         File[] content = f.listFiles();
@@ -299,7 +312,7 @@ public class ArchiveManager {
         return wasDeleted;
     }
 
-    private class ArchivePathManager {
+    private static class ArchivePathManager {
         private String clazz = "";
         private boolean found = false;
         private boolean extracted = false;

@@ -1,5 +1,6 @@
 package org.fife.ui.hex.swing;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 public class HexSearch {
@@ -26,7 +27,7 @@ public class HexSearch {
         ArrayList<Byte> arr = new ArrayList<>();
         switch (type) {
             case TEXT:
-                byte[] bytesText = str.getBytes();
+                byte[] bytesText = str.getBytes(StandardCharsets.UTF_8);
                 if (bytesText.length == 0) {
                     throw new StringIndexOutOfBoundsException();
                 }

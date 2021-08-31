@@ -9,6 +9,7 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 
 class ByteArrayTransferable implements Transferable {
     private static final DataFlavor[] FLAVORS;
@@ -39,10 +40,10 @@ class ByteArrayTransferable implements Transferable {
 
     public Object getTransferData(final DataFlavor flavor) throws UnsupportedFlavorException, IOException {
         if (flavor.equals(ByteArrayTransferable.FLAVORS[0])) {
-            return new String(this.bytes);
+            return new String(this.bytes, StandardCharsets.UTF_8);
         }
         if (flavor.equals(ByteArrayTransferable.FLAVORS[1])) {
-            return new StringReader(new String(this.bytes));
+            return new StringReader(new String(this.bytes, StandardCharsets.UTF_8));
         }
         throw new UnsupportedFlavorException(flavor);
     }

@@ -53,10 +53,6 @@ public class Transformer implements ClassFileTransformer {
     public void resetLastValidResult() {
         results = new HashMap<>();
     }
-    
-    public void resetOverrides() {
-        overrides = new HashMap<>();
-    }
 
     /**
      * This method allows saving of bytecode

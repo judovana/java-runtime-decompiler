@@ -1,4 +1,3 @@
-<a href="https://copr.fedorainfracloud.org/coprs/radekmanak/java-runtime-decompiler/package/java-runtime-decompiler/"><img src="https://copr.fedorainfracloud.org/coprs/radekmanak/java-runtime-decompiler/package/java-runtime-decompiler/status_image/last_build.png" /></a>
 # Java Runtime Decompiler
 *Java Runtime Decompiler*, or *JRD* for short, allows you to extract bytecode from the running JVM and decompile it with an external decompiler.
 ## Installation
@@ -20,7 +19,7 @@ Then, in images/target/runtime-decompiler... `./start.sh` in a *Linux terminal* 
 In order to start using Java-Runtime-Decompiler, you will need to select the Decompiler Agent's path in *Configure → Agent Path*.
 The Decompiler Agent is a built-in project and can usually be found at `./decompiler_agent/target/decompiler-agent-*.jar`. The image should have agent preset.
 #### Configuring external decompilers
-Internal *javap* and *javap -v* decompiling tools are available by default. In image, we try to keep bundled as much decompilers as possible bundled.
+Internal *javap* and *javap -v* decompiling tools are available by default. In image, we try to keep as many decompilers as possible bundled.
 
 Additionally, external decompilers are supported and can be configured in *Configure → Plugins*:
 * You can download them using the links below and set them up yourself using the *New* button.
@@ -130,4 +129,4 @@ Saved: /tmp/bin/org/jc/impl/InMemoryJavaSourceFileObject.class
 Saved: /tmp/bin/org/jc/api/InMemoryCompiler.class
 ```
 
-Dont forget that all operations are same over classapth, remote vm, or process of VM - *runtime* compiler/decompiler!
+Don't forget that all operations are same over classpath, remote vm, or process of VM - *runtime* compiler/decompiler!

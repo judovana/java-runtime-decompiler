@@ -18,21 +18,12 @@ public class AgentAttachManager {
         this.loader = new AgentLoader();
         
     }
-    
-     void setAttacher(AgentLoader loader) {
-        this.loader = loader;
-    }
-
-    void setVmManager(VmManager vmManager) {
-        this.vmManager = vmManager;
-    }
-  
 
     VmDecompilerStatus attachAgentToVm(String vmId, int vmPid)  {
         OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Attaching agent to VM '" + vmPid + "'");
         int attachedPort = AgentLoader.INVALID_PORT;
         try {
-            attachedPort = loader.attach(vmId, vmPid);
+            attachedPort = loader.attach(vmPid);
         } catch (Exception ex) {
             OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
         }
@@ -44,7 +35,6 @@ public class AgentAttachManager {
         status.setHostname("localhost");
         status.setListenPort(attachedPort);
         status.setVmId(vmId);
-        status.setTimeStamp(System.currentTimeMillis());
         vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
         return status;
     }

@@ -2,7 +2,7 @@
   "Name": "jcoder",
   "WrapperURL": "file://${XDG_CONFIG_HOME}/plugins/JcoderDecompilerWrapper.java",
   "DependencyURL": [
-    "file://${HOME}/.m2/repository/org/openjdk/asmtools/7.0.b10-ea/asmtools-core-7.0.b10-ea.jar"
+    "file://${HOME}/.m2/repository/org/openjdk/asmtools/asmtools-core/7.0.b10-ea/asmtools-core-7.0.b10-ea.jar"
   ],
   "DecompilerDownloadURL": "https://github.com/openjdk/asmtools"
 }

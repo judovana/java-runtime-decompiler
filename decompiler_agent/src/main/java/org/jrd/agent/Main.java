@@ -9,7 +9,7 @@ import java.lang.instrument.Instrumentation;
  */
 public class Main {
 
-    private static final String ADRESS_STRING = "address:";
+    private static final String ADDRESS_STRING = "address:";
     private static final String PORT_STRING = "port:";
     private static String hostname;
     private static Integer port;
@@ -29,8 +29,8 @@ public class Main {
         if (agentArgs != null) {
             String[] argsArray = agentArgs.split(",");
             for (String arg : argsArray) {
-                if (arg.startsWith(ADRESS_STRING)) {
-                    hostname = arg.substring(ADRESS_STRING.length(), arg.length());
+                if (arg.startsWith(ADDRESS_STRING)) {
+                    hostname = arg.substring(ADDRESS_STRING.length(), arg.length());
 
                 } else if (arg.startsWith(PORT_STRING)) {
                     try {
@@ -47,8 +47,7 @@ public class Main {
             }
         }
 
-        boolean start = ConnectionDelegator.initialize(hostname, port, p);
-
+        ConnectionDelegator.initialize(hostname, port, p);
     }
 
     /**

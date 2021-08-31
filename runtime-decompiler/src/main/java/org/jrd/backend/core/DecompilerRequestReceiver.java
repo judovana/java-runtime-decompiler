@@ -1,6 +1,7 @@
 package org.jrd.backend.core;
 
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jrd.backend.communication.CallDecompilerAgent;
 import org.jrd.backend.communication.FsAgent;
 import org.jrd.backend.communication.JrdAgent;
@@ -8,6 +9,7 @@ import org.jrd.backend.core.AgentRequestAction.RequestAction;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -21,7 +23,7 @@ import static org.jrd.backend.decompiling.PluginManager.UNDECOMPILABLE_LAMBDA;
  */
 public class DecompilerRequestReceiver {
 
-    //private static final Logger logger = LoggingUtils.getLogger(DecompilerRequestReciever.class);
+    //private static final Logger logger = LoggingUtils.getLogger(DecompilerRequestReceiver.class);
 
     private final AgentAttachManager attachManager;
     private VmManager vmManager;
@@ -89,6 +91,7 @@ public class DecompilerRequestReceiver {
         try {
             return Integer.parseInt(intStr);
         } catch (NumberFormatException e) {
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, msg);
             OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
             return NOT_ATTACHED;
         }
@@ -111,7 +114,7 @@ public class DecompilerRequestReceiver {
         return actualListenPort;
     }
 
-    private class ResponseWithPort {
+    private static class ResponseWithPort {
         private final String response;
         private final int port;
 
@@ -146,9 +149,7 @@ public class DecompilerRequestReceiver {
             VmDecompilerStatus status = new VmDecompilerStatus();
             status.setHostname(hostname);
             status.setListenPort(reply.port);
-            status.setTimeStamp(System.currentTimeMillis());
             status.setVmId(vmId);
-            status.setBytesClassName(className);
             //note, that we have no reply from overwrite. Or better, nothing to do with reply
             vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
 
@@ -166,9 +167,7 @@ public class DecompilerRequestReceiver {
             VmDecompilerStatus status = new VmDecompilerStatus();
             status.setHostname(hostname);
             status.setListenPort(reply.port);
-            status.setTimeStamp(System.currentTimeMillis());
             status.setVmId(vmId);
-            status.setBytesClassName(className);
             status.setLoadedClassBytes(reply.response);
             vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
 
@@ -184,49 +183,16 @@ public class DecompilerRequestReceiver {
     private String getAllLoadedClassesAction(String hostname, int listenPort, String vmId, int vmPid) {
         try {
             ResponseWithPort reply = getResponse(hostname, listenPort, vmId, vmPid, "CLASSES");
-            String[] arrayOfClasses = parseClasses(reply.response);
-            if (arrayOfClasses != null) {
-                Arrays.sort(arrayOfClasses, new Comparator<String>() {
-                    @Override
-                    public int compare(String o1, String o2) {
-                        if (o1 == null && o2 == null) {
-                            return 0;
-                        }
-                        if (o1 == null && o2 != null) {
-                            return 1;
-                        }
-                        if (o1 != null && o2 == null) {
-                            return -1;
-                        }
-                        if (o1.startsWith("[") && !o2.startsWith("[")) {
-                            return 1;
-                        }
-                        if (!o1.startsWith("[") && o2.startsWith("[")) {
-                            return -1;
-                        }
-                        if (o1.contains(UNDECOMPILABLE_LAMBDA) && !o2.contains(UNDECOMPILABLE_LAMBDA)) {
-                            return 1;
-                        }
-                        if (!o1.contains(UNDECOMPILABLE_LAMBDA) && o2.contains(UNDECOMPILABLE_LAMBDA)) {
-                            return -1;
-                        }
-                        if (LAMBDA_FORM.matcher(o1).matches() && !LAMBDA_FORM.matcher(o2).matches()) {
-                            return 1;
-                        }
-                        if (!LAMBDA_FORM.matcher(o1).matches() && LAMBDA_FORM.matcher(o2).matches()) {
-                            return -1;
-                        }
 
-                        return o1.compareTo(o2);
-                    }
-                });
-            }
+            String[] arrayOfClasses = parseClasses(reply.response);
+            Arrays.sort(arrayOfClasses, new ClassesComparator());
+
             VmDecompilerStatus status = new VmDecompilerStatus();
             status.setHostname(hostname);
             status.setListenPort(reply.port);
-            status.setTimeStamp(System.currentTimeMillis());
             status.setVmId(vmId);
             status.setLoadedClassNames(arrayOfClasses);
+
             vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
         } catch (Exception ex) {
             OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
@@ -238,7 +204,7 @@ public class DecompilerRequestReceiver {
 
     private String getHaltAction(String hostname, int listenPort, String vmId, int vmPid) {
         try {
-            ResponseWithPort reply = getResponse(hostname, listenPort, vmId, vmPid, "HALT");
+            getResponse(hostname, listenPort, vmId, vmPid, "HALT");
         } catch (Exception e) {
             OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Exception when calling halt action", e));
         } finally {
@@ -273,4 +239,43 @@ public class DecompilerRequestReceiver {
 
     }
 
+    private static class ClassesComparator implements Comparator<String>, Serializable {
+
+        @SuppressFBWarnings(
+                value = "NP_NULL_ON_SOME_PATH_MIGHT_BE_INFEASIBLE",
+                justification = "SpotBugs false reports possible NP dereference, even though both o1 & o2 are tested for nullness. "
+        )
+        @Override
+        public int compare(String o1, String o2) {
+            if (o1 == null && o2 == null) {
+                return 0;
+            }
+            if (o1 == null && o2 != null) {
+                return 1;
+            }
+            if (o1 != null && o2 == null) {
+                return -1;
+            }
+            if (o1.startsWith("[") && !o2.startsWith("[")) {
+                return 1;
+            }
+            if (!o1.startsWith("[") && o2.startsWith("[")) {
+                return -1;
+            }
+            if (o1.contains(UNDECOMPILABLE_LAMBDA) && !o2.contains(UNDECOMPILABLE_LAMBDA)) {
+                return 1;
+            }
+            if (!o1.contains(UNDECOMPILABLE_LAMBDA) && o2.contains(UNDECOMPILABLE_LAMBDA)) {
+                return -1;
+            }
+            if (LAMBDA_FORM.matcher(o1).matches() && !LAMBDA_FORM.matcher(o2).matches()) {
+                return 1;
+            }
+            if (!LAMBDA_FORM.matcher(o1).matches() && LAMBDA_FORM.matcher(o2).matches()) {
+                return -1;
+            }
+
+            return o1.compareTo(o2);
+        }
+    }
 }

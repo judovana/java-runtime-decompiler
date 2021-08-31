@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
@@ -65,10 +66,10 @@ public class DecompilerWrapperInformation {
         return javap;
     }
 
-    public static DecompilerWrapperInformation getJavapv() {
-        DecompilerWrapperInformation javapv = new DecompilerWrapperInformation();
-        javapv.setName(JAVAP_VERBOSE_NAME);
-        return javapv;
+    public static DecompilerWrapperInformation getJavapVerbose() {
+        DecompilerWrapperInformation javapVerbose = new DecompilerWrapperInformation();
+        javapVerbose.setName(JAVAP_VERBOSE_NAME);
+        return javapVerbose;
     }
 
     public String getFileLocation() {
@@ -91,10 +92,19 @@ public class DecompilerWrapperInformation {
     }
 
     public void setFullyQualifiedClassName() {
-        try (BufferedReader br = new BufferedReader(new FileReader(wrapperURL.getExpandedPath()))) {
+        String wrapperPath = wrapperURL.getExpandedPath();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(wrapperPath, StandardCharsets.UTF_8))) {
             String packageName = "";
             String className = "";
             String line = br.readLine();
+
+            if (line == null) {
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Wrapper '" + wrapperPath + "' is empty!");
+                invalidWrapper = true;
+                return;
+            }
+
             // Check first line for package name
             if (line.startsWith("package ")) {
                 packageName = line.replace(";", ".").split(" ")[1];
@@ -231,7 +241,7 @@ public class DecompilerWrapperInformation {
         }
     }
 
-    public static String LOCAL_SCOPE = "local";
+    public static final String LOCAL_SCOPE = "local";
 
     public String getScope() {
         String scope = "unknown";
@@ -252,6 +262,10 @@ public class DecompilerWrapperInformation {
             }
         }
         return scope;
+    }
+
+    public boolean isLocal() {
+        return getScope().equals(LOCAL_SCOPE);
     }
 
     @Override

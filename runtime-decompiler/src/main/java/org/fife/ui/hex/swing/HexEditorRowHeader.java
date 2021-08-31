@@ -68,7 +68,7 @@ class HexEditorRowHeader extends JList implements TableModelListener {
         CELL_BORDER = BorderFactory.createEmptyBorder(0, 5, 0, 5);
     }
 
-    private class CellRenderer extends DefaultListCellRenderer {
+    private static class CellRenderer extends DefaultListCellRenderer {
         private static final long serialVersionUID = 1L;
 
         public CellRenderer() {

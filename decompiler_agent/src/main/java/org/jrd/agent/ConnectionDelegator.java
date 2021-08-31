@@ -9,13 +9,11 @@ public class ConnectionDelegator extends Thread{
 
     private static ConnectionDelegator connectionDelegator;
     public static final int DEFAULT_PORT = 5395;
-    public static final String DEFAULT_ADRESS = "localhost";
+    public static final String DEFAULT_ADDRESS = "localhost";
 
     private ServerSocket theServerSocket;
     private InstrumentationProvider provider;
-    private static boolean running;
-    private static String addressGiven;
-    private static Integer portGiven;
+    private boolean running;
 
     private ConnectionDelegator(InstrumentationProvider provider, ServerSocket serverSocket) {
         this.provider = provider;
@@ -36,15 +34,13 @@ public class ConnectionDelegator extends Thread{
      */
     public static synchronized boolean initialize(String hostname, Integer port,
                                                   InstrumentationProvider provider) {
-        ConnectionDelegator.addressGiven = hostname;
-        portGiven = port;
         ServerSocket initServerSocket = null;
         try {
             if (port == null) {
                 port = DEFAULT_PORT;
             }
             if (hostname == null) {
-                hostname = DEFAULT_ADRESS;
+                hostname = DEFAULT_ADDRESS;
             }
             initServerSocket = new ServerSocket();
             initServerSocket.bind(new InetSocketAddress(hostname, port));
@@ -65,6 +61,7 @@ public class ConnectionDelegator extends Thread{
     @Override
     public void run() {
         running = true;
+
         while (running) {
             if (theServerSocket.isClosed()) {
                 return;
@@ -95,10 +92,13 @@ public class ConnectionDelegator extends Thread{
      * Closes server socket
      * Already connected clients can finish their work but no new clients can connect.
      */
-    public static void gracefulShutdown(){
+    public void gracefulShutdown(){
         if (/*Agent was created by client*/true){
             running = false;
         }
     }
 
+    public static ConnectionDelegator getConnectionDelegator() {
+        return connectionDelegator;
+    }
 }

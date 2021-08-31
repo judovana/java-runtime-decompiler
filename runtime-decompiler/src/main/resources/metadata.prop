@@ -1,0 +1,4 @@
+version=${project.version}
+timestamp=${maven.build.timestamp}
+groupId=${project.groupId}
+name=${project.parent.name}

@@ -1,11 +1,9 @@
 package org.jrd.backend.data;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -17,39 +15,39 @@ import static org.jrd.backend.data.Directories.isOsWindows;
  */
 public class Help {
 
-    private static final String HELP_FORMAT = HELP + ", " + H;
-    private static final String VERBOSE_FORMAT = VERBOSE;
-    private static final String VERSION_FORMAT = VERSION;
-    private static final String BASE64_FORMAT = BASE64 + " <PUC> <CLASS REGEX>...";
-    private static final String BYTES_FORMAT = BYTES + " <PUC> <CLASS REGEX>...";
-    private static final String LISTJVMS_FORMAT = LISTJVMS;
-    private static final String LISTPLUGINS_FORMAT = LISTPLUGINS;
-    private static final String LISTCLASSES_FORMAT = LISTCLASSES + " <PUC> [<CLASS REGEX>...]";
-    private static final String COMPILE_FORMAT = COMPILE + " [-p <PLUGIN>] [-cp <PUC>] [-r] <PATH>...";
-    private static final String DECOMPILE_FORMAT = DECOMPILE + " <PUC> <PLUGIN> <CLASS REGEX>...";
-    private static final String OVERWRITE_FORMAT = OVERWRITE + " <PUC> <CLASS NAME> [<CLASS FILE>]";
-    private static final String SAVEAS_FORMAT = SAVEAS + " <PATH>";
-    private static final String SAVELIKE_FORMAT = SAVELIKE + " <SAVE METHOD>";
+    static final String HELP_FORMAT = HELP + ", " + H;
+    static final String VERBOSE_FORMAT = VERBOSE;
+    static final String VERSION_FORMAT = VERSION;
+    static final String BASE64_FORMAT = BASE64 + " <PUC> <CLASS REGEX>...";
+    static final String BYTES_FORMAT = BYTES + " <PUC> <CLASS REGEX>...";
+    static final String LIST_JVMS_FORMAT = LIST_JVMS;
+    static final String LIST_PLUGINS_FORMAT = LIST_PLUGINS;
+    static final String LIST_CLASSES_FORMAT = LIST_CLASSES + " <PUC> [<CLASS REGEX>...]";
+    static final String COMPILE_FORMAT = COMPILE + " [-p <PLUGIN>] [-cp <PUC>] [-r] <PATH>...";
+    static final String DECOMPILE_FORMAT = DECOMPILE + " <PUC> <PLUGIN> <CLASS REGEX>...";
+    static final String OVERWRITE_FORMAT = OVERWRITE + " <PUC> <CLASS NAME> [<CLASS FILE>]";
+    static final String SAVE_AS_FORMAT = SAVE_AS + " <PATH>";
+    static final String SAVE_LIKE_FORMAT = SAVE_LIKE + " <SAVE METHOD>";
 
     private static final String HELP_TEXT = "Print this help text.";
     private static final String VERBOSE_TEXT = "All exceptions and some debugging strings will be printed to standard error.";
     private static final String VERSION_TEXT = "Print version project name, version and build timestamp.";
     private static final String BASE64_TEXT = "Print Base64 encoded binary form of requested classes of a process.";
     private static final String BYTES_TEXT = "Print binary form of requested classes of a process";
-    private static final String LISTJVMS_TEXT = "List all local Java processes and their PIDs.";
-    private static final String LISTPLUGINS_TEXT = "List all currently configured decompiler plugins and their statuses.";
-    private static final String LISTCLASSES_TEXT = "List all loaded classes of a process, optionally filtering them.\n" +
-            "Only '" + SAVELIKE + " " + Saving.EXACT + "' or '" + SAVELIKE + " " + Saving.DEFAULT + "' are allowed as saving modifiers.";
+    private static final String LIST_JVMS_TEXT = "List all local Java processes and their PIDs.";
+    private static final String LIST_PLUGINS_TEXT = "List all currently configured decompiler plugins and their statuses.";
+    private static final String LIST_CLASSES_TEXT = "List all loaded classes of a process, optionally filtering them.\n" +
+            "Only '" + SAVE_LIKE + " " + Saving.EXACT + "' or '" + SAVE_LIKE + " " + Saving.DEFAULT + "' are allowed as saving modifiers.";
     private static final String COMPILE_TEXT = "Compile local files against runtime classpath, specified by -cp.\n" +
             "Use -p to utilize some plugins' (like jasm or jcoder) bundled compilers.\n" +
             "Use -r for recursive search if <PATH> is a directory.\n" +
-            "If the argument of '" + SAVEAS + "' is a valid PID or URL, the compiled code will be attempted to be injected into that process.\n" +
-            "If multiple PATHs were specified, but no '" + SAVEAS + "', the process fails.";
+            "If the argument of '" + SAVE_AS + "' is a valid PID or URL, the compiled code will be attempted to be injected into that process.\n" +
+            "If multiple PATHs were specified, but no '" + SAVE_AS + "', the process fails.";
     private static final String DECOMPILE_TEXT = "Decompile and print classes of a process with the specified decompiler plugin.\n" +
             "Javap can be passed options by appending them without spaces: 'javap-v-public ...' executes as 'javap -v -public ...'";
     private static final String OVERWRITE_TEXT = "Overwrite class of a process with new bytecode. If <CLASS FILE> is not set, standard input is used.";
-    private static final String SAVEAS_TEXT = "All outputs will be written to PATH instead of to standard output.";
-    private static final String SAVELIKE_TEXT = "Specify how saving will behave.";
+    private static final String SAVE_AS_TEXT = "All outputs will be written to PATH instead of to standard output.";
+    private static final String SAVE_LIKE_TEXT = "Specify how saving will behave.";
 
     private static final String NOTES_SLASH = "All options can be with either one or two leading slashes ('-').";
     private static final String NOTES_REGEX = "When using <CLASS REGEX>, don't forget to escape dollar signs '$' of inner classes to '\\$', as otherwise they are treated as end-of-line by REGEX.";
@@ -71,8 +69,8 @@ public class Help {
     private static final String LAUNCHER_LINUX = "./start.sh";
     private static final String LAUNCHER_WINDOWS = "start.bat";
 
-    private static final Map<String, String> ALL_OPTIONS;
-    private static final Map<String, String> SAVING_OPTIONS;
+    static final Map<String, String> ALL_OPTIONS;
+    static final Map<String, String> SAVING_OPTIONS;
     private static final Map<String, String[]> NOTES;
 
     static {
@@ -80,9 +78,9 @@ public class Help {
         ALL_OPTIONS.put(HELP_FORMAT, HELP_TEXT);
         ALL_OPTIONS.put(VERBOSE_FORMAT, VERBOSE_TEXT);
         ALL_OPTIONS.put(VERSION_FORMAT, VERSION_TEXT);
-        ALL_OPTIONS.put(LISTJVMS_FORMAT, LISTJVMS_TEXT);
-        ALL_OPTIONS.put(LISTPLUGINS_FORMAT, LISTPLUGINS_TEXT);
-        ALL_OPTIONS.put(LISTCLASSES_FORMAT, LISTCLASSES_TEXT);
+        ALL_OPTIONS.put(LIST_JVMS_FORMAT, LIST_JVMS_TEXT);
+        ALL_OPTIONS.put(LIST_PLUGINS_FORMAT, LIST_PLUGINS_TEXT);
+        ALL_OPTIONS.put(LIST_CLASSES_FORMAT, LIST_CLASSES_TEXT);
         ALL_OPTIONS.put(BASE64_FORMAT, BASE64_TEXT);
         ALL_OPTIONS.put(BYTES_FORMAT, BYTES_TEXT);
         ALL_OPTIONS.put(COMPILE_FORMAT, COMPILE_TEXT);
@@ -90,8 +88,8 @@ public class Help {
         ALL_OPTIONS.put(OVERWRITE_FORMAT, OVERWRITE_TEXT);
 
         SAVING_OPTIONS = new LinkedHashMap<>();
-        SAVING_OPTIONS.put(SAVEAS_FORMAT, SAVEAS_TEXT);
-        SAVING_OPTIONS.put(SAVELIKE_FORMAT, SAVELIKE_TEXT);
+        SAVING_OPTIONS.put(SAVE_AS_FORMAT, SAVE_AS_TEXT);
+        SAVING_OPTIONS.put(SAVE_LIKE_FORMAT, SAVE_LIKE_TEXT);
 
         NOTES = new LinkedHashMap<>();
         NOTES.put(NOTES_SLASH, new String[0]);
@@ -100,8 +98,8 @@ public class Help {
         NOTES.put(NOTES_SAVE, NOTES_SAVE_ITEMS);
     }
 
-    private static final String[] UNSAVABLE_OPTIONS = {HELP, H, LISTJVMS, LISTPLUGINS, OVERWRITE};
-    private static final String[] SAVABLE_OPTIONS = {LISTCLASSES, BYTES, BASE64, COMPILE, DECOMPILE};
+    private static final String[] UNSAVABLE_OPTIONS = {HELP, H, LIST_JVMS, LIST_PLUGINS, OVERWRITE};
+    private static final String[] SAVABLE_OPTIONS = {LIST_CLASSES, BYTES, BASE64, COMPILE, DECOMPILE};
 
     private static final int LONGEST_FORMAT_LENGTH =
             Stream.of(ALL_OPTIONS.keySet(), SAVING_OPTIONS.keySet())
@@ -239,7 +237,7 @@ public class Help {
 
         @Override
         public String savingModifiers() {
-            return " [" + SAVEAS + " [" + SAVELIKE + "]]";
+            return " [" + SAVE_AS + " [" + SAVE_LIKE + "]]";
         }
 
         @Override
@@ -280,13 +278,9 @@ public class Help {
             String buildTimestamp, centerTitle;
 
             try {
-                Cli.VersionFromManifest attributes = getJrdAttributes().get();
-
-                buildTimestamp = attributes.getTimestamp().split(" ")[0];
-                centerTitle = attributes.getGroup();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            } catch (NoSuchElementException | IndexOutOfBoundsException e) {
+                buildTimestamp = MetadataProperties.getInstance().getTimestamp().split(" ")[0];
+                centerTitle = MetadataProperties.getInstance().getGroup();
+            } catch (IndexOutOfBoundsException e) {
                 buildTimestamp = "";
                 centerTitle = ""; // empty == defaults to "General Commands Manual"
             }
@@ -352,7 +346,7 @@ public class Help {
 
         @Override
         public String savingModifiers() {
-            return " [" + formatWrap('I', SAVEAS) + " [" + formatWrap('I', SAVELIKE) + "]]";
+            return " [" + formatWrap('I', SAVE_AS) + " [" + formatWrap('I', SAVE_LIKE) + "]]";
         }
 
         @Override

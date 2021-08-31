@@ -27,7 +27,7 @@ class HexTable extends JTable {
     private HexTableModel model;
     int leadSelectionIndex;
     int anchorSelectionIndex;
-    private static final Color ANTERNATING_CELL_COLOR;
+    private static final Color ALTERNATING_CELL_COLOR;
 
     public HexTable(final HexEditor hexEditor, final HexTableModel model) {
         super(model);
@@ -38,6 +38,7 @@ class HexTable extends JTable {
         this.setFont(new Font("Monospaced", 0, 14));
         this.setCellSelectionEnabled(true);
         this.setSelectionMode(1);
+        this.setSurrendersFocusOnKeystroke(true);
         this.setDefaultEditor(Object.class, new CellEditor());
         this.setDefaultRenderer(Object.class, new CellRenderer());
         this.getTableHeader().setReorderingAllowed(false);
@@ -191,7 +192,7 @@ class HexTable extends JTable {
 
     @Override
     protected void processKeyEvent(final KeyEvent e) {
-        if (e.getID() == 401) {
+        if (e.getID() == KeyEvent.KEY_PRESSED) {
             switch (e.getKeyCode()) {
                 case 37: {
                     final boolean extend = e.isShiftDown();
@@ -252,8 +253,25 @@ class HexTable extends JTable {
                     e.consume();
                     break;
                 }
+                case KeyEvent.VK_SPACE:
+                case KeyEvent.VK_ENTER:
+                    final int row = anchorSelectionIndex / 16;
+                    final int col = anchorSelectionIndex % 16;
+
+                    this.editCellAt(row, col);
+
+                    e.consume();
+                    break;
+            }
+        } else if (e.getID() == KeyEvent.KEY_TYPED) {
+            switch (e.getKeyChar()) {
+                case ' ':
+                case '\n':
+                    e.consume(); // disregard KEY_TYPED after KEY_PRESSED
+                    break;
             }
         }
+
         super.processKeyEvent(e);
     }
 
@@ -310,7 +328,7 @@ class HexTable extends JTable {
     }
 
     static {
-        ANTERNATING_CELL_COLOR = new Color(240, 240, 240);
+        ALTERNATING_CELL_COLOR = new Color(240, 240, 240);
     }
 
     private static class CellEditor extends DefaultCellEditor implements FocusListener {
@@ -371,10 +389,10 @@ class HexTable extends JTable {
                     this.highlight.setLocation(start, end);
                 }
                 final boolean colorBG = HexTable.this.hexEditor.getAlternateRowBG() && (row & 0x1) > 0;
-                this.setBackground(colorBG ? HexTable.ANTERNATING_CELL_COLOR : table.getBackground());
+                this.setBackground(colorBG ? HexTable.ALTERNATING_CELL_COLOR : table.getBackground());
             } else if (!selected) {
                 if ((HexTable.this.hexEditor.getAlternateRowBG() && (row & 0x1) > 0) ^ (HexTable.this.hexEditor.getAlternateColumnBG() && (column & 0x1) > 0)) {
-                    this.setBackground(HexTable.ANTERNATING_CELL_COLOR);
+                    this.setBackground(HexTable.ALTERNATING_CELL_COLOR);
                 } else {
                     this.setBackground(table.getBackground());
                 }
