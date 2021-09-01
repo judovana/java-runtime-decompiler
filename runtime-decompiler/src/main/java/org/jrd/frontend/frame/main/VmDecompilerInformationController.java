@@ -255,7 +255,7 @@ public class VmDecompilerInformationController {
      * If "error" response is received shows an error dialog.
      */
     private void loadClassNames() {
-        OutputController.log("Loading Class Names");
+        OutputController.getLogger().log("Loading Class Names");
         showLoadingDialog();
         AgentRequestAction request = createRequest(RequestAction.CLASSES, "");
         String response = submitRequest(request);
@@ -275,7 +275,7 @@ public class VmDecompilerInformationController {
 
 
 	private void loadClassInfos() {
-        OutputController.log("Loading Class Infos");
+        OutputController.getLogger().log("Loading Class Infos");
         showLoadingDialog();
         AgentRequestAction request = createRequest(RequestAction.CLASSINFOS, "");
         String response = submitRequest(request);
