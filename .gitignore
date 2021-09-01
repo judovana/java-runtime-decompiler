@@ -32,5 +32,8 @@ hs_err_pid*
 
 # Eclipse related files
 .settings
-*.classpath
+.classpath
+.project
+*.settings
 *.project
+*.classpath
