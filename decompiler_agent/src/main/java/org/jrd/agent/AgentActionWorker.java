@@ -89,32 +89,32 @@ public class AgentActionWorker extends Thread {
         }
         try {
             if (null == line) {
-                OutputControllerAgent.getLogger()
-                .log("Line is null: ");
+                OutputControllerAgent.getLogger().log("Line is null: ");
                 outputStream.write("ERROR\n");
                 outputStream.flush();
             } else {
                 switch (line) {
-                case "HALT":
-                    closeSocket(outputStream);
-                    OutputControllerAgent.getLogger().log("AGENT: Received HALT command, Closing socket and exiting.");
-                    break;
-                case "CLASSES":
-                    getAllLoadedClasses(inputStream, outputStream);
-                    break;
-                case "CLASSINFOS":
-                    getAllLoadedClassesInfo(inputStream, outputStream);
-                    break;
-                case "BYTES":
-                    sendByteCode(inputStream, outputStream);
-                    break;
-                case "OVERWRITE":
-                    recieveByteCode(inputStream, outputStream);
-                    break;
-                default:
-                	outputStream.write("ERROR\n");
-                    outputStream.flush();
-                    break;
+                    case "HALT":
+                        closeSocket(outputStream);
+                        OutputControllerAgent.getLogger()
+                                .log("AGENT: Received HALT command, Closing socket and exiting.");
+                        break;
+                    case "CLASSES":
+                        getAllLoadedClasses(outputStream);
+                        break;
+                    case "CLASSINFOS":
+                        getAllLoadedClassesInfo(outputStream);
+                        break;
+                    case "BYTES":
+                        sendByteCode(inputStream, outputStream);
+                        break;
+                    case "OVERWRITE":
+                        receiveByteCode(inputStream, outputStream);
+                        break;
+                    default:
+                        outputStream.write("ERROR\n");
+                        outputStream.flush();
+                        break;
                 }
             }
         } catch (IOException e) {
@@ -156,7 +156,7 @@ public class AgentActionWorker extends Thread {
         out.flush();
     }
 
-    public void getAllLoadedClassesInfo(BufferedReader in, BufferedWriter out) throws IOException {
+    public void getAllLoadedClassesInfo(BufferedWriter out) throws IOException {
         out.write("CLASSINFOS");
         out.newLine();
         LinkedBlockingQueue<String[]> classInfos = new LinkedBlockingQueue<String[]>(1024);

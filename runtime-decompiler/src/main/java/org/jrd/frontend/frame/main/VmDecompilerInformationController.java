@@ -98,6 +98,15 @@ public class VmDecompilerInformationController {
         newFsVmDialog.setVisible(true);
     }
 
+    public class vmArrayList<T> extends ArrayList<VmInfo> {
+        @Override
+        public boolean add(VmInfo vmInfo) {
+            super.add(vmInfo);
+            this.sort(Comparator.comparingInt(VmInfo::getVmPid));
+            return true;
+        }
+    }
+
     @SuppressWarnings("unchecked") // event.getSource() is always of type JList<VmInfo>
     private void removeVmDialog(ActionEvent event) {
         String vmType = event.getActionCommand();
@@ -395,7 +404,7 @@ public class VmDecompilerInformationController {
         }
 
         switch (action) {
-        	case CLASSINFOS:
+            case CLASSINFOS:
             case CLASSES:
             case HALT:
                 request = AgentRequestAction.create(vmInfo, hostname, listenPort, action);

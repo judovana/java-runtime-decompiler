@@ -212,7 +212,6 @@ public class DecompilerRequestReceiver {
             VmDecompilerStatus status = new VmDecompilerStatus();
             status.setHostname(hostname);
             status.setListenPort(reply.port);
-            status.setTimeStamp(System.currentTimeMillis());
             status.setVmId(vmId);
             status.setLoadedClassInfos(arrayOfClasses);
             vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
