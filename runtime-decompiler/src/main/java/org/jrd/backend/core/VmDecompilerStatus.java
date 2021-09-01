@@ -1,11 +1,10 @@
 package org.jrd.backend.core;
 
-
+import java.util.*;
 /**
  * This class stores all information about the state of decompiler plugin on 
  * each VM.
  */
-import java.util.*;
 
 public class VmDecompilerStatus{
 

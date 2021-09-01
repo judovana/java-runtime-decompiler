@@ -216,7 +216,6 @@ public class DecompilerRequestReceiver {
             status.setLoadedClassInfos(arrayOfClasses);
             vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
         } catch (Exception ex) {
-            OutputController.getLogger().log("Jaboody");
             OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
             return ERROR_RESPONSE;
         }
