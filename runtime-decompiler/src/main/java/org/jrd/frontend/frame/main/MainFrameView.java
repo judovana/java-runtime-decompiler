@@ -5,6 +5,7 @@ import org.jrd.backend.data.MetadataProperties;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.frontend.frame.about.AboutView;
 import org.jrd.frontend.frame.license.LicenseView;
+import org.jrd.frontend.frame.main.renderer.VmListRenderer;
 import org.jrd.frontend.frame.settings.SettingsView;
 import org.jrd.frontend.utility.ImageButtonFactory;
 import org.jrd.frontend.utility.ScreenFinder;
