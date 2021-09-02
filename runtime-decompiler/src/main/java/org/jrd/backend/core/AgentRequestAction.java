@@ -58,7 +58,8 @@ public class AgentRequestAction {
         OVERWRITE(3),
         INIT_CLASS(4),
         OVERRIDES(5),
-        REMOVE_OVERRIDES(6);
+        REMOVE_OVERRIDES(6),
+        CLASSES_WITH_INFO(7);
 
         private final int intVal;
 

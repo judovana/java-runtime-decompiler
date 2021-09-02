@@ -95,7 +95,10 @@ public class AgentActionWorker extends Thread {
                         AgentLogger.getLogger().log("Agent received HALT command, closing socket and exiting.");
                         break;
                     case "CLASSES":
-                        getAllLoadedClasses(outputStream);
+                        getAllLoadedClasses(outputStream, false);
+                        break;
+                    case "CLASSES_WITH_INFO":
+                        getAllLoadedClasses(outputStream, true);
                         break;
                     case "OVERRIDES":
                         getAllOverridesClasses(outputStream);
@@ -161,11 +164,11 @@ public class AgentActionWorker extends Thread {
     }
 
 
-    private void getAllLoadedClasses(BufferedWriter out) throws IOException {
+    private void getAllLoadedClasses(BufferedWriter out, boolean doGetInfo) throws IOException {
         getList(out, "CLASSES", new ListInjector() {
             @Override
             public void inject(BlockingQueue target) throws InterruptedException {
-                provider.getClassesNames(target, abort);
+                provider.getClasses(target, abort, doGetInfo);
             }
         });
     }

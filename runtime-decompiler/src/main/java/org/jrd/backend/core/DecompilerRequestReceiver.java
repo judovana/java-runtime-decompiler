@@ -13,10 +13,8 @@ import org.jrd.backend.data.VmManager;
 import org.jrd.backend.decompiling.PluginManager;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
 
 /**
  * This class manages the requests that are put in queue by the controller.
@@ -80,6 +78,7 @@ public class DecompilerRequestReceiver {
                 break;
             case OVERRIDES:
             case CLASSES:
+            case CLASSES_WITH_INFO:
                 response = getListAction(hostname, port, vmId, vmPid, action);
                 break;
             case HALT:
@@ -212,13 +211,15 @@ public class DecompilerRequestReceiver {
     private String getListAction(String hostname, int listenPort, String vmId, int vmPid, RequestAction type) {
         try {
             ResponseWithPort reply = getResponse(hostname, listenPort, vmId, vmPid, type.toString());
-            String[] arrayOfClasses = parseClasses(reply.response);
+            ClassInfo[] arrayOfClasses = parseClasses(reply.response);
             Arrays.sort(arrayOfClasses, new ClassesComparator());
+
             VmDecompilerStatus status = new VmDecompilerStatus();
             status.setHostname(hostname);
             status.setListenPort(reply.port);
             status.setVmId(vmId);
-            status.setLoadedClassNames(arrayOfClasses);
+            status.setLoadedClasses(arrayOfClasses);
+
             vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
         } catch (Exception ex) {
             Logger.getLogger().log(Logger.Level.ALL, ex);
@@ -250,20 +251,14 @@ public class DecompilerRequestReceiver {
         return actualListenPort;
     }
 
-    private String[] parseClasses(String classes) {
-        String[] array = classes.split(";");
-        List<String> list = new ArrayList<>(Arrays.asList(array));
-        list.removeAll(Arrays.asList("", null));
-        List<String> list1 = new ArrayList<>();
-        for (String s : list) {
-            list1.add(s);
-        }
-        java.util.Collections.sort(list1);
-        return list1.toArray(new String[]{});
-
+    private ClassInfo[] parseClasses(String classes) {
+        return Arrays.stream(classes.split(";"))
+                .filter(s -> s != null && !s.isEmpty() && !s.startsWith("|")) // ... && backwards compatibility && name is not empty
+                .map(ClassInfo::new)
+                .toArray(ClassInfo[]::new);
     }
 
-    private static class ClassesComparator implements Comparator<String>, Serializable {
+    private static class ClassesComparator implements Comparator<ClassInfo>, Serializable {
 
         @SuppressWarnings({"ReturnCount", "CyclomaticComplexity"}) // comparator syntax
         @SuppressFBWarnings(
@@ -271,16 +266,20 @@ public class DecompilerRequestReceiver {
                 justification = "False report of possible NP dereference, despite testing both o1 & o2 for nullness."
         )
         @Override
-        public int compare(String o1, String o2) {
-            if (o1 == null && o2 == null) {
+        public int compare(ClassInfo c1, ClassInfo c2) {
+            if (c1 == null && c2 == null) {
                 return 0;
             }
-            if (o1 == null && o2 != null) {
+            if (c1 == null && c2 != null) {
                 return 1;
             }
-            if (o1 != null && o2 == null) {
+            if (c1 != null && c2 == null) {
                 return -1;
             }
+
+            String o1 = c1.getName();
+            String o2 = c2.getName();
+
             if (o1.startsWith("[") && !o2.startsWith("[")) {
                 return 1;
             }
