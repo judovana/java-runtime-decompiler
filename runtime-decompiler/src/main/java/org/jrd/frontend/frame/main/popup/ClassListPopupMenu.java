@@ -1,5 +1,7 @@
 package org.jrd.frontend.frame.main.popup;
 
+import org.jrd.backend.core.ClassInfo;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
@@ -10,10 +12,11 @@ public final class ClassListPopupMenu extends JPopupMenu {
     private ClassListPopupMenu() {
     }
 
-    public static ClassListPopupMenu create(String classToCopy) {
+    public static ClassListPopupMenu create(ClassInfo classToCopy) {
         ClassListPopupMenu result = new ClassListPopupMenu();
 
-        result.add(createCopyClassNameItem("Copy class name", classToCopy));
+        result.add(createCopyClassNameItem("Copy class name", classToCopy.getName()));
+        result.add(createCopyClassNameItem("Copy class location", classToCopy.getLocation()));
 
         return result;
     }
