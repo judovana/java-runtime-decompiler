@@ -16,6 +16,8 @@ public class InstrumentationProvider {
     private final Transformer transformer;
     private final Instrumentation instrumentation;
 
+    private static final String INFO_DELIMITER = "|";
+
     InstrumentationProvider(Instrumentation inst, Transformer transformer) {
         this.transformer = transformer;
         this.instrumentation = inst;
@@ -86,10 +88,22 @@ public class InstrumentationProvider {
      * @param abort abort signal
      * @throws InterruptedException interrupted exception
      */
-    public void getClassesNames(BlockingQueue<String> queue, Boolean abort) throws InterruptedException {
+    public void getClasses(BlockingQueue<String> queue, Boolean abort, boolean doGetInfo) throws InterruptedException {
         Class[] loadedClasses = instrumentation.getAllLoadedClasses();
         for (Class loadedClass : loadedClasses) {
-            queue.put(loadedClass.getName());
+            String className = loadedClass.getName();
+            if (doGetInfo) {
+                String location;
+                try {
+                    location = loadedClass.getProtectionDomain().getCodeSource().getLocation().getPath();
+                } catch (Exception ex) {
+                    location = "unknown";
+                }
+
+                queue.put(className + INFO_DELIMITER + location);
+            } else {
+                queue.put(className);
+            }
             if (abort) {
                 break;
             }
