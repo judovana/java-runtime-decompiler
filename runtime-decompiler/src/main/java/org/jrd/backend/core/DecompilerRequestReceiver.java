@@ -252,8 +252,9 @@ public class DecompilerRequestReceiver {
     }
 
     private ClassInfo[] parseClasses(String classes) {
+        // filter: not null && backwards compatibility && name is not empty
         return Arrays.stream(classes.split(";"))
-                .filter(s -> s != null && !s.isEmpty() && !s.startsWith("|")) // ... && backwards compatibility && name is not empty
+                .filter(s -> s != null && !s.isEmpty() && !s.startsWith("|"))
                 .map(ClassInfo::new)
                 .toArray(ClassInfo[]::new);
     }
