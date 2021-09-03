@@ -2,6 +2,8 @@ package org.jrd.backend.data;
 
 import org.jrd.backend.core.AgentRequestAction;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -39,6 +41,14 @@ public class CliTest {
     private final StreamWrappers streams = new StreamWrappers();
 
     private static final String UNKNOWN_FLAG = "--zyxwvutsrqponmlqjihgfedcba";
+
+    @BeforeAll
+    static void startup() {
+        Assumptions.assumeTrue(
+                !Config.getConfig().getAgentExpandedPath().isEmpty(),
+                "Agent path is not set up, aborting CliTest."
+        );
+    }
 
     @Timeout(5)
     @BeforeEach
