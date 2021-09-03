@@ -1,6 +1,6 @@
 name: Java CI
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -18,4 +18,17 @@ jobs:
           cache: maven
 
       - name: Build with Maven
-        run: mvn --batch-mode --update-snapshots verify
+        run: mvn --batch-mode --update-snapshots clean install
+
+      - name: Create and populate config file
+        run: |
+          set -x
+          CONFIG_HOME="$HOME/.config/java-runtime-decompiler/conf"
+          mkdir -p -v "$CONFIG_HOME"
+          AGENT_PATH=$(find "${{ github.workspace }}" -name "decompiler-agent-*.jar" | head -n 1)
+          echo "{\"AGENT_PATH\":\"${AGENT_PATH}\"}" > "$CONFIG_HOME/config.json"
+          cat "$CONFIG_HOME/config.json"
+        shell: bash
+
+      - name: Test Cli
+        run: mvn --batch-mode test -Dtest=CliTest -DfailIfNoTests=false
