@@ -1,5 +1,6 @@
 package org.jrd.frontend.frame.plugins;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jrd.backend.data.Directories;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -10,6 +11,10 @@ import org.junit.jupiter.api.condition.OS;
 import java.io.File;
 import java.nio.file.Paths;
 
+@SuppressFBWarnings(
+        value = "DMI_HARDCODED_ABSOLUTE_FILENAME",
+        justification = "Hardcoded paths aren't used for manipulating with an actual filesystem."
+)
 class FileSelectorArrayRowTest {
     @BeforeAll
     static void setup(){
