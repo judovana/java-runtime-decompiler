@@ -193,7 +193,7 @@ public class VmManager{
     }
 
     public HashSet<VmInfo> getVmInfoSet() {
-        return this.vmInfoSet;
+        return new HashSet<>(this.vmInfoSet);
     }
 
     public void subscribeToVMChange(ActionListener listener){

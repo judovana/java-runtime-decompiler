@@ -109,10 +109,11 @@ public class PluginConfigurationEditorController {
 
             configPanelHashMap.clear();
             pluginManager.loadConfigs();
-            updateWrapperList(pluginManager.getWrappers());
+            List<DecompilerWrapperInformation> newWrappers = pluginManager.getWrappers();
+            updateWrapperList(newWrappers);
 
-            for(int i = 0; i < pluginManager.getWrappers().size(); i++){
-                if(selected.toString().contains(pluginManager.getWrappers().get(i).getFullyQualifiedClassName())){
+            for(int i = 0; i < newWrappers.size(); i++){
+                if(selected.toString().contains(newWrappers.get(i).getFullyQualifiedClassName())){
                     view.getPluginListPanel().getWrapperJList().setSelectedIndex(i);
                     break;
                 }
@@ -229,7 +230,7 @@ public class PluginConfigurationEditorController {
                     "Saving error",
                     JOptionPane.ERROR_MESSAGE);
         }
-        pluginManager.getWrappers().add(clonedWrapper);
+        pluginManager.addWrapper(clonedWrapper);
         return clonedWrapper;
     }
 
