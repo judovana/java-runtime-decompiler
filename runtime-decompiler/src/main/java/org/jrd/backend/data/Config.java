@@ -136,19 +136,19 @@ public class Config {
                 configMap.put(kv[0], kv[1]);
             });
             saveConfigFile();
-            legacyConfFile.delete();
+
+            Files.delete(legacyConfFile.toPath());
         }
     }
 
     public void saveConfigFile() throws IOException {
         File confFile = new File(CONFIG_FILE_PATH);
+
         if (!confFile.getParentFile().exists()){
-            confFile.getParentFile().mkdirs();
-        }
-        if (!confFile.exists()) {
-            confFile.createNewFile();
+            Files.createDirectories(confFile.getParentFile().toPath());
         }
 
+        // creates file if it does not exist
         Files.write(Paths.get(CONFIG_FILE_PATH), Collections.singleton(gson.toJson(configMap)), StandardCharsets.UTF_8);
     }
 
