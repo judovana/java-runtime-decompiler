@@ -1,5 +1,6 @@
 package org.jrd.backend.data;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jrd.backend.core.OutputController;
 
 import java.io.IOException;
@@ -60,6 +61,7 @@ public class MetadataProperties {
      * Properties that also use the default value passed to {@link Properties#getProperty(String, String) getProperty()}
      * if the property was found, but matched the regex passed at initialization.
      */
+    @SuppressFBWarnings(value = "EQ_DOESNT_OVERRIDE_EQUALS", justification = "Not necessary to override equals here.")
     private static class FromFileProperties extends Properties {
         private final Pattern unpropagatedValuePattern;
 
