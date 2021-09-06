@@ -116,7 +116,7 @@ public class VmInfo implements Serializable {
     )
     public void setCp(List<File> cp) {
         if (cp == null){
-            this.cp = cp;
+            this.cp = null;
         } else {
             this.cp = Collections.unmodifiableList(cp);
         }

@@ -18,7 +18,7 @@ public class ArchiveManagerOptions {
 	private static final List<String> defaults = List.of(".zip", ".jar", ".war", ".ear");
 
 	public void setExtension(List<String> s) {
-		extensions = s;
+		extensions = Collections.unmodifiableList(s);
 	}
 
 	public List<String> getExtensions() {
