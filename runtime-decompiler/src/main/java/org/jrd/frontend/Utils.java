@@ -4,6 +4,7 @@ import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.DecompilerRequestReceiver;
+import org.jrd.backend.core.OutputController;
 import org.jrd.backend.data.Cli;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
@@ -38,7 +39,11 @@ public class Utils {
             name = cheatName(fileNameBase, naming, suffix, clazz);
             File f = new File(name);
             if (naming == SRC_SUBDIRS_NAME) {
-                f.getParentFile().mkdirs();
+                try {
+                    Files.createDirectories(f.getParentFile().toPath());
+                } catch (IOException e) {
+                    OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
+                }
             }
             Files.write(f.toPath(), content);
             ss = "Saved: ";

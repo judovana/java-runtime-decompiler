@@ -3,6 +3,9 @@ package org.jrd.backend.data;
 import org.jrd.backend.core.OutputController;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public final class Directories {
@@ -78,8 +81,19 @@ public final class Directories {
 
     public static void createPluginDirectory() {
         File pluginDir = new File(getPluginDirectory());
+
         if (!pluginDir.exists()) {
-            pluginDir.mkdirs();
+            if (!pluginDir.mkdirs()) {
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Unable to create plugin directory '" + pluginDir.getAbsolutePath() + "'.");
+            }
+        }
+    }
+
+    public static void deleteWithException(String stringPath) {
+        try {
+            Files.delete(Path.of(stringPath));
+        } catch (IOException e) {
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
         }
     }
 }

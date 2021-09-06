@@ -236,7 +236,7 @@ public class ArchiveManager {
                 Files.copy(Path.of(path), c.toPath(), REPLACE_EXISTING);
             }
             // Delete once it was moved
-            new File(path).delete();
+            Directories.deleteWithException(path);
         }
     }
 

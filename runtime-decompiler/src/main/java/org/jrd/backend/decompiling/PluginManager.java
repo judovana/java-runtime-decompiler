@@ -21,8 +21,6 @@ import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Base64;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -241,7 +239,7 @@ public class PluginManager {
                 OutputController.getLogger().log(e);
             } finally {
                 // Delete compiled class
-                new File(System.getProperty("java.io.tmpdir") + "/" + wrapper.getFullyQualifiedClassName() + ".class").delete();
+                Directories.deleteWithException(System.getProperty("java.io.tmpdir") + "/" + wrapper.getFullyQualifiedClassName() + ".class");
             }
         }
     }
@@ -262,8 +260,7 @@ public class PluginManager {
         }
         boolean fileChanged = !oldWrapper.getFileLocation().equals(newWrapper.getFileLocation());
         if (fileChanged && oldWrapper.getScope().equals("local")) {
-            File oldWrapperFile = new File(oldWrapper.getFileLocation());
-            oldWrapperFile.delete();
+            Directories.deleteWithException(oldWrapper.getFileLocation());
         }
 
         wrappers.remove(oldWrapper);
@@ -275,17 +272,8 @@ public class PluginManager {
         wrappers.remove(wrapperInformation);
 
         if (wrapperInformation.getScope().equals("local")) {
-            try {
-                Files.delete(Path.of(wrapperInformation.getFileLocation()));
-            } catch (IOException e) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
-            }
-
-            try {
-                Files.delete(Path.of(ImportUtils.flipWrapperExtension(wrapperInformation.getFileLocation())));
-            } catch (IOException e) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
-            }
+            Directories.deleteWithException(wrapperInformation.getFileLocation());
+            Directories.deleteWithException(ImportUtils.flipWrapperExtension(wrapperInformation.getFileLocation()));
         }
     }
 
@@ -322,12 +310,7 @@ public class PluginManager {
         int errLevel = compileWrapper(plugin, errStream);
         //cleaning after compilation
         String fileName = plugin.getWrapperURL().getFile().getName();
-
-        try {
-            Files.delete(Path.of(System.getProperty("java.io.tmpdir"), fileName.substring(0, fileName.length() - 4) + "class"));
-        } catch (IOException e) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, e);
-        }
+        Directories.deleteWithException(System.getProperty("java.io.tmpdir") + fileName.substring(0, fileName.length() - 4) + "class");
 
         return errLevel != 0 ? new String(errStream.toByteArray(), StandardCharsets.UTF_8) : null;
     }
