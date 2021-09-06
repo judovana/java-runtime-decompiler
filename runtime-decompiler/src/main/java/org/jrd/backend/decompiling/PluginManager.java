@@ -192,54 +192,53 @@ public class PluginManager {
 
             return;
         }
-        {
-            try {
-                // Compile Wrapper
-                compileWrapper(wrapper, null);
 
-                // Load wrapper
-                List<URL> classPathList = new LinkedList<>();
-                for (ExpandableUrl url : wrapper.getDependencyURLs()) {
-                    classPathList.add(url.getExpandedURL());
-                }
-                classPathList.add(new URL(prependFileProtocol(System.getProperty("java.io.tmpdir")) + "/")); // trailing slash just in case
+        try {
+            // Compile Wrapper
+            compileWrapper(wrapper, null);
 
-                // Reflect classes & methods and store them in DecompilerWrapperInformation for later use
-                ClassLoader loader = URLClassLoader.newInstance(
-                        classPathList.toArray(new URL[0]),
-                        getClass().getClassLoader()
-                );
-                Class<?> DecompilerClass = loader.loadClass(wrapper.getFullyQualifiedClassName());
-                Constructor<?> constructor = DecompilerClass.getConstructor();
-                wrapper.setInstance(constructor.newInstance());
-
-                try {
-                    wrapper.setDecompileMethodNoInners(DecompilerClass.getMethod("decompile", byte[].class, String[].class));
-                } catch (Exception e) {
-                    OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "No custom decompile method (without inner classes): " + e.getMessage());
-                }
-
-                try {
-                    wrapper.setDecompileMethodWithInners(DecompilerClass.getMethod("decompile", String.class, byte[].class, Map.class, String[].class));
-                } catch (Exception e) {
-                    OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "No custom decompile method (with inner classes): " + e.getMessage());
-                }
-
-                if (!wrapper.haveDecompilerMethod()) {
-                    throw new InstantiationException("Decompiler '" + wrapper.getName() + "' does not have any decompile methods!");
-                }
-
-                try {
-                    wrapper.setCompileMethod(DecompilerClass.getMethod("compile", Map.class, String[].class, Object.class));
-                } catch (Exception e) {
-                    OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "No custom compile method: " + e.getMessage());
-                }
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException | ClassNotFoundException | MalformedURLException e) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Decompiler wrapper could not be loaded. " + e.getMessage());
-                OutputController.getLogger().log(e);
-            } finally { // delete compiled class
-                Directories.deleteWithException(System.getProperty("java.io.tmpdir") + "/" + wrapper.getFullyQualifiedClassName() + ".class");
+            // Load wrapper
+            List<URL> classPathList = new LinkedList<>();
+            for (ExpandableUrl url : wrapper.getDependencyURLs()) {
+                classPathList.add(url.getExpandedURL());
             }
+            classPathList.add(new URL(prependFileProtocol(System.getProperty("java.io.tmpdir")) + "/")); // trailing slash just in case
+
+            // Reflect classes & methods and store them in DecompilerWrapperInformation for later use
+            ClassLoader loader = URLClassLoader.newInstance(
+                    classPathList.toArray(new URL[0]),
+                    getClass().getClassLoader()
+            );
+            Class<?> DecompilerClass = loader.loadClass(wrapper.getFullyQualifiedClassName());
+            Constructor<?> constructor = DecompilerClass.getConstructor();
+            wrapper.setInstance(constructor.newInstance());
+
+            try {
+                wrapper.setDecompileMethodNoInners(DecompilerClass.getMethod("decompile", byte[].class, String[].class));
+            } catch (Exception e) {
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "No custom decompile method (without inner classes): " + e.getMessage());
+            }
+
+            try {
+                wrapper.setDecompileMethodWithInners(DecompilerClass.getMethod("decompile", String.class, byte[].class, Map.class, String[].class));
+            } catch (Exception e) {
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "No custom decompile method (with inner classes): " + e.getMessage());
+            }
+
+            if (!wrapper.haveDecompilerMethod()) {
+                throw new InstantiationException("Decompiler '" + wrapper.getName() + "' does not have any decompile methods!");
+            }
+
+            try {
+                wrapper.setCompileMethod(DecompilerClass.getMethod("compile", Map.class, String[].class, Object.class));
+            } catch (Exception e) {
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "No custom compile method: " + e.getMessage());
+            }
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException | ClassNotFoundException | MalformedURLException e) {
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Decompiler wrapper could not be loaded. " + e.getMessage());
+            OutputController.getLogger().log(e);
+        } finally { // delete compiled class
+            Directories.deleteWithException(System.getProperty("java.io.tmpdir") + "/" + wrapper.getFullyQualifiedClassName() + ".class");
         }
     }
 
