@@ -268,6 +268,14 @@ public class DecompilerWrapperInformation {
         return getScope().equals(LOCAL_SCOPE);
     }
 
+    public boolean isJavap() {
+        return name.equals(DecompilerWrapperInformation.JAVAP_NAME);
+    }
+
+    public boolean isJavapVerbose() {
+        return name.equals(DecompilerWrapperInformation.JAVAP_VERBOSE_NAME);
+    }
+
     @Override
     public String toString() {
         return getName() + " [" + getScope() + "]";
