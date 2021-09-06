@@ -65,8 +65,6 @@ public class Communicate {
 
         this.commInput = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
         this.commOutput = new BufferedWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8));
-
-        return;
     }
 
     /**

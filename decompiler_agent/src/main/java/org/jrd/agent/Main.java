@@ -30,11 +30,11 @@ public class Main {
             String[] argsArray = agentArgs.split(",");
             for (String arg : argsArray) {
                 if (arg.startsWith(ADDRESS_STRING)) {
-                    hostname = arg.substring(ADDRESS_STRING.length(), arg.length());
+                    hostname = arg.substring(ADDRESS_STRING.length());
 
                 } else if (arg.startsWith(PORT_STRING)) {
                     try {
-                        port = Integer.valueOf(arg.substring(PORT_STRING.length(), arg.length()));
+                        port = Integer.valueOf(arg.substring(PORT_STRING.length()));
                         if (port <= 0) {
                             OutputControllerAgent.getLogger().log(new RuntimeException("The port value is negative:" + port));
                             port = null;
