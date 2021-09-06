@@ -17,6 +17,7 @@ public final class ClassListPopupMenu extends JPopupMenu {
 
         result.add(createCopyClassNameItem("Copy class name", classToCopy.getName()));
         result.add(createCopyClassNameItem("Copy class location", classToCopy.getLocation()));
+        result.add(createCopyClassNameItem("Copy class loader", classToCopy.getClassLoader()));
 
         return result;
     }
