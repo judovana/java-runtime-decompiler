@@ -312,7 +312,7 @@ public class PluginManager {
         String fileName = plugin.getWrapperURL().getFile().getName();
         Directories.deleteWithException(System.getProperty("java.io.tmpdir") + fileName.substring(0, fileName.length() - 4) + "class");
 
-        return errLevel != 0 ? new String(errStream.toByteArray(), StandardCharsets.UTF_8) : null;
+        return errLevel != 0 ? errStream.toString(StandardCharsets.UTF_8) : null;
     }
 
     public DecompilerWrapperInformation createWrapper() {

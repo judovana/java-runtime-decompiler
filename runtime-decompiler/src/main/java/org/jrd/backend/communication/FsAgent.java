@@ -87,7 +87,7 @@ public class FsAgent implements JrdAgent {
     private String readClasses() throws IOException {
         List<String> classes = new ArrayList<>();
         new OperateOnCp<Void>(cp).operateOnCp(null, new ListingCpOperator(classes));
-        return classes.stream().collect(Collectors.joining(";"));
+        return String.join(";", classes);
     }
 
     private interface CpOperator<T> {
