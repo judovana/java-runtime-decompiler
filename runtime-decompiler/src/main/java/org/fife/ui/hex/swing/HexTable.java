@@ -262,12 +262,16 @@ class HexTable extends JTable {
 
                     e.consume();
                     break;
+                default:
+                    break;
             }
         } else if (e.getID() == KeyEvent.KEY_TYPED) {
             switch (e.getKeyChar()) {
                 case ' ':
                 case '\n':
                     e.consume(); // disregard KEY_TYPED after KEY_PRESSED
+                    break;
+                default:
                     break;
             }
         }
