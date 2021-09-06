@@ -24,6 +24,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -43,7 +44,7 @@ public class PluginManager {
     private List<DecompilerWrapperInformation> wrappers;
 
     public List<DecompilerWrapperInformation> getWrappers() {
-        return wrappers;
+        return Collections.unmodifiableList(wrappers);
     }
 
     Gson gson;
@@ -373,4 +374,7 @@ public class PluginManager {
         }
     }
 
+    public void addWrapper(DecompilerWrapperInformation wrapper) {
+        wrappers.add(wrapper);
+    }
 }

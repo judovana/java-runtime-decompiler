@@ -627,10 +627,7 @@ public class Cli {
             throw new RuntimeException(LIST_PLUGINS + " does not expect arguments.");
         }
 
-        PluginManager pm = new PluginManager();
-        List<DecompilerWrapperInformation> wrappers = pm.getWrappers();
-
-        for (DecompilerWrapperInformation dw : wrappers) {
+        for (DecompilerWrapperInformation dw : pluginManager.getWrappers()) {
             System.out.println(dw.getName() + " " + dw.getScope() + "/" + invalidityToString(dw.isInvalidWrapper()) + " - " + dw.getFileLocation());
         }
     }

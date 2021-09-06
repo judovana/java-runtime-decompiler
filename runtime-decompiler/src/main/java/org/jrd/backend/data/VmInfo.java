@@ -123,7 +123,7 @@ public class VmInfo implements Serializable {
     }
 
     public List<File> getCp() {
-        return cp;
+        return Collections.unmodifiableList(cp);
     }
 
     public String getCpString() {
