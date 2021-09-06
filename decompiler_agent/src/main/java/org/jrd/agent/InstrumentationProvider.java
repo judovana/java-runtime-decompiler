@@ -100,7 +100,14 @@ public class InstrumentationProvider {
                     location = "unknown";
                 }
 
-                queue.put(className + INFO_DELIMITER + location);
+                String classLoader;
+                try {
+                    classLoader = loadedClass.getClassLoader().toString();
+                } catch (Exception ex) {
+                    classLoader = "unknown";
+                }
+
+                queue.put(className + INFO_DELIMITER + location + INFO_DELIMITER + classLoader);
             } else {
                 queue.put(className);
             }
