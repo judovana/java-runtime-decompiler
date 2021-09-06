@@ -13,7 +13,7 @@ public class ConnectionDelegator extends Thread{
 
     private ServerSocket theServerSocket;
     private InstrumentationProvider provider;
-    private boolean running;
+    private static boolean running;
 
     private ConnectionDelegator(InstrumentationProvider provider, ServerSocket serverSocket) {
         this.provider = provider;
@@ -60,7 +60,7 @@ public class ConnectionDelegator extends Thread{
      */
     @Override
     public void run() {
-        running = true;
+        setRunning(true);
 
         while (running) {
             if (theServerSocket.isClosed()) {
@@ -88,17 +88,17 @@ public class ConnectionDelegator extends Thread{
         }
     }
 
+    private synchronized static void setRunning(boolean isRunning) {
+        running = isRunning;
+    }
+
     /**
      * Closes server socket
      * Already connected clients can finish their work but no new clients can connect.
      */
-    public void gracefulShutdown(){
+    public static void gracefulShutdown(){
         if (/*Agent was created by client*/true){
-            running = false;
+            setRunning(false);
         }
-    }
-
-    public static ConnectionDelegator getConnectionDelegator() {
-        return connectionDelegator;
     }
 }
