@@ -34,9 +34,9 @@ public class NewConnectionController {
     }
 
     /**
-     * Returns true if portString is an integer between 0 and 65535
-     * @param portString
-     * @return
+     * Validates a port.
+     * @param portString string representation of the port number
+     * @return true if portString is an integer between 0 and 65535
      */
     boolean isValidPort(String portString) {
         try {

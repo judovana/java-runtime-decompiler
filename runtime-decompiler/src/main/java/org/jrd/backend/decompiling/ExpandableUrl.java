@@ -54,14 +54,12 @@ public class ExpandableUrl {
         }
     }
 
-    /**
+    /*
      * There were many differences in file protocol handling
      * between jdk8 and jdk11. Especially on Windows, Where
      * redundant / could auto point to C:\ or simply kill the path
      * Although this method should be of signature URL:(File),
-     * it was left as String String, as the slashes are making us mad
-     * @param url
-     * @return
+     * it was left as String String, as the slashes are making us mad.
      */
     protected static String prependFileProtocol(String url) {
         return "file:" + url;

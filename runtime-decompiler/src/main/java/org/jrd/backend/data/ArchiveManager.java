@@ -141,7 +141,7 @@ public class ArchiveManager {
      * Recursively unpacks all required archives
      * @param toUnpack Archive to be unpacked
      * @return File pointer to last archive
-     * @throws IOException
+     * @throws IOException if an I/O error occurs during unpacking
      */
     private File recursiveUnpack(File toUnpack) throws IOException {
         File destDir = new File(tmpdir + fileSeparator + "jrd" + fileSeparator + currentD);
@@ -187,8 +187,8 @@ public class ArchiveManager {
      * ZipSlip guard
      * @param destinationDir Destination directory
      * @param zipEntry Zip entry
-     * @return
-     * @throws IOException
+     * @return File object pointing to "destinationDir/zipEntry"
+     * @throws IOException cannot happen
      */
     public File newFile(File destinationDir, ZipEntry zipEntry) throws IOException {
         File destFile = new File(destinationDir, zipEntry.getName());
@@ -245,7 +245,7 @@ public class ArchiveManager {
      * @param f2zip File/Folder to be archived
      * @param fName Name of the file
      * @param zOut Zip output stream used to output zipped bytes
-     * @throws IOException
+     * @throws IOException if an I/O error occurs when writing to the output stream
      */
     public void recursiveZip(File f2zip, String fName, ZipOutputStream zOut) throws IOException {
         if (f2zip.isDirectory()) {
