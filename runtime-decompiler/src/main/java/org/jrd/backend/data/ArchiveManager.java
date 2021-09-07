@@ -250,7 +250,7 @@ public class ArchiveManager {
     public void recursiveZip(File f2zip, String fName, ZipOutputStream zOut) throws IOException {
         if (f2zip.isDirectory()) {
             if (!fName.endsWith(fileSeparator)) {
-                fName += fileSeparator;
+                fName += "/";
             }
             zOut.putNextEntry(new ZipEntry(fName));
             zOut.closeEntry();
