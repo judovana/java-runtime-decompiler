@@ -44,25 +44,25 @@ public class PluginConfigurationEditorController {
         view.getPluginTopOptionPanel().getOpenWebsiteButton().addActionListener(actionEvent -> openDecompilerDownloadURL());
         view.getPluginTopOptionPanel().getImportButton().addActionListener(actionEvent -> openImportDialog());
         view.getOkCancelPanel().getOkButton().addActionListener(actionEvent -> {
-            for (DecompilerWrapperInformation wrapperInformation: configPanelHashMap.keySet()){
+            for (DecompilerWrapperInformation wrapperInformation: configPanelHashMap.keySet()) {
                 applyWrapperChange(wrapperInformation);
             }
             view.dispose();
-            if (pluginsConfiguredListener != null){
-                pluginsConfiguredListener.actionPerformed(new ActionEvent(this, 0 , null));
+            if (pluginsConfiguredListener != null) {
+                pluginsConfiguredListener.actionPerformed(new ActionEvent(this, 0, null));
             }
         });
         view.getOkCancelPanel().getCancelButton().addActionListener(actionEvent -> view.dispose());
         view.getOkCancelPanel().getValidateButton().addActionListener(actionEvent -> {
-            if(view.getPluginListPanel().getWrapperJList().getSelectedIndex() == -1) return;
+            if (view.getPluginListPanel().getWrapperJList().getSelectedIndex() == -1) return;
             String result = pluginManager.validatePlugin(getDataFromPanel((DecompilerWrapperInformation) view.getPluginListPanel().getWrapperJList().getSelectedValue()));
-            if (result != null){
+            if (result != null) {
                 JOptionPane.showMessageDialog(view,
                         "Validation failed: " + result,
                         "Error",
                         JOptionPane.ERROR_MESSAGE);
-            }else {
-                JOptionPane.showMessageDialog(view,"This plugin is valid.","Success", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(view, "This plugin is valid.", "Success", JOptionPane.INFORMATION_MESSAGE);
             }
 
         });
@@ -71,14 +71,14 @@ public class PluginConfigurationEditorController {
         view.getPluginListPanel().getWrapperJList().setSelectedIndex(0);
     }
 
-    private void openImportDialog(){
+    private void openImportDialog() {
         List<URL> availableDecompilers = ImportUtils.getWrappersFromClasspath();
         ArrayList<String> availableDecompilerNames = new ArrayList<>();
 
-        for(URL url : availableDecompilers){
+        for (URL url : availableDecompilers) {
             try {
                 URL javaWrapperComplement = new URL(ImportUtils.flipWrapperExtension(url.toString()));
-                if (javaWrapperComplement.openStream() != null){
+                if (javaWrapperComplement.openStream() != null) {
                     availableDecompilerNames.add(url.toString().substring(url.toString().lastIndexOf("/") + 1));
                 }
             } catch (IOException e) {
@@ -99,8 +99,8 @@ public class PluginConfigurationEditorController {
             URL selectedURL = availableDecompilers.get(availableDecompilerNames.indexOf(selected.toString()));
             String selectedFilename = ImportUtils.filenameFromUrl(selectedURL);
 
-            if(new File(Directories.getPluginDirectory() + File.separator + selectedFilename).exists()){
-                if(confirmWrapperOverwrite() != JOptionPane.OK_OPTION){
+            if (new File(Directories.getPluginDirectory() + File.separator + selectedFilename).exists()) {
+                if (confirmWrapperOverwrite() != JOptionPane.OK_OPTION) {
                     return;
                 }
             }
@@ -112,8 +112,8 @@ public class PluginConfigurationEditorController {
             List<DecompilerWrapperInformation> newWrappers = pluginManager.getWrappers();
             updateWrapperList(newWrappers);
 
-            for(int i = 0; i < newWrappers.size(); i++){
-                if(selected.toString().contains(newWrappers.get(i).getFullyQualifiedClassName())){
+            for (int i = 0; i < newWrappers.size(); i++) {
+                if (selected.toString().contains(newWrappers.get(i).getFullyQualifiedClassName())) {
                     view.getPluginListPanel().getWrapperJList().setSelectedIndex(i);
                     break;
                 }
@@ -121,7 +121,7 @@ public class PluginConfigurationEditorController {
         }
     }
 
-    private int confirmWrapperOverwrite(){
+    private int confirmWrapperOverwrite() {
         String[] options = {"Yes", "No"};
         return JOptionPane.showOptionDialog(this.view,
                 "An identical file already exists in " + Directories.getPluginDirectory() + ".\n" +
@@ -134,9 +134,9 @@ public class PluginConfigurationEditorController {
                 options[1]);
     }
 
-    void onPluginJListChange(){
+    void onPluginJListChange() {
         if (view.getPluginListPanel().getWrapperJList().getSelectedIndex() == -1) return;
-        DecompilerWrapperInformation selectedPlugin = (DecompilerWrapperInformation)view.getPluginListPanel().getWrapperJList().getSelectedValue();
+        DecompilerWrapperInformation selectedPlugin = (DecompilerWrapperInformation) view.getPluginListPanel().getWrapperJList().getSelectedValue();
         ConfigPanel configPanel = getOrCreatePluginConfigPanel(selectedPlugin);
 
         toggleWebsiteButton(selectedPlugin);
@@ -144,8 +144,8 @@ public class PluginConfigurationEditorController {
         view.switchCard(configPanel, String.valueOf(System.identityHashCode(configPanel)));
     }
 
-    private void toggleWebsiteButton(DecompilerWrapperInformation plugin){
-        if(plugin.getDecompilerDownloadURL() != null){
+    private void toggleWebsiteButton(DecompilerWrapperInformation plugin) {
+        if (plugin.getDecompilerDownloadURL() != null) {
             view.getPluginTopOptionPanel().getOpenWebsiteButton().setEnabled(true);
             view.getPluginTopOptionPanel().getOpenWebsiteButton().setToolTipText(null);
         } else {
@@ -157,7 +157,7 @@ public class PluginConfigurationEditorController {
         }
     }
 
-    public void openDecompilerDownloadURL(){
+    public void openDecompilerDownloadURL() {
         JList wrapperJList = view.getPluginListPanel().getWrapperJList();
         DecompilerWrapperInformation wrapperInformation = (DecompilerWrapperInformation) wrapperJList.getSelectedValue();
         if (wrapperInformation.getDecompilerDownloadURL() != null) {
@@ -166,8 +166,8 @@ public class PluginConfigurationEditorController {
                 java.awt.Desktop.getDesktop().browse(downloadURI);
             } catch (IOException | URISyntaxException e) {
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
-            } catch (UnsupportedOperationException e){
-                JOptionPane.showMessageDialog(view, "Website could not be opened automatically. Go to: "  + wrapperInformation.getDecompilerDownloadURL().toString());
+            } catch (UnsupportedOperationException e) {
+                JOptionPane.showMessageDialog(view, "Website could not be opened automatically. Go to: " + wrapperInformation.getDecompilerDownloadURL().toString());
             }
         }
     }
@@ -207,10 +207,9 @@ public class PluginConfigurationEditorController {
         JList<DecompilerWrapperInformation> wrapperJList = view.getPluginListPanel().getWrapperJList();
 
         List<DecompilerWrapperInformation> pluginsWithoutJavap = new ArrayList<>(wrappers);
-        for (int x = 0; x< pluginsWithoutJavap.size() ; x++) {
+        for (int x = 0; x < pluginsWithoutJavap.size(); x++) {
             DecompilerWrapperInformation wrapperInformation = pluginsWithoutJavap.get(x);
-            if (wrapperInformation.getName().equals(DecompilerWrapperInformation.JAVAP_NAME)
-                    || wrapperInformation.getName().equals(DecompilerWrapperInformation.JAVAP_VERBOSE_NAME)) {
+            if (wrapperInformation.isJavap() || wrapperInformation.isJavapVerbose()) {
                 pluginsWithoutJavap.remove(wrapperInformation);
                 x--;
             }
@@ -218,7 +217,7 @@ public class PluginConfigurationEditorController {
         wrapperJList.setListData(pluginsWithoutJavap.toArray(new DecompilerWrapperInformation[0]));
     }
 
-    private DecompilerWrapperInformation cloneWrapper(DecompilerWrapperInformation wrapperInformation){
+    private DecompilerWrapperInformation cloneWrapper(DecompilerWrapperInformation wrapperInformation) {
         DecompilerWrapperInformation clonedWrapper = getDataFromPanel(wrapperInformation);
         pluginManager.setLocationForNewWrapper(clonedWrapper);
         clonedWrapper.setDecompilerDownloadURL(wrapperInformation.getDecompilerDownloadURL().toString());
@@ -236,12 +235,12 @@ public class PluginConfigurationEditorController {
 
     private void applyWrapperChange(DecompilerWrapperInformation oldWrapper) {
         File f = new File(oldWrapper.getFileLocation());
-        if (!f.canWrite()){
+        if (!f.canWrite()) {
             return;
         }
         DecompilerWrapperInformation newWrapper = getDataFromPanel(oldWrapper);
         newWrapper.setFileLocation(oldWrapper.getFileLocation());
-        if(oldWrapper.getDecompilerDownloadURL() == null){
+        if (oldWrapper.getDecompilerDownloadURL() == null) {
             newWrapper.setDecompilerDownloadURL("");
         } else {
             newWrapper.setDecompilerDownloadURL(oldWrapper.getDecompilerDownloadURL().toString());
@@ -256,7 +255,7 @@ public class PluginConfigurationEditorController {
         }
     }
 
-    public DecompilerWrapperInformation getDataFromPanel(DecompilerWrapperInformation wrapperInformation){
+    public DecompilerWrapperInformation getDataFromPanel(DecompilerWrapperInformation wrapperInformation) {
         ConfigPanel configPanel = configPanelHashMap.get(wrapperInformation);
         DecompilerWrapperInformation newWrapper = new DecompilerWrapperInformation();
 
@@ -266,8 +265,8 @@ public class PluginConfigurationEditorController {
         return newWrapper;
     }
 
-    public ConfigPanel getOrCreatePluginConfigPanel(DecompilerWrapperInformation vmInfo){
-        if (configPanelHashMap.containsKey(vmInfo)){
+    public ConfigPanel getOrCreatePluginConfigPanel(DecompilerWrapperInformation vmInfo) {
+        if (configPanelHashMap.containsKey(vmInfo)) {
             return configPanelHashMap.get(vmInfo);
         }
         ConfigPanel configPanel = new ConfigPanel();
@@ -277,19 +276,19 @@ public class PluginConfigurationEditorController {
     }
 
     public void updatePanelInfo(ConfigPanel pluginConfigPanel, DecompilerWrapperInformation vmInfo) {
-        if (vmInfo.getFileLocation() != null){
+        if (vmInfo.getFileLocation() != null) {
             pluginConfigPanel.getJsonFileURL().setText("Location: " + vmInfo.getFileLocation());
-            if(!Files.isWritable(Paths.get(vmInfo.getFileLocation()))){
+            if (!Files.isWritable(Paths.get(vmInfo.getFileLocation()))) {
                 pluginConfigPanel.getMessagePanel().setVisible(true);
             }
         }
-        if (vmInfo.getName() != null){
+        if (vmInfo.getName() != null) {
             pluginConfigPanel.getNamePanel().getTextField().setText(vmInfo.getName());
         }
-        if (vmInfo.getDependencyURLs() != null){
+        if (vmInfo.getDependencyURLs() != null) {
             vmInfo.getDependencyURLs().forEach(url -> pluginConfigPanel.getDependencyUrlPanel().addRow(url.getRawPath(), false));
         }
-        if (vmInfo.getWrapperURL() != null){
+        if (vmInfo.getWrapperURL() != null) {
             pluginConfigPanel.getWrapperUrlPanel().setText(vmInfo.getWrapperURL().getRawPath());
         }
     }

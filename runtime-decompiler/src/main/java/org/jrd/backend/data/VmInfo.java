@@ -70,7 +70,7 @@ public class VmInfo implements Serializable {
     }
 
     public void replaceVmDecompilerStatus(VmDecompilerStatus status) {
-        if (getVmId().equals(status.getVmId())){
+        if (getVmId().equals(status.getVmId())) {
             setVmDecompilerStatus(status);
         } else {
             OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG,
@@ -115,7 +115,7 @@ public class VmInfo implements Serializable {
             justification = "Classpath is only used for FS VMs, in other cases getCp() does not get called, thus null is permissible."
     )
     public void setCp(List<File> cp) {
-        if (cp == null){
+        if (cp == null) {
             this.cp = null;
         } else {
             this.cp = Collections.unmodifiableList(cp);
@@ -139,7 +139,7 @@ public class VmInfo implements Serializable {
         return String.format(
                 "%s %s (type %s",
                 vmId, vmName, type
-        ) + (type == Type.FS ? ", classpath: " + getCpString() : "" ) + ")";
+        ) + (type == Type.FS ? ", classpath: " + getCpString() : "") + ")";
     }
 
     @Override

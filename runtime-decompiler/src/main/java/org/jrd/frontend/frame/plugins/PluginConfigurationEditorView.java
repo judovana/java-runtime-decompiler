@@ -1,4 +1,5 @@
 package org.jrd.frontend.frame.plugins;
+
 import org.jrd.frontend.frame.main.MainFrameView;
 
 import javax.swing.*;
@@ -60,15 +61,15 @@ public class PluginConfigurationEditorView extends JDialog {
         return okCancelPanel;
     }
 
-    public void switchCard(JPanel jPanel, String id){
+    public void switchCard(JPanel jPanel, String id) {
         boolean isNew = true;
-        for (Component component : cardConfigPanel.getComponents()){
-            if (jPanel == component){
+        for (Component component : cardConfigPanel.getComponents()) {
+            if (jPanel == component) {
                 isNew = false;
                 break;
             }
         }
-        if (isNew){
+        if (isNew) {
             cardConfigPanel.add(jPanel, id);
         }
         cardLayoutForConfigPanels.show(cardConfigPanel, id);

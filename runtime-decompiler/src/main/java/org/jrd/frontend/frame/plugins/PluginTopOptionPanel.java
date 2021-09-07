@@ -10,21 +10,22 @@ public class PluginTopOptionPanel extends JPanel {
     private final JButton openWebsiteButton;
     private final JButton importButton;
 
-    public PluginTopOptionPanel(){
+    public PluginTopOptionPanel() {
         final int height = 28;
         final int buttonWidth = 84;
+        Dimension buttonSize = new Dimension(buttonWidth, height);
 
         this.setLayout(new GridBagLayout());
-        this.setPreferredSize(new Dimension(0,height));
+        this.setPreferredSize(new Dimension(0, height));
 
         cloneButton = new JButton("Clone");
-        cloneButton.setPreferredSize(new Dimension(buttonWidth,height));
+        cloneButton.setPreferredSize(buttonSize);
         deleteButton = new JButton("Delete");
-        deleteButton.setPreferredSize(new Dimension(buttonWidth,height));
+        deleteButton.setPreferredSize(buttonSize);
         openWebsiteButton = new JButton("Website");
-        openWebsiteButton.setPreferredSize(new Dimension(buttonWidth,height));
+        openWebsiteButton.setPreferredSize(buttonSize);
         importButton = new JButton("Import");
-        importButton.setPreferredSize(new Dimension(buttonWidth,height));
+        importButton.setPreferredSize(buttonSize);
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.weightx = 0;

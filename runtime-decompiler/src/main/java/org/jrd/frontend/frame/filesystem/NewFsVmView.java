@@ -86,7 +86,7 @@ public class NewFsVmView extends JDialog {
                     jf.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
                     int returnVal = jf.showOpenDialog(selectCpButton);
                     if (returnVal == JFileChooser.APPROVE_OPTION) {
-                        if (jf.getSelectedFile().isDirectory()){
+                        if (jf.getSelectedFile().isDirectory()) {
                             lastOpened = jf.getSelectedFile().getAbsolutePath();
                         } else {
                             lastOpened = jf.getSelectedFile().getParentFile().getAbsolutePath();

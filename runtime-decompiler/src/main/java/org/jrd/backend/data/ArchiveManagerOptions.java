@@ -6,40 +6,42 @@ import java.util.List;
 
 public class ArchiveManagerOptions {
 
-	private static class ArchiveManagerOptionsHolder {
-		private static final ArchiveManagerOptions INSTANCE = new ArchiveManagerOptions();
-	}
+    private static class ArchiveManagerOptionsHolder {
+        private static final ArchiveManagerOptions INSTANCE = new ArchiveManagerOptions();
+    }
 
-	public static ArchiveManagerOptions getInstance() {
-		return ArchiveManagerOptionsHolder.INSTANCE;
-	}
+    public static ArchiveManagerOptions getInstance() {
+        return ArchiveManagerOptionsHolder.INSTANCE;
+    }
 
-	private List<String> extensions = new ArrayList<>();
-	private static final List<String> defaults = List.of(".zip", ".jar", ".war", ".ear");
+    private List<String> extensions = new ArrayList<>();
+    private static final List<String> defaults = List.of(".zip", ".jar", ".war", ".ear");
 
-	public void setExtension(List<String> s) {
-		extensions = Collections.unmodifiableList(s);
-	}
+    public void setExtension(List<String> s) {
+        extensions = Collections.unmodifiableList(s);
+    }
 
-	public List<String> getExtensions() {
-		return Collections.unmodifiableList(extensions);
-	}
+    public List<String> getExtensions() {
+        return Collections.unmodifiableList(extensions);
+    }
 
-	public boolean isInner(String n) {
-		String name = n.toLowerCase();
-		if (extensions == null || extensions.isEmpty() || (extensions.size() == 1 && extensions.get(0).trim().isEmpty())) {
-			return oneEnds(defaults, name);
-		} else {
-			return oneEnds(extensions, name);
-		}
-	}
+    public boolean isInner(String n) {
+        String name = n.toLowerCase();
 
-	private boolean oneEnds(List<String> suffixes, String name) {
-		for (String suffix : suffixes) {
-			if (name.endsWith(suffix.toLowerCase())) {
-				return true;
-			}
-		}
-		return false;
-	}
+        if (extensions == null || extensions.isEmpty() || (extensions.size() == 1 && extensions.get(0).trim().isEmpty())) {
+            return oneEnds(defaults, name);
+        } else {
+            return oneEnds(extensions, name);
+        }
+    }
+
+    private boolean oneEnds(List<String> suffixes, String name) {
+        for (String suffix : suffixes) {
+            if (name.endsWith(suffix.toLowerCase())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

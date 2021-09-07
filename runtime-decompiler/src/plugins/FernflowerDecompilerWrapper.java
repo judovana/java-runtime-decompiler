@@ -12,27 +12,27 @@ import java.io.PrintStream;
 public class FernflowerDecompilerWrapper {
 
     public String classToStub(String s) {
-        return s.replace(".", "/")+".class";
+        return s.replace(".", "/") + ".class";
     }
 
-    public File classToFile(File f,String clazz) {
-        return new File(f.getAbsolutePath()+"/"+classToStub(clazz));
+    public File classToFile(File f, String clazz) {
+        return new File(f.getAbsolutePath() + "/" + classToStub(clazz));
     }
 
 /**
 At the end of this fun was found, that fernflower, correctly, ignores naming, so all the fun with saving in file tree may be hapily abandoned
 and just bunch of tmp files can be used. Final file is always given_dir/Cazz.java , where class is not fully qalified nor placed in pkg dirs
 **/
-    public String decompile(String name, byte[] bytecode, Map<String,byte[]> innerClasses, String[] options) throws IOException{
-        File base = File.createTempFile("fernflower-"+name, ".class");
+    public String decompile(String name, byte[] bytecode, Map<String, byte[]> innerClasses, String[] options) throws IOException {
+        File base = File.createTempFile("fernflower-" + name, ".class");
         base.delete();
         base.mkdir();
         base.deleteOnExit();
         File mainFile = bytesToFile(classToFile(base, name), bytecode);
-        String[] args = new String[innerClasses.entrySet().size()+2];
+        String[] args = new String[innerClasses.entrySet().size() + 2];
         int i = 0;
         args[i] = mainFile.getAbsolutePath();
-        for(Map.Entry<String, byte[]> item: innerClasses.entrySet()){
+        for (Map.Entry<String, byte[]> item: innerClasses.entrySet()) {
             File ff = bytesToFile(classToFile(base, item.getKey()), item.getValue());
             i++;
             args[i] = ff.getAbsolutePath();
@@ -42,17 +42,17 @@ and just bunch of tmp files can be used. Final file is always given_dir/Cazz.jav
         File decompiledFile = null;
         String decompiledString;
         try {
-            Object[] o = fernflower(base.getAbsolutePath()+"/"+mainFile.getName().replace(".class", ".java"), args);
-            decompiledFile = (File)o[0];
-            decompiledString = (String)o[1];
+            Object[] o = fernflower(base.getAbsolutePath() + "/" + mainFile.getName().replace(".class", ".java"), args);
+            decompiledFile = (File) o[0];
+            decompiledString = (String) o[1];
         } catch (IOException e) {
             e.printStackTrace();
             return e.toString();
         } finally {
-            if (mainFile != null && mainFile.exists()){
+            if (mainFile != null && mainFile.exists()) {
                 mainFile.delete();
             }
-            if (decompiledFile != null && decompiledFile.exists()){
+            if (decompiledFile != null && decompiledFile.exists()) {
                 decompiledFile.delete();
             }
             
@@ -61,24 +61,24 @@ and just bunch of tmp files can be used. Final file is always given_dir/Cazz.jav
 
     }
 
-    public String decompile(byte[] bytecode, String[] options){
+    public String decompile(byte[] bytecode, String[] options) {
         File tempByteFile = null;
         File decompiledFile = null;
         String decompiledString;
         try {
             tempByteFile = bytesToFile(bytecode);
             String[] args = new String[]{tempByteFile.getAbsolutePath(), System.getProperty("java.io.tmpdir")};
-            Object[] o = fernflower(tempByteFile.getPath().substring(0, tempByteFile.getPath().length()-6)+ ".java", args);
-            decompiledFile = (File)o[0];
-            decompiledString = (String)o[1];
+            Object[] o = fernflower(tempByteFile.getPath().substring(0, tempByteFile.getPath().length() - 6) + ".java", args);
+            decompiledFile = (File) o[0];
+            decompiledString = (String) o[1];
         } catch (IOException e) {
             e.printStackTrace();
             return e.toString();
         } finally {
-            if (tempByteFile != null && tempByteFile.exists()){
+            if (tempByteFile != null && tempByteFile.exists()) {
                 tempByteFile.delete();
             }
-            if (decompiledFile != null && decompiledFile.exists()){
+            if (decompiledFile != null && decompiledFile.exists()) {
                 decompiledFile.delete();
             }
             

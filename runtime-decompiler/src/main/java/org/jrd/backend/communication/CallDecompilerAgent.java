@@ -12,7 +12,7 @@ import java.io.IOException;
 public class CallDecompilerAgent implements JrdAgent {
     
     public static final String DEFAULT_ADDRESS = "localhost";
-    public static final int DEFAULT_PORT= 5395;
+    public static final int DEFAULT_PORT = 5395;
     
     private final int port;
     private final String address;
@@ -45,15 +45,15 @@ public class CallDecompilerAgent implements JrdAgent {
      * @return agents response or null
      */
     @Override
-    public String submitRequest(final String request){
+    public String submitRequest(final String request) {
         final Communicate comm = new Communicate(this.address, this.port);
         try {
             comm.println(request);
             return comm.readResponse();
-        }catch(IOException ex){
+        } catch (IOException ex) {
             OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, ex);
             return null;
-        }finally {
+        } finally {
             comm.close();
         }
     

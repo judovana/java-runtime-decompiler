@@ -25,7 +25,7 @@ public class ConfigPanel extends JPanel {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.NORTHWEST;
         gbc.fill = GridBagConstraints.BOTH;
-        gbc.insets = new Insets(3,3,3,3);
+        gbc.insets = new Insets(3, 3, 3, 3);
         gbc.weightx = 1;
         this.add(jsonFileURL, gbc);
         gbc.gridy = 1;

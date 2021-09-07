@@ -17,7 +17,7 @@ import java.nio.file.Paths;
 )
 class FileSelectorArrayRowTest {
     @BeforeAll
-    static void setup(){
+    static void setup() {
         Directories.createPluginDirectory();
     }
 

@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers inputStream Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template inputStream the editor.
- */
 package org.jrd.agent;
 
 import java.io.BufferedReader;
@@ -29,14 +24,14 @@ public class AgentActionWorker extends Thread {
     private InstrumentationProvider provider;
     private Boolean abort = false;
 
-    public AgentActionWorker(Socket socket, InstrumentationProvider provider){
+    public AgentActionWorker(Socket socket, InstrumentationProvider provider) {
         this.socket = socket;
         this.provider = provider;
 
         try {
             executeRequest(socket);
         } catch (Exception e) {
-            OutputControllerAgent.getLogger().log(new RuntimeException("Error when trying to execute the request. Exception: " , e));
+            OutputControllerAgent.getLogger().log(new RuntimeException("Error when trying to execute the request. Exception: ", e));
             try {
                 socket.close();
             } catch (IOException e1) {
@@ -50,7 +45,7 @@ public class AgentActionWorker extends Thread {
         try {
             is = socket.getInputStream();
         } catch (IOException e) {
-            OutputControllerAgent.getLogger().log(new RuntimeException("Error when opening the input stream of the socket. Exception: " , e));
+            OutputControllerAgent.getLogger().log(new RuntimeException("Error when opening the input stream of the socket. Exception: ", e));
             try {
                 socket.close();
             } catch (IOException e1) {
@@ -128,12 +123,12 @@ public class AgentActionWorker extends Thread {
                 OutputControllerAgent.getLogger().log(e);
             }
         }).start();
-        while (true){
+        while (true) {
             String x = classNames.poll();
-            if (x == null){
+            if (x == null) {
                 continue;
             }
-            if ("---END---".equals(x)){
+            if ("---END---".equals(x)) {
                 break;
             } else {
                 out.write(x);
@@ -179,7 +174,7 @@ public class AgentActionWorker extends Thread {
         }
         try {
             provider.setClassBody(className, Base64.getDecoder().decode(classBodyBase64));
-            out.write("DONE");//overwrite specific done?
+            out.write("DONE"); // overwrite specific done?
             out.newLine();
         } catch (Exception ex) {
             OutputControllerAgent.getLogger().log(ex);

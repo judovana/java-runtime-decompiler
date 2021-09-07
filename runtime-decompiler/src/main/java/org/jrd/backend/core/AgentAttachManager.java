@@ -12,14 +12,13 @@ public class AgentAttachManager {
     private AgentLoader loader;
     private VmManager vmManager;
 
-      
-    public AgentAttachManager(VmManager vmManager){
+    public AgentAttachManager(VmManager vmManager) {
         this.vmManager = vmManager;
         this.loader = new AgentLoader();
         
     }
 
-    VmDecompilerStatus attachAgentToVm(String vmId, int vmPid)  {
+    VmDecompilerStatus attachAgentToVm(String vmId, int vmPid) {
         OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Attaching agent to VM '" + vmPid + "'");
         int attachedPort = AgentLoader.INVALID_PORT;
         try {

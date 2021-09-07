@@ -251,7 +251,7 @@ public class CliTest {
     @Test
     @Timeout(10)
     void testListJvms() throws Exception {
-        while(!queryJvmList().contains(dummy.getPid())) {
+        while (!queryJvmList().contains(dummy.getPid())) {
             Thread.sleep(5000); // vmManager only refreshes vmList every 5 seconds
         }
     }
@@ -364,7 +364,7 @@ public class CliTest {
     @ParameterizedTest
     @ValueSource(strings = {"", "-v"})
     void testDecompileJavap(String option) throws Exception {
-        args = new String[]{DECOMPILE, dummy.getPid(), "javap" + option , TestingDummyHelper.CLASS_REGEX};
+        args = new String[]{DECOMPILE, dummy.getPid(), "javap" + option, TestingDummyHelper.CLASS_REGEX};
         cli = new Cli(args, model);
 
         cli.consumeCli();

@@ -6,4 +6,40 @@
 
 <module name="Checker">
 
+    <!-- Checks for whitespace, see http://checkstyle.sf.net/config_whitespace.html -->
+    <module name="FileTabCharacter">
+        <property name="eachLine" value="true"/>
+    </module>
+    
+    <module name="TreeWalker">
+        <!-- Checks for whitespace, see http://checkstyle.sf.net/config_whitespace.html -->
+        
+        <module name="EmptyForInitializerPad" />
+        <module name="EmptyForIteratorPad" />
+        <module name="EmptyLineSeparator">
+            <property name="allowNoEmptyLineBetweenFields" value="true"/>
+        </module>
+        <module name="GenericWhitespace" />
+        <module name="MethodParamPad" />
+        <module name="NoLineWrap" />
+        <module name="NoWhitespaceAfter" />
+        <module name="NoWhitespaceBefore" />
+        <module name="NoWhitespaceBeforeCaseDefaultColon" />
+        <module name="OperatorWrap" >
+            <property name="option" value="eol"/>
+        </module>
+        <module name="ParenPad" />
+        <module name="SeparatorWrap" >
+            <property name="tokens" value="COMMA"/>
+            <property name="option" value="eol"/>
+        </module>
+        <module name="SeparatorWrap">
+            <property name="tokens" value="DOT"/>
+            <property name="option" value="nl"/>
+        </module>
+        <module name="SingleSpaceSeparator" />
+        <module name="TypecastParenPad" />
+        <module name="WhitespaceAfter" />
+        <module name="WhitespaceAround" />
+    </module>
 </module>

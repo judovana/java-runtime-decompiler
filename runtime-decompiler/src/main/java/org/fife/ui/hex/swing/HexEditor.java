@@ -129,7 +129,7 @@ public class HexEditor extends JScrollPane {
         this.table.open(fileName);
     }
 
-    public byte[] get(){
+    public byte[] get() {
         return table.getDocBuffer();
     }
 

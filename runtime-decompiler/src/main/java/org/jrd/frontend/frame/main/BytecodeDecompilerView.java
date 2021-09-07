@@ -385,7 +385,7 @@ public class BytecodeDecompilerView {
             GridBagConstraints gbc = new GridBagConstraints();
             gbc.fill = GridBagConstraints.BOTH;
             gbc.anchor = GridBagConstraints.WEST;
-            gbc.insets = new Insets(3,3,3,3);
+            gbc.insets = new Insets(3, 3, 3, 3);
 
             gbc.gridx = 0;
             gbc.weightx = 1;
@@ -533,7 +533,7 @@ public class BytecodeDecompilerView {
                     filtered.add(clazz);
                 }
             }
-        }catch(Exception ex){
+        } catch (Exception ex) {
             classesSortField.setForeground(Color.red);
             classesSortField.repaint();
             for (String clazz : loadedClasses) {

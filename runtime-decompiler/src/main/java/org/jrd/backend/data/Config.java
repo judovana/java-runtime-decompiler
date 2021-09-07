@@ -59,7 +59,7 @@ public class Config {
 
     public String getAgentExpandedPath() {
         String expandedPath = ExpandableUrl.createFromPath((String) configMap.get(AGENT_PATH_KEY)).getExpandedPath();
-        if(isOsWindows() && expandedPath.length() > 0 && expandedPath.charAt(0) == '/') { // Agent attaching fails on Windows when path starts with a slash
+        if (isOsWindows() && expandedPath.length() > 0 && expandedPath.charAt(0) == '/') { // Agent attaching fails on Windows when path starts with a slash
             expandedPath = expandedPath.substring(1);
         }
         return expandedPath;
@@ -127,10 +127,10 @@ public class Config {
         File confFile = new File(CONFIG_FILE_PATH);
         File legacyConfFile = new File(LEGACY_CONFIG_FILE_PATH);
         if (confFile.exists()) {
-            try (FileReader reader = new FileReader(confFile, StandardCharsets.UTF_8)){
+            try (FileReader reader = new FileReader(confFile, StandardCharsets.UTF_8)) {
                 configMap = gson.fromJson(reader, configMap.getClass());
             }
-        }else if (legacyConfFile.exists()){
+        } else if (legacyConfFile.exists()) {
             Files.readAllLines(Paths.get(LEGACY_CONFIG_FILE_PATH)).forEach(s -> {
                 String[] kv = s.split("===");
                 configMap.put(kv[0], kv[1]);
@@ -144,7 +144,7 @@ public class Config {
     public void saveConfigFile() throws IOException {
         File confFile = new File(CONFIG_FILE_PATH);
 
-        if (!confFile.getParentFile().exists()){
+        if (!confFile.getParentFile().exists()) {
             Files.createDirectories(confFile.getParentFile().toPath());
         }
 

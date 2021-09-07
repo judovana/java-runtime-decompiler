@@ -5,7 +5,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class ConnectionDelegator extends Thread{
+public class ConnectionDelegator extends Thread {
 
     private static ConnectionDelegator connectionDelegator;
     public static final int DEFAULT_PORT = 5395;
@@ -45,7 +45,7 @@ public class ConnectionDelegator extends Thread{
             initServerSocket = new ServerSocket();
             initServerSocket.bind(new InetSocketAddress(hostname, port));
         } catch (IOException e) {
-            OutputControllerAgent.getLogger().log( new RuntimeException("Exception occurred when opening the socket: ", e));
+            OutputControllerAgent.getLogger().log(new RuntimeException("Exception occurred when opening the socket: ", e));
             return false;
         }
 
@@ -79,7 +79,7 @@ public class ConnectionDelegator extends Thread{
                     new AgentActionWorker(clientSocket, provider)).start();
         }
 
-        if (!theServerSocket.isClosed()){
+        if (!theServerSocket.isClosed()) {
             try {
                 theServerSocket.close();
             } catch (IOException e) {
@@ -96,8 +96,8 @@ public class ConnectionDelegator extends Thread{
      * Closes server socket
      * Already connected clients can finish their work but no new clients can connect.
      */
-    public static void gracefulShutdown(){
-        if (/*Agent was created by client*/true){
+    public static void gracefulShutdown() {
+        if (/*Agent was created by client*/true) {
             setRunning(false);
         }
     }
