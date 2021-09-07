@@ -4,7 +4,7 @@ public class OutputController {
 
     private static final String NULL_OBJECT = "Trying to log null object";
 
-    public static enum Level {
+    public enum Level {
 
         MESSAGE_ALL, // - stdout/log in all cases
         MESSAGE_DEBUG, // - stdout/log in verbose/debug mode

@@ -266,7 +266,7 @@ public class ArchiveManager {
             return;
         }
 
-        try (FileInputStream fis = new FileInputStream(f2zip);) {
+        try (FileInputStream fis = new FileInputStream(f2zip)) {
             ZipEntry zEntry = new ZipEntry(fName);
             zOut.putNextEntry(zEntry);
             byte[] bytes = new byte[1024];

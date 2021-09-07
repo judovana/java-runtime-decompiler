@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
  */
 public class VmInfo implements Serializable {
 
-    public static enum Type {
+    public enum Type {
         LOCAL, REMOTE, FS
     }
 
