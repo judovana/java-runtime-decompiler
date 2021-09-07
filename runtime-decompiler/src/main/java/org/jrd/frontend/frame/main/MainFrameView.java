@@ -18,6 +18,7 @@ import java.awt.event.WindowEvent;
 
 import static org.jrd.backend.data.Directories.isPortable;
 
+@SuppressWarnings("Indentation") // indented Swing components greatly help with orientation
 public class MainFrameView {
 
     private JFrame mainFrame;

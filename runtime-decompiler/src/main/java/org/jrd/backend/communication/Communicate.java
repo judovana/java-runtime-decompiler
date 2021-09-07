@@ -110,7 +110,7 @@ public class Communicate {
         if (initLine.equals("ERROR")) {
             OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Agent returned error."));
             return "ERROR";
-       } else if (initLine.equals("BYTES")) {
+        } else if (initLine.equals("BYTES")) {
             try {
                 String bytes = trimReadLine();
 

@@ -16,6 +16,7 @@ import static org.jrd.backend.data.Directories.isPortable;
 import static org.jrd.frontend.frame.plugins.FileSelectorArrayRow.fallback;
 import static org.jrd.frontend.frame.plugins.FileSelectorArrayRow.getTextFieldToolTip;
 
+@SuppressWarnings("Indentation") // indented Swing components greatly help with orientation
 public class ConfigureView extends JDialog {
 
     private JPanel mainPanel;

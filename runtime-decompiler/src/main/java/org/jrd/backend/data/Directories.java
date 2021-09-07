@@ -32,7 +32,7 @@ public final class Directories {
      * @return xdg plugin directory (e.g. ~/.config/java-runtime-decompiler/plugins
      */
     public static String getPluginDirectory() {
-       return getXdgJrdBaseDir() + XDG_PLUGIN_SUFFIX;
+        return getXdgJrdBaseDir() + XDG_PLUGIN_SUFFIX;
     }
 
     /**
