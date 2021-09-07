@@ -25,10 +25,10 @@ public class Utils {
     public static final int SRC_SUBDIRS_NAME = 1;
     public static final int CUSTOM_NAME = 2;
 
-    public static interface StatusKeeper {
-        public void setText(String s);
+    public interface StatusKeeper {
+        void setText(String s);
 
-        public void onException(Exception ex);
+        void onException(Exception ex);
     }
 
     public static boolean saveByGui(String fileNameBase, int naming, String suffix, StatusKeeper status, String clazz, byte[] content) {

@@ -23,12 +23,12 @@ public class JavapDisassemblerWrapper {
                     OptionsString.append(option);
                 }
             }
-            com.sun.tools.javap.Main.run(new String[]{otherArgs+OptionsString.toString(), tempByteFile.getAbsolutePath()}, printWriter);
+            com.sun.tools.javap.Main.run(new String[]{otherArgs + OptionsString, tempByteFile.getAbsolutePath()}, printWriter);
             return readStringFromFile(tempOutputFile.getAbsolutePath());
         } catch (Exception e){
             StringWriter errors = new StringWriter();
             e.printStackTrace(new PrintWriter(errors));
-            return "Exception while decompiling" + errors.toString();
+            return "Exception while decompiling" + errors;
         }
     }
 

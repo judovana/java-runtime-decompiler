@@ -49,7 +49,7 @@ public class AgentRequestAction {
     
     private final Map<String, String> parameters;
     
-    public static enum RequestAction {
+    public enum RequestAction {
         CLASSES(0),
         BYTES(1),
         HALT(2),
@@ -57,7 +57,7 @@ public class AgentRequestAction {
 
         private final int intVal;
 
-        private RequestAction(int intVal) {
+        RequestAction(int intVal) {
             this.intVal = intVal;
         }
 
