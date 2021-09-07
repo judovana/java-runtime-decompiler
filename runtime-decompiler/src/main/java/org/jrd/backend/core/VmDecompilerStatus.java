@@ -8,7 +8,7 @@ import java.util.Arrays;
  * each VM.
  */
 
-public class VmDecompilerStatus{
+public class VmDecompilerStatus {
 
     private String vmId;
     private String hostname;

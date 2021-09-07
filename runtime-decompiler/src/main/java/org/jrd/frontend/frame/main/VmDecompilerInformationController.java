@@ -269,11 +269,11 @@ public class VmDecompilerInformationController {
         String bytesInString = vmStatus.getLoadedClassBytes();
         byte[] bytes = Base64.getDecoder().decode(bytesInString);
         try {
-            decompiledClass = pluginManager.decompile(bytecodeDecompilerView.getSelectedDecompilerWrapperInformation(),name,  bytes, null, vmInfo, vmManager);
+            decompiledClass = pluginManager.decompile(bytecodeDecompilerView.getSelectedDecompilerWrapperInformation(), name, bytes, null, vmInfo, vmManager);
         } catch (Exception e) {
             OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
         }
-        bytecodeDecompilerView.reloadTextField(name, decompiledClass,  bytes);
+        bytecodeDecompilerView.reloadTextField(name, decompiledClass, bytes);
     }
 
     private static LatestPaths lastLoaded = new LatestPaths();
@@ -293,7 +293,7 @@ public class VmDecompilerInformationController {
             lastLoaded.lastSaveBin = rewriteClassDialog.getSaveBinPath();
             lastLoaded.filesToCompile = rewriteClassDialog.getFilesToCompile();
             lastLoaded.outputExternalFilesDir = rewriteClassDialog.getOutputExternalFilesDir();
-            lastLoaded.outputBinaries  = rewriteClassDialog.getOutputBinaries();
+            lastLoaded.outputBinaries = rewriteClassDialog.getOutputBinaries();
         }
     }
 

@@ -67,7 +67,7 @@ public class ArchiveManager {
             if (!entry.isDirectory()) {
                 if (shouldOpen(entry.getName())) {
                     pathManager.addPathPart(entry.getName());
-                    if(findClazz(new ZipInputStream(zis), clazz)) {
+                    if (findClazz(new ZipInputStream(zis), clazz)) {
                         return true;
                     }
                     pathManager.removePathPart(entry.getName());

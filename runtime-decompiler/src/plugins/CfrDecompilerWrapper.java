@@ -17,27 +17,27 @@ import java.util.stream.*;
 public class CfrDecompilerWrapper {
 
     public String classToStub(String s) {
-        return s.replace(".", "/")+".class";
+        return s.replace(".", "/") + ".class";
     }
 
-    public File classToFile(File f,String clazz) {
-        return new File(f.getAbsolutePath()+"/"+classToStub(clazz));
+    public File classToFile(File f, String clazz) {
+        return new File(f.getAbsolutePath() + "/" + classToStub(clazz));
     }
 
-    public String decompile(String name, byte[] bytecode, Map<String,byte[]> innerClasses, String[] options) throws IOException{
-        File base = File.createTempFile("crf-"+name, ".class");
+    public String decompile(String name, byte[] bytecode, Map<String, byte[]> innerClasses, String[] options) throws IOException {
+        File base = File.createTempFile("crf-" + name, ".class");
         base.delete();
         base.mkdir();
         base.deleteOnExit();
-        File out = File.createTempFile("crf-"+name, ".java");
+        File out = File.createTempFile("crf-" + name, ".java");
         out.delete();
         out.mkdir();
         out.deleteOnExit();
         File mainFile = bytesToFile(classToFile(base, name), bytecode);
-        String[] args = new String[innerClasses.entrySet().size()+5];
+        String[] args = new String[innerClasses.entrySet().size() + 5];
         int i = 0;
         args[i] = mainFile.getAbsolutePath();
-        for(Map.Entry<String, byte[]> item: innerClasses.entrySet()){
+        for (Map.Entry<String, byte[]> item: innerClasses.entrySet()) {
             i++;
             File ff = bytesToFile(classToFile(base, item.getKey()), item.getValue());
             args[i] = ff.getAbsolutePath();
@@ -55,16 +55,16 @@ public class CfrDecompilerWrapper {
         String decompiledString;
         try {
             Object[] o = cfr(out, args);
-            decompiledFile = (File)o[0];
-            decompiledString = (String)o[1];
+            decompiledFile = (File) o[0];
+            decompiledString = (String) o[1];
         } catch (IOException e) {
             e.printStackTrace();
             return e.toString();
         } finally {
-            if (mainFile != null && mainFile.exists()){
+            if (mainFile != null && mainFile.exists()) {
                 mainFile.delete();
             }
-            if (decompiledFile != null && decompiledFile.exists()){
+            if (decompiledFile != null && decompiledFile.exists()) {
                 decompiledFile.delete();
             }
             
@@ -73,8 +73,8 @@ public class CfrDecompilerWrapper {
 
     }
 
-    public String decompile(byte[] bytecode, String[] options) throws IOException{
-        return decompile("unknow.cfr.class"+bytecode.length, bytecode, new HashMap<String,byte[]>(), options);
+    public String decompile(byte[] bytecode, String[] options) throws IOException {
+        return decompile("unknow.cfr.class" + bytecode.length, bytecode, new HashMap<String, byte[]>(), options);
     }
 
     private Object[] cfr(File decompiledDir, String... args) throws IOException {

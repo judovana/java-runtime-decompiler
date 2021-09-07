@@ -66,7 +66,7 @@ public class HexSearch {
     public boolean searchHexCode(String str, HexSearchOptions type) {
         searchState = new SearchState(0, 0, false);
         ArrayList<Byte> arr = getByteArray(str, type);
-        findMatch(arr,0);
+        findMatch(arr, 0);
         if (searchState.isFound()) {
             hex.setSelectedRange(searchState.getStart(), searchState.getEnd() - 1);
             return true;

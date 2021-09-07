@@ -7,7 +7,7 @@ import javax.swing.border.EtchedBorder;
 import java.awt.*;
 import java.awt.event.ActionListener;
 
-public class NewConnectionView extends JDialog{
+public class NewConnectionView extends JDialog {
 
     private JPanel mainPanel;
     private HostnamePortInputPanel hostnamePortInputPanel;
@@ -18,15 +18,15 @@ public class NewConnectionView extends JDialog{
 
     private ActionListener addButtonListener;
 
-    public static class HostnamePortInputPanel extends JPanel{
+    public static class HostnamePortInputPanel extends JPanel {
 
         JTextField hostnameTextField;
         JTextField portTextField;
 
-        HostnamePortInputPanel(){
+        HostnamePortInputPanel() {
             this.hostnameTextField = new JTextField();
             this.portTextField = new JTextField();
-            this.portTextField.setPreferredSize(new Dimension(90,0));
+            this.portTextField.setPreferredSize(new Dimension(90, 0));
 
             this.setLayout(new GridBagLayout());
             GridBagConstraints gbc = new GridBagConstraints();
@@ -49,11 +49,11 @@ public class NewConnectionView extends JDialog{
             this.add(portTextField, gbc);
             gbc.gridx = 4;
             this.add(Box.createHorizontalStrut(20), gbc);
-            this.setPreferredSize(new Dimension(0,120));
+            this.setPreferredSize(new Dimension(0, 120));
         }
     }
 
-    public NewConnectionView(MainFrameView mainFrameView){
+    public NewConnectionView(MainFrameView mainFrameView) {
 
         hostnamePortInputPanel = new HostnamePortInputPanel();
 
@@ -61,11 +61,11 @@ public class NewConnectionView extends JDialog{
         okButton.addActionListener(actionEvent -> {
             addButtonListener.actionPerformed(actionEvent);
         });
-        okButton.setPreferredSize(new Dimension(90,30));
+        okButton.setPreferredSize(new Dimension(90, 30));
 
         cancelButton = new JButton("Cancel");
         cancelButton.addActionListener(actionEvent -> dispose());
-        cancelButton.setPreferredSize(new Dimension(90,30));
+        cancelButton.setPreferredSize(new Dimension(90, 30));
 
         okCancelPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -96,7 +96,7 @@ public class NewConnectionView extends JDialog{
         configureOKCancelPanel.add(Box.createHorizontalGlue(), gbc);
         gbc.gridx = 1;
         configureOKCancelPanel.add(okCancelPanel, gbc);
-        configureOKCancelPanel.setPreferredSize(new Dimension(0,60));
+        configureOKCancelPanel.setPreferredSize(new Dimension(0, 60));
 
 
         mainPanel = new JPanel(new GridBagLayout());
@@ -110,15 +110,15 @@ public class NewConnectionView extends JDialog{
         mainPanel.add(hostnamePortInputPanel, gbc);
         gbc.gridy = 1;
         gbc.weighty = 1;
-        mainPanel.add(Box.createVerticalGlue(),gbc);
+        mainPanel.add(Box.createVerticalGlue(), gbc);
         gbc.gridy = 2;
         gbc.weighty = 0;
         mainPanel.add(configureOKCancelPanel, gbc);
 
 
         this.setTitle("New connection");
-        this.setSize(new Dimension(400,220));
-        this.setMinimumSize(new Dimension(250,220));
+        this.setSize(new Dimension(400, 220));
+        this.setMinimumSize(new Dimension(250, 220));
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setLocationRelativeTo(mainFrameView.getMainFrame());
         this.setModalityType(ModalityType.APPLICATION_MODAL);
@@ -126,11 +126,11 @@ public class NewConnectionView extends JDialog{
 
     }
 
-    String getHostname(){
+    String getHostname() {
         return hostnamePortInputPanel.hostnameTextField.getText();
     }
 
-    String getPortString() throws NumberFormatException{
+    String getPortString() throws NumberFormatException {
         return hostnamePortInputPanel.portTextField.getText();
     }
 

@@ -117,7 +117,7 @@ public class FsAgent implements JrdAgent {
                         }
                     }
                 } else {
-                    if (op instanceof ListingCpOperator){
+                    if (op instanceof ListingCpOperator) {
                         try (ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(c))) {
                             T ret = onEntryList(zipInputStream, clazz, op);
                             if (ret != null) {

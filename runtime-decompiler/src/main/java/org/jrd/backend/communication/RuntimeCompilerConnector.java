@@ -68,17 +68,17 @@ public class RuntimeCompilerConnector {
         @Override
         public Collection<IdentifiedBytecode> compileClass(ClassesProvider classesProvider, Optional<MessagesListener> messagesConsumer, IdentifiedSource... javaSourceFiles) {
             try {
-                Map<String,String> inputs = new HashMap<>();
-                for(IdentifiedSource is: javaSourceFiles) {
+                Map<String, String> inputs = new HashMap<>();
+                for (IdentifiedSource is: javaSourceFiles) {
                     inputs.put(is.getClassIdentifier().getFullName(), is.getSourceCode());
                 }
                 Object r = currentDecompiler.getCompileMethod().invoke(currentDecompiler.getInstance(), inputs, new String[0], messagesConsumer.get());
                 Map<String, byte[]> rr = (Map<String, byte[]>) r;
                 List<IdentifiedBytecode> rrr = new ArrayList<>(rr.size());
-                for(Map.Entry<String, byte[]> e: rr.entrySet()){
+                for (Map.Entry<String, byte[]> e: rr.entrySet()) {
                     rrr.add(new IdentifiedBytecode(new ClassIdentifier(e.getKey()), e.getValue()));
                 }
-                return  rrr;
+                return rrr;
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }

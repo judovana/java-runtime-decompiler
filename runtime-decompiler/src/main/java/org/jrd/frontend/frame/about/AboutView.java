@@ -28,12 +28,12 @@ public class AboutView extends JDialog {
             "</body></html>");
 
         editorPane.addHyperlinkListener(event -> {
-            if(event.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED)) {
+            if (event.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED)) {
                 try {
                     Desktop.getDesktop().browse(event.getURL().toURI());
                 } catch (IOException | URISyntaxException e0) {
                     OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e0);
-                } catch (UnsupportedOperationException e1){
+                } catch (UnsupportedOperationException e1) {
                     OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Unable to open link."));
                 }
 

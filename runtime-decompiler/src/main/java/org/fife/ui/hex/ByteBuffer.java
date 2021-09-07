@@ -108,6 +108,6 @@ public class ByteBuffer {
     }
 
     public byte[] getBuffer() {
-        return  Arrays.copyOf(buffer, buffer.length);
+        return Arrays.copyOf(buffer, buffer.length);
     }
 }

@@ -17,7 +17,7 @@ public class LicenseView extends JDialog {
     JTextArea licenseTextArea;
     JScrollPane scrollPane;
 
-    public LicenseView(MainFrameView mainFrameView){
+    public LicenseView(MainFrameView mainFrameView) {
         licenseTextArea = new JTextArea();
         licenseTextArea.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         scrollPane = new JScrollPane(licenseTextArea);
@@ -37,8 +37,8 @@ public class LicenseView extends JDialog {
         licenseTextArea.setCaretPosition(0);
 
         this.setTitle("License");
-        this.setSize(new Dimension(600,650));
-        this.setMinimumSize(new Dimension(250,330));
+        this.setSize(new Dimension(600, 650));
+        this.setMinimumSize(new Dimension(250, 330));
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setModalityType(ModalityType.APPLICATION_MODAL);
         this.setLayout(new BorderLayout());

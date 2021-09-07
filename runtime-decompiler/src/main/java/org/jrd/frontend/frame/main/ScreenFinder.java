@@ -33,7 +33,9 @@ module.  An independent module is a module which is not derived from
 or based on this library.  If you modify this library, you may extend
 this exception to your version of the library, but you are not
 obligated to do so.  If you do not wish to do so, delete this
-exception statement from your version. */
+exception statement from your version.
+*/
+
 package org.jrd.frontend.frame.main;
 
 import java.awt.GraphicsConfiguration;
@@ -54,7 +56,7 @@ public class ScreenFinder {
         return p;
     }
 
-    public static Rectangle  getCurrentScreenSizeWithoutBounds() {
+    public static Rectangle getCurrentScreenSizeWithoutBounds() {
         try {
             final Point p = MouseInfo.getPointerInfo().getLocation();
             return getScreenOnCoordsWithoutBounds(p);
@@ -63,10 +65,10 @@ public class ScreenFinder {
         }
     }
 
-    public static void  centerWindowsToCurrentScreen(final Window w) {
+    public static void centerWindowsToCurrentScreen(final Window w) {
         final Rectangle bounds = getCurrentScreenSizeWithoutBounds();
-        w.setLocation(bounds.x + (bounds.width - w.getWidth())/2,
-                bounds.y + (bounds.height - w.getHeight())/2);
+        w.setLocation(bounds.x + (bounds.width - w.getWidth()) / 2,
+                bounds.y + (bounds.height - w.getHeight()) / 2);
     }
 
     public static void moveWindowNextTo(Window baseWindow, Window movedWindow) {

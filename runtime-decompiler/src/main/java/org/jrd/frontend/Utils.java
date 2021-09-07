@@ -95,6 +95,7 @@ public class Utils {
     public static String guessClass(String src) throws IOException {
         return Cli.guessName(Files.readAllBytes(new File(src).toPath()));
     }
+
     public static IdentifiedSource[] sourcesToIdentifiedSources(boolean recursive, List<File> sources) throws IOException {
         return sourcesToIdentifiedSources(recursive, sources.stream().map(x -> x.getAbsolutePath()).toArray(String[]::new));
     }

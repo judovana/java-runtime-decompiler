@@ -16,7 +16,7 @@ public final class Directories {
     private static final String XDG_JRD_HOME = File.separator + ".config" + XDG_JRD_SUFFIX;
 
 
-    private Directories(){
+    private Directories() {
     }
 
     /**
@@ -40,14 +40,14 @@ public final class Directories {
      * @return xdg decompiler directory (e.g. ~/.config/java-runtime-decompiler)
      */
     public static String getXdgJrdBaseDir() {
-        if(isPortable()){
+        if (isPortable()) {
             return getJrdLocation() + File.separator + "config";
         } else {
             String homeDir = System.getProperty("user.home");
             String res = System.getenv("XDG_CONFIG_HOME");
             String xdgConfigHome;
 
-            if (homeDir.isEmpty() && (res == null || res.isEmpty()) ){
+            if (homeDir.isEmpty() && (res == null || res.isEmpty())) {
                 /* fail here */
                 throw new NullPointerException("No such a directory in the system!");
             }
@@ -61,8 +61,8 @@ public final class Directories {
         }
     }
 
-    public static String getJrdLocation(){
-        if(System.getProperty("jrd.location") == null){
+    public static String getJrdLocation() {
+        if (System.getProperty("jrd.location") == null) {
             OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "jrd.location environment variable not found, using fallback");
             return Paths.get(".").normalize().toAbsolutePath().toString();
         } else {
@@ -70,7 +70,7 @@ public final class Directories {
         }
     }
 
-    public static boolean isPortable(){
+    public static boolean isPortable() {
         String purpose = System.getProperty("jrd.purpose");
         return "PORTABLE".equals(purpose);
     }

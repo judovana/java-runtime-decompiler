@@ -17,7 +17,7 @@ public class DecompilerWrapperInformationSerializer implements JsonSerializer<De
             jsonArray.add(url.getRawURL());
         });
         jsonObject.add("DependencyURL", jsonArray);
-        if (decompilerWrapperInformation.getDecompilerDownloadURL() == null){
+        if (decompilerWrapperInformation.getDecompilerDownloadURL() == null) {
             jsonObject.addProperty("DecompilerDownloadURL", "");
         } else {
             jsonObject.addProperty("DecompilerDownloadURL", decompilerWrapperInformation.getDecompilerDownloadURL().toString());

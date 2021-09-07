@@ -7,16 +7,16 @@ import java.awt.*;
 /**
  * Panel with three buttons "Validate", "OK" and "Cancel"
  */
-public class OkCancelPanel extends JPanel{
+public class OkCancelPanel extends JPanel {
 
     private final JButton okButton;
     private final JButton cancelButton;
     private final JButton validateButton;
 
-    OkCancelPanel(){
+    OkCancelPanel() {
         this.setLayout(new GridBagLayout());
         this.setPreferredSize(new Dimension(0, 50));
-        setBorder(new MatteBorder(1,0,0,0, UIManager.getColor("Separator.shadow")));
+        setBorder(new MatteBorder(1, 0, 0, 0, UIManager.getColor("Separator.shadow")));
         GridBagConstraints gbc;
 
         okButton = new JButton("OK");
@@ -24,7 +24,7 @@ public class OkCancelPanel extends JPanel{
         cancelButton = new JButton("Cancel");
         cancelButton.setPreferredSize(new Dimension(90, 28));
         validateButton = new JButton("Validate");
-        validateButton.setPreferredSize(new Dimension(90,28));
+        validateButton.setPreferredSize(new Dimension(90, 28));
 
         gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.BOTH;
@@ -33,7 +33,7 @@ public class OkCancelPanel extends JPanel{
         this.add(Box.createHorizontalGlue(), gbc);
         gbc.weightx = 0;
         gbc.gridx = 1;
-        this.add(validateButton,gbc);
+        this.add(validateButton, gbc);
         gbc.gridx = 2;
         this.add(Box.createHorizontalStrut(15), gbc);
         gbc.gridx = 3;
@@ -46,9 +46,10 @@ public class OkCancelPanel extends JPanel{
         this.add(Box.createHorizontalStrut(20), gbc);
     }
 
-    public JButton getValidateButton(){
+    public JButton getValidateButton() {
         return validateButton;
     }
+
     public JButton getOkButton() {
         return okButton;
     }

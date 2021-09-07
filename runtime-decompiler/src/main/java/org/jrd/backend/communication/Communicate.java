@@ -97,7 +97,7 @@ public class Communicate {
      * Method that reads agent's response.
      * @return "ERROR" in case of fail or corresponding bytes or class names
      */
-    public String readResponse(){
+    public String readResponse() {
         String initLine;
 
         try {
@@ -114,7 +114,7 @@ public class Communicate {
             try {
                 String bytes = trimReadLine();
 
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Agent returned bytes: "+ bytes);
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Agent returned bytes: " + bytes);
                 return bytes;
             } catch (IOException ex) {
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, ex);
@@ -135,7 +135,7 @@ public class Communicate {
                     OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, ex);
                 }
             }
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG,"Agent returned class names.");
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Agent returned class names.");
             return str.toString();
             // Agent shutdown response
         } else if (initLine.equals("GOODBYE")) {

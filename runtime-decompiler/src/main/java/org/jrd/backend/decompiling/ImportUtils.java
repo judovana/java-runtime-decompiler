@@ -24,12 +24,12 @@ public final class ImportUtils {
 
     }
 
-    public static List<URL> getWrappersFromClasspath(){
+    public static List<URL> getWrappersFromClasspath() {
         String classpath = System.getProperty("java.class.path");
         String[] classpathEntries = classpath.split(File.pathSeparator);
         List<URL> jsonFiles = new ArrayList<>();
 
-        for(String entry : classpathEntries) {
+        for (String entry : classpathEntries) {
             File entryFile = new File(entry);
             if (!entryFile.exists()) {
                 continue;
@@ -37,7 +37,7 @@ public final class ImportUtils {
 
             try {
                 Listable listable;
-                if(entry.endsWith(".jar")){
+                if (entry.endsWith(".jar")) {
                     listable = new Zip(entryFile);
                 } else {
                     listable = new Directory(entryFile);
@@ -108,7 +108,7 @@ public final class ImportUtils {
 
         private void crawl(List<URL> pathList, File dir) throws MalformedURLException {
             File[] fileList = dir.listFiles();
-            if(fileList != null){
+            if (fileList != null) {
                 for (File file : fileList) {
                     if (file.isDirectory()) {
                         crawl(pathList, file);
@@ -145,9 +145,9 @@ public final class ImportUtils {
             List<URL> children = new ArrayList<>();
 
             Enumeration<? extends ZipEntry> entries = jarFile.entries();
-            while(entries.hasMoreElements()){
+            while (entries.hasMoreElements()) {
                 ZipEntry zipEntry = entries.nextElement();
-                if(zipEntry.getName().endsWith(".json")){
+                if (zipEntry.getName().endsWith(".json")) {
                     URL url = new URL("jar:file:" + jarFile.getName() + "!/" + zipEntry.getName());
                     children.add(url);
                 }

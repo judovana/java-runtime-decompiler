@@ -50,7 +50,7 @@ class ExpandableUrlTest {
     // slashes
     @Test
     @EnabledOnOs(OS.WINDOWS)
-    void testUnifySlashesOnWindows(){
+    void testUnifySlashesOnWindows() {
         assertEquals("/path", unifySlashes("path"));
         assertEquals("/path", unifySlashes("/path"));
         assertEquals("/longer/path", unifySlashes("longer/path"));
@@ -61,7 +61,7 @@ class ExpandableUrlTest {
 
     @Test
     @EnabledOnOs(OS.LINUX)
-    void testUnifySlashesOnLinux(){
+    void testUnifySlashesOnLinux() {
         assertEquals("path", unifySlashes("path"));
         assertEquals("/path", unifySlashes("/path"));
         assertEquals("longer/path", unifySlashes("longer/path"));

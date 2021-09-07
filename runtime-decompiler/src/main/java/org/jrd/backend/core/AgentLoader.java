@@ -38,15 +38,15 @@ public class AgentLoader {
         //logger.finest("Attempting to attach decompiler agent for VM '" + pid + "' on port '" + port + "'");
         try {
             String[] installProps = createProperties(port);
-            try{  
-            InstallDecompilerAgentImpl.install(Integer.toString(pid), false, false, "localhost", port, installProps);
-                } catch (IllegalArgumentException | IOException | AttachNotSupportedException | AgentLoadException | AgentInitializationException ex) {
+            try {
+                InstallDecompilerAgentImpl.install(Integer.toString(pid), false, false, "localhost", port, installProps);
+            } catch (IllegalArgumentException | IOException | AttachNotSupportedException | AgentLoadException | AgentInitializationException ex) {
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Attach failed!! Cause: " + ex.getMessage(), ex));
-                    return INVALID_PORT;
-                }
+                return INVALID_PORT;
+            }
 
             if (port > 0) {
-                return port;//new AgentInfo(pid, port, null, vmId, agentId, false);
+                return port; // new AgentInfo(pid, port, null, vmId, agentId, false);
             } else {
                 return INVALID_PORT;
             }

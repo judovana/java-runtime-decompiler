@@ -13,7 +13,7 @@ public class TextInputPanel extends JPanel {
         jLabel.setText(label);
     }
 
-    TextInputPanel(){
+    TextInputPanel() {
         this.setPreferredSize(new Dimension(0, 80));
         this.setLayout(new GridBagLayout());
 

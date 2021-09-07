@@ -14,7 +14,7 @@ import java.util.*;
 /**
  * This class is used for creating/removing/updating information about available Java Virtual Machines.
  */
-public class VmManager{
+public class VmManager {
 
     private HashSet<VmInfo> vmInfoSet;
     Set<ActionListener> actionListeners = new HashSet<>();
@@ -26,7 +26,7 @@ public class VmManager{
         loadSavedFsVms();
 
         Thread VMUpdateThread = new Thread(() -> {
-            while (true){
+            while (true) {
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {
@@ -84,7 +84,7 @@ public class VmManager{
         // Add all new VMs.
         newVmInfoSet.forEach(vmInfo -> {
             boolean isNewVm = vmInfoSet.stream().noneMatch(vmInfo1 -> vmInfo1.getVmId().equals(vmInfo.getVmId()));
-            if (isNewVm){
+            if (isNewVm) {
                 setChanged();
                 vmInfoSet.add(vmInfo);
             }
@@ -93,10 +93,10 @@ public class VmManager{
         // Remove old VMs that are no longer available.
         Iterator<VmInfo> iterator = vmInfoSet.iterator();
         HashSet<VmInfo> forRemoval = new HashSet<>();
-        while (iterator.hasNext()){
+        while (iterator.hasNext()) {
             VmInfo vmInfo = iterator.next();
             boolean noLongerExists = newVmInfoSet.stream().noneMatch(vmInfo1 -> vmInfo1.getVmId().equals(vmInfo.getVmId()));
-            if (vmInfo.getType() == VmInfo.Type.LOCAL && noLongerExists){
+            if (vmInfo.getType() == VmInfo.Type.LOCAL && noLongerExists) {
                 setChanged();
                 forRemoval.add(vmInfo);
             }
@@ -105,7 +105,7 @@ public class VmManager{
         notifyListeners();
     }
 
-    public VmInfo createRemoteVM(String hostname, int port){
+    public VmInfo createRemoteVM(String hostname, int port) {
         String id = UUID.randomUUID().toString();
         VmInfo vmInfo = new VmInfo(id, 0, hostname, VmInfo.Type.REMOTE, null);
         VmDecompilerStatus status = new VmDecompilerStatus();
@@ -122,9 +122,11 @@ public class VmManager{
 
     public VmInfo createFsVM(List<File> cp, String name, boolean shouldBeSaved) {
         int pid = getNextAvailableFsVmPid();
-        VmInfo vmInfo = new VmInfo(""+pid, pid, name, VmInfo.Type.FS, cp);
+        String stringPid = String.valueOf(pid);
+
+        VmInfo vmInfo = new VmInfo(stringPid, pid, name, VmInfo.Type.FS, cp);
         VmDecompilerStatus status = new VmDecompilerStatus();
-        status.setVmId(""+pid);
+        status.setVmId(stringPid);
         status.setHostname(null);
         status.setListenPort(pid);
         vmInfo.setVmDecompilerStatus(status);
@@ -183,9 +185,9 @@ public class VmManager{
         return null;
     }
 
-    public VmInfo getVmInfoByID(String VmId){
+    public VmInfo getVmInfoByID(String VmId) {
         for (VmInfo vmInfo : vmInfoSet) {
-            if (vmInfo.getVmId().equals(VmId)){
+            if (vmInfo.getVmId().equals(VmId)) {
                 return vmInfo;
             }
         }
@@ -196,31 +198,31 @@ public class VmManager{
         return new HashSet<>(this.vmInfoSet);
     }
 
-    public void subscribeToVMChange(ActionListener listener){
-        if (listener == null){
+    public void subscribeToVMChange(ActionListener listener) {
+        if (listener == null) {
             throw new NullPointerException();
         }
         actionListeners.add(listener);
     }
 
-    public void notifyListeners(){
-        if (hasChanged()){
+    public void notifyListeners() {
+        if (hasChanged()) {
             clearChanged();
-            for (ActionListener listener: actionListeners){
+            for (ActionListener listener: actionListeners) {
                 listener.actionPerformed(new ActionEvent(this, 0, null));
             }
         }
     }
 
-    private boolean hasChanged(){
+    private boolean hasChanged() {
         return changed;
     }
 
-    private void setChanged(){
+    private void setChanged() {
         changed = true;
     }
 
-    private  void clearChanged(){
+    private void clearChanged() {
         changed = false;
     }
 }

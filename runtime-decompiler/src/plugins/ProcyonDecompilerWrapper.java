@@ -20,7 +20,7 @@ public class ProcyonDecompilerWrapper {
             e.printStackTrace();
             return e.toString();
         } finally {
-            if (tempByteFile != null && tempByteFile.exists()){
+            if (tempByteFile != null && tempByteFile.exists()) {
                 tempByteFile.delete();
             }
         }

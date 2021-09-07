@@ -10,21 +10,21 @@ public class NewConnectionController {
     NewConnectionView newConnectionView;
     VmManager vmManager;
 
-    public NewConnectionController(NewConnectionView newConnectionView, VmManager vmManager){
+    public NewConnectionController(NewConnectionView newConnectionView, VmManager vmManager) {
         this.newConnectionView = newConnectionView;
         this.vmManager = vmManager;
 
         newConnectionView.setAddButtonListener(e -> addRemoteVmInfo());
     }
 
-    private void addRemoteVmInfo(){
+    private void addRemoteVmInfo() {
         String hostname = newConnectionView.getHostname();
         String portString = newConnectionView.getPortString();
-        if (hostname.isEmpty()){
+        if (hostname.isEmpty()) {
             JOptionPane.showMessageDialog(newConnectionView, "Hostname is Empty.", " ", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        if (isValidPort(portString)){
+        if (isValidPort(portString)) {
             int port = Integer.parseInt(portString);
             vmManager.createRemoteVM(hostname, port);
             newConnectionView.dispose();
