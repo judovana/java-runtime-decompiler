@@ -5,15 +5,29 @@
 
 
 <module name="Checker">
+    <!-- Enable annotations -->
+    <module name="SuppressWarningsFilter"/>
 
     <!-- Checks for whitespace, see http://checkstyle.sf.net/config_whitespace.html -->
     <module name="FileTabCharacter">
         <property name="eachLine" value="true"/>
     </module>
-    
+
+    <!-- Miscellaneous checks, see https://checkstyle.sourceforge.io/config_misc.html -->
+    <module name="NewlineAtEndOfFile" />
+    <module name="OrderedProperties">
+        <property name="fileExtensions" value=".prop"/>
+    </module>
+    <module name="Translation" />
+    <module name="UniqueProperties">
+        <property name="fileExtensions" value=".prop"/>
+    </module>
+
     <module name="TreeWalker">
-        <!-- Checks for whitespace, see http://checkstyle.sf.net/config_whitespace.html -->
-        
+        <!-- Enable annotations -->
+        <module name="SuppressWarningsHolder"/>
+
+        <!-- Checks for whitespace, see https://checkstyle.sourceforge.io/config_whitespace.html -->
         <module name="EmptyForInitializerPad" />
         <module name="EmptyForIteratorPad" />
         <module name="EmptyLineSeparator">
@@ -41,5 +55,20 @@
         <module name="TypecastParenPad" />
         <module name="WhitespaceAfter" />
         <module name="WhitespaceAround" />
+
+        <!-- Miscellaneous checks, see https://checkstyle.sourceforge.io/config_misc.html -->
+        <module name="ArrayTypeStyle" />
+        <module name="CommentsIndentation" />
+        <module name="DescendantToken" />
+        <module name="Indentation">
+            <property name="arrayInitIndent" value="8"/>
+        </module>
+        <module name="NoCodeInFile" />
+        <module name="OuterTypeFilename" />
+        <module name="TodoComment" />
+        <module name="UncommentedMain">
+            <property name="excludedClasses" value="\.(Help|Main)$"/>
+        </module>
+        <module name="UpperEll" />
     </module>
 </module>

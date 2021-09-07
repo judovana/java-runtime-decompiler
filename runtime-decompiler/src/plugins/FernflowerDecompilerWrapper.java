@@ -19,10 +19,10 @@ public class FernflowerDecompilerWrapper {
         return new File(f.getAbsolutePath() + "/" + classToStub(clazz));
     }
 
-/**
-At the end of this fun was found, that fernflower, correctly, ignores naming, so all the fun with saving in file tree may be hapily abandoned
-and just bunch of tmp files can be used. Final file is always given_dir/Cazz.java , where class is not fully qalified nor placed in pkg dirs
-**/
+    /*
+    At the end of this fun was found, that fernflower, correctly, ignores naming, so all the fun with saving in file tree may be hapily abandoned
+    and just bunch of tmp files can be used. Final file is always given_dir/Cazz.java , where class is not fully qalified nor placed in pkg dirs
+    */
     public String decompile(String name, byte[] bytecode, Map<String, byte[]> innerClasses, String[] options) throws IOException {
         File base = File.createTempFile("fernflower-" + name, ".class");
         base.delete();
@@ -94,9 +94,9 @@ and just bunch of tmp files can be used. Final file is always given_dir/Cazz.jav
             File decompiledFile = new File(decompiledFilePath);
             String decompiledString = readStringFromFile(decompiledFilePath);
             return new Object[]{decompiledFile, decompiledString};
-       } finally {
-           System.setOut(old);
-       }
+        } finally {
+            System.setOut(old);
+        }
     }
 
     private String readStringFromFile(String filePath) throws IOException {

@@ -92,9 +92,9 @@ public class CfrDecompilerWrapper {
             }
             String decompiledString = readStringFromFile(decompiledFiles.get(0));
             return new Object[]{decompiledFiles.get(0), decompiledString};
-       } finally {
-           System.setOut(old);
-       }
+        } finally {
+            System.setOut(old);
+        }
     }
 
     private String readStringFromFile(File filePath) throws IOException {

@@ -40,6 +40,7 @@ import java.util.regex.Pattern;
 /**
  * Class that creates GUI for attached VM.
  */
+@SuppressWarnings("Indentation") // indented Swing components greatly help with orientation
 public class BytecodeDecompilerView {
 
     private JPanel bytecodeDecompilerPanel;

@@ -31,7 +31,7 @@ public class AgentLoader {
     /**
      * This method handles the attachment of a decompiler agent to given VM.
      * @param pid PID of the VM
-     * @return AgentInfo object, if successful, else null
+     * @return port number if successful, else {@link #INVALID_PORT}
      */
     public int attach(int pid) {
         int port = findPort();
@@ -46,13 +46,13 @@ public class AgentLoader {
             }
 
             if (port > 0) {
-                return port; // new AgentInfo(pid, port, null, vmId, agentId, false);
+                return port;
             } else {
                 return INVALID_PORT;
             }
         } catch (IllegalArgumentException | IOException e) {
             OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Unable to attach decompiler agent to VM '" + pid + "' on port '" + port + "'", e));
-        return INVALID_PORT;
+            return INVALID_PORT;
         }
     }
 
