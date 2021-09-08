@@ -49,7 +49,10 @@ import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Window;
 
-public class ScreenFinder {
+public final class ScreenFinder {
+
+    private ScreenFinder() {
+    }
 
     public static Point getCurrentPoint() {
         final Point p = MouseInfo.getPointerInfo().getLocation();

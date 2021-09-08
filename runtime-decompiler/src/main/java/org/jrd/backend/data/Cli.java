@@ -228,11 +228,11 @@ public class Cli {
         } else { // validate first
             FileToClassValidator.StringAndScore r = FileToClassValidator.validate(classStr, newBytecodeFile);
 
-            if (r.score > 0 && r.score < 10) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "WARNING: " + r.message);
+            if (r.getScore() > 0 && r.getScore() < 10) {
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "WARNING: " + r.getMessage());
             }
-            if (r.score >= 10) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "ERROR: " + r.message);
+            if (r.getScore() >= 10) {
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "ERROR: " + r.getMessage());
             }
 
             clazz = VmDecompilerInformationController.fileToBase64(newBytecodeFile);

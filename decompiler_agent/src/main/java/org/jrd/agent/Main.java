@@ -7,12 +7,15 @@ import java.lang.instrument.Instrumentation;
  *
  * @author pmikova
  */
-public class Main {
+public final class Main {
 
     private static final String ADDRESS_STRING = "address:";
     private static final String PORT_STRING = "port:";
     private static String hostname;
     private static Integer port;
+
+    private Main() {
+    }
 
     /**
      * Premain method is executed when the agent is loaded. It sets the port and

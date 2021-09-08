@@ -20,10 +20,13 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Utils {
+public final class Utils {
     public static final int FULLY_QUALIFIED_NAME = 0;
     public static final int SRC_SUBDIRS_NAME = 1;
     public static final int CUSTOM_NAME = 2;
+
+    private Utils() {
+    }
 
     public interface StatusKeeper {
         void setText(String s);

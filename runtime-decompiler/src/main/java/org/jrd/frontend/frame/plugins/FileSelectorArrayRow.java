@@ -11,10 +11,7 @@ import java.io.File;
 
 public class FileSelectorArrayRow extends JPanel {
 
-    GridBagConstraints gbc;
-
     private JTextField textField;
-
     private JButton removeButton;
     private JButton browseButton;
     private JFileChooser chooser;
@@ -23,7 +20,7 @@ public class FileSelectorArrayRow extends JPanel {
 
     FileSelectorArrayRow(FileSelectorArrayPanel parent, String url) {
         this.setLayout(new GridBagLayout());
-        gbc = new GridBagConstraints();
+        GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.NORTHWEST;
         gbc.fill = GridBagConstraints.BOTH;
         textField = new JTextField(url);

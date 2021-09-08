@@ -8,7 +8,7 @@ import java.io.InputStream;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
-public class MetadataProperties {
+public final class MetadataProperties {
     private final Properties properties;
 
     private static final Pattern UNPROPAGATED_VALUE = Pattern.compile("\\$\\{.*}");

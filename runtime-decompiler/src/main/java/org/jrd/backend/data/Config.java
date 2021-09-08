@@ -19,7 +19,7 @@ import java.util.Map;
 /**
  * Singleton class for storing and retrieving configuration strings.
  */
-public class Config {
+public final class Config {
 
     private final Gson gson;
     private Map<String, Object> configMap;

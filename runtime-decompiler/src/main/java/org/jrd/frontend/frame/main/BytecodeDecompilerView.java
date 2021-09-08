@@ -343,7 +343,7 @@ public class BytecodeDecompilerView {
     }
 
     private static class UndoRedoKeyAdapter extends KeyAdapter {
-        UndoManager undoManager = new UndoManager();
+        private UndoManager undoManager = new UndoManager();
 
         @Override
         public void keyReleased(KeyEvent e) {
@@ -361,7 +361,7 @@ public class BytecodeDecompilerView {
         }
     }
 
-    private static class SearchControlsPanel extends JPanel {
+    private static final class SearchControlsPanel extends JPanel {
         private final JTextField searchField = new JTextField("");
         private final JButton previousButton = new JButton("Previous");
         private final JButton nextButton = new JButton("Next");
