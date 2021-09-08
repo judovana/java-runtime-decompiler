@@ -167,8 +167,7 @@ public class InstallDecompilerAgentImpl {
         }
     }
     
-    private void locateAgent() throws IOException
-    {
+    private void locateAgent() throws IOException {
         agentJar = config.getAgentExpandedPath();
     }
 }

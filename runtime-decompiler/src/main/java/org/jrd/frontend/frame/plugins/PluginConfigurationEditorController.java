@@ -58,7 +58,10 @@ public class PluginConfigurationEditorController {
         });
         view.getOkCancelPanel().getCancelButton().addActionListener(actionEvent -> view.dispose());
         view.getOkCancelPanel().getValidateButton().addActionListener(actionEvent -> {
-            if (view.getPluginListPanel().getWrapperJList().getSelectedIndex() == -1) return;
+            if (view.getPluginListPanel().getWrapperJList().getSelectedIndex() == -1) {
+                return;
+            }
+
             String result = pluginManager.validatePlugin(getDataFromPanel((DecompilerWrapperInformation) view.getPluginListPanel().getWrapperJList().getSelectedValue()));
             if (result != null) {
                 JOptionPane.showMessageDialog(view,
@@ -68,7 +71,6 @@ public class PluginConfigurationEditorController {
             } else {
                 JOptionPane.showMessageDialog(view, "This plugin is valid.", "Success", JOptionPane.INFORMATION_MESSAGE);
             }
-
         });
 
         updateWrapperList(pluginManager.getWrappers());
@@ -139,7 +141,10 @@ public class PluginConfigurationEditorController {
     }
 
     void onPluginJListChange() {
-        if (view.getPluginListPanel().getWrapperJList().getSelectedIndex() == -1) return;
+        if (view.getPluginListPanel().getWrapperJList().getSelectedIndex() == -1) {
+            return;
+        }
+
         DecompilerWrapperInformation selectedPlugin = (DecompilerWrapperInformation) view.getPluginListPanel().getWrapperJList().getSelectedValue();
         ConfigPanel configPanel = getOrCreatePluginConfigPanel(selectedPlugin);
 
