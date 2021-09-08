@@ -2,19 +2,19 @@ package org.jrd.backend.data;
 
 import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.ClassesProvider;
+import io.github.mkoncek.classpathless.api.ClasspathlessCompiler;
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
-import io.github.mkoncek.classpathless.api.ClasspathlessCompiler;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.OutputController;
 import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 import org.jrd.backend.decompiling.PluginManager;
+import org.jrd.frontend.Utils;
+import org.jrd.frontend.frame.filesystem.NewFsVmController;
 import org.jrd.frontend.frame.main.FileToClassValidator;
 import org.jrd.frontend.frame.main.VmDecompilerInformationController;
-import org.jrd.frontend.frame.filesystem.NewFsVmController;
-import org.jrd.frontend.Utils;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -33,13 +33,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
-
-import static org.jrd.backend.data.Help.LIST_CLASSES_FORMAT;
-import static org.jrd.backend.data.Help.BYTES_FORMAT;
-import static org.jrd.backend.data.Help.BASE64_FORMAT;
-import static org.jrd.backend.data.Help.DECOMPILE_FORMAT;
-import static org.jrd.backend.data.Help.OVERWRITE_FORMAT;
-import static org.jrd.backend.data.Help.printHelpText;
 
 public class Cli {
 
@@ -219,7 +212,7 @@ public class Cli {
             newBytecodeFile = null;
         } else {
             if (filteredArgs.size() != 4) {
-                throw new IllegalArgumentException("Incorrect argument count! Please use '" + OVERWRITE_FORMAT + "'.");
+                throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.OVERWRITE_FORMAT + "'.");
             }
             newBytecodeFile = filteredArgs.get(3);
         }
@@ -434,7 +427,7 @@ public class Cli {
 
     private void decompile() throws Exception {
         if (filteredArgs.size() < 4) {
-            throw new IllegalArgumentException("Incorrect argument count! Please use '" + DECOMPILE_FORMAT + "'.");
+            throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.DECOMPILE_FORMAT + "'.");
         }
 
         VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
@@ -529,7 +522,7 @@ public class Cli {
 
     private void printBytes(boolean justBytes) throws Exception {
         if (filteredArgs.size() < 3) {
-            throw new IllegalArgumentException("Incorrect argument count! Please use '" + (justBytes ? BYTES_FORMAT : BASE64_FORMAT) + "'.");
+            throw new IllegalArgumentException("Incorrect argument count! Please use '" + (justBytes ? Help.BYTES_FORMAT : Help.BASE64_FORMAT) + "'.");
         }
 
         VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
@@ -562,7 +555,7 @@ public class Cli {
 
     private void listClasses() throws IOException {
         if (filteredArgs.size() < 2) {
-            throw new IllegalArgumentException("Incorrect argument count! Please use '" + LIST_CLASSES_FORMAT + "'.");
+            throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.LIST_CLASSES_FORMAT + "'.");
         }
 
         VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
@@ -647,7 +640,7 @@ public class Cli {
     }
 
     private void printHelp() {
-        printHelpText();
+        Help.printHelpText();
     }
 
     private static String invalidityToString(boolean invalidWrapper) {

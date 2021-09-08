@@ -2,19 +2,16 @@ package org.jrd.frontend.frame.agent;
 
 import org.jrd.backend.core.OutputController;
 import org.jrd.backend.data.Config;
+import org.jrd.backend.data.Directories;
 import org.jrd.frontend.frame.main.BytecodeDecompilerView;
 import org.jrd.frontend.frame.main.MainFrameView;
+import org.jrd.frontend.frame.plugins.FileSelectorArrayRow;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-
-import static org.jrd.backend.data.Directories.getJrdLocation;
-import static org.jrd.backend.data.Directories.isPortable;
-import static org.jrd.frontend.frame.plugins.FileSelectorArrayRow.fallback;
-import static org.jrd.frontend.frame.plugins.FileSelectorArrayRow.getTextFieldToolTip;
 
 @SuppressWarnings("Indentation") // indented Swing components greatly help with orientation
 public class ConfigureView extends JDialog {
@@ -41,7 +38,7 @@ public class ConfigureView extends JDialog {
 
             this.agentPathTextField = new JTextField();
             this.agentPathTextField.setToolTipText(BytecodeDecompilerView.styleTooltip() + "Select a path to the Decompiler Agent.<br />" +
-                    getTextFieldToolTip()
+                    FileSelectorArrayRow.getTextFieldToolTip()
             );
             this.agentPathTextField.setText(initialAgentPath);
 
@@ -56,12 +53,12 @@ public class ConfigureView extends JDialog {
 
             chooser = new JFileChooser();
             File dir;
-            if (isPortable()) {
-                dir = new File(getJrdLocation() + File.separator + "libs");
+            if (Directories.isPortable()) {
+                dir = new File(Directories.getJrdLocation() + File.separator + "libs");
             } else {
-                dir = new File(getJrdLocation() + File.separator + "decompiler_agent" + File.separator + "target");
+                dir = new File(Directories.getJrdLocation() + File.separator + "decompiler_agent" + File.separator + "target");
             }
-            chooser.setCurrentDirectory(fallback(dir));
+            chooser.setCurrentDirectory(FileSelectorArrayRow.fallback(dir));
 
             this.setLayout(new GridBagLayout());
             GridBagConstraints gbc = new GridBagConstraints();

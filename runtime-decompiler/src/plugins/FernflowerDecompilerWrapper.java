@@ -1,13 +1,12 @@
 import org.jetbrains.java.decompiler.main.decompiler.ConsoleDecompiler;
 
-import java.util.Map;
-import java.io.File;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.io.PrintStream;
+import java.util.Map;
 
 public class FernflowerDecompilerWrapper {
 

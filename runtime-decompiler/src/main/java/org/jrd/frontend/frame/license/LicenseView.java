@@ -4,7 +4,8 @@ import org.jrd.backend.core.OutputController;
 import org.jrd.frontend.frame.main.MainFrameView;
 
 import javax.swing.*;
-import javax.swing.border.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
 import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.jrd.backend.data.Cli.*;
-import static org.jrd.backend.data.Directories.isOsWindows;
 
 /**
  * Class for relaying help texts to the user.
@@ -242,7 +241,7 @@ public class Help {
 
         @Override
         public String launcher() {
-            return (isOsWindows() ? LAUNCHER_WINDOWS : LAUNCHER_LINUX) + " [" + VERBOSE + "] ";
+            return (Directories.isOsWindows() ? LAUNCHER_WINDOWS : LAUNCHER_LINUX) + " [" + VERBOSE + "] ";
         }
 
         @Override
