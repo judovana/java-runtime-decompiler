@@ -333,8 +333,7 @@ public class PluginManager {
         final GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(DecompilerWrapperInformation.class, new DecompilerWrapperInformationSerializer());
         gsonBuilder.setPrettyPrinting();
-        final Gson gson = gsonBuilder.create();
-        final String json = gson.toJson(wrapper);
+        final String json = gsonBuilder.create().toJson(wrapper);
         if (wrapper.getScope().equals("local")) {
             Directories.createPluginDirectory();
         }

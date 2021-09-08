@@ -20,12 +20,10 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class AgentActionWorker extends Thread {
 
-    private Socket socket;
     private InstrumentationProvider provider;
     private Boolean abort = false;
 
     public AgentActionWorker(Socket socket, InstrumentationProvider provider) {
-        this.socket = socket;
         this.provider = provider;
 
         try {
@@ -82,7 +80,7 @@ public class AgentActionWorker extends Thread {
             } else {
                 switch (line) {
                     case "HALT":
-                        closeSocket(outputStream);
+                        closeSocket(outputStream, socket);
                         OutputControllerAgent.getLogger().log("AGENT: Received HALT command, Closing socket and exiting.");
                         break;
                     case "CLASSES":
@@ -183,11 +181,10 @@ public class AgentActionWorker extends Thread {
         out.flush();
     }
 
-    private void closeSocket(BufferedWriter out) throws IOException {
+    private void closeSocket(BufferedWriter out, Socket socket) throws IOException {
         out.write("GOODBYE");
         out.flush();
         socket.close();
         ConnectionDelegator.gracefulShutdown();
     }
-
 }

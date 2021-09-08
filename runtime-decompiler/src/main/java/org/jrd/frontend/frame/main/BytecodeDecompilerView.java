@@ -519,7 +519,7 @@ public class BytecodeDecompilerView {
     }
 
     private void updateClassList() {
-        ArrayList<String> filtered = new ArrayList<>();
+        List<String> filtered = new ArrayList<>();
         String filter = classesSortField.getText().trim();
         if (filter.isEmpty()) {
             filter = ".*";

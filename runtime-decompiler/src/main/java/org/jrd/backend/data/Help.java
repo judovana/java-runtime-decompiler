@@ -274,7 +274,8 @@ public class Help {
 
         @Override
         public void printTitle() {
-            String buildTimestamp, centerTitle;
+            String buildTimestamp;
+            String centerTitle;
 
             try {
                 buildTimestamp = MetadataProperties.getInstance().getTimestamp().split(" ")[0];

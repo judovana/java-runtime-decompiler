@@ -182,12 +182,12 @@ public class DecompilerWrapperInformation {
         }
     }
 
-    public void setWrapperURLFromPath(String wrapperURL) {
-        setWrapperURL(() -> DecompilerWrapperInformation.this.wrapperURL = ExpandableUrl.createFromPath(wrapperURL));
+    public void setWrapperURLFromPath(String path) {
+        setWrapperURL(() -> DecompilerWrapperInformation.this.wrapperURL = ExpandableUrl.createFromPath(path));
     }
 
-    private void setWrapperURLFromURL(String wrapperURL) {
-        setWrapperURL(() -> DecompilerWrapperInformation.this.wrapperURL = ExpandableUrl.createFromStringUrl(wrapperURL));
+    private void setWrapperURLFromURL(String url) {
+        setWrapperURL(() -> DecompilerWrapperInformation.this.wrapperURL = ExpandableUrl.createFromStringUrl(url));
     }
 
     public List<ExpandableUrl> getDependencyURLs() {

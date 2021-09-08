@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -63,19 +64,21 @@ public class ArchiveManager {
     private boolean findClazz(ZipInputStream zis, String clazz) throws IOException {
         ZipEntry entry = null;
         while ((entry = zis.getNextEntry()) != null) {
-            if (!entry.isDirectory()) {
-                if (shouldOpen(entry.getName())) {
-                    pathManager.addPathPart(entry.getName());
-                    if (findClazz(new ZipInputStream(zis), clazz)) {
-                        return true;
-                    }
-                    pathManager.removePathPart(entry.getName());
-                } else {
-                    String clazzInJar = FsAgent.toClass(entry.getName());
-                    if (clazzInJar.equals(clazz)) {
-                        pathManager.setFound();
-                        return true;
-                    }
+            if (entry.isDirectory()) {
+                continue;
+            }
+
+            if (shouldOpen(entry.getName())) {
+                pathManager.addPathPart(entry.getName());
+                if (findClazz(new ZipInputStream(zis), clazz)) {
+                    return true;
+                }
+                pathManager.removePathPart(entry.getName());
+            } else {
+                String clazzInJar = FsAgent.toClass(entry.getName());
+                if (clazzInJar.equals(clazz)) {
+                    pathManager.setFound();
+                    return true;
                 }
             }
         }
@@ -215,7 +218,7 @@ public class ArchiveManager {
             String path = tmpdir + fileSeparator + "jrd" + fileSeparator + tmp[tmp.length - 1] + fileSeparator;
             FileOutputStream fileStream = new FileOutputStream(path);
             ZipOutputStream zOut = new ZipOutputStream(fileStream);
-            File f2zip = new File(tmpdir + fileSeparator + "jrd" + fileSeparator + (i));
+            File f2zip = new File(tmpdir + fileSeparator + "jrd" + fileSeparator + i);
             File[] children = f2zip.listFiles();
 
             if (children != null) {
@@ -315,7 +318,7 @@ public class ArchiveManager {
         private String clazz = "";
         private boolean found = false;
         private boolean extracted = false;
-        private ArrayList<String> currentPath = new ArrayList<>();
+        private List<String> currentPath = new ArrayList<>();
 
         public boolean wasFound() {
             return found;

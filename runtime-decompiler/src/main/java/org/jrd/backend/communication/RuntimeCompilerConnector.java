@@ -49,7 +49,7 @@ public class RuntimeCompilerConnector {
         public List<String> getClassPathListing() {
             AgentRequestAction request = VmDecompilerInformationController.createRequest(vmInfo, AgentRequestAction.RequestAction.CLASSES);
             String response = VmDecompilerInformationController.submitRequest(vmManager, request);
-            if (response.equals("ok")) {
+            if ("ok".equals(response)) {
                 String[] classes = vmInfo.getVmDecompilerStatus().getLoadedClassNames();
                 return Arrays.asList(classes);
             } else {

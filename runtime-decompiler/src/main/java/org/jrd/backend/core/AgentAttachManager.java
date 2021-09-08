@@ -15,7 +15,6 @@ public class AgentAttachManager {
     public AgentAttachManager(VmManager vmManager) {
         this.vmManager = vmManager;
         this.loader = new AgentLoader();
-        
     }
 
     VmDecompilerStatus attachAgentToVm(String vmId, int vmPid) {

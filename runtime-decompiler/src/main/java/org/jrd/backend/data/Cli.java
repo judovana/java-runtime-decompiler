@@ -92,6 +92,7 @@ public class Cli {
             OutputController.getLogger().log(ex);
         }
 
+        @SuppressWarnings("ReturnCount") // returns in switch cases
         public int toInt(String suffix) {
             switch (like) {
                 case FQN:
@@ -136,6 +137,7 @@ public class Cli {
         return filteredArgs.isEmpty();
     }
 
+    @SuppressWarnings("ModifiedControlVariable") // shifting arguments when parsing
     private List<String> prefilterArgs(String[] originalArgs) {
         List<String> args = new ArrayList<>(originalArgs.length);
         String saveAs = null;
@@ -240,13 +242,14 @@ public class Cli {
                 classStr,
                 clazz);
         String response = VmDecompilerInformationController.submitRequest(vmManager, request);
-        if (response.equals("ok")) {
+        if ("ok".equals(response)) {
             System.out.println("Most likely done successfully.");
         } else {
             throw new RuntimeException(VmDecompilerInformationController.CLASSES_NOPE);
         }
     }
 
+    @SuppressWarnings("ModifiedControlVariable") // shifting arguments when parsing
     private void compile() throws Exception {
         if (filteredArgs.size() < 2) {
             throw new IllegalArgumentException("Expected at least one file for compile.");
@@ -259,13 +262,13 @@ public class Cli {
         for (int i = 1; i < filteredArgs.size(); i++) {
             String arg = filteredArgs.get(i);
 
-            if (arg.equals("-p")) {
+            if ("-p".equals(arg)) {
                 wantedCustomCompiler = filteredArgs.get(i + 1);
                 i++; // shift
-            } else if (arg.equals("-cp")) {
+            } else if ("-cp".equals(arg)) {
                 puc = filteredArgs.get(i + 1);
                 i++; // shift
-            } else if (arg.equals("-r")) {
+            } else if ("-r".equals(arg)) {
                 isRecursive = true;
             } else {
                 File fileToCompile = new File(arg);
@@ -354,7 +357,7 @@ public class Cli {
                         Base64.getEncoder().encodeToString(bytecode.getFile()));
                 String response = VmDecompilerInformationController.submitRequest(vmManager, request);
 
-                if (response.equals("ok")) {
+                if ("ok".equals(response)) {
                     OutputController.getLogger().log("Successfully uploaded class '" + className + "'.");
                 } else {
                     failCount++;
@@ -410,13 +413,13 @@ public class Cli {
                     for (int i = 0; i < words.length; i++) {
                         String keyWord = words[i];
 
-                        if (keyWord.equals("0xCAFEBABE")) {
+                        if ("0xCAFEBABE".equals(keyWord)) {
                             return clazz.replace("/", "."); // jcoder's disassembler uses / instead of and has fully qualified class name as class name
                         }
-                        if (keyWord.equals("package")) {
+                        if ("package".equals(keyWord)) {
                             pkg = words[i + 1].replace("/", "."); // jasm's disassembler uses / instead of .
                         }
-                        if (keyWord.equals("class") || keyWord.equals("interface") || keyWord.equals("enum")) {
+                        if ("class".equals(keyWord) || "interface".equals(keyWord) || "enum".equals(keyWord)) {
                             clazz = words[i + 1];
                         }
                     }
@@ -655,7 +658,7 @@ public class Cli {
         AgentRequestAction request = VmDecompilerInformationController.createRequest(vmInfo, AgentRequestAction.RequestAction.CLASSES, null);
         String response = VmDecompilerInformationController.submitRequest(manager, request);
 
-        if (response.equals("ok")) {
+        if ("ok".equals(response)) {
             return vmInfo.getVmDecompilerStatus().getLoadedClassNames();
         } else {
             throw new RuntimeException(VmDecompilerInformationController.CLASSES_NOPE);
@@ -666,7 +669,7 @@ public class Cli {
         AgentRequestAction request = VmDecompilerInformationController.createRequest(vmInfo, AgentRequestAction.RequestAction.BYTES, clazz);
         String response = VmDecompilerInformationController.submitRequest(manager, request);
 
-        if (response.equals("ok")) {
+        if ("ok".equals(response)) {
             return vmInfo.getVmDecompilerStatus();
         } else {
             throw new RuntimeException(VmDecompilerInformationController.CLASSES_NOPE);

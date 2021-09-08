@@ -41,6 +41,7 @@ public class FsAgent implements JrdAgent {
      *                are refused
      * @return agents response or null
      */
+    @SuppressWarnings("ReturnCount") // pretty returns
     @Override
     public String submitRequest(final String request) {
         String[] q = request.split("\\s+");
@@ -102,10 +103,12 @@ public class FsAgent implements JrdAgent {
             this.cp = cp;
         }
 
+        @SuppressWarnings({"NestedIfDepth", "ReturnCount"}) // no way around this
         private T operateOnCp(String clazz, CpOperator<T> op) throws IOException {
             for (File c : cp) {
                 if (c.isDirectory()) {
                     String root = sanitize(c.getAbsolutePath());
+
                     if (clazz == null) {
                         //no return, search
                         op.onDirEntry(c, null);
@@ -128,6 +131,7 @@ public class FsAgent implements JrdAgent {
                         if (clazz == null) {
                             throw new IOException("Trying to find class but no class is specified");
                         }
+
                         ArchiveManager am = ArchiveManager.getInstance();
                         if (am.isClassInFile(clazz, c)) {
                             if (am.needExtract()) {
@@ -176,7 +180,7 @@ public class FsAgent implements JrdAgent {
             while (entries.hasMoreElements()) {
                 ZipEntry ze = entries.nextElement();
                 if (!ze.isDirectory()) {
-                    String clazzInJar = toClass((ze.getName()));
+                    String clazzInJar = toClass(ze.getName());
                     if (clazzInJar.equals(clazz)) {
                         return op.onJarEntry(f, zipFile, ze);
                     }

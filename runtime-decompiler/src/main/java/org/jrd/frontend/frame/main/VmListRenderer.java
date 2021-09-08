@@ -81,6 +81,8 @@ public class VmListRenderer extends JPanel implements ListCellRenderer<VmInfo> {
                         "ID: " + vmInfo.getVmPid() + "</html>"
                 );
                 break;
+            default:
+                break;
         }
 
         if (isSelected) {

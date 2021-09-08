@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 class TestingDummyHelper {
 
-    private Process process = null;
+    private Process process;
 
     static final String CLASS_NAME = "TestingDummy";
     static final String TMP_DIR = System.getProperty("java.io.tmpdir");
@@ -59,7 +59,7 @@ class TestingDummyHelper {
         ByteArrayOutputStream errStream = new ByteArrayOutputStream();
 
         int errLevel = compiler.run(null, null, errStream,
-                "-d", System.getProperty("java.io.tmpdir"),
+                "-d", TMP_DIR,
                 DOT_JAVA_PATH
         );
         String errMessage = errStream.toString(StandardCharsets.UTF_8);

@@ -34,9 +34,10 @@ public class HexSearchActionListener implements ActionListener {
                 case NEXT:
                     hexSearchEngine.next(hexSearch.getText(), (HexSearch.HexSearchOptions) hexSearchType.getSelectedItem());
                     break;
-
                 case PREV:
                     hexSearchEngine.previous(hexSearch.getText(), (HexSearch.HexSearchOptions) hexSearchType.getSelectedItem());
+                    break;
+                default:
                     break;
             }
         } catch (Exception e) {

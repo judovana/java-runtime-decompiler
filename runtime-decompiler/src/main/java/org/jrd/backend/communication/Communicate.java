@@ -97,6 +97,7 @@ public class Communicate {
      * Method that reads agent's response.
      * @return "ERROR" in case of fail or corresponding bytes or class names
      */
+    @SuppressWarnings("ReturnCount") // returns in switch cases
     public String readResponse() {
         String initLine;
 

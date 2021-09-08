@@ -239,6 +239,7 @@ public class DecompilerRequestReceiver {
 
     private static class ClassesComparator implements Comparator<String>, Serializable {
 
+        @SuppressWarnings("ReturnCount") // comparator syntax
         @SuppressFBWarnings(
                 value = "NP_NULL_ON_SOME_PATH_MIGHT_BE_INFEASIBLE",
                 justification = "SpotBugs false reports possible NP dereference, even though both o1 & o2 are tested for nullness. "

@@ -51,7 +51,7 @@ public final class Directories {
                 /* fail here */
                 throw new NullPointerException("No such a directory in the system!");
             }
-            if (res == null || res.equals("")) {
+            if (res == null || "".equals(res)) {
                 xdgConfigHome = homeDir + XDG_JRD_HOME;
             } else {
                 xdgConfigHome = res + XDG_JRD_SUFFIX;

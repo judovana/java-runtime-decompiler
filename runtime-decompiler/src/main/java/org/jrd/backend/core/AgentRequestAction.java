@@ -62,11 +62,7 @@ public class AgentRequestAction {
             this.intVal = intVal;
         }
 
-        /**
-         *
-         * @param act action string
-         * @return request
-         */
+        @SuppressWarnings("ReturnCount") // returns in switch cases
         public static RequestAction returnAction(String act) {
 
             int action;

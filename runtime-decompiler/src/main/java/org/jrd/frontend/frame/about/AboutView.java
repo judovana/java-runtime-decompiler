@@ -16,9 +16,9 @@ public class AboutView extends JDialog {
         JLabel label = new JLabel();
         Font font = label.getFont();
 
-        StringBuffer style = new StringBuffer("font-family:" + font.getFamily() + ";");
-        style.append("font-weight:" + (font.isBold() ? "bold" : "normal") + ";");
-        style.append("font-size:" + font.getSize() + "pt;");
+        String style = "font-family:" + font.getFamily() + ";" +
+                "font-weight:" + (font.isBold() ? "bold" : "normal") + ";" +
+                "font-size:" + font.getSize() + "pt;";
 
         JEditorPane editorPane = new JEditorPane("text/html", "<html><body style=\"" + style + "\">" +
             "<h2>Java-Runtime-Decompiler</h2>" +

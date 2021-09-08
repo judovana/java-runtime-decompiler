@@ -17,7 +17,6 @@ public class OkCancelPanel extends JPanel {
         this.setLayout(new GridBagLayout());
         this.setPreferredSize(new Dimension(0, 50));
         setBorder(new MatteBorder(1, 0, 0, 0, UIManager.getColor("Separator.shadow")));
-        GridBagConstraints gbc;
 
         okButton = new JButton("OK");
         okButton.setPreferredSize(new Dimension(90, 28));
@@ -26,7 +25,7 @@ public class OkCancelPanel extends JPanel {
         validateButton = new JButton("Validate");
         validateButton.setPreferredSize(new Dimension(90, 28));
 
-        gbc = new GridBagConstraints();
+        GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.BOTH;
         gbc.anchor = GridBagConstraints.EAST;
         gbc.weightx = 1;

@@ -57,7 +57,6 @@ public class JasmDecompilerWrapper {
         File target = new File(parentDir, "bin");
         target.mkdir();
         log(maybeLogger, "entering into " + parentDir.getAbsolutePath());
-        org.openjdk.asmtools.jasm.Main jasm = new org.openjdk.asmtools.jasm.Main(System.err, "jdis");
         List<String> tmpSources = new ArrayList<>(src.size());
         for (Map.Entry<String, String> fileToCompile : src.entrySet()) {
             File nw = new File(srcs, fileToCompile.getKey() + ".java");
@@ -70,9 +69,11 @@ public class JasmDecompilerWrapper {
         tmpSources.add(0, "-g"); //shoud add debug info
         String[] opts = tmpSources.toArray(new String[0]);
         log(maybeLogger, "jasm " + Arrays.toString(opts));
+
+        org.openjdk.asmtools.jasm.Main jasm = new org.openjdk.asmtools.jasm.Main(System.err, "jdis");
         jasm.compile(opts);
         Map<String, byte[]> r = new HashMap();
-        Files.walk(target.toPath()).filter(Files::isRegularFile).forEach((k) -> {
+        Files.walk(target.toPath()).filter(Files::isRegularFile).forEach(k -> {
             try {
                 String futureFullyQualifiedNiceName = k.toString();
                 futureFullyQualifiedNiceName = futureFullyQualifiedNiceName.replace(target + File.separator, "");

@@ -30,7 +30,9 @@ public class HexEditor extends JScrollPane {
 
     public HexEditor() {
         final HexTableModel model = new HexTableModel(this);
-        this.setViewportView(this.table = new HexTable(this, model));
+        this.table = new HexTable(this, model);
+
+        this.setViewportView(table);
         this.setShowRowHeader(true);
         this.setAlternateRowBG(false);
         this.setAlternateColumnBG(false);
@@ -123,10 +125,6 @@ public class HexEditor extends JScrollPane {
 
     public Point offsetToCell(final int offset) {
         return this.table.offsetToCell(offset);
-    }
-
-    public void open(final String fileName) throws IOException {
-        this.table.open(fileName);
     }
 
     public byte[] get() {

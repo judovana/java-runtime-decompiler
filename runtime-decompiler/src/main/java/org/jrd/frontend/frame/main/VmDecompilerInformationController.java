@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 /**
  * This class provides Action listeners and request handling for
@@ -139,9 +140,9 @@ public class VmDecompilerInformationController {
     }
 
     private void updateVmLists() {
-        ArrayList<VmInfo> localVms = new ArrayList<>();
-        ArrayList<VmInfo> remoteVms = new ArrayList<>();
-        ArrayList<VmInfo> fsVms = new ArrayList<>();
+        List<VmInfo> localVms = new ArrayList<>();
+        List<VmInfo> remoteVms = new ArrayList<>();
+        List<VmInfo> fsVms = new ArrayList<>();
 
         vmManager.getVmInfoSet().forEach(info -> {
             if (info.getType() == VmInfo.Type.LOCAL) {
@@ -240,7 +241,7 @@ public class VmDecompilerInformationController {
         showLoadingDialog();
         AgentRequestAction request = createRequest(RequestAction.CLASSES, "");
         String response = submitRequest(request);
-        if (response.equals("ok")) {
+        if ("ok".equals(response)) {
             VmDecompilerStatus vmStatus = vmInfo.getVmDecompilerStatus();
             String[] classes = vmStatus.getLoadedClassNames();
             bytecodeDecompilerView.reloadClassList(classes);
@@ -339,7 +340,7 @@ public class VmDecompilerInformationController {
         try {
             AgentRequestAction request = createRequest(RequestAction.HALT, "");
             String response = submitRequest(request);
-            if (response.equals("ok")) {
+            if ("ok".equals(response)) {
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Agent closing socket and exiting");
             }
         } catch (Exception e) {
