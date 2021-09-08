@@ -54,10 +54,9 @@ public class FernflowerDecompilerWrapper {
             if (decompiledFile != null && decompiledFile.exists()) {
                 decompiledFile.delete();
             }
-            
         }
-        return decompiledString;
 
+        return decompiledString;
     }
 
     public String decompile(byte[] bytecode, String[] options) {
@@ -80,8 +79,8 @@ public class FernflowerDecompilerWrapper {
             if (decompiledFile != null && decompiledFile.exists()) {
                 decompiledFile.delete();
             }
-            
         }
+
         return decompiledString;
     }
 

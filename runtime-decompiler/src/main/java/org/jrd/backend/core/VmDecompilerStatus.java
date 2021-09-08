@@ -4,7 +4,7 @@ package org.jrd.backend.core;
 import java.util.Arrays;
 
 /**
- * This class stores all information about the state of decompiler plugin on 
+ * This class stores all information about the state of decompiler plugin on
  * each VM.
  */
 
@@ -20,12 +20,11 @@ public class VmDecompilerStatus {
         this.loadedClassBytes = "";
         this.loadedClassNames = new String[]{};
     }
-    
+
     public String getVmId() {
         return vmId;
     }
 
-    
     public void setVmId(String vmId) {
         this.vmId = vmId;
     }
@@ -38,12 +37,10 @@ public class VmDecompilerStatus {
         this.hostname = hostname;
     }
 
-    
     public void setListenPort(int port) {
         this.listenPort = port;
     }
 
-    
     public int getListenPort() {
         return listenPort;
     }
@@ -52,17 +49,17 @@ public class VmDecompilerStatus {
         this.loadedClassNames = Arrays.copyOf(loadedClassNames, loadedClassNames.length);
 
     }
-    
+
     public String getLoadedClassBytes() {
         return loadedClassBytes;
     }
 
-    
+
     public String[] getLoadedClassNames() {
         return Arrays.copyOf(loadedClassNames, loadedClassNames.length);
     }
 
-    
+
     public void setLoadedClassBytes(String value) {
         loadedClassBytes = value;
     }

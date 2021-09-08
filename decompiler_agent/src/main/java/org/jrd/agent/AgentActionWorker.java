@@ -156,7 +156,7 @@ public class AgentActionWorker extends Thread {
         }
         out.flush();
     }
-    
+
     private void receiveByteCode(BufferedReader in, BufferedWriter out) throws IOException {
         String className = in.readLine();
         if (className == null) {
