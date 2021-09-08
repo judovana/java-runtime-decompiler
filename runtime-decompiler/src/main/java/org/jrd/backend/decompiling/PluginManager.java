@@ -2,7 +2,6 @@ package org.jrd.backend.decompiling;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
 import org.jrd.backend.core.OutputController;
 import org.jrd.backend.data.Cli;
 import org.jrd.backend.data.Directories;
@@ -31,8 +30,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-
-import static org.jrd.backend.decompiling.ExpandableUrl.prependFileProtocol;
 
 /**
  * Executes manages external decompiler wrapper plugins.
@@ -203,7 +200,7 @@ public class PluginManager {
             for (ExpandableUrl url : wrapper.getDependencyURLs()) {
                 classPathList.add(url.getExpandedURL());
             }
-            classPathList.add(new URL(prependFileProtocol(System.getProperty("java.io.tmpdir")) + "/")); // trailing slash just in case
+            classPathList.add(new URL(ExpandableUrl.prependFileProtocol(System.getProperty("java.io.tmpdir")) + "/")); // trailing slash just in case
 
             // Reflect classes & methods and store them in DecompilerWrapperInformation for later use
             ClassLoader loader = URLClassLoader.newInstance(

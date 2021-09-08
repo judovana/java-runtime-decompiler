@@ -8,9 +8,6 @@ import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import static org.jrd.backend.data.Directories.getJrdLocation;
-import static org.jrd.backend.data.Directories.isOsWindows;
-
 public class ExpandableUrl {
 
     public static class MalformedURLToPath extends RuntimeException {
@@ -72,7 +69,7 @@ public class ExpandableUrl {
     static String expandEnvVars(String path, boolean prependSlash) {
         String pluginDir = unifySlashes(Directories.getXdgJrdBaseDir(), prependSlash);
         String homeDir = unifySlashes(System.getProperty("user.home"), prependSlash);
-        String jrdDir = unifySlashes(getJrdLocation(), prependSlash);
+        String jrdDir = unifySlashes(Directories.getJrdLocation(), prependSlash);
 
         path = path.replace("${JRD}", jrdDir);
         path = path.replace("${XDG_CONFIG_HOME}", pluginDir);
@@ -84,7 +81,7 @@ public class ExpandableUrl {
     private static String collapseEnvVars(String path) {
         String pluginDir = unifySlashes(Directories.getXdgJrdBaseDir());
         String homeDir = unifySlashes(System.getProperty("user.home"));
-        String jrdDir = unifySlashes(getJrdLocation());
+        String jrdDir = unifySlashes(Directories.getJrdLocation());
 
         return collapseEnvVars(unifySlashes(path), homeDir, pluginDir, jrdDir);
     }
@@ -103,7 +100,7 @@ public class ExpandableUrl {
 
     public static String unifySlashes(String dir, boolean prependSlash) {
         dir = dir.replaceAll("\\\\", "/");
-        if (prependSlash && isOsWindows() && !dir.startsWith("file") && dir.length() > 0 && dir.charAt(0) != '/' && dir.charAt(0) != '$') {
+        if (prependSlash && Directories.isOsWindows() && !dir.startsWith("file") && dir.length() > 0 && dir.charAt(0) != '/' && dir.charAt(0) != '$') {
             dir = "/" + dir;
         }
 

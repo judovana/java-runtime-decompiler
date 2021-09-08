@@ -11,12 +11,12 @@ import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 import org.jrd.backend.decompiling.PluginManager;
-import org.jrd.frontend.frame.remote.NewConnectionController;
-import org.jrd.frontend.frame.remote.NewConnectionView;
 import org.jrd.frontend.frame.filesystem.NewFsVmController;
 import org.jrd.frontend.frame.filesystem.NewFsVmView;
 import org.jrd.frontend.frame.plugins.PluginConfigurationEditorController;
 import org.jrd.frontend.frame.plugins.PluginConfigurationEditorView;
+import org.jrd.frontend.frame.remote.NewConnectionController;
+import org.jrd.frontend.frame.remote.NewConnectionView;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;

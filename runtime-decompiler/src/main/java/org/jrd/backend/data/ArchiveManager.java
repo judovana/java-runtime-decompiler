@@ -9,13 +9,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
-
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class ArchiveManager {
 
@@ -230,10 +229,10 @@ public class ArchiveManager {
             fileStream.close();
             // Move it into the temp file if it's not last, so it can be packaged
             if (i > 0) {
-                Files.copy(Path.of(path), Path.of(tmpdir + fileSeparator + "jrd" + fileSeparator + (i - 1) + fileSeparator + pathManager.get(i)), REPLACE_EXISTING);
+                Files.copy(Path.of(path), Path.of(tmpdir + fileSeparator + "jrd" + fileSeparator + (i - 1) + fileSeparator + pathManager.get(i)), StandardCopyOption.REPLACE_EXISTING);
             } else {
                 // It's the last, replace the original
-                Files.copy(Path.of(path), c.toPath(), REPLACE_EXISTING);
+                Files.copy(Path.of(path), c.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }
             // Delete once it was moved
             Directories.deleteWithException(path);

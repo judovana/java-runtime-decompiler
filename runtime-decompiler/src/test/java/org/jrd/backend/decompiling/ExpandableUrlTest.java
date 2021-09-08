@@ -1,73 +1,68 @@
 package org.jrd.backend.decompiling;
 
 import org.jrd.backend.data.Directories;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
 
-import static org.jrd.backend.data.Directories.getJrdLocation;
-import static org.jrd.backend.data.Directories.isOsWindows;
-import static org.jrd.backend.decompiling.ExpandableUrl.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ExpandableUrlTest {
     @Test
     @EnabledOnOs(OS.WINDOWS)
     void testIsOsWindowsOnWindows() {
-        assertTrue(isOsWindows());
+        assertTrue(Directories.isOsWindows());
     }
 
     @Test
     @EnabledOnOs(OS.LINUX)
     void testIsOsWindowsOnLinux() {
-        assertFalse(isOsWindows());
+        assertFalse(Directories.isOsWindows());
     }
 
     // env vars
     @Test
     void testCollapseEnvVars() {
-        assertEquals("${HOME}", collapseEnvVars("home_path", "home_path", "config_path", "jrd_path"));
-        assertEquals("${XDG_CONFIG_HOME}", collapseEnvVars("config_path", "home_path", "config_path", "jrd_path"));
-        assertEquals("${JRD}", collapseEnvVars("jrd_path", "home_path", "config_path", "jrd_path"));
-        assertEquals("${HOME}", collapseEnvVars("${HOME}", "home_path", "config_path", "jrd_path"));
-        assertEquals("different_path", collapseEnvVars("different_path", "home_path", "config_path", "jrd_path"));
-        assertEquals("/${HOME}", collapseEnvVars("/home_path", "home_path", "config_path", "jrd_path"));
+        assertEquals("${HOME}", ExpandableUrl.collapseEnvVars("home_path", "home_path", "config_path", "jrd_path"));
+        assertEquals("${XDG_CONFIG_HOME}", ExpandableUrl.collapseEnvVars("config_path", "home_path", "config_path", "jrd_path"));
+        assertEquals("${JRD}", ExpandableUrl.collapseEnvVars("jrd_path", "home_path", "config_path", "jrd_path"));
+        assertEquals("${HOME}", ExpandableUrl.collapseEnvVars("${HOME}", "home_path", "config_path", "jrd_path"));
+        assertEquals("different_path", ExpandableUrl.collapseEnvVars("different_path", "home_path", "config_path", "jrd_path"));
+        assertEquals("/${HOME}", ExpandableUrl.collapseEnvVars("/home_path", "home_path", "config_path", "jrd_path"));
     }
 
     @Test
     void testExpandEnvVars() {
-        assertEquals(unifySlashes(System.getProperty("user.home")), expandEnvVars("${HOME}"));
-        assertEquals(unifySlashes(Directories.getXdgJrdBaseDir()), expandEnvVars("${XDG_CONFIG_HOME}"));
-        assertEquals(unifySlashes(getJrdLocation()), expandEnvVars("${JRD}"));
+        assertEquals(ExpandableUrl.unifySlashes(System.getProperty("user.home")), ExpandableUrl.expandEnvVars("${HOME}"));
+        assertEquals(ExpandableUrl.unifySlashes(Directories.getXdgJrdBaseDir()), ExpandableUrl.expandEnvVars("${XDG_CONFIG_HOME}"));
+        assertEquals(ExpandableUrl.unifySlashes(Directories.getJrdLocation()), ExpandableUrl.expandEnvVars("${JRD}"));
     }
 
     // slashes
     @Test
     @EnabledOnOs(OS.WINDOWS)
     void testUnifySlashesOnWindows() {
-        assertEquals("/path", unifySlashes("path"));
-        assertEquals("/path", unifySlashes("/path"));
-        assertEquals("/longer/path", unifySlashes("longer/path"));
-        assertEquals("/longer/path", unifySlashes("longer\\path"));
-        assertEquals("/longer/path", unifySlashes("/longer/path"));
-        assertEquals("/longer/path", unifySlashes("/longer\\path"));
+        assertEquals("/path", ExpandableUrl.unifySlashes("path"));
+        assertEquals("/path", ExpandableUrl.unifySlashes("/path"));
+        assertEquals("/longer/path", ExpandableUrl.unifySlashes("longer/path"));
+        assertEquals("/longer/path", ExpandableUrl.unifySlashes("longer\\path"));
+        assertEquals("/longer/path", ExpandableUrl.unifySlashes("/longer/path"));
+        assertEquals("/longer/path", ExpandableUrl.unifySlashes("/longer\\path"));
     }
 
     @Test
     @EnabledOnOs(OS.LINUX)
     void testUnifySlashesOnLinux() {
-        assertEquals("path", unifySlashes("path"));
-        assertEquals("/path", unifySlashes("/path"));
-        assertEquals("longer/path", unifySlashes("longer/path"));
-        assertEquals("longer/path", unifySlashes("longer\\path"));
-        assertEquals("/longer/path", unifySlashes("/longer/path"));
-        assertEquals("/longer/path", unifySlashes("/longer\\path"));
+        assertEquals("path", ExpandableUrl.unifySlashes("path"));
+        assertEquals("/path", ExpandableUrl.unifySlashes("/path"));
+        assertEquals("longer/path", ExpandableUrl.unifySlashes("longer/path"));
+        assertEquals("longer/path", ExpandableUrl.unifySlashes("longer\\path"));
+        assertEquals("/longer/path", ExpandableUrl.unifySlashes("/longer/path"));
+        assertEquals("/longer/path", ExpandableUrl.unifySlashes("/longer\\path"));
     }
 
     // createFromPath
@@ -78,7 +73,7 @@ class ExpandableUrlTest {
         ExpandableUrl expandableUrl = ExpandableUrl.createFromPath("/" + System.getProperty("user.home"));
 
         assertEquals("${HOME}", expandableUrl.getRawPath());
-        assertEquals(unifySlashes(System.getProperty("user.home"), false), expandableUrl.getExpandedPath());
+        assertEquals(ExpandableUrl.unifySlashes(System.getProperty("user.home"), false), expandableUrl.getExpandedPath());
         assertEquals("file:${HOME}", expandableUrl.getRawURL());
         assertEquals(new URL("file:" + System.getProperty("user.home")), expandableUrl.getExpandedURL());
 
@@ -90,7 +85,7 @@ class ExpandableUrlTest {
         ExpandableUrl expandableUrl = ExpandableUrl.createFromPath(System.getProperty("user.home"));
 
         assertEquals("${HOME}", expandableUrl.getRawPath());
-        assertEquals(unifySlashes(System.getProperty("user.home"), false), expandableUrl.getExpandedPath());
+        assertEquals(ExpandableUrl.unifySlashes(System.getProperty("user.home"), false), expandableUrl.getExpandedPath());
         assertEquals("file:${HOME}", expandableUrl.getRawURL());
         assertEquals(new URL("file:" + System.getProperty("user.home")), expandableUrl.getExpandedURL());
 
@@ -102,7 +97,7 @@ class ExpandableUrlTest {
         ExpandableUrl expandableUrl = ExpandableUrl.createFromPath("${HOME}");
 
         assertEquals("${HOME}", expandableUrl.getRawPath());
-        assertEquals(unifySlashes(System.getProperty("user.home"), false), expandableUrl.getExpandedPath());
+        assertEquals(ExpandableUrl.unifySlashes(System.getProperty("user.home"), false), expandableUrl.getExpandedPath());
         assertEquals("file:${HOME}", expandableUrl.getRawURL());
         assertEquals(new URL("file:" + System.getProperty("user.home")), expandableUrl.getExpandedURL());
 
@@ -116,7 +111,7 @@ class ExpandableUrlTest {
         ExpandableUrl expandableUrl = ExpandableUrl.createFromStringUrl("file:/" + System.getProperty("user.home"));
 
         assertEquals("${HOME}", expandableUrl.getRawPath());
-        assertEquals(unifySlashes(System.getProperty("user.home"), false), expandableUrl.getExpandedPath());
+        assertEquals(ExpandableUrl.unifySlashes(System.getProperty("user.home"), false), expandableUrl.getExpandedPath());
         assertEquals("file:${HOME}", expandableUrl.getRawURL());
         assertEquals(new URL("file:" + System.getProperty("user.home")), expandableUrl.getExpandedURL());
 
@@ -129,7 +124,7 @@ class ExpandableUrlTest {
         ExpandableUrl expandableUrl = ExpandableUrl.createFromStringUrl("file:///" + System.getProperty("user.home"));
 
         assertEquals("${HOME}", expandableUrl.getRawPath());
-        assertEquals(unifySlashes(System.getProperty("user.home"), false), expandableUrl.getExpandedPath());
+        assertEquals(ExpandableUrl.unifySlashes(System.getProperty("user.home"), false), expandableUrl.getExpandedPath());
         assertEquals("file:${HOME}", expandableUrl.getRawURL());
         assertEquals(new URL("file:" + System.getProperty("user.home")), expandableUrl.getExpandedURL());
 
@@ -142,7 +137,7 @@ class ExpandableUrlTest {
         ExpandableUrl expandableUrl = ExpandableUrl.createFromStringUrl("file:" + System.getProperty("user.home"));
 
         assertEquals("${HOME}", expandableUrl.getRawPath());
-        assertEquals(unifySlashes(System.getProperty("user.home"), false), expandableUrl.getExpandedPath());
+        assertEquals(ExpandableUrl.unifySlashes(System.getProperty("user.home"), false), expandableUrl.getExpandedPath());
         assertEquals("file:${HOME}", expandableUrl.getRawURL());
         assertEquals(new URL("file:" + System.getProperty("user.home")), expandableUrl.getExpandedURL());
 
@@ -165,7 +160,7 @@ class ExpandableUrlTest {
         ExpandableUrl expandableUrl = ExpandableUrl.createFromStringUrl("file:${HOME}");
 
         assertEquals("${HOME}", expandableUrl.getRawPath());
-        assertEquals(unifySlashes(System.getProperty("user.home"), false), expandableUrl.getExpandedPath());
+        assertEquals(ExpandableUrl.unifySlashes(System.getProperty("user.home"), false), expandableUrl.getExpandedPath());
         assertEquals("file:${HOME}", expandableUrl.getRawURL());
         assertEquals(new URL("file:" + System.getProperty("user.home")), expandableUrl.getExpandedURL());
 
@@ -177,7 +172,7 @@ class ExpandableUrlTest {
         ExpandableUrl expandableUrl = ExpandableUrl.createFromStringUrl("file://${HOME}");
 
         assertEquals("${HOME}", expandableUrl.getRawPath());
-        assertEquals(unifySlashes(System.getProperty("user.home"), false), expandableUrl.getExpandedPath());
+        assertEquals(ExpandableUrl.unifySlashes(System.getProperty("user.home"), false), expandableUrl.getExpandedPath());
         assertEquals("file:${HOME}", expandableUrl.getRawURL());
         assertEquals(new URL("file:" + System.getProperty("user.home")), expandableUrl.getExpandedURL());
 

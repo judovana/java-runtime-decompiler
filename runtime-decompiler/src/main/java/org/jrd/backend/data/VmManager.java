@@ -1,9 +1,9 @@
 package org.jrd.backend.data;
 
-import org.jrd.backend.core.OutputController;
-import org.jrd.backend.core.VmDecompilerStatus;
 import com.sun.tools.attach.VirtualMachine;
 import com.sun.tools.attach.VirtualMachineDescriptor;
+import org.jrd.backend.core.OutputController;
+import org.jrd.backend.core.VmDecompilerStatus;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

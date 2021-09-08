@@ -1,7 +1,8 @@
 package org.jrd.backend.data;
 
-
+import com.google.gson.Gson;
 import org.jrd.backend.core.OutputController;
+import org.jrd.backend.decompiling.ExpandableUrl;
 
 import java.io.File;
 import java.io.FileReader;
@@ -10,15 +11,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-
-import com.google.gson.Gson;
-import org.jrd.backend.decompiling.ExpandableUrl;
-
-import static org.jrd.backend.data.Directories.isOsWindows;
-
 
 /**
  * Singleton class for storing and retrieving configuration strings.
@@ -59,7 +54,7 @@ public class Config {
 
     public String getAgentExpandedPath() {
         String expandedPath = ExpandableUrl.createFromPath((String) configMap.get(AGENT_PATH_KEY)).getExpandedPath();
-        if (isOsWindows() && expandedPath.length() > 0 && expandedPath.charAt(0) == '/') { // Agent attaching fails on Windows when path starts with a slash
+        if (Directories.isOsWindows() && expandedPath.length() > 0 && expandedPath.charAt(0) == '/') { // Agent attaching fails on Windows when path starts with a slash
             expandedPath = expandedPath.substring(1);
         }
         return expandedPath;

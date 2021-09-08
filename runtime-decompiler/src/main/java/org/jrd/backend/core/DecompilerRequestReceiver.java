@@ -8,15 +8,13 @@ import org.jrd.backend.communication.JrdAgent;
 import org.jrd.backend.core.AgentRequestAction.RequestAction;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
+import org.jrd.backend.decompiling.PluginManager;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-
-import static org.jrd.backend.decompiling.PluginManager.LAMBDA_FORM;
-import static org.jrd.backend.decompiling.PluginManager.UNDECOMPILABLE_LAMBDA;
 
 /**
  * This class manages the requests that are put in queue by the controller.
@@ -262,16 +260,16 @@ public class DecompilerRequestReceiver {
             if (!o1.startsWith("[") && o2.startsWith("[")) {
                 return -1;
             }
-            if (o1.contains(UNDECOMPILABLE_LAMBDA) && !o2.contains(UNDECOMPILABLE_LAMBDA)) {
+            if (o1.contains(PluginManager.UNDECOMPILABLE_LAMBDA) && !o2.contains(PluginManager.UNDECOMPILABLE_LAMBDA)) {
                 return 1;
             }
-            if (!o1.contains(UNDECOMPILABLE_LAMBDA) && o2.contains(UNDECOMPILABLE_LAMBDA)) {
+            if (!o1.contains(PluginManager.UNDECOMPILABLE_LAMBDA) && o2.contains(PluginManager.UNDECOMPILABLE_LAMBDA)) {
                 return -1;
             }
-            if (LAMBDA_FORM.matcher(o1).matches() && !LAMBDA_FORM.matcher(o2).matches()) {
+            if (PluginManager.LAMBDA_FORM.matcher(o1).matches() && !PluginManager.LAMBDA_FORM.matcher(o2).matches()) {
                 return 1;
             }
-            if (!LAMBDA_FORM.matcher(o1).matches() && LAMBDA_FORM.matcher(o2).matches()) {
+            if (!PluginManager.LAMBDA_FORM.matcher(o1).matches() && PluginManager.LAMBDA_FORM.matcher(o2).matches()) {
                 return -1;
             }
 

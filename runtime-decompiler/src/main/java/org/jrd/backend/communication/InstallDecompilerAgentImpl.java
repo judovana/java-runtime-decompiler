@@ -1,12 +1,12 @@
 package org.jrd.backend.communication;
 
-import org.jrd.backend.data.Config;
-
 import com.sun.tools.attach.AgentInitializationException;
 import com.sun.tools.attach.AgentLoadException;
 import com.sun.tools.attach.AttachNotSupportedException;
 import com.sun.tools.attach.VirtualMachine;
 import com.sun.tools.attach.VirtualMachineDescriptor;
+import org.jrd.backend.data.Config;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;

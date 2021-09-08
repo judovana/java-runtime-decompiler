@@ -1,11 +1,11 @@
 package org.jrd.frontend.frame.main;
 
-import java.awt.Color;
-import java.io.File;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import java.awt.Color;
+import java.io.File;
 
 /**
  *

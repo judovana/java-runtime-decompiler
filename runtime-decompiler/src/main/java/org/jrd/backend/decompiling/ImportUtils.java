@@ -16,8 +16,6 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import static org.jrd.backend.data.Directories.createPluginDirectory;
-
 public final class ImportUtils {
 
     private ImportUtils() {
@@ -78,7 +76,7 @@ public final class ImportUtils {
     }
 
     private static void copyWrappers(URL wrapperURL, String wrapperFilename) throws IOException {
-        createPluginDirectory();
+        Directories.createPluginDirectory();
 
         copyBetweenStreams(wrapperURL, wrapperFilename);
 

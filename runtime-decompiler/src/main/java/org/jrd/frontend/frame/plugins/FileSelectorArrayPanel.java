@@ -1,9 +1,9 @@
 package org.jrd.frontend.frame.plugins;
 
-import java.util.LinkedList;
-import java.util.List;
 import javax.swing.*;
 import java.awt.*;
+import java.util.LinkedList;
+import java.util.List;
 
 public class FileSelectorArrayPanel extends JPanel {
 

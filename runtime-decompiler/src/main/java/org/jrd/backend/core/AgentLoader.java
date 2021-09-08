@@ -1,8 +1,9 @@
 package org.jrd.backend.core;
 
+import com.sun.tools.attach.AgentInitializationException;
+import com.sun.tools.attach.AgentLoadException;
+import com.sun.tools.attach.AttachNotSupportedException;
 import org.jrd.backend.communication.InstallDecompilerAgentImpl;
-
-import com.sun.tools.attach.*;
 
 import java.io.IOException;
 import java.net.ServerSocket;

@@ -7,9 +7,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 
-import static org.jrd.frontend.frame.plugins.FileSelectorArrayRow.fallback;
-import static org.jrd.frontend.frame.plugins.FileSelectorArrayRow.getTextFieldToolTip;
-
 public class FileSelectorPanel extends JPanel {
 
     private JTextField textField;
@@ -26,7 +23,7 @@ public class FileSelectorPanel extends JPanel {
         this.textField = new JTextField();
         textField.setPreferredSize(new Dimension(0, 32));
         textField.setToolTipText(BytecodeDecompilerView.styleTooltip() + "Select a path to the decompiler wrapper .java file.<br />" +
-                getTextFieldToolTip()
+                FileSelectorArrayRow.getTextFieldToolTip()
         );
 
         this.jLabel = new JLabel(label);
@@ -34,7 +31,7 @@ public class FileSelectorPanel extends JPanel {
 
         this.chooser = new JFileChooser();
         File dir = new File(Directories.getPluginDirectory());
-        chooser.setCurrentDirectory(fallback(dir));
+        chooser.setCurrentDirectory(FileSelectorArrayRow.fallback(dir));
 
         browseButton.addActionListener(actionEvent -> {
             int returnVar = chooser.showOpenDialog(this);

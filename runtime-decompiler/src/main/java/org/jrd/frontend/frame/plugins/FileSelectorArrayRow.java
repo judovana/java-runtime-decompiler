@@ -2,16 +2,12 @@ package org.jrd.frontend.frame.plugins;
 
 import org.jrd.backend.core.OutputController;
 import org.jrd.backend.data.Directories;
+import org.jrd.backend.decompiling.ExpandableUrl;
 import org.jrd.frontend.frame.main.BytecodeDecompilerView;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-
-import static org.jrd.backend.data.Directories.getJrdLocation;
-import static org.jrd.backend.data.Directories.isPortable;
-import static org.jrd.backend.data.Directories.isOsWindows;
-import static org.jrd.backend.decompiling.ExpandableUrl.unifySlashes;
 
 public class FileSelectorArrayRow extends JPanel {
 
@@ -49,8 +45,8 @@ public class FileSelectorArrayRow extends JPanel {
 
         chooser = new JFileChooser();
         File dir;
-        if (isPortable()) {
-            dir = new File(getJrdLocation() + File.separator + "libs" + File.separator + "decompilers");
+        if (Directories.isPortable()) {
+            dir = new File(Directories.getJrdLocation() + File.separator + "libs" + File.separator + "decompilers");
         } else {
             dir = new File(System.getProperty("user.home") + File.separator + ".m2" + File.separator + "repository");
         }
@@ -88,10 +84,10 @@ public class FileSelectorArrayRow extends JPanel {
     }
 
     public static String getTextFieldToolTip() {
-        return "A valid path is absolute, " + ((isOsWindows()) ? "can start with a single forward slash \"/\", " : "") + "and can contain the following macros:<br /><ul>" +
-                "<li><b>${HOME}</b>, which substitutes <b>" + unifySlashes(System.getProperty("user.home")) + "</b></li>" +
-                "<li><b>${XDG_CONFIG_HOME}</b>, which substitutes <b>" + unifySlashes(Directories.getXdgJrdBaseDir()) + "</b></li>" +
-                "<li><b>${JRD}</b>, which substitutes <b>" + unifySlashes(getJrdLocation()) + "</b></li>" +
+        return "A valid path is absolute, " + ((Directories.isOsWindows()) ? "can start with a single forward slash \"/\", " : "") + "and can contain the following macros:<br /><ul>" +
+                "<li><b>${HOME}</b>, which substitutes <b>" + ExpandableUrl.unifySlashes(System.getProperty("user.home")) + "</b></li>" +
+                "<li><b>${XDG_CONFIG_HOME}</b>, which substitutes <b>" + ExpandableUrl.unifySlashes(Directories.getXdgJrdBaseDir()) + "</b></li>" +
+                "<li><b>${JRD}</b>, which substitutes <b>" + ExpandableUrl.unifySlashes(Directories.getJrdLocation()) + "</b></li>" +
                 "</ul></html>";
     }
 
