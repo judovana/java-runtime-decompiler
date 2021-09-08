@@ -29,11 +29,11 @@ public class NestedJarsTest {
 
 	@Test
 	void nestedJarsSearchTest() throws IOException {
-		assertTrue(am.isClassInFile("MyMainToTestOn", f));
+		assertTrue(am.isClassInFile("MainNotNested", f));
 		assertTrue(am.isClassInFile("bye2.reallyNestedClass", f));
-		assertTrue(am.isClassInFile("eu.tester.reader.Reader", f));
-		assertTrue(am.isClassInFile("help.ReaderHelp", f));
-		assertTrue(am.isClassInFile("tester.MyMainToTestOnInDir", f));
+		assertTrue(am.isClassInFile("eu.tester.reader.NestedPseudoReader", f));
+		assertTrue(am.isClassInFile("help.NestedReaderInHelp", f));
+		assertTrue(am.isClassInFile("tester.MainToTestOnInDir", f));
 
 		assertFalse(am.isClassInFile("WillFail", f));
 		assertFalse(am.isClassInFile("ReaderHelp", f));
@@ -64,19 +64,19 @@ public class NestedJarsTest {
 
 	@Test
 	void needExtractTests() throws IOException {
-		assertTrue(am.isClassInFile("MyMainToTestOn", f));
+		assertTrue(am.isClassInFile("MainNotNested", f));
 		assertFalse(am.needExtract());
 
 		assertTrue(am.isClassInFile("bye2.reallyNestedClass", f));
 		assertTrue(am.needExtract());
 
-		assertTrue(am.isClassInFile("eu.tester.reader.Reader", f));
+		assertTrue(am.isClassInFile("eu.tester.reader.NestedPseudoReader", f));
 		assertTrue(am.needExtract());
 
-		assertTrue(am.isClassInFile("help.ReaderHelp", f));
+		assertTrue(am.isClassInFile("help.NestedReaderInHelp", f));
 		assertTrue(am.needExtract());
 
-		assertTrue(am.isClassInFile("tester.MyMainToTestOnInDir", f));
+		assertTrue(am.isClassInFile("tester.MainToTestOnInDir", f));
 		assertFalse(am.needExtract());
 	}
 
@@ -84,9 +84,9 @@ public class NestedJarsTest {
 	void unpackTests() throws IOException {
 		assertTrue(am.isClassInFile("bye2.reallyNestedClass", f));
 		File tmp = am.unpack(f);
-		assertTrue(tmp.getAbsolutePath().endsWith("3/bye/fuuu3/fuuu2/fuuu/bye2.zip") || tmp.getAbsolutePath().endsWith("3\\bye\\fuuu3\\fuuu2\\fuuu\\bye2.zip"));
+		assertTrue(tmp.getAbsolutePath().endsWith("3/bye/fuuu3/fuuu2/fuuu/reallyNested.zip") || tmp.getAbsolutePath().endsWith("3\\bye\\fuuu3\\fuuu2\\fuuu\\bye2.zip"));
 
-		assertTrue(am.isClassInFile("eu.tester.reader.Reader", f));
+		assertTrue(am.isClassInFile("eu.tester.reader.NestedPseudoReader", f));
 		tmp = am.unpack(f);
 		assertTrue(tmp.getAbsolutePath().endsWith("0/reader.jar") || tmp.getAbsolutePath().endsWith("0\\reader.jar"));
 		am.delete();
@@ -95,7 +95,7 @@ public class NestedJarsTest {
 	@Test
 	void packTests() throws IOException {
 		String separator = System.getProperty("file.separator");
-		assertTrue(am.isClassInFile("eu.tester.reader.Reader", f));
+		assertTrue(am.isClassInFile("eu.tester.reader.NestedPseudoReader", f));
 		File tmp = am.unpack(f);
 		assertTrue(tmp.getAbsolutePath().endsWith("0" + separator + "reader.jar"));
 		File tmp2 = new File(tmp.getParent() + separator + "test.txt");
@@ -105,8 +105,8 @@ public class NestedJarsTest {
 		am.pack(tmp2);
 		am.delete();
 
-		am.isClassInFile("help.ReaderHelp", tmp2);
-		assertTrue(am.isClassInFile("eu.tester.reader.Reader", tmp2));
+		am.isClassInFile("help.NestedReaderInHelp", tmp2);
+		assertTrue(am.isClassInFile("eu.tester.reader.NestedPseudoReader", tmp2));
 		tmp = am.unpack(tmp2);
 		tmp2 = new File(tmp.getParent());
 		ArrayList<String> names = new ArrayList<>();
