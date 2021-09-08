@@ -5,7 +5,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class ConnectionDelegator extends Thread {
+public final class ConnectionDelegator extends Thread {
 
     private static ConnectionDelegator connectionDelegator;
     public static final int DEFAULT_PORT = 5395;

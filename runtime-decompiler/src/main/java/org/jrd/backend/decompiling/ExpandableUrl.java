@@ -8,7 +8,7 @@ import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class ExpandableUrl {
+public final class ExpandableUrl {
 
     public static class MalformedURLToPath extends RuntimeException {
         public MalformedURLToPath(Throwable cause) {

@@ -91,14 +91,21 @@ public class FileToClassValidator implements DocumentListener {
 
     public static class StringAndScore {
 
-        public final int score;
-        public final String message;
+        private final int score;
+        private final String message;
 
         public StringAndScore(int score, String message) {
             this.score = score;
             this.message = message;
         }
 
+        public int getScore() {
+            return score;
+        }
+
+        public String getMessage() {
+            return message;
+        }
     }
 
 }

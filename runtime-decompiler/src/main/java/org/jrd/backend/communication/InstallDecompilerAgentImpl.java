@@ -7,7 +7,6 @@ import com.sun.tools.attach.VirtualMachine;
 import com.sun.tools.attach.VirtualMachineDescriptor;
 import org.jrd.backend.data.Config;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 
@@ -21,10 +20,10 @@ import java.util.List;
  * This is a provisional solution for the attachment, while I am trying to create
  * an abstract library to share some functionality.
  */
-public class InstallDecompilerAgentImpl {
+public final class InstallDecompilerAgentImpl {
 
     public static void install(String pid, boolean addToBoot, boolean setPolicy, String host, int port, String[] properties)
-            throws IllegalArgumentException, FileNotFoundException,
+            throws IllegalArgumentException,
             IOException, AttachNotSupportedException,
             AgentLoadException, AgentInitializationException {
 

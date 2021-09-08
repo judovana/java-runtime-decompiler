@@ -12,7 +12,7 @@ import static org.jrd.backend.data.Cli.*;
 /**
  * Class for relaying help texts to the user.
  */
-public class Help {
+public final class Help {
 
     static final String HELP_FORMAT = HELP + ", " + H;
     static final String VERBOSE_FORMAT = VERBOSE;
@@ -106,6 +106,9 @@ public class Help {
                     .map(String::length)
                     .max(Integer::compare)
                     .orElse(30) + 1; // at least one space between format and text
+
+    private Help() {
+    }
 
     protected static void printHelpText() {
         printHelpText(new CliHelpFormatter());

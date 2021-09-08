@@ -6,7 +6,6 @@ import org.jrd.frontend.frame.main.VmDecompilerInformationController;
 
 public class Main {
 
-
     public static void main(String[] allArgs) throws Exception {
         Model model = new Model();
         Cli cli = new Cli(allArgs, model);

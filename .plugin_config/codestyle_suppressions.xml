@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+        "-//Checkstyle//DTD SuppressionXpathFilter Experimental Configuration 1.2//EN"
+        "https://checkstyle.org/dtds/suppressions_1_2_xpath_experimental.dtd">
+
+<suppressions>
+    <!--  Suppress HideUtilityClassConstructor check for any classes that contain method named "main"  -->
+    <suppress-xpath
+            checks="HideUtilityClassConstructor"
+            query="//CLASS_DEF[//METHOD_DEF[./IDENT[@text='main']]]"/>
+</suppressions>

@@ -27,6 +27,12 @@
         <!-- Enable annotations -->
         <module name="SuppressWarningsHolder"/>
 
+        <!-- Allow supressions per file -->
+        <module name="SuppressionXpathFilter">
+            <property name="file" value=".plugin_config/codestyle_suppressions.xml"/> <!-- from project root -->
+            <property name="optional" value="false"/>
+        </module>
+
         <!-- Checks for whitespace, see https://checkstyle.org/config_whitespace.html -->
         <module name="EmptyForInitializerPad" />
         <module name="EmptyForIteratorPad" />
@@ -177,5 +183,20 @@
             <property name="allowedDuplicates" value="2"/>
         </module>
         -->
+
+        <!-- Class design checks, see https://checkstyle.org/config_design.html -->
+        <module name="FinalClass" />
+        <module name="HideUtilityClassConstructor" />
+        <module name="InterfaceIsType" />
+        <module name="MutableException" />
+        <module name="OneTopLevelClass" />
+        <module name="ThrowsCount">
+            <property name="max" value="5"/>
+        </module>
+        <module name="VisibilityModifier">
+            <property name="packageAllowed" value="true"/>
+            <property name="protectedAllowed" value="true"/>
+            <property name="allowPublicImmutableFields" value="true"/>
+        </module>
     </module>
 </module>

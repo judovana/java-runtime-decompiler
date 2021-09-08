@@ -24,15 +24,15 @@ public class ConfigureView extends JDialog {
 
     private final Config config = Config.getConfig();
 
-    public static class ConfigurePanel extends JPanel {
+    private static class ConfigurePanel extends JPanel {
 
-        public JTextField agentPathTextField;
-        public JLabel agentPathLabel;
-        public JButton browseButton;
-        public JLabel checkBoxSettings;
-        public JCheckBox useHostSystemClassesCheckBox;
+        private JTextField agentPathTextField;
+        private JLabel agentPathLabel;
+        private JButton browseButton;
+        private JLabel checkBoxSettings;
+        private JCheckBox useHostSystemClassesCheckBox;
 
-        public JFileChooser chooser;
+        private JFileChooser chooser;
 
         ConfigurePanel(String initialAgentPath, boolean initialUseHostSystemClasses) {
 

@@ -151,8 +151,8 @@ public class RewriteClassDialog extends JDialog {
         namingSource = new JComboBox<String>(saveOptions);
         namingSource.setSelectedIndex(Utils.FULLY_QUALIFIED_NAME);
         namingBinary.setSelectedIndex(Utils.SRC_SUBDIRS_NAME);
-        futureBinTarget = new JTextField(latestPaths.lastSaveBin);
-        futureSrcTarget = new JTextField(latestPaths.lastSaveSrc);
+        futureBinTarget = new JTextField(latestPaths.getLastSaveBin());
+        futureSrcTarget = new JTextField(latestPaths.getLastSaveSrc());
         selectBinTarget = new JButton("...");
         selectSrcTarget = new JButton("...");
         compileAndUpload = new JButton("Compile " + origName + "and directly upload to " + vmInfo.getVmId());
@@ -164,7 +164,7 @@ public class RewriteClassDialog extends JDialog {
         inputs = new JPanel(new GridLayout(3, 1));
         buttons = new JPanel(new GridLayout(3, 1));
         validation = new JLabel("???");
-        filePath = new JTextField(latestPaths.lastManualUpload);
+        filePath = new JTextField(latestPaths.getLastManualUpload());
         className = new JTextField(origName);
         selectSrc = new JButton("...");
         nothing = new JLabel();
@@ -174,14 +174,14 @@ public class RewriteClassDialog extends JDialog {
         externalFiles.setName("Compile external files");
         externalFiles.add(new JLabel("Select external files to compile against runtime classpath"), BorderLayout.NORTH);
         JPanel exFilesIn = new JPanel(new BorderLayout());
-        filesToCompile = new JTextField(latestPaths.filesToCompile);
+        filesToCompile = new JTextField(latestPaths.getFilesToCompile());
         exFilesIn.add(filesToCompile, BorderLayout.CENTER);
         recursive = new JCheckBox("recursive");
         exFilesIn.add(recursive, BorderLayout.WEST);
         selectExternalFiles = new JButton("...");
         exFilesIn.add(selectExternalFiles, BorderLayout.EAST);
         externalFiles.add(exFilesIn);
-        outputExternalFilesDir = new JTextField(latestPaths.outputExternalFilesDir);
+        outputExternalFilesDir = new JTextField(latestPaths.getOutputExternalFilesDir());
         namingExternal = new JComboBox<>(saveOptions);
         namingExternal.setSelectedIndex(Utils.SRC_SUBDIRS_NAME);
         selectExternalFilesSave = new JButton("...");
@@ -204,7 +204,7 @@ public class RewriteClassDialog extends JDialog {
         binaryFilename = new JLabel(origName + " - " + origBin.length);
         namingBinaryView = new JComboBox<>(saveOptions);
         namingBinaryView.setSelectedIndex(Utils.SRC_SUBDIRS_NAME);
-        outputBinaries = new JTextField(latestPaths.outputBinaries);
+        outputBinaries = new JTextField(latestPaths.getOutputBinaries());
         selectBinary = new JButton("...");
         saveBinary = new JButton("Save current binary buffer");
         uploadBinary = new JButton("Upload current binary " + origName + " to " + vmInfo.getVmId());
