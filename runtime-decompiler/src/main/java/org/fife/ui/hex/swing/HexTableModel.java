@@ -178,7 +178,7 @@ public class HexTableModel extends AbstractTableModel {
         private byte oldVal;
         private byte newVal;
 
-        public ByteChangedUndoableEdit(final int offs, final byte oldVal, final byte newVal) {
+        ByteChangedUndoableEdit(final int offs, final byte oldVal, final byte newVal) {
             this.offs = offs;
             this.oldVal = oldVal;
             this.newVal = newVal;
@@ -218,7 +218,7 @@ public class HexTableModel extends AbstractTableModel {
         private byte[] removed;
         private byte[] added;
 
-        public BytesReplacedUndoableEdit(final int offs, final byte[] removed, final byte[] added) {
+        BytesReplacedUndoableEdit(final int offs, final byte[] removed, final byte[] added) {
             this.offs = offs;
             this.removed = removed;
             this.added = added;

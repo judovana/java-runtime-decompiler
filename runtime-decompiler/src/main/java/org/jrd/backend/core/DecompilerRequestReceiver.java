@@ -116,7 +116,7 @@ public class DecompilerRequestReceiver {
         private final String response;
         private final int port;
 
-        public ResponseWithPort(String response, int port) {
+        ResponseWithPort(String response, int port) {
             this.response = response;
             this.port = port;
         }

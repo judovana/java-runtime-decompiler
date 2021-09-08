@@ -478,7 +478,7 @@ public class CliTest {
         private final PrintStream originalOut;
         private final PrintStream originalErr;
 
-        public StreamWrappers() {
+        StreamWrappers() {
             out = new ByteArrayOutputStream();
             err = new ByteArrayOutputStream();
             originalOut = System.out;

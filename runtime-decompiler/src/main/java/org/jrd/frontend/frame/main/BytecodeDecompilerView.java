@@ -597,7 +597,7 @@ public class BytecodeDecompilerView {
 
         private final VmDecompilerInformationController.ClassRewriter worker;
 
-        public RewriteActionListener(VmDecompilerInformationController.ClassRewriter worker) {
+        RewriteActionListener(VmDecompilerInformationController.ClassRewriter worker) {
             this.worker = worker;
         }
 

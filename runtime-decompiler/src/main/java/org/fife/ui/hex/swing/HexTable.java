@@ -21,7 +21,7 @@ import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.io.InputStream;
 
-class HexTable extends JTable {
+public class HexTable extends JTable {
     private static final long serialVersionUID = 1L;
     private final HexEditor hexEditor;
     private HexTableModel model;
@@ -338,7 +338,7 @@ class HexTable extends JTable {
     private static class CellEditor extends DefaultCellEditor implements FocusListener {
         private static final long serialVersionUID = 1L;
 
-        public CellEditor() {
+        CellEditor() {
             super(createTextField());
             final AbstractDocument doc = (AbstractDocument) ((JTextComponent) this.editorComponent).getDocument();
             doc.setDocumentFilter(new EditorDocumentFilter());
@@ -374,7 +374,7 @@ class HexTable extends JTable {
         private static final long serialVersionUID = 1L;
         private Point highlight;
 
-        public CellRenderer() {
+        CellRenderer() {
             this.highlight = new Point();
         }
 

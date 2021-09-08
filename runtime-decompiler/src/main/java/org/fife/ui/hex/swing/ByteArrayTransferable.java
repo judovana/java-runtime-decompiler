@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 
-class ByteArrayTransferable implements Transferable {
+public class ByteArrayTransferable implements Transferable {
     private static final DataFlavor[] FLAVORS;
 
     static {

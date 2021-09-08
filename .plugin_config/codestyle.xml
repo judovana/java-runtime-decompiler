@@ -198,5 +198,9 @@
             <property name="protectedAllowed" value="true"/>
             <property name="allowPublicImmutableFields" value="true"/>
         </module>
+
+        <!-- Modifier checks, see https://checkstyle.org/config_modifier.html -->
+        <module name="ModifierOrder" />
+        <module name="RedundantModifier" />
     </module>
 </module>
