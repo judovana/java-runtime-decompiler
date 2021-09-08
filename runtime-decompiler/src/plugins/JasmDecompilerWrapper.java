@@ -35,9 +35,6 @@ public class JasmDecompilerWrapper {
     }
 
     private void log(Object logger, String message) {
-        if (logger == null || message == null) {
-            //return;
-        }
         try {
             //Currently plugins do not ahve access to parent classloader
             //Method logingMethod = logger.getClass().getMethod("addMessage", java.util.logging.Level.class, String.class);

@@ -288,12 +288,15 @@ public class DecompilerWrapperInformation {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (!(obj instanceof DecompilerWrapperInformation))
+        }
+        if (!(obj instanceof DecompilerWrapperInformation)) {
             return false;
+        }
 
         DecompilerWrapperInformation other = (DecompilerWrapperInformation) obj;
         if (this.fileLocation == null || other.fileLocation == null) {
