@@ -121,11 +121,11 @@ class TestingDummyHelper {
     }
 
     static class TestingDummyException extends Exception {
-        public TestingDummyException(String message) {
+        TestingDummyException(String message) {
             super(message);
         }
 
-        public TestingDummyException(String message, Throwable cause) {
+        TestingDummyException(String message, Throwable cause) {
             super(message, cause);
         }
     }

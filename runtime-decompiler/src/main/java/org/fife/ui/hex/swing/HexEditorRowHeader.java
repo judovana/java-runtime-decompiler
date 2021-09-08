@@ -11,7 +11,7 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import java.awt.*;
 
-class HexEditorRowHeader extends JList implements TableModelListener {
+public class HexEditorRowHeader extends JList implements TableModelListener {
     private static final long serialVersionUID = 1L;
     private HexTable table;
     private RowHeaderListModel model;
@@ -73,7 +73,7 @@ class HexEditorRowHeader extends JList implements TableModelListener {
     private static class CellRenderer extends DefaultListCellRenderer {
         private static final long serialVersionUID = 1L;
 
-        public CellRenderer() {
+        CellRenderer() {
             this.setHorizontalAlignment(4);
         }
 
@@ -112,7 +112,7 @@ class HexEditorRowHeader extends JList implements TableModelListener {
     private class RowHeaderBorder extends EmptyBorder {
         private static final long serialVersionUID = 1L;
 
-        public RowHeaderBorder() {
+        RowHeaderBorder() {
             super(0, 0, 0, 2);
         }
 

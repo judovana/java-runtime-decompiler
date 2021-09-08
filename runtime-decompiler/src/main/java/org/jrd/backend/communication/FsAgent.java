@@ -99,7 +99,7 @@ public class FsAgent implements JrdAgent {
     private static class OperateOnCp<T> {
         private final List<File> cp;
 
-        public OperateOnCp(List<File> cp) {
+        OperateOnCp(List<File> cp) {
             this.cp = cp;
         }
 
@@ -216,7 +216,7 @@ public class FsAgent implements JrdAgent {
     private static class WritingCpOperator implements CpOperator<Void> {
         private final String body;
 
-        public WritingCpOperator(String body) {
+        WritingCpOperator(String body) {
             this.body = body;
         }
 
@@ -261,7 +261,7 @@ public class FsAgent implements JrdAgent {
     private static class ListingCpOperator implements CpOperator<Void> {
         private final List<String> classes;
 
-        public ListingCpOperator(List<String> classes) {
+        ListingCpOperator(List<String> classes) {
             this.classes = classes;
         }
 

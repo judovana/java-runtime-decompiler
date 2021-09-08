@@ -88,7 +88,7 @@ public final class ConnectionDelegator extends Thread {
         }
     }
 
-    private synchronized static void setRunning(boolean isRunning) {
+    private static synchronized void setRunning(boolean isRunning) {
         running = isRunning;
     }
 

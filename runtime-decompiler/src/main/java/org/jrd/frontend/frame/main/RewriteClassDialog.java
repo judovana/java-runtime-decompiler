@@ -50,7 +50,7 @@ public class RewriteClassDialog extends JDialog {
     private static class TextFieldBasedStus implements Utils.StatusKeeper {
         private final JTextField status;
 
-        public TextFieldBasedStus(JTextField status) {
+        TextFieldBasedStus(JTextField status) {
             this.status = status;
         }
 
@@ -469,7 +469,7 @@ public class RewriteClassDialog extends JDialog {
         private Collection<IdentifiedBytecode> result;
 
 
-        public CompilationWithResult(ClasspathlessCompiler rc, ClassesProvider cp, JTextArea compilationLog, IdentifiedSource... sources) {
+        CompilationWithResult(ClasspathlessCompiler rc, ClassesProvider cp, JTextArea compilationLog, IdentifiedSource... sources) {
             this.rc = rc;
             this.cp = cp;
             this.compilationLog = compilationLog;
@@ -509,7 +509,7 @@ public class RewriteClassDialog extends JDialog {
         protected final DecompilerWrapperInformation decompilerWrapper;
         protected final boolean haveCompiler;
 
-        public CompilerOutputActionFields(JTextField status, VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapperInformation dwi, boolean haveCompiler, int namingSchema,
+        CompilerOutputActionFields(JTextField status, VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapperInformation dwi, boolean haveCompiler, int namingSchema,
                 String destination) {
             this.status = status;
             this.vmInfo = vmInfo;
@@ -524,8 +524,7 @@ public class RewriteClassDialog extends JDialog {
 
     private static class SavingCompilerOutputAction extends CompilerOutputActionFields {
 
-
-        public SavingCompilerOutputAction(JTextField status, VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapperInformation dwi, boolean haveCompiler, int namingSchema,
+        SavingCompilerOutputAction(JTextField status, VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapperInformation dwi, boolean haveCompiler, int namingSchema,
                 String destination) {
             super(status, vmInfo, vmManager, pm, dwi, haveCompiler, namingSchema, destination);
         }
@@ -578,8 +577,7 @@ public class RewriteClassDialog extends JDialog {
 
     private static class UploadingCompilerOutputAction extends CompilerOutputActionFields {
 
-
-        public UploadingCompilerOutputAction(JTextField status, VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapperInformation dwi, boolean haveCompiler, int namingSchema,
+        UploadingCompilerOutputAction(JTextField status, VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapperInformation dwi, boolean haveCompiler, int namingSchema,
                 String destination) {
             super(status, vmInfo, vmManager, pm, dwi, haveCompiler, namingSchema, destination);
         }
