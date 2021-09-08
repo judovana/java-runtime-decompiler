@@ -100,53 +100,58 @@ public class Communicate {
     public String readResponse() {
         String initLine;
 
+        // read header
         try {
             initLine = trimReadLine();
         } catch (IOException ex) {
             OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, ex);
             return "ERROR";
         }
-        
-        if (initLine.equals("ERROR")) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Agent returned error."));
-            return "ERROR";
-        } else if (initLine.equals("BYTES")) {
-            try {
-                String bytes = trimReadLine();
 
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Agent returned bytes: " + bytes);
-                return bytes;
-            } catch (IOException ex) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, ex);
-            }
-        } else if (initLine.equals("CLASSES")) {
-            StringBuilder str = new StringBuilder();
-            while (true) {
+        // parse body based on header
+        switch (initLine) {
+            case "ERROR":
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Agent returned error."));
+                return "ERROR";
+            case "BYTES":
                 try {
-                    String s = this.commInput.readLine();
-                    if (s == null) {
-                        break;
-                    }
-                    s = s.trim();
-                    if (!s.isEmpty()) {
-                        str.append(s).append(";");
-                    }
+                    String bytes = trimReadLine();
+
+                    OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Agent returned bytes: " + bytes);
+                    return bytes;
                 } catch (IOException ex) {
-                    OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, ex);
+                    OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
+                    return "ERROR";
                 }
-            }
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Agent returned class names.");
-            return str.toString();
-            // Agent shutdown response
-        } else if (initLine.equals("GOODBYE")) {
-            return "OK";
-            //generic done for non-returning  commands. Eg overwrite response. Made this confirmation more  granular? done-overwrite?
-        } else if (initLine.equals("DONE")) {
-            return "OK";
+            case "CLASSES":
+                StringBuilder str = new StringBuilder();
+
+                while (true) {
+                    try {
+                        String s = this.commInput.readLine();
+                        if (s == null) {
+                            break;
+                        }
+                        s = s.trim();
+                        if (!s.isEmpty()) {
+                            str.append(s).append(";");
+                        }
+                    } catch (IOException ex) {
+                        OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
+                    }
+                }
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Agent successfully returned class names.");
+                return str.toString();
+            case "GOODBYE":
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Agent closed socket when halting.");
+                return "OK";
+            case "DONE":
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Agent successfully overwrote class.");
+                return "OK";
+            default:
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Unknown agent response header: '" + initLine + "'.");
+                return "ERROR";
         }
-        
-        OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Unknown header of " + initLine);
-        return "ERROR";
     }
 
     /**
