@@ -98,10 +98,10 @@ public final class ImportUtils {
     }
 
     public static class Directory implements Listable {
-        private File file;
+        private final File directoryFile;
 
         public Directory(File file) {
-            this.file = file;
+            this.directoryFile = file;
         }
 
         private void crawl(List<URL> pathList, File dir) throws MalformedURLException {
@@ -122,7 +122,7 @@ public final class ImportUtils {
         @Override
         public List<URL> listChildren() throws IOException {
             List<URL> children = new ArrayList<>();
-            crawl(children, file);
+            crawl(children, directoryFile);
             return children;
         }
     }

@@ -34,12 +34,16 @@ public class HexTableModel extends AbstractTableModel {
         this.doc = new ByteBuffer(16);
         this.bytesPerRow = 16;
         this.undoManager = new UndoManager();
+
         this.columnNames = new String[17];
         for (int i = 0; i < 16; ++i) {
             this.columnNames[i] = "+" + Integer.toHexString(i).toUpperCase();
         }
         this.columnNames[16] = "ASCII Dump";
-        Arrays.fill(this.dumpColBuf = new char[16], ' ');
+
+        this.dumpColBuf = new char[16];
+        Arrays.fill(dumpColBuf, ' ');
+
         this.byteStringValues = new String[256];
         for (int i = 0; i < this.byteStringValues.length; ++i) {
             this.byteStringValues[i] = Integer.toHexString(i);

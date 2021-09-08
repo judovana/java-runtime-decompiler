@@ -22,7 +22,7 @@ public class PluginConfigurationEditorController {
 
     private PluginManager pluginManager;
     private PluginConfigurationEditorView view;
-    private HashMap<DecompilerWrapperInformation, ConfigPanel> configPanelHashMap;
+    private Map<DecompilerWrapperInformation, ConfigPanel> configPanelHashMap;
 
     private ActionListener pluginsConfiguredListener;
 
@@ -79,7 +79,7 @@ public class PluginConfigurationEditorController {
 
     private void openImportDialog() {
         List<URL> availableDecompilers = ImportUtils.getWrappersFromClasspath();
-        ArrayList<String> availableDecompilerNames = new ArrayList<>();
+        List<String> availableDecompilerNames = new ArrayList<>();
 
         for (URL url : availableDecompilers) {
             try {
@@ -189,22 +189,22 @@ public class PluginConfigurationEditorController {
 
     private void removeWrapper(DecompilerWrapperInformation wrapperInformation) {
         if (wrapperInformation == null) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Attempted Delete operation with no plugin wrapper selected.");
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Attempted delete operation with no plugin wrapper selected.");
             return;
         }
 
-        JList wrapperJList = view.getPluginListPanel().getWrapperJList();
         String name = wrapperInformation.toString();
         int dialogResult = JOptionPane.showConfirmDialog(view, "Are you sure you want to remove " +
                 name + "?", "Warning", JOptionPane.OK_CANCEL_OPTION);
-
         if (dialogResult == JOptionPane.CANCEL_OPTION) {
             return;
         }
+
         pluginManager.deleteWrapper(wrapperInformation);
         configPanelHashMap.remove(wrapperInformation);
         updateWrapperList(pluginManager.getWrappers());
 
+        JList wrapperJList = view.getPluginListPanel().getWrapperJList();
         if (wrapperJList.getModel().getSize() == 0) {
             view.clearConfigPanel();
             return;
@@ -215,14 +215,13 @@ public class PluginConfigurationEditorController {
     public void updateWrapperList(List<DecompilerWrapperInformation> wrappers) {
         JList<DecompilerWrapperInformation> wrapperJList = view.getPluginListPanel().getWrapperJList();
 
-        List<DecompilerWrapperInformation> pluginsWithoutJavap = new ArrayList<>(wrappers);
-        for (int x = 0; x < pluginsWithoutJavap.size(); x++) {
-            DecompilerWrapperInformation wrapperInformation = pluginsWithoutJavap.get(x);
-            if (wrapperInformation.isJavap() || wrapperInformation.isJavapVerbose()) {
-                pluginsWithoutJavap.remove(wrapperInformation);
-                x--;
+        List<DecompilerWrapperInformation> pluginsWithoutJavap = new ArrayList<>(wrappers.size());
+        for (DecompilerWrapperInformation wrapper : wrappers) {
+            if (!wrapper.isJavap() && !wrapper.isJavapVerbose()) {
+                pluginsWithoutJavap.add(wrapper);
             }
         }
+
         wrapperJList.setListData(pluginsWithoutJavap.toArray(new DecompilerWrapperInformation[0]));
     }
 

@@ -25,13 +25,10 @@ public class ExpandableUrl {
     private String path;
 
     private ExpandableUrl(String s) {
-        String path = expandEnvVars(s);
-        if (!new File(path).exists()) {
-            if (s.isEmpty()) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new FileNotFoundException("Filename empty."));
-            } else {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new FileNotFoundException(path));
-            }
+        String expandedPath = expandEnvVars(s);
+        if (!new File(expandedPath).exists()) {
+            String message = s.isEmpty() ? "Filename empty." : expandedPath;
+            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new FileNotFoundException(message));
         }
         this.path = s;
     }

@@ -16,8 +16,8 @@ import java.util.*;
  */
 public class VmManager {
 
-    private HashSet<VmInfo> vmInfoSet;
-    Set<ActionListener> actionListeners = new HashSet<>();
+    private Set<VmInfo> vmInfoSet;
+    private Set<ActionListener> actionListeners = new HashSet<>();
     boolean changed;
 
     public VmManager() {
@@ -72,7 +72,8 @@ public class VmManager {
      * This list is then compared to vmInfoSet. Old Vms are removed and new are added.
      */
     public void updateLocalVMs() {
-        HashSet<VmInfo> newVmInfoSet = new HashSet<>();
+        Set<VmInfo> newVmInfoSet = new HashSet<>();
+
         for (VirtualMachineDescriptor descriptor : VirtualMachine.list()) {
             String vmId = descriptor.id();
             String processId = descriptor.id();
@@ -92,7 +93,7 @@ public class VmManager {
 
         // Remove old VMs that are no longer available.
         Iterator<VmInfo> iterator = vmInfoSet.iterator();
-        HashSet<VmInfo> forRemoval = new HashSet<>();
+        Set<VmInfo> forRemoval = new HashSet<>();
         while (iterator.hasNext()) {
             VmInfo vmInfo = iterator.next();
             boolean noLongerExists = newVmInfoSet.stream().noneMatch(vmInfo1 -> vmInfo1.getVmId().equals(vmInfo.getVmId()));
@@ -194,7 +195,7 @@ public class VmManager {
         throw new NoSuchElementException("VmInfo with VmID" + VmId + "does no exist in VmList");
     }
 
-    public HashSet<VmInfo> getVmInfoSet() {
+    public Set<VmInfo> getVmInfoSet() {
         return new HashSet<>(this.vmInfoSet);
     }
 

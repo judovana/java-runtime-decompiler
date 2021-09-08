@@ -28,11 +28,16 @@ public class ArchiveManagerOptions {
     public boolean isInner(String n) {
         String name = n.toLowerCase();
 
-        if (extensions == null || extensions.isEmpty() || (extensions.size() == 1 && extensions.get(0).trim().isEmpty())) {
+        if (areExtensionsEmpty()) {
             return oneEnds(defaults, name);
         } else {
             return oneEnds(extensions, name);
         }
+    }
+
+    private boolean areExtensionsEmpty() {
+        return extensions == null || extensions.isEmpty() ||
+                extensions.size() == 1 && extensions.get(0).trim().isEmpty();
     }
 
     private boolean oneEnds(List<String> suffixes, String name) {

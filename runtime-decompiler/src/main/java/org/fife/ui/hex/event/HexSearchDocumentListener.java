@@ -13,7 +13,7 @@ public class HexSearchDocumentListener implements DocumentListener {
     private final HexSearch hexSearchEngine;
     private final JTextField hexSearch;
     private final JComboBox<HexSearch.HexSearchOptions> hexSearchType;
-    private ActionListener wasNotFoundListener = null;
+    private ActionListener wasNotFoundListener;
 
     public HexSearchDocumentListener(HexSearch hexSearchEngine, JTextField hexSearch, JComboBox<HexSearch.HexSearchOptions> hexSearchType) {
         this.hexSearchEngine = hexSearchEngine;

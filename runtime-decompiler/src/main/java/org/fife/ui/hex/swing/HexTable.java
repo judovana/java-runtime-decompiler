@@ -405,18 +405,15 @@ class HexTable extends JTable {
         }
 
         private Object sanitize(Object value, int row, int column) {
-            if (column < 0 || column > 15) {
+            if (column < 0 || column > 15 || !(value instanceof String)) {
                 return value;
             }
-            if (value instanceof String) {
-                String s = (String) value;
-                if (s.length() < 2) {
-                    return "0" + s.toUpperCase();
-                } else {
-                    return s.toUpperCase();
-                }
+
+            String s = (String) value;
+            if (s.length() < 2) {
+                return "0" + s.toUpperCase();
             } else {
-                return value;
+                return s.toUpperCase();
             }
         }
 

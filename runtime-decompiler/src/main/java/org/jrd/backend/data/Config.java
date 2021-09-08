@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Singleton class for storing and retrieving configuration strings.
@@ -21,7 +22,7 @@ import java.util.List;
 public class Config {
 
     private final Gson gson;
-    private HashMap<String, Object> configMap;
+    private Map<String, Object> configMap;
 
     private static final String CONFIG_FILE_PATH = Directories.getConfigDirectory() + File.separator + "config.json";
     private static final String LEGACY_CONFIG_FILE_PATH = Directories.getConfigDirectory() + File.separator + "config.cfg";

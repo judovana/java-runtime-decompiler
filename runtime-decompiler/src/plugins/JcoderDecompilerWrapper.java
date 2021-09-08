@@ -36,7 +36,7 @@ public class JcoderDecompilerWrapper {
 
     private void log(Object logger, String message) {
         try {
-            //Currently plugins do not ahve access to parent classloader
+            //Currently plugins do not ahve access to parent classloadloer
             //Method logingMethod = logger.getClass().getMethod("addMessage", java.util.logging.Level.class, String.class);
             //logingMethod.invoke(logger, message);
             System.err.println(message);
@@ -57,7 +57,6 @@ public class JcoderDecompilerWrapper {
         File target = new File(parentDir, "bin");
         target.mkdir();
         log(maybeLogger, "entering into " + parentDir.getAbsolutePath());
-        org.openjdk.asmtools.jcoder.Main jcoder = new org.openjdk.asmtools.jcoder.Main(System.err, "jcoder");
         List<String> tmpSources = new ArrayList<>(src.size());
         for (Map.Entry<String, String> fileToCompile : src.entrySet()) {
             File nw = new File(srcs, fileToCompile.getKey() + ".java");
@@ -69,9 +68,11 @@ public class JcoderDecompilerWrapper {
         tmpSources.add(0, "-d");
         String[] opts = tmpSources.toArray(new String[0]);
         log(maybeLogger, "jcoder " + Arrays.toString(opts));
+
+        org.openjdk.asmtools.jcoder.Main jcoder = new org.openjdk.asmtools.jcoder.Main(System.err, "jcoder");
         jcoder.compile(opts);
         Map<String, byte[]> r = new HashMap();
-        Files.walk(target.toPath()).filter(Files::isRegularFile).forEach((k) -> {
+        Files.walk(target.toPath()).filter(Files::isRegularFile).forEach(k -> {
             try {
                 String futureFullyQualifiedNiceName = k.toString();
                 futureFullyQualifiedNiceName = futureFullyQualifiedNiceName.replace(target + File.separator, "");

@@ -66,7 +66,6 @@ public class MetadataProperties {
         private final Pattern unpropagatedValuePattern;
 
         public FromFileProperties(Pattern pattern) {
-            super();
             this.unpropagatedValuePattern = pattern;
         }
 

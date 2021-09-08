@@ -4,6 +4,7 @@ import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class represent our transformer for retrieving bytecode.
@@ -13,8 +14,8 @@ import java.util.HashMap;
 public class Transformer implements ClassFileTransformer {
 
     private boolean allowToSaveBytecode = false;
-    private HashMap<String, byte[]> results = new HashMap<>();
-    private HashMap<String, byte[]> overrides = new HashMap<>();
+    private Map<String, byte[]> results = new HashMap<>();
+    private Map<String, byte[]> overrides = new HashMap<>();
 
     @Override
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {

@@ -34,18 +34,16 @@ public class InstrumentationProvider {
     }
 
     private byte[] getClassBody(Class clazz) throws UnmodifiableClassException {
-        transformer.allowToSaveBytecode();
         byte[] result;
-        try {
-            transformer.allowToSaveBytecode();
-            instrumentation.retransformClasses(clazz);
-            String nameWithSlashes = clazz.getName().replace(".", "/");
-            result = transformer.getResult(nameWithSlashes);
-        } catch (RuntimeException ex) {
-            throw new RuntimeException(ex); //?? same exception?
-        }
+
+        transformer.allowToSaveBytecode();
+        instrumentation.retransformClasses(clazz);
+        String nameWithSlashes = clazz.getName().replace(".", "/");
+        result = transformer.getResult(nameWithSlashes);
+
         transformer.denyToSaveBytecode(); //should be in finally?
         transformer.resetLastValidResult();
+
         return result;
     }
 

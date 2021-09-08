@@ -19,7 +19,9 @@ class HexEditorRowHeader extends JList implements TableModelListener {
 
     public HexEditorRowHeader(final HexTable table) {
         this.table = table;
-        this.setModel(this.model = new RowHeaderListModel());
+        this.model = new RowHeaderListModel();
+
+        this.setModel(model);
         this.setFocusable(false);
         this.setFont(table.getFont());
         this.setFixedCellHeight(table.getRowHeight());

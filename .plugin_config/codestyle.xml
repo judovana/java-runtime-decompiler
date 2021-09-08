@@ -8,12 +8,12 @@
     <!-- Enable annotations -->
     <module name="SuppressWarningsFilter"/>
 
-    <!-- Checks for whitespace, see http://checkstyle.sf.net/config_whitespace.html -->
+    <!-- Checks for whitespace, see http://checkstyle.org/config_whitespace.html -->
     <module name="FileTabCharacter">
         <property name="eachLine" value="true"/>
     </module>
 
-    <!-- Miscellaneous checks, see https://checkstyle.sourceforge.io/config_misc.html -->
+    <!-- Miscellaneous checks, see https://checkstyle.org/config_misc.html -->
     <module name="NewlineAtEndOfFile" />
     <module name="OrderedProperties">
         <property name="fileExtensions" value=".prop"/>
@@ -27,7 +27,7 @@
         <!-- Enable annotations -->
         <module name="SuppressWarningsHolder"/>
 
-        <!-- Checks for whitespace, see https://checkstyle.sourceforge.io/config_whitespace.html -->
+        <!-- Checks for whitespace, see https://checkstyle.org/config_whitespace.html -->
         <module name="EmptyForInitializerPad" />
         <module name="EmptyForIteratorPad" />
         <module name="EmptyLineSeparator">
@@ -56,7 +56,7 @@
         <module name="WhitespaceAfter" />
         <module name="WhitespaceAround" />
 
-        <!-- Miscellaneous checks, see https://checkstyle.sourceforge.io/config_misc.html -->
+        <!-- Miscellaneous checks, see https://checkstyle.org/config_misc.html -->
         <module name="ArrayTypeStyle" />
         <module name="CommentsIndentation" />
         <module name="DescendantToken" />
@@ -71,7 +71,7 @@
         </module>
         <module name="UpperEll" />
 
-        <!-- Import checks, see https://checkstyle.sourceforge.io/config_imports.html, especially "IDEA formatter" -->
+        <!-- Import checks, see https://checkstyle.org/config_imports.html, especially "IDEA formatter" -->
         <module name="AvoidStarImport">
             <property name="excludes" value="java.awt,javax.swing,java.util"/>
 
@@ -95,7 +95,7 @@
         <module name="RedundantImport" />
         <module name="UnusedImports" />
 
-        <!-- Block checks, see https://checkstyle.sourceforge.io/config_blocks.html -->
+        <!-- Block checks, see https://checkstyle.org/config_blocks.html -->
         <module name="AvoidNestedBlocks">
             <property name="allowInSwitchCase" value="true"/>
         </module>
@@ -104,5 +104,78 @@
         <module name="LeftCurly" />
         <module name="NeedBraces" />
         <module name="RightCurly" />
+
+        <!-- Coding checks, see https://checkstyle.org/config_coding.html -->
+        <module name="AvoidDoubleBraceInitialization" />
+        <module name="AvoidNoArgumentSuperConstructorCall" />
+        <module name="CovariantEquals" />
+        <module name="DefaultComesLast" />
+        <module name="EmptyStatement" />
+        <module name="EqualsAvoidNull" />
+        <module name="EqualsHashCode" />
+        <module name="ExplicitInitialization">
+            <property name="onlyObjectReferences" value="true"/>
+        </module>
+        <module name="FallThrough">
+            <property name="checkLastCaseGroup" value="true"/>
+        </module>
+        <module name="HiddenField">
+            <property name="ignoreConstructorParameter" value="true"/>
+            <property name="ignoreSetter" value="true"/>
+        </module>
+        <module name="IllegalInstantiation" />
+        <module name="IllegalThrows" />
+        <module name="IllegalToken" />
+        <module name="IllegalType" />
+        <module name="IllegalType"> <!-- Non-default IllegalType checks -->
+            <property name="illegalClassNames" value="ArrayList,LinkedList,Hashtable,Vector"/>
+        </module>
+        <module name="InnerAssignment" />
+        <module name="MissingSwitchDefault" />
+        <module name="ModifiedControlVariable" />
+        <module name="MultipleVariableDeclarations" />
+        <module name="NestedForDepth" />
+        <module name="NestedIfDepth">
+            <property name="max" value="2"/>
+        </module>
+        <module name="NestedTryDepth" />
+        <module name="NoArrayTrailingComma" />
+        <module name="NoClone" />
+        <module name="NoEnumTrailingComma" />
+        <module name="NoFinalizer" />
+        <module name="OneStatementPerLine" />
+        <module name="OverloadMethodsDeclarationOrder" />
+        <module name="RequireThis">
+            <property name="validateOnlyOverlapping" value="true"/>
+        </module>
+        <module name="ReturnCount">
+            <property name="max" value="3"/>
+            <property name="maxForVoid" value="3"/>
+        </module>
+        <module name="SimplifyBooleanExpression" />
+        <module name="SimplifyBooleanReturn" />
+        <module name="StringLiteralEquality" />
+        <module name="SuperClone" />
+        <module name="SuperFinalize" />
+        <module name="UnnecessaryParentheses" />
+        <module name="UnnecessarySemicolonAfterOuterTypeDeclaration" />
+        <module name="UnnecessarySemicolonAfterTypeMemberDeclaration" />
+        <module name="UnnecessarySemicolonInEnumeration" />
+        <module name="UnnecessarySemicolonInTryWithResources" />
+        <module name="VariableDeclarationUsageDistance">
+            <property name="allowedDistance" value="4"/>
+        </module>
+        <!-- Implementing the following checks would require a major overhaul -->
+        <!--
+        <module name="FinalLocalVariable" />
+        <module name="IllegalCatch" />
+        <module name="MagicNumber">
+            <property name="ignoreFieldDeclaration" value="true"/>
+            <property name="ignoreAnnotation" value="true"/>
+        </module>
+        <module name="MultipleStringLiterals">
+            <property name="allowedDuplicates" value="2"/>
+        </module>
+        -->
     </module>
 </module>
