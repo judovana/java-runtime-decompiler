@@ -43,15 +43,11 @@ public class ArchiveManager {
      */
     public boolean isClassInFile(String clazz, File c) throws IOException {
         try (ZipInputStream zis = new ZipInputStream(new FileInputStream(c))) {
-            if (pathManager.wasFound() && pathManager.getCurrentClazz().equals(clazz)) {
-                return true;
-            } else {
-                delete();
-                pathManager = new ArchivePathManager();
-                pathManager.setClazz(clazz);
-                pathManager.addPathPart(c.getName());
-                return findClazz(zis, clazz);
-            }
+            delete();
+            pathManager = new ArchivePathManager();
+            pathManager.setClazz(clazz);
+            pathManager.addPathPart(c.getName());
+            return findClazz(zis, clazz);
         }
     }
 
@@ -116,10 +112,10 @@ public class ArchiveManager {
      * @throws IOException Error while reading streams
      */
     public File unpack(File c) throws IOException {
-        if (pathManager.isExtracted()) {
+        /*if (pathManager.isExtracted()) {
             // If file is already extracted, return the extracted one
             return new File(jrdFolder + (pathManager.getPathSize() - 2) + fileSeparator + (pathManager.get(pathManager.getPathSize() - 1)));
-        }
+        }*/
 
         File f = new File(jrdFolder);
         if (f.exists() && !delete()) { // do not log if it didn't even exist before
