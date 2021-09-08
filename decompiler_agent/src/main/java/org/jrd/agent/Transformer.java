@@ -38,7 +38,7 @@ public class Transformer implements ClassFileTransformer {
     public byte[] getResult(String name) {
         return results.get(name);
     }
-    
+
     public void setOverride(String name, byte[] body) {
         overrides.put(name, body);
     }

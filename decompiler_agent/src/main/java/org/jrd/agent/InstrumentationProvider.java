@@ -18,8 +18,8 @@ public class InstrumentationProvider {
     InstrumentationProvider(Instrumentation inst, Transformer transformer) {
         this.transformer = transformer;
         this.instrumentation = inst;
-    }    
-        
+    }
+
     public void setClassBody(String cname, byte[] nwBody) throws UnmodifiableClassException {
         Class clazz = findClass(cname);
         transformer.allowToSaveBytecode();

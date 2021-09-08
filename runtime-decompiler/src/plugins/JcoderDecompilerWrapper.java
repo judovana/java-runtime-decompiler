@@ -36,9 +36,6 @@ public class JcoderDecompilerWrapper {
 
     private void log(Object logger, String message) {
         try {
-            //Currently plugins do not ahve access to parent classloadloer
-            //Method logingMethod = logger.getClass().getMethod("addMessage", java.util.logging.Level.class, String.class);
-            //logingMethod.invoke(logger, message);
             System.err.println(message);
         } catch (Exception ex) {
             System.err.println("Jcoder have logger, but that logger do not have correct addMessage java.util.logging.Level String method or call failed");

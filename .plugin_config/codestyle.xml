@@ -23,6 +23,13 @@
         <property name="fileExtensions" value=".prop"/>
     </module>
 
+    <!-- Regex checks, see https://checkstyle.org/config_regexp.html -->
+    <module name="RegexpMultiline">
+        <property name="format" value="(\/\*)([^*]*;[^*]*)(?!\*)([^\/*][^*]*\*+)*\/"/>
+        <property name="matchAcrossLines" value="true"/>
+        <property name="message" value="Commented-out multi-line code"/>
+    </module>
+
     <module name="TreeWalker">
         <!-- Enable annotations -->
         <module name="SuppressWarningsHolder"/>
@@ -202,5 +209,17 @@
         <!-- Modifier checks, see https://checkstyle.org/config_modifier.html -->
         <module name="ModifierOrder" />
         <module name="RedundantModifier" />
+
+        <!-- Regex checks, see https://checkstyle.org/config_regexp.html -->
+        <module name="Regexp">
+            <property name="format" value="[ \t]+$"/>
+            <property name="illegalPattern" value="true"/>
+            <property name="message" value="Trailing whitespace"/>
+        </module>
+        <module name="Regexp">
+            <property name="format" value="^.*(?!\B&quot;[^&quot;]*)\/{2}(?![^&quot;]*&quot;\B)\s?.*;.*$"/>
+            <property name="illegalPattern" value="true"/>
+            <property name="message" value="Commented-out one-line code"/>
+        </module>
     </module>
 </module>

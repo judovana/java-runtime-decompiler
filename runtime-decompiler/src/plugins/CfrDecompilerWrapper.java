@@ -65,10 +65,9 @@ public class CfrDecompilerWrapper {
             if (decompiledFile != null && decompiledFile.exists()) {
                 decompiledFile.delete();
             }
-            
         }
-        return decompiledString;
 
+        return decompiledString;
     }
 
     public String decompile(byte[] bytecode, String[] options) throws IOException {

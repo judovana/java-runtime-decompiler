@@ -22,7 +22,6 @@ public class Communicate {
     private Socket commSocket;
     private BufferedReader commInput;
     private BufferedWriter commOutput;
-    //private static final Logger logger = LoggingUtils.getLogger(Communicate.class);
 
     /**
      * Constructor creates a socket on given port and saves the streams into

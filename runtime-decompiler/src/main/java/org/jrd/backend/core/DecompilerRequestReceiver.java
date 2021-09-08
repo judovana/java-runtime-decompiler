@@ -21,8 +21,6 @@ import java.util.List;
  */
 public class DecompilerRequestReceiver {
 
-    //private static final Logger logger = LoggingUtils.getLogger(DecompilerRequestReceiver.class);
-
     private final AgentAttachManager attachManager;
     private VmManager vmManager;
 
@@ -173,7 +171,6 @@ public class DecompilerRequestReceiver {
             OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
             return ERROR_RESPONSE;
         }
-        //logger.info("Request for bytecode sent");
 
         return OK_RESPONSE;
     }

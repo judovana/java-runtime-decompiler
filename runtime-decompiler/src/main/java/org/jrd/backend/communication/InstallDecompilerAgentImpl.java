@@ -152,20 +152,15 @@ public final class InstallDecompilerAgentImpl {
             if (setPolicy) {
                 agentOptions += ",policy:true";
             }
-            /* if (useModuleLoader) {
-                agentOptions += ",modules:org.jboss.byteman.modules.jbossmodules.JBossModulesSystem,sys:" + modulePluginJar;
-            }*/
             if (props != null) {
                 agentOptions += props;
             }
-            vm.loadAgent(agentJar,
-                     agentOptions);
-            
+            vm.loadAgent(agentJar, agentOptions);
         } finally {
             vm.detach();
         }
     }
-    
+
     private void locateAgent() throws IOException {
         agentJar = config.getAgentExpandedPath();
     }

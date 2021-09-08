@@ -3,12 +3,11 @@ package org.jrd.backend.core;
 import org.jrd.backend.data.VmManager;
 
 /**
- * Attach manager for agent contains utility methods and information about 
+ * Attach manager for agent contains utility methods and information about
  * attach.
  */
 public class AgentAttachManager {
- 
-    //private static final Logger logger = LoggingUtils.getLogger(AgentAttachManager.class); 
+
     private AgentLoader loader;
     private VmManager vmManager;
 
@@ -37,6 +36,3 @@ public class AgentAttachManager {
         return status;
     }
 }
-
-    
-
