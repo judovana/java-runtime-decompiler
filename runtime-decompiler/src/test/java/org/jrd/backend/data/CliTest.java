@@ -11,6 +11,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -44,9 +45,15 @@ public class CliTest {
 
     @BeforeAll
     static void startup() {
+        String agentPath = Config.getConfig().getAgentExpandedPath();
+
         Assumptions.assumeTrue(
-                !Config.getConfig().getAgentExpandedPath().isEmpty(),
+                !agentPath.isEmpty(),
                 "Agent path is not set up, aborting CliTest."
+        );
+        Assumptions.assumeTrue(
+                new File(agentPath).exists(),
+                "Agent path is set up to nonexistent file, aborting CliTest."
         );
     }
 
