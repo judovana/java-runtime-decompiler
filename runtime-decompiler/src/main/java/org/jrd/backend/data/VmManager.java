@@ -25,7 +25,7 @@ public class VmManager {
         updateLocalVMs();
         loadSavedFsVms();
 
-        Thread VMUpdateThread = new Thread(() -> {
+        Thread vmUpdateThread = new Thread(() -> {
             while (true) {
                 try {
                     Thread.sleep(5000);
@@ -35,9 +35,8 @@ public class VmManager {
                 updateLocalVMs();
             }
         });
-        VMUpdateThread.setDaemon(true);
-        VMUpdateThread.start();
-
+        vmUpdateThread.setDaemon(true);
+        vmUpdateThread.start();
     }
 
     private void loadSavedFsVms() {
@@ -165,8 +164,8 @@ public class VmManager {
         return removed;
     }
 
-    public VmInfo findVmFromPID(String param) {
-        VmInfo result = findVmFromPIDNoException(param);
+    public VmInfo findVmFromPid(String param) {
+        VmInfo result = findVmFromPidNoException(param);
 
         if (result == null) {
             throw new RuntimeException("VM with pid of " + param + " not found");
@@ -175,7 +174,7 @@ public class VmManager {
         return result;
     }
 
-    public VmInfo findVmFromPIDNoException(String param) {
+    public VmInfo findVmFromPidNoException(String param) {
         int pid = Integer.parseInt(param);
         for (VmInfo vmInfo : vmInfoSet) {
             if (vmInfo.getVmPid() == pid) {
@@ -186,13 +185,13 @@ public class VmManager {
         return null;
     }
 
-    public VmInfo getVmInfoByID(String VmId) {
+    public VmInfo getVmInfoByID(String vmId) {
         for (VmInfo vmInfo : vmInfoSet) {
-            if (vmInfo.getVmId().equals(VmId)) {
+            if (vmInfo.getVmId().equals(vmId)) {
                 return vmInfo;
             }
         }
-        throw new NoSuchElementException("VmInfo with VmID" + VmId + "does no exist in VmList");
+        throw new NoSuchElementException("VmInfo with VmID" + vmId + "does no exist in VmList");
     }
 
     public Set<VmInfo> getVmInfoSet() {

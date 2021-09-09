@@ -22,6 +22,10 @@
             <Method name="~.*get.*JList.*" />
             <Bug pattern="EI_EXPOSE_REP" />
         </Match>
+        <Match>
+            <Method name="~.*get.*Url.*" />
+            <Bug pattern="EI_EXPOSE_REP" />
+        </Match>
 
         <!-- Objects -->
         <Match>

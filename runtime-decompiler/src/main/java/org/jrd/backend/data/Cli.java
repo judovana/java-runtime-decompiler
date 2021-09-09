@@ -172,7 +172,7 @@ public class Cli {
         String operation = cleanParameter(filteredArgs.get(0));
         switch (operation) {
             case LIST_JVMS:
-                listJVMs();
+                listJvms();
                 break;
             case LIST_PLUGINS:
                 listPlugins();
@@ -628,7 +628,7 @@ public class Cli {
         }
     }
 
-    private void listJVMs() {
+    private void listJvms() {
         if (filteredArgs.size() != 1) {
             throw new RuntimeException(LIST_JVMS + " does not expect arguments.");
         }
@@ -720,7 +720,7 @@ public class Cli {
 
         switch (puc) {
             case LOCAL:
-                return vmManager.findVmFromPID(param);
+                return vmManager.findVmFromPid(param);
             case FS:
                 return vmManager.createFsVM(NewFsVmController.cpToFilesCaught(param), null, false);
             case REMOTE:

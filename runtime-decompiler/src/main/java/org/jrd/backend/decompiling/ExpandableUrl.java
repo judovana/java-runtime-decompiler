@@ -10,8 +10,8 @@ import java.net.URL;
 
 public final class ExpandableUrl {
 
-    public static class MalformedURLToPath extends RuntimeException {
-        public MalformedURLToPath(Throwable cause) {
+    public static class MalformedUrlToPath extends RuntimeException {
+        public MalformedUrlToPath(Throwable cause) {
             super(cause);
         }
     }
@@ -104,11 +104,11 @@ public final class ExpandableUrl {
         return dir;
     }
 
-    public URL getExpandedURL() throws MalformedURLException {
+    public URL getExpandedUrl() throws MalformedURLException {
         return new URL("file", "", expandEnvVars(this.path, false));
     }
 
-    public String getRawURL() {
+    public String getRawUrl() {
         try {
             return collapseEnvVars(new URL("file", "", expandEnvVars(this.path)).toString());
         } catch (MalformedURLException e) {
@@ -118,9 +118,9 @@ public final class ExpandableUrl {
 
     public String getExpandedPath() {
         try {
-            return getExpandedURL().getPath();
+            return getExpandedUrl().getPath();
         } catch (MalformedURLException e) {
-            throw new MalformedURLToPath(e);
+            throw new MalformedUrlToPath(e);
         }
     }
 

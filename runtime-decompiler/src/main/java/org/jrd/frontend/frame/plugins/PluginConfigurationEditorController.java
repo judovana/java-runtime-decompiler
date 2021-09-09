@@ -3,6 +3,7 @@ package org.jrd.frontend.frame.plugins;
 import org.jrd.backend.core.OutputController;
 import org.jrd.backend.data.Directories;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
+import org.jrd.backend.decompiling.ExpandableUrl;
 import org.jrd.backend.decompiling.ImportUtils;
 import org.jrd.backend.decompiling.PluginManager;
 
@@ -45,7 +46,7 @@ public class PluginConfigurationEditorController {
             DecompilerWrapperInformation wrapperInformation = (DecompilerWrapperInformation) wrapperJList.getSelectedValue();
             removeWrapper(wrapperInformation);
         });
-        view.getPluginTopOptionPanel().getOpenWebsiteButton().addActionListener(actionEvent -> openDecompilerDownloadURL());
+        view.getPluginTopOptionPanel().getOpenWebsiteButton().addActionListener(actionEvent -> openDecompilerDownloadUrl());
         view.getPluginTopOptionPanel().getImportButton().addActionListener(actionEvent -> openImportDialog());
         view.getOkCancelPanel().getOkButton().addActionListener(actionEvent -> {
             for (DecompilerWrapperInformation wrapperInformation: configPanelHashMap.keySet()) {
@@ -102,8 +103,8 @@ public class PluginConfigurationEditorController {
                 availableDecompilerNames.toArray()[0]);
 
         if (selected != null) { // null if the user cancels
-            URL selectedURL = availableDecompilers.get(availableDecompilerNames.indexOf(selected.toString()));
-            String selectedFilename = ImportUtils.filenameFromUrl(selectedURL);
+            URL selectedUrl = availableDecompilers.get(availableDecompilerNames.indexOf(selected.toString()));
+            String selectedFilename = ImportUtils.filenameFromUrl(selectedUrl);
 
             if (new File(Directories.getPluginDirectory() + File.separator + selectedFilename).exists()) {
                 if (confirmWrapperOverwrite() != JOptionPane.OK_OPTION) {
@@ -111,7 +112,7 @@ public class PluginConfigurationEditorController {
                 }
             }
 
-            ImportUtils.importOnePlugin(selectedURL, selectedFilename);
+            ImportUtils.importOnePlugin(selectedUrl, selectedFilename);
 
             configPanelHashMap.clear();
             pluginManager.loadConfigs();
@@ -154,7 +155,7 @@ public class PluginConfigurationEditorController {
     }
 
     private void toggleWebsiteButton(DecompilerWrapperInformation plugin) {
-        if (plugin.getDecompilerDownloadURL() != null) {
+        if (plugin.getDecompilerDownloadUrl() != null) {
             view.getPluginTopOptionPanel().getOpenWebsiteButton().setEnabled(true);
             view.getPluginTopOptionPanel().getOpenWebsiteButton().setToolTipText(null);
         } else {
@@ -166,17 +167,17 @@ public class PluginConfigurationEditorController {
         }
     }
 
-    public void openDecompilerDownloadURL() {
+    public void openDecompilerDownloadUrl() {
         JList wrapperJList = view.getPluginListPanel().getWrapperJList();
         DecompilerWrapperInformation wrapperInformation = (DecompilerWrapperInformation) wrapperJList.getSelectedValue();
-        if (wrapperInformation.getDecompilerDownloadURL() != null) {
+        if (wrapperInformation.getDecompilerDownloadUrl() != null) {
             try {
-                URI downloadURI = wrapperInformation.getDecompilerDownloadURL().toURI();
-                java.awt.Desktop.getDesktop().browse(downloadURI);
+                URI downloadUri = wrapperInformation.getDecompilerDownloadUrl().toURI();
+                java.awt.Desktop.getDesktop().browse(downloadUri);
             } catch (IOException | URISyntaxException e) {
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
             } catch (UnsupportedOperationException e) {
-                JOptionPane.showMessageDialog(view, "Website could not be opened automatically. Go to: " + wrapperInformation.getDecompilerDownloadURL().toString());
+                JOptionPane.showMessageDialog(view, "Website could not be opened automatically. Go to: " + wrapperInformation.getDecompilerDownloadUrl().toString());
             }
         }
     }
@@ -228,7 +229,7 @@ public class PluginConfigurationEditorController {
     private DecompilerWrapperInformation cloneWrapper(DecompilerWrapperInformation wrapperInformation) {
         DecompilerWrapperInformation clonedWrapper = getDataFromPanel(wrapperInformation);
         pluginManager.setLocationForNewWrapper(clonedWrapper);
-        clonedWrapper.setDecompilerDownloadURL(wrapperInformation.getDecompilerDownloadURL().toString());
+        clonedWrapper.setDecompilerDownloadUrl(wrapperInformation.getDecompilerDownloadUrl().toString());
         try {
             pluginManager.saveWrapper(clonedWrapper);
         } catch (IOException e) {
@@ -248,10 +249,10 @@ public class PluginConfigurationEditorController {
         }
         DecompilerWrapperInformation newWrapper = getDataFromPanel(oldWrapper);
         newWrapper.setFileLocation(oldWrapper.getFileLocation());
-        if (oldWrapper.getDecompilerDownloadURL() == null) {
-            newWrapper.setDecompilerDownloadURL("");
+        if (oldWrapper.getDecompilerDownloadUrl() == null) {
+            newWrapper.setDecompilerDownloadUrl("");
         } else {
-            newWrapper.setDecompilerDownloadURL(oldWrapper.getDecompilerDownloadURL().toString());
+            newWrapper.setDecompilerDownloadUrl(oldWrapper.getDecompilerDownloadUrl().toString());
         }
         try {
             pluginManager.replace(oldWrapper, newWrapper);
@@ -268,8 +269,8 @@ public class PluginConfigurationEditorController {
         DecompilerWrapperInformation newWrapper = new DecompilerWrapperInformation();
 
         newWrapper.setName(configPanel.getNamePanel().getTextField().getText());
-        newWrapper.setWrapperURLFromPath(configPanel.getWrapperUrlPanel().getText());
-        newWrapper.setDependencyURLsFromPath(configPanel.getDependencyUrlPanel().getStringList());
+        newWrapper.setWrapperUrlFromPath(configPanel.getWrapperUrlPanel().getText());
+        newWrapper.setDependencyUrlsFromPath(configPanel.getDependencyUrlPanel().getStringList());
         return newWrapper;
     }
 
@@ -285,7 +286,7 @@ public class PluginConfigurationEditorController {
 
     public void updatePanelInfo(ConfigPanel pluginConfigPanel, DecompilerWrapperInformation vmInfo) {
         if (vmInfo.getFileLocation() != null) {
-            pluginConfigPanel.getJsonFileURL().setText("Location: " + vmInfo.getFileLocation());
+            pluginConfigPanel.getJsonFileUrl().setText("Location: " + vmInfo.getFileLocation());
             if (!Files.isWritable(Paths.get(vmInfo.getFileLocation()))) {
                 pluginConfigPanel.getMessagePanel().setVisible(true);
             }
@@ -293,11 +294,13 @@ public class PluginConfigurationEditorController {
         if (vmInfo.getName() != null) {
             pluginConfigPanel.getNamePanel().getTextField().setText(vmInfo.getName());
         }
-        if (vmInfo.getDependencyURLs() != null) {
-            vmInfo.getDependencyURLs().forEach(url -> pluginConfigPanel.getDependencyUrlPanel().addRow(url.getRawPath(), false));
+
+        List<ExpandableUrl> dependencyUrls = vmInfo.getDependencyUrls();
+        if (dependencyUrls != null) {
+            dependencyUrls.forEach(url -> pluginConfigPanel.getDependencyUrlPanel().addRow(url.getRawPath(), false));
         }
-        if (vmInfo.getWrapperURL() != null) {
-            pluginConfigPanel.getWrapperUrlPanel().setText(vmInfo.getWrapperURL().getRawPath());
+        if (vmInfo.getWrapperUrl() != null) {
+            pluginConfigPanel.getWrapperUrlPanel().setText(vmInfo.getWrapperUrl().getRawPath());
         }
     }
 

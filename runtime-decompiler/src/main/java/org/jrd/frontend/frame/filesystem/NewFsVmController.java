@@ -20,7 +20,7 @@ public class NewFsVmController {
     }
 
     private void addFsVm() {
-        String cp = newConnectionView.getCP();
+        String cp = newConnectionView.getCp();
         String name = newConnectionView.getNameHelper();
         boolean shouldBeSaved = newConnectionView.shouldBeSaved();
         List<File> r;

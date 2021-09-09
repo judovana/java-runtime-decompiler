@@ -21,8 +21,8 @@ public class HexEditor extends JScrollPane {
     public static final String PROPERTY_HIGHLIGHT_ASCII_DUMP = "highlightAsciiDump";
     public static final String PROPERTY_SHOW_GRID = "showGrid";
     private HexTable table;
-    private boolean alternateRowBG;
-    private boolean alternateColumnBG;
+    private boolean alternateRowBackground;
+    private boolean alternateColumnBackground;
     private boolean highlightSelectionInAsciiDump;
     private Color highlightSelectionInAsciiDumpColor;
     private static final TransferHandler DEFAULT_TRANSFER_HANDLER;
@@ -34,8 +34,8 @@ public class HexEditor extends JScrollPane {
 
         this.setViewportView(table);
         this.setShowRowHeader(true);
-        this.setAlternateRowBG(false);
-        this.setAlternateColumnBG(false);
+        this.setAlternateRowBackground(false);
+        this.setAlternateColumnBackground(false);
         this.setHighlightSelectionInAsciiDump(true);
         this.setHighlightSelectionInAsciiDumpColor(new Color(255, 255, 192));
         this.setTransferHandler(HexEditor.DEFAULT_TRANSFER_HANDLER);
@@ -83,12 +83,12 @@ public class HexEditor extends JScrollPane {
         }
     }
 
-    public boolean getAlternateColumnBG() {
-        return this.alternateColumnBG;
+    public boolean getAlternateColumnBackground() {
+        return this.alternateColumnBackground;
     }
 
-    public boolean getAlternateRowBG() {
-        return this.alternateRowBG;
+    public boolean getAlternateRowBackground() {
+        return this.alternateRowBackground;
     }
 
     public byte getByte(final int offset) {
@@ -168,17 +168,17 @@ public class HexEditor extends JScrollPane {
         this.replaceBytes(offset, len, bytes);
     }
 
-    public void setAlternateColumnBG(final boolean alternate) {
-        if (alternate != this.alternateColumnBG) {
-            this.alternateColumnBG = alternate;
+    public void setAlternateColumnBackground(final boolean alternate) {
+        if (alternate != this.alternateColumnBackground) {
+            this.alternateColumnBackground = alternate;
             this.table.repaint();
             this.firePropertyChange(PROPERTY_ALTERNATE_COLUMN_BG, !alternate, alternate);
         }
     }
 
-    public void setAlternateRowBG(final boolean alternate) {
-        if (alternate != this.alternateRowBG) {
-            this.alternateRowBG = alternate;
+    public void setAlternateRowBackground(final boolean alternate) {
+        if (alternate != this.alternateRowBackground) {
+            this.alternateRowBackground = alternate;
             this.table.repaint();
             this.firePropertyChange(PROPERTY_ALTERNATE_ROW_BG, !alternate, alternate);
         }

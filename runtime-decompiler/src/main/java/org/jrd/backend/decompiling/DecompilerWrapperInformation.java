@@ -13,6 +13,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -22,17 +23,17 @@ public class DecompilerWrapperInformation {
      * Class containing information about available Decompiler wrapper
      *
      * @param name                  Decompiler name
-     * @param wrapperURL            location of wrapper.java file
-     * @param dependencyURLs        location of wrapper dependencies
-     * @param decompilerDownloadURL decompiler download URL
+     * @param wrapperUrl            location of wrapper.java file
+     * @param dependencyUrls        location of wrapper dependencies
+     * @param decompilerDownloadUrl decompiler download URL
      */
-    public DecompilerWrapperInformation(String name, String wrapperURL, List<String> dependencyURLs,
-                                        String decompilerDownloadURL) {
+    public DecompilerWrapperInformation(String name, String wrapperUrl, List<String> dependencyUrls,
+                                        String decompilerDownloadUrl) {
         setName(name);
-        setWrapperURLFromURL(wrapperURL);
+        setWrapperUrlFromUrl(wrapperUrl);
         setFullyQualifiedClassName();
-        setDependencyURLsFromURL(dependencyURLs);
-        setDecompilerDownloadURL(decompilerDownloadURL);
+        setDependencyUrlsFromUrl(dependencyUrls);
+        setDecompilerDownloadUrl(decompilerDownloadUrl);
         setFileLocation("");
     }
 
@@ -46,11 +47,11 @@ public class DecompilerWrapperInformation {
     }
 
     private String name;
-    private URL decompilerDownloadURL;
+    private URL decompilerDownloadUrl;
     private String fileLocation;
     private String fullyQualifiedClassName;
-    private ExpandableUrl wrapperURL;
-    private List<ExpandableUrl> DependencyURLs;
+    private ExpandableUrl wrapperUrl;
+    private List<ExpandableUrl> dependencyUrls;
     private Method decompileMethodNoInners;
     private Method decompileMethodWithInners;
     private Method compileMethod;
@@ -92,7 +93,7 @@ public class DecompilerWrapperInformation {
     }
 
     public void setFullyQualifiedClassName() {
-        String wrapperPath = wrapperURL.getExpandedPath();
+        String wrapperPath = wrapperUrl.getExpandedPath();
 
         try (BufferedReader br = new BufferedReader(new FileReader(wrapperPath, StandardCharsets.UTF_8))) {
             String packageName = "";
@@ -163,49 +164,57 @@ public class DecompilerWrapperInformation {
         this.name = name;
     }
 
-    public ExpandableUrl getWrapperURL() {
-        return wrapperURL;
+    public ExpandableUrl getWrapperUrl() {
+        return wrapperUrl;
     }
 
-    private void setWrapperURL(Runnable r) {
+    private void setWrapperUrl(Runnable r) {
         try {
             r.run();
-            File file = this.wrapperURL.getFile();
+            File file = this.wrapperUrl.getFile();
             if (!(file.exists() && file.canRead())) {
                 invalidWrapper = true;
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Cant read file or does not exist! " + file.getAbsolutePath()));
             }
-        } catch (ExpandableUrl.MalformedURLToPath e) {
-            this.wrapperURL = null;
+        } catch (ExpandableUrl.MalformedUrlToPath e) {
+            this.wrapperUrl = null;
             this.invalidWrapper = true;
             OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
         }
     }
 
-    public void setWrapperURLFromPath(String path) {
-        setWrapperURL(() -> DecompilerWrapperInformation.this.wrapperURL = ExpandableUrl.createFromPath(path));
+    public void setWrapperUrlFromPath(String path) {
+        setWrapperUrl(() -> DecompilerWrapperInformation.this.wrapperUrl = ExpandableUrl.createFromPath(path));
     }
 
-    private void setWrapperURLFromURL(String url) {
-        setWrapperURL(() -> DecompilerWrapperInformation.this.wrapperURL = ExpandableUrl.createFromStringUrl(url));
+    private void setWrapperUrlFromUrl(String url) {
+        setWrapperUrl(() -> DecompilerWrapperInformation.this.wrapperUrl = ExpandableUrl.createFromStringUrl(url));
     }
 
-    public List<ExpandableUrl> getDependencyURLs() {
-        return DependencyURLs;
+    public List<ExpandableUrl> getDependencyUrls() {
+        return Collections.unmodifiableList(dependencyUrls);
     }
 
-    private void setDependencyURLs(List<String> dependencyURLs, Switcher switcher) {
-        DependencyURLs = new LinkedList<>();
-        for (String s : dependencyURLs) {
+    public void setDependencyUrlsFromPath(List<String> dependencyUrls) {
+        setDependencyUrls(dependencyUrls, ExpandableUrl::createFromPath);
+    }
+
+    public void setDependencyUrlsFromUrl(List<String> dependencyUrls) {
+        setDependencyUrls(dependencyUrls, ExpandableUrl::createFromStringUrl);
+    }
+
+    private void setDependencyUrls(List<String> dependencyUrls, Switcher switcher) {
+        this.dependencyUrls = new LinkedList<>();
+        for (String s : dependencyUrls) {
             try {
-                ExpandableUrl dependencyURL = switcher.getExpandableUrl(s);
-                DependencyURLs.add(dependencyURL);
-                File file = dependencyURL.getFile();
+                ExpandableUrl dependencyUrl = switcher.getExpandableUrl(s);
+                this.dependencyUrls.add(dependencyUrl);
+                File file = dependencyUrl.getFile();
                 if (!(file.exists() && file.canRead())) {
                     invalidWrapper = true;
                 }
-            } catch (ExpandableUrl.MalformedURLToPath e) {
-                DependencyURLs.add(null);
+            } catch (ExpandableUrl.MalformedUrlToPath e) {
+                this.dependencyUrls.add(null);
                 this.invalidWrapper = true;
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
             }
@@ -220,23 +229,15 @@ public class DecompilerWrapperInformation {
         ExpandableUrl getExpandableUrl(String s);
     }
 
-    public void setDependencyURLsFromPath(List<String> dependencyURLs) {
-        setDependencyURLs(dependencyURLs, ExpandableUrl::createFromPath);
+    public URL getDecompilerDownloadUrl() {
+        return decompilerDownloadUrl;
     }
 
-    public void setDependencyURLsFromURL(List<String> dependencyURLs) {
-        setDependencyURLs(dependencyURLs, ExpandableUrl::createFromStringUrl);
-    }
-
-    public URL getDecompilerDownloadURL() {
-        return decompilerDownloadURL;
-    }
-
-    public void setDecompilerDownloadURL(String decompilerDownloadURL) {
+    public void setDecompilerDownloadUrl(String decompilerDownloadUrl) {
         try {
-            this.decompilerDownloadURL = new URL(decompilerDownloadURL);
+            this.decompilerDownloadUrl = new URL(decompilerDownloadUrl);
         } catch (MalformedURLException e1) {
-            this.decompilerDownloadURL = null;
+            this.decompilerDownloadUrl = null;
             OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, e1);
         }
     }

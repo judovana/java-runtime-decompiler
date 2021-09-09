@@ -53,9 +53,9 @@ public final class ImportUtils {
         return url.toString().substring(url.toString().lastIndexOf("/") + 1);
     }
 
-    public static void importOnePlugin(URL selectedURL, String selectedFilename) {
+    public static void importOnePlugin(URL selectedUrl, String selectedFilename) {
         try {
-            copyWrappers(selectedURL, selectedFilename);
+            copyWrappers(selectedUrl, selectedFilename);
         } catch (IOException e) {
             OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
         }
@@ -75,12 +75,12 @@ public final class ImportUtils {
         }
     }
 
-    private static void copyWrappers(URL wrapperURL, String wrapperFilename) throws IOException {
+    private static void copyWrappers(URL wrapperUrl, String wrapperFilename) throws IOException {
         Directories.createPluginDirectory();
 
-        copyBetweenStreams(wrapperURL, wrapperFilename);
+        copyBetweenStreams(wrapperUrl, wrapperFilename);
 
-        URL javaComplementUrl = new URL(flipWrapperExtension(wrapperURL.toString()));
+        URL javaComplementUrl = new URL(flipWrapperExtension(wrapperUrl.toString()));
         String javaComplementName = flipWrapperExtension(wrapperFilename);
 
         copyBetweenStreams(javaComplementUrl, javaComplementName);

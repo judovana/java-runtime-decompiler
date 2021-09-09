@@ -66,7 +66,7 @@ public class RewriteClassDialog extends JDialog {
         }
     }
 
-    private static final String[] saveOptions = new String[]{"fully qualified name", "src subdirectories name", "custom name"};
+    private static final String[] SAVE_OPTIONS = new String[]{"fully qualified name", "src subdirectories name", "custom name"};
     private final JTabbedPane dualPane;
 
     private final JPanel currentBufferPane;
@@ -147,8 +147,8 @@ public class RewriteClassDialog extends JDialog {
         }
         saveSrcBuffer = new JButton("Save current buffer");
         compileAndSave = new JButton("Compile and save as");
-        namingBinary = new JComboBox<String>(saveOptions);
-        namingSource = new JComboBox<String>(saveOptions);
+        namingBinary = new JComboBox<String>(SAVE_OPTIONS);
+        namingSource = new JComboBox<String>(SAVE_OPTIONS);
         namingSource.setSelectedIndex(Utils.FULLY_QUALIFIED_NAME);
         namingBinary.setSelectedIndex(Utils.SRC_SUBDIRS_NAME);
         futureBinTarget = new JTextField(latestPaths.getLastSaveBin());
@@ -182,7 +182,7 @@ public class RewriteClassDialog extends JDialog {
         exFilesIn.add(selectExternalFiles, BorderLayout.EAST);
         externalFiles.add(exFilesIn);
         outputExternalFilesDir = new JTextField(latestPaths.getOutputExternalFilesDir());
-        namingExternal = new JComboBox<>(saveOptions);
+        namingExternal = new JComboBox<>(SAVE_OPTIONS);
         namingExternal.setSelectedIndex(Utils.SRC_SUBDIRS_NAME);
         selectExternalFilesSave = new JButton("...");
         JPanel saveExFilesIn = new JPanel(new BorderLayout());
@@ -202,7 +202,7 @@ public class RewriteClassDialog extends JDialog {
         binaryView = new JPanel(new GridLayout(0, 1));
         binaryView.setName("Current binary buffer");
         binaryFilename = new JLabel(origName + " - " + origBin.length);
-        namingBinaryView = new JComboBox<>(saveOptions);
+        namingBinaryView = new JComboBox<>(SAVE_OPTIONS);
         namingBinaryView.setSelectedIndex(Utils.SRC_SUBDIRS_NAME);
         outputBinaries = new JTextField(latestPaths.getOutputBinaries());
         selectBinary = new JButton("...");

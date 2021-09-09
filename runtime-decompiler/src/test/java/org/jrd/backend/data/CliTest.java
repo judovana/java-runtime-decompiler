@@ -69,7 +69,7 @@ public class CliTest {
         assertTrue(dummy.isAlive());
 
         model = new Model(); // must be below dummy process execution to be aware of it during VmManager instantiation
-        while (model.getVmManager().findVmFromPIDNoException(dummy.getPid()) == null) {
+        while (model.getVmManager().findVmFromPidNoException(dummy.getPid()) == null) {
             Thread.sleep(100);
             model.getVmManager().updateLocalVMs();
         }
