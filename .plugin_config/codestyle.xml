@@ -133,6 +133,7 @@
             <property name="checkLastCaseGroup" value="true"/>
         </module>
         <module name="HiddenField">
+            <property name="ignoreFormat" value="^dependencyUrls$"/> <!-- setters have some extra parameters which checkstyle doesn't recognize -->
             <property name="ignoreConstructorParameter" value="true"/>
             <property name="ignoreSetter" value="true"/>
         </module>
@@ -221,5 +222,33 @@
             <property name="illegalPattern" value="true"/>
             <property name="message" value="Commented-out one-line code"/>
         </module>
+
+        <!-- Naming conventions checks, see https://checkstyle.org/config_naming.html -->
+        <module name="AbbreviationAsWordInName">
+            <property name="ignoreStatic" value="false"/>
+            <property name="allowedAbbreviationLength" value="1"/>
+            <property name="allowedAbbreviations" value="J,VM"/>
+        </module>
+        <module name="AbstractClassName" />
+        <module name="CatchParameterName">
+            <property name="format" value="^(e|t|ex|[a-z][a-zA-Z1-9]+)$"/>
+        </module>
+        <module name="ClassTypeParameterName" />
+        <module name="ConstantName" />
+        <module name="IllegalIdentifierName" />
+        <module name="InterfaceTypeParameterName" />
+        <module name="LambdaParameterName" />
+        <module name="LocalFinalVariableName" />
+        <module name="LocalVariableName" />
+        <module name="MemberName" />
+        <module name="MethodName" />
+        <module name="MethodTypeParameterName" />
+        <module name="PackageName" />
+        <module name="ParameterName" />
+        <module name="PatternVariableName" />
+        <module name="RecordComponentName" />
+        <module name="RecordTypeParameterName" />
+        <module name="StaticVariableName" />
+        <module name="TypeName" />
     </module>
 </module>

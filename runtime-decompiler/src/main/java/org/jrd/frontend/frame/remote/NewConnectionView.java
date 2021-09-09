@@ -12,7 +12,7 @@ public class NewConnectionView extends JDialog {
     private JPanel mainPanel;
     private HostnamePortInputPanel hostnamePortInputPanel;
     private JPanel okCancelPanel;
-    private JPanel configureOKCancelPanel;
+    private JPanel configureOkCancelPanel;
     private JButton okButton;
     private JButton cancelButton;
 
@@ -84,8 +84,8 @@ public class NewConnectionView extends JDialog {
         gbc.gridx = 4;
         okCancelPanel.add(Box.createHorizontalStrut(20), gbc);
 
-        configureOKCancelPanel = new JPanel(new GridBagLayout());
-        configureOKCancelPanel.setBorder(new EtchedBorder());
+        configureOkCancelPanel = new JPanel(new GridBagLayout());
+        configureOkCancelPanel.setBorder(new EtchedBorder());
         gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.BOTH;
         gbc.anchor = GridBagConstraints.NORTHWEST;
@@ -93,10 +93,10 @@ public class NewConnectionView extends JDialog {
         gbc.weighty = 1;
         gbc.gridx = 0;
         gbc.gridy = 0;
-        configureOKCancelPanel.add(Box.createHorizontalGlue(), gbc);
+        configureOkCancelPanel.add(Box.createHorizontalGlue(), gbc);
         gbc.gridx = 1;
-        configureOKCancelPanel.add(okCancelPanel, gbc);
-        configureOKCancelPanel.setPreferredSize(new Dimension(0, 60));
+        configureOkCancelPanel.add(okCancelPanel, gbc);
+        configureOkCancelPanel.setPreferredSize(new Dimension(0, 60));
 
 
         mainPanel = new JPanel(new GridBagLayout());
@@ -113,7 +113,7 @@ public class NewConnectionView extends JDialog {
         mainPanel.add(Box.createVerticalGlue(), gbc);
         gbc.gridy = 2;
         gbc.weighty = 0;
-        mainPanel.add(configureOKCancelPanel, gbc);
+        mainPanel.add(configureOkCancelPanel, gbc);
 
 
         this.setTitle("New connection");

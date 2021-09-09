@@ -392,10 +392,10 @@ public class HexTable extends JTable {
                     final int end = Math.min(selEnd, b2) - b1;
                     this.highlight.setLocation(start, end);
                 }
-                final boolean colorBG = HexTable.this.hexEditor.getAlternateRowBG() && (row & 0x1) > 0;
+                final boolean colorBG = HexTable.this.hexEditor.getAlternateRowBackground() && (row & 0x1) > 0;
                 this.setBackground(colorBG ? HexTable.ALTERNATING_CELL_COLOR : table.getBackground());
             } else if (!selected) {
-                if ((HexTable.this.hexEditor.getAlternateRowBG() && (row & 0x1) > 0) ^ (HexTable.this.hexEditor.getAlternateColumnBG() && (column & 0x1) > 0)) {
+                if ((HexTable.this.hexEditor.getAlternateRowBackground() && (row & 0x1) > 0) ^ (HexTable.this.hexEditor.getAlternateColumnBackground() && (column & 0x1) > 0)) {
                     this.setBackground(HexTable.ALTERNATING_CELL_COLOR);
                 } else {
                     this.setBackground(table.getBackground());

@@ -128,7 +128,7 @@ public class DecompilerRequestReceiver {
             actualListenPort = getPort(hostname, listenPort, vmId, vmPid);
             nativeAgent = new CallDecompilerAgent(actualListenPort, hostname);
         } else {
-            VmInfo vmInfo = vmManager.findVmFromPID(vmId);
+            VmInfo vmInfo = vmManager.findVmFromPid(vmId);
             nativeAgent = new FsAgent(vmInfo.getCp());
         }
         String reply = nativeAgent.submitRequest(requestBody);

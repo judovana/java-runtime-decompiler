@@ -197,8 +197,8 @@ public class PluginManager {
 
             // Load wrapper
             List<URL> classPathList = new LinkedList<>();
-            for (ExpandableUrl url : wrapper.getDependencyURLs()) {
-                classPathList.add(url.getExpandedURL());
+            for (ExpandableUrl url : wrapper.getDependencyUrls()) {
+                classPathList.add(url.getExpandedUrl());
             }
             classPathList.add(new URL(ExpandableUrl.prependFileProtocol(System.getProperty("java.io.tmpdir")) + "/")); // trailing slash just in case
 
@@ -207,18 +207,18 @@ public class PluginManager {
                     classPathList.toArray(new URL[0]),
                     getClass().getClassLoader()
             );
-            Class<?> DecompilerClass = loader.loadClass(wrapper.getFullyQualifiedClassName());
-            Constructor<?> constructor = DecompilerClass.getConstructor();
+            Class<?> decompilerClass = loader.loadClass(wrapper.getFullyQualifiedClassName());
+            Constructor<?> constructor = decompilerClass.getConstructor();
             wrapper.setInstance(constructor.newInstance());
 
             try {
-                wrapper.setDecompileMethodNoInners(DecompilerClass.getMethod("decompile", byte[].class, String[].class));
+                wrapper.setDecompileMethodNoInners(decompilerClass.getMethod("decompile", byte[].class, String[].class));
             } catch (Exception e) {
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "No custom decompile method (without inner classes): " + e.getMessage());
             }
 
             try {
-                wrapper.setDecompileMethodWithInners(DecompilerClass.getMethod("decompile", String.class, byte[].class, Map.class, String[].class));
+                wrapper.setDecompileMethodWithInners(decompilerClass.getMethod("decompile", String.class, byte[].class, Map.class, String[].class));
             } catch (Exception e) {
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "No custom decompile method (with inner classes): " + e.getMessage());
             }
@@ -228,7 +228,7 @@ public class PluginManager {
             }
 
             try {
-                wrapper.setCompileMethod(DecompilerClass.getMethod("compile", Map.class, String[].class, Object.class));
+                wrapper.setCompileMethod(decompilerClass.getMethod("compile", Map.class, String[].class, Object.class));
             } catch (Exception e) {
                 OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "No custom compile method: " + e.getMessage());
             }
@@ -288,8 +288,8 @@ public class PluginManager {
 
         return compiler.run(null, null, errStream,
                 "-d", System.getProperty("java.io.tmpdir"),
-                "-cp", URLListToCSV(wrapper.getDependencyURLs(), System.getProperty("path.separator")),
-                wrapper.getWrapperURL().getExpandedPath()
+                "-cp", urlListToCsv(wrapper.getDependencyUrls(), System.getProperty("path.separator")),
+                wrapper.getWrapperUrl().getExpandedPath()
         );
     }
 
@@ -305,7 +305,7 @@ public class PluginManager {
 
         int errLevel = compileWrapper(plugin, errStream);
         //cleaning after compilation
-        String fileName = plugin.getWrapperURL().getFile().getName();
+        String fileName = plugin.getWrapperUrl().getFile().getName();
         Directories.deleteWithException(System.getProperty("java.io.tmpdir") + fileName.substring(0, fileName.length() - 4) + "class");
 
         return errLevel != 0 ? errStream.toString(StandardCharsets.UTF_8) : null;
@@ -316,9 +316,9 @@ public class PluginManager {
         newWrapper.setName("unnamed");
         setLocationForNewWrapper(newWrapper);
         Directories.createPluginDirectory();
-        File plugin_json_file = new File(newWrapper.getFileLocation());
+        File pluginJsonFile = new File(newWrapper.getFileLocation());
         try {
-            plugin_json_file.createNewFile();
+            pluginJsonFile.createNewFile();
         } catch (IOException e) {
             OutputController.getLogger().log("Plugin wrapper json configuration file could not be loaded");
         }
@@ -353,7 +353,7 @@ public class PluginManager {
      * Converts list of URLs to CSV String<br>
      * example: (list){URL1,URL2,URL3} -> (String)URL1:URL2:URL3
      */
-    private String URLListToCSV(List<ExpandableUrl> list, String delimiter) {
+    private static String urlListToCsv(List<ExpandableUrl> list, String delimiter) {
         if (list == null) {
             return "";
         }

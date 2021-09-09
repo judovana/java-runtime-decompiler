@@ -5,7 +5,7 @@ import java.awt.*;
 
 public class ConfigPanel extends JPanel {
 
-    private final JLabel jsonFileURL;
+    private final JLabel jsonFileUrl;
     private final MessagePanel messagePanel;
     private final TextInputPanel namePanel;
     private final FileSelectorPanel wrapperUrlPanel;
@@ -14,7 +14,7 @@ public class ConfigPanel extends JPanel {
     public ConfigPanel() {
         this.setLayout(new GridBagLayout());
 
-        jsonFileURL = new JLabel();
+        jsonFileUrl = new JLabel();
         messagePanel = new MessagePanel("<html><b>Info:</b> You don't have permissions to save this configuration! " +
                 "You can clone it and save the copy.</html>");
         messagePanel.setVisible(false);
@@ -27,7 +27,7 @@ public class ConfigPanel extends JPanel {
         gbc.fill = GridBagConstraints.BOTH;
         gbc.insets = new Insets(3, 3, 3, 3);
         gbc.weightx = 1;
-        this.add(jsonFileURL, gbc);
+        this.add(jsonFileUrl, gbc);
         gbc.gridy = 1;
         this.add(messagePanel, gbc);
         gbc.gridy = 2;
@@ -44,8 +44,8 @@ public class ConfigPanel extends JPanel {
         gbc.weighty = 0;
     }
 
-    public JLabel getJsonFileURL() {
-        return jsonFileURL;
+    public JLabel getJsonFileUrl() {
+        return jsonFileUrl;
     }
 
     public MessagePanel getMessagePanel() {

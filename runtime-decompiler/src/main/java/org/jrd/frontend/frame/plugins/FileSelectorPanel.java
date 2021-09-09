@@ -18,7 +18,7 @@ public class FileSelectorPanel extends JPanel {
         this(label, "Browse");
     }
 
-    FileSelectorPanel(String label, String ButtonLabel) {
+    FileSelectorPanel(String label, String buttonLabel) {
 
         this.textField = new JTextField();
         textField.setPreferredSize(new Dimension(0, 32));
@@ -27,7 +27,7 @@ public class FileSelectorPanel extends JPanel {
         );
 
         this.jLabel = new JLabel(label);
-        this.browseButton = new JButton(ButtonLabel);
+        this.browseButton = new JButton(buttonLabel);
 
         this.chooser = new JFileChooser();
         File dir = new File(Directories.getPluginDirectory());
