@@ -310,7 +310,7 @@ public class Cli {
             if (wantedCustomCompiler != null) {
                 decompiler = findDecompiler(wantedCustomCompiler);
 
-                if (pluginManager.hasDecompiler(decompiler)) {
+                if (pluginManager.hasBundledCompiler(decompiler)) {
                     compilerLogMessage = wantedCustomCompiler + "'s bundled compiler will be used for overwrite.";
                     hasCompiler = true;
                 }

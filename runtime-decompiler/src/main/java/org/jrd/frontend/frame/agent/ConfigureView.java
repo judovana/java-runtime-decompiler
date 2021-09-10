@@ -35,7 +35,6 @@ public class ConfigureView extends JDialog {
         private JFileChooser chooser;
 
         ConfigurePanel(String initialAgentPath, boolean initialUseHostSystemClasses) {
-
             this.agentPathTextField = new JTextField();
             this.agentPathTextField.setToolTipText(BytecodeDecompilerView.styleTooltip() + "Select a path to the Decompiler Agent.<br />" +
                     FileSelectorArrayRow.getTextFieldToolTip()

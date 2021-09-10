@@ -6,7 +6,6 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
@@ -23,8 +22,7 @@ public class NewFsVmView extends JDialog {
 
     private ActionListener addButtonListener;
 
-    public class CpNamePanel extends JPanel {
-
+    public static class CpNamePanel extends JPanel {
         JTextField cpTextField;
         JTextField nameTextField;
         JButton selectCpButton;
@@ -79,32 +77,32 @@ public class NewFsVmView extends JDialog {
 
             this.setLayout(new BorderLayout());
             this.add(textAndName, BorderLayout.CENTER);
-            selectCpButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent actionEvent) {
-                    JFileChooser jf = new JFileChooser(lastOpened);
-                    jf.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-                    int returnVal = jf.showOpenDialog(selectCpButton);
-                    if (returnVal == JFileChooser.APPROVE_OPTION) {
-                        if (jf.getSelectedFile().isDirectory()) {
-                            lastOpened = jf.getSelectedFile().getAbsolutePath();
-                        } else {
-                            lastOpened = jf.getSelectedFile().getParentFile().getAbsolutePath();
-                        }
-                        String lcp = jf.getSelectedFile().getAbsolutePath();
-                        if (cpTextField.getText().trim().isEmpty()) {
-                            cpTextField.setText(lcp);
-                        } else {
-                            cpTextField.setText(cpTextField.getText() + File.pathSeparator + lcp);
-                        }
-                    }
+            selectCpButton.addActionListener(actionEvent -> selectCp());
+        }
+
+        private void selectCp() {
+            JFileChooser jf = new JFileChooser(lastOpened);
+            jf.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+
+            int returnVal = jf.showOpenDialog(selectCpButton);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                if (jf.getSelectedFile().isDirectory()) {
+                    lastOpened = jf.getSelectedFile().getAbsolutePath();
+                } else {
+                    lastOpened = jf.getSelectedFile().getParentFile().getAbsolutePath();
                 }
-            });
+
+                String lcp = jf.getSelectedFile().getAbsolutePath();
+                if (cpTextField.getText().trim().isEmpty()) {
+                    cpTextField.setText(lcp);
+                } else {
+                    cpTextField.setText(cpTextField.getText() + File.pathSeparator + lcp);
+                }
+            }
         }
     }
 
     public NewFsVmView(MainFrameView mainFrameView) {
-
         mCpNamePanel = new CpNamePanel();
 
         okButton = new JButton("Add");
@@ -148,7 +146,6 @@ public class NewFsVmView extends JDialog {
         configureOkCancelPanel.add(okCancelPanel, gbc);
         configureOkCancelPanel.setPreferredSize(new Dimension(0, 60));
 
-
         mainPanel = new JPanel(new GridBagLayout());
         gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.NORTHWEST;
@@ -165,7 +162,6 @@ public class NewFsVmView extends JDialog {
         gbc.weighty = 0;
         mainPanel.add(configureOkCancelPanel, gbc);
 
-
         this.setTitle("New filesystem VM");
         this.setSize(new Dimension(400, 220));
         this.setMinimumSize(new Dimension(250, 220));
@@ -173,7 +169,6 @@ public class NewFsVmView extends JDialog {
         this.setLocationRelativeTo(mainFrameView.getMainFrame());
         this.setModalityType(ModalityType.APPLICATION_MODAL);
         this.add(mainPanel);
-
     }
 
     String getCp() {

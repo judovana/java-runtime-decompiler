@@ -4,9 +4,9 @@
         "https://checkstyle.org/dtds/suppressions_1_2_xpath_experimental.dtd">
 
 <suppressions>
-    <!--  Suppress JavaNCSS metric check for constructors of large frontend classes -->
+    <!--  Suppress length/complexity checks for constructors of large frontend classes -->
     <suppress-xpath
-            checks="JavaNCSS"
+            checks="JavaNCSS|MethodLength|ExecutableStatementCount"
             query="
             //CLASS_DEF//CTOR_DEF[./IDENT[@text='MainFrameView']]
             |//CLASS_DEF//CTOR_DEF[./IDENT[@text='BytecodeDecompilerView']]

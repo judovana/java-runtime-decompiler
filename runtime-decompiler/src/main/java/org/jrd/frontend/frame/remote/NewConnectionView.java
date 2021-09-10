@@ -54,7 +54,6 @@ public class NewConnectionView extends JDialog {
     }
 
     public NewConnectionView(MainFrameView mainFrameView) {
-
         hostnamePortInputPanel = new HostnamePortInputPanel();
 
         okButton = new JButton("Add");
@@ -98,7 +97,6 @@ public class NewConnectionView extends JDialog {
         configureOkCancelPanel.add(okCancelPanel, gbc);
         configureOkCancelPanel.setPreferredSize(new Dimension(0, 60));
 
-
         mainPanel = new JPanel(new GridBagLayout());
         gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.NORTHWEST;
@@ -115,7 +113,6 @@ public class NewConnectionView extends JDialog {
         gbc.weighty = 0;
         mainPanel.add(configureOkCancelPanel, gbc);
 
-
         this.setTitle("New connection");
         this.setSize(new Dimension(400, 220));
         this.setMinimumSize(new Dimension(250, 220));
@@ -123,7 +120,6 @@ public class NewConnectionView extends JDialog {
         this.setLocationRelativeTo(mainFrameView.getMainFrame());
         this.setModalityType(ModalityType.APPLICATION_MODAL);
         this.add(mainPanel);
-
     }
 
     String getHostname() {

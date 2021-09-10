@@ -190,67 +190,56 @@ public class HexTable extends JTable {
         return renderer.getTableCellRendererComponent(this, value, isSelected, hasFocus, row, column);
     }
 
+    private void processKeyPressedEvent(KeyEvent e, boolean isExtended, int offset) {
+        this.changeSelectionByOffset(offset, isExtended);
+        e.consume();
+    }
+
     @Override
     protected void processKeyEvent(final KeyEvent e) {
         if (e.getID() == KeyEvent.KEY_PRESSED) {
+            final boolean extend = e.isShiftDown();
+
             switch (e.getKeyCode()) {
                 case 37: {
-                    final boolean extend = e.isShiftDown();
-                    final int offs = Math.max(this.leadSelectionIndex - 1, 0);
-                    this.changeSelectionByOffset(offs, extend);
-                    e.consume();
+                    processKeyPressedEvent(e, extend, Math.max(this.leadSelectionIndex - 1, 0));
                     break;
                 }
                 case 39: {
-                    final boolean extend = e.isShiftDown();
-                    final int offs = Math.min(this.leadSelectionIndex + 1, this.model.getByteCount() - 1);
-                    this.changeSelectionByOffset(offs, extend);
-                    e.consume();
+                    processKeyPressedEvent(e, extend, Math.min(this.leadSelectionIndex + 1, this.model.getByteCount() - 1));
                     break;
                 }
                 case 38: {
-                    final boolean extend = e.isShiftDown();
-                    final int offs = Math.max(this.leadSelectionIndex - 16, 0);
-                    this.changeSelectionByOffset(offs, extend);
-                    e.consume();
+                    processKeyPressedEvent(e, extend, Math.max(this.leadSelectionIndex - 16, 0));
                     break;
                 }
                 case 40: {
-                    final boolean extend = e.isShiftDown();
-                    final int offs = Math.min(this.leadSelectionIndex + 16, this.model.getByteCount() - 1);
-                    this.changeSelectionByOffset(offs, extend);
-                    e.consume();
+                    processKeyPressedEvent(e, extend, Math.min(this.leadSelectionIndex + 16, this.model.getByteCount() - 1));
                     break;
                 }
                 case 34: {
-                    final boolean extend = e.isShiftDown();
                     final int visibleRowCount = this.getVisibleRect().height / this.getRowHeight();
                     final int offs = Math.min(this.leadSelectionIndex + visibleRowCount * 16, this.model.getByteCount() - 1);
-                    this.changeSelectionByOffset(offs, extend);
-                    e.consume();
+
+                    processKeyPressedEvent(e, extend, offs);
                     break;
                 }
                 case 33: {
-                    final boolean extend = e.isShiftDown();
                     final int visibleRowCount = this.getVisibleRect().height / this.getRowHeight();
                     final int offs = Math.max(this.leadSelectionIndex - visibleRowCount * 16, 0);
-                    this.changeSelectionByOffset(offs, extend);
-                    e.consume();
+
+                    processKeyPressedEvent(e, extend, offs);
                     break;
                 }
                 case 36: {
-                    final boolean extend = e.isShiftDown();
-                    final int offs = this.leadSelectionIndex / 16 * 16;
-                    this.changeSelectionByOffset(offs, extend);
-                    e.consume();
+                    processKeyPressedEvent(e, extend, this.leadSelectionIndex / 16 * 16);
                     break;
                 }
                 case 35: {
-                    final boolean extend = e.isShiftDown();
                     int offs = this.leadSelectionIndex / 16 * 16 + 15;
                     offs = Math.min(offs, this.model.getByteCount() - 1);
-                    this.changeSelectionByOffset(offs, extend);
-                    e.consume();
+
+                    processKeyPressedEvent(e, extend, offs);
                     break;
                 }
                 case KeyEvent.VK_SPACE:
@@ -259,7 +248,6 @@ public class HexTable extends JTable {
                     final int col = anchorSelectionIndex % 16;
 
                     this.editCellAt(row, col);
-
                     e.consume();
                     break;
                 default:

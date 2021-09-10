@@ -58,21 +58,7 @@ public class PluginConfigurationEditorController {
             }
         });
         view.getOkCancelPanel().getCancelButton().addActionListener(actionEvent -> view.dispose());
-        view.getOkCancelPanel().getValidateButton().addActionListener(actionEvent -> {
-            if (view.getPluginListPanel().getWrapperJList().getSelectedIndex() == -1) {
-                return;
-            }
-
-            String result = pluginManager.validatePlugin(getDataFromPanel((DecompilerWrapperInformation) view.getPluginListPanel().getWrapperJList().getSelectedValue()));
-            if (result != null) {
-                JOptionPane.showMessageDialog(view,
-                        "Validation failed: " + result,
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(view, "This plugin is valid.", "Success", JOptionPane.INFORMATION_MESSAGE);
-            }
-        });
+        view.getOkCancelPanel().getValidateButton().addActionListener(event -> validateWrapper());
 
         updateWrapperList(pluginManager.getWrappers());
         view.getPluginListPanel().getWrapperJList().setSelectedIndex(0);
@@ -211,6 +197,22 @@ public class PluginConfigurationEditorController {
             return;
         }
         wrapperJList.setSelectedIndex(0);
+    }
+
+    private void validateWrapper() {
+        if (view.getPluginListPanel().getWrapperJList().getSelectedIndex() == -1) {
+            return;
+        }
+
+        String result = pluginManager.validatePlugin(getDataFromPanel((DecompilerWrapperInformation) view.getPluginListPanel().getWrapperJList().getSelectedValue()));
+        if (result != null) {
+            JOptionPane.showMessageDialog(view,
+                    "Validation failed: " + result,
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(view, "This plugin is valid.", "Success", JOptionPane.INFORMATION_MESSAGE);
+        }
     }
 
     public void updateWrapperList(List<DecompilerWrapperInformation> wrappers) {

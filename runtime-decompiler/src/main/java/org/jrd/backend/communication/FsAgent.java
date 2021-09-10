@@ -265,6 +265,7 @@ public class FsAgent implements JrdAgent {
             this.classes = classes;
         }
 
+        @SuppressWarnings("AnonInnerLength") // already in an inner class, no need to extract it to another inner class
         @Override
         public Void onDirEntry(File c, File clazz) throws IOException {
             Files.walkFileTree(c.toPath(), new FileVisitor<Path>() {

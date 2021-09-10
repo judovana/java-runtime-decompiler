@@ -71,10 +71,11 @@ public class JcoderDecompilerWrapper {
         Map<String, byte[]> r = new HashMap();
         Files.walk(target.toPath()).filter(Files::isRegularFile).forEach(k -> {
             try {
-                String futureFullyQualifiedNiceName = k.toString();
-                futureFullyQualifiedNiceName = futureFullyQualifiedNiceName.replace(target + File.separator, "");
-                futureFullyQualifiedNiceName = futureFullyQualifiedNiceName.replace(File.separator, ".");
-                futureFullyQualifiedNiceName = futureFullyQualifiedNiceName.replaceAll("\\.class$", "");
+                String futureFullyQualifiedNiceName = k
+                        .toString()
+                        .replace(target + File.separator, "")
+                        .replace(File.separator, ".")
+                        .replaceAll("\\.class$", "");
                 r.put(futureFullyQualifiedNiceName, Files.readAllBytes(k));
             } catch (IOException ex) {
                 ex.printStackTrace();
