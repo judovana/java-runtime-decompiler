@@ -25,7 +25,8 @@ public class JcoderDecompilerWrapper {
             }
             String data = baos.toString(utf8);
             if (data.isEmpty()) {
-                return "No output, unpatched asmtools? See https://github.com/openjdk/asmtools/pull/13/commits/6f8e5b532aa0cdb032ede0854de30da16cf2bb5c";
+                return "No output, unpatched asmtools? See " +
+                        "https://github.com/openjdk/asmtools/pull/13/commits/6f8e5b532aa0cdb032ede0854de30da16cf2bb5c";
             }
             return data;
         } catch (Exception e) {
@@ -35,12 +36,7 @@ public class JcoderDecompilerWrapper {
     }
 
     private void log(Object logger, String message) {
-        try {
-            System.err.println(message);
-        } catch (Exception ex) {
-            System.err.println("Jcoder have logger, but that logger do not have correct addMessage java.util.logging.Level String method or call failed");
-            ex.printStackTrace();
-        }
+        System.err.println(message);
     }
 
     public Map<String, byte[]> compile(Map<String, String> src, String[] options, Object maybeLogger) throws Exception {

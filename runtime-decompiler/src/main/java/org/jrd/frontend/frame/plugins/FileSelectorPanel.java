@@ -22,7 +22,8 @@ public class FileSelectorPanel extends JPanel {
 
         this.textField = new JTextField();
         textField.setPreferredSize(new Dimension(0, 32));
-        textField.setToolTipText(BytecodeDecompilerView.styleTooltip() + "Select a path to the decompiler wrapper .java file.<br />" +
+        textField.setToolTipText(BytecodeDecompilerView.styleTooltip() +
+                "Select a path to the decompiler wrapper .java file.<br />" +
                 FileSelectorArrayRow.getTextFieldToolTip()
         );
 

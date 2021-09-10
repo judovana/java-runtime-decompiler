@@ -37,7 +37,9 @@ public final class CommonUtils {
         void onException(Exception ex);
     }
 
-    public static boolean saveByGui(String fileNameBase, int naming, String suffix, StatusKeeper status, String clazz, byte[] content) {
+    public static boolean saveByGui(
+            String fileNameBase, int naming, String suffix, StatusKeeper status, String clazz, byte[] content
+    ) {
         String name = "???";
         String ss = "Error to save: ";
         boolean r = true;
@@ -61,7 +63,9 @@ public final class CommonUtils {
         return r;
     }
 
-    public static boolean uploadByGui(VmInfo vmInfo, VmManager vmManager, StatusKeeper status, String clazz, byte[] content) {
+    public static boolean uploadByGui(
+            VmInfo vmInfo, VmManager vmManager, StatusKeeper status, String clazz, byte[] content
+    ) {
         String ss = "Error to upload: ";
         boolean r = true;
         try {
@@ -91,10 +95,11 @@ public final class CommonUtils {
         throw new RuntimeException("Unknown name target " + selectedIndex);
     }
 
-
     public static String uploadBytecode(String clazz, VmManager vmManager, VmInfo vmInfo, byte[] bytes) {
         final String body = DecompilationController.bytesToBase64(bytes);
-        AgentRequestAction request = DecompilationController.createRequest(vmInfo, AgentRequestAction.RequestAction.OVERWRITE, clazz, body);
+        AgentRequestAction request = DecompilationController.createRequest(
+                vmInfo, AgentRequestAction.RequestAction.OVERWRITE, clazz, body
+        );
         return DecompilationController.submitRequest(vmManager, request);
     }
 
@@ -102,11 +107,14 @@ public final class CommonUtils {
         return Cli.guessName(Files.readAllBytes(new File(src).toPath()));
     }
 
-    public static IdentifiedSource[] sourcesToIdentifiedSources(boolean recursive, List<File> sources) throws IOException {
-        return sourcesToIdentifiedSources(recursive, sources.stream().map(x -> x.getAbsolutePath()).toArray(String[]::new));
+    public static IdentifiedSource[] toIdentifiedSources(boolean recursive, List<File> sources) throws IOException {
+        return toIdentifiedSources(
+                recursive,
+                sources.stream().map(x -> x.getAbsolutePath()).toArray(String[]::new)
+        );
     }
 
-    public static IdentifiedSource[] sourcesToIdentifiedSources(boolean recursive, String... sources) throws IOException {
+    public static IdentifiedSource[] toIdentifiedSources(boolean recursive, String... sources) throws IOException {
         List<IdentifiedSource> loaded = new ArrayList<>(sources.length);
         for (int i = 0; i < sources.length; i++) {
             File f = new File(sources[i]);
@@ -115,7 +123,10 @@ public final class CommonUtils {
                     Files.walkFileTree(f.toPath(), new ClassVisitor(loaded));
                 }
             } else {
-                loaded.add(new IdentifiedSource(new ClassIdentifier(guessClass(f.getAbsolutePath())), Files.readAllBytes(f.toPath())));
+                loaded.add(new IdentifiedSource(
+                        new ClassIdentifier(guessClass(f.getAbsolutePath())),
+                        Files.readAllBytes(f.toPath())
+                ));
             }
         }
         return loaded.toArray(new IdentifiedSource[0]);
@@ -129,15 +140,18 @@ public final class CommonUtils {
         }
 
         @Override
-        public FileVisitResult preVisitDirectory(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
+        public FileVisitResult preVisitDirectory(Path path, BasicFileAttributes attributes) throws IOException {
             return FileVisitResult.CONTINUE;
         }
 
         @Override
-        public FileVisitResult visitFile(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
+        public FileVisitResult visitFile(Path path, BasicFileAttributes attributes) throws IOException {
             File clazz = path.toFile();
             if (clazz.getName().endsWith(".java")) {
-                identifiedSources.add(new IdentifiedSource(new ClassIdentifier(guessClass(clazz.getAbsolutePath())), Files.readAllBytes(clazz.toPath())));
+                identifiedSources.add(new IdentifiedSource(
+                        new ClassIdentifier(guessClass(clazz.getAbsolutePath())),
+                        Files.readAllBytes(clazz.toPath())
+                ));
             }
             return FileVisitResult.CONTINUE;
         }

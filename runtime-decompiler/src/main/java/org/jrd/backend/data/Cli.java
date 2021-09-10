@@ -332,7 +332,9 @@ public class Cli {
         // handle -p
         ClasspathlessCompiler compiler = args.getCompiler();
 
-        IdentifiedSource[] identifiedSources = CommonUtils.sourcesToIdentifiedSources(args.isRecursive, args.filesToCompile);
+        IdentifiedSource[] identifiedSources = CommonUtils.toIdentifiedSources(
+                args.isRecursive, args.filesToCompile
+        );
         Collection<IdentifiedBytecode> allBytecode = compiler.compileClass(
                 provider,
                 Optional.of((level, message) -> Logger.getLogger().log(message)),
@@ -396,7 +398,9 @@ public class Cli {
         String pkg = null;
         String clazz = null;
 
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(fileContents), StandardCharsets.UTF_8))) {
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(new ByteArrayInputStream(fileContents), StandardCharsets.UTF_8)
+        )) {
             while (true) {
                 if (clazz != null && pkg != null) {
                     return pkg + "." + clazz; // this return should be most likely everywhere inline
@@ -426,11 +430,11 @@ public class Cli {
                     for (int i = 0; i < words.length; i++) {
                         String keyWord = words[i];
 
-                        if ("0xCAFEBABE".equals(keyWord)) {
-                            return clazz.replace("/", "."); // jcoder's disassembler uses / instead of and has fully qualified class name as class name
+                        if ("0xCAFEBABE".equals(keyWord)) { // jcoder uses / and fully qualified class name
+                            return clazz.replace("/", ".");
                         }
                         if ("package".equals(keyWord)) {
-                            pkg = words[i + 1].replace("/", "."); // jasm's disassembler uses / instead of .
+                            pkg = words[i + 1].replace("/", "."); // jasm uses / instead of .
                         }
                         if ("class".equals(keyWord) || "interface".equals(keyWord) || "enum".equals(keyWord)) {
                             clazz = words[i + 1];
@@ -477,7 +481,9 @@ public class Cli {
                 }
 
                 if (decompiler != null) {
-                    String decompilationResult = pluginManager.decompile(decompiler, clazz, bytes, options, vmInfo, vmManager);
+                    String decompilationResult = pluginManager.decompile(
+                            decompiler, clazz, bytes, options, vmInfo, vmManager
+                    );
 
                     if (!outOrSave(clazz, ".java", decompilationResult)) {
                         failCount++;
@@ -588,7 +594,9 @@ public class Cli {
         listClassesFromVmInfo(vmInfo, classRegexes);
     }
 
-    private static List<String> obtainFilteredClasses(VmInfo vmInfo, VmManager vmManager, List<Pattern> filter) throws IOException {
+    private static List<String> obtainFilteredClasses(
+            VmInfo vmInfo, VmManager vmManager, List<Pattern> filter
+    ) throws IOException {
         String[] allClasses = obtainClasses(vmInfo, vmManager);
         List<String> filteredClasses = new ArrayList<>(allClasses.length);
 
@@ -606,7 +614,9 @@ public class Cli {
 
         if (saving.shouldSave()) {
             if (saving.like.equals(Saving.DEFAULT) || saving.like.equals(Saving.EXACT)) {
-                try (PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(saving.as), StandardCharsets.UTF_8))) {
+                try (PrintWriter pw = new PrintWriter(
+                        new OutputStreamWriter(new FileOutputStream(saving.as), StandardCharsets.UTF_8)
+                )) {
                     for (String clazz : classes) {
                         pw.println(clazz);
                     }
@@ -637,7 +647,10 @@ public class Cli {
         }
 
         for (DecompilerWrapper dw : pluginManager.getWrappers()) {
-            System.out.println(dw.getName() + " " + dw.getScope() + "/" + invalidityToString(dw.isInvalidWrapper()) + " - " + dw.getFileLocation());
+            System.out.printf(
+                    "%s %s/%s - %s%n",
+                    dw.getName(), dw.getScope(), invalidityToString(dw.isInvalidWrapper()), dw.getFileLocation()
+            );
         }
     }
 
@@ -668,7 +681,9 @@ public class Cli {
     }
 
     public static String[] obtainClasses(VmInfo vmInfo, VmManager manager) {
-        AgentRequestAction request = DecompilationController.createRequest(vmInfo, AgentRequestAction.RequestAction.CLASSES, null);
+        AgentRequestAction request = DecompilationController.createRequest(
+                vmInfo, AgentRequestAction.RequestAction.CLASSES, null
+        );
         String response = DecompilationController.submitRequest(manager, request);
 
         if ("ok".equals(response)) {
@@ -679,7 +694,9 @@ public class Cli {
     }
 
     public static VmDecompilerStatus obtainClass(VmInfo vmInfo, String clazz, VmManager manager) {
-        AgentRequestAction request = DecompilationController.createRequest(vmInfo, AgentRequestAction.RequestAction.BYTES, clazz);
+        AgentRequestAction request = DecompilationController.createRequest(
+                vmInfo, AgentRequestAction.RequestAction.BYTES, clazz
+        );
         String response = DecompilationController.submitRequest(manager, request);
 
         if ("ok".equals(response)) {

@@ -61,7 +61,7 @@ public class Logger {
             if (isVerbose || level == Level.ALL) {
                 ((Throwable) o).printStackTrace();
             }
-            // show gui error dialog? To disturbing? Add shownexttime checkbox? just notification(sounds best considering the nature of exceptions)?
+            // show gui error dialog? Add shownexttime checkbox?
             return;
         } else {
             s = o.toString();

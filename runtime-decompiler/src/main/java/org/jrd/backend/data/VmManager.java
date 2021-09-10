@@ -95,7 +95,10 @@ public class VmManager {
         Set<VmInfo> forRemoval = new HashSet<>();
         while (iterator.hasNext()) {
             VmInfo vmInfo = iterator.next();
-            boolean noLongerExists = newVmInfoSet.stream().noneMatch(vmInfo1 -> vmInfo1.getVmId().equals(vmInfo.getVmId()));
+            boolean noLongerExists = newVmInfoSet
+                    .stream()
+                    .noneMatch(info -> info.getVmId().equals(vmInfo.getVmId()));
+
             if (vmInfo.getType() == VmInfo.Type.LOCAL && noLongerExists) {
                 setChanged();
                 forRemoval.add(vmInfo);

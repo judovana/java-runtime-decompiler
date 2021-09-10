@@ -29,11 +29,11 @@ public class AgentActionWorker extends Thread {
         try {
             executeRequest(socket);
         } catch (Exception e) {
-            AgentLogger.getLogger().log(new RuntimeException("Error when trying to execute the request. Exception: ", e));
+            AgentLogger.getLogger().log(new RuntimeException("Error when trying to execute the request. Cause: ", e));
             try {
                 socket.close();
             } catch (IOException e1) {
-                AgentLogger.getLogger().log(new RuntimeException("Error when trying to close the socket: ", e1));
+                AgentLogger.getLogger().log(new RuntimeException("Error when trying to close the socket. Cause: ", e1));
             }
         }
     }
@@ -43,11 +43,11 @@ public class AgentActionWorker extends Thread {
         try {
             is = socket.getInputStream();
         } catch (IOException e) {
-            AgentLogger.getLogger().log(new RuntimeException("Error when opening the input stream of the socket. Exception: ", e));
+            AgentLogger.getLogger().log(new RuntimeException("Error when opening the socket input stream. Cause: ", e));
             try {
                 socket.close();
             } catch (IOException e1) {
-                AgentLogger.getLogger().log(new RuntimeException("Error when closing the socket. Exception: ", e1));
+                AgentLogger.getLogger().log(new RuntimeException("Error when closing the socket. Cause: ", e1));
             }
             return;
         }
@@ -56,11 +56,11 @@ public class AgentActionWorker extends Thread {
         try {
             os = socket.getOutputStream();
         } catch (IOException e) {
-            AgentLogger.getLogger().log(new RuntimeException("Error when opening the output stream of the socket. Exception: ", e));
+            AgentLogger.getLogger().log(new RuntimeException("Error when opening the socket output stream. Cause: ", e));
             try {
                 socket.close();
             } catch (IOException e1) {
-                AgentLogger.getLogger().log(new RuntimeException("Error when closing the socket. Exception: ", e1));
+                AgentLogger.getLogger().log(new RuntimeException("Error when closing the socket. Cause: ", e1));
             }
             return;
         }
@@ -81,7 +81,7 @@ public class AgentActionWorker extends Thread {
                 switch (line) {
                     case "HALT":
                         closeSocket(outputStream, socket);
-                        AgentLogger.getLogger().log("AGENT: Received HALT command, Closing socket and exiting.");
+                        AgentLogger.getLogger().log("Agent received HALT command, closing socket and exiting.");
                         break;
                     case "CLASSES":
                         getAllLoadedClasses(outputStream);
@@ -99,13 +99,12 @@ public class AgentActionWorker extends Thread {
                 }
             }
         } catch (IOException e) {
-            AgentLogger.getLogger().log(new RuntimeException("Exception occurred while trying to process the request:", e));
-
+            AgentLogger.getLogger().log(new RuntimeException("Error when trying to process the request:", e));
         } finally {
             try {
                 socket.close();
             } catch (IOException e) {
-                AgentLogger.getLogger().log(new RuntimeException("Exception occurred while trying to close the socket:", e));
+                AgentLogger.getLogger().log(new RuntimeException("Error when trying to close the socket:", e));
             }
         }
     }

@@ -5,6 +5,7 @@ import org.jrd.backend.data.Directories;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -182,9 +183,14 @@ public class DecompilerWrapper {
         try {
             r.run();
             File file = this.wrapperUrl.getFile();
-            if (!(file.exists() && file.canRead())) {
+
+            if (!file.exists()) {
                 invalidWrapper = true;
-                Logger.getLogger().log(Logger.Level.ALL, new RuntimeException("Cant read file or does not exist! " + file.getAbsolutePath()));
+                Logger.getLogger().log(Logger.Level.ALL, new FileNotFoundException(file.getAbsolutePath()));
+            }
+            if (!file.canRead()) {
+                invalidWrapper = true;
+                Logger.getLogger().log(Logger.Level.ALL, new IOException("Unable to read file '" + file.getAbsolutePath() + "'."));
             }
         } catch (ExpandableUrl.MalformedUrlToPath e) {
             this.wrapperUrl = null;

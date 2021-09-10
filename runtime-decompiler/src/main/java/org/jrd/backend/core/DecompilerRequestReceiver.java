@@ -139,16 +139,20 @@ public class DecompilerRequestReceiver {
         return new ResponseWithPort(reply, actualListenPort);
     }
 
-    private String getOverwriteAction(String hostname, int listenPort, String vmId, int vmPid, String className, String nwBody) {
+    private String getOverwriteAction(
+            String hostname, int listenPort, String vmId, int vmPid, String className, String newBody
+    ) {
         try {
-            ResponseWithPort reply = getResponse(hostname, listenPort, vmId, vmPid, "OVERWRITE\n" + className + "\n" + nwBody);
+            ResponseWithPort reply = getResponse(
+                    hostname, listenPort, vmId, vmPid, "OVERWRITE\n" + className + "\n" + newBody
+            );
+
             VmDecompilerStatus status = new VmDecompilerStatus();
             status.setHostname(hostname);
             status.setListenPort(reply.port);
             status.setVmId(vmId);
-            //note, that we have no reply from overwrite. Or better, nothing to do with reply
+            // Note that we have no reply from overwrite. Or better, nothing to do with reply
             vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
-
         } catch (Exception ex) {
             Logger.getLogger().log(Logger.Level.ALL, ex);
             return ERROR_RESPONSE;
@@ -239,7 +243,7 @@ public class DecompilerRequestReceiver {
         @SuppressWarnings({"ReturnCount", "CyclomaticComplexity"}) // comparator syntax
         @SuppressFBWarnings(
                 value = "NP_NULL_ON_SOME_PATH_MIGHT_BE_INFEASIBLE",
-                justification = "SpotBugs false reports possible NP dereference, even though both o1 & o2 are tested for nullness. "
+                justification = "False report of possible NP dereference, despite testing both o1 & o2 for nullness."
         )
         @Override
         public int compare(String o1, String o2) {

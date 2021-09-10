@@ -36,7 +36,9 @@ public class ConfigureView extends JDialog {
 
         ConfigurePanel(String initialAgentPath, boolean initialUseHostSystemClasses) {
             this.agentPathTextField = new JTextField();
-            this.agentPathTextField.setToolTipText(BytecodeDecompilerView.styleTooltip() + "Select a path to the Decompiler Agent.<br />" +
+            this.agentPathTextField.setToolTipText(
+                    BytecodeDecompilerView.styleTooltip() +
+                    "Select a path to the Decompiler Agent.<br />" +
                     FileSelectorArrayRow.getTextFieldToolTip()
             );
             this.agentPathTextField.setText(initialAgentPath);
@@ -55,7 +57,10 @@ public class ConfigureView extends JDialog {
             if (Directories.isPortable()) {
                 dir = new File(Directories.getJrdLocation() + File.separator + "libs");
             } else {
-                dir = new File(Directories.getJrdLocation() + File.separator + "decompiler_agent" + File.separator + "target");
+                dir = new File(Directories.getJrdLocation() + File.separator +
+                        "decompiler_agent" + File.separator +
+                        "target"
+                );
             }
             chooser.setCurrentDirectory(FileSelectorArrayRow.fallback(dir));
 

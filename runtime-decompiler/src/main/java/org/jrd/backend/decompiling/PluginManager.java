@@ -138,28 +138,44 @@ public class PluginManager {
      * @return Decompiled bytecode or exception String
      * @throws Exception the exception String
      */
-    public synchronized String decompile(DecompilerWrapper wrapper, String name, byte[] bytecode, String[] options, VmInfo vmInfo, VmManager vmManager) throws Exception {
+    public synchronized String decompile(
+            DecompilerWrapper wrapper,
+            String name,
+            byte[] bytecode,
+            String[] options,
+            VmInfo vmInfo,
+            VmManager vmManager
+    ) throws Exception {
         if (wrapper == null) {
             return "No valid decompiler selected. Unable to decompile. \n " +
                     "If there is no decompiler selected, you need to set paths to decompiler in" +
                     "decompiler wrapper";
         }
+
         if (!wrapper.haveDecompilerMethod()) {
             initializeWrapper(wrapper);
         }
+
         if (wrapper.getDecompileMethodWithInners() != null && name != null && vmInfo != null && vmManager != null) {
             String[] allClasses = Cli.obtainClasses(vmInfo, vmManager);
             Map<String, byte[]> innerClasses = new HashMap<>();
+
             for (String clazz : allClasses) {
                 if (isDecompilableInnerClass(name, clazz)) {
-                    innerClasses.put(clazz, Base64.getDecoder().decode(Cli.obtainClass(vmInfo, clazz, vmManager).getLoadedClassBytes()));
+                    innerClasses.put(
+                            clazz,
+                            Base64.getDecoder().decode(Cli.obtainClass(vmInfo, clazz, vmManager).getLoadedClassBytes())
+                    );
                 }
             }
-            return (String) wrapper.getDecompileMethodWithInners().invoke(wrapper.getInstance(), name, bytecode, innerClasses, options);
+
+            return (String) wrapper.getDecompileMethodWithInners().invoke(
+                    wrapper.getInstance(), name, bytecode, innerClasses, options
+            );
         } else if (wrapper.getDecompileMethodNoInners() != null) {
             return (String) wrapper.getDecompileMethodNoInners().invoke(wrapper.getInstance(), bytecode, options);
         } else {
-            throw new RuntimeException("This decompiler have no suitable decompile method for give parameters");
+            throw new RuntimeException("This decompiler has no suitable decompile method for give parameters");
         }
     }
 
@@ -186,7 +202,9 @@ public class PluginManager {
         if (wrapper.isJavap() || wrapper.isJavapVerbose()) {
             try {
                 wrapper.setInstance(new JavapDisassemblerWrapper(wrapper.isJavap() ? "" : "-v"));
-                wrapper.setDecompileMethodNoInners(JavapDisassemblerWrapper.class.getMethod("decompile", byte[].class, String[].class));
+                wrapper.setDecompileMethodNoInners(JavapDisassemblerWrapper.class.getMethod(
+                        "decompile", byte[].class, String[].class
+                ));
             } catch (NoSuchMethodException e) {
                 Logger.getLogger().log("Could not find decompile method in org/jrd/backend/decompiling/JavapDisassemblerWrapper");
             }
@@ -203,7 +221,9 @@ public class PluginManager {
             for (ExpandableUrl url : wrapper.getDependencyUrls()) {
                 classPathList.add(url.getExpandedUrl());
             }
-            classPathList.add(new URL(ExpandableUrl.prependFileProtocol(System.getProperty("java.io.tmpdir")) + "/")); // trailing slash just in case
+            classPathList.add(new URL(
+                    ExpandableUrl.prependFileProtocol(System.getProperty("java.io.tmpdir")) + "/"
+            )); // trailing slash just in case
 
             // Reflect classes & methods and store them in DecompilerWrapper for later use
             ClassLoader loader = URLClassLoader.newInstance(
@@ -215,13 +235,17 @@ public class PluginManager {
             wrapper.setInstance(constructor.newInstance());
 
             try {
-                wrapper.setDecompileMethodNoInners(decompilerClass.getMethod("decompile", byte[].class, String[].class));
+                wrapper.setDecompileMethodNoInners(decompilerClass.getMethod(
+                        "decompile", byte[].class, String[].class)
+                );
             } catch (Exception e) {
                 Logger.getLogger().log(Logger.Level.DEBUG, "No custom decompile method (without inner classes): " + e.getMessage());
             }
 
             try {
-                wrapper.setDecompileMethodWithInners(decompilerClass.getMethod("decompile", String.class, byte[].class, Map.class, String[].class));
+                wrapper.setDecompileMethodWithInners(decompilerClass.getMethod(
+                        "decompile", String.class, byte[].class, Map.class, String[].class
+                ));
             } catch (Exception e) {
                 Logger.getLogger().log(Logger.Level.DEBUG, "No custom decompile method (with inner classes): " + e.getMessage());
             }
@@ -235,11 +259,14 @@ public class PluginManager {
             } catch (Exception e) {
                 Logger.getLogger().log(Logger.Level.DEBUG, "No custom compile method: " + e.getMessage());
             }
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException | ClassNotFoundException | MalformedURLException e) {
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                NoSuchMethodException | ClassNotFoundException | MalformedURLException e) {
             Logger.getLogger().log(Logger.Level.ALL, "Decompiler wrapper could not be loaded. " + e.getMessage());
             Logger.getLogger().log(e);
         } finally { // delete compiled class
-            Directories.deleteWithException(System.getProperty("java.io.tmpdir") + "/" + wrapper.getFullyQualifiedClassName() + ".class");
+            Directories.deleteWithException(
+                    System.getProperty("java.io.tmpdir") + "/" + wrapper.getFullyQualifiedClassName() + ".class"
+            );
         }
     }
 
@@ -309,7 +336,9 @@ public class PluginManager {
         int errLevel = compileWrapper(plugin, errStream);
         //cleaning after compilation
         String fileName = plugin.getWrapperUrl().getFile().getName();
-        Directories.deleteWithException(System.getProperty("java.io.tmpdir") + fileName.substring(0, fileName.length() - 4) + "class");
+        Directories.deleteWithException(
+                System.getProperty("java.io.tmpdir") + fileName.substring(0, fileName.length() - 4) + "class"
+        );
 
         return errLevel != 0 ? errStream.toString(StandardCharsets.UTF_8) : null;
     }
@@ -346,9 +375,10 @@ public class PluginManager {
     }
 
     private void sortWrappers() {
-        wrappers.sort(
-                Comparator.comparing(DecompilerWrapper::getScope).reversed() // reversed so that javap is always the bottom
-                        .thenComparing(DecompilerWrapper::getName)
+        wrappers.sort(Comparator
+                .comparing(DecompilerWrapper::getScope)
+                .reversed() // reversed so that javap is always the bottom
+                .thenComparing(DecompilerWrapper::getName)
         );
     }
 

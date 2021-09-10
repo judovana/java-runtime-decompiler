@@ -28,7 +28,11 @@ public class JavapDisassemblerWrapper {
                     optionsString.append(option);
                 }
             }
-            com.sun.tools.javap.Main.run(new String[]{otherArgs + optionsString, tempByteFile.getAbsolutePath()}, printWriter);
+
+            com.sun.tools.javap.Main.run(
+                    new String[]{otherArgs + optionsString, tempByteFile.getAbsolutePath()}, printWriter
+            );
+
             return readStringFromFile(tempOutputFile.getAbsolutePath());
         } catch (Exception e) {
             StringWriter errors = new StringWriter();

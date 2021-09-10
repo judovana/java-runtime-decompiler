@@ -76,6 +76,19 @@ public class MainFrameView {
     private static final Dimension BUTTON_SIZE = new Dimension(35, 35);
     private static final String WELCOME_CARD = "welcomePanel";
     private static final String DECOMPILER_CARD = "decompilerView";
+    @SuppressWarnings("LineLength") // string formatting
+    private static final String WELCOME_MESSAGE =
+            "Welcome to Java-Runtime-Decompiler\n" +
+            "\n" +
+            "Before using the app, the Decompiler Agent's path needs to be selected in 'Configure -> Decompiler Agent'.\n" +
+            "It's a built-in project and can usually be found at '" + ((Directories.isPortable()) ? "./libs/" : "./decompiler_agent/target/") + "decompiler-agent-*.jar'.\n" +
+            "\n" +
+            "Internal javap decompiling tools are available by default.\n" +
+            "You can also download an external decompiler, e.g. via 'mvn clean install -PdownloadPlugins', and set it up in 'Configure -> Plugins'.\n" +
+            "Currently supported decompilers are: Fernflower, Procyon, jasm.\n" +
+            "\n" +
+            "JRD is dangerous program, and as it allows you to overwrite classes in running JVM. By doing so, you can break the JVM .\n" +
+            "Use with caution.  jdk9+ is not allowed to attach by default. Run JVM with -Djdk.attach.allowAttachSelf=true.\n";
 
     public JFrame getMainFrame() {
         return mainFrame;
@@ -239,7 +252,10 @@ public class MainFrameView {
 
         fsVmLabelPanel = new JPanel(new BorderLayout());
         fsVmLabelPanel.add(fsVmButtonPanel, BorderLayout.EAST);
-        fsVmLabelPanel.add(new JLabel("Local Filesystem Classpath Elements", SwingConstants.CENTER), BorderLayout.CENTER);
+        fsVmLabelPanel.add(
+                new JLabel("Local Filesystem Classpath Elements", SwingConstants.CENTER),
+                BorderLayout.CENTER
+        );
         fsVmPanel = new JPanel(new BorderLayout());
         fsVmPanel.setName("Local FS");
         fsVmPanel.add(fsVmLabelPanel, BorderLayout.NORTH);
@@ -259,18 +275,8 @@ public class MainFrameView {
 
         // centerPanel, welcomePanel
         welcomeJTextArea = new JTextArea(9, 40);
-        welcomeJTextArea.setText("Welcome to Java-Runtime-Decompiler\n" +
-                "\n" +
-                "Before using the app, the Decompiler Agent's path needs to be selected in 'Configure -> Decompiler Agent'.\n" +
-                "It's a built-in project and can usually be found at '" + ((Directories.isPortable()) ? "./libs/" : "./decompiler_agent/target/") + "decompiler-agent-*.jar'.\n" +
-                "\n" +
-                "Internal javap decompiling tools are available by default.\n" +
-                "You can also download an external decompiler, e.g. via 'mvn clean install -PdownloadPlugins', and set it up in 'Configure -> Plugins'.\n" +
-                "Currently supported decompilers are: Fernflower, Procyon, jasm.\n" +
-                "\n" +
-                "JRD is dangerous program, and as it allows you to overwrite classes in running JVM. By doing so, you can break the JVM .\n" +
-                "Use with caution.  jdk9+ is not allowed to attach by default. Run JVM with -Djdk.attach.allowAttachSelf=true.\n");
-        welcomeJTextArea.setFont(new Font(welcomeJTextArea.getFont().getFontName(), welcomeJTextArea.getFont().getStyle(), 20));
+        welcomeJTextArea.setText(WELCOME_MESSAGE);
+        welcomeJTextArea.setFont(welcomeJTextArea.getFont().deriveFont(20.0F));
         welcomeJTextArea.setLineWrap(true);
         welcomeJTextArea.setWrapStyleWord(true);
         welcomeJTextArea.setEditable(false);
@@ -429,8 +435,8 @@ public class MainFrameView {
     private void setVmList(JList<VmInfo> vmList, VmInfo[] vmInfos) {
         VmInfo selectedValue = vmList.getSelectedValue();
         vmList.setListData(vmInfos);
-        if (selectedValue != null) {
-            vmList.setSelectedValue(selectedValue, true); // if !vmList.contains(selectedValue), e.g. after removal, selection gets cleared
+        if (selectedValue != null) { // if !vmList.contains(selectedValue), e.g. after removal, selection gets cleared
+            vmList.setSelectedValue(selectedValue, true);
         }
     }
 

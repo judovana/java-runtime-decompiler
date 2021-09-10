@@ -19,10 +19,12 @@ public class FernflowerDecompilerWrapper {
     }
 
     /*
-    At the end of this fun was found, that fernflower, correctly, ignores naming, so all the fun with saving in file tree may be hapily abandoned
-    and just bunch of tmp files can be used. Final file is always given_dir/Cazz.java , where class is not fully qalified nor placed in pkg dirs
+    * At the end of this fun was found, that fernflower, correctly, ignores naming, so all the fun with saving in file tree may be hapily abandoned
+    * and just bunch of tmp files can be used. Final file is always given_dir/Cazz.java , where class is not fully qalified nor placed in pkg dirs
     */
-    public String decompile(String name, byte[] bytecode, Map<String, byte[]> innerClasses, String[] options) throws IOException {
+    public String decompile(
+            String name, byte[] bytecode, Map<String, byte[]> innerClasses, String[] options
+    ) throws IOException {
         File base = File.createTempFile("fernflower-" + name, ".class");
         base.delete();
         base.mkdir();
@@ -66,7 +68,9 @@ public class FernflowerDecompilerWrapper {
         try {
             tempByteFile = bytesToFile(bytecode);
             String[] args = new String[]{tempByteFile.getAbsolutePath(), System.getProperty("java.io.tmpdir")};
-            Object[] o = fernflower(tempByteFile.getPath().substring(0, tempByteFile.getPath().length() - 6) + ".java", args);
+            Object[] o = fernflower(
+                    tempByteFile.getPath().substring(0, tempByteFile.getPath().length() - 6) + ".java", args
+            );
             decompiledFile = (File) o[0];
             decompiledString = (String) o[1];
         } catch (IOException e) {

@@ -47,7 +47,9 @@ public class RuntimeCompilerConnector {
 
         @Override
         public List<String> getClassPathListing() {
-            AgentRequestAction request = DecompilationController.createRequest(vmInfo, AgentRequestAction.RequestAction.CLASSES);
+            AgentRequestAction request = DecompilationController.createRequest(
+                    vmInfo, AgentRequestAction.RequestAction.CLASSES
+            );
             String response = DecompilationController.submitRequest(vmManager, request);
             if ("ok".equals(response)) {
                 String[] classes = vmInfo.getVmDecompilerStatus().getLoadedClassNames();
@@ -66,13 +68,17 @@ public class RuntimeCompilerConnector {
         }
 
         @Override
-        public Collection<IdentifiedBytecode> compileClass(ClassesProvider classesProvider, Optional<MessagesListener> messagesConsumer, IdentifiedSource... javaSourceFiles) {
+        public Collection<IdentifiedBytecode> compileClass(
+                ClassesProvider provider, Optional<MessagesListener> messagesConsumer, IdentifiedSource... sources
+        ) {
             try {
                 Map<String, String> inputs = new HashMap<>();
-                for (IdentifiedSource is: javaSourceFiles) {
+                for (IdentifiedSource is: sources) {
                     inputs.put(is.getClassIdentifier().getFullName(), is.getSourceCode());
                 }
-                Object r = currentDecompiler.getCompileMethod().invoke(currentDecompiler.getInstance(), inputs, new String[0], messagesConsumer.get());
+                Object r = currentDecompiler.getCompileMethod().invoke(
+                        currentDecompiler.getInstance(), inputs, new String[0], messagesConsumer.get()
+                );
                 Map<String, byte[]> rr = (Map<String, byte[]>) r;
                 List<IdentifiedBytecode> rrr = new ArrayList<>(rr.size());
                 for (Map.Entry<String, byte[]> e: rr.entrySet()) {

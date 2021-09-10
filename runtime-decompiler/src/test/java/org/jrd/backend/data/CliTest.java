@@ -9,13 +9,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
+import java.util.stream.Stream;
 
 import static org.jrd.backend.data.Cli.*;
 import static org.jrd.backend.data.Help.*;
@@ -78,12 +79,14 @@ public class CliTest {
     }
 
     @AfterEach
-    void cleanup() throws InterruptedException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    void cleanup() {
         streams.captureStreams(false);
 
         assertTrue(dummy.isAlive());
         // halt agent, otherwise an open socket prevents termination of dummy process
-        AgentRequestAction request = DecompilationController.createRequest(cli.getVmInfo(dummy.getPid()), AgentRequestAction.RequestAction.HALT, "");
+        AgentRequestAction request = DecompilationController.createRequest(
+                cli.getVmInfo(dummy.getPid()), AgentRequestAction.RequestAction.HALT, ""
+        );
         String response = DecompilationController.submitRequest(model.getVmManager(), request);
         assertEquals("ok", response);
 
@@ -166,7 +169,9 @@ public class CliTest {
         );
     }
 
-    private static String processFormat(String original, String puc, String[] classRegex, String className, String classFile, String plugin) {
+    private static String processFormat(
+            String original, String puc, String[] classRegex, String className, String classFile, String plugin
+    ) {
         String result = original
                 .replace("...", "")
                 .replace("<PUC>", puc)
@@ -195,9 +200,16 @@ public class CliTest {
         return new String[]{operation};
     }
 
-    //temporarily missing COMPILE
+    // temporarily missing COMPILE
+    private static Stream<String> operations() {
+        return Stream.of(
+                H, HELP, VERBOSE, VERSION, LIST_JVMS, LIST_PLUGINS,
+                LIST_CLASSES_FORMAT, BYTES_FORMAT, BASE64_FORMAT, DECOMPILE_FORMAT, OVERWRITE_FORMAT
+        );
+    }
+
     @ParameterizedTest
-    @ValueSource(strings = {H, HELP, VERBOSE, VERSION, LIST_JVMS, LIST_PLUGINS, LIST_CLASSES_FORMAT, BYTES_FORMAT, BASE64_FORMAT, DECOMPILE_FORMAT, OVERWRITE_FORMAT})
+    @MethodSource("operations")
     void testValidOperation(String operation) {
         args = processArgs(operation);
         cli = new Cli(args, model);
@@ -206,7 +218,7 @@ public class CliTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {H, HELP, VERBOSE, VERSION, LIST_JVMS, LIST_PLUGINS, LIST_CLASSES_FORMAT, BYTES_FORMAT, BASE64_FORMAT, DECOMPILE_FORMAT, OVERWRITE_FORMAT})
+    @MethodSource("operations")
     void testValidOperationTwoSlashes(String operation) {
         args = processArgs(operation);
         args[0] = twoSlashes(args[0]);
@@ -243,7 +255,7 @@ public class CliTest {
         cli.consumeCli();
         String jvms = streams.getOut();
 
-        List<String> pids = new ArrayList<>(); // previous test's dummy termination can take time to propagate, hence List.contains
+        List<String> pids = new ArrayList<>(); // test dummy termination can take time to propagate => List.contains
         Matcher m = TestingDummyHelper.JVM_LIST_REGEX.matcher(jvms);
         while (m.find()) {
             pids.add(m.group(1));
@@ -376,13 +388,15 @@ public class CliTest {
         String jrdDisassembled = streams.getOut();
         String javapDisassembled = TestingDummyHelper.executeJavaP(option);
 
-        assertEqualsWithTolerance(jrdDisassembled, javapDisassembled, 0.8); // JRD javap has additional debug comment lines + header is different
+        // JRD javap has additional debug comment lines + header is different
+        assertEqualsWithTolerance(jrdDisassembled, javapDisassembled, 0.8);
     }
 
     @SuppressWarnings("unchecked") // field reflection
     @Test
     void testArgumentCleaning() throws Exception {
-        Field field = Cli.class.getDeclaredField("filteredArgs"); // changing access modifier of filteredArgs for this test is not justifiable
+        // changing access modifier of filteredArgs for this test is not justifiable
+        Field field = Cli.class.getDeclaredField("filteredArgs");
         field.setAccessible(true);
 
         // nothing gets cleaned
@@ -449,7 +463,8 @@ public class CliTest {
                     } else if (j == 0) { // distance between str1 and "" == how long str1 is
                         matrix[i][j] = i;
                     } else {
-                        int substitution = matrix[i - 1][j - 1] + substitutionCost(str1.charAt(i - 1), str2.charAt(j - 1));
+                        int substitution = matrix[i - 1][j - 1] +
+                                substitutionCost(str1.charAt(i - 1), str2.charAt(j - 1));
                         int insertion = matrix[i][j - 1] + 1;
                         int deletion = matrix[i - 1][j] + 1;
 

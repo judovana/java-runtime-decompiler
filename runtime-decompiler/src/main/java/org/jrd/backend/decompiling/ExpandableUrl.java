@@ -38,9 +38,11 @@ public final class ExpandableUrl {
     }
 
     public static ExpandableUrl createFromStringUrl(String url) throws MalformedMacroExpansion {
-        if (!url.startsWith("file:")) { // Backward compatibility reasons, prior to 2.0.0 URLs were stored without file protocol prefix in the .json file
+        // Backward compatibility - prior to JRD 2.0.0 URLs were stored without file protocol prefix in the .json file
+        if (!url.startsWith("file:")) {
             url = prependFileProtocol(url);
         }
+
         try {
             return createFromPath(new URL(expandEnvVars(url, true)).getPath());
         } catch (MalformedURLException e) {
@@ -97,7 +99,9 @@ public final class ExpandableUrl {
 
     public static String unifySlashes(String dir, boolean prependSlash) {
         dir = dir.replaceAll("\\\\", "/");
-        if (prependSlash && Directories.isOsWindows() && !dir.startsWith("file") && dir.length() > 0 && dir.charAt(0) != '/' && dir.charAt(0) != '$') {
+        if (prependSlash && Directories.isOsWindows() &&
+            !dir.startsWith("file") && dir.length() > 0 && dir.charAt(0) != '/' && dir.charAt(0) != '$'
+        ) {
             dir = "/" + dir;
         }
 

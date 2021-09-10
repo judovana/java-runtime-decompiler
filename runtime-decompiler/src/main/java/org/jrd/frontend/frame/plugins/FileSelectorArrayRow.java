@@ -25,7 +25,8 @@ public class FileSelectorArrayRow extends JPanel {
         gbc.fill = GridBagConstraints.BOTH;
         textField = new JTextField(url);
         textField.setPreferredSize(new Dimension(0, 32));
-        textField.setToolTipText(BytecodeDecompilerView.styleTooltip() + "Select a path to the dependency .jar file.<br />" +
+        textField.setToolTipText(BytecodeDecompilerView.styleTooltip() +
+                "Select a path to the dependency .jar file.<br />" +
                 getTextFieldToolTip()
         );
 
@@ -81,10 +82,18 @@ public class FileSelectorArrayRow extends JPanel {
     }
 
     public static String getTextFieldToolTip() {
-        return "A valid path is absolute, " + ((Directories.isOsWindows()) ? "can start with a single forward slash \"/\", " : "") + "and can contain the following macros:<br /><ul>" +
-                "<li><b>${HOME}</b>, which substitutes <b>" + ExpandableUrl.unifySlashes(System.getProperty("user.home")) + "</b></li>" +
-                "<li><b>${XDG_CONFIG_HOME}</b>, which substitutes <b>" + ExpandableUrl.unifySlashes(Directories.getXdgJrdBaseDir()) + "</b></li>" +
-                "<li><b>${JRD}</b>, which substitutes <b>" + ExpandableUrl.unifySlashes(Directories.getJrdLocation()) + "</b></li>" +
+        return "A valid path is absolute, " +
+                ((Directories.isOsWindows()) ? "can start with a single forward slash \"/\", " : "") +
+                "and can contain the following macros:<br /><ul>" +
+
+                "<li><b>${HOME}</b>, which substitutes <b>" +
+                ExpandableUrl.unifySlashes(System.getProperty("user.home")) + "</b></li>" +
+
+                "<li><b>${XDG_CONFIG_HOME}</b>, which substitutes <b>" +
+                ExpandableUrl.unifySlashes(Directories.getXdgJrdBaseDir()) + "</b></li>" +
+
+                "<li><b>${JRD}</b>, which substitutes <b>" +
+                ExpandableUrl.unifySlashes(Directories.getJrdLocation()) + "</b></li>" +
                 "</ul></html>";
     }
 
