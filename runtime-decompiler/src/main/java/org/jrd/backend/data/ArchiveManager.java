@@ -92,10 +92,10 @@ public class ArchiveManager {
      */
     public static boolean shouldOpen(String n) throws IOException {
         /* This way has been selected as there's no other "easier" way of determining if it is an archive.
-           We initially tried to use streams - open a stream over ZipEntry, but because of the way streams work this method is not possible as it will
-           edit the original entry and there's no way of returning. This caused some branches to be skipped while searching.
-           Also closing stream derived from another stream, will close all streams that are connected, even the parent stream. This was a concern as there might be a lot of
-           streams opened and none of them could be closed until they are all fully searched.
+         * We initially tried to use streams - open a stream over ZipEntry, but because of the way streams work this method is not possible as it will
+         * edit the original entry and there's no way of returning. This caused some branches to be skipped while searching.
+         * Also closing stream derived from another stream, will close all streams that are connected, even the parent stream. This was a concern as there might be a lot of
+         * streams opened and none of them could be closed until they are all fully searched.
          * Option to add custom extensions will be added */
         return ArchiveManagerOptions.getInstance().isInner(n);
     }
@@ -118,12 +118,17 @@ public class ArchiveManager {
     public File unpack(File c) throws IOException {
         if (pathManager.isExtracted()) {
             // If file is already extracted, return the extracted one
-            return new File(TMP_DIR + FILE_SEPARATOR + "jrd" + FILE_SEPARATOR + (pathManager.getPathSize() - 2) + FILE_SEPARATOR + (pathManager.get(pathManager.getPathSize() - 1)));
+            return new File(TMP_DIR + FILE_SEPARATOR +
+                    "jrd" + FILE_SEPARATOR +
+                    (pathManager.getPathSize() - 2) + FILE_SEPARATOR +
+                    (pathManager.get(pathManager.getPathSize() - 1)));
         }
 
         File f = new File(TMP_DIR + FILE_SEPARATOR + "jrd" + FILE_SEPARATOR);
         if (f.exists() && !delete()) { // do not log if it didn't even exist before
-            Logger.getLogger().log(Logger.Level.ALL, "Could not delete jrd temp directory at '" + f.getAbsolutePath() + "'!");
+            Logger.getLogger().log(
+                    Logger.Level.ALL, "Could not delete jrd temp directory at '" + f.getAbsolutePath() + "'!"
+            );
         }
 
         // Create my dir in tmpdir
@@ -232,7 +237,13 @@ public class ArchiveManager {
             fileStream.close();
             // Move it into the temp file if it's not last, so it can be packaged
             if (i > 0) {
-                Files.copy(Path.of(path), Path.of(TMP_DIR + FILE_SEPARATOR + "jrd" + FILE_SEPARATOR + (i - 1) + FILE_SEPARATOR + pathManager.get(i)), StandardCopyOption.REPLACE_EXISTING);
+                Files.copy(
+                        Path.of(path),
+                        Path.of(TMP_DIR + FILE_SEPARATOR +
+                                "jrd" + FILE_SEPARATOR +
+                                (i - 1) + FILE_SEPARATOR + pathManager.get(i)),
+                        StandardCopyOption.REPLACE_EXISTING
+                );
             } else {
                 // It's the last, replace the original
                 Files.copy(Path.of(path), c.toPath(), StandardCopyOption.REPLACE_EXISTING);

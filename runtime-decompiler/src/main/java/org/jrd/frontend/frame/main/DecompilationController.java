@@ -79,7 +79,9 @@ public class DecompilationController {
     // Method for opening plugin configuration window
     private void createConfigurationEditor() {
         pluginConfigurationEditorView = new PluginConfigurationEditorView(mainFrameView);
-        pluginConfigurationEditorController = new PluginConfigurationEditorController(pluginConfigurationEditorView, pluginManager);
+        pluginConfigurationEditorController = new PluginConfigurationEditorController(
+                pluginConfigurationEditorView, pluginManager
+        );
         pluginConfigurationEditorController.setPluginsConfiguredListener(actionEvent -> {
             bytecodeDecompilerView.refreshComboBox(pluginManager.getWrappers());
         });
@@ -108,7 +110,13 @@ public class DecompilationController {
 
         if (selectedVm == null) {
             Logger.getLogger().log(Logger.Level.ALL, "Attempted to remove " + vmType + " with none selected.");
-            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), "No " + vmType + " selected.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    mainFrameView.getMainFrame(),
+                    "No " + vmType + " selected.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
             return;
         }
 
@@ -118,7 +126,9 @@ public class DecompilationController {
             confirmMessage += "\nRemoving it will also no longer keep it saved between JRD instances.";
         }
 
-        int dialogResult = JOptionPane.showConfirmDialog(mainFrameView.getMainFrame(), confirmMessage, "Warning", JOptionPane.OK_CANCEL_OPTION);
+        int dialogResult = JOptionPane.showConfirmDialog(
+                mainFrameView.getMainFrame(), confirmMessage, "Warning", JOptionPane.OK_CANCEL_OPTION
+        );
         if (dialogResult == JOptionPane.CANCEL_OPTION) {
             return;
         }
@@ -126,7 +136,9 @@ public class DecompilationController {
         if (!vmManager.removeVm(selectedVm)) {
             String removeFailMessage = "Failed to remove VM: " + selectedVm;
             Logger.getLogger().log(Logger.Level.ALL, removeFailMessage);
-            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), removeFailMessage, "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    mainFrameView.getMainFrame(), removeFailMessage, "Error", JOptionPane.ERROR_MESSAGE
+            );
         }
 
         if (isSavedFsVm) {
@@ -234,7 +246,9 @@ public class DecompilationController {
         hideLoadingDialog();
     }
 
-    public static final String CLASSES_NOPE = "Classes couldn't be loaded. Do you have agent configured? On JDK 9 and higher, did you run the target process with '-Djdk.attach.allowAttachSelf=true'?";
+    public static final String CLASSES_NOPE = "Classes couldn't be loaded." +
+            "Do you have agent configured?" +
+            "On JDK 9 and higher, did you run the target process with '-Djdk.attach.allowAttachSelf=true'?";
 
     /**
      * Sends request for classes. If "ok" response is received updates classes
@@ -273,7 +287,9 @@ public class DecompilationController {
         String bytesInString = vmStatus.getLoadedClassBytes();
         byte[] bytes = Base64.getDecoder().decode(bytesInString);
         try {
-            decompiledClass = pluginManager.decompile(bytecodeDecompilerView.getSelectedDecompiler(), name, bytes, null, vmInfo, vmManager);
+            decompiledClass = pluginManager.decompile(
+                    bytecodeDecompilerView.getSelectedDecompiler(), name, bytes, null, vmInfo, vmManager
+            );
         } catch (Exception e) {
             Logger.getLogger().log(Logger.Level.ALL, e);
         }
@@ -283,12 +299,16 @@ public class DecompilationController {
     class ClassOverwriter {
         private LatestPaths lastLoaded = new LatestPaths();
 
-        void overwriteClass(DecompilerWrapper selectedDecompiler, String name, String buffer, byte[] binBuffer, int supperSelect) {
+        void overwriteClass(
+                DecompilerWrapper selectedDecompiler, String name, String buffer, byte[] binBuffer, boolean isBinary
+        ) {
             if (name == null || name.trim().isEmpty()) {
                 name = "???";
             }
 
-            final OverwriteClassDialog overwriteClassDialog = new OverwriteClassDialog(name, lastLoaded, buffer, binBuffer, vmInfo, vmManager, pluginManager, selectedDecompiler, supperSelect);
+            final OverwriteClassDialog overwriteClassDialog = new OverwriteClassDialog(
+                    name, lastLoaded, buffer, binBuffer, vmInfo, vmManager, pluginManager, selectedDecompiler, isBinary
+            );
             ScreenFinder.centerWindowsToCurrentScreen(overwriteClassDialog);
             overwriteClassDialog.setVisible(true);
 

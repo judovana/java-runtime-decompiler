@@ -24,7 +24,8 @@ public class AboutView extends JDialog {
             "<h2>Java-Runtime-Decompiler</h2>" +
             "Version " + MetadataProperties.getInstance().getVersion() + "<br />" +
             "Licenced under the GNU General Public License v3.0<br />" +
-            "Visit <a href=\"https://github.com/pmikova/java-runtime-decompiler\">the GitHub repository</a> for more information.<br />" +
+            "Visit <a href=\"https://github.com/pmikova/java-runtime-decompiler\">the GitHub repository</a>" +
+            " for more information.<br />" +
             "</body></html>");
 
         editorPane.addHyperlinkListener(event -> {
@@ -42,6 +43,11 @@ public class AboutView extends JDialog {
         editorPane.setEditable(false);
         editorPane.setBackground(new Color(label.getBackground().getRGB()));
 
-        JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), editorPane, "About Java-Runtime-Decompiler", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(
+                mainFrameView.getMainFrame(),
+                editorPane,
+                "About Java-Runtime-Decompiler",
+                JOptionPane.INFORMATION_MESSAGE
+        );
     }
 }

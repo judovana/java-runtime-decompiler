@@ -67,7 +67,11 @@ public class OverwriteClassDialog extends JDialog {
         }
     }
 
-    private static final String[] SAVE_OPTIONS = new String[]{"fully qualified name", "src subdirectories name", "custom name"};
+    private static final String[] SAVE_OPTIONS = new String[]{
+            "fully qualified name",
+            "src subdirectories name",
+            "custom name"
+    };
     private final JTabbedPane dualPane;
 
     private final JPanel currentBufferPane;
@@ -122,8 +126,17 @@ public class OverwriteClassDialog extends JDialog {
     private final VmInfo vmInfo;
     private final VmManager vmManager;
 
-    public OverwriteClassDialog(final String name, final LatestPaths latestPaths, final String currentBuffer, final byte[] cBinBuffer, VmInfo vmInfo, VmManager vmManager, PluginManager pluginManager,
-                                DecompilerWrapper selectedDecompiler, int supperSelection) {
+    public OverwriteClassDialog(
+            final String name,
+            final LatestPaths latestPaths,
+            final String currentBuffer,
+            final byte[] cBinBuffer,
+            VmInfo vmInfo,
+            VmManager vmManager,
+            PluginManager pluginManager,
+            DecompilerWrapper selectedDecompiler,
+            boolean isBinaryVisible
+    ) {
         super((JFrame) null, "Specify class and selectSrc its bytecode", true);
         this.setSize(400, 400);
         this.setLayout(new BorderLayout());
@@ -245,24 +258,35 @@ public class OverwriteClassDialog extends JDialog {
             statusCompileCurrentBuffer.setText(ex.getMessage());
             dualPane.setSelectedIndex(1);
         }
-        if (supperSelection > 0) {
+        if (isBinaryVisible) {
             dualPane.setSelectedIndex(3);
         }
-
 
         saveSrcBuffer.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                CommonUtils.saveByGui(futureSrcTarget.getText(), namingSource.getSelectedIndex(), ".java", new TextFieldBasedStus(statusCompileCurrentBuffer), origName, origBuffer.getBytes(StandardCharsets.UTF_8));
-
+                CommonUtils.saveByGui(
+                        futureSrcTarget.getText(),
+                        namingSource.getSelectedIndex(),
+                        ".java",
+                        new TextFieldBasedStus(statusCompileCurrentBuffer),
+                        origName,
+                        origBuffer.getBytes(StandardCharsets.UTF_8)
+                );
             }
         });
 
         saveBinary.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                CommonUtils.saveByGui(outputBinaries.getText(), namingBinaryView.getSelectedIndex(), ".class", new TextFieldBasedStus(statusBinary), origName, origBin);
-
+                CommonUtils.saveByGui(
+                        outputBinaries.getText(),
+                        namingBinaryView.getSelectedIndex(),
+                        ".class",
+                        new TextFieldBasedStus(statusBinary),
+                        origName,
+                        origBin
+                );
             }
         });
 
@@ -329,7 +353,9 @@ public class OverwriteClassDialog extends JDialog {
                     if (filesToCompile.getText().trim().isEmpty()) {
                         filesToCompile.setText(jf.getSelectedFile().getAbsolutePath());
                     } else {
-                        filesToCompile.setText(filesToCompile.getText() + File.pathSeparator + jf.getSelectedFile().getAbsolutePath());
+                        filesToCompile.setText(
+                                filesToCompile.getText() + File.pathSeparator + jf.getSelectedFile().getAbsolutePath()
+                        );
                     }
                 }
             }
@@ -339,9 +365,17 @@ public class OverwriteClassDialog extends JDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    String response = CommonUtils.uploadBytecode(className.getText(), vmManager, vmInfo, DecompilationController.fileToBytes(filePath.getText()));
+                    String response = CommonUtils.uploadBytecode(
+                            className.getText(),
+                            vmManager,
+                            vmInfo,
+                            DecompilationController.fileToBytes(filePath.getText())
+                    );
+
                     if (response.equals(DecompilerRequestReceiver.ERROR_RESPONSE)) {
-                        JOptionPane.showMessageDialog(null, "Class overwrite failed.", "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(
+                                null, "Class overwrite failed.", "Error", JOptionPane.ERROR_MESSAGE
+                        );
                     } else {
                         validation.setForeground(Color.black);
                         validation.setText("Upload looks ok");
@@ -353,42 +387,90 @@ public class OverwriteClassDialog extends JDialog {
             }
         });
 
-        compileAndSave.addActionListener(actionEvent -> {
-            IdentifiedSource currentIs = new IdentifiedSource(new ClassIdentifier(origName), origBuffer.getBytes(StandardCharsets.UTF_8));
-            new SavingCompilerOutputAction(statusCompileCurrentBuffer, vmInfo, vmManager, pluginManager, decompiler, haveCompiler, namingBinary.getSelectedIndex(), futureBinTarget.getText()).run(
-                    currentIs);
+        compileAndSave.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                IdentifiedSource currentIs = new IdentifiedSource(
+                        new ClassIdentifier(origName), origBuffer.getBytes(StandardCharsets.UTF_8)
+                );
+
+                new SavingCompilerOutputAction(
+                        statusCompileCurrentBuffer,
+                        vmInfo,
+                        vmManager,
+                        pluginManager,
+                        decompiler,
+                        haveCompiler,
+                        namingBinary.getSelectedIndex(),
+                        futureBinTarget.getText()
+                ).run(currentIs);
+            }
         });
 
-        compileAndUpload.addActionListener(actionEvent -> {
-            IdentifiedSource currentIs = new IdentifiedSource(new ClassIdentifier(origName), origBuffer.getBytes(StandardCharsets.UTF_8));
-            new UploadingCompilerOutputAction(statusCompileCurrentBuffer, vmInfo, vmManager, pluginManager, decompiler, haveCompiler, namingBinary.getSelectedIndex(), futureBinTarget.getText()).run(
-                    currentIs);
+        compileAndUpload.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                IdentifiedSource currentIs = new IdentifiedSource(
+                        new ClassIdentifier(origName), origBuffer.getBytes(StandardCharsets.UTF_8)
+                );
+
+                new UploadingCompilerOutputAction(
+                        statusCompileCurrentBuffer,
+                        vmInfo,
+                        vmManager,
+                        pluginManager,
+                        decompiler,
+                        haveCompiler,
+                        namingBinary.getSelectedIndex(),
+                        futureBinTarget.getText()
+                ).run(currentIs);
+            }
         });
 
-        compileExternalFiles.addActionListener(actionEvent -> {
-            String[] sources = filesToCompile.getText().split(File.pathSeparator);
-            try {
-                IdentifiedSource[] loaded = CommonUtils.sourcesToIdentifiedSources(recursive.isSelected(), sources);
-                new SavingCompilerOutputAction(statusExternalFiles, vmInfo, vmManager, pluginManager, decompiler, haveCompiler, namingExternal.getSelectedIndex(),
-                        outputExternalFilesDir.getText()).run(loaded);
-            } catch (Exception ex) {
-                Logger.getLogger().log(ex);
-                statusExternalFiles.setText(ex.getMessage());
-                JOptionPane.showMessageDialog(null, ex.getMessage());
+        compileExternalFiles.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                String[] sources = filesToCompile.getText().split(File.pathSeparator);
+
+                try {
+                    IdentifiedSource[] loaded = CommonUtils.toIdentifiedSources(recursive.isSelected(), sources);
+                    new SavingCompilerOutputAction(
+                            statusExternalFiles,
+                            vmInfo,
+                            vmManager,
+                            pluginManager,
+                            decompiler,
+                            haveCompiler,
+                            namingExternal.getSelectedIndex(),
+                            outputExternalFilesDir.getText()
+                    ).run(loaded);
+                } catch (Exception ex) {
+                    Logger.getLogger().log(ex);
+                    statusExternalFiles.setText(ex.getMessage());
+                    JOptionPane.showMessageDialog(null, ex.getMessage());
+                }
             }
         });
     }
 
 
-    private static OverwriteClassDialog.CompilationWithResult compileWithGui(VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapper currentDecompiler, boolean haveCompiler,
-                                                                             IdentifiedSource... sources) {
+    private static OverwriteClassDialog.CompilationWithResult compileWithGui(
+            VmInfo vmInfo,
+            VmManager vmManager,
+            DecompilerWrapper wrapper,
+            boolean hasCompiler,
+            IdentifiedSource... sources
+    ) {
         ClassesProvider cp = new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager);
         ClasspathlessCompiler rc;
-        if (haveCompiler) {
-            rc = new RuntimeCompilerConnector.ForeignCompilerWrapper(currentDecompiler);
+
+        if (hasCompiler) {
+            rc = new RuntimeCompilerConnector.ForeignCompilerWrapper(wrapper);
         } else {
             boolean useHostClasses = Config.getConfig().doUseHostSystemClasses();
-            ClasspathlessCompiler.Arguments arguments = new ClasspathlessCompiler.Arguments().useHostJavaClasses(useHostClasses);
+            ClasspathlessCompiler.Arguments arguments = new ClasspathlessCompiler
+                    .Arguments()
+                    .useHostJavaClasses(useHostClasses);
 
             rc = new io.github.mkoncek.classpathless.impl.CompilerJavac(arguments);
         }
@@ -396,11 +478,15 @@ public class OverwriteClassDialog extends JDialog {
         JTextArea compilationLog = new JTextArea();
         compilationRunningDialog.setSize(300, 400);
         compilationRunningDialog.add(new JScrollPane(compilationLog));
-        OverwriteClassDialog.CompilationWithResult compiler = new OverwriteClassDialog.CompilationWithResult(rc, cp, compilationLog, sources);
+
+        OverwriteClassDialog.CompilationWithResult compiler = new OverwriteClassDialog.CompilationWithResult(
+                rc, cp, compilationLog, sources
+        );
         Thread t = new Thread(compiler);
         t.start();
         compilationRunningDialog.setLocationRelativeTo(null);
         compilationRunningDialog.setVisible(true);
+
         return compiler;
     }
 
@@ -475,7 +561,9 @@ public class OverwriteClassDialog extends JDialog {
         private Collection<IdentifiedBytecode> result;
 
 
-        CompilationWithResult(ClasspathlessCompiler rc, ClassesProvider cp, JTextArea compilationLog, IdentifiedSource... sources) {
+        CompilationWithResult(
+                ClasspathlessCompiler rc, ClassesProvider cp, JTextArea compilationLog, IdentifiedSource... sources
+        ) {
             this.rc = rc;
             this.cp = cp;
             this.compilationLog = compilationLog;
@@ -515,8 +603,16 @@ public class OverwriteClassDialog extends JDialog {
         protected final DecompilerWrapper decompilerWrapper;
         protected final boolean haveCompiler;
 
-        CompilerOutputActionFields(JTextField status, VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapper dwi, boolean haveCompiler, int namingSchema,
-                                   String destination) {
+        CompilerOutputActionFields(
+                JTextField status,
+                VmInfo vmInfo,
+                VmManager vmManager,
+                PluginManager pm,
+                DecompilerWrapper dwi,
+                boolean haveCompiler,
+                int namingSchema,
+                String destination
+        ) {
             this.status = status;
             this.vmInfo = vmInfo;
             this.vmManager = vmManager;
@@ -530,13 +626,24 @@ public class OverwriteClassDialog extends JDialog {
 
     private static class SavingCompilerOutputAction extends CompilerOutputActionFields {
 
-        SavingCompilerOutputAction(JTextField status, VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapper dwi, boolean haveCompiler, int namingSchema,
-                                   String destination) {
-            super(status, vmInfo, vmManager, pm, dwi, haveCompiler, namingSchema, destination);
+        SavingCompilerOutputAction(
+                JTextField status,
+                VmInfo vmInfo,
+                VmManager vmManager,
+                PluginManager pm,
+                DecompilerWrapper dwi,
+                boolean hasCompiler,
+                int namingSchema,
+                String destination
+        ) {
+            super(status, vmInfo, vmManager, pm, dwi, hasCompiler, namingSchema, destination);
         }
 
         public void run(IdentifiedSource... sources) {
-            OverwriteClassDialog.CompilationWithResult compiler = compileWithGui(this.vmInfo, this.vmManager, pluginManager, decompilerWrapper, haveCompiler, sources);
+            OverwriteClassDialog.CompilationWithResult compiler = compileWithGui(
+                    this.vmInfo, this.vmManager, decompilerWrapper, haveCompiler, sources
+            );
+
             if (compiler.ex == null && compiler.result == null) {
                 String s = "No output from compiler, maybe still running?";
                 JOptionPane.showMessageDialog(null, s);
@@ -544,7 +651,7 @@ public class OverwriteClassDialog extends JDialog {
             } else if (compiler.ex != null) {
                 JOptionPane.showMessageDialog(null, compiler.ex.getMessage());
                 status.setText("Failed - " + compiler.ex.getMessage());
-            } else if (compiler.result != null) {
+            } else {
                 if (compiler.result.size() <= 0) {
                     status.setText("compilation finished, but no output.. nothing to save");
                     status.repaint();
@@ -553,17 +660,27 @@ public class OverwriteClassDialog extends JDialog {
                     status.setText("something done, will save now");
                     status.repaint();
                 }
+
                 if (namingSchema == CommonUtils.CUSTOM_NAME) {
                     if (compiler.result.size() > 0) {
-                        String s = "Output of compilation was " + compiler.result.size() + "classes. Can not save more then one file to exact filename";
+                        String s = "Output of compilation was " + compiler.result.size() + "classes. " +
+                                "Cannot save more then one file to exact filename";
                         JOptionPane.showMessageDialog(null, s);
                         status.setText(s);
                         return;
                     }
                 }
+
                 int saved = 0;
                 for (IdentifiedBytecode clazz : compiler.result) {
-                    boolean r = CommonUtils.saveByGui(destination, namingSchema, ".class", new TextFieldBasedStus(status), clazz.getClassIdentifier().getFullName(), clazz.getFile());
+                    boolean r = CommonUtils.saveByGui(
+                            destination,
+                            namingSchema,
+                            ".class",
+                            new TextFieldBasedStus(status),
+                            clazz.getClassIdentifier().getFullName(),
+                            clazz.getFile()
+                    );
                     if (r) {
                         saved++;
                     }
@@ -572,24 +689,35 @@ public class OverwriteClassDialog extends JDialog {
                     if (saved == compiler.result.size()) {
                         status.setText("Saved all " + saved + "classes to" + destination);
                     } else {
-                        status.setText("Saved only " + saved + " from total of " + compiler.result.size() + " classes to" + destination);
+                        status.setText("Saved only " + saved +
+                                " out of " + compiler.result.size() +
+                                " classes to" + destination
+                        );
                     }
                 }
-            } else {
-                status.setText("Really weird state, report bug how to achieve this");
             }
         }
     }
 
     private static class UploadingCompilerOutputAction extends CompilerOutputActionFields {
 
-        UploadingCompilerOutputAction(JTextField status, VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapper dwi, boolean haveCompiler, int namingSchema,
-                                      String destination) {
-            super(status, vmInfo, vmManager, pm, dwi, haveCompiler, namingSchema, destination);
+        UploadingCompilerOutputAction(
+                JTextField status,
+                VmInfo vmInfo,
+                VmManager vmManager,
+                PluginManager pm,
+                DecompilerWrapper wrapper,
+                boolean hasCompiler,
+                int namingSchema,
+                String destination) {
+            super(status, vmInfo, vmManager, pm, wrapper, hasCompiler, namingSchema, destination);
         }
 
         public void run(IdentifiedSource... sources) {
-            OverwriteClassDialog.CompilationWithResult compiler = compileWithGui(this.vmInfo, this.vmManager, pluginManager, decompilerWrapper, haveCompiler, sources);
+            OverwriteClassDialog.CompilationWithResult compiler = compileWithGui(
+                    this.vmInfo, this.vmManager, decompilerWrapper, haveCompiler, sources
+            );
+
             if (compiler.ex == null && compiler.result == null) {
                 String s = "No output from compiler, maybe still running?";
                 JOptionPane.showMessageDialog(null, s);
@@ -597,7 +725,7 @@ public class OverwriteClassDialog extends JDialog {
             } else if (compiler.ex != null) {
                 JOptionPane.showMessageDialog(null, compiler.ex.getMessage());
                 status.setText("Failed - " + compiler.ex.getMessage());
-            } else if (compiler.result != null) {
+            } else {
                 if (compiler.result.size() <= 0) {
                     status.setText("compilation finished, but no output.. nothing to upload");
                     status.repaint();
@@ -606,22 +734,32 @@ public class OverwriteClassDialog extends JDialog {
                     status.setText("something done, will upload now");
                     status.repaint();
                 }
+
                 int saved = 0;
                 for (IdentifiedBytecode clazz : compiler.result) {
-                    boolean r = CommonUtils.uploadByGui(vmInfo, vmManager, new TextFieldBasedStus(status), clazz.getClassIdentifier().getFullName(), clazz.getFile());
+                    boolean r = CommonUtils.uploadByGui(
+                            vmInfo,
+                            vmManager,
+                            new TextFieldBasedStus(status),
+                            clazz.getClassIdentifier().getFullName(),
+                            clazz.getFile()
+                    );
+
                     if (r) {
                         saved++;
                     }
                 }
+
                 if (compiler.result.size() > 1) {
                     if (saved == compiler.result.size()) {
-                        status.setText("uploaded all " + saved + "classes to" + vmInfo.getVmId());
+                        status.setText("Uploaded all " + saved + " classes to " + vmInfo.getVmId());
                     } else {
-                        status.setText("uploaded only " + saved + " from total of " + compiler.result.size() + " classes to" + vmInfo.getVmId());
+                        status.setText("Uploaded only " + saved +
+                                " out of " + compiler.result.size() +
+                                " classes to " + vmInfo.getVmId()
+                        );
                     }
                 }
-            } else {
-                status.setText("Really weird state, report bug how to achieve this");
             }
         }
     }

@@ -120,7 +120,9 @@ public class HexEditor extends JScrollPane {
     }
 
     private void invokeAction(final Action a) {
-        a.actionPerformed(new ActionEvent(this, 1001, (String) a.getValue("Name"), EventQueue.getMostRecentEventTime(), 0));
+        a.actionPerformed(new ActionEvent(
+                this, 1001, (String) a.getValue("Name"), EventQueue.getMostRecentEventTime(), 0
+        ));
     }
 
     public Point offsetToCell(final int offset) {

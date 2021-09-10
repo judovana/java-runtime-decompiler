@@ -108,7 +108,13 @@ public final class ScreenFinder {
             final GraphicsDevice device = getScreenOnCoords(p);
             final Rectangle screenSize = device.getDefaultConfiguration().getBounds();
             final Insets insets = Toolkit.getDefaultToolkit().getScreenInsets(device.getDefaultConfiguration());
-            return new Rectangle((int) screenSize.getX() + insets.left, (int) screenSize.getY() + insets.top, (int) screenSize.getWidth() - insets.left, (int) screenSize.getHeight() - insets.bottom);
+
+            return new Rectangle(
+                    (int) screenSize.getX() + insets.left,
+                    (int) screenSize.getY() + insets.top,
+                    (int) screenSize.getWidth() - insets.left,
+                    (int) screenSize.getHeight() - insets.bottom
+            );
         } catch (HeadlessException | IllegalArgumentException ex) {
             return new Rectangle(800, 600);
         }

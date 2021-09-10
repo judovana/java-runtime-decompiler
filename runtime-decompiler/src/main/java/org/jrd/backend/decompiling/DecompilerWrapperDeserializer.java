@@ -13,13 +13,17 @@ import java.util.List;
 public class DecompilerWrapperDeserializer implements JsonDeserializer<DecompilerWrapper> {
 
     @Override
-    public DecompilerWrapper deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+    public DecompilerWrapper deserialize(
+            JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext
+    ) throws JsonParseException {
         final JsonObject json = jsonElement.getAsJsonObject();
 
         final String name = json.get("Name").getAsString();
         final String wrapperURL = json.get("WrapperURL").getAsString();
+
         final List<String> dependencyURLs = new LinkedList<>();
         json.get("DependencyURL").getAsJsonArray().forEach(dependency -> dependencyURLs.add(dependency.getAsString()));
+
         final String decompilerURL = json.get("DecompilerDownloadURL").getAsString();
 
         return new DecompilerWrapper(name, wrapperURL, dependencyURLs, decompilerURL);

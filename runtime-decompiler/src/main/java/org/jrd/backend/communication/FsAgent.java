@@ -270,12 +270,12 @@ public class FsAgent implements JrdAgent {
         public Void onDirEntry(File c, File clazz) throws IOException {
             Files.walkFileTree(c.toPath(), new FileVisitor<Path>() {
                 @Override
-                public FileVisitResult preVisitDirectory(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
+                public FileVisitResult preVisitDirectory(Path path, BasicFileAttributes attributes) throws IOException {
                     return FileVisitResult.CONTINUE;
                 }
 
                 @Override
-                public FileVisitResult visitFile(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
+                public FileVisitResult visitFile(Path path, BasicFileAttributes attributes) throws IOException {
                     String s = sanitize(path.toFile().getAbsolutePath());
                     String root = sanitize(c.getAbsolutePath());
                     addJustClass(s, classes, root);

@@ -84,6 +84,9 @@ public class BytecodeDecompilerView {
     private final JFrame mainFrame;
     private JFrame detachedBytecodeFrame;
 
+    private static final List<Integer> CLASS_LIST_REGISTERED_KEY_CODES = List.of(
+            KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_PAGE_UP, KeyEvent.VK_PAGE_DOWN, KeyEvent.VK_ENTER
+    );
     private static final Insets PANEL_INSETS = new Insets(3, 3, 3, 3);
     private static final String DETACH_BUTTON_TEXT = "Detach";
     private static final String ATTACH_BUTTON_TEXT = "Attach";
@@ -152,7 +155,7 @@ public class BytecodeDecompilerView {
         filteredClassesJList.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                if (List.of(KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_PAGE_UP, KeyEvent.VK_PAGE_DOWN, KeyEvent.VK_ENTER).contains(e.getKeyCode())) {
+                if (CLASS_LIST_REGISTERED_KEY_CODES.contains(e.getKeyCode())) {
                     final String name = filteredClassesJList.getSelectedValue();
                     if (name != null || filteredClassesJList.getSelectedIndex() != -1) {
                         classWorker(name);
@@ -373,7 +376,9 @@ public class BytecodeDecompilerView {
         private SearchControlsPanel(Component optionsComponent) {
             super(new GridBagLayout());
 
-            Timer wasNotFoundTimer = new Timer(250, (ActionEvent e) -> searchField.setForeground(originalSearchFieldColor));
+            Timer wasNotFoundTimer = new Timer(
+                    250, (ActionEvent e) -> searchField.setForeground(originalSearchFieldColor)
+            );
             wasNotFoundTimer.setRepeats(false);
             wasNotFoundActionListener = e -> {
                 searchField.setForeground(Color.RED);
@@ -423,10 +428,16 @@ public class BytecodeDecompilerView {
 
             SearchControlsPanel controls = new SearchControlsPanel(hexSearchType);
 
-            DocumentListener hexSearchDocumentListener = new HexSearchDocumentListener(hexSearchEngine, controls.searchField, hexSearchType, controls.wasNotFoundActionListener);
+            DocumentListener hexSearchDocumentListener = new HexSearchDocumentListener(
+                    hexSearchEngine, controls.searchField, hexSearchType, controls.wasNotFoundActionListener
+            );
             controls.searchField.getDocument().addDocumentListener(hexSearchDocumentListener);
-            controls.previousButton.addActionListener(new HexSearchActionListener(hexSearchEngine, controls.searchField, hexSearchType, HexSearchActionListener.Method.PREV));
-            controls.nextButton.addActionListener(new HexSearchActionListener(hexSearchEngine, controls.searchField, hexSearchType, HexSearchActionListener.Method.NEXT));
+            controls.previousButton.addActionListener(new HexSearchActionListener(
+                    hexSearchEngine, controls.searchField, hexSearchType, HexSearchActionListener.Method.PREV)
+            );
+            controls.nextButton.addActionListener(new HexSearchActionListener(
+                    hexSearchEngine, controls.searchField, hexSearchType, HexSearchActionListener.Method.NEXT)
+            );
             hexSearchType.addActionListener(event -> hexSearchDocumentListener.changedUpdate(null));
 
             return controls;
@@ -455,7 +466,9 @@ public class BytecodeDecompilerView {
                 }
 
                 private void invokeSearch() {
-                    SwingUtilities.invokeLater(() -> parent.initialSearchBytecode(controls.searchField.getText(), regexCheckBox.isSelected()));
+                    SwingUtilities.invokeLater(() ->
+                            parent.initialSearchBytecode(controls.searchField.getText(), regexCheckBox.isSelected())
+                    );
                 }
             };
             regexCheckBox.addActionListener(actionEvent -> listener.changedUpdate(null));
@@ -604,7 +617,13 @@ public class BytecodeDecompilerView {
 
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
-            worker.overwriteClass(getSelectedDecompiler(), BytecodeDecompilerView.this.lastDecompiledClass, BytecodeDecompilerView.this.bytecodeSyntaxTextArea.getText(), BytecodeDecompilerView.this.hex.get(), buffers.getSelectedIndex());
+            worker.overwriteClass(
+                    getSelectedDecompiler(),
+                    BytecodeDecompilerView.this.lastDecompiledClass,
+                    BytecodeDecompilerView.this.bytecodeSyntaxTextArea.getText(),
+                    BytecodeDecompilerView.this.hex.get(),
+                    !isSourceBufferVisible()
+            );
         }
     }
 

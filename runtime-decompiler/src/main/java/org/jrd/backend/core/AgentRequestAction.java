@@ -105,13 +105,17 @@ public class AgentRequestAction {
 
     public static final String CLASS_TO_OVERWRITE_BODY = "body-to-overwrite";
 
-    public static AgentRequestAction create(VmInfo vmInfo, String hostname, int listenPort, RequestAction action, String name, String base64body) {
+    public static AgentRequestAction create(
+            VmInfo vmInfo, String hostname, int listenPort, RequestAction action, String name, String base64body
+    ) {
         AgentRequestAction req = create(vmInfo, hostname, listenPort, action, name);
         req.setParameter(CLASS_TO_OVERWRITE_BODY, base64body);
         return req;
     }
 
-    public static AgentRequestAction create(VmInfo vmInfo, String hostname, int listenPort, RequestAction action, String name) {
+    public static AgentRequestAction create(
+            VmInfo vmInfo, String hostname, int listenPort, RequestAction action, String name
+    ) {
         AgentRequestAction req = create(vmInfo, hostname, listenPort, action);
         req.setParameter(CLASS_TO_DECOMPILE_NAME, name);
         return req;

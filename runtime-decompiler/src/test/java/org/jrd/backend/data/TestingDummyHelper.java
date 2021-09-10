@@ -101,7 +101,9 @@ class TestingDummyHelper {
         }
         javap.waitFor();
 
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(javap.getInputStream(), StandardCharsets.UTF_8))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(
+                javap.getInputStream(), StandardCharsets.UTF_8
+        ))) {
             String output = br.lines().collect(Collectors.joining("\n"));
             javap.destroy();
             return output;

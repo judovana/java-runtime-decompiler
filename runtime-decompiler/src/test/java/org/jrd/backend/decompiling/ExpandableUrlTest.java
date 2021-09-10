@@ -24,22 +24,37 @@ class ExpandableUrlTest {
         assertFalse(Directories.isOsWindows());
     }
 
+    private String collapseWithTestPaths(String pathToCollapse) {
+        return ExpandableUrl.collapseEnvVars(pathToCollapse, "home_path", "config_path", "jrd_path");
+    }
+
     // env vars
     @Test
     void testCollapseEnvVars() {
-        assertEquals("${HOME}", ExpandableUrl.collapseEnvVars("home_path", "home_path", "config_path", "jrd_path"));
-        assertEquals("${XDG_CONFIG_HOME}", ExpandableUrl.collapseEnvVars("config_path", "home_path", "config_path", "jrd_path"));
-        assertEquals("${JRD}", ExpandableUrl.collapseEnvVars("jrd_path", "home_path", "config_path", "jrd_path"));
-        assertEquals("${HOME}", ExpandableUrl.collapseEnvVars("${HOME}", "home_path", "config_path", "jrd_path"));
-        assertEquals("different_path", ExpandableUrl.collapseEnvVars("different_path", "home_path", "config_path", "jrd_path"));
-        assertEquals("/${HOME}", ExpandableUrl.collapseEnvVars("/home_path", "home_path", "config_path", "jrd_path"));
+        assertEquals("${HOME}", collapseWithTestPaths("home_path"));
+        assertEquals("${XDG_CONFIG_HOME}", collapseWithTestPaths("config_path"));
+        assertEquals("${JRD}", collapseWithTestPaths("jrd_path"));
+        assertEquals("${HOME}", collapseWithTestPaths("${HOME}"));
+        assertEquals("different_path", collapseWithTestPaths("different_path"));
+        assertEquals("/${HOME}", collapseWithTestPaths("/home_path"));
     }
 
     @Test
     void testExpandEnvVars() {
-        assertEquals(ExpandableUrl.unifySlashes(System.getProperty("user.home")), ExpandableUrl.expandEnvVars("${HOME}"));
-        assertEquals(ExpandableUrl.unifySlashes(Directories.getXdgJrdBaseDir()), ExpandableUrl.expandEnvVars("${XDG_CONFIG_HOME}"));
-        assertEquals(ExpandableUrl.unifySlashes(Directories.getJrdLocation()), ExpandableUrl.expandEnvVars("${JRD}"));
+        assertEquals(
+                ExpandableUrl.unifySlashes(System.getProperty("user.home")),
+                ExpandableUrl.expandEnvVars("${HOME}")
+        );
+
+        assertEquals(
+                ExpandableUrl.unifySlashes(Directories.getXdgJrdBaseDir()),
+                ExpandableUrl.expandEnvVars("${XDG_CONFIG_HOME}")
+        );
+
+        assertEquals(
+                ExpandableUrl.unifySlashes(Directories.getJrdLocation()),
+                ExpandableUrl.expandEnvVars("${JRD}")
+        );
     }
 
     // slashes
@@ -73,7 +88,10 @@ class ExpandableUrlTest {
         ExpandableUrl expandableUrl = ExpandableUrl.createFromPath("/" + System.getProperty("user.home"));
 
         assertEquals("${HOME}", expandableUrl.getRawPath());
-        assertEquals(ExpandableUrl.unifySlashes(System.getProperty("user.home"), false), expandableUrl.getExpandedPath());
+        assertEquals(
+                ExpandableUrl.unifySlashes(System.getProperty("user.home"), false),
+                expandableUrl.getExpandedPath()
+        );
         assertEquals("file:${HOME}", expandableUrl.getRawUrl());
         assertEquals(new URL("file:" + System.getProperty("user.home")), expandableUrl.getExpandedUrl());
 
@@ -85,7 +103,10 @@ class ExpandableUrlTest {
         ExpandableUrl expandableUrl = ExpandableUrl.createFromPath(System.getProperty("user.home"));
 
         assertEquals("${HOME}", expandableUrl.getRawPath());
-        assertEquals(ExpandableUrl.unifySlashes(System.getProperty("user.home"), false), expandableUrl.getExpandedPath());
+        assertEquals(
+                ExpandableUrl.unifySlashes(System.getProperty("user.home"), false),
+                expandableUrl.getExpandedPath()
+        );
         assertEquals("file:${HOME}", expandableUrl.getRawUrl());
         assertEquals(new URL("file:" + System.getProperty("user.home")), expandableUrl.getExpandedUrl());
 
@@ -97,8 +118,11 @@ class ExpandableUrlTest {
         ExpandableUrl expandableUrl = ExpandableUrl.createFromPath("${HOME}");
 
         assertEquals("${HOME}", expandableUrl.getRawPath());
-        assertEquals(ExpandableUrl.unifySlashes(System.getProperty("user.home"), false), expandableUrl.getExpandedPath());
-        assertEquals("file:${HOME}", expandableUrl.getRawUrl());
+        assertEquals(
+                ExpandableUrl.unifySlashes(System.getProperty("user.home"), false),
+                expandableUrl.getExpandedPath());
+        assertEquals("file:${HOME}", expandableUrl.getRawUrl()
+        );
         assertEquals(new URL("file:" + System.getProperty("user.home")), expandableUrl.getExpandedUrl());
 
         assertDoesNotThrow(() -> Paths.get(expandableUrl.getExpandedPath()));
@@ -111,7 +135,10 @@ class ExpandableUrlTest {
         ExpandableUrl expandableUrl = ExpandableUrl.createFromStringUrl("file:/" + System.getProperty("user.home"));
 
         assertEquals("${HOME}", expandableUrl.getRawPath());
-        assertEquals(ExpandableUrl.unifySlashes(System.getProperty("user.home"), false), expandableUrl.getExpandedPath());
+        assertEquals(
+                ExpandableUrl.unifySlashes(System.getProperty("user.home"), false),
+                expandableUrl.getExpandedPath()
+        );
         assertEquals("file:${HOME}", expandableUrl.getRawUrl());
         assertEquals(new URL("file:" + System.getProperty("user.home")), expandableUrl.getExpandedUrl());
 
@@ -124,7 +151,10 @@ class ExpandableUrlTest {
         ExpandableUrl expandableUrl = ExpandableUrl.createFromStringUrl("file:///" + System.getProperty("user.home"));
 
         assertEquals("${HOME}", expandableUrl.getRawPath());
-        assertEquals(ExpandableUrl.unifySlashes(System.getProperty("user.home"), false), expandableUrl.getExpandedPath());
+        assertEquals(
+                ExpandableUrl.unifySlashes(System.getProperty("user.home"), false),
+                expandableUrl.getExpandedPath()
+        );
         assertEquals("file:${HOME}", expandableUrl.getRawUrl());
         assertEquals(new URL("file:" + System.getProperty("user.home")), expandableUrl.getExpandedUrl());
 
@@ -137,7 +167,10 @@ class ExpandableUrlTest {
         ExpandableUrl expandableUrl = ExpandableUrl.createFromStringUrl("file:" + System.getProperty("user.home"));
 
         assertEquals("${HOME}", expandableUrl.getRawPath());
-        assertEquals(ExpandableUrl.unifySlashes(System.getProperty("user.home"), false), expandableUrl.getExpandedPath());
+        assertEquals(
+                ExpandableUrl.unifySlashes(System.getProperty("user.home"), false),
+                expandableUrl.getExpandedPath()
+        );
         assertEquals("file:${HOME}", expandableUrl.getRawUrl());
         assertEquals(new URL("file:" + System.getProperty("user.home")), expandableUrl.getExpandedUrl());
 
@@ -160,7 +193,10 @@ class ExpandableUrlTest {
         ExpandableUrl expandableUrl = ExpandableUrl.createFromStringUrl("file:${HOME}");
 
         assertEquals("${HOME}", expandableUrl.getRawPath());
-        assertEquals(ExpandableUrl.unifySlashes(System.getProperty("user.home"), false), expandableUrl.getExpandedPath());
+        assertEquals(
+                ExpandableUrl.unifySlashes(System.getProperty("user.home"), false),
+                expandableUrl.getExpandedPath()
+        );
         assertEquals("file:${HOME}", expandableUrl.getRawUrl());
         assertEquals(new URL("file:" + System.getProperty("user.home")), expandableUrl.getExpandedUrl());
 
@@ -172,7 +208,10 @@ class ExpandableUrlTest {
         ExpandableUrl expandableUrl = ExpandableUrl.createFromStringUrl("file://${HOME}");
 
         assertEquals("${HOME}", expandableUrl.getRawPath());
-        assertEquals(ExpandableUrl.unifySlashes(System.getProperty("user.home"), false), expandableUrl.getExpandedPath());
+        assertEquals(
+                ExpandableUrl.unifySlashes(System.getProperty("user.home"), false),
+                expandableUrl.getExpandedPath()
+        );
         assertEquals("file:${HOME}", expandableUrl.getRawUrl());
         assertEquals(new URL("file:" + System.getProperty("user.home")), expandableUrl.getExpandedUrl());
 

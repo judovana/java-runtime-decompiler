@@ -22,7 +22,9 @@ public class CfrDecompilerWrapper {
         return new File(f.getAbsolutePath() + "/" + classToStub(clazz));
     }
 
-    public String decompile(String name, byte[] bytecode, Map<String, byte[]> innerClasses, String[] options) throws IOException {
+    public String decompile(
+            String name, byte[] bytecode, Map<String, byte[]> innerClasses, String[] options
+    ) throws IOException {
         File base = File.createTempFile("crf-" + name, ".class");
         base.delete();
         base.mkdir();

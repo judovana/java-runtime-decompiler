@@ -22,9 +22,9 @@ import java.util.List;
  */
 public final class InstallDecompilerAgentImpl {
 
-    public static void install(String pid, boolean addToBoot, boolean setPolicy, String host, int port, String[] properties)
-            throws IllegalArgumentException,
-            IOException, AttachNotSupportedException,
+    public static void install(
+            String pid, boolean addToBoot, boolean setPolicy, String host, int port, String[] properties
+    ) throws IllegalArgumentException, IOException, AttachNotSupportedException,
             AgentLoadException, AgentInitializationException {
 
         if (port < 0) {
@@ -41,7 +41,9 @@ public final class InstallDecompilerAgentImpl {
             }
         }
 
-        InstallDecompilerAgentImpl install = new InstallDecompilerAgentImpl(pid, addToBoot, setPolicy, host, port, properties);
+        InstallDecompilerAgentImpl install = new InstallDecompilerAgentImpl(
+                pid, addToBoot, setPolicy, host, port, properties
+        );
         install.locateAgent();
         install.attach();
         install.injectAgent();

@@ -36,8 +36,12 @@ public class VmInfo implements Serializable {
     private Type type;
     private java.util.List<File> cp;
 
-    private static final Comparator<VmInfo> HOSTNAME_COMPARATOR = Comparator.comparing(info -> info.getVmDecompilerStatus().getHostname(), String::compareTo);
-    private static final Comparator<VmInfo> PORT_COMPARATOR = Comparator.comparingInt(info -> info.getVmDecompilerStatus().getListenPort());
+    private static final Comparator<VmInfo> HOSTNAME_COMPARATOR = Comparator.comparing(
+            info -> info.getVmDecompilerStatus().getHostname(), String::compareTo
+    );
+    private static final Comparator<VmInfo> PORT_COMPARATOR = Comparator.comparingInt(
+            info -> info.getVmDecompilerStatus().getListenPort()
+    );
     public static final Comparator<VmInfo> LOCAL_VM_COMPARATOR = Comparator.comparingInt(VmInfo::getVmPid);
     public static final Comparator<VmInfo> REMOTE_VM_COMPARATOR = HOSTNAME_COMPARATOR.thenComparing(PORT_COMPARATOR);
     public static final Comparator<VmInfo> FS_VM_COMPARATOR = LOCAL_VM_COMPARATOR.reversed();
@@ -111,7 +115,7 @@ public class VmInfo implements Serializable {
 
     @SuppressFBWarnings(
             value = "NP_LOAD_OF_KNOWN_NULL_VALUE",
-            justification = "Classpath is only used for FS VMs, in other cases getCp() does not get called, thus null is permissible."
+            justification = "Classpath is only used for FS VMs, in other cases getCp() does not get called"
     )
     public void setCp(List<File> cp) {
         if (cp == null) {
@@ -179,7 +183,9 @@ public class VmInfo implements Serializable {
     }
 
     static VmInfo base64Deserialize(String base64Representation) throws IOException, ClassNotFoundException {
-        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(Base64.getDecoder().decode(base64Representation)));
+        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(
+                Base64.getDecoder().decode(base64Representation)
+        ));
         return (VmInfo) ois.readObject();
     }
 }

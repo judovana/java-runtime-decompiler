@@ -36,14 +36,17 @@ public final class Help {
     private static final String LIST_JVMS_TEXT = "List all local Java processes and their PIDs.";
     private static final String LIST_PLUGINS_TEXT = "List all currently configured decompiler plugins and their statuses.";
     private static final String LIST_CLASSES_TEXT = "List all loaded classes of a process, optionally filtering them.\n" +
-            "Only '" + SAVE_LIKE + " " + Saving.EXACT + "' or '" + SAVE_LIKE + " " + Saving.DEFAULT + "' are allowed as saving modifiers.";
+            "Only '" + SAVE_LIKE + " " + Saving.EXACT + "' or '" + SAVE_LIKE + " " + Saving.DEFAULT +
+            "' are allowed as saving modifiers.";
     private static final String COMPILE_TEXT = "Compile local files against runtime classpath, specified by -cp.\n" +
             "Use -p to utilize some plugins' (like jasm or jcoder) bundled compilers.\n" +
             "Use -r for recursive search if <PATH> is a directory.\n" +
-            "If the argument of '" + SAVE_AS + "' is a valid PID or URL, the compiled code will be attempted to be injected into that process.\n" +
+            "If the argument of '" + SAVE_AS + "' is a valid PID or URL, " +
+            "the compiled code will be attempted to be injected into that process.\n" +
             "If multiple PATHs were specified, but no '" + SAVE_AS + "', the process fails.";
     private static final String DECOMPILE_TEXT = "Decompile and print classes of a process with the specified decompiler plugin.\n" +
-            "Javap can be passed options by appending them without spaces: 'javap-v-public ...' executes as 'javap -v -public ...'";
+            "Javap can be passed options by appending them without spaces: " +
+            "'javap-v-public ...' executes as 'javap -v -public ...'";
     private static final String OVERWRITE_TEXT = "Overwrite class of a process with new bytecode. If <CLASS FILE> is not set, standard input is used.";
     private static final String SAVE_AS_TEXT = "All outputs will be written to PATH instead of to standard output.";
     private static final String SAVE_LIKE_TEXT = "Specify how saving will behave.";

@@ -1,5 +1,6 @@
 package org.jrd.frontend.frame.plugins;
 
+import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.frontend.frame.main.MainFrameView;
 
 import javax.swing.*;
@@ -81,5 +82,9 @@ public class PluginConfigurationEditorView extends JDialog {
         cardConfigPanel.removeAll();
         cardConfigPanel.revalidate();
         cardConfigPanel.repaint();
+    }
+
+    DecompilerWrapper getSelectedWrapper() {
+        return (DecompilerWrapper) getPluginListPanel().getWrapperJList().getSelectedValue();
     }
 }

@@ -24,8 +24,8 @@ public final class Config {
     private final Gson gson;
     private Map<String, Object> configMap;
 
-    private static final String CONFIG_FILE_PATH = Directories.getConfigDirectory() + File.separator + "config.json";
-    private static final String LEGACY_CONFIG_FILE_PATH = Directories.getConfigDirectory() + File.separator + "config.cfg";
+    private static final String CONFIG_PATH = Directories.getConfigDirectory() + File.separator + "config.json";
+    private static final String LEGACY_CONFIG_PATH = Directories.getConfigDirectory() + File.separator + "config.cfg";
 
     private static final String AGENT_PATH_KEY = "AGENT_PATH";
     private static final String SAVED_FS_VMS_KEY = "FS_VMS";
@@ -55,9 +55,12 @@ public final class Config {
 
     public String getAgentExpandedPath() {
         String expandedPath = ExpandableUrl.createFromPath((String) configMap.get(AGENT_PATH_KEY)).getExpandedPath();
-        if (Directories.isOsWindows() && expandedPath.length() > 0 && expandedPath.charAt(0) == '/') { // Agent attaching fails on Windows when path starts with a slash
+
+        // Agent attaching fails on Windows when path starts with a slash
+        if (Directories.isOsWindows() && expandedPath.length() > 0 && expandedPath.charAt(0) == '/') {
             expandedPath = expandedPath.substring(1);
         }
+
         return expandedPath;
     }
 
@@ -120,14 +123,14 @@ public final class Config {
     private void loadConfigFile() throws IOException {
         configMap = new HashMap<>();
         configMap.put(AGENT_PATH_KEY, "");
-        File confFile = new File(CONFIG_FILE_PATH);
-        File legacyConfFile = new File(LEGACY_CONFIG_FILE_PATH);
+        File confFile = new File(CONFIG_PATH);
+        File legacyConfFile = new File(LEGACY_CONFIG_PATH);
         if (confFile.exists()) {
             try (FileReader reader = new FileReader(confFile, StandardCharsets.UTF_8)) {
                 configMap = gson.fromJson(reader, configMap.getClass());
             }
         } else if (legacyConfFile.exists()) {
-            Files.readAllLines(Paths.get(LEGACY_CONFIG_FILE_PATH)).forEach(s -> {
+            Files.readAllLines(Paths.get(LEGACY_CONFIG_PATH)).forEach(s -> {
                 String[] kv = s.split("===");
                 configMap.put(kv[0], kv[1]);
             });
@@ -138,14 +141,14 @@ public final class Config {
     }
 
     public void saveConfigFile() throws IOException {
-        File confFile = new File(CONFIG_FILE_PATH);
+        File confFile = new File(CONFIG_PATH);
 
         if (!confFile.getParentFile().exists()) {
             Files.createDirectories(confFile.getParentFile().toPath());
         }
 
         // creates file if it does not exist
-        Files.write(Paths.get(CONFIG_FILE_PATH), Collections.singleton(gson.toJson(configMap)), StandardCharsets.UTF_8);
+        Files.write(Paths.get(CONFIG_PATH), Collections.singleton(gson.toJson(configMap)), StandardCharsets.UTF_8);
     }
 
 }

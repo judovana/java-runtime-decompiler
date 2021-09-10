@@ -28,7 +28,9 @@ public class NewFsVmController {
         try {
             r = cpToFiles(cp);
         } catch (InvalidClasspathException e) {
-            JOptionPane.showMessageDialog(newConnectionView, e.getMessage(), "Unable to create FS VM", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    newConnectionView, e.getMessage(), "Unable to create FS VM", JOptionPane.WARNING_MESSAGE
+            );
             return;
         }
 

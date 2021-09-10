@@ -47,21 +47,29 @@ public class VmListRenderer extends JPanel implements ListCellRenderer<VmInfo> {
     }
 
     @Override
-    public Component getListCellRendererComponent(JList<? extends VmInfo> list, VmInfo vmInfo, int index, boolean isSelected, boolean cellHasFocus) {
+    public Component getListCellRendererComponent(
+            JList<? extends VmInfo> list, VmInfo vmInfo, int index, boolean isSelected, boolean cellHasFocus
+    ) {
         switch (vmInfo.getType()) {
             case LOCAL:
                 name.setText(vmInfo.getVmName().split(" ")[0]);
                 pid.setText("PID: " + vmInfo.getVmPid());
                 cp.setVisible(false);
 
-                this.setToolTipText(BytecodeDecompilerView.styleTooltip() + "NAME: " + vmInfo.getVmName().split(" ")[0] + "<br>PID: " + vmInfo.getVmPid() + "</html>");
+                this.setToolTipText(BytecodeDecompilerView.styleTooltip() +
+                        "NAME: " + vmInfo.getVmName().split(" ")[0] + "<br />" +
+                        "PID: " + vmInfo.getVmPid() +
+                        "</html>");
                 break;
             case REMOTE:
                 name.setText("Hostname: " + vmInfo.getVmName());
                 pid.setText("Port: " + vmInfo.getVmDecompilerStatus().getListenPort());
                 cp.setVisible(false);
 
-                this.setToolTipText(BytecodeDecompilerView.styleTooltip() + "Hostname: " + vmInfo.getVmName() + "<br>Port: " + vmInfo.getVmDecompilerStatus().getListenPort() + "</html>");
+                this.setToolTipText(BytecodeDecompilerView.styleTooltip() +
+                        "Hostname: " + vmInfo.getVmName() + "<br />" +
+                        "Port: " + vmInfo.getVmDecompilerStatus().getListenPort() +
+                        "</html>");
                 break;
             case FS:
                 if (vmInfo.hasName()) {

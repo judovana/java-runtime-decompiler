@@ -18,7 +18,9 @@ public class Transformer implements ClassFileTransformer {
     private Map<String, byte[]> overrides = new HashMap<>();
 
     @Override
-    public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
+    public byte[] transform(
+            ClassLoader loader, String className, Class<?> clazz, ProtectionDomain domain, byte[] classfileBuffer
+    ) throws IllegalClassFormatException {
         if (allowToSaveBytecode) {
             results.put(className, classfileBuffer);
             byte[] b = overrides.get(className);

@@ -206,7 +206,9 @@ public class HexTable extends JTable {
                     break;
                 }
                 case 39: {
-                    processKeyPressedEvent(e, extend, Math.min(this.leadSelectionIndex + 1, this.model.getByteCount() - 1));
+                    processKeyPressedEvent(
+                            e, extend, Math.min(this.leadSelectionIndex + 1, this.model.getByteCount() - 1)
+                    );
                     break;
                 }
                 case 38: {
@@ -214,12 +216,16 @@ public class HexTable extends JTable {
                     break;
                 }
                 case 40: {
-                    processKeyPressedEvent(e, extend, Math.min(this.leadSelectionIndex + 16, this.model.getByteCount() - 1));
+                    processKeyPressedEvent(
+                            e, extend, Math.min(this.leadSelectionIndex + 16, this.model.getByteCount() - 1)
+                    );
                     break;
                 }
                 case 34: {
                     final int visibleRowCount = this.getVisibleRect().height / this.getRowHeight();
-                    final int offs = Math.min(this.leadSelectionIndex + visibleRowCount * 16, this.model.getByteCount() - 1);
+                    final int offs = Math.min(
+                            this.leadSelectionIndex + visibleRowCount * 16, this.model.getByteCount() - 1
+                    );
 
                     processKeyPressedEvent(e, extend, offs);
                     break;
@@ -367,7 +373,14 @@ public class HexTable extends JTable {
         }
 
         @Override
-        public Component getTableCellRendererComponent(final JTable table, final Object value, final boolean selected, final boolean focus, final int row, final int column) {
+        public Component getTableCellRendererComponent(
+                final JTable table,
+                final Object value,
+                final boolean selected,
+                final boolean focus,
+                final int row,
+                final int column
+        ) {
             super.getTableCellRendererComponent(table, sanitize(value, row, column), selected, focus, row, column);
             this.highlight.setLocation(-1, -1);
             if (column == table.getColumnCount() - 1 && HexTable.this.hexEditor.getHighlightSelectionInAsciiDump()) {
@@ -383,7 +396,8 @@ public class HexTable extends JTable {
                 final boolean colorBG = HexTable.this.hexEditor.getAlternateRowBackground() && (row & 0x1) > 0;
                 this.setBackground(colorBG ? HexTable.ALTERNATING_CELL_COLOR : table.getBackground());
             } else if (!selected) {
-                if ((HexTable.this.hexEditor.getAlternateRowBackground() && (row & 0x1) > 0) ^ (HexTable.this.hexEditor.getAlternateColumnBackground() && (column & 0x1) > 0)) {
+                if ((HexTable.this.hexEditor.getAlternateRowBackground() && (row & 0x1) > 0) ^ // xor!
+                        (HexTable.this.hexEditor.getAlternateColumnBackground() && (column & 0x1) > 0)) {
                     this.setBackground(HexTable.ALTERNATING_CELL_COLOR);
                 } else {
                     this.setBackground(table.getBackground());
@@ -440,7 +454,9 @@ public class HexTable extends JTable {
         }
 
         @Override
-        public void insertString(final FilterBypass fb, final int offs, final String string, final AttributeSet attr) throws BadLocationException {
+        public void insertString(
+                final FilterBypass fb, final int offs, final String string, final AttributeSet attr
+        ) throws BadLocationException {
             final Document doc = fb.getDocument();
             final String temp = doc.getText(0, offs) + string + doc.getText(offs, doc.getLength() - offs);
             if (this.ensureByteRepresented(temp)) {
@@ -449,7 +465,9 @@ public class HexTable extends JTable {
         }
 
         @Override
-        public void replace(final FilterBypass fb, final int offs, final int len, final String text, final AttributeSet attrs) throws BadLocationException {
+        public void replace(
+                final FilterBypass fb, final int offs, final int len, final String text, final AttributeSet attrs
+        ) throws BadLocationException {
             final Document doc = fb.getDocument();
             final String temp = doc.getText(0, offs) + text + doc.getText(offs + len, doc.getLength() - (offs + len));
             if (this.ensureByteRepresented(temp)) {
