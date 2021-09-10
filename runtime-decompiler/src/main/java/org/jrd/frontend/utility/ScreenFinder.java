@@ -36,7 +36,7 @@
  * exception statement from your version.
  */
 
-package org.jrd.frontend.frame.main;
+package org.jrd.frontend.utility;
 
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;

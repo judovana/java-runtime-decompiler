@@ -12,6 +12,7 @@ import org.fife.ui.rtextarea.SearchEngine;
 import org.fife.ui.rtextarea.SearchResult;
 import org.jrd.backend.core.OutputController;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
+import org.jrd.frontend.utility.ScreenFinder;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
@@ -71,7 +72,7 @@ public class BytecodeDecompilerView {
 
     private ActionListener bytesActionListener;
     private ActionListener classesActionListener;
-    private RewriteActionListener rewriteActionListener;
+    private OverwriteActionListener overwriteActionListener;
 
     private String[] loadedClasses;
     private String lastDecompiledClass = "";
@@ -174,7 +175,7 @@ public class BytecodeDecompilerView {
                     protected Void doInBackground() throws Exception {
                         try {
                             ActionEvent event = new ActionEvent(this, 3, name);
-                            rewriteActionListener.actionPerformed(event);
+                            overwriteActionListener.actionPerformed(event);
                         } catch (Throwable t) {
                             OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, t);
                         }
@@ -593,22 +594,22 @@ public class BytecodeDecompilerView {
         bytesActionListener = listener;
     }
 
-    private class RewriteActionListener implements ActionListener {
+    private class OverwriteActionListener implements ActionListener {
 
-        private final VmDecompilerInformationController.ClassRewriter worker;
+        private final VmDecompilerInformationController.ClassOverwriter worker;
 
-        RewriteActionListener(VmDecompilerInformationController.ClassRewriter worker) {
+        OverwriteActionListener(VmDecompilerInformationController.ClassOverwriter worker) {
             this.worker = worker;
         }
 
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
-            worker.rewriteClass(getSelectedDecompilerWrapperInformation(), BytecodeDecompilerView.this.lastDecompiledClass, BytecodeDecompilerView.this.bytecodeSyntaxTextArea.getText(), BytecodeDecompilerView.this.hex.get(), buffers.getSelectedIndex());
+            worker.overwriteClass(getSelectedDecompilerWrapperInformation(), BytecodeDecompilerView.this.lastDecompiledClass, BytecodeDecompilerView.this.bytecodeSyntaxTextArea.getText(), BytecodeDecompilerView.this.hex.get(), buffers.getSelectedIndex());
         }
     }
 
-    public void setRewriteActionListener(VmDecompilerInformationController.ClassRewriter worker) {
-        this.rewriteActionListener = new RewriteActionListener(worker);
+    public void setOverwriteActionListener(VmDecompilerInformationController.ClassOverwriter worker) {
+        this.overwriteActionListener = new OverwriteActionListener(worker);
     }
 
     public void refreshComboBox(List<DecompilerWrapperInformation> wrappers) {

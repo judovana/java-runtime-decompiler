@@ -13,10 +13,13 @@ import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.filesystem.NewFsVmController;
 import org.jrd.frontend.frame.filesystem.NewFsVmView;
+import org.jrd.frontend.frame.overwrite.LatestPaths;
+import org.jrd.frontend.frame.overwrite.OverwriteClassDialog;
 import org.jrd.frontend.frame.plugins.PluginConfigurationEditorController;
 import org.jrd.frontend.frame.plugins.PluginConfigurationEditorView;
 import org.jrd.frontend.frame.remote.NewConnectionController;
 import org.jrd.frontend.frame.remote.NewConnectionView;
+import org.jrd.frontend.utility.ScreenFinder;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -65,7 +68,7 @@ public class VmDecompilerInformationController {
         mainFrameView.setRemoveVmDialogListener(this::removeVmDialog);
         bytecodeDecompilerView.setClassesActionListener(e -> loadClassNames());
         bytecodeDecompilerView.setBytesActionListener(e -> loadClassBytecode(e.getActionCommand()));
-        bytecodeDecompilerView.setRewriteActionListener(new ClassRewriter());
+        bytecodeDecompilerView.setOverwriteActionListener(new ClassOverwriter());
 
         mainFrameView.setVmChanging(this::changeVm);
         mainFrameView.setHaltAgentListener(e -> haltAgent());
@@ -277,24 +280,24 @@ public class VmDecompilerInformationController {
         bytecodeDecompilerView.reloadTextField(name, decompiledClass, bytes);
     }
 
-    class ClassRewriter {
+    class ClassOverwriter {
         private LatestPaths lastLoaded = new LatestPaths();
 
-        void rewriteClass(DecompilerWrapperInformation selectedDecompiler, String name, String buffer, byte[] binBuffer, int supperSelect) {
+        void overwriteClass(DecompilerWrapperInformation selectedDecompiler, String name, String buffer, byte[] binBuffer, int supperSelect) {
             if (name == null || name.trim().isEmpty()) {
                 name = "???";
             }
 
-            final RewriteClassDialog rewriteClassDialog = new RewriteClassDialog(name, lastLoaded, buffer, binBuffer, vmInfo, vmManager, pluginManager, selectedDecompiler, supperSelect);
-            ScreenFinder.centerWindowsToCurrentScreen(rewriteClassDialog);
-            rewriteClassDialog.setVisible(true);
+            final OverwriteClassDialog overwriteClassDialog = new OverwriteClassDialog(name, lastLoaded, buffer, binBuffer, vmInfo, vmManager, pluginManager, selectedDecompiler, supperSelect);
+            ScreenFinder.centerWindowsToCurrentScreen(overwriteClassDialog);
+            overwriteClassDialog.setVisible(true);
 
-            lastLoaded.setLastManualUpload(rewriteClassDialog.getManualUploadPath());
-            lastLoaded.setLastSaveSrc(rewriteClassDialog.getSaveSrcPath());
-            lastLoaded.setLastSaveBin(rewriteClassDialog.getSaveBinPath());
-            lastLoaded.setFilesToCompile(rewriteClassDialog.getFilesToCompile());
-            lastLoaded.setOutputExternalFilesDir(rewriteClassDialog.getOutputExternalFilesDir());
-            lastLoaded.setOutputBinaries(rewriteClassDialog.getOutputBinaries());
+            lastLoaded.setLastManualUpload(overwriteClassDialog.getManualUploadPath());
+            lastLoaded.setLastSaveSrc(overwriteClassDialog.getSaveSrcPath());
+            lastLoaded.setLastSaveBin(overwriteClassDialog.getSaveBinPath());
+            lastLoaded.setFilesToCompile(overwriteClassDialog.getFilesToCompile());
+            lastLoaded.setOutputExternalFilesDir(overwriteClassDialog.getOutputExternalFilesDir());
+            lastLoaded.setOutputBinaries(overwriteClassDialog.getOutputBinaries());
         }
     }
 

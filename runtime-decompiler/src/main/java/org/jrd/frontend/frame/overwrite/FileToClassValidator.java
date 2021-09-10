@@ -1,4 +1,4 @@
-package org.jrd.frontend.frame.main;
+package org.jrd.frontend.frame.overwrite;
 
 import javax.swing.JLabel;
 import javax.swing.JTextField;

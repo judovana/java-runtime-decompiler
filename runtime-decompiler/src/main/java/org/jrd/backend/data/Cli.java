@@ -11,10 +11,10 @@ import org.jrd.backend.core.OutputController;
 import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 import org.jrd.backend.decompiling.PluginManager;
-import org.jrd.frontend.Utils;
 import org.jrd.frontend.frame.filesystem.NewFsVmController;
-import org.jrd.frontend.frame.main.FileToClassValidator;
 import org.jrd.frontend.frame.main.VmDecompilerInformationController;
+import org.jrd.frontend.frame.overwrite.FileToClassValidator;
+import org.jrd.frontend.utility.CommonUtils;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -57,7 +57,7 @@ public class Cli {
     private Saving saving;
     private boolean isVerbose;
 
-    protected static class Saving implements Utils.StatusKeeper {
+    protected static class Saving implements CommonUtils.StatusKeeper {
         protected static final String DEFAULT = "default";
         protected static final String EXACT = "exact";
         protected static final String FQN = "fqn";
@@ -96,19 +96,19 @@ public class Cli {
         public int toInt(String suffix) {
             switch (like) {
                 case FQN:
-                    return Utils.FULLY_QUALIFIED_NAME;
+                    return CommonUtils.FULLY_QUALIFIED_NAME;
                 case EXACT:
-                    return Utils.CUSTOM_NAME;
+                    return CommonUtils.CUSTOM_NAME;
                 case DIR:
-                    return Utils.SRC_SUBDIRS_NAME;
+                    return CommonUtils.SRC_SUBDIRS_NAME;
                 case DEFAULT:
                     if (".java".equals(suffix)) {
-                        return Utils.FULLY_QUALIFIED_NAME;
+                        return CommonUtils.FULLY_QUALIFIED_NAME;
                     }
                     if (".class".equals(suffix)) {
-                        return Utils.SRC_SUBDIRS_NAME;
+                        return CommonUtils.SRC_SUBDIRS_NAME;
                     }
-                    return Utils.CUSTOM_NAME;
+                    return CommonUtils.CUSTOM_NAME;
                 default:
                     throw new RuntimeException("Unknown saving type: " + like + ". Allowed are: " + FQN + "," + DIR + "," + EXACT);
             }
@@ -322,7 +322,7 @@ public class Cli {
             compiler = new io.github.mkoncek.classpathless.impl.CompilerJavac();
         }
 
-        IdentifiedSource[] identifiedSources = Utils.sourcesToIdentifiedSources(isRecursive, filesToCompile);
+        IdentifiedSource[] identifiedSources = CommonUtils.sourcesToIdentifiedSources(isRecursive, filesToCompile);
         Collection<IdentifiedBytecode> allBytecode = compiler.compileClass(
                 provider,
                 Optional.of((level, message) -> OutputController.getLogger().log(message)),
@@ -493,7 +493,7 @@ public class Cli {
 
     private boolean outOrSave(String name, String extension, byte[] body, boolean forceBytes) throws IOException {
         if (saving.shouldSave()) {
-            return Utils.saveByGui(saving.as, saving.toInt(extension), extension, saving, name, body);
+            return CommonUtils.saveByGui(saving.as, saving.toInt(extension), extension, saving, name, body);
         } else {
             if (forceBytes) {
                 System.out.write(body);

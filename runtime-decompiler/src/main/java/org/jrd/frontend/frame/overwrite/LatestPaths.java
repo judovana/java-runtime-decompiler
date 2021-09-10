@@ -1,4 +1,4 @@
-package org.jrd.frontend.frame.main;
+package org.jrd.frontend.frame.overwrite;
 
 public final class LatestPaths {
     private String lastManualUpload;
