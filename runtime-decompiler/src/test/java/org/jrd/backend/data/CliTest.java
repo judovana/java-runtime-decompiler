@@ -1,7 +1,7 @@
 package org.jrd.backend.data;
 
 import org.jrd.backend.core.AgentRequestAction;
-import org.jrd.frontend.frame.main.VmDecompilerInformationController;
+import org.jrd.frontend.frame.main.DecompilationController;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
@@ -83,8 +83,8 @@ public class CliTest {
 
         assertTrue(dummy.isAlive());
         // halt agent, otherwise an open socket prevents termination of dummy process
-        AgentRequestAction request = VmDecompilerInformationController.createRequest(cli.getVmInfo(dummy.getPid()), AgentRequestAction.RequestAction.HALT, "");
-        String response = VmDecompilerInformationController.submitRequest(model.getVmManager(), request);
+        AgentRequestAction request = DecompilationController.createRequest(cli.getVmInfo(dummy.getPid()), AgentRequestAction.RequestAction.HALT, "");
+        String response = DecompilationController.submitRequest(model.getVmManager(), request);
         assertEquals("ok", response);
 
         assertTrue(dummy.isAlive());

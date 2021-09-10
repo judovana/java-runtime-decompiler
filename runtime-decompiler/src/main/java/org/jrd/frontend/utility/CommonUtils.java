@@ -8,7 +8,7 @@ import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.Cli;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
-import org.jrd.frontend.frame.main.VmDecompilerInformationController;
+import org.jrd.frontend.frame.main.DecompilationController;
 
 import java.io.File;
 import java.io.IOException;
@@ -93,9 +93,9 @@ public final class CommonUtils {
 
 
     public static String uploadBytecode(String clazz, VmManager vmManager, VmInfo vmInfo, byte[] bytes) {
-        final String body = VmDecompilerInformationController.bytesToBase64(bytes);
-        AgentRequestAction request = VmDecompilerInformationController.createRequest(vmInfo, AgentRequestAction.RequestAction.OVERWRITE, clazz, body);
-        return VmDecompilerInformationController.submitRequest(vmManager, request);
+        final String body = DecompilationController.bytesToBase64(bytes);
+        AgentRequestAction request = DecompilationController.createRequest(vmInfo, AgentRequestAction.RequestAction.OVERWRITE, clazz, body);
+        return DecompilationController.submitRequest(vmManager, request);
     }
 
     public static String guessClass(String src) throws IOException {
