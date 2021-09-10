@@ -1,21 +1,20 @@
 package org.jrd.agent;
 
-public class OutputControllerAgent {
+public class AgentLogger {
 
     private static final String NULL_OBJECT = "Trying to log null object";
 
 
 
-    private static class OutputControllerHolder {
-
-        //https://en.wikipedia.org/wiki/Initialization_on_demand_holder_idiom
-        //https://en.wikipedia.org/wiki/Double-checked_locking#Usage_in_Java
-        private static final OutputControllerAgent INSTANCE = new OutputControllerAgent();
+    private static class AgentLoggerHolder {
+        // https://en.wikipedia.org/wiki/Initialization_on_demand_holder_idiom
+        // https://en.wikipedia.org/wiki/Double-checked_locking#Usage_in_Java
+        private static final AgentLogger INSTANCE = new AgentLogger();
     }
 
 
-    public static OutputControllerAgent getLogger() {
-        return OutputControllerHolder.INSTANCE;
+    public static AgentLogger getLogger() {
+        return AgentLoggerHolder.INSTANCE;
     }
 
 

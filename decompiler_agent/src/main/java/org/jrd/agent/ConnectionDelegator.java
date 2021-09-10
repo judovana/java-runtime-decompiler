@@ -45,7 +45,7 @@ public final class ConnectionDelegator extends Thread {
             initServerSocket = new ServerSocket();
             initServerSocket.bind(new InetSocketAddress(hostname, port));
         } catch (IOException e) {
-            OutputControllerAgent.getLogger().log(new RuntimeException("Exception occurred when opening the socket: ", e));
+            AgentLogger.getLogger().log(new RuntimeException("Exception occurred when opening the socket: ", e));
             return false;
         }
 
@@ -71,7 +71,7 @@ public final class ConnectionDelegator extends Thread {
                 clientSocket = theServerSocket.accept();
             } catch (IOException e) {
                 if (!theServerSocket.isClosed()) {
-                    OutputControllerAgent.getLogger().log(new RuntimeException("The server socket is closed, killing the thread.", e));
+                    AgentLogger.getLogger().log(new RuntimeException("The server socket is closed, killing the thread.", e));
                 }
                 return;
             }
@@ -83,7 +83,7 @@ public final class ConnectionDelegator extends Thread {
             try {
                 theServerSocket.close();
             } catch (IOException e) {
-                OutputControllerAgent.getLogger().log(new RuntimeException("Error when closing the server socket", e));
+                AgentLogger.getLogger().log(new RuntimeException("Error when closing the server socket", e));
             }
         }
     }
