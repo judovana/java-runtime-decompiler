@@ -10,11 +10,10 @@ import java.lang.reflect.Type;
 import java.util.LinkedList;
 import java.util.List;
 
-public class DecompilerWrapperInformationDeserializer implements JsonDeserializer<DecompilerWrapperInformation> {
+public class DecompilerWrapperDeserializer implements JsonDeserializer<DecompilerWrapper> {
 
     @Override
-    public DecompilerWrapperInformation deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-
+    public DecompilerWrapper deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
         final JsonObject json = jsonElement.getAsJsonObject();
 
         final String name = json.get("Name").getAsString();
@@ -23,6 +22,6 @@ public class DecompilerWrapperInformationDeserializer implements JsonDeserialize
         json.get("DependencyURL").getAsJsonArray().forEach(dependency -> dependencyURLs.add(dependency.getAsString()));
         final String decompilerURL = json.get("DecompilerDownloadURL").getAsString();
 
-        return new DecompilerWrapperInformation(name, wrapperURL, dependencyURLs, decompilerURL);
+        return new DecompilerWrapper(name, wrapperURL, dependencyURLs, decompilerURL);
     }
 }

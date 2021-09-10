@@ -9,7 +9,7 @@ import org.jrd.backend.data.Config;
 import org.jrd.backend.data.Model;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
-import org.jrd.backend.decompiling.DecompilerWrapperInformation;
+import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.filesystem.NewFsVmController;
 import org.jrd.frontend.frame.filesystem.NewFsVmView;
@@ -273,7 +273,7 @@ public class DecompilationController {
         String bytesInString = vmStatus.getLoadedClassBytes();
         byte[] bytes = Base64.getDecoder().decode(bytesInString);
         try {
-            decompiledClass = pluginManager.decompile(bytecodeDecompilerView.getSelectedDecompilerWrapperInformation(), name, bytes, null, vmInfo, vmManager);
+            decompiledClass = pluginManager.decompile(bytecodeDecompilerView.getSelectedDecompiler(), name, bytes, null, vmInfo, vmManager);
         } catch (Exception e) {
             Logger.getLogger().log(Logger.Level.ALL, e);
         }
@@ -283,7 +283,7 @@ public class DecompilationController {
     class ClassOverwriter {
         private LatestPaths lastLoaded = new LatestPaths();
 
-        void overwriteClass(DecompilerWrapperInformation selectedDecompiler, String name, String buffer, byte[] binBuffer, int supperSelect) {
+        void overwriteClass(DecompilerWrapper selectedDecompiler, String name, String buffer, byte[] binBuffer, int supperSelect) {
             if (name == null || name.trim().isEmpty()) {
                 name = "???";
             }

@@ -11,7 +11,7 @@ import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.data.Cli;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
-import org.jrd.backend.decompiling.DecompilerWrapperInformation;
+import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.frontend.frame.main.DecompilationController;
 
 import java.util.ArrayList;
@@ -59,9 +59,9 @@ public class RuntimeCompilerConnector {
     }
 
     public static class ForeignCompilerWrapper implements ClasspathlessCompiler {
-        private final DecompilerWrapperInformation currentDecompiler;
+        private final DecompilerWrapper currentDecompiler;
 
-        public ForeignCompilerWrapper(DecompilerWrapperInformation currentDecompiler) {
+        public ForeignCompilerWrapper(DecompilerWrapper currentDecompiler) {
             this.currentDecompiler = currentDecompiler;
         }
 

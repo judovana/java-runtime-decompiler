@@ -38,9 +38,9 @@ import java.util.regex.Pattern;
  */
 public class PluginManager {
 
-    private List<DecompilerWrapperInformation> wrappers;
+    private List<DecompilerWrapper> wrappers;
 
-    public List<DecompilerWrapperInformation> getWrappers() {
+    public List<DecompilerWrapper> getWrappers() {
         return Collections.unmodifiableList(wrappers);
     }
 
@@ -53,7 +53,7 @@ public class PluginManager {
         wrappers = new LinkedList<>();
 
         gson = new GsonBuilder()
-                .registerTypeAdapter(DecompilerWrapperInformation.class, new DecompilerWrapperInformationDeserializer())
+                .registerTypeAdapter(DecompilerWrapper.class, new DecompilerWrapperDeserializer())
                 .create();
 
         loadConfigs();
@@ -71,8 +71,8 @@ public class PluginManager {
             loadConfigsFromLocation(Directories.getPluginDirectory());
         }
 
-        wrappers.add(DecompilerWrapperInformation.getJavap());
-        wrappers.add(DecompilerWrapperInformation.getJavapVerbose());
+        wrappers.add(DecompilerWrapper.getJavap());
+        wrappers.add(DecompilerWrapper.getJavapVerbose());
 
         sortWrappers();
     }
@@ -104,19 +104,19 @@ public class PluginManager {
     }
 
     /**
-     * Loads information decompiler json file into List<DecompilerWrapperInformation>Wrapper.
+     * Loads information decompiler json file into List<DecompilerWrapper>Wrapper.
      */
     private void loadConfig(File file) {
         if (file.getName().endsWith(".json")) {
-            DecompilerWrapperInformation wrapper;
+            DecompilerWrapper wrapper;
             try (FileReader fileReader = new FileReader(file.getAbsolutePath(), StandardCharsets.UTF_8)) {
-                wrapper = gson.fromJson(fileReader, DecompilerWrapperInformation.class);
+                wrapper = gson.fromJson(fileReader, DecompilerWrapper.class);
             } catch (IOException | NullPointerException e) {
                 Logger.getLogger().log(Logger.Level.DEBUG, e);
                 wrapper = null;
             }
             if (wrapper == null) {
-                wrapper = new DecompilerWrapperInformation(file.getName());
+                wrapper = new DecompilerWrapper(file.getName());
             }
             wrapper.setFileLocation(file.getAbsolutePath());
             wrappers.add(wrapper);
@@ -138,7 +138,7 @@ public class PluginManager {
      * @return Decompiled bytecode or exception String
      * @throws Exception the exception String
      */
-    public synchronized String decompile(DecompilerWrapperInformation wrapper, String name, byte[] bytecode, String[] options, VmInfo vmInfo, VmManager vmManager) throws Exception {
+    public synchronized String decompile(DecompilerWrapper wrapper, String name, byte[] bytecode, String[] options, VmInfo vmInfo, VmManager vmManager) throws Exception {
         if (wrapper == null) {
             return "No valid decompiler selected. Unable to decompile. \n " +
                     "If there is no decompiler selected, you need to set paths to decompiler in" +
@@ -163,7 +163,7 @@ public class PluginManager {
         }
     }
 
-    public synchronized boolean hasBundledCompiler(DecompilerWrapperInformation wrapper) {
+    public synchronized boolean hasBundledCompiler(DecompilerWrapper wrapper) {
         if (wrapper == null) {
             throw new RuntimeException("No valid decompiler selected. Current-Buffer may not be usable");
         }
@@ -182,7 +182,7 @@ public class PluginManager {
     /**
      * Compiles wrapper plugin, loads it into JVM and stores it for later.
      */
-    private void initializeWrapper(DecompilerWrapperInformation wrapper) {
+    private void initializeWrapper(DecompilerWrapper wrapper) {
         if (wrapper.isJavap() || wrapper.isJavapVerbose()) {
             try {
                 wrapper.setInstance(new JavapDisassemblerWrapper(wrapper.isJavap() ? "" : "-v"));
@@ -205,7 +205,7 @@ public class PluginManager {
             }
             classPathList.add(new URL(ExpandableUrl.prependFileProtocol(System.getProperty("java.io.tmpdir")) + "/")); // trailing slash just in case
 
-            // Reflect classes & methods and store them in DecompilerWrapperInformation for later use
+            // Reflect classes & methods and store them in DecompilerWrapper for later use
             ClassLoader loader = URLClassLoader.newInstance(
                     classPathList.toArray(new URL[0]),
                     getClass().getClassLoader()
@@ -243,7 +243,7 @@ public class PluginManager {
         }
     }
 
-    public void replace(DecompilerWrapperInformation oldWrapper, DecompilerWrapperInformation newWrapper) throws IOException {
+    public void replace(DecompilerWrapper oldWrapper, DecompilerWrapper newWrapper) throws IOException {
         if (oldWrapper == null || newWrapper == null) {
             return;
         }
@@ -267,26 +267,26 @@ public class PluginManager {
         sortWrappers();
     }
 
-    public void deleteWrapper(DecompilerWrapperInformation wrapperInformation) {
-        wrappers.remove(wrapperInformation);
+    public void deleteWrapper(DecompilerWrapper wrapper) {
+        wrappers.remove(wrapper);
 
-        if (wrapperInformation.getScope().equals("local")) {
-            Directories.deleteWithException(wrapperInformation.getFileLocation());
-            Directories.deleteWithException(ImportUtils.flipWrapperExtension(wrapperInformation.getFileLocation()));
+        if (wrapper.getScope().equals("local")) {
+            Directories.deleteWithException(wrapper.getFileLocation());
+            Directories.deleteWithException(ImportUtils.flipWrapperExtension(wrapper.getFileLocation()));
         }
     }
 
-    public void setLocationForNewWrapper(DecompilerWrapperInformation wrapperInformation) {
-        File file = new File(Directories.getPluginDirectory() + "/" + wrapperInformation.getName().replaceAll(" ", "_") + ".json");
+    public void setLocationForNewWrapper(DecompilerWrapper wrapper) {
+        File file = new File(Directories.getPluginDirectory() + "/" + wrapper.getName().replaceAll(" ", "_") + ".json");
         int i = 1;
         while (file.exists()) {
-            file = new File(Directories.getPluginDirectory() + "/" + wrapperInformation.getName() + '(' + i + ')' + ".json");
+            file = new File(Directories.getPluginDirectory() + "/" + wrapper.getName() + '(' + i + ')' + ".json");
             i++;
         }
-        wrapperInformation.setFileLocation(file.getAbsolutePath());
+        wrapper.setFileLocation(file.getAbsolutePath());
     }
 
-    private int compileWrapper(DecompilerWrapperInformation wrapper, ByteArrayOutputStream errStream) {
+    private int compileWrapper(DecompilerWrapper wrapper, ByteArrayOutputStream errStream) {
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 
         return compiler.run(null, null, errStream,
@@ -302,7 +302,7 @@ public class PluginManager {
      * @param plugin - plugin to validate
      * @return error message or null
      */
-    public String validatePlugin(DecompilerWrapperInformation plugin) {
+    public String validatePlugin(DecompilerWrapper plugin) {
         //compiling and getting error from the compiler
         ByteArrayOutputStream errStream = new ByteArrayOutputStream();
 
@@ -314,8 +314,8 @@ public class PluginManager {
         return errLevel != 0 ? errStream.toString(StandardCharsets.UTF_8) : null;
     }
 
-    public DecompilerWrapperInformation createWrapper() {
-        DecompilerWrapperInformation newWrapper = new DecompilerWrapperInformation();
+    public DecompilerWrapper createWrapper() {
+        DecompilerWrapper newWrapper = new DecompilerWrapper();
         newWrapper.setName("unnamed");
         setLocationForNewWrapper(newWrapper);
         Directories.createPluginDirectory();
@@ -332,9 +332,9 @@ public class PluginManager {
         return newWrapper;
     }
 
-    public void saveWrapper(DecompilerWrapperInformation wrapper) throws IOException {
+    public void saveWrapper(DecompilerWrapper wrapper) throws IOException {
         final GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(DecompilerWrapperInformation.class, new DecompilerWrapperInformationSerializer());
+        gsonBuilder.registerTypeAdapter(DecompilerWrapper.class, new DecompilerWrapperSerializer());
         gsonBuilder.setPrettyPrinting();
         final String json = gsonBuilder.create().toJson(wrapper);
         if (wrapper.getScope().equals("local")) {
@@ -347,8 +347,8 @@ public class PluginManager {
 
     private void sortWrappers() {
         wrappers.sort(
-                Comparator.comparing(DecompilerWrapperInformation::getScope).reversed() // reversed so that javap is always the bottom
-                        .thenComparing(DecompilerWrapperInformation::getName)
+                Comparator.comparing(DecompilerWrapper::getScope).reversed() // reversed so that javap is always the bottom
+                        .thenComparing(DecompilerWrapper::getName)
         );
     }
 
@@ -373,7 +373,7 @@ public class PluginManager {
         }
     }
 
-    public void addWrapper(DecompilerWrapperInformation wrapper) {
+    public void addWrapper(DecompilerWrapper wrapper) {
         wrappers.add(wrapper);
     }
 }
