@@ -9,7 +9,7 @@ import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
-import org.jrd.backend.decompiling.DecompilerWrapperInformation;
+import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.filesystem.NewFsVmController;
 import org.jrd.frontend.frame.main.DecompilationController;
@@ -303,7 +303,7 @@ public class Cli {
         }
 
         public ClasspathlessCompiler getCompiler() {
-            DecompilerWrapperInformation decompiler = null;
+            DecompilerWrapper decompiler = null;
             boolean hasCompiler = false;
             String compilerLogMessage = "Default runtime compiler will be used for overwrite.";
 
@@ -464,14 +464,14 @@ public class Cli {
                     throw new RuntimeException("Plugin loading directly from file is not implemented.");
                 }
 
-                DecompilerWrapperInformation decompiler;
+                DecompilerWrapper decompiler;
                 String[] options = null;
-                if (plugin.startsWith(DecompilerWrapperInformation.JAVAP_NAME)) {
+                if (plugin.startsWith(DecompilerWrapper.JAVAP_NAME)) {
                     options = Arrays.stream(plugin.split("-"))
                             .skip(1) // do not include "javap" in options
                             .map(s -> "-" + s)
                             .toArray(String[]::new);
-                    decompiler = findDecompiler(DecompilerWrapperInformation.JAVAP_NAME);
+                    decompiler = findDecompiler(DecompilerWrapper.JAVAP_NAME);
                 } else {
                     decompiler = findDecompiler(plugin);
                 }
@@ -517,17 +517,17 @@ public class Cli {
         }
     }
 
-    private DecompilerWrapperInformation findDecompiler(String decompilerName) {
-        List<DecompilerWrapperInformation> wrappers = pluginManager.getWrappers();
-        DecompilerWrapperInformation decompiler = null;
+    private DecompilerWrapper findDecompiler(String decompilerName) {
+        List<DecompilerWrapper> wrappers = pluginManager.getWrappers();
+        DecompilerWrapper decompiler = null;
 
-        for (DecompilerWrapperInformation wrapper : wrappers) {
+        for (DecompilerWrapper wrapper : wrappers) {
             if (!wrapper.isLocal() && wrapper.getName().equals(decompilerName)) {
                 decompiler = wrapper;
             }
         }
         // LOCAL is preferred one
-        for (DecompilerWrapperInformation wrapper : wrappers) {
+        for (DecompilerWrapper wrapper : wrappers) {
             if (wrapper.isLocal() && wrapper.getName().equals(decompilerName)) {
                 decompiler = wrapper;
             }
@@ -636,7 +636,7 @@ public class Cli {
             throw new RuntimeException(LIST_PLUGINS + " does not expect arguments.");
         }
 
-        for (DecompilerWrapperInformation dw : pluginManager.getWrappers()) {
+        for (DecompilerWrapper dw : pluginManager.getWrappers()) {
             System.out.println(dw.getName() + " " + dw.getScope() + "/" + invalidityToString(dw.isInvalidWrapper()) + " - " + dw.getFileLocation());
         }
     }

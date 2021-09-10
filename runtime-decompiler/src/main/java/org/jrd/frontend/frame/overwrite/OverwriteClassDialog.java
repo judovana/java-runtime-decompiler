@@ -12,7 +12,7 @@ import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.Config;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
-import org.jrd.backend.decompiling.DecompilerWrapperInformation;
+import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.main.DecompilationController;
 import org.jrd.frontend.utility.CommonUtils;
@@ -93,7 +93,7 @@ public class OverwriteClassDialog extends JDialog {
     private final JLabel nothing;
     private final JButton ok;
     private final PluginManager pluginManager;
-    private final DecompilerWrapperInformation decompiler;
+    private final DecompilerWrapper decompiler;
     private boolean haveCompiler;
 
     private final JPanel externalFiles;
@@ -123,7 +123,7 @@ public class OverwriteClassDialog extends JDialog {
     private final VmManager vmManager;
 
     public OverwriteClassDialog(final String name, final LatestPaths latestPaths, final String currentBuffer, final byte[] cBinBuffer, VmInfo vmInfo, VmManager vmManager, PluginManager pluginManager,
-                                DecompilerWrapperInformation selectedDecompiler, int supperSelection) {
+                                DecompilerWrapper selectedDecompiler, int supperSelection) {
         super((JFrame) null, "Specify class and selectSrc its bytecode", true);
         this.setSize(400, 400);
         this.setLayout(new BorderLayout());
@@ -380,7 +380,7 @@ public class OverwriteClassDialog extends JDialog {
     }
 
 
-    private static OverwriteClassDialog.CompilationWithResult compileWithGui(VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapperInformation currentDecompiler, boolean haveCompiler,
+    private static OverwriteClassDialog.CompilationWithResult compileWithGui(VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapper currentDecompiler, boolean haveCompiler,
                                                                              IdentifiedSource... sources) {
         ClassesProvider cp = new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager);
         ClasspathlessCompiler rc;
@@ -512,11 +512,11 @@ public class OverwriteClassDialog extends JDialog {
         protected final int namingSchema;
         protected final String destination;
         protected final PluginManager pluginManager;
-        protected final DecompilerWrapperInformation decompilerWrapper;
+        protected final DecompilerWrapper decompilerWrapper;
         protected final boolean haveCompiler;
 
-        CompilerOutputActionFields(JTextField status, VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapperInformation dwi, boolean haveCompiler, int namingSchema,
-                String destination) {
+        CompilerOutputActionFields(JTextField status, VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapper dwi, boolean haveCompiler, int namingSchema,
+                                   String destination) {
             this.status = status;
             this.vmInfo = vmInfo;
             this.vmManager = vmManager;
@@ -530,8 +530,8 @@ public class OverwriteClassDialog extends JDialog {
 
     private static class SavingCompilerOutputAction extends CompilerOutputActionFields {
 
-        SavingCompilerOutputAction(JTextField status, VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapperInformation dwi, boolean haveCompiler, int namingSchema,
-                String destination) {
+        SavingCompilerOutputAction(JTextField status, VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapper dwi, boolean haveCompiler, int namingSchema,
+                                   String destination) {
             super(status, vmInfo, vmManager, pm, dwi, haveCompiler, namingSchema, destination);
         }
 
@@ -583,8 +583,8 @@ public class OverwriteClassDialog extends JDialog {
 
     private static class UploadingCompilerOutputAction extends CompilerOutputActionFields {
 
-        UploadingCompilerOutputAction(JTextField status, VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapperInformation dwi, boolean haveCompiler, int namingSchema,
-                String destination) {
+        UploadingCompilerOutputAction(JTextField status, VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapper dwi, boolean haveCompiler, int namingSchema,
+                                      String destination) {
             super(status, vmInfo, vmManager, pm, dwi, haveCompiler, namingSchema, destination);
         }
 

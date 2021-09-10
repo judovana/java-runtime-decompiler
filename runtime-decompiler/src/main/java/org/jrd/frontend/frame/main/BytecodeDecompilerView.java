@@ -11,7 +11,7 @@ import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
 import org.fife.ui.rtextarea.SearchResult;
 import org.jrd.backend.core.Logger;
-import org.jrd.backend.decompiling.DecompilerWrapperInformation;
+import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.frontend.utility.ScreenFinder;
 
 import javax.swing.*;
@@ -60,7 +60,7 @@ public class BytecodeDecompilerView {
                     private JButton redoButton;
                     private JButton detachButton;
                     private JButton overwriteButton;
-                    private JComboBox<DecompilerWrapperInformation> pluginComboBox;
+                    private JComboBox<DecompilerWrapper> pluginComboBox;
                 private final JTabbedPane buffers;
                     private JPanel sourceBuffer;
                         private RTextScrollPane bytecodeScrollPane;
@@ -243,7 +243,7 @@ public class BytecodeDecompilerView {
         gbc.weightx = 1;
         classesToolBar.add(classesSortField, gbc);
 
-        pluginComboBox = new JComboBox<DecompilerWrapperInformation>();
+        pluginComboBox = new JComboBox<DecompilerWrapper>();
         pluginComboBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -604,7 +604,7 @@ public class BytecodeDecompilerView {
 
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
-            worker.overwriteClass(getSelectedDecompilerWrapperInformation(), BytecodeDecompilerView.this.lastDecompiledClass, BytecodeDecompilerView.this.bytecodeSyntaxTextArea.getText(), BytecodeDecompilerView.this.hex.get(), buffers.getSelectedIndex());
+            worker.overwriteClass(getSelectedDecompiler(), BytecodeDecompilerView.this.lastDecompiledClass, BytecodeDecompilerView.this.bytecodeSyntaxTextArea.getText(), BytecodeDecompilerView.this.hex.get(), buffers.getSelectedIndex());
         }
     }
 
@@ -612,17 +612,17 @@ public class BytecodeDecompilerView {
         this.overwriteActionListener = new OverwriteActionListener(worker);
     }
 
-    public void refreshComboBox(List<DecompilerWrapperInformation> wrappers) {
+    public void refreshComboBox(List<DecompilerWrapper> wrappers) {
         pluginComboBox.removeAllItems();
-        wrappers.forEach(decompilerWrapperInformation -> {
-            if (!decompilerWrapperInformation.isInvalidWrapper()) {
-                pluginComboBox.addItem(decompilerWrapperInformation);
+        wrappers.forEach(wrapper -> {
+            if (!wrapper.isInvalidWrapper()) {
+                pluginComboBox.addItem(wrapper);
             }
         });
     }
 
-    public DecompilerWrapperInformation getSelectedDecompilerWrapperInformation() {
-        return (DecompilerWrapperInformation) pluginComboBox.getSelectedItem();
+    public DecompilerWrapper getSelectedDecompiler() {
+        return (DecompilerWrapper) pluginComboBox.getSelectedItem();
     }
 
     private void initialSearchBytecode(String query, boolean isRegex) {

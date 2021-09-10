@@ -2,7 +2,7 @@ package org.jrd.frontend.frame.plugins;
 
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.Directories;
-import org.jrd.backend.decompiling.DecompilerWrapperInformation;
+import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.ExpandableUrl;
 import org.jrd.backend.decompiling.ImportUtils;
 import org.jrd.backend.decompiling.PluginManager;
@@ -23,7 +23,7 @@ public class PluginConfigurationEditorController {
 
     private PluginManager pluginManager;
     private PluginConfigurationEditorView view;
-    private Map<DecompilerWrapperInformation, ConfigPanel> configPanelHashMap;
+    private Map<DecompilerWrapper, ConfigPanel> configPanelHashMap;
 
     private ActionListener pluginsConfiguredListener;
 
@@ -36,21 +36,21 @@ public class PluginConfigurationEditorController {
         view.getPluginListPanel().getAddWrapperButton().addActionListener(actionEvent -> addWrapper());
         view.getPluginTopOptionPanel().getCloneButton().addActionListener(actionEvent -> {
             JList wrapperJList = view.getPluginListPanel().getWrapperJList();
-            DecompilerWrapperInformation wrapperInformation = (DecompilerWrapperInformation) wrapperJList.getSelectedValue();
-            DecompilerWrapperInformation clonedWrapper = cloneWrapper(wrapperInformation);
+            DecompilerWrapper wrapper = (DecompilerWrapper) wrapperJList.getSelectedValue();
+            DecompilerWrapper clonedWrapper = cloneWrapper(wrapper);
             updateWrapperList(pluginManager.getWrappers());
             view.getPluginListPanel().getWrapperJList().setSelectedValue(clonedWrapper, true);
         });
         view.getPluginTopOptionPanel().getDeleteButton().addActionListener(actionEvent -> {
             JList wrapperJList = view.getPluginListPanel().getWrapperJList();
-            DecompilerWrapperInformation wrapperInformation = (DecompilerWrapperInformation) wrapperJList.getSelectedValue();
-            removeWrapper(wrapperInformation);
+            DecompilerWrapper wrapper = (DecompilerWrapper) wrapperJList.getSelectedValue();
+            removeWrapper(wrapper);
         });
         view.getPluginTopOptionPanel().getOpenWebsiteButton().addActionListener(actionEvent -> openDecompilerDownloadUrl());
         view.getPluginTopOptionPanel().getImportButton().addActionListener(actionEvent -> openImportDialog());
         view.getOkCancelPanel().getOkButton().addActionListener(actionEvent -> {
-            for (DecompilerWrapperInformation wrapperInformation: configPanelHashMap.keySet()) {
-                applyWrapperChange(wrapperInformation);
+            for (DecompilerWrapper wrapper: configPanelHashMap.keySet()) {
+                applyWrapperChange(wrapper);
             }
             view.dispose();
             if (pluginsConfiguredListener != null) {
@@ -102,7 +102,7 @@ public class PluginConfigurationEditorController {
 
             configPanelHashMap.clear();
             pluginManager.loadConfigs();
-            List<DecompilerWrapperInformation> newWrappers = pluginManager.getWrappers();
+            List<DecompilerWrapper> newWrappers = pluginManager.getWrappers();
             updateWrapperList(newWrappers);
 
             for (int i = 0; i < newWrappers.size(); i++) {
@@ -132,7 +132,7 @@ public class PluginConfigurationEditorController {
             return;
         }
 
-        DecompilerWrapperInformation selectedPlugin = (DecompilerWrapperInformation) view.getPluginListPanel().getWrapperJList().getSelectedValue();
+        DecompilerWrapper selectedPlugin = (DecompilerWrapper) view.getPluginListPanel().getWrapperJList().getSelectedValue();
         ConfigPanel configPanel = getOrCreatePluginConfigPanel(selectedPlugin);
 
         toggleWebsiteButton(selectedPlugin);
@@ -140,7 +140,7 @@ public class PluginConfigurationEditorController {
         view.switchCard(configPanel, String.valueOf(System.identityHashCode(configPanel)));
     }
 
-    private void toggleWebsiteButton(DecompilerWrapperInformation plugin) {
+    private void toggleWebsiteButton(DecompilerWrapper plugin) {
         if (plugin.getDecompilerDownloadUrl() != null) {
             view.getPluginTopOptionPanel().getOpenWebsiteButton().setEnabled(true);
             view.getPluginTopOptionPanel().getOpenWebsiteButton().setToolTipText(null);
@@ -155,40 +155,40 @@ public class PluginConfigurationEditorController {
 
     public void openDecompilerDownloadUrl() {
         JList wrapperJList = view.getPluginListPanel().getWrapperJList();
-        DecompilerWrapperInformation wrapperInformation = (DecompilerWrapperInformation) wrapperJList.getSelectedValue();
-        if (wrapperInformation.getDecompilerDownloadUrl() != null) {
+        DecompilerWrapper wrapper = (DecompilerWrapper) wrapperJList.getSelectedValue();
+        if (wrapper.getDecompilerDownloadUrl() != null) {
             try {
-                URI downloadUri = wrapperInformation.getDecompilerDownloadUrl().toURI();
+                URI downloadUri = wrapper.getDecompilerDownloadUrl().toURI();
                 java.awt.Desktop.getDesktop().browse(downloadUri);
             } catch (IOException | URISyntaxException e) {
                 Logger.getLogger().log(Logger.Level.ALL, e);
             } catch (UnsupportedOperationException e) {
-                JOptionPane.showMessageDialog(view, "Website could not be opened automatically. Go to: " + wrapperInformation.getDecompilerDownloadUrl().toString());
+                JOptionPane.showMessageDialog(view, "Website could not be opened automatically. Go to: " + wrapper.getDecompilerDownloadUrl().toString());
             }
         }
     }
 
     private void addWrapper() {
-        DecompilerWrapperInformation wrapperInformation = pluginManager.createWrapper();
+        DecompilerWrapper wrapper = pluginManager.createWrapper();
         updateWrapperList(pluginManager.getWrappers());
-        view.getPluginListPanel().getWrapperJList().setSelectedValue(wrapperInformation, true);
+        view.getPluginListPanel().getWrapperJList().setSelectedValue(wrapper, true);
     }
 
-    private void removeWrapper(DecompilerWrapperInformation wrapperInformation) {
-        if (wrapperInformation == null) {
+    private void removeWrapper(DecompilerWrapper wrapper) {
+        if (wrapper == null) {
             Logger.getLogger().log(Logger.Level.DEBUG, "Attempted delete operation with no plugin wrapper selected.");
             return;
         }
 
-        String name = wrapperInformation.toString();
+        String name = wrapper.toString();
         int dialogResult = JOptionPane.showConfirmDialog(view, "Are you sure you want to remove " +
                 name + "?", "Warning", JOptionPane.OK_CANCEL_OPTION);
         if (dialogResult == JOptionPane.CANCEL_OPTION) {
             return;
         }
 
-        pluginManager.deleteWrapper(wrapperInformation);
-        configPanelHashMap.remove(wrapperInformation);
+        pluginManager.deleteWrapper(wrapper);
+        configPanelHashMap.remove(wrapper);
         updateWrapperList(pluginManager.getWrappers());
 
         JList wrapperJList = view.getPluginListPanel().getWrapperJList();
@@ -204,7 +204,7 @@ public class PluginConfigurationEditorController {
             return;
         }
 
-        String result = pluginManager.validatePlugin(getDataFromPanel((DecompilerWrapperInformation) view.getPluginListPanel().getWrapperJList().getSelectedValue()));
+        String result = pluginManager.validatePlugin(getDataFromPanel((DecompilerWrapper) view.getPluginListPanel().getWrapperJList().getSelectedValue()));
         if (result != null) {
             JOptionPane.showMessageDialog(view,
                     "Validation failed: " + result,
@@ -215,23 +215,23 @@ public class PluginConfigurationEditorController {
         }
     }
 
-    public void updateWrapperList(List<DecompilerWrapperInformation> wrappers) {
-        JList<DecompilerWrapperInformation> wrapperJList = view.getPluginListPanel().getWrapperJList();
+    public void updateWrapperList(List<DecompilerWrapper> wrappers) {
+        JList<DecompilerWrapper> wrapperJList = view.getPluginListPanel().getWrapperJList();
 
-        List<DecompilerWrapperInformation> pluginsWithoutJavap = new ArrayList<>(wrappers.size());
-        for (DecompilerWrapperInformation wrapper : wrappers) {
+        List<DecompilerWrapper> pluginsWithoutJavap = new ArrayList<>(wrappers.size());
+        for (DecompilerWrapper wrapper : wrappers) {
             if (!wrapper.isJavap() && !wrapper.isJavapVerbose()) {
                 pluginsWithoutJavap.add(wrapper);
             }
         }
 
-        wrapperJList.setListData(pluginsWithoutJavap.toArray(new DecompilerWrapperInformation[0]));
+        wrapperJList.setListData(pluginsWithoutJavap.toArray(new DecompilerWrapper[0]));
     }
 
-    private DecompilerWrapperInformation cloneWrapper(DecompilerWrapperInformation wrapperInformation) {
-        DecompilerWrapperInformation clonedWrapper = getDataFromPanel(wrapperInformation);
+    private DecompilerWrapper cloneWrapper(DecompilerWrapper wrapper) {
+        DecompilerWrapper clonedWrapper = getDataFromPanel(wrapper);
         pluginManager.setLocationForNewWrapper(clonedWrapper);
-        clonedWrapper.setDecompilerDownloadUrl(wrapperInformation.getDecompilerDownloadUrl().toString());
+        clonedWrapper.setDecompilerDownloadUrl(wrapper.getDecompilerDownloadUrl().toString());
         try {
             pluginManager.saveWrapper(clonedWrapper);
         } catch (IOException e) {
@@ -244,12 +244,12 @@ public class PluginConfigurationEditorController {
         return clonedWrapper;
     }
 
-    private void applyWrapperChange(DecompilerWrapperInformation oldWrapper) {
+    private void applyWrapperChange(DecompilerWrapper oldWrapper) {
         File f = new File(oldWrapper.getFileLocation());
         if (!f.canWrite()) {
             return;
         }
-        DecompilerWrapperInformation newWrapper = getDataFromPanel(oldWrapper);
+        DecompilerWrapper newWrapper = getDataFromPanel(oldWrapper);
         newWrapper.setFileLocation(oldWrapper.getFileLocation());
         if (oldWrapper.getDecompilerDownloadUrl() == null) {
             newWrapper.setDecompilerDownloadUrl("");
@@ -266,9 +266,9 @@ public class PluginConfigurationEditorController {
         }
     }
 
-    public DecompilerWrapperInformation getDataFromPanel(DecompilerWrapperInformation wrapperInformation) {
-        ConfigPanel configPanel = configPanelHashMap.get(wrapperInformation);
-        DecompilerWrapperInformation newWrapper = new DecompilerWrapperInformation();
+    public DecompilerWrapper getDataFromPanel(DecompilerWrapper wrapper) {
+        ConfigPanel configPanel = configPanelHashMap.get(wrapper);
+        DecompilerWrapper newWrapper = new DecompilerWrapper();
 
         newWrapper.setName(configPanel.getNamePanel().getTextField().getText());
         newWrapper.setWrapperUrlFromPath(configPanel.getWrapperUrlPanel().getText());
@@ -276,7 +276,7 @@ public class PluginConfigurationEditorController {
         return newWrapper;
     }
 
-    public ConfigPanel getOrCreatePluginConfigPanel(DecompilerWrapperInformation vmInfo) {
+    public ConfigPanel getOrCreatePluginConfigPanel(DecompilerWrapper vmInfo) {
         if (configPanelHashMap.containsKey(vmInfo)) {
             return configPanelHashMap.get(vmInfo);
         }
@@ -286,7 +286,7 @@ public class PluginConfigurationEditorController {
         return configPanel;
     }
 
-    public void updatePanelInfo(ConfigPanel pluginConfigPanel, DecompilerWrapperInformation vmInfo) {
+    public void updatePanelInfo(ConfigPanel pluginConfigPanel, DecompilerWrapper vmInfo) {
         if (vmInfo.getFileLocation() != null) {
             pluginConfigPanel.getJsonFileUrl().setText("Location: " + vmInfo.getFileLocation());
             if (!Files.isWritable(Paths.get(vmInfo.getFileLocation()))) {

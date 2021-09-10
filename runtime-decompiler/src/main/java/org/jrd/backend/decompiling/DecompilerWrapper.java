@@ -17,18 +17,22 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-public class DecompilerWrapperInformation {
+/**
+ * Class for holding information about a decompiler wrapper (also called a plugin).
+ */
+public class DecompilerWrapper {
 
     /**
-     * Class containing information about available Decompiler wrapper
+     * Constructs a valid wrapper.
      *
      * @param name                  Decompiler name
      * @param wrapperUrl            location of wrapper.java file
      * @param dependencyUrls        location of wrapper dependencies
      * @param decompilerDownloadUrl decompiler download URL
      */
-    public DecompilerWrapperInformation(String name, String wrapperUrl, List<String> dependencyUrls,
-                                        String decompilerDownloadUrl) {
+    public DecompilerWrapper(
+            String name, String wrapperUrl, List<String> dependencyUrls, String decompilerDownloadUrl
+    ) {
         setName(name);
         setWrapperUrlFromUrl(wrapperUrl);
         setFullyQualifiedClassName();
@@ -37,13 +41,19 @@ public class DecompilerWrapperInformation {
         setFileLocation("");
     }
 
-    // Constructor for broken wrappers, so we can track them.
-    public DecompilerWrapperInformation(String url) {
+    /**
+     * Constructs an invalid wrapper to differentiate them from valid ones.
+     * @param url broken wrapper identifier, used as a name
+     */
+    public DecompilerWrapper(String url) {
         setName(url);
         invalidWrapper = true;
     }
 
-    public DecompilerWrapperInformation() {
+    /**
+     * Constructs an empty, but temporarily valid wrapper.
+     */
+    public DecompilerWrapper() {
     }
 
     private String name;
@@ -61,14 +71,14 @@ public class DecompilerWrapperInformation {
     public static final String JAVAP_NAME = "javap";
     public static final String JAVAP_VERBOSE_NAME = "javap -v";
 
-    public static DecompilerWrapperInformation getJavap() {
-        DecompilerWrapperInformation javap = new DecompilerWrapperInformation();
+    public static DecompilerWrapper getJavap() {
+        DecompilerWrapper javap = new DecompilerWrapper();
         javap.setName(JAVAP_NAME);
         return javap;
     }
 
-    public static DecompilerWrapperInformation getJavapVerbose() {
-        DecompilerWrapperInformation javapVerbose = new DecompilerWrapperInformation();
+    public static DecompilerWrapper getJavapVerbose() {
+        DecompilerWrapper javapVerbose = new DecompilerWrapper();
         javapVerbose.setName(JAVAP_VERBOSE_NAME);
         return javapVerbose;
     }
@@ -184,11 +194,11 @@ public class DecompilerWrapperInformation {
     }
 
     public void setWrapperUrlFromPath(String path) {
-        setWrapperUrl(() -> DecompilerWrapperInformation.this.wrapperUrl = ExpandableUrl.createFromPath(path));
+        setWrapperUrl(() -> DecompilerWrapper.this.wrapperUrl = ExpandableUrl.createFromPath(path));
     }
 
     private void setWrapperUrlFromUrl(String url) {
-        setWrapperUrl(() -> DecompilerWrapperInformation.this.wrapperUrl = ExpandableUrl.createFromStringUrl(url));
+        setWrapperUrl(() -> DecompilerWrapper.this.wrapperUrl = ExpandableUrl.createFromStringUrl(url));
     }
 
     public List<ExpandableUrl> getDependencyUrls() {
@@ -270,11 +280,11 @@ public class DecompilerWrapperInformation {
     }
 
     public boolean isJavap() {
-        return name.equals(DecompilerWrapperInformation.JAVAP_NAME);
+        return name.equals(DecompilerWrapper.JAVAP_NAME);
     }
 
     public boolean isJavapVerbose() {
-        return name.equals(DecompilerWrapperInformation.JAVAP_VERBOSE_NAME);
+        return name.equals(DecompilerWrapper.JAVAP_VERBOSE_NAME);
     }
 
     @Override
@@ -295,11 +305,11 @@ public class DecompilerWrapperInformation {
         if (obj == null) {
             return false;
         }
-        if (!(obj instanceof DecompilerWrapperInformation)) {
+        if (!(obj instanceof DecompilerWrapper)) {
             return false;
         }
 
-        DecompilerWrapperInformation other = (DecompilerWrapperInformation) obj;
+        DecompilerWrapper other = (DecompilerWrapper) obj;
         if (this.fileLocation == null || other.fileLocation == null) {
             return getName().equals(other.getName());
         } else {
