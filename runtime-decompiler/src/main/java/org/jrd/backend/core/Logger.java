@@ -1,22 +1,21 @@
 package org.jrd.backend.core;
 
+/**
+ * Class for logging Strings and Exceptions
+ */
 public class Logger {
 
-    private static final String NULL_OBJECT = "Trying to log null object";
+    private static final String NULL_OBJECT_MESSAGE = "Trying to log null object";
 
     public enum Level {
         ALL, // log in all cases
         DEBUG // log in verbose/debug mode
     }
 
-    private boolean verbose = false;
+    private boolean isVerbose = false;
 
     public void setVerbose() {
-        verbose = true;
-    }
-
-    public boolean isVerbose() {
-        return verbose;
+        isVerbose = true;
     }
 
     private static class LoggerHolder {
@@ -29,28 +28,37 @@ public class Logger {
         return LoggerHolder.INSTANCE;
     }
 
-    public void log(Level level, String s) {
-        log(level, (Object) s);
+    public void log(Level level, String message) {
+        log(level, (Object) message);
     }
 
-    public void log(Level level, Throwable s) {
-        log(level, (Object) s);
+    public void log(Level level, Throwable throwable) {
+        log(level, (Object) throwable);
     }
 
-    public void log(String s) {
-        log(Level.DEBUG, (Object) s);
+    /**
+     * Shorthand for {@code log(Logger.Level.DEBUG, message)}.
+     * @param message the string to be logged
+     */
+    public void log(String message) {
+        log(Level.DEBUG, (Object) message);
     }
 
-    public void log(Throwable s) {
-        log(Level.DEBUG, (Object) s);
+    /**
+     * Shorthand for {@code log(Logger.Level.DEBUG, throwable)}.
+     * @param throwable the exception/error to be logged
+     */
+    public void log(Throwable throwable) {
+        log(Level.DEBUG, (Object) throwable);
     }
 
     private void log(Level level, Object o) {
         String s = "";
+
         if (o == null) {
-            s = NULL_OBJECT;
+            s = NULL_OBJECT_MESSAGE;
         } else if (o instanceof Throwable) {
-            if (verbose || level == Level.ALL) {
+            if (isVerbose || level == Level.ALL) {
                 ((Throwable) o).printStackTrace();
             }
             // show gui error dialog? To disturbing? Add shownexttime checkbox? just notification(sounds best considering the nature of exceptions)?
@@ -58,7 +66,8 @@ public class Logger {
         } else {
             s = o.toString();
         }
-        if (verbose || level == Level.ALL) {
+
+        if (isVerbose || level == Level.ALL) {
             System.err.println(s);
             // print to some gui console?
         }
