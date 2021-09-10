@@ -1,7 +1,7 @@
 package org.jrd.backend.data;
 
 import com.google.gson.Gson;
-import org.jrd.backend.core.OutputController;
+import org.jrd.backend.core.Logger;
 import org.jrd.backend.decompiling.ExpandableUrl;
 
 import java.io.File;
@@ -41,7 +41,7 @@ public final class Config {
         try {
             loadConfigFile();
         } catch (IOException e) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
+            Logger.getLogger().log(Logger.Level.ALL, e);
         }
     }
 
@@ -65,7 +65,7 @@ public final class Config {
         if (agentPath.endsWith(".jar")) {
             configMap.put(AGENT_PATH_KEY, ExpandableUrl.createFromPath(agentPath).getRawPath());
         } else {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Agent must be a .jar file"));
+            Logger.getLogger().log(Logger.Level.ALL, new RuntimeException("Agent must be a .jar file"));
         }
     }
 
@@ -107,8 +107,8 @@ public final class Config {
         try {
             return getOrCreateSavedFsVms().contains(vmInfo.base64Serialize());
         } catch (IOException e) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Unable to determine if '" + vmInfo + "' is saved. Cause:");
-            OutputController.getLogger().log(e);
+            Logger.getLogger().log(Logger.Level.ALL, "Unable to determine if '" + vmInfo + "' is saved. Cause:");
+            Logger.getLogger().log(e);
             return false;
         }
     }

@@ -1,6 +1,6 @@
 package org.jrd.frontend.frame.plugins;
 
-import org.jrd.backend.core.OutputController;
+import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.Directories;
 import org.jrd.backend.decompiling.ExpandableUrl;
 import org.jrd.frontend.frame.main.BytecodeDecompilerView;
@@ -34,7 +34,7 @@ public class FileSelectorArrayRow extends JPanel {
             removeButton = new JButton(icon);
         } catch (NullPointerException e) {
             removeButton = new JButton("X");
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("File " + DELETE_ICON + " not found. Falling back to String version.", e));
+            Logger.getLogger().log(Logger.Level.ALL, new RuntimeException("File " + DELETE_ICON + " not found. Falling back to String version.", e));
         }
         removeButton.addActionListener(actionEvent -> {
             parent.removeRow(this);

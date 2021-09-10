@@ -1,6 +1,6 @@
 package org.jrd.backend.decompiling;
 
-import org.jrd.backend.core.OutputController;
+import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.Directories;
 
 import java.io.File;
@@ -43,7 +43,7 @@ public final class ImportUtils {
                 jsonFiles.addAll(listable.listChildren());
 
             } catch (IOException e) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
+                Logger.getLogger().log(Logger.Level.ALL, e);
             }
         }
         return jsonFiles;
@@ -57,7 +57,7 @@ public final class ImportUtils {
         try {
             copyWrappers(selectedUrl, selectedFilename);
         } catch (IOException e) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
+            Logger.getLogger().log(Logger.Level.ALL, e);
         }
     }
 
@@ -92,7 +92,7 @@ public final class ImportUtils {
         } else if (filePath.endsWith(".java")) {
             return filePath.replace(".java", ".json");
         } else {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Incorrect plugin wrapper path: " + filePath));
+            Logger.getLogger().log(Logger.Level.ALL, new RuntimeException("Incorrect plugin wrapper path: " + filePath));
             return filePath;
         }
     }

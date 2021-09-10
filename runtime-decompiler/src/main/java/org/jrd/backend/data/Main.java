@@ -1,6 +1,6 @@
 package org.jrd.backend.data;
 
-import org.jrd.backend.core.OutputController;
+import org.jrd.backend.core.Logger;
 import org.jrd.frontend.frame.main.MainFrameView;
 import org.jrd.frontend.frame.main.VmDecompilerInformationController;
 
@@ -10,7 +10,7 @@ public class Main {
         Model model = new Model();
         Cli cli = new Cli(allArgs, model);
         if (cli.shouldBeVerbose()) {
-            OutputController.getLogger().setVerbose();
+            Logger.getLogger().setVerbose();
         }
         if (cli.isGui()) {
             setLookAndFeel();
@@ -28,7 +28,7 @@ public class Main {
                 try {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
                 } catch (Exception e) {
-                    OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, e);
+                    Logger.getLogger().log(Logger.Level.DEBUG, e);
                 }
                 break;
             }

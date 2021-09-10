@@ -1,7 +1,7 @@
 package org.jrd.backend.communication;
 
 
-import org.jrd.backend.core.OutputController;
+import org.jrd.backend.core.Logger;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -34,17 +34,17 @@ public class Communicate {
         try {
             this.commSocket = new Socket(host, port);
         } catch (IOException ex) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
+            Logger.getLogger().log(Logger.Level.ALL, ex);
         }
         InputStream is;
         try {
             is = this.commSocket.getInputStream();
         } catch (IOException e) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
+            Logger.getLogger().log(Logger.Level.ALL, e);
             try {
                 this.commSocket.close();
             } catch (IOException e1) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e1);
+                Logger.getLogger().log(Logger.Level.ALL, e1);
             }
             return;
         }
@@ -53,11 +53,11 @@ public class Communicate {
         try {
             os = this.commSocket.getOutputStream();
         } catch (IOException e) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, e);
+            Logger.getLogger().log(Logger.Level.DEBUG, e);
             try {
                 this.commSocket.close();
             } catch (IOException e1) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, e1);
+                Logger.getLogger().log(Logger.Level.DEBUG, e1);
             }
             return;
         }
@@ -73,7 +73,7 @@ public class Communicate {
         try {
             this.commSocket.close(); // also closes the in/out streams
         } catch (IOException e) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, e);
+            Logger.getLogger().log(Logger.Level.DEBUG, e);
         } finally {
             this.commSocket = null;
             this.commInput = null;
@@ -85,7 +85,7 @@ public class Communicate {
         String line = this.commInput.readLine();
 
         if (line == null) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Agent returned null response."));
+            Logger.getLogger().log(Logger.Level.ALL, new RuntimeException("Agent returned null response."));
             return "ERROR";
         }
 
@@ -104,23 +104,23 @@ public class Communicate {
         try {
             initLine = trimReadLine();
         } catch (IOException ex) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, ex);
+            Logger.getLogger().log(Logger.Level.DEBUG, ex);
             return "ERROR";
         }
 
         // parse body based on header
         switch (initLine) {
             case "ERROR":
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Agent returned error."));
+                Logger.getLogger().log(Logger.Level.ALL, new RuntimeException("Agent returned error."));
                 return "ERROR";
             case "BYTES":
                 try {
                     String bytes = trimReadLine();
 
-                    OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Agent returned bytes: " + bytes);
+                    Logger.getLogger().log(Logger.Level.DEBUG, "Agent returned bytes: " + bytes);
                     return bytes;
                 } catch (IOException ex) {
-                    OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
+                    Logger.getLogger().log(Logger.Level.ALL, ex);
                     return "ERROR";
                 }
             case "CLASSES":
@@ -137,19 +137,19 @@ public class Communicate {
                             str.append(s).append(";");
                         }
                     } catch (IOException ex) {
-                        OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
+                        Logger.getLogger().log(Logger.Level.ALL, ex);
                     }
                 }
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Agent successfully returned class names.");
+                Logger.getLogger().log(Logger.Level.DEBUG, "Agent successfully returned class names.");
                 return str.toString();
             case "GOODBYE":
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Agent closed socket when halting.");
+                Logger.getLogger().log(Logger.Level.DEBUG, "Agent closed socket when halting.");
                 return "OK";
             case "DONE":
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Agent successfully overwrote class.");
+                Logger.getLogger().log(Logger.Level.DEBUG, "Agent successfully overwrote class.");
                 return "OK";
             default:
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Unknown agent response header: '" + initLine + "'.");
+                Logger.getLogger().log(Logger.Level.ALL, "Unknown agent response header: '" + initLine + "'.");
                 return "ERROR";
         }
     }

@@ -47,16 +47,16 @@ public class DecompilerRequestReceiver {
         try {
             action = RequestAction.returnAction(actionStr);
         } catch (IllegalArgumentException e) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, new RuntimeException("Illegal action in request", e));
+            Logger.getLogger().log(Logger.Level.DEBUG, new RuntimeException("Illegal action in request", e));
             return ERROR_RESPONSE;
         }
         port = tryParseInt(portStr, "Listen port is not an integer!");
         vmPid = tryParseInt(vmPidStr, "VM PID is not a number!");
 
         if (vmPid >= 0 || port >= 0) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Processing request. VM ID: " + vmId + ", PID: " + vmPid + ", action: " + action + ", port: " + portStr);
+            Logger.getLogger().log(Logger.Level.DEBUG, "Processing request. VM ID: " + vmId + ", PID: " + vmPid + ", action: " + action + ", port: " + portStr);
         } else {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Processing request. VM ID: " + vmId + ", action: " + action);
+            Logger.getLogger().log(Logger.Level.DEBUG, "Processing request. VM ID: " + vmId + ", action: " + action);
         }
         String response;
         switch (action) {
@@ -76,7 +76,7 @@ public class DecompilerRequestReceiver {
                 response = getHaltAction(hostname, port, vmId, vmPid);
                 break;
             default:
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Unknown action given: " + action);
+                Logger.getLogger().log(Logger.Level.DEBUG, "Unknown action given: " + action);
                 return ERROR_RESPONSE;
         }
         return response;
@@ -87,8 +87,8 @@ public class DecompilerRequestReceiver {
         try {
             return Integer.parseInt(intStr);
         } catch (NumberFormatException e) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, msg);
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
+            Logger.getLogger().log(Logger.Level.DEBUG, msg);
+            Logger.getLogger().log(Logger.Level.ALL, e);
             return NOT_ATTACHED;
         }
     }
@@ -150,7 +150,7 @@ public class DecompilerRequestReceiver {
             vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
 
         } catch (Exception ex) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
+            Logger.getLogger().log(Logger.Level.ALL, ex);
             return ERROR_RESPONSE;
         }
 
@@ -168,7 +168,7 @@ public class DecompilerRequestReceiver {
             vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
 
         } catch (Exception ex) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
+            Logger.getLogger().log(Logger.Level.ALL, ex);
             return ERROR_RESPONSE;
         }
 
@@ -190,7 +190,7 @@ public class DecompilerRequestReceiver {
 
             vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
         } catch (Exception ex) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
+            Logger.getLogger().log(Logger.Level.ALL, ex);
             return ERROR_RESPONSE;
         }
         return OK_RESPONSE;
@@ -201,7 +201,7 @@ public class DecompilerRequestReceiver {
         try {
             getResponse(hostname, listenPort, vmId, vmPid, "HALT");
         } catch (Exception e) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Exception when calling halt action", e));
+            Logger.getLogger().log(Logger.Level.ALL, new RuntimeException("Exception when calling halt action", e));
         } finally {
             vmManager.getVmInfoByID(vmId).removeVmDecompilerStatus();
         }

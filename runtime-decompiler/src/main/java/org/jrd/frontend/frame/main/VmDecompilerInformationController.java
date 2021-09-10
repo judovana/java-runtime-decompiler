@@ -3,7 +3,7 @@ package org.jrd.frontend.frame.main;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.AgentRequestAction.RequestAction;
 import org.jrd.backend.core.DecompilerRequestReceiver;
-import org.jrd.backend.core.OutputController;
+import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.data.Config;
 import org.jrd.backend.data.Model;
@@ -107,7 +107,7 @@ public class VmDecompilerInformationController {
         VmInfo selectedVm = sourceList.getSelectedValue();
 
         if (selectedVm == null) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Attempted to remove " + vmType + " with none selected.");
+            Logger.getLogger().log(Logger.Level.ALL, "Attempted to remove " + vmType + " with none selected.");
             JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), "No " + vmType + " selected.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -125,7 +125,7 @@ public class VmDecompilerInformationController {
 
         if (!vmManager.removeVm(selectedVm)) {
             String removeFailMessage = "Failed to remove VM: " + selectedVm;
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, removeFailMessage);
+            Logger.getLogger().log(Logger.Level.ALL, removeFailMessage);
             JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), removeFailMessage, "Error", JOptionPane.ERROR_MESSAGE);
         }
 
@@ -134,8 +134,8 @@ public class VmDecompilerInformationController {
                 Config.getConfig().removeSavedFsVm(selectedVm);
                 Config.getConfig().saveConfigFile();
             } catch (IOException e) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Unable to tag '" + vmInfo + "' as no longer to be saved. Cause:");
-                OutputController.getLogger().log(e);
+                Logger.getLogger().log(Logger.Level.ALL, "Unable to tag '" + vmInfo + "' as no longer to be saved. Cause:");
+                Logger.getLogger().log(e);
             }
         }
 
@@ -275,7 +275,7 @@ public class VmDecompilerInformationController {
         try {
             decompiledClass = pluginManager.decompile(bytecodeDecompilerView.getSelectedDecompilerWrapperInformation(), name, bytes, null, vmInfo, vmManager);
         } catch (Exception e) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
+            Logger.getLogger().log(Logger.Level.ALL, e);
         }
         bytecodeDecompilerView.reloadTextField(name, decompiledClass, bytes);
     }
@@ -343,10 +343,10 @@ public class VmDecompilerInformationController {
             AgentRequestAction request = createRequest(RequestAction.HALT, "");
             String response = submitRequest(request);
             if ("ok".equals(response)) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Agent closing socket and exiting");
+                Logger.getLogger().log(Logger.Level.DEBUG, "Agent closing socket and exiting");
             }
         } catch (Exception e) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Error when sending request to halt agent", e));
+            Logger.getLogger().log(Logger.Level.ALL, new RuntimeException("Error when sending request to halt agent", e));
         }
     }
 

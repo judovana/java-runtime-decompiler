@@ -2,7 +2,7 @@ package org.jrd.backend.data;
 
 import com.sun.tools.attach.VirtualMachine;
 import com.sun.tools.attach.VirtualMachineDescriptor;
-import org.jrd.backend.core.OutputController;
+import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
 
 import java.awt.event.ActionEvent;
@@ -30,7 +30,7 @@ public class VmManager {
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {
-                    OutputController.getLogger().log(e);
+                    Logger.getLogger().log(e);
                 }
                 updateLocalVMs();
             }
@@ -44,13 +44,13 @@ public class VmManager {
         try {
             savedFsVms = Config.getConfig().getSavedFsVms();
         } catch (IOException | ClassNotFoundException e) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Failed to load saved FS VMs. Cause: ");
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
+            Logger.getLogger().log(Logger.Level.ALL, "Failed to load saved FS VMs. Cause: ");
+            Logger.getLogger().log(Logger.Level.ALL, e);
             return;
         }
 
         if (savedFsVms.isEmpty()) {
-            OutputController.getLogger().log("No saved FS VMs to load.");
+            Logger.getLogger().log("No saved FS VMs to load.");
             return;
         }
 
@@ -137,8 +137,8 @@ public class VmManager {
                 Config.getConfig().addSavedFsVm(vmInfo);
                 Config.getConfig().saveConfigFile();
             } catch (IOException e) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Failed to save FS VM '" + vmInfo + "'.");
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
+                Logger.getLogger().log(Logger.Level.ALL, "Failed to save FS VM '" + vmInfo + "'.");
+                Logger.getLogger().log(Logger.Level.ALL, e);
             }
         }
 

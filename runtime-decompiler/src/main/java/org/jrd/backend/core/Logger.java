@@ -1,12 +1,12 @@
 package org.jrd.backend.core;
 
-public class OutputController {
+public class Logger {
 
     private static final String NULL_OBJECT = "Trying to log null object";
 
     public enum Level {
-        MESSAGE_ALL, // - stdout/log in all cases
-        MESSAGE_DEBUG // - stdout/log in verbose/debug mode
+        ALL, // log in all cases
+        DEBUG // log in verbose/debug mode
     }
 
     private boolean verbose = false;
@@ -19,16 +19,14 @@ public class OutputController {
         return verbose;
     }
 
-    private static class OutputControllerHolder {
-
-        //https://en.wikipedia.org/wiki/Initialization_on_demand_holder_idiom
-        //https://en.wikipedia.org/wiki/Double-checked_locking#Usage_in_Java
-        private static final OutputController INSTANCE = new OutputController();
+    private static class LoggerHolder {
+        // https://en.wikipedia.org/wiki/Initialization_on_demand_holder_idiom
+        // https://en.wikipedia.org/wiki/Double-checked_locking#Usage_in_Java
+        private static final Logger INSTANCE = new Logger();
     }
 
-
-    public static OutputController getLogger() {
-        return OutputControllerHolder.INSTANCE;
+    public static Logger getLogger() {
+        return LoggerHolder.INSTANCE;
     }
 
     public void log(Level level, String s) {
@@ -40,11 +38,11 @@ public class OutputController {
     }
 
     public void log(String s) {
-        log(Level.MESSAGE_DEBUG, (Object) s);
+        log(Level.DEBUG, (Object) s);
     }
 
     public void log(Throwable s) {
-        log(Level.MESSAGE_DEBUG, (Object) s);
+        log(Level.DEBUG, (Object) s);
     }
 
     private void log(Level level, Object o) {
@@ -52,7 +50,7 @@ public class OutputController {
         if (o == null) {
             s = NULL_OBJECT;
         } else if (o instanceof Throwable) {
-            if (verbose || level == Level.MESSAGE_ALL) {
+            if (verbose || level == Level.ALL) {
                 ((Throwable) o).printStackTrace();
             }
             // show gui error dialog? To disturbing? Add shownexttime checkbox? just notification(sounds best considering the nature of exceptions)?
@@ -60,10 +58,9 @@ public class OutputController {
         } else {
             s = o.toString();
         }
-        if (verbose || level == Level.MESSAGE_ALL) {
+        if (verbose || level == Level.ALL) {
             System.err.println(s);
             // print to some gui console?
         }
     }
-
 }

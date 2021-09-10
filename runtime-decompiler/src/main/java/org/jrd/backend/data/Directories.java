@@ -1,6 +1,6 @@
 package org.jrd.backend.data;
 
-import org.jrd.backend.core.OutputController;
+import org.jrd.backend.core.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -63,7 +63,7 @@ public final class Directories {
 
     public static String getJrdLocation() {
         if (System.getProperty("jrd.location") == null) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "jrd.location environment variable not found, using fallback");
+            Logger.getLogger().log(Logger.Level.DEBUG, "jrd.location environment variable not found, using fallback");
             return Paths.get(".").normalize().toAbsolutePath().toString();
         } else {
             return System.getProperty("jrd.location");
@@ -84,7 +84,7 @@ public final class Directories {
 
         if (!pluginDir.exists()) {
             if (!pluginDir.mkdirs()) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Unable to create plugin directory '" + pluginDir.getAbsolutePath() + "'.");
+                Logger.getLogger().log(Logger.Level.ALL, "Unable to create plugin directory '" + pluginDir.getAbsolutePath() + "'.");
             }
         }
     }
@@ -93,7 +93,7 @@ public final class Directories {
         try {
             Files.delete(Path.of(stringPath));
         } catch (IOException e) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
+            Logger.getLogger().log(Logger.Level.ALL, e);
         }
     }
 }

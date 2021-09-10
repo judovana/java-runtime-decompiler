@@ -10,7 +10,7 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
 import org.fife.ui.rtextarea.SearchResult;
-import org.jrd.backend.core.OutputController;
+import org.jrd.backend.core.Logger;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 import org.jrd.frontend.utility.ScreenFinder;
 
@@ -177,7 +177,7 @@ public class BytecodeDecompilerView {
                             ActionEvent event = new ActionEvent(this, 3, name);
                             overwriteActionListener.actionPerformed(event);
                         } catch (Throwable t) {
-                            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, t);
+                            Logger.getLogger().log(Logger.Level.ALL, t);
                         }
                         return null;
                     }
@@ -199,7 +199,7 @@ public class BytecodeDecompilerView {
 
                             classesActionListener.actionPerformed(event);
                         } catch (Throwable t) {
-                            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, t);
+                            Logger.getLogger().log(Logger.Level.ALL, t);
                         }
                         return null;
                     }
@@ -580,7 +580,7 @@ public class BytecodeDecompilerView {
         try {
             hex.open(new ByteArrayInputStream(source));
         } catch (IOException ex) {
-            OutputController.getLogger().log(ex);
+            Logger.getLogger().log(ex);
         }
         this.lastDecompiledClass = name;
     }
@@ -663,7 +663,7 @@ public class BytecodeDecompilerView {
                     ActionEvent event = new ActionEvent(this, 1, name);
                     bytesActionListener.actionPerformed(event);
                 } catch (Throwable t) {
-                    OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, t);
+                    Logger.getLogger().log(Logger.Level.ALL, t);
                 }
                 return null;
             }

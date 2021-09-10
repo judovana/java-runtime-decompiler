@@ -1,6 +1,6 @@
 package org.jrd.backend.decompiling;
 
-import org.jrd.backend.core.OutputController;
+import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.Directories;
 
 import java.io.BufferedReader;
@@ -101,7 +101,7 @@ public class DecompilerWrapperInformation {
             String line = br.readLine();
 
             if (line == null) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Wrapper '" + wrapperPath + "' is empty!");
+                Logger.getLogger().log(Logger.Level.ALL, "Wrapper '" + wrapperPath + "' is empty!");
                 invalidWrapper = true;
                 return;
             }
@@ -119,7 +119,7 @@ public class DecompilerWrapperInformation {
             }
             fullyQualifiedClassName = packageName + className;
         } catch (IOException e) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, e);
+            Logger.getLogger().log(Logger.Level.DEBUG, e);
             invalidWrapper = true;
         }
     }
@@ -174,12 +174,12 @@ public class DecompilerWrapperInformation {
             File file = this.wrapperUrl.getFile();
             if (!(file.exists() && file.canRead())) {
                 invalidWrapper = true;
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Cant read file or does not exist! " + file.getAbsolutePath()));
+                Logger.getLogger().log(Logger.Level.ALL, new RuntimeException("Cant read file or does not exist! " + file.getAbsolutePath()));
             }
         } catch (ExpandableUrl.MalformedUrlToPath e) {
             this.wrapperUrl = null;
             this.invalidWrapper = true;
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
+            Logger.getLogger().log(Logger.Level.ALL, e);
         }
     }
 
@@ -216,7 +216,7 @@ public class DecompilerWrapperInformation {
             } catch (ExpandableUrl.MalformedUrlToPath e) {
                 this.dependencyUrls.add(null);
                 this.invalidWrapper = true;
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
+                Logger.getLogger().log(Logger.Level.ALL, e);
             }
         }
     }
@@ -238,7 +238,7 @@ public class DecompilerWrapperInformation {
             this.decompilerDownloadUrl = new URL(decompilerDownloadUrl);
         } catch (MalformedURLException e1) {
             this.decompilerDownloadUrl = null;
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, e1);
+            Logger.getLogger().log(Logger.Level.DEBUG, e1);
         }
     }
 

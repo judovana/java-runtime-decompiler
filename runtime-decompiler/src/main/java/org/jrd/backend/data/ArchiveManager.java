@@ -1,7 +1,7 @@
 package org.jrd.backend.data;
 
 import org.jrd.backend.communication.FsAgent;
-import org.jrd.backend.core.OutputController;
+import org.jrd.backend.core.Logger;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -123,7 +123,7 @@ public class ArchiveManager {
 
         File f = new File(TMP_DIR + FILE_SEPARATOR + "jrd" + FILE_SEPARATOR);
         if (f.exists() && !delete()) { // do not log if it didn't even exist before
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Could not delete jrd temp directory at '" + f.getAbsolutePath() + "'!");
+            Logger.getLogger().log(Logger.Level.ALL, "Could not delete jrd temp directory at '" + f.getAbsolutePath() + "'!");
         }
 
         // Create my dir in tmpdir
@@ -308,7 +308,7 @@ public class ArchiveManager {
 
         boolean wasDeleted = f.delete();
         if (!wasDeleted) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Could not delete file '" + f.getAbsolutePath() + "'.");
+            Logger.getLogger().log(Logger.Level.DEBUG, "Could not delete file '" + f.getAbsolutePath() + "'.");
         }
 
         return wasDeleted;

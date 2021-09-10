@@ -1,7 +1,7 @@
 package org.jrd.backend.communication;
 
 
-import org.jrd.backend.core.OutputController;
+import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.ArchiveManager;
 
 import java.io.DataInputStream;
@@ -60,7 +60,7 @@ public class FsAgent implements JrdAgent {
                     throw new RuntimeException("Unknown command: " + q[0]);
             }
         } catch (Exception ex) {
-            OutputController.getLogger().log(ex);
+            Logger.getLogger().log(ex);
             return "ERROR";
         }
     }
@@ -194,7 +194,7 @@ public class FsAgent implements JrdAgent {
         if (s.endsWith(".class")) {
             classes.add(toClass(s.substring(root.length() + 1)));
         } else {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "ignored non .class element on cp: " + s);
+            Logger.getLogger().log(Logger.Level.DEBUG, "ignored non .class element on cp: " + s);
         }
     }
 
@@ -223,7 +223,7 @@ public class FsAgent implements JrdAgent {
         @Override
         public Void onDirEntry(File dir, File clazz) throws IOException {
             Files.write(clazz.toPath(), Base64.getDecoder().decode(body));
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "written " + clazz.getAbsolutePath());
+            Logger.getLogger().log(Logger.Level.DEBUG, "written " + clazz.getAbsolutePath());
             return null;
         }
 
@@ -234,7 +234,7 @@ public class FsAgent implements JrdAgent {
             try (FileSystem fs = FileSystems.newFileSystem(file.toPath(), null)) {
                 Path fileInsideZipPath = fs.getPath(ze.getName());
                 Files.write(fileInsideZipPath, Base64.getDecoder().decode(body));
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "written " + file.getAbsolutePath() + "!" + fileInsideZipPath);
+                Logger.getLogger().log(Logger.Level.DEBUG, "written " + file.getAbsolutePath() + "!" + fileInsideZipPath);
             }
             return null;
         }

@@ -4,7 +4,7 @@ import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.DecompilerRequestReceiver;
-import org.jrd.backend.core.OutputController;
+import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.Cli;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
@@ -48,7 +48,7 @@ public final class CommonUtils {
                 try {
                     Files.createDirectories(f.getParentFile().toPath());
                 } catch (IOException e) {
-                    OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
+                    Logger.getLogger().log(Logger.Level.ALL, e);
                 }
             }
             Files.write(f.toPath(), content);

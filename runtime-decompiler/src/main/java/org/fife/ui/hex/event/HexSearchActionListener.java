@@ -1,7 +1,7 @@
 package org.fife.ui.hex.event;
 
 import org.fife.ui.hex.swing.HexSearch;
-import org.jrd.backend.core.OutputController;
+import org.jrd.backend.core.Logger;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -41,7 +41,7 @@ public class HexSearchActionListener implements ActionListener {
                     break;
             }
         } catch (Exception e) {
-            OutputController.getLogger().log(e);
+            Logger.getLogger().log(e);
         }
     }
 }
