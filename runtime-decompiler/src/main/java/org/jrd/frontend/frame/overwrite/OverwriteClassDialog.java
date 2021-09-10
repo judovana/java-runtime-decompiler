@@ -14,7 +14,7 @@ import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 import org.jrd.backend.decompiling.PluginManager;
-import org.jrd.frontend.frame.main.VmDecompilerInformationController;
+import org.jrd.frontend.frame.main.DecompilationController;
 import org.jrd.frontend.utility.CommonUtils;
 
 import javax.swing.JButton;
@@ -339,7 +339,7 @@ public class OverwriteClassDialog extends JDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    String response = CommonUtils.uploadBytecode(className.getText(), vmManager, vmInfo, VmDecompilerInformationController.fileToBytes(filePath.getText()));
+                    String response = CommonUtils.uploadBytecode(className.getText(), vmManager, vmInfo, DecompilationController.fileToBytes(filePath.getText()));
                     if (response.equals(DecompilerRequestReceiver.ERROR_RESPONSE)) {
                         JOptionPane.showMessageDialog(null, "Class overwrite failed.", "Error", JOptionPane.ERROR_MESSAGE);
                     } else {

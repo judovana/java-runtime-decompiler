@@ -596,9 +596,9 @@ public class BytecodeDecompilerView {
 
     private class OverwriteActionListener implements ActionListener {
 
-        private final VmDecompilerInformationController.ClassOverwriter worker;
+        private final DecompilationController.ClassOverwriter worker;
 
-        OverwriteActionListener(VmDecompilerInformationController.ClassOverwriter worker) {
+        OverwriteActionListener(DecompilationController.ClassOverwriter worker) {
             this.worker = worker;
         }
 
@@ -608,7 +608,7 @@ public class BytecodeDecompilerView {
         }
     }
 
-    public void setOverwriteActionListener(VmDecompilerInformationController.ClassOverwriter worker) {
+    public void setOverwriteActionListener(DecompilationController.ClassOverwriter worker) {
         this.overwriteActionListener = new OverwriteActionListener(worker);
     }
 

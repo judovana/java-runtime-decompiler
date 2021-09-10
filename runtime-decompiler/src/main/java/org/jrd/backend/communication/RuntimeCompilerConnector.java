@@ -12,7 +12,7 @@ import org.jrd.backend.data.Cli;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
-import org.jrd.frontend.frame.main.VmDecompilerInformationController;
+import org.jrd.frontend.frame.main.DecompilationController;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,8 +47,8 @@ public class RuntimeCompilerConnector {
 
         @Override
         public List<String> getClassPathListing() {
-            AgentRequestAction request = VmDecompilerInformationController.createRequest(vmInfo, AgentRequestAction.RequestAction.CLASSES);
-            String response = VmDecompilerInformationController.submitRequest(vmManager, request);
+            AgentRequestAction request = DecompilationController.createRequest(vmInfo, AgentRequestAction.RequestAction.CLASSES);
+            String response = DecompilationController.submitRequest(vmManager, request);
             if ("ok".equals(response)) {
                 String[] classes = vmInfo.getVmDecompilerStatus().getLoadedClassNames();
                 return Arrays.asList(classes);

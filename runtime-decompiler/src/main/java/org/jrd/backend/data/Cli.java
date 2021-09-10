@@ -12,7 +12,7 @@ import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.filesystem.NewFsVmController;
-import org.jrd.frontend.frame.main.VmDecompilerInformationController;
+import org.jrd.frontend.frame.main.DecompilationController;
 import org.jrd.frontend.frame.overwrite.FileToClassValidator;
 import org.jrd.frontend.utility.CommonUtils;
 
@@ -224,7 +224,7 @@ public class Cli {
         String clazz;
 
         if (newBytecodeFile == null) {
-            clazz = VmDecompilerInformationController.stdinToBase64();
+            clazz = DecompilationController.stdinToBase64();
         } else { // validate first
             FileToClassValidator.StringAndScore r = FileToClassValidator.validate(classStr, newBytecodeFile);
 
@@ -235,17 +235,17 @@ public class Cli {
                 Logger.getLogger().log(Logger.Level.ALL, "ERROR: " + r.getMessage());
             }
 
-            clazz = VmDecompilerInformationController.fileToBase64(newBytecodeFile);
+            clazz = DecompilationController.fileToBase64(newBytecodeFile);
         }
-        AgentRequestAction request = VmDecompilerInformationController.createRequest(vmInfo,
+        AgentRequestAction request = DecompilationController.createRequest(vmInfo,
                 AgentRequestAction.RequestAction.OVERWRITE,
                 classStr,
                 clazz);
-        String response = VmDecompilerInformationController.submitRequest(vmManager, request);
+        String response = DecompilationController.submitRequest(vmManager, request);
         if ("ok".equals(response)) {
             System.out.println("Most likely done successfully.");
         } else {
-            throw new RuntimeException(VmDecompilerInformationController.CLASSES_NOPE);
+            throw new RuntimeException(DecompilationController.CLASSES_NOPE);
         }
     }
 
@@ -361,11 +361,11 @@ public class Cli {
                 String className = bytecode.getClassIdentifier().getFullName();
                 Logger.getLogger().log("Uploading class '" + className + "'.");
 
-                AgentRequestAction request = VmDecompilerInformationController.createRequest(targetVm,
+                AgentRequestAction request = DecompilationController.createRequest(targetVm,
                         AgentRequestAction.RequestAction.OVERWRITE,
                         className,
                         Base64.getEncoder().encodeToString(bytecode.getFile()));
-                String response = VmDecompilerInformationController.submitRequest(vmManager, request);
+                String response = DecompilationController.submitRequest(vmManager, request);
 
                 if ("ok".equals(response)) {
                     Logger.getLogger().log("Successfully uploaded class '" + className + "'.");
@@ -668,24 +668,24 @@ public class Cli {
     }
 
     public static String[] obtainClasses(VmInfo vmInfo, VmManager manager) {
-        AgentRequestAction request = VmDecompilerInformationController.createRequest(vmInfo, AgentRequestAction.RequestAction.CLASSES, null);
-        String response = VmDecompilerInformationController.submitRequest(manager, request);
+        AgentRequestAction request = DecompilationController.createRequest(vmInfo, AgentRequestAction.RequestAction.CLASSES, null);
+        String response = DecompilationController.submitRequest(manager, request);
 
         if ("ok".equals(response)) {
             return vmInfo.getVmDecompilerStatus().getLoadedClassNames();
         } else {
-            throw new RuntimeException(VmDecompilerInformationController.CLASSES_NOPE);
+            throw new RuntimeException(DecompilationController.CLASSES_NOPE);
         }
     }
 
     public static VmDecompilerStatus obtainClass(VmInfo vmInfo, String clazz, VmManager manager) {
-        AgentRequestAction request = VmDecompilerInformationController.createRequest(vmInfo, AgentRequestAction.RequestAction.BYTES, clazz);
-        String response = VmDecompilerInformationController.submitRequest(manager, request);
+        AgentRequestAction request = DecompilationController.createRequest(vmInfo, AgentRequestAction.RequestAction.BYTES, clazz);
+        String response = DecompilationController.submitRequest(manager, request);
 
         if ("ok".equals(response)) {
             return vmInfo.getVmDecompilerStatus();
         } else {
-            throw new RuntimeException(VmDecompilerInformationController.CLASSES_NOPE);
+            throw new RuntimeException(DecompilationController.CLASSES_NOPE);
         }
     }
 

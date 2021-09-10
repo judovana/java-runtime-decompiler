@@ -1,8 +1,8 @@
 package org.jrd.backend.data;
 
 import org.jrd.backend.core.Logger;
+import org.jrd.frontend.frame.main.DecompilationController;
 import org.jrd.frontend.frame.main.MainFrameView;
-import org.jrd.frontend.frame.main.VmDecompilerInformationController;
 
 public class Main {
 
@@ -15,7 +15,7 @@ public class Main {
         if (cli.isGui()) {
             setLookAndFeel();
             MainFrameView mainView = new MainFrameView();
-            new VmDecompilerInformationController(mainView, model);
+            new DecompilationController(mainView, model);
         } else {
             cli.consumeCli();
         }

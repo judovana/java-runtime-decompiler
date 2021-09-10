@@ -35,7 +35,7 @@ import java.util.List;
  * This class provides Action listeners and request handling for
  * the GUI.
  */
-public class VmDecompilerInformationController {
+public class DecompilationController {
 
     private final MainFrameView mainFrameView;
     private final BytecodeDecompilerView bytecodeDecompilerView;
@@ -52,7 +52,7 @@ public class VmDecompilerInformationController {
     public static final int CLASS_NAME = 0;
     public static final int CLASS_BODY = 1;
 
-    public VmDecompilerInformationController(MainFrameView mainFrameView, Model model) {
+    public DecompilationController(MainFrameView mainFrameView, Model model) {
         this.mainFrameView = mainFrameView;
         this.bytecodeDecompilerView = mainFrameView.getBytecodeDecompilerView();
         this.vmManager = model.getVmManager();
