@@ -1,4 +1,4 @@
-package org.jrd.frontend.frame.main;
+package org.jrd.frontend.frame.overwrite;
 
 import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.ClassesProvider;
@@ -14,7 +14,8 @@ import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 import org.jrd.backend.decompiling.PluginManager;
-import org.jrd.frontend.Utils;
+import org.jrd.frontend.frame.main.VmDecompilerInformationController;
+import org.jrd.frontend.utility.CommonUtils;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -45,9 +46,9 @@ import java.util.Optional;
 import java.util.logging.Level;
 
 
-public class RewriteClassDialog extends JDialog {
+public class OverwriteClassDialog extends JDialog {
 
-    private static class TextFieldBasedStus implements Utils.StatusKeeper {
+    private static class TextFieldBasedStus implements CommonUtils.StatusKeeper {
         private final JTextField status;
 
         TextFieldBasedStus(JTextField status) {
@@ -121,8 +122,8 @@ public class RewriteClassDialog extends JDialog {
     private final VmInfo vmInfo;
     private final VmManager vmManager;
 
-    public RewriteClassDialog(final String name, final LatestPaths latestPaths, final String currentBuffer, final byte[] cBinBuffer, VmInfo vmInfo, VmManager vmManager, PluginManager pluginManager,
-            DecompilerWrapperInformation selectedDecompiler, int supperSelection) {
+    public OverwriteClassDialog(final String name, final LatestPaths latestPaths, final String currentBuffer, final byte[] cBinBuffer, VmInfo vmInfo, VmManager vmManager, PluginManager pluginManager,
+                                DecompilerWrapperInformation selectedDecompiler, int supperSelection) {
         super((JFrame) null, "Specify class and selectSrc its bytecode", true);
         this.setSize(400, 400);
         this.setLayout(new BorderLayout());
@@ -149,8 +150,8 @@ public class RewriteClassDialog extends JDialog {
         compileAndSave = new JButton("Compile and save as");
         namingBinary = new JComboBox<String>(SAVE_OPTIONS);
         namingSource = new JComboBox<String>(SAVE_OPTIONS);
-        namingSource.setSelectedIndex(Utils.FULLY_QUALIFIED_NAME);
-        namingBinary.setSelectedIndex(Utils.SRC_SUBDIRS_NAME);
+        namingSource.setSelectedIndex(CommonUtils.FULLY_QUALIFIED_NAME);
+        namingBinary.setSelectedIndex(CommonUtils.SRC_SUBDIRS_NAME);
         futureBinTarget = new JTextField(latestPaths.getLastSaveBin());
         futureSrcTarget = new JTextField(latestPaths.getLastSaveSrc());
         selectBinTarget = new JButton("...");
@@ -183,7 +184,7 @@ public class RewriteClassDialog extends JDialog {
         externalFiles.add(exFilesIn);
         outputExternalFilesDir = new JTextField(latestPaths.getOutputExternalFilesDir());
         namingExternal = new JComboBox<>(SAVE_OPTIONS);
-        namingExternal.setSelectedIndex(Utils.SRC_SUBDIRS_NAME);
+        namingExternal.setSelectedIndex(CommonUtils.SRC_SUBDIRS_NAME);
         selectExternalFilesSave = new JButton("...");
         JPanel saveExFilesIn = new JPanel(new BorderLayout());
         saveExFilesIn.add(selectExternalFilesSave, BorderLayout.EAST);
@@ -203,7 +204,7 @@ public class RewriteClassDialog extends JDialog {
         binaryView.setName("Current binary buffer");
         binaryFilename = new JLabel(origName + " - " + origBin.length);
         namingBinaryView = new JComboBox<>(SAVE_OPTIONS);
-        namingBinaryView.setSelectedIndex(Utils.SRC_SUBDIRS_NAME);
+        namingBinaryView.setSelectedIndex(CommonUtils.SRC_SUBDIRS_NAME);
         outputBinaries = new JTextField(latestPaths.getOutputBinaries());
         selectBinary = new JButton("...");
         saveBinary = new JButton("Save current binary buffer");
@@ -252,7 +253,7 @@ public class RewriteClassDialog extends JDialog {
         saveSrcBuffer.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                Utils.saveByGui(futureSrcTarget.getText(), namingSource.getSelectedIndex(), ".java", new TextFieldBasedStus(statusCompileCurrentBuffer), origName, origBuffer.getBytes(StandardCharsets.UTF_8));
+                CommonUtils.saveByGui(futureSrcTarget.getText(), namingSource.getSelectedIndex(), ".java", new TextFieldBasedStus(statusCompileCurrentBuffer), origName, origBuffer.getBytes(StandardCharsets.UTF_8));
 
             }
         });
@@ -260,7 +261,7 @@ public class RewriteClassDialog extends JDialog {
         saveBinary.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                Utils.saveByGui(outputBinaries.getText(), namingBinaryView.getSelectedIndex(), ".class", new TextFieldBasedStus(statusBinary), origName, origBin);
+                CommonUtils.saveByGui(outputBinaries.getText(), namingBinaryView.getSelectedIndex(), ".class", new TextFieldBasedStus(statusBinary), origName, origBin);
 
             }
         });
@@ -268,7 +269,7 @@ public class RewriteClassDialog extends JDialog {
         uploadBinary.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                Utils.uploadByGui(vmInfo, vmManager, new TextFieldBasedStus(statusBinary), origName, origBin);
+                CommonUtils.uploadByGui(vmInfo, vmManager, new TextFieldBasedStus(statusBinary), origName, origBin);
             }
         });
     }
@@ -295,7 +296,7 @@ public class RewriteClassDialog extends JDialog {
     private static void setSelectSaveListener(JButton selectTarget, JTextField futureTarget, JComboBox<String> naming) {
         selectTarget.addActionListener(e -> {
             JFileChooser jf = new JFileChooser(futureTarget.getText());
-            if (naming.getSelectedIndex() < Utils.CUSTOM_NAME) {
+            if (naming.getSelectedIndex() < CommonUtils.CUSTOM_NAME) {
                 jf.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             } else {
                 jf.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -334,9 +335,9 @@ public class RewriteClassDialog extends JDialog {
         });
         ok.addActionListener(e -> {
             try {
-                String response = Utils.uploadBytecode(className.getText(), vmManager, vmInfo, VmDecompilerInformationController.fileToBytes(filePath.getText()));
+                String response = CommonUtils.uploadBytecode(className.getText(), vmManager, vmInfo, VmDecompilerInformationController.fileToBytes(filePath.getText()));
                 if (response.equals(DecompilerRequestReceiver.ERROR_RESPONSE)) {
-                    JOptionPane.showMessageDialog(null, "class rewrite failed.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "Class overwrite failed.", "Error", JOptionPane.ERROR_MESSAGE);
                 } else {
                     validation.setForeground(Color.black);
                     validation.setText("Upload looks ok");
@@ -362,7 +363,7 @@ public class RewriteClassDialog extends JDialog {
         compileExternalFiles.addActionListener(actionEvent -> {
             String[] sources = filesToCompile.getText().split(File.pathSeparator);
             try {
-                IdentifiedSource[] loaded = Utils.sourcesToIdentifiedSources(recursive.isSelected(), sources);
+                IdentifiedSource[] loaded = CommonUtils.sourcesToIdentifiedSources(recursive.isSelected(), sources);
                 new SavingCompilerOutputAction(statusExternalFiles, vmInfo, vmManager, pluginManager, decompiler, haveCompiler, namingExternal.getSelectedIndex(),
                         outputExternalFilesDir.getText()).run(loaded);
             } catch (Exception ex) {
@@ -374,8 +375,8 @@ public class RewriteClassDialog extends JDialog {
     }
 
 
-    private static RewriteClassDialog.CompilationWithResult compileWithGui(VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapperInformation currentDecompiler, boolean haveCompiler,
-                                                                           IdentifiedSource... sources) {
+    private static OverwriteClassDialog.CompilationWithResult compileWithGui(VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapperInformation currentDecompiler, boolean haveCompiler,
+                                                                             IdentifiedSource... sources) {
         ClassesProvider cp = new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager);
         ClasspathlessCompiler rc;
         if (haveCompiler) {
@@ -390,7 +391,7 @@ public class RewriteClassDialog extends JDialog {
         JTextArea compilationLog = new JTextArea();
         compilationRunningDialog.setSize(300, 400);
         compilationRunningDialog.add(new JScrollPane(compilationLog));
-        RewriteClassDialog.CompilationWithResult compiler = new RewriteClassDialog.CompilationWithResult(rc, cp, compilationLog, sources);
+        OverwriteClassDialog.CompilationWithResult compiler = new OverwriteClassDialog.CompilationWithResult(rc, cp, compilationLog, sources);
         Thread t = new Thread(compiler);
         t.start();
         compilationRunningDialog.setLocationRelativeTo(null);
@@ -530,7 +531,7 @@ public class RewriteClassDialog extends JDialog {
         }
 
         public void run(IdentifiedSource... sources) {
-            RewriteClassDialog.CompilationWithResult compiler = compileWithGui(this.vmInfo, this.vmManager, pluginManager, decompilerWrapper, haveCompiler, sources);
+            OverwriteClassDialog.CompilationWithResult compiler = compileWithGui(this.vmInfo, this.vmManager, pluginManager, decompilerWrapper, haveCompiler, sources);
             if (compiler.ex == null && compiler.result == null) {
                 String s = "No output from compiler, maybe still running?";
                 JOptionPane.showMessageDialog(null, s);
@@ -547,7 +548,7 @@ public class RewriteClassDialog extends JDialog {
                     status.setText("something done, will save now");
                     status.repaint();
                 }
-                if (namingSchema == Utils.CUSTOM_NAME) {
+                if (namingSchema == CommonUtils.CUSTOM_NAME) {
                     if (compiler.result.size() > 0) {
                         String s = "Output of compilation was " + compiler.result.size() + "classes. Can not save more then one file to exact filename";
                         JOptionPane.showMessageDialog(null, s);
@@ -557,7 +558,7 @@ public class RewriteClassDialog extends JDialog {
                 }
                 int saved = 0;
                 for (IdentifiedBytecode clazz : compiler.result) {
-                    boolean r = Utils.saveByGui(destination, namingSchema, ".class", new TextFieldBasedStus(status), clazz.getClassIdentifier().getFullName(), clazz.getFile());
+                    boolean r = CommonUtils.saveByGui(destination, namingSchema, ".class", new TextFieldBasedStus(status), clazz.getClassIdentifier().getFullName(), clazz.getFile());
                     if (r) {
                         saved++;
                     }
@@ -583,7 +584,7 @@ public class RewriteClassDialog extends JDialog {
         }
 
         public void run(IdentifiedSource... sources) {
-            RewriteClassDialog.CompilationWithResult compiler = compileWithGui(this.vmInfo, this.vmManager, pluginManager, decompilerWrapper, haveCompiler, sources);
+            OverwriteClassDialog.CompilationWithResult compiler = compileWithGui(this.vmInfo, this.vmManager, pluginManager, decompilerWrapper, haveCompiler, sources);
             if (compiler.ex == null && compiler.result == null) {
                 String s = "No output from compiler, maybe still running?";
                 JOptionPane.showMessageDialog(null, s);
@@ -602,7 +603,7 @@ public class RewriteClassDialog extends JDialog {
                 }
                 int saved = 0;
                 for (IdentifiedBytecode clazz : compiler.result) {
-                    boolean r = Utils.uploadByGui(vmInfo, vmManager, new TextFieldBasedStus(status), clazz.getClassIdentifier().getFullName(), clazz.getFile());
+                    boolean r = CommonUtils.uploadByGui(vmInfo, vmManager, new TextFieldBasedStus(status), clazz.getClassIdentifier().getFullName(), clazz.getFile());
                     if (r) {
                         saved++;
                     }

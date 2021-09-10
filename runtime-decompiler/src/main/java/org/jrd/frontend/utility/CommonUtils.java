@@ -1,4 +1,4 @@
-package org.jrd.frontend;
+package org.jrd.frontend.utility;
 
 import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
@@ -20,12 +20,15 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class Utils {
+/**
+ * Class with utility methods common for both CLI and GUI.
+ */
+public final class CommonUtils {
     public static final int FULLY_QUALIFIED_NAME = 0;
     public static final int SRC_SUBDIRS_NAME = 1;
     public static final int CUSTOM_NAME = 2;
 
-    private Utils() {
+    private CommonUtils() {
     }
 
     public interface StatusKeeper {

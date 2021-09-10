@@ -1,5 +1,7 @@
 package org.jrd.frontend.frame.main;
 
+import org.jrd.frontend.utility.ScreenFinder;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
