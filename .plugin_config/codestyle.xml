@@ -30,6 +30,11 @@
         <property name="message" value="Commented-out multi-line code"/>
     </module>
 
+    <!-- Size violation checks, see https://checkstyle.org/config_sizes.html -->
+    <module name="FileLength">
+        <property name="max" value="1000"/>
+    </module>
+
     <module name="TreeWalker">
         <!-- Enable annotations -->
         <module name="SuppressWarningsHolder"/>
@@ -263,5 +268,23 @@
         <module name="JavaNCSS">
             <property name="methodMaximum" value="80"/>
         </module>
+
+        <!-- Size violation checks, see https://checkstyle.org/config_sizes.html -->
+        <module name="AnonInnerLength" />
+        <module name="ExecutableStatementCount">
+            <property name="max" value="35"/>
+            <property name="tokens" value="METHOD_DEF,INSTANCE_INIT,STATIC_INIT,COMPACT_CTOR_DEF,LAMBDA "/>
+        </module>
+        <module name="LambdaBodyLength">
+            <property name="max" value="12"/> <!-- Default is 10, but the check counts both the first and last row -->
+        </module>
+        <module name="MethodCount" />
+        <module name="MethodLength" />
+        <module name="OuterTypeNumber" />
+        <module name="ParameterNumber">
+            <property name="ignoreOverriddenMethods" value="true"/>
+            <property name="tokens" value="METHOD_DEF"/>
+        </module>
+        <module name="RecordComponentNumber" />
     </module>
 </module>

@@ -112,36 +112,44 @@ public final class CommonUtils {
             File f = new File(sources[i]);
             if (f.isDirectory()) {
                 if (recursive) {
-                    Files.walkFileTree(f.toPath(), new FileVisitor<Path>() {
-                        @Override
-                        public FileVisitResult preVisitDirectory(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
-                            return FileVisitResult.CONTINUE;
-                        }
-
-                        @Override
-                        public FileVisitResult visitFile(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
-                            File clazz = path.toFile();
-                            if (clazz.getName().endsWith(".java")) {
-                                loaded.add(new IdentifiedSource(new ClassIdentifier(guessClass(clazz.getAbsolutePath())), Files.readAllBytes(clazz.toPath())));
-                            }
-                            return FileVisitResult.CONTINUE;
-                        }
-
-                        @Override
-                        public FileVisitResult visitFileFailed(Path path, IOException e) throws IOException {
-                            return FileVisitResult.CONTINUE;
-                        }
-
-                        @Override
-                        public FileVisitResult postVisitDirectory(Path path, IOException e) throws IOException {
-                            return FileVisitResult.CONTINUE;
-                        }
-                    });
+                    Files.walkFileTree(f.toPath(), new ClassVisitor(loaded));
                 }
             } else {
                 loaded.add(new IdentifiedSource(new ClassIdentifier(guessClass(f.getAbsolutePath())), Files.readAllBytes(f.toPath())));
             }
         }
         return loaded.toArray(new IdentifiedSource[0]);
+    }
+
+    private static class ClassVisitor implements FileVisitor<Path> {
+        List<IdentifiedSource> identifiedSources;
+
+        ClassVisitor(List<IdentifiedSource> loaded) {
+            identifiedSources = loaded;
+        }
+
+        @Override
+        public FileVisitResult preVisitDirectory(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
+            return FileVisitResult.CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult visitFile(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
+            File clazz = path.toFile();
+            if (clazz.getName().endsWith(".java")) {
+                identifiedSources.add(new IdentifiedSource(new ClassIdentifier(guessClass(clazz.getAbsolutePath())), Files.readAllBytes(clazz.toPath())));
+            }
+            return FileVisitResult.CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult visitFileFailed(Path path, IOException e) throws IOException {
+            return FileVisitResult.CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult postVisitDirectory(Path path, IOException e) throws IOException {
+            return FileVisitResult.CONTINUE;
+        }
     }
 }

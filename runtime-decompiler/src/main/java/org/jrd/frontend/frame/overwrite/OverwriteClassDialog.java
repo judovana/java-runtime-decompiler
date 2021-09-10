@@ -226,14 +226,14 @@ public class OverwriteClassDialog extends JDialog {
         setValidation();
         setSelectListener();
         setOkListener();
-        adds();
+        addComponentsToPanels();
 
         this.pluginManager = pluginManager;
         this.decompiler = selectedDecompiler;
         try {
             this.haveCompiler = false;
-            boolean haveDecompiler = this.pluginManager.hasDecompiler(decompiler);
-            String s = "Default runtime coI'm busympiler will be used";
+            boolean haveDecompiler = this.pluginManager.hasBundledCompiler(decompiler);
+            String s = "Default runtime compiler will be used";
             if (haveDecompiler) {
                 s = selectedDecompiler.getName() + " plugin is delivered with its own compiler!!";
                 this.haveCompiler = true;
@@ -313,6 +313,7 @@ public class OverwriteClassDialog extends JDialog {
         setSelectSaveListener(selectBinTarget, futureBinTarget, namingBinary);
         setSelectSaveListener(selectExternalFilesSave, outputExternalFilesDir, namingExternal);
         setSelectSaveListener(selectBinary, outputBinaries, namingBinary);
+
         selectExternalFiles.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -333,18 +334,22 @@ public class OverwriteClassDialog extends JDialog {
                 }
             }
         });
-        ok.addActionListener(e -> {
-            try {
-                String response = CommonUtils.uploadBytecode(className.getText(), vmManager, vmInfo, VmDecompilerInformationController.fileToBytes(filePath.getText()));
-                if (response.equals(DecompilerRequestReceiver.ERROR_RESPONSE)) {
-                    JOptionPane.showMessageDialog(null, "Class overwrite failed.", "Error", JOptionPane.ERROR_MESSAGE);
-                } else {
-                    validation.setForeground(Color.black);
-                    validation.setText("Upload looks ok");
+
+        ok.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    String response = CommonUtils.uploadBytecode(className.getText(), vmManager, vmInfo, VmDecompilerInformationController.fileToBytes(filePath.getText()));
+                    if (response.equals(DecompilerRequestReceiver.ERROR_RESPONSE)) {
+                        JOptionPane.showMessageDialog(null, "Class overwrite failed.", "Error", JOptionPane.ERROR_MESSAGE);
+                    } else {
+                        validation.setForeground(Color.black);
+                        validation.setText("Upload looks ok");
+                    }
+                } catch (Exception ex) {
+                    OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
+                    JOptionPane.showMessageDialog(null, ex, "Error", JOptionPane.ERROR_MESSAGE);
                 }
-            } catch (Exception ex) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
-                JOptionPane.showMessageDialog(null, ex, "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -399,7 +404,7 @@ public class OverwriteClassDialog extends JDialog {
         return compiler;
     }
 
-    private void adds() {
+    private void addComponentsToPanels() {
         inputs.add(filePath);
         inputs.add(className);
         inputs.add(className);

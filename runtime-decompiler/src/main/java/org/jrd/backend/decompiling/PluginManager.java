@@ -163,16 +163,19 @@ public class PluginManager {
         }
     }
 
-    public synchronized boolean hasDecompiler(DecompilerWrapperInformation wrapper) {
+    public synchronized boolean hasBundledCompiler(DecompilerWrapperInformation wrapper) {
         if (wrapper == null) {
             throw new RuntimeException("No valid decompiler selected. Current-Buffer may not be usable");
         }
+
         if (!wrapper.haveDecompilerMethod()) { //compile method may remain null
             initializeWrapper(wrapper);
         }
-        if (wrapper.getName().equals(DecompilerWrapperInformation.JAVAP_NAME) || wrapper.getName().equals(DecompilerWrapperInformation.JAVAP_VERBOSE_NAME)) {
+
+        if (wrapper.isJavap() || wrapper.isJavapVerbose()) {
             throw new RuntimeException("Javap can not back-compiled. Current-Buffer may not be usable");
         }
+
         return wrapper.getCompileMethod() != null;
     }
 
