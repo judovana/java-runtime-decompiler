@@ -4,6 +4,15 @@
         "https://checkstyle.org/dtds/suppressions_1_2_xpath_experimental.dtd">
 
 <suppressions>
+    <!--  Suppress JavaNCSS metric check for constructors of large frontend classes -->
+    <suppress-xpath
+            checks="JavaNCSS"
+            query="
+            //CLASS_DEF//CTOR_DEF[./IDENT[@text='MainFrameView']]
+            |//CLASS_DEF//CTOR_DEF[./IDENT[@text='BytecodeDecompilerView']]
+            |//CLASS_DEF//CTOR_DEF[./IDENT[@text='OverwriteClassDialog']]
+    "/>
+
     <!--  Suppress HideUtilityClassConstructor check for any classes that contain method named "main"  -->
     <suppress-xpath
             checks="HideUtilityClassConstructor"

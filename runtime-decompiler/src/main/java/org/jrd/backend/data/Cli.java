@@ -189,7 +189,7 @@ public class Cli {
                 decompile();
                 break;
             case COMPILE:
-                compile();
+                compile(new CompileArguments());
                 break;
             case OVERWRITE:
                 overwrite();
@@ -249,80 +249,90 @@ public class Cli {
         }
     }
 
-    @SuppressWarnings("ModifiedControlVariable") // shifting arguments when parsing
-    private void compile() throws Exception {
-        if (filteredArgs.size() < 2) {
-            throw new IllegalArgumentException("Expected at least one file for compile.");
-        }
-        String puc = null;
-        String wantedCustomCompiler = null;
+    private final class CompileArguments {
+        String wantedCustomCompiler;
+        String puc;
         boolean isRecursive = false;
         List<File> filesToCompile = new ArrayList<>(1);
 
-        for (int i = 1; i < filteredArgs.size(); i++) {
-            String arg = filteredArgs.get(i);
+        @SuppressWarnings("ModifiedControlVariable") // shifting arguments when parsing
+        CompileArguments() throws FileNotFoundException {
+            if (filteredArgs.size() < 2) {
+                throw new IllegalArgumentException("Expected at least one file for compile.");
+            }
 
-            if ("-p".equals(arg)) {
-                wantedCustomCompiler = filteredArgs.get(i + 1);
-                i++; // shift
-            } else if ("-cp".equals(arg)) {
-                puc = filteredArgs.get(i + 1);
-                i++; // shift
-            } else if ("-r".equals(arg)) {
-                isRecursive = true;
-            } else {
-                File fileToCompile = new File(arg);
+            for (int i = 1; i < filteredArgs.size(); i++) {
+                String arg = filteredArgs.get(i);
 
-                if (!fileToCompile.exists()) {
-                    throw new FileNotFoundException(fileToCompile.getAbsolutePath());
+                if ("-p".equals(arg)) {
+                    wantedCustomCompiler = filteredArgs.get(i + 1);
+                    i++; // shift
+                } else if ("-cp".equals(arg)) {
+                    puc = filteredArgs.get(i + 1);
+                    i++; // shift
+                } else if ("-r".equals(arg)) {
+                    isRecursive = true;
+                } else {
+                    File fileToCompile = new File(arg);
+
+                    if (!fileToCompile.exists()) {
+                        throw new FileNotFoundException(fileToCompile.getAbsolutePath());
+                    }
+
+                    filesToCompile.add(fileToCompile);
                 }
-
-                filesToCompile.add(fileToCompile);
             }
         }
 
-        // handle -cp
-        ClassesProvider provider;
-        if (puc == null) {
-            provider = new ClassesProvider() {
-                @Override
-                public Collection<IdentifiedBytecode> getClass(ClassIdentifier... names) {
-                    return new ArrayList<>();
-                }
+        public ClassesProvider getClassesProvider() {
+            if (puc == null) {
+                return new ClassesProvider() {
+                    @Override
+                    public Collection<IdentifiedBytecode> getClass(ClassIdentifier... names) {
+                        return new ArrayList<>();
+                    }
 
-                @Override
-                public List<String> getClassPathListing() {
-                    return new ArrayList<>();
-                }
-            };
-        } else {
-            VmInfo vmInfo = getVmInfo(puc);
-            provider = new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager);
+                    @Override
+                    public List<String> getClassPathListing() {
+                        return new ArrayList<>();
+                    }
+                };
+            } else {
+                return new RuntimeCompilerConnector.JrdClassesProvider(getVmInfo(puc), vmManager);
+            }
         }
+
+        public ClasspathlessCompiler getCompiler() {
+            DecompilerWrapperInformation decompiler = null;
+            boolean hasCompiler = false;
+            String compilerLogMessage = "Default runtime compiler will be used for overwrite.";
+
+            if (wantedCustomCompiler != null) {
+                decompiler = findDecompiler(wantedCustomCompiler);
+
+                if (pluginManager.hasDecompiler(decompiler)) {
+                    compilerLogMessage = wantedCustomCompiler + "'s bundled compiler will be used for overwrite.";
+                    hasCompiler = true;
+                }
+            }
+            OutputController.getLogger().log(compilerLogMessage);
+
+            if (hasCompiler) {
+                return new RuntimeCompilerConnector.ForeignCompilerWrapper(decompiler);
+            } else {
+                return new io.github.mkoncek.classpathless.impl.CompilerJavac();
+            }
+        }
+    }
+
+    private void compile(CompileArguments args) throws Exception {
+        // handle -cp
+        ClassesProvider provider = args.getClassesProvider();
 
         // handle -p
-        DecompilerWrapperInformation decompiler = null;
-        boolean hasCompiler = false;
-        String compilerLogMessage = "Default runtime compiler will be used for overwrite.";
+        ClasspathlessCompiler compiler = args.getCompiler();
 
-        if (wantedCustomCompiler != null) {
-            decompiler = findDecompiler(wantedCustomCompiler);
-
-            if (pluginManager.hasDecompiler(decompiler)) {
-                compilerLogMessage = wantedCustomCompiler + "'s bundled compiler will be used for overwrite.";
-                hasCompiler = true;
-            }
-        }
-        OutputController.getLogger().log(compilerLogMessage);
-
-        ClasspathlessCompiler compiler;
-        if (hasCompiler) {
-            compiler = new RuntimeCompilerConnector.ForeignCompilerWrapper(decompiler);
-        } else {
-            compiler = new io.github.mkoncek.classpathless.impl.CompilerJavac();
-        }
-
-        IdentifiedSource[] identifiedSources = CommonUtils.sourcesToIdentifiedSources(isRecursive, filesToCompile);
+        IdentifiedSource[] identifiedSources = CommonUtils.sourcesToIdentifiedSources(args.isRecursive, args.filesToCompile);
         Collection<IdentifiedBytecode> allBytecode = compiler.compileClass(
                 provider,
                 Optional.of((level, message) -> OutputController.getLogger().log(message)),
@@ -381,6 +391,7 @@ public class Cli {
         }
     }
 
+    @SuppressWarnings("CyclomaticComplexity") // un-refactorable
     public static String guessName(byte[] fileContents) throws IOException {
         String pkg = null;
         String clazz = null;
@@ -395,13 +406,15 @@ public class Cli {
                 if (line == null) { // reached end of reader
                     if (pkg == null && clazz == null) {
                         throw new RuntimeException("Neither package nor class was found.");
-                    } else if (pkg == null) {
-                        throw new RuntimeException("Package not found for class '" + clazz + "'.");
-                    } else if (clazz == null) {
-                        throw new RuntimeException("Class not found for package '" + pkg + "'.");
-                    } else {
-                        return pkg + "." + clazz;
                     }
+                    if (pkg == null) {
+                        throw new RuntimeException("Package not found for class '" + clazz + "'.");
+                    }
+                    if (clazz == null) {
+                        throw new RuntimeException("Class not found for package '" + pkg + "'.");
+                    }
+
+                    return pkg + "." + clazz;
                 }
 
                 line = line.trim();

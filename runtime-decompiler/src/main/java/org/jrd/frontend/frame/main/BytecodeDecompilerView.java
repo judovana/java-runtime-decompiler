@@ -152,7 +152,7 @@ public class BytecodeDecompilerView {
         filteredClassesJList.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_PAGE_UP || e.getKeyCode() == KeyEvent.VK_PAGE_DOWN || e.getKeyCode() == KeyEvent.VK_ENTER) {
+                if (List.of(KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_PAGE_UP, KeyEvent.VK_PAGE_DOWN, KeyEvent.VK_ENTER).contains(e.getKeyCode())) {
                     final String name = filteredClassesJList.getSelectedValue();
                     if (name != null || filteredClassesJList.getSelectedIndex() != -1) {
                         classWorker(name);

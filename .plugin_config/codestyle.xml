@@ -250,5 +250,18 @@
         <module name="RecordTypeParameterName" />
         <module name="StaticVariableName" />
         <module name="TypeName" />
+
+        <!-- Metrics, see https://checkstyle.org/config_metrics.html -->
+        <!-- Default properties here have difficulty with frontend classes, but can be subject for future overhaul -->
+        <module name="BooleanExpressionComplexity">
+            <property name="max" value="5"/>
+        </module>
+        <module name="CyclomaticComplexity">
+            <property name="max" value="12"/>
+            <property name="switchBlockAsSingleDecisionPoint" value="true"/>
+        </module>
+        <module name="JavaNCSS">
+            <property name="methodMaximum" value="80"/>
+        </module>
     </module>
 </module>
