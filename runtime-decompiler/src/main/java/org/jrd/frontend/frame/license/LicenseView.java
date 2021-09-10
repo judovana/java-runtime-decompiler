@@ -1,6 +1,6 @@
 package org.jrd.frontend.frame.license;
 
-import org.jrd.backend.core.OutputController;
+import org.jrd.backend.core.Logger;
 import org.jrd.frontend.frame.main.MainFrameView;
 
 import javax.swing.*;
@@ -30,7 +30,7 @@ public class LicenseView extends JDialog {
             reader.lines().forEach(s -> sb.append(s).append('\n'));
         } catch (IOException e) {
             sb.append("Unable to read LICENSE file.");
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, sb.toString());
+            Logger.getLogger().log(Logger.Level.ALL, sb.toString());
         }
 
         licenseTextArea.setText(sb.toString());

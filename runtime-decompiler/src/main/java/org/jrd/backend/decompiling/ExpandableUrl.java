@@ -1,6 +1,6 @@
 package org.jrd.backend.decompiling;
 
-import org.jrd.backend.core.OutputController;
+import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.Directories;
 
 import java.io.File;
@@ -28,7 +28,7 @@ public final class ExpandableUrl {
         String expandedPath = expandEnvVars(s);
         if (!new File(expandedPath).exists()) {
             String message = s.isEmpty() ? "Filename empty." : expandedPath;
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new FileNotFoundException(message));
+            Logger.getLogger().log(Logger.Level.ALL, new FileNotFoundException(message));
         }
         this.path = s;
     }

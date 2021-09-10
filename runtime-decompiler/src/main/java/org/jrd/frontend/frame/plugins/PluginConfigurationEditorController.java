@@ -1,6 +1,6 @@
 package org.jrd.frontend.frame.plugins;
 
-import org.jrd.backend.core.OutputController;
+import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.Directories;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 import org.jrd.backend.decompiling.ExpandableUrl;
@@ -75,7 +75,7 @@ public class PluginConfigurationEditorController {
                     availableDecompilerNames.add(url.toString().substring(url.toString().lastIndexOf("/") + 1));
                 }
             } catch (IOException e) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
+                Logger.getLogger().log(Logger.Level.ALL, e);
             }
         }
 
@@ -161,7 +161,7 @@ public class PluginConfigurationEditorController {
                 URI downloadUri = wrapperInformation.getDecompilerDownloadUrl().toURI();
                 java.awt.Desktop.getDesktop().browse(downloadUri);
             } catch (IOException | URISyntaxException e) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
+                Logger.getLogger().log(Logger.Level.ALL, e);
             } catch (UnsupportedOperationException e) {
                 JOptionPane.showMessageDialog(view, "Website could not be opened automatically. Go to: " + wrapperInformation.getDecompilerDownloadUrl().toString());
             }
@@ -176,7 +176,7 @@ public class PluginConfigurationEditorController {
 
     private void removeWrapper(DecompilerWrapperInformation wrapperInformation) {
         if (wrapperInformation == null) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Attempted delete operation with no plugin wrapper selected.");
+            Logger.getLogger().log(Logger.Level.DEBUG, "Attempted delete operation with no plugin wrapper selected.");
             return;
         }
 

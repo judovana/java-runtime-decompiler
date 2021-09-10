@@ -2,7 +2,7 @@ package org.jrd.backend.decompiling;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.jrd.backend.core.OutputController;
+import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.Cli;
 import org.jrd.backend.data.Directories;
 import org.jrd.backend.data.VmInfo;
@@ -112,7 +112,7 @@ public class PluginManager {
             try (FileReader fileReader = new FileReader(file.getAbsolutePath(), StandardCharsets.UTF_8)) {
                 wrapper = gson.fromJson(fileReader, DecompilerWrapperInformation.class);
             } catch (IOException | NullPointerException e) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, e);
+                Logger.getLogger().log(Logger.Level.DEBUG, e);
                 wrapper = null;
             }
             if (wrapper == null) {
@@ -188,7 +188,7 @@ public class PluginManager {
                 wrapper.setInstance(new JavapDisassemblerWrapper(wrapper.isJavap() ? "" : "-v"));
                 wrapper.setDecompileMethodNoInners(JavapDisassemblerWrapper.class.getMethod("decompile", byte[].class, String[].class));
             } catch (NoSuchMethodException e) {
-                OutputController.getLogger().log("Could not find decompile method in org/jrd/backend/decompiling/JavapDisassemblerWrapper");
+                Logger.getLogger().log("Could not find decompile method in org/jrd/backend/decompiling/JavapDisassemblerWrapper");
             }
 
             return;
@@ -217,13 +217,13 @@ public class PluginManager {
             try {
                 wrapper.setDecompileMethodNoInners(decompilerClass.getMethod("decompile", byte[].class, String[].class));
             } catch (Exception e) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "No custom decompile method (without inner classes): " + e.getMessage());
+                Logger.getLogger().log(Logger.Level.DEBUG, "No custom decompile method (without inner classes): " + e.getMessage());
             }
 
             try {
                 wrapper.setDecompileMethodWithInners(decompilerClass.getMethod("decompile", String.class, byte[].class, Map.class, String[].class));
             } catch (Exception e) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "No custom decompile method (with inner classes): " + e.getMessage());
+                Logger.getLogger().log(Logger.Level.DEBUG, "No custom decompile method (with inner classes): " + e.getMessage());
             }
 
             if (!wrapper.haveDecompilerMethod()) {
@@ -233,11 +233,11 @@ public class PluginManager {
             try {
                 wrapper.setCompileMethod(decompilerClass.getMethod("compile", Map.class, String[].class, Object.class));
             } catch (Exception e) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "No custom compile method: " + e.getMessage());
+                Logger.getLogger().log(Logger.Level.DEBUG, "No custom compile method: " + e.getMessage());
             }
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException | ClassNotFoundException | MalformedURLException e) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Decompiler wrapper could not be loaded. " + e.getMessage());
-            OutputController.getLogger().log(e);
+            Logger.getLogger().log(Logger.Level.ALL, "Decompiler wrapper could not be loaded. " + e.getMessage());
+            Logger.getLogger().log(e);
         } finally { // delete compiled class
             Directories.deleteWithException(System.getProperty("java.io.tmpdir") + "/" + wrapper.getFullyQualifiedClassName() + ".class");
         }
@@ -254,7 +254,7 @@ public class PluginManager {
         try {
             saveWrapper(newWrapper);
         } catch (IOException e) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Error saving wrapper.", e));
+            Logger.getLogger().log(Logger.Level.ALL, new RuntimeException("Error saving wrapper.", e));
             throw e;
         }
         boolean fileChanged = !oldWrapper.getFileLocation().equals(newWrapper.getFileLocation());
@@ -323,7 +323,7 @@ public class PluginManager {
         try {
             pluginJsonFile.createNewFile();
         } catch (IOException e) {
-            OutputController.getLogger().log("Plugin wrapper json configuration file could not be loaded");
+            Logger.getLogger().log("Plugin wrapper json configuration file could not be loaded");
         }
 
         wrappers.add(newWrapper);

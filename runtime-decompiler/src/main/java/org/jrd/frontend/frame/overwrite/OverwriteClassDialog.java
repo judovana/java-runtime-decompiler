@@ -8,7 +8,7 @@ import io.github.mkoncek.classpathless.api.IdentifiedSource;
 import io.github.mkoncek.classpathless.api.MessagesListener;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.core.DecompilerRequestReceiver;
-import org.jrd.backend.core.OutputController;
+import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.Config;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
@@ -62,7 +62,7 @@ public class OverwriteClassDialog extends JDialog {
 
         @Override
         public void onException(Exception ex) {
-            OutputController.getLogger().log(ex);
+            Logger.getLogger().log(ex);
             JOptionPane.showMessageDialog(null, ex.getMessage());
         }
     }
@@ -347,7 +347,7 @@ public class OverwriteClassDialog extends JDialog {
                         validation.setText("Upload looks ok");
                     }
                 } catch (Exception ex) {
-                    OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, ex);
+                    Logger.getLogger().log(Logger.Level.ALL, ex);
                     JOptionPane.showMessageDialog(null, ex, "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
@@ -372,7 +372,7 @@ public class OverwriteClassDialog extends JDialog {
                 new SavingCompilerOutputAction(statusExternalFiles, vmInfo, vmManager, pluginManager, decompiler, haveCompiler, namingExternal.getSelectedIndex(),
                         outputExternalFilesDir.getText()).run(loaded);
             } catch (Exception ex) {
-                OutputController.getLogger().log(ex);
+                Logger.getLogger().log(ex);
                 statusExternalFiles.setText(ex.getMessage());
                 JOptionPane.showMessageDialog(null, ex.getMessage());
             }
@@ -488,16 +488,16 @@ public class OverwriteClassDialog extends JDialog {
                 result = rc.compileClass(cp, Optional.of(new MessagesListener() {
                     @Override
                     public void addMessage(Level level, String s) {
-                        OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, s);
+                        Logger.getLogger().log(Logger.Level.ALL, s);
                         compilationLog.setText(compilationLog.getText() + s + "\n");
                     }
                 }), sources);
             } catch (Exception e) {
                 this.ex = e;
-                OutputController.getLogger().log(e);
+                Logger.getLogger().log(e);
                 compilationLog.setText(compilationLog.getText() + e.getMessage() + "\n");
             } finally {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, "Compilation finished");
+                Logger.getLogger().log(Logger.Level.DEBUG, "Compilation finished");
                 compilationLog.setText(compilationLog.getText() + "Compilation finished, you may close dialog\n");
             }
 

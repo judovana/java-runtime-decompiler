@@ -1,7 +1,7 @@
 package org.jrd.backend.data;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.jrd.backend.core.OutputController;
+import org.jrd.backend.core.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,7 +28,7 @@ public final class MetadataProperties {
         try (InputStream stream = getClass().getResourceAsStream(PROPERTY_FILE_RESOURCE)) {
             properties.load(stream);
         } catch (IOException e) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "Unable to read property file '" + PROPERTY_FILE_RESOURCE + "'.");
+            Logger.getLogger().log(Logger.Level.ALL, "Unable to read property file '" + PROPERTY_FILE_RESOURCE + "'.");
         }
     }
 

@@ -1,6 +1,6 @@
 package org.jrd.frontend.frame.remote;
 
-import org.jrd.backend.core.OutputController;
+import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.VmManager;
 
 import javax.swing.*;
@@ -43,7 +43,7 @@ public class NewConnectionController {
             int port = Integer.parseInt(portString);
             return port > 0 && port <= 65535;
         } catch (NumberFormatException e) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
+            Logger.getLogger().log(Logger.Level.ALL, e);
             return false;
         }
     }

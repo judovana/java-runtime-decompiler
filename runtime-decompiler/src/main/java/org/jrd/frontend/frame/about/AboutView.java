@@ -1,6 +1,6 @@
 package org.jrd.frontend.frame.about;
 
-import org.jrd.backend.core.OutputController;
+import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.MetadataProperties;
 import org.jrd.frontend.frame.main.MainFrameView;
 
@@ -32,9 +32,9 @@ public class AboutView extends JDialog {
                 try {
                     Desktop.getDesktop().browse(event.getURL().toURI());
                 } catch (IOException | URISyntaxException e1) {
-                    OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e1);
+                    Logger.getLogger().log(Logger.Level.ALL, e1);
                 } catch (UnsupportedOperationException e2) {
-                    OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("Unable to open link."));
+                    Logger.getLogger().log(Logger.Level.ALL, new RuntimeException("Unable to open link."));
                 }
 
             }

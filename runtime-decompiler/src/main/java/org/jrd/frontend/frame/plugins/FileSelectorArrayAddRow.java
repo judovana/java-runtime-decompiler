@@ -1,6 +1,6 @@
 package org.jrd.frontend.frame.plugins;
 
-import org.jrd.backend.core.OutputController;
+import org.jrd.backend.core.Logger;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,7 +21,7 @@ public class FileSelectorArrayAddRow extends JPanel {
             addButton = new JButton(icon);
         } catch (NullPointerException e) {
             addButton = new JButton("+");
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, new RuntimeException("File " + PLUS_SIGN_ICON + " not found. Falling back to String version.", e));
+            Logger.getLogger().log(Logger.Level.ALL, new RuntimeException("File " + PLUS_SIGN_ICON + " not found. Falling back to String version.", e));
         }
         addButton.setPreferredSize(new Dimension(32, 32));
         addButton.setBorderPainted(false);

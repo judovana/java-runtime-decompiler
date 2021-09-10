@@ -1,6 +1,6 @@
 package org.jrd.frontend.frame.agent;
 
-import org.jrd.backend.core.OutputController;
+import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.Config;
 import org.jrd.backend.data.Directories;
 import org.jrd.frontend.frame.main.BytecodeDecompilerView;
@@ -121,7 +121,7 @@ public class ConfigureView extends JDialog {
             try {
                 config.saveConfigFile();
             } catch (IOException e) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
+                Logger.getLogger().log(Logger.Level.ALL, e);
             }
             dispose();
         });

@@ -1,7 +1,7 @@
 package org.jrd.backend.communication;
 
 
-import org.jrd.backend.core.OutputController;
+import org.jrd.backend.core.Logger;
 
 import java.io.IOException;
 
@@ -47,7 +47,7 @@ public class CallDecompilerAgent implements JrdAgent {
             comm.println(request);
             return comm.readResponse();
         } catch (IOException ex) {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG, ex);
+            Logger.getLogger().log(Logger.Level.DEBUG, ex);
             return null;
         } finally {
             comm.close();

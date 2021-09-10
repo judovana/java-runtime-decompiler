@@ -1,7 +1,7 @@
 package org.jrd.backend.data;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.jrd.backend.core.OutputController;
+import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
 
 import java.io.ByteArrayInputStream;
@@ -73,8 +73,7 @@ public class VmInfo implements Serializable {
         if (getVmId().equals(status.getVmId())) {
             setVmDecompilerStatus(status);
         } else {
-            OutputController.getLogger().log(OutputController.Level.MESSAGE_DEBUG,
-                    "Old and new VmDecompilerStatus id does not match!");
+            Logger.getLogger().log(Logger.Level.DEBUG, "Old and new VmDecompilerStatus IDs do not match!");
         }
     }
 

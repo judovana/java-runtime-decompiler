@@ -7,7 +7,7 @@ import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.core.AgentRequestAction;
-import org.jrd.backend.core.OutputController;
+import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.decompiling.DecompilerWrapperInformation;
 import org.jrd.backend.decompiling.PluginManager;
@@ -89,7 +89,7 @@ public class Cli {
 
         @Override
         public void onException(Exception ex) {
-            OutputController.getLogger().log(ex);
+            Logger.getLogger().log(ex);
         }
 
         @SuppressWarnings("ReturnCount") // returns in switch cases
@@ -210,7 +210,7 @@ public class Cli {
     private void overwrite() throws Exception {
         String newBytecodeFile;
         if (filteredArgs.size() == 3) {
-            OutputController.getLogger().log("Reading class for overwrite from stdin.");
+            Logger.getLogger().log("Reading class for overwrite from stdin.");
             newBytecodeFile = null;
         } else {
             if (filteredArgs.size() != 4) {
@@ -229,10 +229,10 @@ public class Cli {
             FileToClassValidator.StringAndScore r = FileToClassValidator.validate(classStr, newBytecodeFile);
 
             if (r.getScore() > 0 && r.getScore() < 10) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "WARNING: " + r.getMessage());
+                Logger.getLogger().log(Logger.Level.ALL, "WARNING: " + r.getMessage());
             }
             if (r.getScore() >= 10) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, "ERROR: " + r.getMessage());
+                Logger.getLogger().log(Logger.Level.ALL, "ERROR: " + r.getMessage());
             }
 
             clazz = VmDecompilerInformationController.fileToBase64(newBytecodeFile);
@@ -315,7 +315,7 @@ public class Cli {
                     hasCompiler = true;
                 }
             }
-            OutputController.getLogger().log(compilerLogMessage);
+            Logger.getLogger().log(compilerLogMessage);
 
             if (hasCompiler) {
                 return new RuntimeCompilerConnector.ForeignCompilerWrapper(decompiler);
@@ -335,7 +335,7 @@ public class Cli {
         IdentifiedSource[] identifiedSources = CommonUtils.sourcesToIdentifiedSources(args.isRecursive, args.filesToCompile);
         Collection<IdentifiedBytecode> allBytecode = compiler.compileClass(
                 provider,
-                Optional.of((level, message) -> OutputController.getLogger().log(message)),
+                Optional.of((level, message) -> Logger.getLogger().log(message)),
                 identifiedSources
         );
 
@@ -349,7 +349,7 @@ public class Cli {
                     shouldUpload = true;
                 }
             } catch (Exception ex) {
-                OutputController.getLogger().log(ex);
+                Logger.getLogger().log(ex);
             }
         }
 
@@ -359,7 +359,7 @@ public class Cli {
 
             for (IdentifiedBytecode bytecode : allBytecode) {
                 String className = bytecode.getClassIdentifier().getFullName();
-                OutputController.getLogger().log("Uploading class '" + className + "'.");
+                Logger.getLogger().log("Uploading class '" + className + "'.");
 
                 AgentRequestAction request = VmDecompilerInformationController.createRequest(targetVm,
                         AgentRequestAction.RequestAction.OVERWRITE,
@@ -368,17 +368,17 @@ public class Cli {
                 String response = VmDecompilerInformationController.submitRequest(vmManager, request);
 
                 if ("ok".equals(response)) {
-                    OutputController.getLogger().log("Successfully uploaded class '" + className + "'.");
+                    Logger.getLogger().log("Successfully uploaded class '" + className + "'.");
                 } else {
                     failCount++;
-                    OutputController.getLogger().log("Failed to upload class '" + className + "'.");
+                    Logger.getLogger().log("Failed to upload class '" + className + "'.");
                 }
             }
 
             if (failCount > 0) {
                 throw new RuntimeException("Failed to upload " + failCount + " classes out of " + allBytecode.size() + " total.");
             } else {
-                OutputController.getLogger().log("Successfully uploaded all " + allBytecode.size() + " classes.");
+                Logger.getLogger().log("Successfully uploaded all " + allBytecode.size() + " classes.");
             }
         } else {
             if (!saving.shouldSave() && allBytecode.size() > 1) {
@@ -696,33 +696,33 @@ public class Cli {
 
         try {
             Integer.valueOf(input);
-            OutputController.getLogger().log("Interpreting '" + input + "' as PID. To use numbers as filenames, try './" + input + "'.");
+            Logger.getLogger().log("Interpreting '" + input + "' as PID. To use numbers as filenames, try './" + input + "'.");
 
             return VmInfo.Type.LOCAL;
         } catch (NumberFormatException e) {
-            OutputController.getLogger().log("Interpretation of '" + input + "' as PID failed because it is not a number.");
+            Logger.getLogger().log("Interpretation of '" + input + "' as PID failed because it is not a number.");
         }
 
         try {
             if (input.split(":").length == 2) {
                 Integer.valueOf(input.split(":")[1]);
-                OutputController.getLogger().log("Interpreting '" + input + "' as hostname:port. To use colons as filenames, try './" + input + "'.");
+                Logger.getLogger().log("Interpreting '" + input + "' as hostname:port. To use colons as filenames, try './" + input + "'.");
 
                 return VmInfo.Type.REMOTE;
             } else {
-                OutputController.getLogger().log("Interpretation of '" + input + "' as hostname:port failed because it cannot be correctly split on ':'.");
+                Logger.getLogger().log("Interpretation of '" + input + "' as hostname:port failed because it cannot be correctly split on ':'.");
             }
         } catch (NumberFormatException e) {
-            OutputController.getLogger().log("Interpretation of '" + input + "' as hostname:port failed because port is not a number.");
+            Logger.getLogger().log("Interpretation of '" + input + "' as hostname:port failed because port is not a number.");
         }
 
         try {
             NewFsVmController.cpToFiles(input);
-            OutputController.getLogger().log("Interpreting " + input + " as FS VM classpath.");
+            Logger.getLogger().log("Interpreting " + input + " as FS VM classpath.");
 
             return VmInfo.Type.FS;
         } catch (NewFsVmController.InvalidClasspathException e) {
-            OutputController.getLogger().log("Interpretation of '" + input + "' as FS VM classpath. failed. Cause: " + e.getMessage());
+            Logger.getLogger().log("Interpretation of '" + input + "' as FS VM classpath. failed. Cause: " + e.getMessage());
         }
 
         throw new RuntimeException("Unable to interpret '" + input + "' as any component of PUC.");
