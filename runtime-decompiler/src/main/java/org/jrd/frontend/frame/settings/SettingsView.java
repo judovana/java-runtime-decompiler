@@ -1,11 +1,9 @@
-package org.jrd.frontend.frame.agent;
+package org.jrd.frontend.frame.settings;
 
-import org.jrd.backend.core.Logger;
+import org.jrd.backend.core.OutputController;
 import org.jrd.backend.data.Config;
-import org.jrd.backend.data.Directories;
 import org.jrd.frontend.frame.main.BytecodeDecompilerView;
 import org.jrd.frontend.frame.main.MainFrameView;
-import org.jrd.frontend.frame.plugins.FileSelectorArrayRow;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
@@ -13,33 +11,36 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 
-@SuppressWarnings("Indentation") // indented Swing components greatly help with orientation
-public class ConfigureView extends JDialog {
+import static org.jrd.backend.data.Directories.getJrdLocation;
+import static org.jrd.backend.data.Directories.isPortable;
+import static org.jrd.frontend.frame.plugins.FileSelectorArrayRow.fallback;
+import static org.jrd.frontend.frame.plugins.FileSelectorArrayRow.getTextFieldToolTip;
+
+public class SettingsView extends JDialog {
 
     private JPanel mainPanel;
-        private ConfigurePanel configurePanel;
+        private SettingsPanel settingsPanel;
         private JPanel okCancelPanel;
             private JButton okButton;
             private JButton cancelButton;
 
     private final Config config = Config.getConfig();
 
-    private static class ConfigurePanel extends JPanel {
+    public static class SettingsPanel extends JPanel {
 
-        private JTextField agentPathTextField;
-        private JLabel agentPathLabel;
-        private JButton browseButton;
-        private JLabel checkBoxSettings;
-        private JCheckBox useHostSystemClassesCheckBox;
+        public JTextField agentPathTextField;
+        public JLabel agentPathLabel;
+        public JButton browseButton;
+        public JLabel checkBoxSettings;
+        public JCheckBox useHostSystemClassesCheckBox;
 
-        private JFileChooser chooser;
+        public JFileChooser chooser;
 
-        ConfigurePanel(String initialAgentPath, boolean initialUseHostSystemClasses) {
+        SettingsPanel(String initialAgentPath, boolean initialUseHostSystemClasses) {
+
             this.agentPathTextField = new JTextField();
-            this.agentPathTextField.setToolTipText(
-                    BytecodeDecompilerView.styleTooltip() +
-                    "Select a path to the Decompiler Agent.<br />" +
-                    FileSelectorArrayRow.getTextFieldToolTip()
+            this.agentPathTextField.setToolTipText(BytecodeDecompilerView.styleTooltip() + "Select a path to the Decompiler Agent.<br />" +
+                    getTextFieldToolTip()
             );
             this.agentPathTextField.setText(initialAgentPath);
 
@@ -54,15 +55,12 @@ public class ConfigureView extends JDialog {
 
             chooser = new JFileChooser();
             File dir;
-            if (Directories.isPortable()) {
-                dir = new File(Directories.getJrdLocation() + File.separator + "libs");
+            if (isPortable()) {
+                dir = new File(getJrdLocation() + File.separator + "libs");
             } else {
-                dir = new File(Directories.getJrdLocation() + File.separator +
-                        "decompiler_agent" + File.separator +
-                        "target"
-                );
+                dir = new File(getJrdLocation() + File.separator + "decompiler_agent" + File.separator + "target");
             }
-            chooser.setCurrentDirectory(FileSelectorArrayRow.fallback(dir));
+            chooser.setCurrentDirectory(fallback(dir));
 
             this.setLayout(new GridBagLayout());
             GridBagConstraints gbc = new GridBagConstraints();
@@ -97,24 +95,24 @@ public class ConfigureView extends JDialog {
         }
     }
 
-    public ConfigureView(MainFrameView mainFrameView) {
-        configurePanel = new ConfigurePanel(config.getAgentRawPath(), config.doUseHostSystemClasses());
-        configurePanel.browseButton.addActionListener(actionEvent -> {
-            int dialogResult = configurePanel.chooser.showOpenDialog(configurePanel);
+    public SettingsView(MainFrameView mainFrameView) {
+        settingsPanel = new SettingsPanel(config.getAgentRawPath(), config.doUseHostSystemClasses());
+        settingsPanel.browseButton.addActionListener(actionEvent -> {
+            int dialogResult = settingsPanel.chooser.showOpenDialog(settingsPanel);
             if (dialogResult == JFileChooser.APPROVE_OPTION) {
-                configurePanel.agentPathTextField.setText(configurePanel.chooser.getSelectedFile().getPath());
+                settingsPanel.agentPathTextField.setText(settingsPanel.chooser.getSelectedFile().getPath());
             }
         });
 
         okButton = new JButton("OK");
         okButton.addActionListener(actionEvent -> {
-            config.setAgentPath(configurePanel.agentPathTextField.getText());
-            config.setUseHostSystemClasses(configurePanel.useHostSystemClassesCheckBox.isSelected());
+            config.setAgentPath(settingsPanel.agentPathTextField.getText());
+            config.setUseHostSystemClasses(settingsPanel.useHostSystemClassesCheckBox.isSelected());
 
             try {
                 config.saveConfigFile();
             } catch (IOException e) {
-                Logger.getLogger().log(Logger.Level.ALL, e);
+                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
             }
             dispose();
         });
@@ -159,7 +157,7 @@ public class ConfigureView extends JDialog {
         gbc.weighty = 0;
         gbc.gridx = 0;
         gbc.gridy = 0;
-        mainPanel.add(configurePanel, gbc);
+        mainPanel.add(settingsPanel, gbc);
 
         gbc.gridy = 1;
         gbc.weighty = 1;
@@ -169,7 +167,7 @@ public class ConfigureView extends JDialog {
         gbc.weighty = 0;
         mainPanel.add(okCancelPanel, gbc);
 
-        this.setTitle("Configure Decompiler Agent");
+        this.setTitle("Settings");
         this.setSize(new Dimension(800, 400));
         this.setMinimumSize(new Dimension(250, 330));
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
