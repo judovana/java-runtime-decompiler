@@ -4,7 +4,11 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
 
     steps:
       - name: Download repo
@@ -21,6 +25,7 @@ jobs:
         run: mvn --batch-mode --update-snapshots clean install
 
       - name: Create and populate config file
+        if: matrix.os == 'ubuntu-latest'
         run: |
           set -x
           CONFIG_HOME="$HOME/.config/java-runtime-decompiler/conf"
@@ -29,6 +34,19 @@ jobs:
           echo "{\"AGENT_PATH\":\"${AGENT_PATH}\"}" > "$CONFIG_HOME/config.json"
           cat "$CONFIG_HOME/config.json"
         shell: bash
+
+      - name: Create and populate config file
+        if: matrix.os == 'windows-latest'
+        run: |
+          @echo on
+          setLocal EnableDelayedExpansion
+          set "CONFIG_HOME=%UserProfile%\.config\java-runtime-decompiler\conf"
+          md %CONFIG_HOME%
+          for /f "delims=" %%i in ('dir *decompiler-agent-*.jar /B /S') do set "AGENT_PATH=%%i"
+          set "AGENT_PATH=%AGENT_PATH:\=/%"
+          echo {"AGENT_PATH":"%AGENT_PATH%"} >"%CONFIG_HOME%\config.json"
+          type "%CONFIG_HOME%\config.json"
+        shell: cmd
 
       - name: Test Cli
         run: mvn --batch-mode test -Dtest=CliTest -DfailIfNoTests=false
