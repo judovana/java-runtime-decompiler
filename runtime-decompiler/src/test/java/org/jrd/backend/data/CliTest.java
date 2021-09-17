@@ -382,21 +382,22 @@ public class CliTest {
     }
 
     private Stream<Arguments> tooFewArgumentsSource() {
+        String unimportantPid = "123456";
         return Stream.of(
                 new String[]{LIST_CLASSES},
                 new String[]{BYTES},
-                new String[]{BYTES, dummy.getPid()},
+                new String[]{BYTES, unimportantPid},
                 new String[]{BASE64},
-                new String[]{BASE64, dummy.getPid()},
+                new String[]{BASE64, unimportantPid},
                 new String[]{OVERWRITE},
-                new String[]{OVERWRITE, dummy.getPid()},
+                new String[]{OVERWRITE, unimportantPid},
                 new String[]{DECOMPILE},
-                new String[]{DECOMPILE, dummy.getPid()},
-                new String[]{DECOMPILE, dummy.getPid(), "javap"},
+                new String[]{DECOMPILE, unimportantPid},
+                new String[]{DECOMPILE, unimportantPid, "javap"},
                 new String[]{COMPILE},
                 new String[]{COMPILE, "-r"},
-                new String[]{COMPILE, "-r", "-cp", dummy.getPid()},
-                new String[]{COMPILE, "-r", "-cp", dummy.getPid(), "-p", "unimportantPluginName"}
+                new String[]{COMPILE, "-r", "-cp", unimportantPid},
+                new String[]{COMPILE, "-r", "-cp", unimportantPid, "-p", "unimportantPluginName"}
         ).map(a -> (Object) a).map(Arguments::of); // cast needed because of varargs factory method .of()
     }
 
