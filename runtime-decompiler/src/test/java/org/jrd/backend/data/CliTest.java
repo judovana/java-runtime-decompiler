@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -32,6 +33,7 @@ import static org.jrd.backend.data.Cli.*;
 import static org.jrd.backend.data.Help.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class CliTest {
     private Model model;
     private String[] args;
@@ -501,6 +503,11 @@ public class CliTest {
         }
 
         public void captureStreams(boolean capture) {
+            if (capture) {
+                out.reset();
+                err.reset();
+            }
+
             System.setOut(capture ? new PrintStream(out, true, StandardCharsets.UTF_8) : originalOut);
             System.setErr(capture ? new PrintStream(err, true, StandardCharsets.UTF_8) : originalErr);
         }
