@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -203,7 +204,7 @@ public class CliTest {
     }
 
     // temporarily missing COMPILE
-    private static Stream<String> operations() {
+    private static Stream<String> validOperationSource() {
         return Stream.of(
                 H, HELP, VERBOSE, VERSION, LIST_JVMS, LIST_PLUGINS,
                 LIST_CLASSES_FORMAT, BYTES_FORMAT, BASE64_FORMAT, DECOMPILE_FORMAT, OVERWRITE_FORMAT
@@ -211,7 +212,7 @@ public class CliTest {
     }
 
     @ParameterizedTest
-    @MethodSource("operations")
+    @MethodSource("validOperationSource")
     void testValidOperation(String operation) {
         args = processArgs(operation);
         cli = new Cli(args, model);
@@ -220,7 +221,7 @@ public class CliTest {
     }
 
     @ParameterizedTest
-    @MethodSource("operations")
+    @MethodSource("validOperationSource")
     void testValidOperationTwoSlashes(String operation) {
         args = processArgs(operation);
         args[0] = twoSlashes(args[0]);
@@ -378,6 +379,34 @@ public class CliTest {
         byte[] decoded = Base64.getDecoder().decode(base64);
 
         assertArrayEquals(bytes, decoded);
+    }
+
+    private Stream<Arguments> tooFewArgumentsSource() {
+        return Stream.of(
+                new String[]{LIST_CLASSES},
+                new String[]{BYTES},
+                new String[]{BYTES, dummy.getPid()},
+                new String[]{BASE64},
+                new String[]{BASE64, dummy.getPid()},
+                new String[]{OVERWRITE},
+                new String[]{OVERWRITE, dummy.getPid()},
+                new String[]{DECOMPILE},
+                new String[]{DECOMPILE, dummy.getPid()},
+                new String[]{DECOMPILE, dummy.getPid(), "javap"},
+                new String[]{COMPILE},
+                new String[]{COMPILE, "-r"},
+                new String[]{COMPILE, "-r", "-cp", dummy.getPid()},
+                new String[]{COMPILE, "-r", "-cp", dummy.getPid(), "-p", "unimportantPluginName"}
+        ).map(a -> (Object) a).map(Arguments::of); // cast needed because of varargs factory method .of()
+    }
+
+    @ParameterizedTest
+    @MethodSource("tooFewArgumentsSource")
+    void testTooFewArguments(String[] wrongArgs) {
+        args = wrongArgs;
+        cli = new Cli(args, model);
+
+        assertThrows(IllegalArgumentException.class, () -> cli.consumeCli());
     }
 
     @ParameterizedTest
