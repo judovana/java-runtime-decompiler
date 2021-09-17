@@ -1,6 +1,6 @@
 name: Java CI
 
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
   build:
@@ -24,7 +24,7 @@ jobs:
       - name: Build with Maven
         run: mvn --batch-mode --update-snapshots clean install
 
-      - name: Create and populate config file
+      - name: Create and populate config file on Linux
         if: matrix.os == 'ubuntu-latest'
         run: |
           set -x
@@ -35,7 +35,7 @@ jobs:
           cat "$CONFIG_HOME/config.json"
         shell: bash
 
-      - name: Create and populate config file
+      - name: Create and populate config file on Windows
         if: matrix.os == 'windows-latest'
         run: |
           @echo on
