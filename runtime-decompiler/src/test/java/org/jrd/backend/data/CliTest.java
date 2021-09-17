@@ -88,7 +88,7 @@ public class CliTest {
         assertTrue(dummy.isAlive());
         // halt agent, otherwise an open socket prevents termination of dummy process
         AgentRequestAction request = DecompilationController.createRequest(
-                cli.getVmInfo(dummy.getPid()), AgentRequestAction.RequestAction.HALT, ""
+                model.getVmManager().findVmFromPid(dummy.getPid()), AgentRequestAction.RequestAction.HALT, ""
         );
         String response = DecompilationController.submitRequest(model.getVmManager(), request);
         assertEquals("ok", response);
