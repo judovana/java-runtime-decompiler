@@ -137,6 +137,27 @@ public class CliTest {
     }
 
     @Test
+    void testIsGui() {
+        // is gui
+        args = new String[]{};
+        cli = new Cli(args, model);
+        assertTrue(cli.isGui());
+
+        args = new String[]{VERBOSE};
+        cli = new Cli(args, model);
+        assertTrue(cli.isGui());
+
+        // is cli
+        args = new String[]{UNKNOWN_FLAG};
+        cli = new Cli(args, model);
+        assertFalse(cli.isGui());
+
+        args = new String[]{VERBOSE, UNKNOWN_FLAG};
+        cli = new Cli(args, model);
+        assertFalse(cli.isGui());
+    }
+
+    @Test
     void testHelp() throws Exception {
         args = new String[] {HELP};
         cli = new Cli(args, model);
