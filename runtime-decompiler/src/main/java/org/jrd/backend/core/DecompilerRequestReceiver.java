@@ -3,8 +3,10 @@ package org.jrd.backend.core;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jrd.backend.communication.CallDecompilerAgent;
+import org.jrd.backend.communication.ErrorCandidate;
 import org.jrd.backend.communication.FsAgent;
 import org.jrd.backend.communication.JrdAgent;
+import org.jrd.backend.communication.TopLevelErrorCandidate;
 import org.jrd.backend.core.AgentRequestAction.RequestAction;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
@@ -24,7 +26,6 @@ public class DecompilerRequestReceiver {
     private final AgentAttachManager attachManager;
     private VmManager vmManager;
 
-    public static final String ERROR_RESPONSE = "error";
     private static final String OK_RESPONSE = "ok";
     private static final int NOT_ATTACHED = -1;
 
@@ -48,7 +49,7 @@ public class DecompilerRequestReceiver {
             action = RequestAction.returnAction(actionStr);
         } catch (IllegalArgumentException e) {
             Logger.getLogger().log(Logger.Level.DEBUG, new RuntimeException("Illegal action in request", e));
-            return ERROR_RESPONSE;
+            return TopLevelErrorCandidate.toError(e);
         }
         port = tryParseInt(portStr, "Listen port is not an integer!");
         vmPid = tryParseInt(vmPidStr, "VM PID is not a number!");
@@ -65,6 +66,10 @@ public class DecompilerRequestReceiver {
                 String classFutureBody = request.getParameter(AgentRequestAction.CLASS_TO_OVERWRITE_BODY);
                 response = getOverwriteAction(hostname, port, vmId, vmPid, classNameForOverwrite, classFutureBody);
                 break;
+            case INIT_CLASS:
+                String fqn = request.getParameter(AgentRequestAction.CLASS_TO_DECOMPILE_NAME);
+                response = getInitAction(hostname, port, vmId, vmPid, fqn);
+                break;
             case BYTES:
                 String className = request.getParameter(AgentRequestAction.CLASS_TO_DECOMPILE_NAME);
                 response = getByteCodeAction(hostname, port, vmId, vmPid, className);
@@ -76,8 +81,9 @@ public class DecompilerRequestReceiver {
                 response = getHaltAction(hostname, port, vmId, vmPid);
                 break;
             default:
-                Logger.getLogger().log(Logger.Level.DEBUG, "Unknown action given: " + action);
-                return ERROR_RESPONSE;
+                String s = "Unknown action given: " + action;
+                Logger.getLogger().log(Logger.Level.DEBUG, s);
+                return TopLevelErrorCandidate.toError(s);
         }
         return response;
 
@@ -132,9 +138,9 @@ public class DecompilerRequestReceiver {
             nativeAgent = new FsAgent(vmInfo.getCp());
         }
         String reply = nativeAgent.submitRequest(requestBody);
-        if ("ERROR".equals(reply)) {
-            throw new RuntimeException("Agent returned ERROR");
-
+        ErrorCandidate errorCandidate = new ErrorCandidate(reply);
+        if (errorCandidate.isError()) {
+            throw new RuntimeException("Agent returned ERROR - " + errorCandidate.getErrorMessage());
         }
         return new ResponseWithPort(reply, actualListenPort);
     }
@@ -146,7 +152,6 @@ public class DecompilerRequestReceiver {
             ResponseWithPort reply = getResponse(
                     hostname, listenPort, vmId, vmPid, "OVERWRITE\n" + className + "\n" + newBody
             );
-
             VmDecompilerStatus status = new VmDecompilerStatus();
             status.setHostname(hostname);
             status.setListenPort(reply.port);
@@ -155,9 +160,24 @@ public class DecompilerRequestReceiver {
             vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
         } catch (Exception ex) {
             Logger.getLogger().log(Logger.Level.ALL, ex);
-            return ERROR_RESPONSE;
+            return TopLevelErrorCandidate.toError(ex);
         }
+        return OK_RESPONSE;
+    }
 
+    private String getInitAction(String hostname, int listenPort, String vmId, int vmPid, String fqn) {
+        try {
+            ResponseWithPort reply =
+                    getResponse(hostname, listenPort, vmId, vmPid, RequestAction.INIT_CLASS + "\n" + fqn);
+            VmDecompilerStatus status = new VmDecompilerStatus();
+            status.setHostname(hostname);
+            status.setListenPort(reply.port);
+            status.setVmId(vmId);
+            vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
+        } catch (Exception ex) {
+            Logger.getLogger().log(Logger.Level.ALL, ex);
+            return TopLevelErrorCandidate.toError(ex);
+        }
         return OK_RESPONSE;
     }
 
@@ -170,35 +190,29 @@ public class DecompilerRequestReceiver {
             status.setVmId(vmId);
             status.setLoadedClassBytes(reply.response);
             vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
-
         } catch (Exception ex) {
             Logger.getLogger().log(Logger.Level.ALL, ex);
-            return ERROR_RESPONSE;
+            return TopLevelErrorCandidate.toError(ex);
         }
-
         return OK_RESPONSE;
     }
 
     private String getAllLoadedClassesAction(String hostname, int listenPort, String vmId, int vmPid) {
         try {
             ResponseWithPort reply = getResponse(hostname, listenPort, vmId, vmPid, "CLASSES");
-
             String[] arrayOfClasses = parseClasses(reply.response);
             Arrays.sort(arrayOfClasses, new ClassesComparator());
-
             VmDecompilerStatus status = new VmDecompilerStatus();
             status.setHostname(hostname);
             status.setListenPort(reply.port);
             status.setVmId(vmId);
             status.setLoadedClassNames(arrayOfClasses);
-
             vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
         } catch (Exception ex) {
             Logger.getLogger().log(Logger.Level.ALL, ex);
-            return ERROR_RESPONSE;
+            return TopLevelErrorCandidate.toError(ex);
         }
         return OK_RESPONSE;
-
     }
 
     private String getHaltAction(String hostname, int listenPort, String vmId, int vmPid) {
@@ -221,7 +235,6 @@ public class DecompilerRequestReceiver {
         if (status != null) {
             actualListenPort = status.getListenPort();
         }
-
         return actualListenPort;
     }
 

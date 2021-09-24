@@ -2,8 +2,8 @@ package org.jrd.frontend.utility;
 
 import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
+import org.jrd.backend.communication.TopLevelErrorCandidate;
 import org.jrd.backend.core.AgentRequestAction;
-import org.jrd.backend.core.DecompilerRequestReceiver;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.Cli;
 import org.jrd.backend.data.VmInfo;
@@ -70,8 +70,8 @@ public final class CommonUtils {
         boolean r = true;
         try {
             String response = uploadBytecode(clazz, vmManager, vmInfo, content);
-            if (response.equals(DecompilerRequestReceiver.ERROR_RESPONSE)) {
-                throw new Exception("Agent returned error");
+            if (new TopLevelErrorCandidate(response).isError()) {
+                throw new Exception("Agent returned error: " + response);
             }
             ss = "uploaded: ";
         } catch (Exception ex) {

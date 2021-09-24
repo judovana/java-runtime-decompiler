@@ -1,5 +1,6 @@
 package org.jrd.frontend.frame.main;
 
+import org.jrd.backend.communication.TopLevelErrorCandidate;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.AgentRequestAction.RequestAction;
 import org.jrd.backend.core.DecompilerRequestReceiver;
@@ -66,6 +67,7 @@ public class DecompilationController {
         mainFrameView.setNewConnectionDialogListener(e -> createNewConnectionDialog());
         mainFrameView.setNewFsVmDialogListener(e -> createNewFsVMDialog());
         mainFrameView.setRemoveVmDialogListener(this::removeVmDialog);
+        bytecodeDecompilerView.setInitActionListener(e -> initClass(e.getActionCommand()));
         bytecodeDecompilerView.setClassesActionListener(e -> loadClassNames());
         bytecodeDecompilerView.setBytesActionListener(e -> loadClassBytecode(e.getActionCommand()));
         bytecodeDecompilerView.setOverwriteActionListener(new ClassOverwriter());
@@ -250,6 +252,22 @@ public class DecompilationController {
             "Do you have agent configured?" +
             "On JDK 9 and higher, did you run the target process with '-Djdk.attach.allowAttachSelf=true'?";
 
+    private void initClass(String fqn) {
+        showLoadingDialog();
+        AgentRequestAction request = createRequest(RequestAction.INIT_CLASS, fqn);
+        String response = submitRequest(request);
+        hideLoadingDialog();
+        if ("ok".equals(response)) {
+            loadClassNames();
+        }
+        if (new TopLevelErrorCandidate(response).isError()) {
+            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(),
+                    response + "\n" + CLASSES_NOPE,
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
     /**
      * Sends request for classes. If "ok" response is received updates classes
      * list. If "error" response is received shows an error dialog.
@@ -264,9 +282,9 @@ public class DecompilationController {
             bytecodeDecompilerView.reloadClassList(classes);
         }
         hideLoadingDialog();
-        if (response.equals(DecompilerRequestReceiver.ERROR_RESPONSE)) {
+        if (new TopLevelErrorCandidate(response).isError()) {
             JOptionPane.showMessageDialog(mainFrameView.getMainFrame(),
-                    CLASSES_NOPE,
+                    response + "\n" + CLASSES_NOPE,
                     "Error",
                     JOptionPane.ERROR_MESSAGE);
         }
@@ -276,9 +294,9 @@ public class DecompilationController {
         AgentRequestAction request = createRequest(RequestAction.BYTES, name);
         String response = submitRequest(request);
         String decompiledClass = "";
-        if (response.equals(DecompilerRequestReceiver.ERROR_RESPONSE)) {
+        if (new TopLevelErrorCandidate(response).isError()) {
             JOptionPane.showMessageDialog(mainFrameView.getMainFrame(),
-                    "Bytecode couldn't be loaded.",
+                    response + "\nBytecode couldn't be loaded.",
                     "Error",
                     JOptionPane.ERROR_MESSAGE);
             return;
@@ -393,6 +411,9 @@ public class DecompilationController {
             case HALT:
                 request = AgentRequestAction.create(vmInfo, hostname, listenPort, action);
                 break;
+            case INIT_CLASS:
+                request = AgentRequestAction.create(vmInfo, hostname, listenPort, action, commands[CLASS_NAME]);
+                break;
             case BYTES:
                 request = AgentRequestAction.create(vmInfo, hostname, listenPort, action, commands[CLASS_NAME]);
                 break;
@@ -418,7 +439,6 @@ public class DecompilationController {
     public static String submitRequest(VmManager vmManager, AgentRequestAction request) {
         DecompilerRequestReceiver receiver = new DecompilerRequestReceiver(vmManager);
         // wait for the request processing
-
         return receiver.processRequest(request); //listener
     }
 

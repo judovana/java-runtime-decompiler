@@ -54,6 +54,8 @@ public class FsAgent implements JrdAgent {
                 case "OVERWRITE":
                     uploadByteCode(request);
                     return "OK";
+                case "INIT_CLASS":
+                    throw new RuntimeException("Init class have no meaning in FS 'vm'");
                 case "HALT":
                     return "OK";
                 default:
@@ -61,7 +63,7 @@ public class FsAgent implements JrdAgent {
             }
         } catch (Exception ex) {
             Logger.getLogger().log(ex);
-            return "ERROR";
+            return ErrorCandidate.toError(ex);
         }
     }
 

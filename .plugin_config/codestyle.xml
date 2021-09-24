@@ -284,7 +284,7 @@
             <property name="max" value="25"/>
         </module>
         <module name="ExecutableStatementCount">
-            <property name="max" value="35"/>
+            <property name="max" value="40"/>
             <property name="tokens" value="METHOD_DEF,INSTANCE_INIT,STATIC_INIT,COMPACT_CTOR_DEF,LAMBDA "/>
         </module>
         <module name="LambdaBodyLength">

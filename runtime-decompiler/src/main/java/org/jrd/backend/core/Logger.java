@@ -1,5 +1,7 @@
 package org.jrd.backend.core;
 
+import org.jrd.frontend.frame.main.GlobalConsole;
+
 /**
  * Class for logging Strings and Exceptions
  */
@@ -7,12 +9,8 @@ public class Logger {
 
     private static final String NULL_OBJECT_MESSAGE = "Trying to log null object";
 
-    public enum Level {
-        ALL, // log in all cases
-        DEBUG // log in verbose/debug mode
-    }
-
     private boolean isVerbose = false;
+    private boolean guiLogging = true;
 
     public void setVerbose() {
         isVerbose = true;
@@ -61,6 +59,9 @@ public class Logger {
             if (isVerbose || level == Level.ALL) {
                 ((Throwable) o).printStackTrace();
             }
+            if (guiLogging) {
+                GlobalConsole.getConsole().addMessage(java.util.logging.Level.ALL, o.toString());
+            }
             // show gui error dialog? Add shownexttime checkbox?
             return;
         } else {
@@ -69,7 +70,22 @@ public class Logger {
 
         if (isVerbose || level == Level.ALL) {
             System.err.println(s);
-            // print to some gui console?
+            if (guiLogging) {
+                GlobalConsole.getConsole().addMessage(java.util.logging.Level.ALL, s);
+            }
         }
+    }
+
+    public void disableGui() {
+        guiLogging = false;
+    }
+
+    public void enableGui() {
+        guiLogging = true;
+    }
+
+    public enum Level {
+        ALL, // log in all cases
+        DEBUG // log in verbose/debug mode
     }
 }

@@ -86,7 +86,7 @@ public class Communicate {
 
         if (line == null) {
             Logger.getLogger().log(Logger.Level.ALL, new RuntimeException("Agent returned null response."));
-            return "ERROR";
+            return ErrorCandidate.toError("null input line");
         }
 
         return line.trim();
@@ -105,27 +105,27 @@ public class Communicate {
             initLine = trimReadLine();
         } catch (IOException ex) {
             Logger.getLogger().log(Logger.Level.DEBUG, ex);
-            return "ERROR";
+            return ErrorCandidate.toError(ex);
         }
 
         // parse body based on header
+        ErrorCandidate errorCandidate = new ErrorCandidate(initLine);
+        if (errorCandidate.isError()) {
+            Logger.getLogger().log(Logger.Level.ALL, new RuntimeException("Agent returned error: " + errorCandidate.getErrorMessage()));
+            return initLine;
+        }
         switch (initLine) {
-            case "ERROR":
-                Logger.getLogger().log(Logger.Level.ALL, new RuntimeException("Agent returned error."));
-                return "ERROR";
             case "BYTES":
                 try {
                     String bytes = trimReadLine();
-
                     Logger.getLogger().log(Logger.Level.DEBUG, "Agent returned bytes: " + bytes);
                     return bytes;
                 } catch (IOException ex) {
                     Logger.getLogger().log(Logger.Level.ALL, ex);
-                    return "ERROR";
+                    return ErrorCandidate.toError(ex);
                 }
             case "CLASSES":
                 StringBuilder str = new StringBuilder();
-
                 while (true) {
                     try {
                         String s = this.commInput.readLine();
@@ -149,8 +149,9 @@ public class Communicate {
                 Logger.getLogger().log(Logger.Level.DEBUG, "Agent successfully overwrote class.");
                 return "OK";
             default:
-                Logger.getLogger().log(Logger.Level.ALL, "Unknown agent response header: '" + initLine + "'.");
-                return "ERROR";
+                String s = "Unknown agent response header: '" + initLine + "'.";
+                Logger.getLogger().log(Logger.Level.ALL, s);
+                return ErrorCandidate.toError(s);
         }
     }
 

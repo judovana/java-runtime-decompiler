@@ -23,6 +23,16 @@ public class AgentActionWorker extends Thread {
     private InstrumentationProvider provider;
     private Boolean abort = false;
 
+    private static final String AGENT_ERROR_ID = "ERROR";
+
+    private static String toError(String message) {
+        return AGENT_ERROR_ID + " " + message;
+    }
+
+    private static String toError(Exception ex) {
+        return toError(ex.toString());
+    }
+
     public AgentActionWorker(Socket socket, InstrumentationProvider provider) {
         this.provider = provider;
 
@@ -75,7 +85,7 @@ public class AgentActionWorker extends Thread {
         }
         try {
             if (null == line) {
-                outputStream.write("ERROR\n");
+                outputStream.write(toError("null welcome line") + "\n");
                 outputStream.flush();
             } else {
                 switch (line) {
@@ -92,8 +102,11 @@ public class AgentActionWorker extends Thread {
                     case "OVERWRITE":
                         receiveByteCode(inputStream, outputStream);
                         break;
+                    case "INIT_CLASS":
+                        initClass(inputStream, outputStream);
+                        break;
                     default:
-                        outputStream.write("ERROR\n");
+                        outputStream.write(toError("unknown command " + line) + "\n");
                         outputStream.flush();
                         break;
                 }
@@ -138,7 +151,7 @@ public class AgentActionWorker extends Thread {
     private void sendByteCode(BufferedReader in, BufferedWriter out) throws IOException {
         String className = in.readLine();
         if (className == null) {
-            out.write("ERROR\n");
+            out.write(toError("no class name provided for bytecode") + "\n");
             out.flush();
             return;
         }
@@ -151,7 +164,25 @@ public class AgentActionWorker extends Thread {
             out.newLine();
         } catch (Exception ex) {
             AgentLogger.getLogger().log(ex);
-            out.write("ERROR\n");
+            out.write(toError(ex) + "\n");
+        }
+        out.flush();
+    }
+
+    private void initClass(BufferedReader in, BufferedWriter out) throws IOException {
+        String fqn = in.readLine();
+        if (fqn == null) {
+            out.write(toError("no fqn") + "\n");
+            out.flush();
+            return;
+        }
+        try {
+            Class.forName(fqn);
+            out.write("DONE");
+            out.newLine();
+        } catch (Exception ex) {
+            AgentLogger.getLogger().log(ex);
+            out.write(toError(ex) + "\n");
         }
         out.flush();
     }
@@ -159,13 +190,13 @@ public class AgentActionWorker extends Thread {
     private void receiveByteCode(BufferedReader in, BufferedWriter out) throws IOException {
         String className = in.readLine();
         if (className == null) {
-            out.write("ERROR\n");
+            out.write(toError("no classname to upload") + "\n");
             out.flush();
             return;
         }
         String classBodyBase64 = in.readLine();
         if (classBodyBase64 == null) {
-            out.write("ERROR\n");
+            out.write(toError("no class body") + "\n");
             out.flush();
             return;
         }
@@ -175,7 +206,7 @@ public class AgentActionWorker extends Thread {
             out.newLine();
         } catch (Exception ex) {
             AgentLogger.getLogger().log(ex);
-            out.write("ERROR\n");
+            out.write(toError(ex) + "\n");
         }
         out.flush();
     }

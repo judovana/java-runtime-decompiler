@@ -47,6 +47,7 @@ public class Cli {
     protected static final String DECOMPILE = "-decompile";
     protected static final String COMPILE = "-compile";
     protected static final String OVERWRITE = "-overwrite";
+    protected static final String INIT = "-init";
     protected static final String VERSION = "-version";
     protected static final String HELP = "-help";
     protected static final String H = "-h";
@@ -194,6 +195,9 @@ public class Cli {
             case OVERWRITE:
                 overwrite();
                 break;
+            case INIT:
+                init();
+                break;
             case HELP:
             case H:
                 printHelp();
@@ -241,6 +245,24 @@ public class Cli {
                 AgentRequestAction.RequestAction.OVERWRITE,
                 classStr,
                 clazz);
+        String response = DecompilationController.submitRequest(vmManager, request);
+        if ("ok".equals(response)) {
+            System.out.println("Most likely done successfully.");
+        } else {
+            throw new RuntimeException(DecompilationController.CLASSES_NOPE);
+        }
+    }
+
+    private void init() throws Exception {
+        if (filteredArgs.size() != 3) {
+            throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.INIT_FORMAT + "'.");
+        }
+        String fqn = filteredArgs.get(2);
+        VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
+
+        AgentRequestAction request = DecompilationController.createRequest(vmInfo,
+                AgentRequestAction.RequestAction.INIT_CLASS,
+                fqn);
         String response = DecompilationController.submitRequest(vmManager, request);
         if ("ok".equals(response)) {
             System.out.println("Most likely done successfully.");
