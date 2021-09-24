@@ -64,6 +64,7 @@ public class MainFrameView {
             private JMenuItem jMenuItemAbout;
             private JMenuItem jMenuItemUsage;
             private JMenuItem jMenuItemLicense;
+            private JMenuItem jMenuItemLog;
 
     private ActionListener vmChangingListener;
     private ActionListener refreshLocalVmsListener;
@@ -337,9 +338,15 @@ public class MainFrameView {
         jMenuItemLicense.addActionListener(actionEvent -> {
             new LicenseView(this);
         });
+
+        jMenuItemLog = new JMenuItem("Log");
+        jMenuItemLog.addActionListener(actionEvent -> {
+            GlobalConsole.getConsole().show();
+        });
         jMenuHelp.add(jMenuItemAbout);
         jMenuHelp.add(jMenuItemUsage);
         jMenuHelp.add(jMenuItemLicense);
+        jMenuHelp.add(jMenuItemLog);
         // jMenuHelp end
 
         menuBar = new JMenuBar();

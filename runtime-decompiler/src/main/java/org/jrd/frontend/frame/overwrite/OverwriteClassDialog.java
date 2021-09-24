@@ -7,7 +7,7 @@ import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
 import io.github.mkoncek.classpathless.api.MessagesListener;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
-import org.jrd.backend.core.DecompilerRequestReceiver;
+import org.jrd.backend.communication.TopLevelErrorCandidate;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.Config;
 import org.jrd.backend.data.VmInfo;
@@ -15,6 +15,7 @@ import org.jrd.backend.data.VmManager;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.main.DecompilationController;
+import org.jrd.frontend.frame.main.GlobalConsole;
 import org.jrd.frontend.utility.CommonUtils;
 
 import javax.swing.JButton;
@@ -245,9 +246,8 @@ public class OverwriteClassDialog extends JDialog {
         this.decompiler = selectedDecompiler;
         try {
             this.haveCompiler = false;
-            boolean haveDecompiler = this.pluginManager.hasBundledCompiler(decompiler);
             String s = "Default runtime compiler will be used";
-            if (haveDecompiler) {
+            if (this.pluginManager.hasBundledCompiler(decompiler)) {
                 s = selectedDecompiler.getName() + " plugin is delivered with its own compiler!!";
                 this.haveCompiler = true;
             }
@@ -372,9 +372,9 @@ public class OverwriteClassDialog extends JDialog {
                             DecompilationController.fileToBytes(filePath.getText())
                     );
 
-                    if (response.equals(DecompilerRequestReceiver.ERROR_RESPONSE)) {
+                    if (new TopLevelErrorCandidate(response).isError()) {
                         JOptionPane.showMessageDialog(
-                                null, "Class overwrite failed.", "Error", JOptionPane.ERROR_MESSAGE
+                                null, response + "\nClass overwrite failed.", "Error", JOptionPane.ERROR_MESSAGE
                         );
                     } else {
                         validation.setForeground(Color.black);
@@ -578,6 +578,7 @@ public class OverwriteClassDialog extends JDialog {
                     public void addMessage(Level level, String s) {
                         Logger.getLogger().log(Logger.Level.ALL, s);
                         compilationLog.setText(compilationLog.getText() + s + "\n");
+                        GlobalConsole.getConsole().addMessage(level, s);
                     }
                 }), sources);
             } catch (Exception e) {

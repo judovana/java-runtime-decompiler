@@ -25,6 +25,7 @@ public final class Help {
     static final String COMPILE_FORMAT = COMPILE + " [-p <PLUGIN>] [-cp <PUC>] [-r] <PATH>...";
     static final String DECOMPILE_FORMAT = DECOMPILE + " <PUC> <PLUGIN> <CLASS REGEX>...";
     static final String OVERWRITE_FORMAT = OVERWRITE + " <PUC> <CLASS NAME> [<CLASS FILE>]";
+    static final String INIT_FORMAT = INIT + " <PUC> <FQN>";
     static final String SAVE_AS_FORMAT = SAVE_AS + " <PATH>";
     static final String SAVE_LIKE_FORMAT = SAVE_LIKE + " <SAVE METHOD>";
 
@@ -48,6 +49,7 @@ public final class Help {
             "Javap can be passed options by appending them without spaces: " +
             "'javap-v-public ...' executes as 'javap -v -public ...'";
     private static final String OVERWRITE_TEXT = "Overwrite class of a process with new bytecode. If <CLASS FILE> is not set, standard input is used.";
+    private static final String INIT_TEXT = "Will try to initialize class in running JVM (no effect in filesystem). As JVM is lazy loading, the class you need may be missing This should fix it.";
     private static final String SAVE_AS_TEXT = "All outputs will be written to PATH instead of to standard output.";
     private static final String SAVE_LIKE_TEXT = "Specify how saving will behave.";
 
@@ -88,6 +90,7 @@ public final class Help {
         ALL_OPTIONS.put(COMPILE_FORMAT, COMPILE_TEXT);
         ALL_OPTIONS.put(DECOMPILE_FORMAT, DECOMPILE_TEXT);
         ALL_OPTIONS.put(OVERWRITE_FORMAT, OVERWRITE_TEXT);
+        ALL_OPTIONS.put(INIT_FORMAT, INIT_TEXT);
 
         SAVING_OPTIONS = new LinkedHashMap<>();
         SAVING_OPTIONS.put(SAVE_AS_FORMAT, SAVE_AS_TEXT);
@@ -100,7 +103,7 @@ public final class Help {
         NOTES.put(NOTES_SAVE, NOTES_SAVE_ITEMS);
     }
 
-    private static final String[] UNSAVABLE_OPTIONS = {HELP, H, LIST_JVMS, LIST_PLUGINS, OVERWRITE};
+    private static final String[] UNSAVABLE_OPTIONS = {HELP, H, LIST_JVMS, LIST_PLUGINS, OVERWRITE, INIT};
     private static final String[] SAVABLE_OPTIONS = {LIST_CLASSES, BYTES, BASE64, COMPILE, DECOMPILE};
 
     private static final int LONGEST_FORMAT_LENGTH =
