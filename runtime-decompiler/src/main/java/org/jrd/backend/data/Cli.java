@@ -259,7 +259,10 @@ public class Cli {
         }
         String fqn = filteredArgs.get(2);
         VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
+        initClass(vmInfo, vmManager, fqn);
+    }
 
+    public static void initClass(VmInfo vmInfo, VmManager vmManager, String fqn) {
         AgentRequestAction request = DecompilationController.createRequest(vmInfo,
                 AgentRequestAction.RequestAction.INIT_CLASS,
                 fqn);

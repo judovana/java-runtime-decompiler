@@ -7,6 +7,7 @@ import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
 import io.github.mkoncek.classpathless.api.MessagesListener;
 import org.jrd.backend.core.AgentRequestAction;
+import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.data.Cli;
 import org.jrd.backend.data.VmInfo;
@@ -38,7 +39,15 @@ public class RuntimeCompilerConnector {
         public Collection<IdentifiedBytecode> getClass(ClassIdentifier... classIdentifiers) {
             List<IdentifiedBytecode> results = new ArrayList<>(classIdentifiers.length);
             for (ClassIdentifier clazz : classIdentifiers) {
-                VmDecompilerStatus result = Cli.obtainClass(vmInfo, clazz.getFullName(), vmManager);
+                VmDecompilerStatus result;
+                try {
+                    result = Cli.obtainClass(vmInfo, clazz.getFullName(), vmManager);
+                } catch (Exception ex) {
+                    Logger.getLogger().log(ex);
+                    Logger.getLogger().log("Attempting to init the class and load again");
+                    Cli.initClass(vmInfo, vmManager, clazz.getFullName());
+                    result = Cli.obtainClass(vmInfo, clazz.getFullName(), vmManager);
+                }
                 byte[] ba = Base64.getDecoder().decode(result.getLoadedClassBytes());
                 results.add(new IdentifiedBytecode(new ClassIdentifier(clazz.getFullName()), ba));
             }
