@@ -1,5 +1,7 @@
 package org.jrd.frontend.frame.main;
 
+import io.github.mkoncek.classpathless.api.IdentifiedSource;
+import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.communication.TopLevelErrorCandidate;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.AgentRequestAction.RequestAction;
@@ -31,6 +33,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.logging.Level;
 
 /**
  * This class provides Action listeners and request handling for
@@ -71,6 +74,7 @@ public class DecompilationController {
         bytecodeDecompilerView.setClassesActionListener(e -> loadClassNames());
         bytecodeDecompilerView.setBytesActionListener(e -> loadClassBytecode(e.getActionCommand()));
         bytecodeDecompilerView.setOverwriteActionListener(new ClassOverwriter());
+        bytecodeDecompilerView.setCompileListener(new QuickCompiler());
 
         mainFrameView.setVmChanging(this::changeVm);
         mainFrameView.setHaltAgentListener(e -> haltAgent());
@@ -312,6 +316,20 @@ public class DecompilationController {
             Logger.getLogger().log(Logger.Level.ALL, e);
         }
         bytecodeDecompilerView.reloadTextField(name, decompiledClass, bytes);
+    }
+
+    class QuickCompiler {
+
+        public void run(DecompilerWrapper wrapper, IdentifiedSource... srcs) {
+            PluginManager.BundledCompilerStatus internalCompiler = pluginManager.getBundledCompilerStatus(wrapper);
+            GlobalConsole.getConsole().addMessage(Level.ALL, internalCompiler.getStatus());
+            OverwriteClassDialog.CompilationWithResult compiler = new OverwriteClassDialog.CompilationWithResult(
+                    OverwriteClassDialog.getClasspathlessCompiler(wrapper, internalCompiler.isEmbedded()),
+                    new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager),
+                    GlobalConsole.getConsole(), srcs);
+            Thread t = new Thread(compiler);
+            t.start();
+        }
     }
 
     class ClassOverwriter {

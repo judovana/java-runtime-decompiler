@@ -1,5 +1,7 @@
 package org.jrd.frontend.frame.main;
 
+import io.github.mkoncek.classpathless.api.ClassIdentifier;
+import io.github.mkoncek.classpathless.api.IdentifiedSource;
 import org.fife.ui.hex.event.HexSearchActionListener;
 import org.fife.ui.hex.event.HexSearchDocumentListener;
 import org.fife.ui.hex.swing.HexEditor;
@@ -34,6 +36,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -78,6 +81,7 @@ public class BytecodeDecompilerView {
     private ActionListener bytesActionListener;
     private ActionListener classesActionListener;
     private ActionListener initActionListener;
+    private DecompilationController.QuickCompiler compileAction;
     private OverwriteActionListener overwriteActionListener;
 
     private String[] loadedClasses;
@@ -226,6 +230,10 @@ public class BytecodeDecompilerView {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 GlobalConsole.getConsole().show();
+                compileAction.run(
+                        (DecompilerWrapper) pluginComboBox.getSelectedItem(),
+                        new IdentifiedSource(new ClassIdentifier(lastDecompiledClass),
+                                bytecodeSyntaxTextArea.getText().getBytes(StandardCharsets.UTF_8)));
             }
         });
 
@@ -666,6 +674,10 @@ public class BytecodeDecompilerView {
 
     public void setInitActionListener(ActionListener listener) {
         initActionListener = listener;
+    }
+
+    public void setCompileListener(DecompilationController.QuickCompiler listener) {
+        compileAction = listener;
     }
 
 

@@ -179,6 +179,33 @@ public class PluginManager {
         }
     }
 
+    public static class BundledCompilerStatus {
+        private final boolean isEmbedded;
+        private final String status;
+
+        public BundledCompilerStatus(boolean isEmbedded, String status) {
+            this.isEmbedded = isEmbedded;
+            this.status = status;
+        }
+
+        public boolean isEmbedded() {
+            return isEmbedded;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+    }
+
+    public synchronized BundledCompilerStatus getBundledCompilerStatus(DecompilerWrapper decompiler) {
+        boolean haveBundledCompiler = this.hasBundledCompiler(decompiler);
+        String s = "Default runtime compiler will be used";
+        if (haveBundledCompiler) {
+            s = decompiler.getName() + " plugin is delivered with its own compiler!!";
+        }
+        return new BundledCompilerStatus(haveBundledCompiler, s);
+    }
+
     public synchronized boolean hasBundledCompiler(DecompilerWrapper wrapper) {
         if (wrapper == null) {
             throw new RuntimeException("No valid decompiler selected. Current-Buffer may not be usable");
