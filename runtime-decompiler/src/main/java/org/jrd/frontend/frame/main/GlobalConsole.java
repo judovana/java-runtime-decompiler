@@ -3,6 +3,7 @@ package org.jrd.frontend.frame.main;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.github.mkoncek.classpathless.api.MessagesListener;
 import org.jrd.backend.core.Logger;
+import org.jrd.frontend.frame.overwrite.OverwriteClassDialog;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,7 +13,7 @@ import java.util.Date;
 import java.util.logging.Level;
 
 
-public class GlobalConsole implements MessagesListener {
+public class GlobalConsole implements MessagesListener, OverwriteClassDialog.TextLog {
 
     private static GlobalConsole console = new GlobalConsole();
     private final JTextArea log;
@@ -23,7 +24,7 @@ public class GlobalConsole implements MessagesListener {
         JButton tmpClean;
         JTextArea tmpLog;
         JFrame tmpFrame;
-        Logger.getLogger().disableGui();
+        Logger.getLogger().disableGuiLogging();
         if (!GraphicsEnvironment.isHeadless()) {
             try {
                 tmpLog = new JTextArea();
@@ -55,7 +56,7 @@ public class GlobalConsole implements MessagesListener {
         clean = tmpClean;
         log = tmpLog;
         frame = tmpFrame;
-        Logger.getLogger().enableGui();
+        Logger.getLogger().enableGuiLogging();
     }
 
     @SuppressFBWarnings(
@@ -92,5 +93,15 @@ public class GlobalConsole implements MessagesListener {
     @Override
     public void addMessage(Level level, String format, Object... args) {
         MessagesListener.super.addMessage(level, format, args);
+    }
+
+    @Override
+    public String getText() {
+        return log.getText();
+    }
+
+    @Override
+    public void setText(String s) {
+        log.setText(s);
     }
 }

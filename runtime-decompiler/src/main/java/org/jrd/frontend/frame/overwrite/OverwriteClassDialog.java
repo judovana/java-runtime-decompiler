@@ -49,6 +49,13 @@ import java.util.logging.Level;
 
 public class OverwriteClassDialog extends JDialog {
 
+    public interface TextLog {
+
+        void setText(String s);
+
+        String getText();
+    }
+
     private static class TextFieldBasedStus implements CommonUtils.StatusKeeper {
         private final JTextField status;
 
@@ -99,7 +106,7 @@ public class OverwriteClassDialog extends JDialog {
     private final JButton ok;
     private final PluginManager pluginManager;
     private final DecompilerWrapper decompiler;
-    private boolean haveCompiler;
+    private PluginManager.BundledCompilerStatus haveCompiler;
 
     private final JPanel externalFiles;
     private final JTextField filesToCompile;
@@ -245,14 +252,9 @@ public class OverwriteClassDialog extends JDialog {
         this.pluginManager = pluginManager;
         this.decompiler = selectedDecompiler;
         try {
-            this.haveCompiler = false;
-            String s = "Default runtime compiler will be used";
-            if (this.pluginManager.hasBundledCompiler(decompiler)) {
-                s = selectedDecompiler.getName() + " plugin is delivered with its own compiler!!";
-                this.haveCompiler = true;
-            }
-            statusExternalFiles.setText(s);
-            statusCompileCurrentBuffer.setText(s);
+            this.haveCompiler = this.pluginManager.getBundledCompilerStatus(decompiler);
+            statusExternalFiles.setText(haveCompiler.getStatus());
+            statusCompileCurrentBuffer.setText(haveCompiler.getStatus());
         } catch (Exception ex) {
             statusExternalFiles.setText(ex.getMessage());
             statusCompileCurrentBuffer.setText(ex.getMessage());
@@ -400,7 +402,7 @@ public class OverwriteClassDialog extends JDialog {
                         vmManager,
                         pluginManager,
                         decompiler,
-                        haveCompiler,
+                        haveCompiler.isEmbedded(),
                         namingBinary.getSelectedIndex(),
                         futureBinTarget.getText()
                 ).run(currentIs);
@@ -420,7 +422,7 @@ public class OverwriteClassDialog extends JDialog {
                         vmManager,
                         pluginManager,
                         decompiler,
-                        haveCompiler,
+                        haveCompiler.isEmbedded(),
                         namingBinary.getSelectedIndex(),
                         futureBinTarget.getText()
                 ).run(currentIs);
@@ -440,7 +442,7 @@ public class OverwriteClassDialog extends JDialog {
                             vmManager,
                             pluginManager,
                             decompiler,
-                            haveCompiler,
+                            haveCompiler.isEmbedded(),
                             namingExternal.getSelectedIndex(),
                             outputExternalFilesDir.getText()
                     ).run(loaded);
@@ -462,8 +464,35 @@ public class OverwriteClassDialog extends JDialog {
             IdentifiedSource... sources
     ) {
         ClassesProvider cp = new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager);
-        ClasspathlessCompiler rc;
+        ClasspathlessCompiler rc = getClasspathlessCompiler(wrapper, hasCompiler);
+        JDialog compilationRunningDialog = new JDialog((JFrame) null, "Compiling", true);
+        final JTextArea compilationLog = new JTextArea();
+        compilationRunningDialog.setSize(300, 400);
+        compilationRunningDialog.add(new JScrollPane(compilationLog));
 
+        OverwriteClassDialog.CompilationWithResult compiler = new OverwriteClassDialog.CompilationWithResult(rc, cp,
+                new TextLog() {
+                    @Override
+                    public void setText(String s) {
+                        compilationLog.setText(s);
+                    }
+
+                    @Override
+                    public String getText() {
+                        return compilationLog.getText();
+                    }
+                }, sources
+        );
+        Thread t = new Thread(compiler);
+        t.start();
+        compilationRunningDialog.setLocationRelativeTo(null);
+        compilationRunningDialog.setVisible(true);
+
+        return compiler;
+    }
+
+    public static ClasspathlessCompiler getClasspathlessCompiler(DecompilerWrapper wrapper, boolean hasCompiler) {
+        ClasspathlessCompiler rc;
         if (hasCompiler) {
             rc = new RuntimeCompilerConnector.ForeignCompilerWrapper(wrapper);
         } else {
@@ -474,20 +503,7 @@ public class OverwriteClassDialog extends JDialog {
 
             rc = new io.github.mkoncek.classpathless.impl.CompilerJavac(arguments);
         }
-        JDialog compilationRunningDialog = new JDialog((JFrame) null, "Compiling", true);
-        JTextArea compilationLog = new JTextArea();
-        compilationRunningDialog.setSize(300, 400);
-        compilationRunningDialog.add(new JScrollPane(compilationLog));
-
-        OverwriteClassDialog.CompilationWithResult compiler = new OverwriteClassDialog.CompilationWithResult(
-                rc, cp, compilationLog, sources
-        );
-        Thread t = new Thread(compiler);
-        t.start();
-        compilationRunningDialog.setLocationRelativeTo(null);
-        compilationRunningDialog.setVisible(true);
-
-        return compiler;
+        return rc;
     }
 
     private void addComponentsToPanels() {
@@ -552,17 +568,17 @@ public class OverwriteClassDialog extends JDialog {
         return outputBinaries.getText();
     }
 
-    private static class CompilationWithResult implements Runnable {
+    public static class CompilationWithResult implements Runnable {
         private final ClasspathlessCompiler rc;
         private final ClassesProvider cp;
-        private final JTextArea compilationLog;
+        private final TextLog compilationLog;
         private final IdentifiedSource[] sources;
         private Exception ex;
         private Collection<IdentifiedBytecode> result;
 
 
-        CompilationWithResult(
-                ClasspathlessCompiler rc, ClassesProvider cp, JTextArea compilationLog, IdentifiedSource... sources
+        public CompilationWithResult(
+                ClasspathlessCompiler rc, ClassesProvider cp, TextLog compilationLog, IdentifiedSource... sources
         ) {
             this.rc = rc;
             this.cp = cp;
@@ -586,8 +602,10 @@ public class OverwriteClassDialog extends JDialog {
                 Logger.getLogger().log(e);
                 compilationLog.setText(compilationLog.getText() + e.getMessage() + "\n");
             } finally {
-                Logger.getLogger().log(Logger.Level.DEBUG, "Compilation finished");
-                compilationLog.setText(compilationLog.getText() + "Compilation finished, you may close dialog\n");
+                String s = "Attempt to compile finished";
+                Logger.getLogger().log(Logger.Level.DEBUG, s + ".");
+                compilationLog.setText(
+                        compilationLog.getText() + s + ", you may close dialog\n");
             }
 
         }

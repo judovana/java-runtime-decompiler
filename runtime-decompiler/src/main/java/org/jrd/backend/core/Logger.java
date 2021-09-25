@@ -76,11 +76,11 @@ public class Logger {
         }
     }
 
-    public void disableGui() {
+    public void disableGuiLogging() {
         guiLogging = false;
     }
 
-    public void enableGui() {
+    public void enableGuiLogging() {
         guiLogging = true;
     }
 
