@@ -87,6 +87,7 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
     public void addMessage(Level level, String s) {
         if (log != null) {
             log.setText(log.getText() + stamp() + tail(s));
+            log.setCaretPosition(log.getDocument().getLength());
         }
     }
 
@@ -103,5 +104,6 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
     @Override
     public void setText(String s) {
         log.setText(s);
+        log.setCaretPosition(log.getDocument().getLength());
     }
 }
