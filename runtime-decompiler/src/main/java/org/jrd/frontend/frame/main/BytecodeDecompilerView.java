@@ -232,6 +232,7 @@ public class BytecodeDecompilerView {
                 GlobalConsole.getConsole().show();
                 compileAction.run(
                         (DecompilerWrapper) pluginComboBox.getSelectedItem(),
+                        false,
                         new IdentifiedSource(new ClassIdentifier(lastDecompiledClass),
                                 bytecodeSyntaxTextArea.getText().getBytes(StandardCharsets.UTF_8)));
             }
@@ -239,10 +240,19 @@ public class BytecodeDecompilerView {
 
         compileAndUploadButton = new JButton("CU");
         compileAndUploadButton.setToolTipText("Compile and directly upload");
-        compileButton.addActionListener(new ActionListener() {
+        compileAndUploadButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 GlobalConsole.getConsole().show();
+                if (!isSourceBufferVisible()) {
+                    compileAction.upload(lastDecompiledClass, hex.get());
+                } else {
+                    compileAction.run(
+                            (DecompilerWrapper) pluginComboBox.getSelectedItem(),
+                            true,
+                            new IdentifiedSource(new ClassIdentifier(lastDecompiledClass),
+                                    bytecodeSyntaxTextArea.getText().getBytes(StandardCharsets.UTF_8)));
+                }
             }
         });
         reloadClassesButton = new JButton("Reload classes");
@@ -679,7 +689,6 @@ public class BytecodeDecompilerView {
     public void setCompileListener(DecompilationController.QuickCompiler listener) {
         compileAction = listener;
     }
-
 
     public void setBytesActionListener(ActionListener listener) {
         bytesActionListener = listener;

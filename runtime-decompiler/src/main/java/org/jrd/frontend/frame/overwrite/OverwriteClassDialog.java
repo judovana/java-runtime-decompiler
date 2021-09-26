@@ -43,6 +43,7 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.logging.Level;
 
@@ -609,6 +610,14 @@ public class OverwriteClassDialog extends JDialog {
             }
 
         }
+
+        public Collection<IdentifiedBytecode> getResult() {
+            if (result == null) {
+                return null;
+            } else {
+                return Collections.unmodifiableCollection(result);
+            }
+        }
     }
 
     private static class CompilerOutputActionFields {
@@ -663,7 +672,7 @@ public class OverwriteClassDialog extends JDialog {
                     this.vmInfo, this.vmManager, decompilerWrapper, haveCompiler, sources
             );
 
-            if (compiler.ex == null && compiler.result == null) {
+            if (compiler.ex == null && compiler.getResult() == null) {
                 String s = "No output from compiler, maybe still running?";
                 JOptionPane.showMessageDialog(null, s);
                 status.setText(s);
@@ -671,7 +680,7 @@ public class OverwriteClassDialog extends JDialog {
                 JOptionPane.showMessageDialog(null, compiler.ex.getMessage());
                 status.setText("Failed - " + compiler.ex.getMessage());
             } else {
-                if (compiler.result.size() <= 0) {
+                if (compiler.getResult().size() <= 0) {
                     status.setText("compilation finished, but no output.. nothing to save");
                     status.repaint();
                     return;
@@ -681,8 +690,8 @@ public class OverwriteClassDialog extends JDialog {
                 }
 
                 if (namingSchema == CommonUtils.CUSTOM_NAME) {
-                    if (compiler.result.size() > 0) {
-                        String s = "Output of compilation was " + compiler.result.size() + "classes. " +
+                    if (compiler.getResult().size() > 0) {
+                        String s = "Output of compilation was " + compiler.getResult().size() + "classes. " +
                                 "Cannot save more then one file to exact filename";
                         JOptionPane.showMessageDialog(null, s);
                         status.setText(s);
@@ -691,7 +700,7 @@ public class OverwriteClassDialog extends JDialog {
                 }
 
                 int saved = 0;
-                for (IdentifiedBytecode clazz : compiler.result) {
+                for (IdentifiedBytecode clazz : compiler.getResult()) {
                     boolean r = CommonUtils.saveByGui(
                             destination,
                             namingSchema,
@@ -704,12 +713,12 @@ public class OverwriteClassDialog extends JDialog {
                         saved++;
                     }
                 }
-                if (compiler.result.size() > 1) {
-                    if (saved == compiler.result.size()) {
+                if (compiler.getResult().size() > 1) {
+                    if (saved == compiler.getResult().size()) {
                         status.setText("Saved all " + saved + "classes to" + destination);
                     } else {
                         status.setText("Saved only " + saved +
-                                " out of " + compiler.result.size() +
+                                " out of " + compiler.getResult().size() +
                                 " classes to" + destination
                         );
                     }
@@ -737,7 +746,7 @@ public class OverwriteClassDialog extends JDialog {
                     this.vmInfo, this.vmManager, decompilerWrapper, haveCompiler, sources
             );
 
-            if (compiler.ex == null && compiler.result == null) {
+            if (compiler.ex == null && compiler.getResult() == null) {
                 String s = "No output from compiler, maybe still running?";
                 JOptionPane.showMessageDialog(null, s);
                 status.setText(s);
@@ -745,7 +754,7 @@ public class OverwriteClassDialog extends JDialog {
                 JOptionPane.showMessageDialog(null, compiler.ex.getMessage());
                 status.setText("Failed - " + compiler.ex.getMessage());
             } else {
-                if (compiler.result.size() <= 0) {
+                if (compiler.getResult().size() <= 0) {
                     status.setText("compilation finished, but no output.. nothing to upload");
                     status.repaint();
                     return;
@@ -755,7 +764,7 @@ public class OverwriteClassDialog extends JDialog {
                 }
 
                 int saved = 0;
-                for (IdentifiedBytecode clazz : compiler.result) {
+                for (IdentifiedBytecode clazz : compiler.getResult()) {
                     boolean r = CommonUtils.uploadByGui(
                             vmInfo,
                             vmManager,
@@ -769,12 +778,12 @@ public class OverwriteClassDialog extends JDialog {
                     }
                 }
 
-                if (compiler.result.size() > 1) {
-                    if (saved == compiler.result.size()) {
+                if (compiler.getResult().size() > 1) {
+                    if (saved == compiler.getResult().size()) {
                         status.setText("Uploaded all " + saved + " classes to " + vmInfo.getVmId());
                     } else {
                         status.setText("Uploaded only " + saved +
-                                " out of " + compiler.result.size() +
+                                " out of " + compiler.getResult().size() +
                                 " classes to " + vmInfo.getVmId()
                         );
                     }
