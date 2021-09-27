@@ -32,7 +32,12 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
                 tmpFrame = new JFrame();
                 tmpFrame.setLayout(new BorderLayout());
                 tmpFrame.add(new JScrollPane(tmpLog));
-                tmpFrame.add(tmpClean, BorderLayout.SOUTH);
+                JPanel p = new JPanel(new BorderLayout());
+                JCheckBox verbose = new JCheckBox("verbose mode", Logger.getLogger().isVerbose());
+                verbose.addActionListener(actionEvent -> Logger.getLogger().setVerbose(verbose.isSelected()));
+                p.add(tmpClean, BorderLayout.CENTER);
+                p.add(verbose, BorderLayout.EAST);
+                tmpFrame.add(p, BorderLayout.SOUTH);
                 tmpFrame.setSize(800, 600);
                 tmpClean.addActionListener(new ActionListener() {
                     @Override

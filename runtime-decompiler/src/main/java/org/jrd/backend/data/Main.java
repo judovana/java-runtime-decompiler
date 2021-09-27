@@ -10,7 +10,7 @@ public class Main {
         Model model = new Model();
         Cli cli = new Cli(allArgs, model);
         if (cli.shouldBeVerbose()) {
-            Logger.getLogger().setVerbose();
+            Logger.getLogger().setVerbose(true);
         }
         if (cli.isGui()) {
             setLookAndFeel();
