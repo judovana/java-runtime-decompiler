@@ -470,7 +470,7 @@ public class OverwriteClassDialog extends JDialog {
             boolean useHostClasses = Config.getConfig().doUseHostSystemClasses();
             ClasspathlessCompiler.Arguments arguments = new ClasspathlessCompiler
                     .Arguments()
-                    .useHostJavaClasses(useHostClasses);
+                    .useHostSystemClasses(useHostClasses);
 
             rc = new io.github.mkoncek.classpathless.impl.CompilerJavac(arguments);
         }
