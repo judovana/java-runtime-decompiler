@@ -2,6 +2,10 @@ package org.jrd.backend.core;
 
 import org.jrd.frontend.frame.main.GlobalConsole;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
+
 /**
  * Class for logging Strings and Exceptions
  */
@@ -65,6 +69,9 @@ public class Logger {
             }
             if (guiLogging) {
                 GlobalConsole.getConsole().addMessage(java.util.logging.Level.ALL, o.toString());
+                if (isVerbose()) {
+                    GlobalConsole.getConsole().addMessage(java.util.logging.Level.ALL, exToString((Throwable) o));
+                }
             }
             // show gui error dialog? Add shownexttime checkbox?
             return;
@@ -91,5 +98,11 @@ public class Logger {
     public enum Level {
         ALL, // log in all cases
         DEBUG // log in verbose/debug mode
+    }
+
+    private String exToString(Throwable e) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        e.printStackTrace(new PrintStream(out, true, StandardCharsets.UTF_8));
+        return new String(out.toByteArray(), StandardCharsets.UTF_8);
     }
 }
