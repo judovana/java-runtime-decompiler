@@ -12,8 +12,12 @@ public class Logger {
     private boolean isVerbose = false;
     private boolean guiLogging = true;
 
-    public void setVerbose() {
-        isVerbose = true;
+    public void setVerbose(boolean verbose) {
+        isVerbose = verbose;
+    }
+
+    public boolean isVerbose() {
+        return isVerbose;
     }
 
     private static class LoggerHolder {
@@ -56,7 +60,7 @@ public class Logger {
         if (o == null) {
             s = NULL_OBJECT_MESSAGE;
         } else if (o instanceof Throwable) {
-            if (isVerbose || level == Level.ALL) {
+            if (isVerbose() || level == Level.ALL) {
                 ((Throwable) o).printStackTrace();
             }
             if (guiLogging) {
@@ -68,7 +72,7 @@ public class Logger {
             s = o.toString();
         }
 
-        if (isVerbose || level == Level.ALL) {
+        if (isVerbose() || level == Level.ALL) {
             System.err.println(s);
             if (guiLogging) {
                 GlobalConsole.getConsole().addMessage(java.util.logging.Level.ALL, s);
