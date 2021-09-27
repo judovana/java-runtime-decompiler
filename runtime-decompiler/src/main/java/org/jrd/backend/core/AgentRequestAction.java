@@ -38,6 +38,7 @@ package org.jrd.backend.core;
 
 import org.jrd.backend.data.VmInfo;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -90,6 +91,13 @@ public class AgentRequestAction {
 
         private String toIntString() {
             return Integer.toString(intVal);
+        }
+
+        public static RequestAction fromString(String s) throws IllegalArgumentException {
+            return Arrays.stream(RequestAction.values())
+                    .filter(v -> v.toString().equals(s))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("unknown value: " + s));
         }
 
     }

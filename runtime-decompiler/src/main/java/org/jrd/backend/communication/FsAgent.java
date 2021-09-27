@@ -1,6 +1,7 @@
 package org.jrd.backend.communication;
 
 
+import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.ArchiveManager;
 
@@ -46,17 +47,18 @@ public class FsAgent implements JrdAgent {
     public String submitRequest(final String request) {
         String[] q = request.split("\\s+");
         try {
-            switch (q[0]) {
-                case "CLASSES":
+            switch (AgentRequestAction.RequestAction.fromString(q[0])) {
+                case CLASSES:
                     return readClasses();
-                case "BYTES":
+                case BYTES:
                     return sendByteCode(request);
-                case "OVERWRITE":
+                case OVERWRITE:
                     uploadByteCode(request);
                     return "OK";
-                case "INIT_CLASS":
-                    throw new RuntimeException("Init class have no meaning in FS 'vm'");
-                case "HALT":
+                case INIT_CLASS:
+                    Logger.getLogger().log(Logger.Level.DEBUG, "Init class have no meaning in FS 'vm'");
+                    return "DONE";
+                case HALT:
                     return "OK";
                 default:
                     throw new RuntimeException("Unknown command: " + q[0]);
