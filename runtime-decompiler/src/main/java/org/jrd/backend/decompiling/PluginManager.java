@@ -7,6 +7,8 @@ import org.jrd.backend.data.Cli;
 import org.jrd.backend.data.Directories;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
+import org.jrd.frontend.frame.main.GlobalConsole;
+import org.jrd.frontend.utility.TeeOutputStream;
 
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
@@ -15,6 +17,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -29,6 +32,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 /**
@@ -151,31 +155,41 @@ public class PluginManager {
                     "If there is no decompiler selected, you need to set paths to decompiler in" +
                     "decompiler wrapper";
         }
-
-        if (!wrapper.haveDecompilerMethod()) {
-            initializeWrapper(wrapper);
-        }
-
-        if (wrapper.getDecompileMethodWithInners() != null && name != null && vmInfo != null && vmManager != null) {
-            String[] allClasses = Cli.obtainClasses(vmInfo, vmManager);
-            Map<String, byte[]> innerClasses = new HashMap<>();
-
-            for (String clazz : allClasses) {
-                if (isDecompilableInnerClass(name, clazz)) {
-                    innerClasses.put(
-                            clazz,
-                            Base64.getDecoder().decode(Cli.obtainClass(vmInfo, clazz, vmManager).getLoadedClassBytes())
-                    );
-                }
+        PrintStream origSerr = System.err;
+        //our plugins can log only to stderr
+        TeeOutputStream tee = new TeeOutputStream(System.err);
+        System.setErr(tee);
+        try {
+            if (!wrapper.haveDecompilerMethod()) {
+                initializeWrapper(wrapper);
             }
 
-            return (String) wrapper.getDecompileMethodWithInners().invoke(
-                    wrapper.getInstance(), name, bytecode, innerClasses, options
-            );
-        } else if (wrapper.getDecompileMethodNoInners() != null) {
-            return (String) wrapper.getDecompileMethodNoInners().invoke(wrapper.getInstance(), bytecode, options);
-        } else {
-            throw new RuntimeException("This decompiler has no suitable decompile method for give parameters");
+            if (wrapper.getDecompileMethodWithInners() != null && name != null && vmInfo != null && vmManager != null) {
+                String[] allClasses = Cli.obtainClasses(vmInfo, vmManager);
+                Map<String, byte[]> innerClasses = new HashMap<>();
+
+                for (String clazz : allClasses) {
+                    if (isDecompilableInnerClass(name, clazz)) {
+                        innerClasses.put(
+                                clazz,
+                                Base64.getDecoder().decode(
+                                        Cli.obtainClass(vmInfo, clazz, vmManager).getLoadedClassBytes())
+                        );
+                    }
+                }
+
+                return (String) wrapper.getDecompileMethodWithInners().invoke(
+                        wrapper.getInstance(), name, bytecode, innerClasses, options
+                );
+            } else if (wrapper.getDecompileMethodNoInners() != null) {
+                return (String) wrapper.getDecompileMethodNoInners().invoke(wrapper.getInstance(), bytecode, options);
+            } else {
+                throw new RuntimeException("This decompiler has no suitable decompile method for give parameters");
+            }
+        } finally {
+            System.setErr(origSerr);
+            //get output of decompiler for research can log only to stderr
+            GlobalConsole.getConsole().addMessage(Level.INFO, new String(tee.getByteArray(), StandardCharsets.UTF_8));
         }
     }
 

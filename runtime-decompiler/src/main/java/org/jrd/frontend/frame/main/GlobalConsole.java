@@ -88,11 +88,22 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
         }
     }
 
+    private Logger.Level levelToLevel(Level level) {
+        if (level.intValue() < Level.WARNING.intValue()) {
+            return Logger.Level.DEBUG;
+        } else {
+            return Logger.Level.ALL;
+        }
+    }
+
     @Override
-    public void addMessage(Level level, String s) {
+    public void addMessage(java.util.logging.Level level, String s) {
+        Logger.Level ourLevel = levelToLevel(level);
         if (log != null) {
-            log.setText(log.getText() + stamp() + tail(s));
-            log.setCaretPosition(log.getDocument().getLength());
+            if (ourLevel == Logger.Level.ALL || Logger.getLogger().isVerbose()) {
+                log.setText(log.getText() + stamp() + tail(s));
+                log.setCaretPosition(log.getDocument().getLength());
+            }
         }
     }
 
