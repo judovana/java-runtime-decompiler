@@ -17,6 +17,7 @@ import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.main.DecompilationController;
 import org.jrd.frontend.frame.main.GlobalConsole;
 import org.jrd.frontend.utility.CommonUtils;
+import org.jrd.frontend.utility.TeeOutputStream;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -40,6 +41,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
@@ -589,15 +591,29 @@ public class OverwriteClassDialog extends JDialog {
 
         @Override
         public void run() {
+            PrintStream origSerr = System.err;
             try {
-                result = rc.compileClass(cp, Optional.of(new MessagesListener() {
-                    @Override
-                    public void addMessage(Level level, String s) {
-                        Logger.getLogger().log(Logger.Level.ALL, s);
-                        compilationLog.setText(compilationLog.getText() + s + "\n");
-                        GlobalConsole.getConsole().addMessage(level, s);
+                //our plugins can log only to stderr
+                TeeOutputStream tee = new TeeOutputStream(System.err);
+                System.setErr(tee);
+                try {
+                    result = rc.compileClass(cp, Optional.of(new MessagesListener() {
+                        @Override
+                        public void addMessage(Level level, String s) {
+                            Logger.getLogger().log(Logger.Level.ALL, s);
+                            compilationLog.setText(compilationLog.getText() + s + "\n");
+                            GlobalConsole.getConsole().addMessage(level, s);
+                        }
+                    }), sources);
+                } finally {
+                    System.setErr(origSerr);
+                    //CompilerJavac is able to log throug above listener.
+                    //others may not. Eg our plugins - ForeignCompilerWrapper - can log only to stderr
+                    if (!(rc instanceof io.github.mkoncek.classpathless.impl.CompilerJavac)) {
+                        compilationLog.setText(
+                                compilationLog.getText() + new String(tee.getByteArray(), StandardCharsets.UTF_8) + "\n");
                     }
-                }), sources);
+                }
             } catch (Exception e) {
                 this.ex = e;
                 Logger.getLogger().log(e);
