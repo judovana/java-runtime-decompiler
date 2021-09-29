@@ -7,8 +7,13 @@ package org.fife.ui.hex.swing;
 import org.fife.ui.hex.event.HexEditorEvent;
 import org.fife.ui.hex.event.HexEditorListener;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.Action;
+import javax.swing.JScrollPane;
+import javax.swing.TransferHandler;
+import javax.swing.UIManager;
+import java.awt.Color;
+import java.awt.EventQueue;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.io.InputStream;
