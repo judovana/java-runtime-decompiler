@@ -85,8 +85,10 @@ public class Communicate {
         String line = this.commInput.readLine();
 
         if (line == null) {
-            Logger.getLogger().log(Logger.Level.ALL, new RuntimeException("Agent returned null response."));
-            return ErrorCandidate.toError("null input line");
+            String message = "Agent returned null response.";
+
+            Logger.getLogger().log(Logger.Level.ALL, new RuntimeException(message));
+            return ErrorCandidate.toError(message);
         }
 
         return line.trim();
@@ -149,9 +151,9 @@ public class Communicate {
                 Logger.getLogger().log(Logger.Level.DEBUG, "Agent successfully overwrote class.");
                 return "OK";
             default:
-                String s = "Unknown agent response header: '" + initLine + "'.";
-                Logger.getLogger().log(Logger.Level.ALL, s);
-                return ErrorCandidate.toError(s);
+                String message = "Unknown agent response header: '" + initLine + "'.";
+                Logger.getLogger().log(Logger.Level.ALL, message);
+                return ErrorCandidate.toError(message);
         }
     }
 

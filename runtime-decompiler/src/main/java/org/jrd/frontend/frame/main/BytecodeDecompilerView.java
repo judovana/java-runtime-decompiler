@@ -180,11 +180,11 @@ public class BytecodeDecompilerView {
         detachButton.setPreferredSize(buttonSizeBasedOnTextField(detachButton, classesSortField));
 
         initClassButton = new JButton("I");
-        initClassButton.setToolTipText("Init class");
+        initClassButton.setToolTipText("Initialize class");
         initClassButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                final String fqn = JOptionPane.showInputDialog("Write FQN of class you wish to try to init", lastFqn);
+                final String fqn = JOptionPane.showInputDialog("Enter the fully qualified name of a class to initialize", lastFqn);
                 if (fqn != null) {
                     lastFqn = fqn;
                     new SwingWorker<Void, Void>() {
@@ -239,7 +239,7 @@ public class BytecodeDecompilerView {
         });
 
         compileAndUploadButton = new JButton("CU");
-        compileAndUploadButton.setToolTipText("Compile and directly upload");
+        compileAndUploadButton.setToolTipText("Compile current class and directly upload");
         compileAndUploadButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {

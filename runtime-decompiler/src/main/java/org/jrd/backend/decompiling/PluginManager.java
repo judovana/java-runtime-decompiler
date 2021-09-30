@@ -152,8 +152,7 @@ public class PluginManager {
     ) throws Exception {
         if (wrapper == null) {
             return "No valid decompiler selected. Unable to decompile. \n " +
-                    "If there is no decompiler selected, you need to set paths to decompiler in" +
-                    "decompiler wrapper";
+                    "If there is no decompiler selected, you need to set paths to decompiler in 'Configure -> Plugins'";
         }
         PrintStream origSerr = System.err;
         //our plugins can log only to stderr
@@ -184,7 +183,7 @@ public class PluginManager {
             } else if (wrapper.getDecompileMethodNoInners() != null) {
                 return (String) wrapper.getDecompileMethodNoInners().invoke(wrapper.getInstance(), bytecode, options);
             } else {
-                throw new RuntimeException("This decompiler has no suitable decompile method for give parameters");
+                throw new RuntimeException("Decompiler " + wrapper.getName() + " has no valid decompile method!");
             }
         } finally {
             System.setErr(origSerr);
@@ -213,16 +212,16 @@ public class PluginManager {
 
     public synchronized BundledCompilerStatus getBundledCompilerStatus(DecompilerWrapper decompiler) {
         boolean haveBundledCompiler = this.hasBundledCompiler(decompiler);
-        String s = "Default runtime compiler will be used";
+        String message = "Default runtime compiler will be used";
         if (haveBundledCompiler) {
-            s = decompiler.getName() + " plugin is delivered with its own compiler!!";
+            message = decompiler.getName() + " plugin is delivered with its own compiler.";
         }
-        return new BundledCompilerStatus(haveBundledCompiler, s);
+        return new BundledCompilerStatus(haveBundledCompiler, message);
     }
 
     public synchronized boolean hasBundledCompiler(DecompilerWrapper wrapper) {
         if (wrapper == null) {
-            throw new RuntimeException("No valid decompiler selected. Current-Buffer may not be usable");
+            throw new RuntimeException("No valid decompiler selected. Current buffer may not be usable.");
         }
 
         if (!wrapper.haveDecompilerMethod()) { //compile method may remain null

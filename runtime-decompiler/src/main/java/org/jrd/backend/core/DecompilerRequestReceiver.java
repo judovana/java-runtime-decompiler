@@ -140,7 +140,7 @@ public class DecompilerRequestReceiver {
         String reply = nativeAgent.submitRequest(requestBody);
         ErrorCandidate errorCandidate = new ErrorCandidate(reply);
         if (errorCandidate.isError()) {
-            throw new RuntimeException("Agent returned ERROR - " + errorCandidate.getErrorMessage());
+            throw new RuntimeException("Agent returned ERROR: " + errorCandidate.getErrorMessage());
         }
         return new ResponseWithPort(reply, actualListenPort);
     }
