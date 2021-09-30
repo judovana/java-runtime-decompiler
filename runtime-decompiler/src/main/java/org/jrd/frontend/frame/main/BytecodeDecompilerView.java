@@ -203,7 +203,7 @@ public class BytecodeDecompilerView {
             }
         });
 
-        overwriteButton = new JButton("Overwrite class");
+        overwriteButton = new JButton("Overwrite");
         overwriteButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
