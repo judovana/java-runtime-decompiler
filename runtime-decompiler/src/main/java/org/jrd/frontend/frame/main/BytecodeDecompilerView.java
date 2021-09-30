@@ -202,6 +202,7 @@ public class BytecodeDecompilerView {
                 }
             }
         });
+        initClassButton.setPreferredSize(buttonSizeBasedOnTextField(initClassButton, classesSortField));
 
         overwriteButton = new JButton("Overwrite");
         overwriteButton.addActionListener(new ActionListener() {
@@ -237,6 +238,7 @@ public class BytecodeDecompilerView {
                                 bytecodeSyntaxTextArea.getText().getBytes(StandardCharsets.UTF_8)));
             }
         });
+        compileButton.setPreferredSize(buttonSizeBasedOnTextField(compileButton, classesSortField));
 
         compileAndUploadButton = new JButton("CU");
         compileAndUploadButton.setToolTipText("Compile current class and directly upload");
@@ -255,6 +257,8 @@ public class BytecodeDecompilerView {
                 }
             }
         });
+        compileAndUploadButton.setPreferredSize(buttonSizeBasedOnTextField(compileAndUploadButton, classesSortField));
+
         reloadClassesButton = new JButton("Reload classes");
         reloadClassesButton.addActionListener(new ActionListener() {
             @Override
