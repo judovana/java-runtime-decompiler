@@ -12,25 +12,28 @@ public final class ClassListPopupMenu extends JPopupMenu {
     private ClassListPopupMenu() {
     }
 
-    public static ClassListPopupMenu create(ClassInfo classToCopy) {
+    public static ClassListPopupMenu create(ClassInfo classToCopy, boolean doShowClassInfo) {
         ClassListPopupMenu result = new ClassListPopupMenu();
 
-        result.add(createCopyClassNameItem("Copy class name", classToCopy.getName()));
-        result.add(createCopyClassNameItem("Copy class location", classToCopy.getLocation()));
-        result.add(createCopyClassNameItem("Copy class loader", classToCopy.getClassLoader()));
+        result.add(createCopyItem("Copy class name", classToCopy.getName()));
+
+        if (doShowClassInfo) {
+            result.add(createCopyItem("Copy class location", classToCopy.getLocation()));
+            result.add(createCopyItem("Copy class loader", classToCopy.getClassLoader()));
+        }
 
         return result;
     }
 
-    private static JMenuItem createCopyClassNameItem(String itemTitle, String className) {
+    private static JMenuItem createCopyItem(String itemTitle, String classProperty) {
         JMenuItem item = new JMenuItem(itemTitle);
 
         item.addActionListener(actionEvent -> {
-            if (className == null || className.isEmpty()) {
+            if (classProperty == null || classProperty.isEmpty()) {
                 return;
             }
 
-            StringSelection selection = new StringSelection(className);
+            StringSelection selection = new StringSelection(classProperty);
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             clipboard.setContents(selection, selection);
         });
