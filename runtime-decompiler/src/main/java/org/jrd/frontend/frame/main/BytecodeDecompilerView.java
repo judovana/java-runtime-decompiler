@@ -184,7 +184,10 @@ public class BytecodeDecompilerView {
         initClassButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                final String fqn = JOptionPane.showInputDialog("Enter the fully qualified name of a class to initialize", lastFqn);
+                final String fqn = JOptionPane.showInputDialog(
+                        mainFrameReference, "Enter the fully qualified name of a class to initialize", lastFqn
+                );
+
                 if (fqn != null) {
                     lastFqn = fqn;
                     new SwingWorker<Void, Void>() {

@@ -4,6 +4,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.github.mkoncek.classpathless.api.MessagesListener;
 import org.jrd.backend.core.Logger;
 import org.jrd.frontend.frame.overwrite.OverwriteClassDialog;
+import org.jrd.frontend.utility.ScreenFinder;
 
 import javax.swing.*;
 import java.awt.*;
@@ -73,6 +74,7 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
     }
 
     public void show() {
+        ScreenFinder.centerWindowsToCurrentScreen(frame);
         frame.setVisible(true);
     }
 
