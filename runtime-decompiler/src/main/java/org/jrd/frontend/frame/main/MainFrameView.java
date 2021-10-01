@@ -9,6 +9,7 @@ import org.jrd.frontend.frame.license.LicenseView;
 import org.jrd.frontend.utility.ScreenFinder;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -149,7 +150,7 @@ public class MainFrameView {
             refreshLocalVmsListener.actionPerformed(actionEvent);
         });
         // make text fit
-        localVmRefreshButton.setBorder(null);
+        localVmRefreshButton.setBorder(new EmptyBorder(0, 0, 0, 0));
         localVmRefreshButton.setMargin(new Insets(0, 0, 0, 0));
         localVmRefreshButton.setPreferredSize(BUTTON_SIZE);
 
