@@ -21,31 +21,33 @@ public class FileSelectorArrayPanel extends JPanel {
         pathTextFields = new LinkedList<>();
         gbc.anchor = GridBagConstraints.NORTHWEST;
         gbc.fill = GridBagConstraints.BOTH;
+        gbc.weightx = 1;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+
+        // Always have at least one row.
+        FileSelectorArrayRow row = addRow("", false);
+        first = true;
 
         jLabel = new JLabel(label);
-        fileSelectorArrayAddRow = new FileSelectorArrayAddRow();
+        fileSelectorArrayAddRow = new FileSelectorArrayAddRow(row.getRightBoundMargin());
         fileSelectorArrayAddRow.getAddButton().addActionListener(actionEvent -> {
             addRow("", true);
         });
 
-        gbc.weightx = 1;
         this.add(jLabel, gbc);
         gbc.gridy = 10000;
         this.add(fileSelectorArrayAddRow, gbc);
-        gbc.gridy = 0;
-
-        // Always have at least one row.
-        addRow("", false);
-        first = true;
+        gbc.gridy = 1;
     }
 
-    void addRow(String url, boolean button) {
+    FileSelectorArrayRow addRow(String url, boolean button) {
         // Fill first row created by constructor.
         if (first) {
             if (!button) {
                 first = false;
                 pathTextFields.get(0).setText(url);
-                return;
+                return null;
             }
         }
         gbc.gridy++;
@@ -53,6 +55,8 @@ public class FileSelectorArrayPanel extends JPanel {
         pathTextFields.add(fileSelectorArrayRow.getTextField());
         this.add(fileSelectorArrayRow, gbc);
         this.revalidate();
+
+        return fileSelectorArrayRow;
     }
 
 

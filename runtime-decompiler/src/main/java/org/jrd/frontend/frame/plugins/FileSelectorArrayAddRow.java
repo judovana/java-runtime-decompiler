@@ -10,7 +10,7 @@ public class FileSelectorArrayAddRow extends JPanel {
     private JButton addButton;
     private static final String PLUS_SIGN_ICON = "/icons/icons8-sum-24.png";
 
-    FileSelectorArrayAddRow() {
+    FileSelectorArrayAddRow(int rightMargin) {
         this.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.NORTHWEST;
@@ -28,11 +28,13 @@ public class FileSelectorArrayAddRow extends JPanel {
 
         gbc.weightx = 1;
         this.add(Box.createHorizontalGlue(), gbc);
+
         gbc.weightx = 0;
         gbc.gridx = 1;
         this.add(addButton, gbc);
+
         gbc.gridx = 2;
-        this.add(Box.createHorizontalStrut(78), gbc);
+        this.add(Box.createHorizontalStrut(rightMargin), gbc);
     }
 
     public JButton getAddButton() {

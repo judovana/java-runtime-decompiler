@@ -17,6 +17,7 @@ public class FileSelectorArrayRow extends JPanel {
     private JFileChooser chooser;
 
     private static final String DELETE_ICON = "/icons/icons8-trash-24.png";
+    private static final int INNER_MARGIN = 20;
 
     FileSelectorArrayRow(FileSelectorArrayPanel parent, String url) {
         this.setLayout(new GridBagLayout());
@@ -68,7 +69,7 @@ public class FileSelectorArrayRow extends JPanel {
         gbc.gridx = 1;
         this.add(removeButton, gbc);
         gbc.gridx = 2;
-        this.add(Box.createHorizontalStrut(20), gbc);
+        this.add(Box.createHorizontalStrut(INNER_MARGIN), gbc);
         gbc.gridx = 3;
         this.add(browseButton, gbc);
     }
@@ -101,4 +102,15 @@ public class FileSelectorArrayRow extends JPanel {
         return textField;
     }
 
+    int getRightBoundMargin() {
+        if (browseButton == null) {
+            return 0;
+        }
+
+        int margin = INNER_MARGIN;
+        margin += browseButton.getFontMetrics(browseButton.getFont()).stringWidth(browseButton.getText());
+        margin += browseButton.getBorder().getBorderInsets(browseButton).left;
+        margin += browseButton.getBorder().getBorderInsets(browseButton).right;
+        return margin;
+    }
 }
