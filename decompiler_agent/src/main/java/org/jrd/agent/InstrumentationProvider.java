@@ -35,15 +35,15 @@ public class InstrumentationProvider {
 
     private byte[] getClassBody(Class clazz) throws UnmodifiableClassException {
         byte[] result;
-
         transformer.allowToSaveBytecode();
-        instrumentation.retransformClasses(clazz);
-        String nameWithSlashes = clazz.getName().replace(".", "/");
-        result = transformer.getResult(nameWithSlashes);
-
-        transformer.denyToSaveBytecode(); //should be in finally?
-        transformer.resetLastValidResult();
-
+        try {
+            String nameWithSlashes = clazz.getName().replace(".", "/");
+            instrumentation.retransformClasses(clazz);
+            result = transformer.getResult(nameWithSlashes);
+        } finally {
+            transformer.denyToSaveBytecode();
+            transformer.resetLastValidResult();
+        }
         return result;
     }
 
