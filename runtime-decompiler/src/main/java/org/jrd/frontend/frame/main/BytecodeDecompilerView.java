@@ -256,7 +256,7 @@ public class BytecodeDecompilerView {
             }
         });
 
-        reloadClassesButton = new JButton("Reload classes");
+        reloadClassesButton = ImageButtonFactory.createRefreshButton("classes");
         reloadClassesButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

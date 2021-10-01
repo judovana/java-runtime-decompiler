@@ -122,6 +122,18 @@ public final class ImageButtonFactory {
         return createButton("init_24dp.png", "Init", "Initialize class");
     }
 
+    public static JButton createAddButton() {
+        return createButton("add_24dp.png", "+", "Add");
+    }
+
+    public static JButton createRemoveButton() {
+        return createButton("remove_24dp.png", "-", "Remove");
+    }
+
+    public static JButton createRefreshButton(String toolTipSuffix) {
+        return createButton("refresh_24dp.png", "\u21BB", "Refresh " + toolTipSuffix);
+    }
+
     public static JButton createDetachButton() {
         return createButton(DETACH_RESOURCE, "Detach", "Detach");
     }
