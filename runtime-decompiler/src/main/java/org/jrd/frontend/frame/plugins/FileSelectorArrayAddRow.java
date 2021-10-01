@@ -24,7 +24,6 @@ public class FileSelectorArrayAddRow extends JPanel {
             Logger.getLogger().log(Logger.Level.ALL, new RuntimeException("File " + PLUS_SIGN_ICON + " not found. Falling back to String version.", e));
         }
         addButton.setPreferredSize(new Dimension(32, 32));
-        addButton.setBorderPainted(false);
 
         gbc.weightx = 1;
         this.add(Box.createHorizontalGlue(), gbc);
