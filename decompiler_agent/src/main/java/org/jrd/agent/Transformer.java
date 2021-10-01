@@ -22,10 +22,12 @@ public class Transformer implements ClassFileTransformer {
             ClassLoader loader, String className, Class<?> clazz, ProtectionDomain domain, byte[] classfileBuffer
     ) throws IllegalClassFormatException {
         if (allowToSaveBytecode) {
-            results.put(className, classfileBuffer);
             byte[] b = overrides.get(className);
             if (b != null) {
+                results.put(className, b);
                 return b;
+            } else {
+                results.put(className, classfileBuffer);
             }
         }
         return null;
