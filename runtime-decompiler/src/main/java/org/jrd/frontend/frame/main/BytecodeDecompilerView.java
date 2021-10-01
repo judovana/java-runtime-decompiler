@@ -179,7 +179,6 @@ public class BytecodeDecompilerView {
 
         detachButton = ImageButtonFactory.createDetachButton();
         detachButton.addActionListener(e -> handleBuffersDetaching());
-        detachButton.setPreferredSize(buttonSizeBasedOnTextField(detachButton, classesSortField));
 
         initClassButton = ImageButtonFactory.createInitButton();
         initClassButton.addActionListener(new ActionListener() {
@@ -203,7 +202,6 @@ public class BytecodeDecompilerView {
                 }
             }
         });
-        initClassButton.setPreferredSize(buttonSizeBasedOnTextField(initClassButton, classesSortField));
 
         overwriteButton = ImageButtonFactory.createOverwriteButton();
         overwriteButton.addActionListener(new ActionListener() {
@@ -224,7 +222,6 @@ public class BytecodeDecompilerView {
                 }.execute();
             }
         });
-        overwriteButton.setPreferredSize(buttonSizeBasedOnTextField(overwriteButton, classesSortField));
 
         compileButton = ImageButtonFactory.createCompileButton();
         compileButton.addActionListener(new ActionListener() {
@@ -238,7 +235,6 @@ public class BytecodeDecompilerView {
                                 bytecodeSyntaxTextArea.getText().getBytes(StandardCharsets.UTF_8)));
             }
         });
-        compileButton.setPreferredSize(buttonSizeBasedOnTextField(compileButton, classesSortField));
 
         compileAndUploadButton = ImageButtonFactory.createCompileUploadButton();
         compileAndUploadButton.addActionListener(new ActionListener() {
@@ -256,7 +252,6 @@ public class BytecodeDecompilerView {
                 }
             }
         });
-        compileAndUploadButton.setPreferredSize(buttonSizeBasedOnTextField(compileAndUploadButton, classesSortField));
 
         reloadClassesButton = new JButton("Reload classes");
         reloadClassesButton.addActionListener(new ActionListener() {
@@ -276,7 +271,6 @@ public class BytecodeDecompilerView {
                 }.execute();
             }
         });
-        reloadClassesButton.setPreferredSize(buttonSizeBasedOnTextField(reloadClassesButton, classesSortField));
 
         buffers = new JTabbedPane();
         buffers.addChangeListener(new ChangeListener() {
@@ -297,7 +291,6 @@ public class BytecodeDecompilerView {
                 hex.undo();
             }
         });
-        undoButton.setPreferredSize(buttonSizeBasedOnTextField(undoButton, classesSortField));
 
         redoButton = ImageButtonFactory.createRedoButton();
         redoButton.addActionListener(actionEvent -> {
@@ -307,7 +300,6 @@ public class BytecodeDecompilerView {
                 hex.redo();
             }
         });
-        redoButton.setPreferredSize(buttonSizeBasedOnTextField(redoButton, classesSortField));
 
         classesToolBar = new JPanel(new GridBagLayout());
         classesToolBar.setBorder(new EtchedBorder());
@@ -356,6 +348,7 @@ public class BytecodeDecompilerView {
         buffersToolBar = new JPanel(new GridBagLayout());
         buffersToolBar.setBorder(new EtchedBorder());
         gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = PANEL_INSETS;
         gbc.weightx = 0;
         buffersToolBar.add(undoButton, gbc);
