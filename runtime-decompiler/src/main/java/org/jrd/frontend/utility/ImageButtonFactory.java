@@ -134,6 +134,10 @@ public final class ImageButtonFactory {
         return createButton("refresh_24dp.png", "\u21BB", "Refresh " + toolTipSuffix);
     }
 
+    public static JButton createTrashButton() {
+        return createButton("trash_24dp.png", "X", "Remove");
+    }
+
     public static JButton createDetachButton() {
         return createButton(DETACH_RESOURCE, "Detach", "Detach");
     }

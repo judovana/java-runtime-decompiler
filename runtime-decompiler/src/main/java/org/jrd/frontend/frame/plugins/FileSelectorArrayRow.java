@@ -1,9 +1,9 @@
 package org.jrd.frontend.frame.plugins;
 
-import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.Directories;
 import org.jrd.backend.decompiling.ExpandableUrl;
 import org.jrd.frontend.frame.main.BytecodeDecompilerView;
+import org.jrd.frontend.utility.ImageButtonFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,7 +16,6 @@ public class FileSelectorArrayRow extends JPanel {
     private JButton browseButton;
     private JFileChooser chooser;
 
-    private static final String DELETE_ICON = "/icons/icons8-trash-24.png";
     private static final int INNER_MARGIN = 20;
 
     FileSelectorArrayRow(FileSelectorArrayPanel parent, String url) {
@@ -31,13 +30,7 @@ public class FileSelectorArrayRow extends JPanel {
                 getTextFieldToolTip()
         );
 
-        try {
-            ImageIcon icon = new ImageIcon(FileSelectorArrayRow.class.getResource(DELETE_ICON));
-            removeButton = new JButton(icon);
-        } catch (NullPointerException e) {
-            removeButton = new JButton("X");
-            Logger.getLogger().log(Logger.Level.ALL, new RuntimeException("File " + DELETE_ICON + " not found. Falling back to String version.", e));
-        }
+        removeButton = ImageButtonFactory.createTrashButton();
         removeButton.addActionListener(actionEvent -> {
             parent.removeRow(this);
         });
@@ -58,7 +51,6 @@ public class FileSelectorArrayRow extends JPanel {
                 textField.setText(chooser.getSelectedFile().getPath());
             }
         });
-        removeButton.setPreferredSize(new Dimension(32, 32));
 
         gbc.gridx = 0;
         gbc.weighty = 1;
