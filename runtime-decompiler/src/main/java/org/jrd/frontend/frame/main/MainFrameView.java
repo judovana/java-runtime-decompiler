@@ -4,9 +4,9 @@ import org.jrd.backend.data.Directories;
 import org.jrd.backend.data.MetadataProperties;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.frontend.frame.about.AboutView;
-import org.jrd.frontend.frame.settings.SettingsView;
 import org.jrd.frontend.frame.license.LicenseView;
 import org.jrd.frontend.frame.nestedJars.NestedJarsView;
+import org.jrd.frontend.frame.settings.SettingsView;
 import org.jrd.frontend.utility.ScreenFinder;
 
 import javax.swing.*;

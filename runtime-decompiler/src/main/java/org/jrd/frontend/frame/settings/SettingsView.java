@@ -1,6 +1,6 @@
 package org.jrd.frontend.frame.settings;
 
-import org.jrd.backend.core.OutputController;
+import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.Config;
 import org.jrd.frontend.frame.main.BytecodeDecompilerView;
 import org.jrd.frontend.frame.main.MainFrameView;
@@ -112,7 +112,7 @@ public class SettingsView extends JDialog {
             try {
                 config.saveConfigFile();
             } catch (IOException e) {
-                OutputController.getLogger().log(OutputController.Level.MESSAGE_ALL, e);
+                Logger.getLogger().log(Logger.Level.ALL, e);
             }
             dispose();
         });
