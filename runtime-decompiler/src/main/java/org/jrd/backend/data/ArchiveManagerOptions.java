@@ -35,7 +35,7 @@ public class ArchiveManagerOptions {
         }
     }
 
-    private boolean areExtensionsEmpty() {
+    public boolean areExtensionsEmpty() {
         return extensions == null || extensions.isEmpty() ||
                 extensions.size() == 1 && extensions.get(0).trim().isEmpty();
     }
