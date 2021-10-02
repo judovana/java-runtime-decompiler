@@ -2,6 +2,8 @@ package org.jrd.frontend.frame.main;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.github.mkoncek.classpathless.api.MessagesListener;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.jrd.backend.core.Logger;
 import org.jrd.frontend.frame.overwrite.OverwriteClassDialog;
 import org.jrd.frontend.utility.ScreenFinder;
@@ -10,26 +12,30 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 
 
 public class GlobalConsole implements MessagesListener, OverwriteClassDialog.TextLog {
 
     private static GlobalConsole console = new GlobalConsole();
-    private final JTextArea log;
+    private final RSyntaxTextArea log;
     private final JButton clean;
     private final JFrame frame;
     private boolean first = true;
 
     public GlobalConsole() {
         JButton tmpClean;
-        JTextArea tmpLog;
+        RSyntaxTextArea tmpLog;
         JFrame tmpFrame;
         Logger.getLogger().disableGuiLogging();
         if (!GraphicsEnvironment.isHeadless()) {
             try {
-                tmpLog = new JTextArea();
+                tmpLog = new RSyntaxTextArea();
+                tmpLog.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_SAS);
                 tmpClean = new JButton("Clean log");
                 tmpFrame = new JFrame("Log console");
                 tmpFrame.setLayout(new BorderLayout());
@@ -37,8 +43,19 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
                 JPanel p = new JPanel(new BorderLayout());
                 JCheckBox verbose = new JCheckBox("Verbose mode", Logger.getLogger().isVerbose());
                 verbose.addActionListener(actionEvent -> Logger.getLogger().setVerbose(verbose.isSelected()));
+                JComboBox<String> hgltr = new JComboBox<String>(getAllLexers());
+                hgltr.setSelectedItem(SyntaxConstants.SYNTAX_STYLE_SAS);
+                hgltr.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent actionEvent) {
+                        if (log != null) {
+                            log.setSyntaxEditingStyle(hgltr.getSelectedItem().toString());
+                        }
+                    }
+                });
                 p.add(tmpClean, BorderLayout.CENTER);
                 p.add(verbose, BorderLayout.EAST);
+                p.add(hgltr, BorderLayout.WEST);
                 tmpFrame.add(p, BorderLayout.SOUTH);
                 tmpFrame.setSize(800, 600);
                 tmpClean.addActionListener(new ActionListener() {
@@ -49,7 +66,7 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
                         }
                     }
                 });
-            } catch (Error eerr) {
+            } catch (Error | Exception eerr) {
                 Logger.getLogger().log(eerr);
                 tmpFrame = null;
                 tmpLog = null;
@@ -66,6 +83,17 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
         Logger.getLogger().enableGuiLogging();
     }
 
+    private String[] getAllLexers() throws IllegalAccessException {
+        List<String> r = new ArrayList();
+        Field[] fields = SyntaxConstants.class.getDeclaredFields();
+        for (Field field : fields) {
+            if (field.getType().equals(String.class)) {
+                r.add(field.get(null).toString());
+            }
+        }
+        return r.toArray(new String[0]);
+    }
+
     @SuppressFBWarnings(
             value = "MS_EXPOSE_REP",
             justification = "Public encapsulated singleton."
@@ -75,9 +103,9 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
     }
 
     public void show() {
-        if(first) {
+        if (first) {
             ScreenFinder.centerWindowsToCurrentScreen(frame);
-            first  = false;
+            first = false;
         }
         frame.setVisible(true);
     }
