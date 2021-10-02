@@ -232,11 +232,6 @@
             <property name="illegalPattern" value="true"/>
             <property name="message" value="Trailing whitespace"/>
         </module>
-        <module name="Regexp">
-            <property name="format" value="^.*(?!\B&quot;[^&quot;]*)\/{2}(?![^&quot;]*&quot;\B)\s?.*;.*$"/>
-            <property name="illegalPattern" value="true"/>
-            <property name="message" value="Commented-out one-line code"/>
-        </module>
 
         <!-- Naming conventions checks, see https://checkstyle.org/config_naming.html -->
         <module name="AbbreviationAsWordInName">
