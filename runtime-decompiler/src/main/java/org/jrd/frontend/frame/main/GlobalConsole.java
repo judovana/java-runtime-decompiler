@@ -20,6 +20,7 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
     private final JTextArea log;
     private final JButton clean;
     private final JFrame frame;
+    private boolean first = true;
 
     public GlobalConsole() {
         JButton tmpClean;
@@ -74,7 +75,10 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
     }
 
     public void show() {
-        ScreenFinder.centerWindowsToCurrentScreen(frame);
+        if(first) {
+            ScreenFinder.centerWindowsToCurrentScreen(frame);
+            first  = false;
+        }
         frame.setVisible(true);
     }
 
