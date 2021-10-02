@@ -49,7 +49,8 @@ public final class Help {
             "Javap can be passed options by appending them without spaces: " +
             "'javap-v-public ...' executes as 'javap -v -public ...'";
     private static final String OVERWRITE_TEXT = "Overwrite class of a process with new bytecode. If <CLASS FILE> is not set, standard input is used.";
-    private static final String INIT_TEXT = "Will try to initialize class in running JVM (no effect in filesystem). As JVM is lazy loading, the class you need may be missing This should fix it.";
+    private static final String INIT_TEXT = "Try to initialize a class in a running JVM (has no effect in FS VMs)." +
+            "Because class loading is lazy, the class you need might be missing, eg. java.lang.Override.";
     private static final String SAVE_AS_TEXT = "All outputs will be written to PATH instead of to standard output.";
     private static final String SAVE_LIKE_TEXT = "Specify how saving will behave.";
 

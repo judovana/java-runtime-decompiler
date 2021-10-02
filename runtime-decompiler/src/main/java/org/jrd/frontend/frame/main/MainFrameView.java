@@ -5,6 +5,7 @@ import org.jrd.backend.data.MetadataProperties;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.frontend.frame.about.AboutView;
 import org.jrd.frontend.frame.license.LicenseView;
+import org.jrd.frontend.utility.ImageButtonFactory;
 import org.jrd.frontend.frame.settings.SettingsView;
 import org.jrd.frontend.utility.ScreenFinder;
 
@@ -144,14 +145,12 @@ public class MainFrameView {
         });
         //localVmList End
 
-        localVmRefreshButton = new JButton("\u21BB");
+        localVmRefreshButton = ImageButtonFactory.createRefreshButton("local VMs");
         localVmRefreshButton.addActionListener(actionEvent -> {
             refreshLocalVmsListener.actionPerformed(actionEvent);
         });
         // make text fit
-        localVmRefreshButton.setBorder(null);
         localVmRefreshButton.setMargin(new Insets(0, 0, 0, 0));
-        localVmRefreshButton.setPreferredSize(BUTTON_SIZE);
 
         localVmButtonPanel = new JPanel();
         localVmButtonPanel.add(localVmRefreshButton);
@@ -172,18 +171,16 @@ public class MainFrameView {
         // localVmPanel End
 
         // remoteVmPanel, remoteVmScrollPane, remoteVmLabelPanel, remoteConnectionButton
-        remoteVmAddButton = new JButton("+");
+        remoteVmAddButton = ImageButtonFactory.createAddButton();
         remoteVmAddButton.addActionListener(actionEvent -> {
             newConnectionDialogListener.actionPerformed(actionEvent);
         });
-        remoteVmAddButton.setPreferredSize(BUTTON_SIZE);
 
-        remoteVmRemoveButton = new JButton("-");
+        remoteVmRemoveButton = ImageButtonFactory.createRemoveButton();
         remoteVmRemoveButton.addActionListener(actionEvent -> {
             ActionEvent event = new ActionEvent(remoteVmList, 0, "remote VM");
             removeVmDialogListener.actionPerformed(event);
         });
-        remoteVmRemoveButton.setPreferredSize(BUTTON_SIZE);
 
         remoteVmButtonPanel = new JPanel();
         remoteVmButtonPanel.add(remoteVmRemoveButton);
@@ -236,16 +233,14 @@ public class MainFrameView {
                 ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
-        fsVmAddButton = new JButton("+");
+        fsVmAddButton = ImageButtonFactory.createAddButton();
         fsVmAddButton.addActionListener(actionEvent -> newFsVmDialogListener.actionPerformed(actionEvent));
-        fsVmAddButton.setPreferredSize(BUTTON_SIZE);
 
-        fsVmRemoveButton = new JButton("-");
+        fsVmRemoveButton = ImageButtonFactory.createRemoveButton();
         fsVmRemoveButton.addActionListener(actionEvent -> {
             ActionEvent event = new ActionEvent(fsVmList, 0, "FS VM");
             removeVmDialogListener.actionPerformed(event);
         });
-        fsVmRemoveButton.setPreferredSize(BUTTON_SIZE);
 
         fsVmButtonPanel = new JPanel();
         fsVmButtonPanel.add(fsVmRemoveButton);

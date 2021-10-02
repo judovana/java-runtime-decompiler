@@ -85,7 +85,7 @@ public class AgentActionWorker extends Thread {
         }
         try {
             if (null == line) {
-                outputStream.write(toError("null welcome line") + "\n");
+                outputStream.write(toError("Agent received no command.") + "\n");
                 outputStream.flush();
             } else {
                 switch (line) {
@@ -106,7 +106,7 @@ public class AgentActionWorker extends Thread {
                         initClass(inputStream, outputStream);
                         break;
                     default:
-                        outputStream.write(toError("unknown command " + line) + "\n");
+                        outputStream.write(toError("Agent received unknown command: '" + line + "'.") + "\n");
                         outputStream.flush();
                         break;
                 }
@@ -151,7 +151,7 @@ public class AgentActionWorker extends Thread {
     private void sendByteCode(BufferedReader in, BufferedWriter out) throws IOException {
         String className = in.readLine();
         if (className == null) {
-            out.write(toError("no class name provided for bytecode") + "\n");
+            out.write(toError("No class name provided for the get bytes command.") + "\n");
             out.flush();
             return;
         }
@@ -172,7 +172,7 @@ public class AgentActionWorker extends Thread {
     private void initClass(BufferedReader in, BufferedWriter out) throws IOException {
         String fqn = in.readLine();
         if (fqn == null) {
-            out.write(toError("no fqn") + "\n");
+            out.write(toError("No FQN provided for the init class command.") + "\n");
             out.flush();
             return;
         }
@@ -190,13 +190,13 @@ public class AgentActionWorker extends Thread {
     private void receiveByteCode(BufferedReader in, BufferedWriter out) throws IOException {
         String className = in.readLine();
         if (className == null) {
-            out.write(toError("no classname to upload") + "\n");
+            out.write(toError("No class name provided for the overwrite command.") + "\n");
             out.flush();
             return;
         }
         String classBodyBase64 = in.readLine();
         if (classBodyBase64 == null) {
-            out.write(toError("no class body") + "\n");
+            out.write(toError("No class body provided for the overwrite command.") + "\n");
             out.flush();
             return;
         }

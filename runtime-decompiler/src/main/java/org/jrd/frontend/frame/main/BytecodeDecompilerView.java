@@ -14,6 +14,7 @@ import org.fife.ui.rtextarea.SearchEngine;
 import org.fife.ui.rtextarea.SearchResult;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.decompiling.DecompilerWrapper;
+import org.jrd.frontend.utility.ImageButtonFactory;
 import org.jrd.frontend.utility.ScreenFinder;
 
 import javax.swing.*;
@@ -91,6 +92,7 @@ public class BytecodeDecompilerView {
     private SearchContext searchContext;
 
     private boolean splitPaneFirstResize = true;
+    private boolean shouldAttach = false;
 
     private final JFrame mainFrame;
     private JFrame detachedBytecodeFrame;
@@ -175,16 +177,17 @@ public class BytecodeDecompilerView {
             }
         });
 
-        detachButton = new JButton(DETACH_BUTTON_TEXT);
+        detachButton = ImageButtonFactory.createDetachButton();
         detachButton.addActionListener(e -> handleBuffersDetaching());
-        detachButton.setPreferredSize(buttonSizeBasedOnTextField(detachButton, classesSortField));
 
-        initClassButton = new JButton("I");
-        initClassButton.setToolTipText("Init class");
+        initClassButton = ImageButtonFactory.createInitButton();
         initClassButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                final String fqn = JOptionPane.showInputDialog("Write FQN of class you wish to try to init", lastFqn);
+                final String fqn = JOptionPane.showInputDialog(
+                        mainFrameReference, "Enter the fully qualified name of a class to initialize", lastFqn
+                );
+
                 if (fqn != null) {
                     lastFqn = fqn;
                     new SwingWorker<Void, Void>() {
@@ -203,7 +206,7 @@ public class BytecodeDecompilerView {
             }
         });
 
-        overwriteButton = new JButton("Overwrite class");
+        overwriteButton = ImageButtonFactory.createOverwriteButton();
         overwriteButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -222,10 +225,8 @@ public class BytecodeDecompilerView {
                 }.execute();
             }
         });
-        overwriteButton.setPreferredSize(buttonSizeBasedOnTextField(overwriteButton, classesSortField));
 
-        compileButton = new JButton("C");
-        compileButton.setToolTipText("Compile current class");
+        compileButton = ImageButtonFactory.createCompileButton();
         compileButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -238,8 +239,7 @@ public class BytecodeDecompilerView {
             }
         });
 
-        compileAndUploadButton = new JButton("CU");
-        compileAndUploadButton.setToolTipText("Compile and directly upload");
+        compileAndUploadButton = ImageButtonFactory.createCompileUploadButton();
         compileAndUploadButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -255,7 +255,8 @@ public class BytecodeDecompilerView {
                 }
             }
         });
-        reloadClassesButton = new JButton("Reload classes");
+
+        reloadClassesButton = ImageButtonFactory.createRefreshButton("classes");
         reloadClassesButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -273,7 +274,6 @@ public class BytecodeDecompilerView {
                 }.execute();
             }
         });
-        reloadClassesButton.setPreferredSize(buttonSizeBasedOnTextField(reloadClassesButton, classesSortField));
 
         buffers = new JTabbedPane();
         buffers.addChangeListener(new ChangeListener() {
@@ -286,8 +286,7 @@ public class BytecodeDecompilerView {
                 }
             }
         });
-        undoButton = new JButton("U");
-        undoButton.setToolTipText("Undo");
+        undoButton = ImageButtonFactory.createUndoButton();
         undoButton.addActionListener(actionEvent -> {
             if (isSourceBufferVisible()) {
                 bytecodeSyntaxTextArea.undoLastAction();
@@ -295,10 +294,8 @@ public class BytecodeDecompilerView {
                 hex.undo();
             }
         });
-        undoButton.setPreferredSize(buttonSizeBasedOnTextField(undoButton, classesSortField));
 
-        redoButton = new JButton("R");
-        redoButton.setToolTipText("Redo");
+        redoButton = ImageButtonFactory.createRedoButton();
         redoButton.addActionListener(actionEvent -> {
             if (isSourceBufferVisible()) {
                 bytecodeSyntaxTextArea.redoLastAction();
@@ -306,7 +303,6 @@ public class BytecodeDecompilerView {
                 hex.redo();
             }
         });
-        redoButton.setPreferredSize(buttonSizeBasedOnTextField(redoButton, classesSortField));
 
         classesToolBar = new JPanel(new GridBagLayout());
         classesToolBar.setBorder(new EtchedBorder());
@@ -355,6 +351,7 @@ public class BytecodeDecompilerView {
         buffersToolBar = new JPanel(new GridBagLayout());
         buffersToolBar.setBorder(new EtchedBorder());
         gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = PANEL_INSETS;
         gbc.weightx = 0;
         buffersToolBar.add(undoButton, gbc);
@@ -565,24 +562,21 @@ public class BytecodeDecompilerView {
         }
     }
 
-
-    private boolean shouldAttach() {
-        return detachButton.getText().equals(ATTACH_BUTTON_TEXT);
-    }
-
     private boolean isSourceBufferVisible() {
         return buffers.getSelectedComponent().equals(sourceBuffer);
     }
 
     private void handleBuffersDetaching() {
-        if (shouldAttach()) {
+        if (shouldAttach) {
+            shouldAttach = false;
             detachedBytecodeFrame.dispatchEvent(new WindowEvent(detachedBytecodeFrame, WindowEvent.WINDOW_CLOSING));
             return;
         }
 
+        shouldAttach = true;
         detachedBytecodeFrame = new JFrame("Bytecode");
 
-        detachButton.setText(ATTACH_BUTTON_TEXT);
+        ImageButtonFactory.flipDetachButton(detachButton, shouldAttach, ATTACH_BUTTON_TEXT);
         splitPane.remove(buffersPanel);
         splitPane.setEnabled(false); // disable slider of the now one-item split pane
         detachedBytecodeFrame.add(buffersPanel);
@@ -594,7 +588,7 @@ public class BytecodeDecompilerView {
                 super.windowClosing(e);
 
                 mainFrame.setSize(mainFrame.getWidth() + buffersPanel.getWidth(), mainFrame.getHeight());
-                detachButton.setText(DETACH_BUTTON_TEXT);
+                ImageButtonFactory.flipDetachButton(detachButton, shouldAttach, DETACH_BUTTON_TEXT);
 
                 splitPane.setEnabled(true);
                 splitPane.add(buffersPanel);

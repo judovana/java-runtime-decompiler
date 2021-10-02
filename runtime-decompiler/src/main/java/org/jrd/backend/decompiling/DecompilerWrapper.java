@@ -208,7 +208,7 @@ public class DecompilerWrapper {
     }
 
     public List<ExpandableUrl> getDependencyUrls() {
-        return Collections.unmodifiableList(dependencyUrls);
+        return dependencyUrls == null ? null : Collections.unmodifiableList(dependencyUrls);
     }
 
     public void setDependencyUrlsFromPath(List<String> dependencyUrls) {

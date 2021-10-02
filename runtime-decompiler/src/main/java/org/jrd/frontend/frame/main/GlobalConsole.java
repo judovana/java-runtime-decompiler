@@ -4,6 +4,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.github.mkoncek.classpathless.api.MessagesListener;
 import org.jrd.backend.core.Logger;
 import org.jrd.frontend.frame.overwrite.OverwriteClassDialog;
+import org.jrd.frontend.utility.ScreenFinder;
 
 import javax.swing.*;
 import java.awt.*;
@@ -29,11 +30,11 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
             try {
                 tmpLog = new JTextArea();
                 tmpClean = new JButton("Clean log");
-                tmpFrame = new JFrame();
+                tmpFrame = new JFrame("Log console");
                 tmpFrame.setLayout(new BorderLayout());
                 tmpFrame.add(new JScrollPane(tmpLog));
                 JPanel p = new JPanel(new BorderLayout());
-                JCheckBox verbose = new JCheckBox("verbose mode", Logger.getLogger().isVerbose());
+                JCheckBox verbose = new JCheckBox("Verbose mode", Logger.getLogger().isVerbose());
                 verbose.addActionListener(actionEvent -> Logger.getLogger().setVerbose(verbose.isSelected()));
                 p.add(tmpClean, BorderLayout.CENTER);
                 p.add(verbose, BorderLayout.EAST);
@@ -66,13 +67,14 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
 
     @SuppressFBWarnings(
             value = "MS_EXPOSE_REP",
-            justification = "Public encapsualted singleton."
+            justification = "Public encapsulated singleton."
     )
     public static GlobalConsole getConsole() {
         return console;
     }
 
     public void show() {
+        ScreenFinder.centerWindowsToCurrentScreen(frame);
         frame.setVisible(true);
     }
 
