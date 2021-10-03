@@ -247,7 +247,7 @@ public class Cli {
                 clazz);
         String response = DecompilationController.submitRequest(vmManager, request);
         if ("ok".equals(response)) {
-            System.out.println("Most likely done successfully.");
+            System.out.println("Overwrite done successfully.");
         } else {
             throw new RuntimeException(DecompilationController.CLASSES_NOPE);
         }
@@ -268,7 +268,7 @@ public class Cli {
                 fqn);
         String response = DecompilationController.submitRequest(vmManager, request);
         if ("ok".equals(response)) {
-            System.out.println("Most likely done successfully.");
+            System.out.println("Class initialization done successfully.");
         } else {
             throw new RuntimeException(DecompilationController.CLASSES_NOPE);
         }
