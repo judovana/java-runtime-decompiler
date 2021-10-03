@@ -232,7 +232,7 @@ public class CliTest {
     // temporarily missing COMPILE
     private static Stream<String> validOperationSource() {
         return Stream.of(
-                H, HELP, VERBOSE, VERSION, LIST_JVMS, LIST_PLUGINS,
+                H, HELP, VERBOSE, VERSION, LIST_JVMS, LIST_PLUGINS, INIT_FORMAT,
                 LIST_CLASSES_FORMAT, BYTES_FORMAT, BASE64_FORMAT, DECOMPILE_FORMAT, OVERWRITE_FORMAT
         );
     }
@@ -257,7 +257,7 @@ public class CliTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {VERBOSE, LIST_JVMS, LIST_PLUGINS, OVERWRITE_FORMAT})
+    @ValueSource(strings = {VERBOSE, LIST_JVMS, LIST_PLUGINS, OVERWRITE_FORMAT, INIT_FORMAT})
     void testTooManyArguments(String operation) {
         if (operation.contains(" ")) {
             args = processFormatDefault(operation + " " + UNKNOWN_FLAG).split(" ");
@@ -440,6 +440,8 @@ public class CliTest {
                 new String[]{BYTES, unimportantPid},
                 new String[]{BASE64},
                 new String[]{BASE64, unimportantPid},
+                new String[]{INIT},
+                new String[]{INIT, unimportantPid},
                 new String[]{OVERWRITE},
                 new String[]{OVERWRITE, unimportantPid},
                 new String[]{DECOMPILE},
@@ -651,6 +653,34 @@ public class CliTest {
 
         RuntimeException e = assertThrows(RuntimeException.class, () -> cli.consumeCli());
         assertEquals(DecompilationController.CLASSES_NOPE, e.getMessage());
+    }
+
+    @Test
+    void testInit() throws Exception {
+        String targetClass = "java.lang.Override";
+        args = new String[]{
+                INIT,
+                dummy.getPid(),
+                targetClass
+        };
+        cli = new Cli(args, model);
+
+        assertDoesNotThrow(() -> cli.consumeCli());
+
+        streams.getOut(); // clean stdout
+        classListMatchesExactly(dummy.getPid(), Pattern.compile(targetClass, Pattern.MULTILINE));
+    }
+
+    @Test
+    void testInitAgentError() {
+        args = new String[]{
+                INIT,
+                dummy.getPid(),
+                UNKNOWN_FLAG
+        };
+        cli = new Cli(args, model);
+
+        assertThrows(RuntimeException.class, () -> cli.consumeCli());
     }
 
     private Stream<byte[]> incorrectClassContents() {
