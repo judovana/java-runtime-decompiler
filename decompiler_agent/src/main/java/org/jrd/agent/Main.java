@@ -1,5 +1,7 @@
 package org.jrd.agent;
 
+import org.jrd.agent.api.Variables;
+
 import java.lang.instrument.Instrumentation;
 
 /**
@@ -25,6 +27,7 @@ public final class Main {
      * @param inst instance of instrumentation of given VM
      */
     public static void premain(String agentArgs, Instrumentation inst) {
+        Variables.init();
         Transformer transformer = new Transformer();
         inst.addTransformer(transformer, true);
         InstrumentationProvider p = new InstrumentationProvider(inst, transformer);
