@@ -151,6 +151,10 @@ class TestingDummyHelper {
         return Long.toString(process.pid());
     }
 
+    String getClasspath() {
+        return TARGET_DIR;
+    }
+
     static String getDefaultContent() {
         return getContent(DEFAULT_GREETING);
     }

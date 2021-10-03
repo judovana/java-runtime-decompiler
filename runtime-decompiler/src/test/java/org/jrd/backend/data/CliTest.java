@@ -301,10 +301,9 @@ public class CliTest {
         }
     }
 
-    @Test
-    void testListClasses() throws Exception {
+    void testListClasses(String pucComponent) throws Exception {
         // no regex
-        args = new String[]{VERBOSE, LIST_CLASSES, dummy.getPid()};
+        args = new String[]{VERBOSE, LIST_CLASSES, pucComponent};
         cli = new Cli(args, model);
 
         cli.consumeCli();
@@ -316,7 +315,7 @@ public class CliTest {
         }
 
         // all regex
-        args = new String[]{LIST_CLASSES, dummy.getPid(), ".*"};
+        args = new String[]{LIST_CLASSES, pucComponent, ".*"};
         cli = new Cli(args, model);
 
         cli.consumeCli();
@@ -334,7 +333,7 @@ public class CliTest {
         ); // exact class list differs between dummy process executions
 
         // specific regex
-        args = new String[]{LIST_CLASSES, dummy.getPid(), TestingDummyHelper.FQN};
+        args = new String[]{LIST_CLASSES, pucComponent, TestingDummyHelper.FQN};
         cli = new Cli(args, model);
 
         cli.consumeCli();
@@ -346,6 +345,12 @@ public class CliTest {
         }
 
         assertEquals(ourClass.lines().count(), 1);
+    }
+
+    @Test
+    void testListClasses() throws Exception {
+        testListClasses(dummy.getPid());
+        testListClasses(dummy.getClasspath());
     }
 
     // until CLI plugin importing is added, this is the only certain output
@@ -361,9 +366,8 @@ public class CliTest {
         assertTrue(plugins.contains("javap -v Internal/valid - null"));
     }
 
-    @Test
-    void testBytes() throws Exception {
-        args = new String[]{BYTES, dummy.getPid(), TestingDummyHelper.CLASS_REGEX};
+    void testBytes(String pucComponent) throws Exception {
+        args = new String[]{BYTES, pucComponent, TestingDummyHelper.CLASS_REGEX};
         cli = new Cli(args, model);
 
         cli.consumeCli();
@@ -375,8 +379,13 @@ public class CliTest {
     }
 
     @Test
-    void testBase64Bytes() throws Exception {
-        args = new String[]{BASE64, dummy.getPid(), TestingDummyHelper.CLASS_REGEX};
+    void testBytes() throws Exception {
+        testBytes(dummy.getPid());
+        testBytes(dummy.getClasspath());
+    }
+
+    void testBase64Bytes(String pucComponent) throws Exception {
+        args = new String[]{BASE64, pucComponent, TestingDummyHelper.CLASS_REGEX};
         cli = new Cli(args, model);
 
         cli.consumeCli();
@@ -389,14 +398,19 @@ public class CliTest {
     }
 
     @Test
-    void testBytesAndBase64BytesEqual() throws Exception {
-        args = new String[]{BYTES, dummy.getPid(), TestingDummyHelper.CLASS_REGEX};
+    void testBase64Bytes() throws Exception {
+        testBase64Bytes(dummy.getPid());
+        testBase64Bytes(dummy.getClasspath());
+    }
+
+    void testBytesAndBase64BytesEqual(String pucComponent) throws Exception {
+        args = new String[]{BYTES, pucComponent, TestingDummyHelper.CLASS_REGEX};
         cli = new Cli(args, model);
 
         cli.consumeCli();
         byte[] bytes = streams.getOutBytes();
 
-        args = new String[]{BASE64, dummy.getPid(), TestingDummyHelper.CLASS_REGEX};
+        args = new String[]{BASE64, pucComponent, TestingDummyHelper.CLASS_REGEX};
         cli = new Cli(args, model);
 
         cli.consumeCli();
@@ -404,6 +418,12 @@ public class CliTest {
         byte[] decoded = Base64.getDecoder().decode(base64);
 
         assertArrayEquals(bytes, decoded);
+    }
+
+    @Test
+    void testBytesAndBase64BytesEqual() throws Exception {
+        testBytesAndBase64BytesEqual(dummy.getPid());
+        testBytesAndBase64BytesEqual(dummy.getClasspath());
     }
 
     private Stream<Arguments> tooFewArgumentsSource() {
@@ -435,10 +455,8 @@ public class CliTest {
         assertThrows(IllegalArgumentException.class, () -> cli.consumeCli());
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"", "-v"})
-    void testDecompileJavap(String option) throws Exception {
-        args = new String[]{DECOMPILE, dummy.getPid(), "javap" + option, TestingDummyHelper.CLASS_REGEX};
+    void testDecompileJavap(String pucComponent, String option) throws Exception {
+        args = new String[]{DECOMPILE, pucComponent, "javap" + option, TestingDummyHelper.CLASS_REGEX};
         cli = new Cli(args, model);
 
         cli.consumeCli();
@@ -447,6 +465,13 @@ public class CliTest {
 
         // JRD javap has additional debug comment lines + header is different
         assertEqualsWithTolerance(jrdDisassembled, javapDisassembled, 0.8);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", "-v"})
+    void testDecompileJavap(String option) throws Exception {
+        testDecompileJavap(dummy.getPid(), option);
+        testDecompileJavap(dummy.getClasspath(), option);
     }
 
     @Test
@@ -496,14 +521,13 @@ public class CliTest {
         assertArrayEquals(args, filteredArgs);
     }
 
-    @Test
-    void testOverwrite() throws Exception {
+    void testOverwrite(String pucComponent) throws Exception {
         String newGreeting = "Greetings";
         createReplacement(newGreeting);
 
         args = new String[]{
                 OVERWRITE,
-                dummy.getPid(),
+                pucComponent,
                 TestingDummyHelper.FQN,
                 TestingDummyHelper.DOT_CLASS_PATH // contains newGreeting because of try-catch above
         };
@@ -513,17 +537,22 @@ public class CliTest {
         assertTrue(streams.getOut().contains("success"));
 
         // assert that change propagated, unfortunately we have to rely on another operation here
-        bytecodeContainsNewString(newGreeting);
+        bytecodeContainsNewString(pucComponent, newGreeting);
     }
 
     @Test
-    void testOverwriteStdIn() throws Exception {
+    void testOverwrite() throws Exception {
+        testOverwrite(dummy.getPid());
+        testOverwrite(dummy.getClasspath());
+    }
+
+    void testOverwriteStdIn(String pucComponent) throws Exception {
         String newGreeting = "Greetings";
         createReplacement(newGreeting);
 
         args = new String[]{
                 OVERWRITE,
-                dummy.getPid(),
+                pucComponent,
                 TestingDummyHelper.FQN
         };
         cli = new Cli(args, model);
@@ -535,9 +564,15 @@ public class CliTest {
 
         assertDoesNotThrow(() -> cli.consumeCli());
         assertTrue(streams.getOut().contains("success"));
-        bytecodeContainsNewString(newGreeting);
+        bytecodeContainsNewString(pucComponent, newGreeting);
 
         System.setIn(originalIn); // revert input stream
+    }
+
+    @Test
+    void testOverwriteStdIn() throws Exception {
+        testOverwriteStdIn(dummy.getPid());
+        testOverwriteStdIn(dummy.getClasspath());
     }
 
     private void createReplacement(String newGreeting) {
@@ -550,8 +585,8 @@ public class CliTest {
         }
     }
 
-    private void bytecodeContainsNewString(String newString) throws Exception {
-        args = new String[]{DECOMPILE, dummy.getPid(), "javap-v", TestingDummyHelper.CLASS_REGEX};
+    private void bytecodeContainsNewString(String pucComponent, String newString) throws Exception {
+        args = new String[]{DECOMPILE, pucComponent, "javap-v", TestingDummyHelper.CLASS_REGEX};
         cli = new Cli(args, model);
 
         cli.consumeCli();
