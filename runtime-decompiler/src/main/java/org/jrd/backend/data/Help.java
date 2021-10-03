@@ -24,7 +24,7 @@ public final class Help {
     static final String LIST_CLASSES_FORMAT = LIST_CLASSES + " <PUC> [<CLASS REGEX>...]";
     static final String COMPILE_FORMAT = COMPILE + " [-p <PLUGIN>] [-cp <PUC>] [-r] <PATH>...";
     static final String DECOMPILE_FORMAT = DECOMPILE + " <PUC> <PLUGIN> <CLASS REGEX>...";
-    static final String OVERWRITE_FORMAT = OVERWRITE + " <PUC> <CLASS NAME> [<CLASS FILE>]";
+    static final String OVERWRITE_FORMAT = OVERWRITE + " <PUC> <FQN> [<CLASS FILE>]";
     static final String INIT_FORMAT = INIT + " <PUC> <FQN>";
     static final String SAVE_AS_FORMAT = SAVE_AS + " <PATH>";
     static final String SAVE_LIKE_FORMAT = SAVE_LIKE + " <SAVE METHOD>";
