@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static org.jrd.backend.data.Cli.*;
@@ -333,24 +334,29 @@ public class CliTest {
         ); // exact class list differs between dummy process executions
 
         // specific regex
-        args = new String[]{LIST_CLASSES, pucComponent, TestingDummyHelper.FQN};
-        cli = new Cli(args, model);
-
-        cli.consumeCli();
-        String ourClass = streams.getOut();
-
-        m = TestingDummyHelper.EXACT_CLASS_REGEX.matcher(ourClass);
-        if (!m.find()) {
-            fail("Class " + TestingDummyHelper.FQN + " not found when listing all classes via specific regex.");
-        }
-
-        assertEquals(ourClass.lines().count(), 1);
+        classListMatchesExactly(pucComponent, TestingDummyHelper.EXACT_CLASS_REGEX);
     }
 
     @Test
     void testListClasses() throws Exception {
         testListClasses(dummy.getPid());
         testListClasses(dummy.getClasspath());
+    }
+
+    private void classListMatchesExactly(String pucComponent, Pattern exactClassRegex) throws Exception {
+        Matcher m;
+        args = new String[]{LIST_CLASSES, pucComponent, exactClassRegex.toString()};
+        cli = new Cli(args, model);
+
+        cli.consumeCli();
+        String ourClass = streams.getOut();
+
+        m = exactClassRegex.matcher(ourClass);
+        if (!m.find()) {
+            fail("Class " + exactClassRegex + " not found when listing classes via exact regex.");
+        }
+
+        assertEquals(ourClass.lines().count(), 1);
     }
 
     // until CLI plugin importing is added, this is the only certain output
