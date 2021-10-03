@@ -209,7 +209,7 @@ public class CliTest {
             result = result.replace("<CLASS REGEX>", String.join(" ", classRegex));
         }
         if (className != null) {
-            result = result.replace("<CLASS NAME>", className);
+            result = result.replace("<FQN>", original.startsWith(INIT) ? "java.lang.Override" : className);
         }
         if (classFile != null) {
             result = result.replace("<CLASS FILE>", classFile);
