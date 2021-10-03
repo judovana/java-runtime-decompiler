@@ -22,6 +22,8 @@ import java.awt.event.WindowEvent;
 @SuppressWarnings("Indentation") // indented Swing components greatly help with orientation
 public class MainFrameView {
 
+    public static final String FS_VM_COMMAND = "FS VM";
+    public static final String REMOTE_VM_ACTION = "remote VM";
     private JFrame mainFrame;
         private JPanel mainPanel;
             private JTabbedPane tabbedPane;
@@ -180,7 +182,7 @@ public class MainFrameView {
 
         remoteVmRemoveButton = ImageButtonFactory.createRemoveButton();
         remoteVmRemoveButton.addActionListener(actionEvent -> {
-            ActionEvent event = new ActionEvent(remoteVmList, 0, "remote VM");
+            ActionEvent event = new ActionEvent(remoteVmList, 0, REMOTE_VM_ACTION);
             removeVmDialogListener.actionPerformed(event);
         });
 
@@ -240,7 +242,7 @@ public class MainFrameView {
 
         fsVmRemoveButton = ImageButtonFactory.createRemoveButton();
         fsVmRemoveButton.addActionListener(actionEvent -> {
-            ActionEvent event = new ActionEvent(fsVmList, 0, "FS VM");
+            ActionEvent event = new ActionEvent(fsVmList, 0, FS_VM_COMMAND);
             removeVmDialogListener.actionPerformed(event);
         });
 
@@ -284,6 +286,21 @@ public class MainFrameView {
         // welcomePanel End
 
         mainFrame = new JFrame();
+        mainFrame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                //todo disconect pernament agents
+                //check fs vm overrides
+                for (int i = 0; i < fsVmList.getModel().getSize(); i++) {
+                    VmInfo vm = fsVmList.getModel().getElementAt(i);
+                    if (DecompilationController.warnOnOvveridesOfFsVm(vm, mainFrame)) {
+                        return;
+                    }
+                }
+                mainFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+                mainFrame.dispose();
+            }
+        });
         bytecodeDecompilerView = new BytecodeDecompilerView(mainFrame);
 
         cardLayout = new CardLayout();
@@ -358,7 +375,7 @@ public class MainFrameView {
         // menuBar end
 
 
-        mainFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        mainFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         mainFrame.setTitle(MetadataProperties.getInstance().getName());
         mainFrame.setSize(1366, 768);
         mainFrame.setMinimumSize(new Dimension(700, 340));

@@ -135,8 +135,13 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
         Logger.Level ourLevel = levelToLevel(level);
         if (log != null) {
             if (ourLevel == Logger.Level.ALL || Logger.getLogger().isVerbose()) {
-                log.setText(log.getText() + stamp() + tail(s));
-                log.setCaretPosition(log.getDocument().getLength());
+                try {
+                    log.setText(log.getText() + stamp() + tail(s));
+                    log.setCaretPosition(log.getDocument().getLength());
+                } catch (Exception ex) {
+                    //belive or not, rsyntax are can throw exception form here, and asnothing expects that, it may be fatal
+                    ex.printStackTrace();
+                }
             }
         }
     }
@@ -153,7 +158,12 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
 
     @Override
     public void setText(String s) {
-        log.setText(s);
-        log.setCaretPosition(log.getDocument().getLength());
+        try {
+            log.setText(s);
+            log.setCaretPosition(log.getDocument().getLength());
+        } catch (Exception ex) {
+            //belive or not, rsyntax are can throw exception form here, and asnothing expects that, it may be fatal
+            ex.printStackTrace();
+        }
     }
 }

@@ -4,6 +4,7 @@ package org.jrd.backend.communication;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.ArchiveManager;
+import org.jrd.backend.data.VmInfo;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -18,8 +19,12 @@ import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
@@ -27,12 +32,52 @@ import java.util.zip.ZipInputStream;
 /**
  * This class is doing agent-like based operations on filesystem
  */
-public class FsAgent implements JrdAgent {
+public final class FsAgent implements JrdAgent {
+
+    private static final Map<VmInfo, FsAgent> AGENTS = new HashMap<>();
 
     private final List<File> cp;
+    /**
+     * This is exact oposite of how remote agent does this.
+     * Remote agent keeps all overrides, because when new class defintion is laoded original is plled, and is modifed (overvritten) by new deffnitio.
+     * <p>
+     * On contrary, in FS, the class is after writing immediately overriden in file FileSystem. So we keep original, saved during first override.
+     * If we keep original, we know class was overwritten.
+     * The removal of of override  ==  restore of original (and remvoal of original from map
+     * <p>
+     * In addition, insted of byte[] we store base64 encoded String
+     */
+    private final Map<String, String> originals = new HashMap<>();
 
-    public FsAgent(List<File> cp) {
+    private FsAgent(List<File> cp) {
         this.cp = cp;
+    }
+
+    public static FsAgent get(VmInfo vmInfo) {
+        FsAgent agent = AGENTS.get(vmInfo);
+        if (agent == null) {
+            agent = new FsAgent(vmInfo.getCp());
+            AGENTS.put(vmInfo, agent);
+        }
+        return agent;
+    }
+
+    public List<String> getOverrides() {
+        return Collections.unmodifiableList(new ArrayList<>(originals.keySet()));
+    }
+
+    private synchronized int cleanOverrides(Pattern pattern) {
+        int removed = 0;
+        List<String> keys = getOverrides();
+        for (String key : keys) {
+            if (pattern.matcher(key).matches()) {
+                String toRestore = originals.remove(key);
+                uploadByteCode(key, toRestore);
+                removed++;
+                Logger.getLogger().log("Restored " + key + " original bytes");
+            }
+        }
+        return removed;
     }
 
     /**
@@ -48,12 +93,27 @@ public class FsAgent implements JrdAgent {
         String[] q = request.split("\\s+");
         try {
             switch (AgentRequestAction.RequestAction.fromString(q[0])) {
+                case OVERRIDES:
+                    return String.join(";", getOverrides());
+                case REMOVE_OVERRIDES:
+                    int removed = cleanOverrides(Pattern.compile(q[1]));
+                    if (removed == 0) {
+                        throw new RuntimeException("Nothing removed by " + q[1] + " in " + originals.size() + " items");
+                    }
+                    return "DONE";
                 case CLASSES:
                     return readClasses();
                 case BYTES:
-                    return sendByteCode(request);
+                    String classNameForBytes = q[1];
+                    return sendByteCode(classNameForBytes);
                 case OVERWRITE:
-                    uploadByteCode(request);
+                    String classNameForOverwrite = q[1];
+                    if (!originals.containsKey(classNameForOverwrite)) {
+                        Logger.getLogger().log("backuping original bytecode of " + classNameForOverwrite);
+                        originals.put(classNameForOverwrite, sendByteCode(classNameForOverwrite));
+                    }
+                    String futureBody = q[2];
+                    uploadByteCode(classNameForOverwrite, futureBody);
                     return "OK";
                 case INIT_CLASS:
                     Logger.getLogger().log(Logger.Level.DEBUG, "Init class have no meaning in FS 'vm'");
@@ -69,19 +129,17 @@ public class FsAgent implements JrdAgent {
         }
     }
 
-    private Void uploadByteCode(String request) {
-        String[] clazz = request.split("\\s+");
+    private Void uploadByteCode(String clazz, String body) {
         try {
-            return new OperateOnCp<Void>(cp).operateOnCp(clazz[1], new WritingCpOperator(clazz[2]));
+            return new OperateOnCp<Void>(cp).operateOnCp(clazz, new WritingCpOperator(body));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private String sendByteCode(String request) {
-        String[] clazz = request.split("\\s+");
+    private String sendByteCode(String clazz) {
         try {
-            String s = new OperateOnCp<String>(cp).operateOnCp(clazz[1], new ReadingCpOperator());
+            String s = new OperateOnCp<String>(cp).operateOnCp(clazz, new ReadingCpOperator());
             return s;
         } catch (IOException e) {
             throw new RuntimeException(e);

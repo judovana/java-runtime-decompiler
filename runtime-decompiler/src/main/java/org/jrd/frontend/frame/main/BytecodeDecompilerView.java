@@ -282,8 +282,8 @@ public class BytecodeDecompilerView {
         copyClassesButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                List<String> l =filteredClassesJList.getSelectedValuesList();
-                if (l!=null && !l.isEmpty()){
+                List<String> l = filteredClassesJList.getSelectedValuesList();
+                if (l != null && !l.isEmpty()) {
                     String s = String.join("\n", l);
                     StringSelection selection = new StringSelection(s);
                     Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();

@@ -139,7 +139,7 @@ public final class ImageButtonFactory {
     }
 
     public static JButton createDetachButton() {
-        return createDetachButton( "Detach", "Detach");
+        return createDetachButton("Detach", "Detach");
     }
 
     public static JButton createDetachButton(String backup, String tooltip) {
