@@ -66,24 +66,21 @@ class TestingDummyHelper {
             Pattern.MULTILINE
     );
 
-    static final String DUMMY_CLASS_CONTENT =
-            "public class " + CLASS_NAME + " {\n" +
-                    "    public static void main(String[] args) throws InterruptedException {\n" +
-                    "        while(true) {\n" +
-                    "            System.out.println(\"Hello\");\n" +
-                    "            Thread.sleep(1000);\n" +
-                    "        }\n" +
-                    "    }\n" +
-                    "}\n";
+    static final String DEFAULT_GREETING = "Hello";
 
-    TestingDummyHelper write() throws TestingDummyException {
+
+    TestingDummyHelper write(String greeting) throws TestingDummyException {
         try (PrintWriter pw = new PrintWriter(DOT_JAVA_PATH, StandardCharsets.UTF_8)) {
-            pw.print(getContentWithPackage());
+            pw.print(getContentWithPackage(greeting));
         } catch (IOException e) {
             throw new TestingDummyException("Failed to write file '" + DOT_JAVA_PATH + "'.", e);
         }
 
         return this;
+    }
+
+    TestingDummyHelper write() throws TestingDummyException {
+        return write("Hello");
     }
 
     TestingDummyHelper compile() throws TestingDummyException {
@@ -154,9 +151,29 @@ class TestingDummyHelper {
         return Long.toString(process.pid());
     }
 
-    static String getContentWithPackage() {
+    static String getDefaultContent() {
+        return getContent(DEFAULT_GREETING);
+    }
+
+    static String getContent(String greeting) {
+        return "public class " + CLASS_NAME + " {\n" +
+                "    public static void main(String[] args) throws InterruptedException {\n" +
+                "        while(true) {\n" +
+                "            System.out.println(\"" + greeting + "\");\n" +
+                "            Thread.sleep(1000);\n" +
+                "        }\n" +
+                "    }\n" +
+                "}\n";
+    }
+
+    static String getContentWithPackage(String greeting) {
         return "package " + PACKAGE_NAME + ";\n\n" +
-                DUMMY_CLASS_CONTENT;
+                getContent(greeting);
+    }
+
+    static String getDefaultContentWithPackage() {
+        return "package " + PACKAGE_NAME + ";\n\n" +
+                getDefaultContent();
     }
 
     static String getEmptyClass() {

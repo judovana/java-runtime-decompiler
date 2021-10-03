@@ -495,7 +495,7 @@ public class CliTest {
 
     private Stream<byte[]> incorrectClassContents() {
         return Stream.of(
-                TestingDummyHelper.DUMMY_CLASS_CONTENT, // no package
+                TestingDummyHelper.getDefaultContent(), // no package
                 "package " + TestingDummyHelper.PACKAGE_NAME + ";", // no class
                 "uncompilable text?"
         ).map(s -> s.getBytes(StandardCharsets.UTF_8));
@@ -509,7 +509,7 @@ public class CliTest {
 
     private Stream<byte[]> correctClassContents() {
         return Stream.of(
-                TestingDummyHelper.getContentWithPackage(),
+                TestingDummyHelper.getDefaultContentWithPackage(),
                 TestingDummyHelper.getEmptyClass()
         ).map(s -> s.getBytes(StandardCharsets.UTF_8));
     }
