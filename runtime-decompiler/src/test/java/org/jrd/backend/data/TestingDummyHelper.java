@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -20,10 +22,39 @@ class TestingDummyHelper {
     private Process process;
 
     static final String CLASS_NAME = "TestingDummy";
-    static final String PACKAGE_NAME = "dummy.package";
-    static final String TMP_DIR = System.getProperty("java.io.tmpdir");
-    static final String DOT_JAVA_PATH = TMP_DIR + File.separator + CLASS_NAME + ".java";
-    static final String DOT_CLASS_PATH = TMP_DIR + File.separator + CLASS_NAME + ".class";
+    static final String PACKAGE_NAME = "testing.dummy";
+    static final String PACKAGE_DIRS = PACKAGE_NAME.replace('.', File.separatorChar);
+    static final String FQN = PACKAGE_NAME + "." + CLASS_NAME;
+
+    static final String SRC_DIR;
+    static final String TARGET_DIR;
+
+    static {
+        String tmpDir;
+        try {
+            tmpDir = Files.createDirectories(Path.of(
+                            System.getProperty("java.io.tmpdir"), CLASS_NAME,
+                            "src", "main", "java", PACKAGE_DIRS
+                    )).toAbsolutePath().toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+            tmpDir = System.getProperty("java.io.tmpdir");
+        }
+        SRC_DIR = tmpDir;
+
+        try {
+            tmpDir = Files.createDirectories(Path.of(
+                    System.getProperty("java.io.tmpdir"), CLASS_NAME, "target"
+            )).toAbsolutePath().toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+            tmpDir = System.getProperty("java.io.tmpdir");
+        }
+        TARGET_DIR = tmpDir;
+    }
+
+    static final String DOT_JAVA_PATH = SRC_DIR + File.separator + CLASS_NAME + ".java";
+    static final String DOT_CLASS_PATH = TARGET_DIR + File.separator + PACKAGE_DIRS + File.separator + CLASS_NAME + ".class";
 
     static final String CLASS_REGEX = ".*" + CLASS_NAME + ".*";
     static final Pattern JVM_LIST_REGEX = Pattern.compile(
@@ -31,7 +62,7 @@ class TestingDummyHelper {
             Pattern.MULTILINE
     );
     static final Pattern EXACT_CLASS_REGEX = Pattern.compile(
-            String.format("^%s$", CLASS_NAME),
+            String.format("^%s$", FQN),
             Pattern.MULTILINE
     );
 
@@ -47,7 +78,7 @@ class TestingDummyHelper {
 
     TestingDummyHelper write() throws TestingDummyException {
         try (PrintWriter pw = new PrintWriter(DOT_JAVA_PATH, StandardCharsets.UTF_8)) {
-            pw.print(DUMMY_CLASS_CONTENT);
+            pw.print(getContentWithPackage());
         } catch (IOException e) {
             throw new TestingDummyException("Failed to write file '" + DOT_JAVA_PATH + "'.", e);
         }
@@ -60,7 +91,7 @@ class TestingDummyHelper {
         ByteArrayOutputStream errStream = new ByteArrayOutputStream();
 
         int errLevel = compiler.run(null, null, errStream,
-                "-d", TMP_DIR,
+                "-d", TARGET_DIR,
                 DOT_JAVA_PATH
         );
         String errMessage = errStream.toString(StandardCharsets.UTF_8);
@@ -73,13 +104,13 @@ class TestingDummyHelper {
     }
 
     TestingDummyHelper execute() throws TestingDummyException {
-        ProcessBuilder pb = new ProcessBuilder("java", "-Djdk.attach.allowAttachSelf=true", CLASS_NAME);
-        pb.directory(new File(TMP_DIR));
+        ProcessBuilder pb = new ProcessBuilder("java", "-Djdk.attach.allowAttachSelf=true", FQN);
+        pb.directory(new File(TARGET_DIR));
 
         try {
             process = pb.start();
         } catch (IOException e) {
-            throw new TestingDummyException("Failed to execute '" + CLASS_NAME + "' class.", e);
+            throw new TestingDummyException("Failed to execute '" + FQN + "' class.", e);
         }
 
         return this;
@@ -89,16 +120,16 @@ class TestingDummyHelper {
         List<String> commands = new ArrayList<>();
         commands.add("javap");
         commands.addAll(Arrays.asList(options));
-        commands.add(CLASS_NAME);
+        commands.add(FQN);
 
         ProcessBuilder pb = new ProcessBuilder(commands);
-        pb.directory(new File(TMP_DIR));
+        pb.directory(new File(TARGET_DIR));
 
         Process javap;
         try {
             javap = pb.start();
         } catch (IOException e) {
-            throw new TestingDummyException("Failed to execute javap on '" + CLASS_NAME + "' class.", e);
+            throw new TestingDummyException("Failed to execute javap on '" + FQN + "' class.", e);
         }
         javap.waitFor();
 
