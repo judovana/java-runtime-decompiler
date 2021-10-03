@@ -38,8 +38,8 @@ class TestingDummyHelper {
     static final String DUMMY_CLASS_CONTENT =
             "public class " + CLASS_NAME + " {\n" +
                     "    public static void main(String[] args) throws InterruptedException {\n" +
-                    "        System.out.println(\"Hello\");\n" +
                     "        while(true) {\n" +
+                    "            System.out.println(\"Hello\");\n" +
                     "            Thread.sleep(1000);\n" +
                     "        }\n" +
                     "    }\n" +
