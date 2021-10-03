@@ -446,6 +446,29 @@ public class CliTest {
         assertEqualsWithTolerance(jrdDisassembled, javapDisassembled, 0.8);
     }
 
+    @Test
+    void testDecompileUnknownPlugin() {
+        args = new String[]{DECOMPILE, dummy.getPid(), UNKNOWN_FLAG, TestingDummyHelper.CLASS_REGEX};
+        cli = new Cli(args, model);
+
+        assertThrows(RuntimeException.class, () -> cli.consumeCli());
+    }
+
+    @Test
+    void testDecompileFilePlugin() {
+        String emptyFilePlugin = "";
+        try {
+            emptyFilePlugin = Files.createTempFile("wrapper", ".json").toAbsolutePath().toString();
+        } catch (IOException e) {
+            fail(e);
+        }
+
+        args = new String[]{DECOMPILE, dummy.getPid(), emptyFilePlugin, TestingDummyHelper.CLASS_REGEX};
+        cli = new Cli(args, model);
+
+        assertThrows(RuntimeException.class, () -> cli.consumeCli());
+    }
+
     @SuppressWarnings("unchecked") // field reflection
     @Test
     void testArgumentCleaning() throws Exception {
