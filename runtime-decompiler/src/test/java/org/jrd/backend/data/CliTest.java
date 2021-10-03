@@ -14,14 +14,17 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -491,6 +494,122 @@ public class CliTest {
 
         filteredArgs = ((List<String>) field.get(cli)).toArray(new String[0]);
         assertArrayEquals(args, filteredArgs);
+    }
+
+    @Test
+    void testOverwrite() throws Exception {
+        String newGreeting = "Greetings";
+        createReplacement(newGreeting);
+
+        args = new String[]{
+                OVERWRITE,
+                dummy.getPid(),
+                TestingDummyHelper.FQN,
+                TestingDummyHelper.DOT_CLASS_PATH // contains newGreeting because of try-catch above
+        };
+        cli = new Cli(args, model);
+
+        assertDoesNotThrow(() -> cli.consumeCli());
+        assertTrue(streams.getOut().contains("success"));
+
+        // assert that change propagated, unfortunately we have to rely on another operation here
+        bytecodeContainsNewString(newGreeting);
+    }
+
+    @Test
+    void testOverwriteStdIn() throws Exception {
+        String newGreeting = "Greetings";
+        createReplacement(newGreeting);
+
+        args = new String[]{
+                OVERWRITE,
+                dummy.getPid(),
+                TestingDummyHelper.FQN
+        };
+        cli = new Cli(args, model);
+
+        // setup input stream
+        ByteArrayInputStream fakeIn = new ByteArrayInputStream(Files.readAllBytes(Path.of(TestingDummyHelper.DOT_CLASS_PATH)));
+        final InputStream originalIn = System.in;
+        System.setIn(fakeIn);
+
+        assertDoesNotThrow(() -> cli.consumeCli());
+        assertTrue(streams.getOut().contains("success"));
+        bytecodeContainsNewString(newGreeting);
+
+        System.setIn(originalIn); // revert input stream
+    }
+
+    private void createReplacement(String newGreeting) {
+        try {
+            new TestingDummyHelper()
+                    .write(newGreeting)
+                    .compile();
+        } catch (TestingDummyHelper.TestingDummyException e) {
+            fail("Failed to create data to be uploaded.", e);
+        }
+    }
+
+    private void bytecodeContainsNewString(String newString) throws Exception {
+        args = new String[]{DECOMPILE, dummy.getPid(), "javap-v", TestingDummyHelper.CLASS_REGEX};
+        cli = new Cli(args, model);
+
+        cli.consumeCli();
+        String overwrittenClassInVm = streams.getOut();
+
+        assertFalse(overwrittenClassInVm.contains(TestingDummyHelper.DEFAULT_GREETING));
+        assertTrue(overwrittenClassInVm.contains(newString));
+    }
+
+    @Test
+    void testOverwriteWarning() {
+        String nonClassFile = TestingDummyHelper.DOT_CLASS_PATH.replace(".class", "");
+        try {
+            Files.copy(Path.of(TestingDummyHelper.DOT_CLASS_PATH), Path.of(nonClassFile), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            fail("Failed to copy file.", e);
+        }
+
+        args = new String[]{
+                OVERWRITE,
+                dummy.getPid(),
+                TestingDummyHelper.FQN,
+                nonClassFile
+        };
+        cli = new Cli(args, model);
+
+        assertDoesNotThrow(() -> cli.consumeCli());
+        String output = streams.getErr();
+        assertTrue(output.contains("WARNING:"));
+    }
+
+    @Test
+    void testOverwriteError() {
+        args = new String[]{
+                OVERWRITE,
+                dummy.getPid(),
+                TestingDummyHelper.FQN,
+                TestingDummyHelper.TARGET_DIR
+        };
+        cli = new Cli(args, model);
+
+        assertThrows(RuntimeException.class, () -> cli.consumeCli()); // wrapped IOException
+        String output = streams.getErr();
+        assertTrue(output.contains("ERROR:"));
+    }
+
+    @Test
+    void testOverwriteAgentError() {
+        args = new String[]{
+                OVERWRITE,
+                dummy.getPid(),
+                UNKNOWN_FLAG, // non-FQN makes agent not find the class
+                TestingDummyHelper.DOT_CLASS_PATH
+        };
+        cli = new Cli(args, model);
+
+        RuntimeException e = assertThrows(RuntimeException.class, () -> cli.consumeCli());
+        assertEquals(DecompilationController.CLASSES_NOPE, e.getMessage());
     }
 
     private Stream<byte[]> incorrectClassContents() {
