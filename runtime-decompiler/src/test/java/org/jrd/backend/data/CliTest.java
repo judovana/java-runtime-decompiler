@@ -188,7 +188,7 @@ public class CliTest {
                 original,
                 dummy.getPid(),
                 new String[]{TestingDummyHelper.CLASS_REGEX},
-                TestingDummyHelper.CLASS_NAME,
+                TestingDummyHelper.FQN,
                 TestingDummyHelper.DOT_CLASS_PATH,
                 "javap"
         );
@@ -331,7 +331,7 @@ public class CliTest {
         ); // exact class list differs between dummy process executions
 
         // specific regex
-        args = new String[]{LIST_CLASSES, dummy.getPid(), TestingDummyHelper.CLASS_NAME};
+        args = new String[]{LIST_CLASSES, dummy.getPid(), TestingDummyHelper.FQN};
         cli = new Cli(args, model);
 
         cli.consumeCli();
@@ -339,7 +339,7 @@ public class CliTest {
 
         m = TestingDummyHelper.EXACT_CLASS_REGEX.matcher(ourClass);
         if (!m.find()) {
-            fail("Class " + TestingDummyHelper.CLASS_NAME + " not found when listing all classes via specific regex.");
+            fail("Class " + TestingDummyHelper.FQN + " not found when listing all classes via specific regex.");
         }
 
         assertEquals(ourClass.lines().count(), 1);
