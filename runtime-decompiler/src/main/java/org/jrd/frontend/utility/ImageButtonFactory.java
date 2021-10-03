@@ -139,7 +139,11 @@ public final class ImageButtonFactory {
     }
 
     public static JButton createDetachButton() {
-        return createButton(DETACH_RESOURCE, "Detach", "Detach");
+        return createDetachButton( "Detach", "Detach");
+    }
+
+    public static JButton createDetachButton(String backup, String tooltip) {
+        return createButton(DETACH_RESOURCE, backup, tooltip);
     }
 
     // Lazy init prevents icon loading each time window is reattached or if the detach function isn't used at all
