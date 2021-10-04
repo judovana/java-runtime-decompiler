@@ -56,6 +56,7 @@ public final class Help {
 
     private static final String NOTES_SLASH = "All options can be with either one or two leading slashes ('-').";
     private static final String NOTES_REGEX = "When using <CLASS REGEX>, don't forget to escape dollar signs '$' of inner classes to '\\$', as otherwise they are treated as end-of-line by REGEX.";
+    private static final String NOTES_FQN = "<FQN> is the fully qualified name of a class as per the Java Language Specification §6.7.";
     private static final String NOTES_PUC = "<PUC>, short for PidUrlClasspath, can be one of:";
     private static final String NOTES_SAVE = "<SAVE METHOD> can be one of:";
     private static final String[] NOTES_PUC_ITEMS = new String[]{
@@ -100,6 +101,7 @@ public final class Help {
         NOTES = new LinkedHashMap<>();
         NOTES.put(NOTES_SLASH, new String[0]);
         NOTES.put(NOTES_REGEX, new String[0]);
+        NOTES.put(NOTES_FQN, new String[0]);
         NOTES.put(NOTES_PUC, NOTES_PUC_ITEMS);
         NOTES.put(NOTES_SAVE, NOTES_SAVE_ITEMS);
     }
