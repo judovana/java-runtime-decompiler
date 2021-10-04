@@ -66,6 +66,10 @@ public class DecompilerRequestReceiver {
                 String classFutureBody = request.getParameter(AgentRequestAction.CLASS_TO_OVERWRITE_BODY);
                 response = getOverwriteAction(hostname, port, vmId, vmPid, classNameForOverwrite, classFutureBody);
                 break;
+            case REMOVE_OVERRIDES:
+                String patern = request.getParameter(AgentRequestAction.CLASS_TO_DECOMPILE_NAME);
+                response = getRemoveOverrideAction(hostname, port, vmId, vmPid, patern);
+                break;
             case INIT_CLASS:
                 String fqn = request.getParameter(AgentRequestAction.CLASS_TO_DECOMPILE_NAME);
                 response = getInitAction(hostname, port, vmId, vmPid, fqn);
@@ -74,8 +78,9 @@ public class DecompilerRequestReceiver {
                 String className = request.getParameter(AgentRequestAction.CLASS_TO_DECOMPILE_NAME);
                 response = getByteCodeAction(hostname, port, vmId, vmPid, className);
                 break;
+            case OVERRIDES:
             case CLASSES:
-                response = getAllLoadedClassesAction(hostname, port, vmId, vmPid);
+                response = getListAction(hostname, port, vmId, vmPid, action);
                 break;
             case HALT:
                 response = getHaltAction(hostname, port, vmId, vmPid);
@@ -165,10 +170,17 @@ public class DecompilerRequestReceiver {
         return OK_RESPONSE;
     }
 
+    private String getRemoveOverrideAction(String hostname, int listenPort, String vmId, int vmPid, String fqn) {
+        return getNoReplyValue(hostname, listenPort, vmId, vmPid, fqn, RequestAction.REMOVE_OVERRIDES);
+    }
+
     private String getInitAction(String hostname, int listenPort, String vmId, int vmPid, String fqn) {
+        return getNoReplyValue(hostname, listenPort, vmId, vmPid, fqn, RequestAction.INIT_CLASS);
+    }
+
+    private String getNoReplyValue(String hostname, int listenPort, String vmId, int vmPid, String argument, RequestAction action) {
         try {
-            ResponseWithPort reply =
-                    getResponse(hostname, listenPort, vmId, vmPid, RequestAction.INIT_CLASS + "\n" + fqn);
+            ResponseWithPort reply = getResponse(hostname, listenPort, vmId, vmPid, action + "\n" + argument);
             VmDecompilerStatus status = new VmDecompilerStatus();
             status.setHostname(hostname);
             status.setListenPort(reply.port);
@@ -183,7 +195,7 @@ public class DecompilerRequestReceiver {
 
     private String getByteCodeAction(String hostname, int listenPort, String vmId, int vmPid, String className) {
         try {
-            ResponseWithPort reply = getResponse(hostname, listenPort, vmId, vmPid, "BYTES\n" + className);
+            ResponseWithPort reply = getResponse(hostname, listenPort, vmId, vmPid, RequestAction.BYTES + "\n" + className);
             VmDecompilerStatus status = new VmDecompilerStatus();
             status.setHostname(hostname);
             status.setListenPort(reply.port);
@@ -197,9 +209,9 @@ public class DecompilerRequestReceiver {
         return OK_RESPONSE;
     }
 
-    private String getAllLoadedClassesAction(String hostname, int listenPort, String vmId, int vmPid) {
+    private String getListAction(String hostname, int listenPort, String vmId, int vmPid, RequestAction type) {
         try {
-            ResponseWithPort reply = getResponse(hostname, listenPort, vmId, vmPid, "CLASSES");
+            ResponseWithPort reply = getResponse(hostname, listenPort, vmId, vmPid, type.toString());
             String[] arrayOfClasses = parseClasses(reply.response);
             Arrays.sort(arrayOfClasses, new ClassesComparator());
             VmDecompilerStatus status = new VmDecompilerStatus();

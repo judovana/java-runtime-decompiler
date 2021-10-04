@@ -54,10 +54,6 @@ public class DecompilationController {
     private VmInfo vmInfo;
     private PluginManager pluginManager;
 
-    // createRequest() uses array of strings on input. Those are most common, usually shared indexes
-    public static final int CLASS_NAME = 0;
-    public static final int CLASS_BODY = 1;
-
     public DecompilationController(MainFrameView mainFrameView, Model model) {
         this.mainFrameView = mainFrameView;
         this.bytecodeDecompilerView = mainFrameView.getBytecodeDecompilerView();
@@ -81,6 +77,12 @@ public class DecompilationController {
         mainFrameView.setVmChanging(this::changeVm);
         mainFrameView.setHaltAgentListener(e -> haltAgent());
         mainFrameView.setPluginConfigurationEditorListener(actionEvent -> createConfigurationEditor());
+        mainFrameView.setManageOverrides(new Runnable() {
+            @Override
+            public void run() {
+                OverridesManager.showFor(mainFrameView.getMainFrame(), DecompilationController.this);
+            }
+        });
         bytecodeDecompilerView.refreshComboBox(pluginManager.getWrappers());
     }
 
@@ -320,19 +322,46 @@ public class DecompilationController {
         bytecodeDecompilerView.reloadTextField(name, decompiledClass, bytes);
     }
 
+    public String getVm() {
+        if (vmInfo == null) {
+            return null;
+        }
+        return vmInfo.getVmId();
+    }
+
+    public String[] getOverrides() {
+        AgentRequestAction request = createRequest(AgentRequestAction.RequestAction.OVERRIDES);
+        String response = submitRequest(request);
+        if ("ok".equals(response)) {
+            VmDecompilerStatus vmStatus = vmInfo.getVmDecompilerStatus();
+            String[] classes = vmStatus.getLoadedClassNames();
+            return classes;
+        } else {
+            throw new RuntimeException(response);
+        }
+    }
+
+    public void removeOverrides(String pattern) {
+        AgentRequestAction request = createRequest(vmInfo, RequestAction.REMOVE_OVERRIDES, pattern);
+        String response = submitRequest(request);
+        if (!"ok".equals(response)) {
+            throw new RuntimeException(response);
+        }
+    }
+
     class QuickCompiler {
 
         public void upload(String clazz, byte[] body) {
             CommonUtils.uploadByGui(vmInfo, vmManager, new CommonUtils.StatusKeeper() {
                 @Override
                 public void setText(String s) {
-                    GlobalConsole.getConsole().addMessage(Level.ALL, s);
+                    GlobalConsole.getConsole().addMessage(Level.WARNING, s);
                 }
 
                 @Override
                 public void onException(Exception ex) {
                     Logger.getLogger().log(ex);
-                    GlobalConsole.getConsole().addMessage(Level.ALL, ex.toString());
+                    GlobalConsole.getConsole().addMessage(Level.WARNING, ex.toString());
                 }
             }, clazz, body);
         }
@@ -463,19 +492,19 @@ public class DecompilationController {
 
         switch (action) {
             case CLASSES:
+            case OVERRIDES:
             case HALT:
                 request = AgentRequestAction.create(vmInfo, hostname, listenPort, action);
                 break;
+            case REMOVE_OVERRIDES:
             case INIT_CLASS:
-                request = AgentRequestAction.create(vmInfo, hostname, listenPort, action, commands[CLASS_NAME]);
-                break;
             case BYTES:
-                request = AgentRequestAction.create(vmInfo, hostname, listenPort, action, commands[CLASS_NAME]);
+                request = AgentRequestAction.create(vmInfo, hostname, listenPort, action, commands[0]);
                 break;
             case OVERWRITE:
                 try {
                     request = AgentRequestAction.create(vmInfo, hostname, listenPort, action,
-                            commands[CLASS_NAME], commands[CLASS_BODY]);
+                            commands[0], commands[1]);
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
@@ -487,7 +516,7 @@ public class DecompilationController {
         return request;
     }
 
-    private String submitRequest(AgentRequestAction request) {
+    String submitRequest(AgentRequestAction request) {
         return submitRequest(vmManager, request);
     }
 

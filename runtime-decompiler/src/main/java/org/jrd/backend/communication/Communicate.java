@@ -1,6 +1,7 @@
 package org.jrd.backend.communication;
 
 
+import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.Logger;
 
 import java.io.BufferedReader;
@@ -116,8 +117,18 @@ public class Communicate {
             Logger.getLogger().log(Logger.Level.ALL, new RuntimeException("Agent returned error: " + errorCandidate.getErrorMessage()));
             return initLine;
         }
+        //non executive commands. Move to enum?
         switch (initLine) {
-            case "BYTES":
+            case "GOODBYE":
+                Logger.getLogger().log(Logger.Level.DEBUG, "Agent closed socket when halting.");
+                return "OK";
+            case "DONE":
+                Logger.getLogger().log(Logger.Level.DEBUG, "Agent successfully overwrote class.");
+                return "OK";
+            default: //this is ok, it jsut feeding of idiotic codestyle
+        }
+        switch (AgentRequestAction.RequestAction.fromString(initLine)) {
+            case BYTES:
                 try {
                     String bytes = trimReadLine();
                     Logger.getLogger().log(Logger.Level.DEBUG, "Agent returned bytes: " + bytes);
@@ -126,7 +137,8 @@ public class Communicate {
                     Logger.getLogger().log(Logger.Level.ALL, ex);
                     return ErrorCandidate.toError(ex);
                 }
-            case "CLASSES":
+            case OVERRIDES:
+            case CLASSES:
                 StringBuilder str = new StringBuilder();
                 while (true) {
                     try {
@@ -142,14 +154,8 @@ public class Communicate {
                         Logger.getLogger().log(Logger.Level.ALL, ex);
                     }
                 }
-                Logger.getLogger().log(Logger.Level.DEBUG, "Agent successfully returned class names.");
+                Logger.getLogger().log(Logger.Level.DEBUG, "Agent successfully returned class names or overrides");
                 return str.toString();
-            case "GOODBYE":
-                Logger.getLogger().log(Logger.Level.DEBUG, "Agent closed socket when halting.");
-                return "OK";
-            case "DONE":
-                Logger.getLogger().log(Logger.Level.DEBUG, "Agent successfully overwrote class.");
-                return "OK";
             default:
                 String message = "Unknown agent response header: '" + initLine + "'.";
                 Logger.getLogger().log(Logger.Level.ALL, message);

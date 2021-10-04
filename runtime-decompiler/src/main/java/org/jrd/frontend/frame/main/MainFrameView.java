@@ -61,6 +61,7 @@ public class MainFrameView {
         private JMenu jMenuConfig;
             private JMenuItem jMenuSettings;
             private JMenuItem jMenuPluginEditor;
+            private JMenuItem jMenuOverrides;
         private JMenu jMenuHelp;
             private JMenuItem jMenuItemAbout;
             private JMenuItem jMenuItemUsage;
@@ -74,6 +75,7 @@ public class MainFrameView {
     private ActionListener removeVmDialogListener;
     private ActionListener pluginConfigurationEditorListener;
     private ActionListener haltAgentListener;
+    private Runnable manageOverrides;
 
     private static final Dimension BUTTON_SIZE = new Dimension(35, 35);
     private static final String WELCOME_CARD = "welcomePanel";
@@ -311,6 +313,11 @@ public class MainFrameView {
             new SettingsView(this);
         });
         jMenuConfig.add(jMenuSettings);
+        jMenuOverrides = new JMenuItem("Overrides");
+        jMenuOverrides.addActionListener(actionEvent -> {
+            manageOverrides.run();
+        });
+        jMenuConfig.add(jMenuOverrides);
         jMenuPluginEditor = new JMenuItem("Plugins");
         jMenuPluginEditor.addActionListener(actionEvent -> {
             pluginConfigurationEditorListener.actionPerformed(actionEvent);
@@ -432,6 +439,10 @@ public class MainFrameView {
 
     void setFsVmList(VmInfo[] vmInfos) {
         setVmList(fsVmList, vmInfos);
+    }
+
+    void setManageOverrides(Runnable action) {
+        this.manageOverrides = action;
     }
 
     private void setVmList(JList<VmInfo> vmList, VmInfo[] vmInfos) {

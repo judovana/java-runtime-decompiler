@@ -2,7 +2,8 @@ package org.jrd.agent;
 
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.regex.Pattern;
 
 /**
  * This class stores instrumentation and transformer objects and handles the
@@ -85,7 +86,7 @@ public class InstrumentationProvider {
      * @param abort abort signal
      * @throws InterruptedException interrupted exception
      */
-    public void getClassesNames(LinkedBlockingQueue<String> queue, Boolean abort) throws InterruptedException {
+    public void getClassesNames(BlockingQueue<String> queue, Boolean abort) throws InterruptedException {
         Class[] loadedClasses = instrumentation.getAllLoadedClasses();
         for (Class loadedClass : loadedClasses) {
             queue.put(loadedClass.getName());
@@ -94,5 +95,16 @@ public class InstrumentationProvider {
             }
         }
         queue.put("---END---");
+    }
+
+    public void getOverrides(BlockingQueue<String> queue) throws InterruptedException {
+        for (String override : transformer.getOverrides()) {
+            queue.put(override);
+        }
+        queue.put("---END---");
+    }
+
+    public int cleanOverrides(String pattern) {
+        return transformer.cleanOverrides(Pattern.compile(pattern));
     }
 }

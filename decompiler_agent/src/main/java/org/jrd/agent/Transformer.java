@@ -3,8 +3,12 @@ package org.jrd.agent;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * This class represent our transformer for retrieving bytecode.
@@ -22,12 +26,17 @@ public class Transformer implements ClassFileTransformer {
             ClassLoader loader, String className, Class<?> clazz, ProtectionDomain domain, byte[] classfileBuffer
     ) throws IllegalClassFormatException {
         if (allowToSaveBytecode) {
-            byte[] b = overrides.get(className);
+            byte[] b = null;
+            //some parts of instrumentation works on p/k/g/class some on p.l.g.class, lets unify that
+            String nameWithoutSlashes = clazz.getName().replace("/", ".");
+            synchronized (this) {
+                b = overrides.get(nameWithoutSlashes);
+            }
             if (b != null) {
-                results.put(className, b);
+                results.put(nameWithoutSlashes, b);
                 return b;
             } else {
-                results.put(className, classfileBuffer);
+                results.put(nameWithoutSlashes, classfileBuffer);
             }
         }
         return null;
@@ -45,6 +54,10 @@ public class Transformer implements ClassFileTransformer {
 
     public void setOverride(String name, byte[] body) {
         overrides.put(name, body);
+    }
+
+    public List<String> getOverrides() {
+        return Collections.unmodifiableList(new ArrayList<>(overrides.keySet()));
     }
 
     /**
@@ -70,5 +83,18 @@ public class Transformer implements ClassFileTransformer {
 
     synchronized void removeOverride(String clazz) {
         overrides.remove(clazz);
+    }
+
+    public synchronized int cleanOverrides(Pattern pattern) {
+        int removed = 0;
+        List<String> keys = getOverrides();
+        for (String key : keys) {
+            if (pattern.matcher(key).matches()) {
+                removeOverride(key);
+                removed++;
+                AgentLogger.getLogger().log("Removed " + key + " override");
+            }
+        }
+        return removed;
     }
 }

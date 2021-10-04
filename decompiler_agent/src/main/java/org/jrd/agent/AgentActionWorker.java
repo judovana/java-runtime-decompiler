@@ -10,6 +10,7 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -96,6 +97,9 @@ public class AgentActionWorker extends Thread {
                     case "CLASSES":
                         getAllLoadedClasses(outputStream);
                         break;
+                    case "OVERRIDES":
+                        getAllOverridesClasses(outputStream);
+                        break;
                     case "BYTES":
                         sendByteCode(inputStream, outputStream);
                         break;
@@ -104,6 +108,9 @@ public class AgentActionWorker extends Thread {
                         break;
                     case "INIT_CLASS":
                         initClass(inputStream, outputStream);
+                        break;
+                    case "REMOVE_OVERRIDES":
+                        removeOverrides(inputStream, outputStream);
                         break;
                     default:
                         outputStream.write(toError("Agent received unknown command: '" + line + "'.") + "\n");
@@ -122,13 +129,18 @@ public class AgentActionWorker extends Thread {
         }
     }
 
-    private void getAllLoadedClasses(BufferedWriter out) throws IOException {
-        out.write("CLASSES");
+
+    private interface ListInjector {
+        void inject(BlockingQueue target) throws InterruptedException;
+    }
+
+    private void getList(BufferedWriter out, String id, ListInjector injector) throws IOException {
+        out.write(id);
         out.newLine();
-        LinkedBlockingQueue<String> classNames = new LinkedBlockingQueue<String>(1024);
+        BlockingQueue<String> classNames = new LinkedBlockingQueue<String>(1024);
         new Thread(() -> {
             try {
-                provider.getClassesNames(classNames, abort);
+                injector.inject(classNames);
             } catch (InterruptedException e) {
                 AgentLogger.getLogger().log(e);
             }
@@ -146,6 +158,25 @@ public class AgentActionWorker extends Thread {
             }
         }
         out.flush();
+    }
+
+
+    private void getAllLoadedClasses(BufferedWriter out) throws IOException {
+        getList(out, "CLASSES", new ListInjector() {
+            @Override
+            public void inject(BlockingQueue target) throws InterruptedException {
+                provider.getClassesNames(target, abort);
+            }
+        });
+    }
+
+    private void getAllOverridesClasses(BufferedWriter out) throws IOException {
+        getList(out, "OVERRIDES", new ListInjector() {
+            @Override
+            public void inject(BlockingQueue target) throws InterruptedException {
+                provider.getOverrides(target);
+            }
+        });
     }
 
     private void sendByteCode(BufferedReader in, BufferedWriter out) throws IOException {
@@ -169,15 +200,23 @@ public class AgentActionWorker extends Thread {
         out.flush();
     }
 
-    private void initClass(BufferedReader in, BufferedWriter out) throws IOException {
-        String fqn = in.readLine();
-        if (fqn == null) {
-            out.write(toError("No FQN provided for the init class command.") + "\n");
+    private interface ParametrisedRunner {
+        void run(String args) throws Exception;
+    }
+
+    private void executeParametrisedNoReturnCommand(
+            BufferedReader in,
+            BufferedWriter out,
+            String help,
+            ParametrisedRunner parametrisedRunner) throws IOException {
+        String args = in.readLine();
+        if (args == null) {
+            out.write(toError(help) + "\n");
             out.flush();
             return;
         }
         try {
-            Class.forName(fqn);
+            parametrisedRunner.run(args);
             out.write("DONE");
             out.newLine();
         } catch (Throwable ex) {
@@ -187,28 +226,45 @@ public class AgentActionWorker extends Thread {
         out.flush();
     }
 
+    private void initClass(BufferedReader in, BufferedWriter out) throws IOException {
+        executeParametrisedNoReturnCommand(in, out,
+                "No FQN provided for the init class command.",
+                new ParametrisedRunner() {
+                    @Override
+                    public void run(String arg) throws Exception {
+                        Class.forName(arg);
+                    }
+                }
+        );
+    }
+
+    private void removeOverrides(BufferedReader in, BufferedWriter out) throws IOException {
+        executeParametrisedNoReturnCommand(in, out, "No regex provided for the remove override. Try .*",
+                new ParametrisedRunner() {
+                    @Override
+                    public void run(String pattern) throws Exception {
+                        int removed = provider.cleanOverrides(pattern);
+                        if (removed == 0) {
+                            throw new Exception("Nothing removed by " + pattern + ".Try OVERRIDES to see active overrides");
+                        }
+                    }
+                });
+    }
+
     private void receiveByteCode(BufferedReader in, BufferedWriter out) throws IOException {
-        String className = in.readLine();
-        if (className == null) {
-            out.write(toError("No class name provided for the overwrite command.") + "\n");
-            out.flush();
-            return;
-        }
-        String classBodyBase64 = in.readLine();
-        if (classBodyBase64 == null) {
-            out.write(toError("No class body provided for the overwrite command.") + "\n");
-            out.flush();
-            return;
-        }
-        try {
-            provider.setClassBody(className, Base64.getDecoder().decode(classBodyBase64));
-            out.write("DONE"); // overwrite specific done?
-            out.newLine();
-        } catch (Exception ex) {
-            AgentLogger.getLogger().log(ex);
-            out.write(toError(ex) + "\n");
-        }
-        out.flush();
+        executeParametrisedNoReturnCommand(in, out, "No class name provided for the overwrite command.",
+                new ParametrisedRunner() {
+                    @Override
+                    public void run(String className) throws Exception {
+                        String classBodyBase64 = in.readLine();
+                        if (classBodyBase64 == null) {
+                            out.write(toError("No class body provided for the overwrite command.") + "\n");
+                            out.flush();
+                            return;
+                        }
+                        provider.setClassBody(className, Base64.getDecoder().decode(classBodyBase64));
+                    }
+                });
     }
 
     private void closeSocket(BufferedWriter out, Socket socket) throws IOException {

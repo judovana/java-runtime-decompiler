@@ -56,7 +56,9 @@ public class AgentRequestAction {
         BYTES(1),
         HALT(2),
         OVERWRITE(3),
-        INIT_CLASS(4);
+        INIT_CLASS(4),
+        OVERRIDES(5),
+        REMOVE_OVERRIDES(6);
 
         private final int intVal;
 
@@ -66,27 +68,20 @@ public class AgentRequestAction {
 
         @SuppressWarnings("ReturnCount") // returns in switch cases
         public static RequestAction returnAction(String act) {
-
             int action;
             try {
                 action = Integer.parseInt(act);
             } catch (NumberFormatException e) {
                 throw new IllegalArgumentException("Unknown action: " + act);
             }
-            switch (action) {
-                case 0:
-                    return CLASSES;
-                case 1:
-                    return BYTES;
-                case 2:
-                    return HALT;
-                case 3:
-                    return OVERWRITE;
-                case 4:
-                    return INIT_CLASS;
-                default:
-                    throw new IllegalArgumentException("Unknown request: " + action);
-            }
+            return RequestAction.fromInt(action);
+        }
+
+        private static RequestAction fromInt(int action) {
+            return Arrays.stream(RequestAction.values())
+                    .filter(v -> v.intVal == action)
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("unknown value: " + action));
         }
 
         private String toIntString() {
