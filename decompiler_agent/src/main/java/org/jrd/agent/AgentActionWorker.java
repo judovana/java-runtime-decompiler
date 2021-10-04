@@ -29,7 +29,7 @@ public class AgentActionWorker extends Thread {
         return AGENT_ERROR_ID + " " + message;
     }
 
-    private static String toError(Exception ex) {
+    private static String toError(Throwable ex) {
         return toError(ex.toString());
     }
 
@@ -162,7 +162,7 @@ public class AgentActionWorker extends Thread {
             out.newLine();
             out.write(encoded);
             out.newLine();
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             AgentLogger.getLogger().log(ex);
             out.write(toError(ex) + "\n");
         }
@@ -180,7 +180,7 @@ public class AgentActionWorker extends Thread {
             Class.forName(fqn);
             out.write("DONE");
             out.newLine();
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             AgentLogger.getLogger().log(ex);
             out.write(toError(ex) + "\n");
         }
