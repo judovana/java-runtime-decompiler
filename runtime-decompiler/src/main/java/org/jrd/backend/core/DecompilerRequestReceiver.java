@@ -62,20 +62,20 @@ public class DecompilerRequestReceiver {
         String response;
         switch (action) {
             case OVERWRITE:
-                String classNameForOverwrite = request.getParameter(AgentRequestAction.CLASS_TO_DECOMPILE_NAME);
+                String classNameForOverwrite = request.getParameter(AgentRequestAction.CLASS_NAME_PARAM);
                 String classFutureBody = request.getParameter(AgentRequestAction.CLASS_TO_OVERWRITE_BODY);
                 response = getOverwriteAction(hostname, port, vmId, vmPid, classNameForOverwrite, classFutureBody);
                 break;
             case REMOVE_OVERRIDES:
-                String patern = request.getParameter(AgentRequestAction.CLASS_TO_DECOMPILE_NAME);
+                String patern = request.getParameter(AgentRequestAction.CLASS_NAME_PARAM);
                 response = getRemoveOverrideAction(hostname, port, vmId, vmPid, patern);
                 break;
             case INIT_CLASS:
-                String fqn = request.getParameter(AgentRequestAction.CLASS_TO_DECOMPILE_NAME);
+                String fqn = request.getParameter(AgentRequestAction.CLASS_NAME_PARAM);
                 response = getInitAction(hostname, port, vmId, vmPid, fqn);
                 break;
             case BYTES:
-                String className = request.getParameter(AgentRequestAction.CLASS_TO_DECOMPILE_NAME);
+                String className = request.getParameter(AgentRequestAction.CLASS_NAME_PARAM);
                 response = getByteCodeAction(hostname, port, vmId, vmPid, className);
                 break;
             case OVERRIDES:

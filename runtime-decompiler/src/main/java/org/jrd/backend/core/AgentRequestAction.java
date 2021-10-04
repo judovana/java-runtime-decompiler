@@ -107,7 +107,7 @@ public class AgentRequestAction {
     public static final String HOSTNAME_PARAM_NAME = "hostname:";
     public static final String LISTEN_PORT_PARAM_NAME = "listen-port";
     public static final int NOT_ATTACHED_PORT = -1;
-    public static final String CLASS_TO_DECOMPILE_NAME = "class-to-decompile";
+    public static final String CLASS_NAME_PARAM = "class--name-param";
 
     public static final String CLASS_TO_OVERWRITE_BODY = "body-to-overwrite";
 
@@ -123,7 +123,7 @@ public class AgentRequestAction {
             VmInfo vmInfo, String hostname, int listenPort, RequestAction action, String name
     ) {
         AgentRequestAction req = create(vmInfo, hostname, listenPort, action);
-        req.setParameter(CLASS_TO_DECOMPILE_NAME, name);
+        req.setParameter(CLASS_NAME_PARAM, name);
         return req;
     }
 
