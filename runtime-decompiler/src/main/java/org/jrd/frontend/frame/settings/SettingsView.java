@@ -11,6 +11,8 @@ import org.jrd.frontend.frame.plugins.FileSelectorArrayRow;
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
@@ -18,6 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SettingsView extends JDialog {
 
@@ -119,14 +122,21 @@ public class SettingsView extends JDialog {
             });
 
             useDefaults = new JCheckBox("Use default extensions");
-            useDefaults.addItemListener(itemEvent -> {
-                newExtensionsTextField.setEnabled(!useDefaults.isSelected());
-                addButton.setEnabled(!useDefaults.isSelected());
-                removeButton.setEnabled(!useDefaults.isSelected());
-                currentExtensionsList.setEnabled(!useDefaults.isSelected());
-            });
+            ActionListener a = new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent actionEvent) {
+                    newExtensionsTextField.setEnabled(!useDefaults.isSelected());
+                    addButton.setEnabled(!useDefaults.isSelected());
+                    removeButton.setEnabled(!useDefaults.isSelected());
+                    currentExtensionsList.setEnabled(!useDefaults.isSelected());
+                    if (!useDefaults.isSelected() && newExtensionsTextField.getText().isEmpty()) {
+                        newExtensionsTextField.setText(ArchiveManagerOptions.DEFAULTS.stream().collect(Collectors.joining(" ")));
+                    }
+                }
+            };
+            useDefaults.addActionListener(a);
             useDefaults.setToolTipText(BytecodeDecompilerView.styleTooltip() +
-                    "Default extensions are: .zip, .jar, .war, .ear");
+                    "Default extensions are: " + ArchiveManagerOptions.DEFAULTS.stream().collect(Collectors.joining(", ")));
 
             // Setup
             if (ArchiveManagerOptions.getInstance().areExtensionsEmpty()) {
@@ -134,6 +144,7 @@ public class SettingsView extends JDialog {
             } else {
                 defaultListModel.addAll(ArchiveManagerOptions.getInstance().getExtensions());
             }
+            a.actionPerformed(null);
 
             addExtensions(gbc);
             this.setPreferredSize(new Dimension(0, 400));
