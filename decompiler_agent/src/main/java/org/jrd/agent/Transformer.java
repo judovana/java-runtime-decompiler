@@ -67,4 +67,8 @@ public class Transformer implements ClassFileTransformer {
     public void denyToSaveBytecode() {
         allowToSaveBytecode = false;
     }
+
+    synchronized void removeOverride(String clazz) {
+        overrides.remove(clazz);
+    }
 }

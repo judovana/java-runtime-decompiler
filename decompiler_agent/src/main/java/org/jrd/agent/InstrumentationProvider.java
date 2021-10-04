@@ -24,9 +24,13 @@ public class InstrumentationProvider {
         Class clazz = findClass(cname);
         transformer.allowToSaveBytecode();
         try {
-            String nameWithSlashes = clazz.getName().replace(".", "/");
-            transformer.setOverride(nameWithSlashes, nwBody);
-            instrumentation.retransformClasses(clazz);
+            transformer.setOverride(clazz.getName(), nwBody);
+            try {
+                instrumentation.retransformClasses(clazz);
+            } catch (Throwable ex) {
+                transformer.removeOverride(clazz.getName());
+                throw ex;
+            }
         } finally {
             transformer.denyToSaveBytecode();
             transformer.resetLastValidResult();
@@ -37,9 +41,12 @@ public class InstrumentationProvider {
         byte[] result;
         transformer.allowToSaveBytecode();
         try {
-            String nameWithSlashes = clazz.getName().replace(".", "/");
-            instrumentation.retransformClasses(clazz);
-            result = transformer.getResult(nameWithSlashes);
+            try {
+                instrumentation.retransformClasses(clazz);
+            } catch (Throwable ex) {
+                transformer.removeOverride(clazz.getName());
+            }
+            result = transformer.getResult(clazz.getName());
         } finally {
             transformer.denyToSaveBytecode();
             transformer.resetLastValidResult();
