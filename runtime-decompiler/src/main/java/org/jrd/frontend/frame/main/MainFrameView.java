@@ -149,7 +149,7 @@ public class MainFrameView {
         });
         //localVmList End
 
-        localVmRefreshButton = ImageButtonFactory.createRefreshButton("local VMs");
+        localVmRefreshButton = ImageButtonFactory.createRefreshButton("Refresh local VMs");
         localVmRefreshButton.addActionListener(actionEvent -> {
             refreshLocalVmsListener.actionPerformed(actionEvent);
         });

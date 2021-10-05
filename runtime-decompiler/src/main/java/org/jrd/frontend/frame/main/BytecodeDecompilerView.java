@@ -67,6 +67,7 @@ public class BytecodeDecompilerView {
                 private JPanel buffersToolBar;
                     private JButton undoButton;
                     private JButton redoButton;
+                    private JButton insertButton;
                     private JButton detachButton;
                     private JButton initClassButton;
                     private JButton overwriteButton;
@@ -87,6 +88,7 @@ public class BytecodeDecompilerView {
     private ActionListener initActionListener;
     private DecompilationController.QuickCompiler compileAction;
     private OverwriteActionListener overwriteActionListener;
+    private DecompilationController.AgentApiGenerator popup;
 
     private String[] loadedClasses;
     private String lastDecompiledClass = "";
@@ -259,7 +261,7 @@ public class BytecodeDecompilerView {
             }
         });
 
-        reloadClassesButton = ImageButtonFactory.createRefreshButton("classes");
+        reloadClassesButton = ImageButtonFactory.createRefreshButton("Refresh classes");
         reloadClassesButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -322,6 +324,18 @@ public class BytecodeDecompilerView {
             }
         });
 
+        insertButton = ImageButtonFactory.createRefreshButton("insert agent api to current position");
+        insertButton.addActionListener(actionEvent -> {
+            if (isSourceBufferVisible()) {
+                popup.getFor(bytecodeSyntaxTextArea).show(insertButton, 0, 0);
+            } else {
+                //button should be disabled
+                if (false) {
+                    System.err.println("checkstyle can go fuck itself");
+                }
+            }
+        });
+
         classesToolBar = new JPanel(new BorderLayout());
         classesToolBar.setBorder(new EtchedBorder());
         classesToolBar.add(reloadClassesButton, BorderLayout.WEST);
@@ -368,6 +382,9 @@ public class BytecodeDecompilerView {
 
         gbc.gridx = 1;
         buffersToolBar.add(redoButton, gbc);
+
+        gbc.gridx = 2;
+        buffersToolBar.add(insertButton, gbc);
 
         gbc.weightx = 1;
         gbc.insets = new Insets(0, 0, 0, 0); // prevent double padding when no glue is utilized
@@ -696,6 +713,10 @@ public class BytecodeDecompilerView {
 
     public void setBytesActionListener(ActionListener listener) {
         bytesActionListener = listener;
+    }
+
+    public void setPopup(DecompilationController.AgentApiGenerator ap) {
+        popup = ap;
     }
 
     private class OverwriteActionListener implements ActionListener {
