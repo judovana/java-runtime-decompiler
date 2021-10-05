@@ -68,11 +68,10 @@ public class JasmDecompilerWrapper {
         Map<String, byte[]> r = new HashMap();
         Files.walk(target.toPath()).filter(Files::isRegularFile).forEach(k -> {
             try {
-                String futureFullyQualifiedNiceName = k
-                        .toString()
-                        .futureFullyQualifiedNiceName.replace(target + File.separator, "")
-                        .futureFullyQualifiedNiceName.replace(File.separator, ".")
-                        .replaceAll("\\.class$", "");
+                String futureFullyQualifiedNiceName = k.toString();
+                futureFullyQualifiedNiceName = futureFullyQualifiedNiceName.replace(target + File.separator, "");
+                futureFullyQualifiedNiceName = futureFullyQualifiedNiceName.replace(File.separator, ".");
+                futureFullyQualifiedNiceName = futureFullyQualifiedNiceName.replaceAll("\\.class$", "");
                 r.put(futureFullyQualifiedNiceName, Files.readAllBytes(k));
             } catch (IOException ex) {
                 ex.printStackTrace();
