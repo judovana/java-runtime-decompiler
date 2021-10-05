@@ -99,6 +99,8 @@ mkdir "$PLUGINS_CONF"
 
 cp "$RSYNTAXTEXTAREA" "$DEPS_DIR"
 cp "$GSON" "$DEPS_DIR"
+cp "$ASM_TREE" "$DEPS_DIR"
+cp "$ASM_JAR" "$DEPS_DIR"
 cp "$BYTEMAN" "$DEPS_DIR"
 cp "$JRD" "$DEPS_DIR"
 cp "$CPLC" "$DEPS_DIR"
