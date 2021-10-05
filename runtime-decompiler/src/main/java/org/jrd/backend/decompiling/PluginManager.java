@@ -2,6 +2,7 @@ package org.jrd.backend.decompiling;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.Cli;
 import org.jrd.backend.data.Directories;
@@ -32,6 +33,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
@@ -164,6 +166,14 @@ public class PluginManager {
             }
 
             if (wrapper.getDecompileMethodWithInners() != null && name != null && vmInfo != null && vmManager != null) {
+                //we have to crawl through all inner classes to be available before final listing,
+                // otherwise decompiler may skip the inner class
+                Set<String> inners = io.github.mkoncek.classpathless.util.ExtractTypenames
+                        .extractNested(bytecode, new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager));
+                //this loop may be redundant, as JrdClassesProvider init all what fails to load (and try to laod again), but...
+                for (String inner: inners) {
+                    Cli.initClass(vmInfo, vmManager, inner);
+                }
                 String[] allClasses = Cli.obtainClasses(vmInfo, vmManager);
                 Map<String, byte[]> innerClasses = new HashMap<>();
 

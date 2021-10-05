@@ -109,7 +109,7 @@ public class Variables {
             }
         }
 
-        public static Object create(String name,  Object defaultValue) throws NoSuchFakeVariableException {
+        public static Object create(String name, Object defaultValue) throws NoSuchFakeVariableException {
             if (GLOBALS.containsKey(name)) {
                 throw new FakeVariableAlreadyDeclared();
             } else {
