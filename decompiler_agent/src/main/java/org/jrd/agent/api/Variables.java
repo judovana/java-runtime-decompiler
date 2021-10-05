@@ -12,7 +12,7 @@ public class Variables {
     public static void init() {
         FakeVariableException.init();
         NoSuchFakeVariableException.init();
-        FakeVariableAlreadyDeclared.init();
+        FakeVariableAlreadyDeclaredException.init();
         Global.init();
     }
 
@@ -46,12 +46,12 @@ public class Variables {
         }
     }
 
-    public static class FakeVariableAlreadyDeclared extends RuntimeException {
+    public static class FakeVariableAlreadyDeclaredException extends RuntimeException {
 
-        public FakeVariableAlreadyDeclared() {
+        public FakeVariableAlreadyDeclaredException() {
         }
 
-        public FakeVariableAlreadyDeclared(String s) {
+        public FakeVariableAlreadyDeclaredException(String s) {
             super(s);
         }
 
@@ -79,7 +79,7 @@ public class Variables {
 
         public static Object setNoReplace(String name, Object value) throws NoSuchFakeVariableException {
             if (GLOBALS.containsKey(name)) {
-                throw new FakeVariableAlreadyDeclared();
+                throw new FakeVariableAlreadyDeclaredException();
             } else {
                 Object old = GLOBALS.put(name, value);
                 if (old != null) {
@@ -111,7 +111,7 @@ public class Variables {
 
         public static Object create(String name, Object defaultValue) throws NoSuchFakeVariableException {
             if (GLOBALS.containsKey(name)) {
-                throw new FakeVariableAlreadyDeclared();
+                throw new FakeVariableAlreadyDeclaredException();
             } else {
                 return GLOBALS.put(name, defaultValue);
             }

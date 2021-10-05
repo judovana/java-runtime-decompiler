@@ -168,8 +168,8 @@ public class PluginManager {
             if (wrapper.getDecompileMethodWithInners() != null && name != null && vmInfo != null && vmManager != null) {
                 //we have to crawl through all inner classes to be available before final listing,
                 // otherwise decompiler may skip the inner class
-                Set<String> inners = io.github.mkoncek.classpathless.util.ExtractTypenames
-                        .extractNested(bytecode, new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager));
+                Set<String> inners = io.github.mkoncek.classpathless.util.BytecodeExtractor
+                        .extractNestedClasses(bytecode, new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager));
                 //this loop may be redundant, as JrdClassesProvider init all what fails to load (and try to laod again), but...
                 for (String inner: inners) {
                     Cli.initClass(vmInfo, vmManager, inner);

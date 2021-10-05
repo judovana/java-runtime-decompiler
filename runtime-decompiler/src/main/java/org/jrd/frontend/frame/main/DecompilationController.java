@@ -2,6 +2,7 @@ package org.jrd.frontend.frame.main;
 
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.jrd.backend.communication.FsAgent;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.communication.TopLevelErrorCandidate;
@@ -74,6 +75,7 @@ public class DecompilationController {
         bytecodeDecompilerView.setBytesActionListener(e -> loadClassBytecode(e.getActionCommand()));
         bytecodeDecompilerView.setOverwriteActionListener(new ClassOverwriter());
         bytecodeDecompilerView.setCompileListener(new QuickCompiler());
+        bytecodeDecompilerView.setPopup(new AgentApiGenerator());
 
         mainFrameView.setVmChanging(this::changeVm);
         mainFrameView.setHaltAgentListener(e -> haltAgent());
@@ -554,4 +556,16 @@ public class DecompilationController {
         return receiver.processRequest(request); //listener
     }
 
+    public class AgentApiGenerator {
+        public JPopupMenu getFor(RSyntaxTextArea text) {
+            if (vmInfo.getVmPid() >= 0) {
+                org.jrd.frontend.utility.AgentApiGenerator.initItems(vmInfo, vmManager);
+                return org.jrd.frontend.utility.AgentApiGenerator.create(text);
+            } else {
+                JPopupMenu p = new JPopupMenu();
+                p.add(new JMenuItem("Agent info is valid only for runnig vms!"));
+                return p;
+            }
+        }
+    }
 }
