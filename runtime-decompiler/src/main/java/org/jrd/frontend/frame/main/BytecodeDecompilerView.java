@@ -324,7 +324,7 @@ public class BytecodeDecompilerView {
             }
         });
 
-        insertButton = ImageButtonFactory.createRefreshButton("insert agent api to current position");
+        insertButton = ImageButtonFactory.createBookButton("insert agent api to current position");
         insertButton.addActionListener(actionEvent -> {
             if (isSourceBufferVisible()) {
                 popup.getFor(bytecodeSyntaxTextArea).show(insertButton, 0, 0);
