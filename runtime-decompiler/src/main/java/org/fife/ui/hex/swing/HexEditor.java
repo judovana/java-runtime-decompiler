@@ -4,10 +4,12 @@
 
 package org.fife.ui.hex.swing;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.fife.ui.hex.event.HexEditorEvent;
 import org.fife.ui.hex.event.HexEditorListener;
 
 import javax.swing.Action;
+import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.TransferHandler;
 import javax.swing.UIManager;
@@ -15,8 +17,10 @@ import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyListener;
 import java.io.IOException;
 import java.io.InputStream;
+
 
 public class HexEditor extends JScrollPane {
     private static final long serialVersionUID = 1L;
@@ -122,6 +126,15 @@ public class HexEditor extends JScrollPane {
 
     HexTable getTable() {
         return this.table;
+    }
+
+    public void addKeyListenerToTable(KeyListener l) {
+        table.addKeyListener(l);
+    }
+
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "to lazy to invert control here")
+    public JComponent getTableFocus() {
+        return table;
     }
 
     private void invokeAction(final Action a) {
@@ -234,4 +247,5 @@ public class HexEditor extends JScrollPane {
     static {
         DEFAULT_TRANSFER_HANDLER = new HexEditorTransferHandler();
     }
+
 }

@@ -81,7 +81,7 @@ public class BytecodeDecompilerView {
                         private SearchControlsPanel bytecodeSearchControls;
                     private JPanel binaryBuffer;
                         private HexEditor hex;
-                        private JPanel hexSearchControls;
+                        private SearchControlsPanel hexSearchControls;
 
     private ActionListener bytesActionListener;
     private ActionListener classesActionListener;
@@ -153,8 +153,6 @@ public class BytecodeDecompilerView {
         UndoRedoKeyAdapter classesSortFieldKeyAdapter = new UndoRedoKeyAdapter();
         classesSortField.getDocument().addUndoableEditListener(classesSortFieldKeyAdapter.getUndoManager());
         classesSortField.addKeyListener(classesSortFieldKeyAdapter);
-
-        bytecodeSearchControls = SearchControlsPanel.createBytecodeControls(this);
 
         classesPanel.add(classesSortField, BorderLayout.NORTH);
 
@@ -354,12 +352,36 @@ public class BytecodeDecompilerView {
         });
 
         bytecodeSyntaxTextArea = new RSyntaxTextArea();
+        bytecodeSyntaxTextArea.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if ((e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) != 0) {
+                    if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+                        System.out.println("ctrl+space");
+                        popup.getFor(bytecodeSyntaxTextArea).show(insertButton, 0, 0);
+                    }
+                    if (e.getKeyCode() == KeyEvent.VK_F) {
+                        bytecodeSearchControls.focus();
+                    }
+                }
+            }
+        });
         bytecodeSyntaxTextArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
         bytecodeSyntaxTextArea.setCodeFoldingEnabled(true);
         bytecodeScrollPane = new RTextScrollPane(bytecodeSyntaxTextArea);
+        bytecodeSearchControls = SearchControlsPanel.createBytecodeControls(this);
 
         hex = new HexEditor();
-
+        hex.addKeyListenerToTable(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if ((e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) != 0) {
+                    if (e.getKeyCode() == KeyEvent.VK_F) {
+                        hexSearchControls.focus();
+                    }
+                }
+            }
+        });
         classes = new JPanel();
         classes.setLayout(new BorderLayout());
         classes.setBorder(new EtchedBorder());
@@ -477,9 +499,17 @@ public class BytecodeDecompilerView {
 
         private final ActionListener wasNotFoundActionListener;
 
-        private SearchControlsPanel(Component optionsComponent) {
+        private SearchControlsPanel(Component optionsComponent, Component forFocus) {
             super(new GridBagLayout());
 
+            searchField.addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                        forFocus.requestFocus();
+                    }
+                }
+            });
             Timer wasNotFoundTimer = new Timer(
                     250, (ActionEvent e) -> searchField.setForeground(originalSearchFieldColor)
             );
@@ -530,7 +560,7 @@ public class BytecodeDecompilerView {
             );
             hexSearchType.setPrototypeDisplayValue(HexSearch.HexSearchOptions.TEXT);
 
-            SearchControlsPanel controls = new SearchControlsPanel(hexSearchType);
+            SearchControlsPanel controls = new SearchControlsPanel(hexSearchType, hex.getTableFocus());
 
             DocumentListener hexSearchDocumentListener = new HexSearchDocumentListener(
                     hexSearchEngine, controls.searchField, hexSearchType, controls.wasNotFoundActionListener
@@ -551,7 +581,7 @@ public class BytecodeDecompilerView {
             final JCheckBox regexCheckBox = new JCheckBox("Regex");
             regexCheckBox.setIconTextGap(3);
 
-            SearchControlsPanel controls = new SearchControlsPanel(regexCheckBox);
+            SearchControlsPanel controls = new SearchControlsPanel(regexCheckBox, parent.bytecodeSyntaxTextArea);
 
             DocumentListener listener = new DocumentListener() {
                 @Override
@@ -586,6 +616,10 @@ public class BytecodeDecompilerView {
 
         public void fireWasNotFoundAction() {
             wasNotFoundActionListener.actionPerformed(null);
+        }
+
+        public void focus() {
+            searchField.requestFocus();
         }
     }
 
