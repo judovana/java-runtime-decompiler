@@ -28,13 +28,29 @@ public final class AgentApiGenerator {
 
     public static final String PUBLIC_STATIC_PREFIX = "public static ";
 
-    private static final class ClazzMethod implements Comparable<ClazzMethod> {
+    private static final class DummyClazzMethod extends ClazzMethod {
+        private DummyClazzMethod(String method) {
+            super(method);
+        }
+
+        @Override
+        public String toString() {
+            return masterPattern;
+        }
+
+        @Override
+        public String toOutput(String owner) {
+            return "(Object)(" + owner + "." + masterPattern + ")\n";
+        }
+    }
+
+    private static class ClazzMethod implements Comparable<ClazzMethod> {
         private final String original;
         private final String resultType;
         private final String returnless;
-        private final String masterPattern;
+        protected final String masterPattern;
 
-        private ClazzMethod(String model) {
+        protected ClazzMethod(String model) {
             masterPattern = model;
             original = model.trim()
                     .replace("java.lang.", "")
@@ -51,7 +67,7 @@ public final class AgentApiGenerator {
 
         @Override
         public int compareTo(ClazzMethod clazzMethod) {
-            return original.compareTo(clazzMethod.original);
+            return toString().compareTo(clazzMethod.toString());
         }
 
         @Override
@@ -63,12 +79,12 @@ public final class AgentApiGenerator {
                 return false;
             }
             ClazzMethod that = (ClazzMethod) o;
-            return Objects.equals(original, that.original);
+            return Objects.equals(toString(), that.toString());
         }
 
         @Override
         public int hashCode() {
-            return original.hashCode();
+            return toString().hashCode();
         }
 
         public String toOutput(String owner) {
@@ -96,6 +112,11 @@ public final class AgentApiGenerator {
     }
 
     public static synchronized void initItems(VmInfo vmInfo, VmManager vmManager, PluginManager pluginManager) {
+        // todo, read from settings
+        initItems(vmInfo, vmManager, pluginManager, true);
+    }
+
+    private static synchronized void initItems(VmInfo vmInfo, VmManager vmManager, PluginManager pluginManager, boolean withSignatures) {
         if (agentApi == null) {
             try {
                 agentApi = new ArrayList<>();
@@ -105,14 +126,20 @@ public final class AgentApiGenerator {
                         new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager));
                 for (String innerClazzName : innerClazzes) {
                     String innerClazz = Cli.obtainClass(vmInfo, innerClazzName, vmManager).getLoadedClassBytes();
-                    DecompilerWrapper decompiler = Cli.findDecompiler(DecompilerWrapper.JAVAP_NAME, pluginManager);
-                    String decompilationResult = pluginManager.decompile(
-                            decompiler,
-                            innerClazzName,
-                            Base64.getDecoder().decode(innerClazz),
-                            new String[0], vmInfo, vmManager);
-                    Collection<ClazzMethod> methods = extractMethods(decompilationResult);
-                    agentApi.add(new ClazzWithMethods(innerClazzName, methods));
+                    if (withSignatures) {
+                        DecompilerWrapper decompiler = Cli.findDecompiler(DecompilerWrapper.JAVAP_NAME, pluginManager);
+                        String decompilationResult = pluginManager.decompile(
+                                decompiler,
+                                innerClazzName,
+                                Base64.getDecoder().decode(innerClazz),
+                                new String[0], vmInfo, vmManager);
+                        Collection<ClazzMethod> methods = extractMethods(decompilationResult);
+                        agentApi.add(new ClazzWithMethods(innerClazzName, methods));
+                    } else {
+                        Collection<String> methods = BytecodeExtractor.extractMethods(Base64.getDecoder().decode(innerClazz));
+                        agentApi.add(new ClazzWithMethods(innerClazzName,
+                                methods.stream().map(a -> new DummyClazzMethod(a)).collect(Collectors.toList())));
+                    }
                 }
                 Collections.sort(agentApi, new Comparator<ClazzWithMethods>() {
                     @Override
