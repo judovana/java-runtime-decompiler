@@ -26,6 +26,7 @@ public final class Help {
     static final String DECOMPILE_FORMAT = DECOMPILE + " <PUC> <PLUGIN> <CLASS REGEX>...";
     static final String OVERWRITE_FORMAT = OVERWRITE + " <PUC> <CLASS NAME> [<CLASS FILE>]";
     static final String INIT_FORMAT = INIT + " <PUC> <FQN>";
+    static final String API_FORMAT = API + " <PUC>";
     static final String SAVE_AS_FORMAT = SAVE_AS + " <PATH>";
     static final String SAVE_LIKE_FORMAT = SAVE_LIKE + " <SAVE METHOD>";
 
@@ -51,6 +52,7 @@ public final class Help {
     private static final String OVERWRITE_TEXT = "Overwrite class of a process with new bytecode. If <CLASS FILE> is not set, standard input is used.";
     private static final String INIT_TEXT = "Try to initialize a class in a running JVM (has no effect in FS VMs)." +
             "Because class loading is lazy, the class you need might be missing, eg. java.lang.Override.";
+    private static final String API_TEXT = "Will print out which can be used to insert fields/methods to running vm";
     private static final String SAVE_AS_TEXT = "All outputs will be written to PATH instead of to standard output.";
     private static final String SAVE_LIKE_TEXT = "Specify how saving will behave.";
 
@@ -92,6 +94,7 @@ public final class Help {
         ALL_OPTIONS.put(DECOMPILE_FORMAT, DECOMPILE_TEXT);
         ALL_OPTIONS.put(OVERWRITE_FORMAT, OVERWRITE_TEXT);
         ALL_OPTIONS.put(INIT_FORMAT, INIT_TEXT);
+        ALL_OPTIONS.put(API_FORMAT, API_TEXT);
 
         SAVING_OPTIONS = new LinkedHashMap<>();
         SAVING_OPTIONS.put(SAVE_AS_FORMAT, SAVE_AS_TEXT);
@@ -104,7 +107,7 @@ public final class Help {
         NOTES.put(NOTES_SAVE, NOTES_SAVE_ITEMS);
     }
 
-    private static final String[] UNSAVABLE_OPTIONS = {HELP, H, LIST_JVMS, LIST_PLUGINS, OVERWRITE, INIT};
+    private static final String[] UNSAVABLE_OPTIONS = {HELP, H, LIST_JVMS, LIST_PLUGINS, OVERWRITE, INIT, API};
     private static final String[] SAVABLE_OPTIONS = {LIST_CLASSES, BYTES, BASE64, COMPILE, DECOMPILE};
 
     private static final int LONGEST_FORMAT_LENGTH =

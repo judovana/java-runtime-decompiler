@@ -14,6 +14,7 @@ import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.filesystem.NewFsVmController;
 import org.jrd.frontend.frame.main.DecompilationController;
 import org.jrd.frontend.frame.overwrite.FileToClassValidator;
+import org.jrd.frontend.utility.AgentApiGenerator;
 import org.jrd.frontend.utility.CommonUtils;
 
 import java.io.BufferedReader;
@@ -48,6 +49,7 @@ public class Cli {
     protected static final String COMPILE = "-compile";
     protected static final String OVERWRITE = "-overwrite";
     protected static final String INIT = "-init";
+    protected static final String API = "-api";
     protected static final String VERSION = "-version";
     protected static final String HELP = "-help";
     protected static final String H = "-h";
@@ -198,6 +200,9 @@ public class Cli {
             case INIT:
                 init();
                 break;
+            case API:
+                api();
+                break;
             case HELP:
             case H:
                 printHelp();
@@ -251,6 +256,15 @@ public class Cli {
         } else {
             throw new RuntimeException(DecompilationController.CLASSES_NOPE);
         }
+    }
+
+    private void api() throws Exception {
+        if (filteredArgs.size() != 2) {
+            throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.API_FORMAT + "'.");
+        }
+        VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
+        AgentApiGenerator.initItems(vmInfo, vmManager, pluginManager);
+        System.out.println(AgentApiGenerator.getInterestingHelp());
     }
 
     private void init() throws Exception {

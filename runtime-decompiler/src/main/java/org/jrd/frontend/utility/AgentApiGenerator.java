@@ -144,7 +144,7 @@ public final class AgentApiGenerator {
         p.add(createExact("System.out.println(String);", text));
         p.add(createExact("System.err.println(String);", text));
         if (agentApi == null) {
-            JMenuItem item = new JMenuItem("Agent api compltion still initialising. Try later");
+            JMenuItem item = new JMenuItem("Agent api completion still initialising. Try later");
             p.add(item);
             return p;
         }
@@ -176,11 +176,35 @@ public final class AgentApiGenerator {
         JMenuItem i = new JMenuItem("Help");
         i.addActionListener(actionEvent -> {
             JOptionPane.showMessageDialog(text,
-                    "This api allows you to \"insert fields\" and \"declare\" new methods (aka Runnable)\n" +
-                            "into *running vm*. This api have no sense in filesystem jar/classes. To read more,\n" +
-                            "try to decompile classes from package: \'org.jrd.agent.api\' to see full api and logic");
+                    getPlainHelp());
         });
         return i;
+    }
+
+    public static String getPlainHelp() {
+        return "This api allows you to \"insert fields\" and \"declare\" new methods (aka Runnable)\n" +
+                "into *running vm*. This api have no sense in filesystem jar/classes. To read more,\n" +
+                "try to decompile classes from package: \'org.jrd.agent.api\' to see full api and logic";
+    }
+
+    public static String getInterestingHelp() {
+        StringBuilder sb = new StringBuilder(getPlainHelp());
+        sb.append("\n");
+        sb.append("\n");
+        if (agentApi == null) {
+            sb.append("Agent api help generation failed");
+            return sb.toString();
+        }
+        for (final ClazzWithMethods cwm : agentApi) {
+            sb.append(cwm.fqn).append("\n");
+            if (!cwm.methods.isEmpty()) {
+                for (final ClazzMethod methodName : cwm.methods) {
+                    sb.append("    ").append(methodName.toString()).append("\n");
+                    sb.append("        ").append(methodName.toOutput(cwm.fqn).trim()).append("\n");
+                }
+            }
+        }
+        return sb.toString();
     }
 
     private static JMenuItem createExact(String s, RSyntaxTextArea text) {
