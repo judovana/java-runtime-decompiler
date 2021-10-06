@@ -559,7 +559,7 @@ public class DecompilationController {
     public class AgentApiGenerator {
         public JPopupMenu getFor(RSyntaxTextArea text) {
             if (vmInfo.getVmPid() >= 0) {
-                org.jrd.frontend.utility.AgentApiGenerator.initItems(vmInfo, vmManager);
+                org.jrd.frontend.utility.AgentApiGenerator.initItems(vmInfo, vmManager, pluginManager);
                 return org.jrd.frontend.utility.AgentApiGenerator.create(text);
             } else {
                 JPopupMenu p = new JPopupMenu();

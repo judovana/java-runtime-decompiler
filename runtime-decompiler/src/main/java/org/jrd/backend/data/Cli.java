@@ -549,6 +549,10 @@ public class Cli {
     }
 
     private DecompilerWrapper findDecompiler(String decompilerName) {
+        return findDecompiler(decompilerName, pluginManager);
+    }
+
+    public static DecompilerWrapper findDecompiler(String decompilerName, PluginManager pluginManager) {
         List<DecompilerWrapper> wrappers = pluginManager.getWrappers();
         DecompilerWrapper decompiler = null;
 
