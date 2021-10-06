@@ -2,6 +2,7 @@ package org.jrd.frontend.frame.main;
 
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
+import org.jrd.backend.communication.FsAgent;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.communication.TopLevelErrorCandidate;
 import org.jrd.backend.core.AgentRequestAction;
@@ -126,7 +127,6 @@ public class DecompilationController {
                     "Error",
                     JOptionPane.ERROR_MESSAGE
             );
-
             return;
         }
 
@@ -139,10 +139,14 @@ public class DecompilationController {
         int dialogResult = JOptionPane.showConfirmDialog(
                 mainFrameView.getMainFrame(), confirmMessage, "Warning", JOptionPane.OK_CANCEL_OPTION
         );
-        if (dialogResult == JOptionPane.CANCEL_OPTION) {
+        if (dialogResult == JOptionPane.CANCEL_OPTION || dialogResult < 0) {
             return;
         }
-
+        if (MainFrameView.FS_VM_COMMAND.equals(vmType)) {
+            if (warnOnOvveridesOfFsVm(selectedVm)) {
+                return;
+            }
+        }
         if (!vmManager.removeVm(selectedVm)) {
             String removeFailMessage = "Failed to remove VM: " + selectedVm;
             Logger.getLogger().log(Logger.Level.ALL, removeFailMessage);
@@ -162,6 +166,30 @@ public class DecompilationController {
         }
 
         cleanup();
+    }
+
+    private boolean warnOnOvveridesOfFsVm(VmInfo selectedVm) {
+        return warnOnOvveridesOfFsVm(selectedVm, mainFrameView.getMainFrame());
+    }
+
+    public static boolean warnOnOvveridesOfFsVm(VmInfo vmInfo, JFrame parent) {
+        List<String> overrides = FsAgent.get(vmInfo).getOverrides();
+        if (overrides.size() > 0) {
+            String omessage = "This vm " + vmInfo.getVmId() + " have overridden classes: ";
+            if (overrides.size() < 5) {
+                omessage = omessage + String.join(", ", overrides);
+            } else {
+                omessage = omessage + overrides.size();
+            }
+            omessage = omessage + "\n Where running JVM can restore original classes by design, FS ones are now permanently overridden." +
+                    "\nPress Cancel to restore them manually";
+            int r = JOptionPane.showConfirmDialog(parent, omessage, "Warning", JOptionPane.OK_CANCEL_OPTION
+            );
+            if (r != JOptionPane.OK_OPTION) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void updateVmLists() {

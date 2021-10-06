@@ -25,6 +25,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.undo.UndoManager;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -56,6 +58,7 @@ public class BytecodeDecompilerView {
                 private JPanel classesToolBar;
                     private JButton reloadClassesButton;
                     private JTextField classesSortField;
+                    private JButton copyClassesButton;
                         private final Color classesSortFieldColor;
                 private JPanel classesPanel;
                     private JScrollPane classesScrollPane;
@@ -275,6 +278,21 @@ public class BytecodeDecompilerView {
             }
         });
 
+        copyClassesButton = ImageButtonFactory.createDetachButton("C", "Copy class names");
+        copyClassesButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                List<String> l = filteredClassesJList.getSelectedValuesList();
+                if (l != null && !l.isEmpty()) {
+                    String s = String.join("\n", l);
+                    StringSelection selection = new StringSelection(s);
+                    Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                    clipboard.setContents(selection, selection);
+                }
+            }
+        });
+
+
         buffers = new JTabbedPane();
         buffers.addChangeListener(new ChangeListener() {
             @Override
@@ -304,19 +322,11 @@ public class BytecodeDecompilerView {
             }
         });
 
-        classesToolBar = new JPanel(new GridBagLayout());
+        classesToolBar = new JPanel(new BorderLayout());
         classesToolBar.setBorder(new EtchedBorder());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = PANEL_INSETS;
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.anchor = GridBagConstraints.WEST;
-
-        gbc.weightx = 0;
-        classesToolBar.add(reloadClassesButton, gbc);
-
-        gbc.gridx = 1;
-        gbc.weightx = 1;
-        classesToolBar.add(classesSortField, gbc);
+        classesToolBar.add(reloadClassesButton, BorderLayout.WEST);
+        classesToolBar.add(classesSortField);
+        classesToolBar.add(copyClassesButton, BorderLayout.EAST);
 
         pluginComboBox = new JComboBox<DecompilerWrapper>();
         pluginComboBox.addActionListener(new ActionListener() {
@@ -350,7 +360,7 @@ public class BytecodeDecompilerView {
 
         buffersToolBar = new JPanel(new GridBagLayout());
         buffersToolBar.setBorder(new EtchedBorder());
-        gbc = new GridBagConstraints();
+        GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = PANEL_INSETS;
         gbc.weightx = 0;
