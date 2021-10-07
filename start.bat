@@ -77,21 +77,12 @@ if not exist %TOOLS% (
 rem Dummy that gets edited in image generation
 set PURPOSE=DEVELOPMENT
 
-rem Change directory for library search
-if "x%PURPOSE%" == "xDEVELOPMENT" (
-  pushd %userprofile%\.m2\repository
-) else (
-  pushd %PORTABLE_JRD_HOME%\libs\deps
-)
-
 rem Recursively find libraries
-for /f "delims=" %%i in ('dir *rsyntaxtextarea-*.jar /B /S') do set RSYNTAXTEXTAREA=%%i
-for /f "delims=" %%i in ('dir *gson-*.jar /B /S') do set GSON=%%i
-for /f "delims=" %%i in ('dir *byteman-install-*.jar /B /S') do set BYTEMAN=%%i
-for /f "delims=" %%i in ('dir *runtime-decompiler-*.jar /B /S') do set JRD=%%i
-for /f "delims=" %%i in ('dir *classpathless-compiler-*.jar /B /S') do set CPLC=%%i
-
-popd
+call :findLib "com\fifesoft\rsyntaxtextarea","*rsyntaxtextarea-*.jar",RSYNTAXTEXTAREA
+call :findLib "com\google\code\gson\gson","*gson-*.jar",GSON
+call :findLib "org\jboss\byteman\byteman-install","*byteman-install-*.jar",BYTEMAN
+call :findLib "java-runtime-decompiler\runtime-decompiler","*runtime-decompiler-*.jar",JRD
+call :findLib "io\github\mkoncek\classpathless-compiler","*classpathless-compiler-*.jar",CPLC
 
 rem Maps an available drive letter via pushd if script is located on a network drive - done to counteract CMD not supporting UNC paths
 if "%PORTABLE_JRD_HOME:~0,2%"=="//" (
@@ -111,3 +102,19 @@ set CLASSPATH=%TOOLS%;%RSYNTAXTEXTAREA%;%GSON%;%BYTEMAN%;%JRD%;%CPLC%
 if "%PORTABLE_JRD_HOME:~0,2%"=="//" (
   popd
 )
+
+rem Exit before function section
+exit /B 0
+
+rem Function for finding mvn repo files (2nd arg) of a certain group (1st arg) & returning it through the 3rd arg
+:findLib
+if "x%PURPOSE%" == "xDEVELOPMENT" (
+  pushd %userprofile%\.m2\repository\%~1
+) else (
+  pushd %PORTABLE_JRD_HOME%\libs\deps
+)
+
+for /f "delims=" %%i in ('dir %~2 /B /S') do set %~3=%%i
+
+popd
+exit /b 0
