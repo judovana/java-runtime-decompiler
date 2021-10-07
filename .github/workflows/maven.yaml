@@ -35,7 +35,7 @@ jobs:
       - name: Build CPLC with Maven
         run: |
           cd cplc
-          mvn --batch-mode --update-snapshots clean install -DskipTests
+          mvn --batch-mode --update-snapshots clean install
 
       - name: Checkout JRD repo
         uses: actions/checkout@v2
