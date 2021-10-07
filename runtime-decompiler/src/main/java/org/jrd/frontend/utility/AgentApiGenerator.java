@@ -203,7 +203,9 @@ public final class AgentApiGenerator {
         JMenuItem i = new JMenuItem("Help");
         i.addActionListener(actionEvent -> {
             JOptionPane.showMessageDialog(text,
-                    getPlainHelp());
+                    getPlainHelp() + "\n You can use" +
+                            " ctrl+spacebar to access code completion from editor." +
+                            " ctrl+f/esc should work for search");
         });
         return i;
     }
@@ -211,7 +213,7 @@ public final class AgentApiGenerator {
     public static String getPlainHelp() {
         return "This api allows you to \"insert fields\" and \"declare\" new methods (aka Runnable)\n" +
                 "into *running vm*. This api have no sense in filesystem jar/classes. To read more,\n" +
-                "try to decompile classes from package: \'org.jrd.agent.api\' to see full api and logic";
+                "try to decompile classes from package: \'org.jrd.agent.api\' to see full api and logic.";
     }
 
     public static String getInterestingHelp() {
