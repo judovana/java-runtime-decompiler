@@ -44,7 +44,7 @@ public class CliTest {
     private Model model;
     private String[] args;
     private Cli cli;
-    private TestingDummyHelper dummy;
+    private AbstractSourceTestClass dummy;
 
     private final StreamWrappers streams = new StreamWrappers();
 
@@ -69,10 +69,10 @@ public class CliTest {
     void setup() throws InterruptedException {
         try {
             dummy = new TestingDummyHelper()
-                    .write()
+                    .writeDefault()
                     .compile()
                     .execute();
-        } catch (TestingDummyHelper.TestingDummyException e) {
+        } catch (AbstractSourceTestClass.SourceTestClassWrapperException e) {
             fail(e);
         }
         assertTrue(dummy.isAlive());
@@ -121,22 +121,22 @@ public class CliTest {
     @Test
     void testShouldBeVerbose() {
         // gui verbose
-        args = new String[] {VERBOSE};
+        args = new String[]{VERBOSE};
         cli = new Cli(args, model);
         assertTrue(cli.shouldBeVerbose());
 
         // gui not verbose
-        args = new String[] {};
+        args = new String[]{};
         cli = new Cli(args, model);
         assertFalse(cli.shouldBeVerbose());
 
         // cli verbose
-        args = new String[] {VERBOSE, UNKNOWN_FLAG};
+        args = new String[]{VERBOSE, UNKNOWN_FLAG};
         cli = new Cli(args, model);
         assertTrue(cli.shouldBeVerbose());
 
         // cli not verbose
-        args = new String[] {UNKNOWN_FLAG};
+        args = new String[]{UNKNOWN_FLAG};
         cli = new Cli(args, model);
         assertFalse(cli.shouldBeVerbose());
     }
@@ -164,7 +164,7 @@ public class CliTest {
 
     @Test
     void testHelp() throws Exception {
-        args = new String[] {HELP};
+        args = new String[]{HELP};
         cli = new Cli(args, model);
 
         cli.consumeCli();
@@ -191,9 +191,9 @@ public class CliTest {
         return processFormat(
                 original,
                 dummy.getPid(),
-                new String[]{TestingDummyHelper.CLASS_REGEX},
-                TestingDummyHelper.FQN,
-                TestingDummyHelper.DOT_CLASS_PATH,
+                new String[]{dummy.getClassRegex()},
+                dummy.getFqn(),
+                dummy.getDotClassPath(),
                 "javap"
         );
     }
@@ -285,7 +285,7 @@ public class CliTest {
         String jvms = streams.getOut();
 
         List<String> pids = new ArrayList<>(); // test dummy termination can take time to propagate => List.contains
-        Matcher m = TestingDummyHelper.JVM_LIST_REGEX.matcher(jvms);
+        Matcher m = dummy.getJvmListRegex().matcher(jvms);
         while (m.find()) {
             pids.add(m.group(1));
         }
@@ -310,9 +310,9 @@ public class CliTest {
         cli.consumeCli();
         String allClassesDefault = streams.getOut();
 
-        Matcher m = TestingDummyHelper.EXACT_CLASS_REGEX.matcher(allClassesDefault);
+        Matcher m = dummy.getExactClassRegex().matcher(allClassesDefault);
         if (!m.find()) {
-            fail("Class " + TestingDummyHelper.CLASS_NAME + " not found when listing all classes.");
+            fail("Class " + dummy.getClassName() + " not found when listing all classes.");
         }
 
         // all regex
@@ -322,9 +322,9 @@ public class CliTest {
         cli.consumeCli();
         String allClassesRegex = streams.getOut();
 
-        m = TestingDummyHelper.EXACT_CLASS_REGEX.matcher(allClassesRegex);
+        m = dummy.getExactClassRegex().matcher(allClassesRegex);
         if (!m.find()) {
-            fail("Class " + TestingDummyHelper.CLASS_NAME + " not found when listing all classes via .* regex.");
+            fail("Class " + dummy.getClassName() + " not found when listing all classes via .* regex.");
         }
 
         assertEqualsWithTolerance(
@@ -334,7 +334,7 @@ public class CliTest {
         ); // exact class list differs between dummy process executions
 
         // specific regex
-        classListMatchesExactly(pucComponent, TestingDummyHelper.EXACT_CLASS_REGEX);
+        classListMatchesExactly(pucComponent, dummy.getExactClassRegex());
     }
 
     @Test
@@ -373,13 +373,13 @@ public class CliTest {
     }
 
     void testBytes(String pucComponent) throws Exception {
-        args = new String[]{BYTES, pucComponent, TestingDummyHelper.CLASS_REGEX};
+        args = new String[]{BYTES, pucComponent, dummy.getClassRegex()};
         cli = new Cli(args, model);
 
         cli.consumeCli();
 
         byte[] bytes = streams.getOutBytes();
-        byte[] fileContents = Files.readAllBytes(Path.of(TestingDummyHelper.DOT_CLASS_PATH));
+        byte[] fileContents = Files.readAllBytes(Path.of(dummy.getDotClassPath()));
 
         assertArrayEquals(fileContents, bytes);
     }
@@ -391,13 +391,13 @@ public class CliTest {
     }
 
     void testBase64Bytes(String pucComponent) throws Exception {
-        args = new String[]{BASE64, pucComponent, TestingDummyHelper.CLASS_REGEX};
+        args = new String[]{BASE64, pucComponent, dummy.getClassRegex()};
         cli = new Cli(args, model);
 
         cli.consumeCli();
 
         byte[] base64Bytes = streams.getOut().trim().getBytes(StandardCharsets.UTF_8);
-        byte[] fileContents = Files.readAllBytes(Path.of(TestingDummyHelper.DOT_CLASS_PATH));
+        byte[] fileContents = Files.readAllBytes(Path.of(dummy.getDotClassPath()));
         byte[] encoded = Base64.getEncoder().encode(fileContents);
 
         assertArrayEquals(encoded, base64Bytes);
@@ -410,13 +410,13 @@ public class CliTest {
     }
 
     void testBytesAndBase64BytesEqual(String pucComponent) throws Exception {
-        args = new String[]{BYTES, pucComponent, TestingDummyHelper.CLASS_REGEX};
+        args = new String[]{BYTES, pucComponent, dummy.getClassRegex()};
         cli = new Cli(args, model);
 
         cli.consumeCli();
         byte[] bytes = streams.getOutBytes();
 
-        args = new String[]{BASE64, pucComponent, TestingDummyHelper.CLASS_REGEX};
+        args = new String[]{BASE64, pucComponent, dummy.getClassRegex()};
         cli = new Cli(args, model);
 
         cli.consumeCli();
@@ -464,12 +464,12 @@ public class CliTest {
     }
 
     void testDecompileJavap(String pucComponent, String option) throws Exception {
-        args = new String[]{DECOMPILE, pucComponent, "javap" + option, TestingDummyHelper.CLASS_REGEX};
+        args = new String[]{DECOMPILE, pucComponent, "javap" + option, dummy.getClassRegex()};
         cli = new Cli(args, model);
 
         cli.consumeCli();
         String jrdDisassembled = streams.getOut();
-        String javapDisassembled = TestingDummyHelper.executeJavaP(option);
+        String javapDisassembled = dummy.executeJavaP(option);
 
         // JRD javap has additional debug comment lines + header is different
         assertEqualsWithTolerance(jrdDisassembled, javapDisassembled, 0.8);
@@ -484,7 +484,7 @@ public class CliTest {
 
     @Test
     void testDecompileUnknownPlugin() {
-        args = new String[]{DECOMPILE, dummy.getPid(), UNKNOWN_FLAG, TestingDummyHelper.CLASS_REGEX};
+        args = new String[]{DECOMPILE, dummy.getPid(), UNKNOWN_FLAG, dummy.getClassRegex()};
         cli = new Cli(args, model);
 
         assertThrows(RuntimeException.class, () -> cli.consumeCli());
@@ -499,7 +499,7 @@ public class CliTest {
             fail(e);
         }
 
-        args = new String[]{DECOMPILE, dummy.getPid(), emptyFilePlugin, TestingDummyHelper.CLASS_REGEX};
+        args = new String[]{DECOMPILE, dummy.getPid(), emptyFilePlugin, dummy.getClassRegex()};
         cli = new Cli(args, model);
 
         assertThrows(RuntimeException.class, () -> cli.consumeCli());
@@ -536,8 +536,8 @@ public class CliTest {
         args = new String[]{
                 OVERWRITE,
                 pucComponent,
-                TestingDummyHelper.FQN,
-                TestingDummyHelper.DOT_CLASS_PATH // contains newGreeting because of try-catch above
+                dummy.getFqn(),
+                dummy.getDotClassPath() // contains newGreeting because of try-catch above
         };
         cli = new Cli(args, model);
 
@@ -561,12 +561,12 @@ public class CliTest {
         args = new String[]{
                 OVERWRITE,
                 pucComponent,
-                TestingDummyHelper.FQN
+                dummy.getFqn()
         };
         cli = new Cli(args, model);
 
         // setup input stream
-        ByteArrayInputStream fakeIn = new ByteArrayInputStream(Files.readAllBytes(Path.of(TestingDummyHelper.DOT_CLASS_PATH)));
+        ByteArrayInputStream fakeIn = new ByteArrayInputStream(Files.readAllBytes(Path.of(dummy.getDotClassPath())));
         final InputStream originalIn = System.in;
         System.setIn(fakeIn);
 
@@ -588,27 +588,27 @@ public class CliTest {
             new TestingDummyHelper()
                     .write(newGreeting)
                     .compile();
-        } catch (TestingDummyHelper.TestingDummyException e) {
+        } catch (AbstractSourceTestClass.SourceTestClassWrapperException e) {
             fail("Failed to create data to be uploaded.", e);
         }
     }
 
     private void bytecodeContainsNewString(String pucComponent, String newString) throws Exception {
-        args = new String[]{DECOMPILE, pucComponent, "javap-v", TestingDummyHelper.CLASS_REGEX};
+        args = new String[]{DECOMPILE, pucComponent, "javap-v", dummy.getClassRegex()};
         cli = new Cli(args, model);
 
         cli.consumeCli();
         String overwrittenClassInVm = streams.getOut();
 
-        assertFalse(overwrittenClassInVm.contains(TestingDummyHelper.DEFAULT_GREETING));
+        assertFalse(overwrittenClassInVm.contains(dummy.getGreetings()));
         assertTrue(overwrittenClassInVm.contains(newString));
     }
 
     @Test
     void testOverwriteWarning() {
-        String nonClassFile = TestingDummyHelper.DOT_CLASS_PATH.replace(".class", "");
+        String nonClassFile = dummy.getDotClassPath().replace(".class", "");
         try {
-            Files.copy(Path.of(TestingDummyHelper.DOT_CLASS_PATH), Path.of(nonClassFile), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(Path.of(dummy.getDotClassPath()), Path.of(nonClassFile), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             fail("Failed to copy file.", e);
         }
@@ -616,7 +616,7 @@ public class CliTest {
         args = new String[]{
                 OVERWRITE,
                 dummy.getPid(),
-                TestingDummyHelper.FQN,
+                dummy.getFqn(),
                 nonClassFile
         };
         cli = new Cli(args, model);
@@ -631,8 +631,8 @@ public class CliTest {
         args = new String[]{
                 OVERWRITE,
                 dummy.getPid(),
-                TestingDummyHelper.FQN,
-                TestingDummyHelper.TARGET_DIR
+                dummy.getFqn(),
+                dummy.getTargetDir()
         };
         cli = new Cli(args, model);
 
@@ -647,7 +647,7 @@ public class CliTest {
                 OVERWRITE,
                 dummy.getPid(),
                 UNKNOWN_FLAG, // non-FQN makes agent not find the class
-                TestingDummyHelper.DOT_CLASS_PATH
+                dummy.getDotClassPath()
         };
         cli = new Cli(args, model);
 
@@ -683,24 +683,29 @@ public class CliTest {
         assertThrows(RuntimeException.class, () -> cli.consumeCli());
     }
 
-    private Stream<byte[]> incorrectClassContents() {
-        return Stream.of(
-                TestingDummyHelper.getDefaultContent(), // no package
-                "package " + TestingDummyHelper.PACKAGE_NAME + ";", // no class
-                "uncompilable text?"
-        ).map(s -> s.getBytes(StandardCharsets.UTF_8));
-    }
-
-    @ParameterizedTest(name = "[{index}]")
-    @MethodSource("incorrectClassContents")
-    void testGuessNameIncorrect(byte[] contents) {
+    @Test
+    public void testGuessNameIncorrectNoPkg() {
+        byte[] contents = dummy.getDefaultContentWithoutPackage().getBytes(StandardCharsets.UTF_8);
         assertThrows(RuntimeException.class, () -> Cli.guessName(contents));
     }
 
+    @Test
+    public void testGuessNameIncorrectNoClass() {
+        byte[] contents = ("package " + dummy.getPackageName() + ";").getBytes(StandardCharsets.UTF_8);
+        assertThrows(RuntimeException.class, () -> Cli.guessName(contents));
+    }
+
+    @Test
+    public void testGuessNameIncorrectNoCompile() {
+        byte[] contents = "uncompilable text?".getBytes(StandardCharsets.UTF_8);
+        assertThrows(RuntimeException.class, () -> Cli.guessName(contents));
+    }
+
+
     private Stream<byte[]> correctClassContents() {
         return Stream.of(
-                TestingDummyHelper.getDefaultContentWithPackage(),
-                TestingDummyHelper.getEmptyClass()
+                new TestingDummyHelper().getDefaultContentWithPackage(),
+                new TestingDummyHelper().getEmptyClassWithPackage()
         ).map(s -> s.getBytes(StandardCharsets.UTF_8));
     }
 
@@ -709,7 +714,7 @@ public class CliTest {
     void testGuessNameCorrect(byte[] contents) {
         try {
             assertEquals(
-                    TestingDummyHelper.PACKAGE_NAME + "." + TestingDummyHelper.CLASS_NAME,
+                    dummy.getPackageName() + "." + dummy.getClassName(),
                     Cli.guessName(contents)
             );
         } catch (IOException e) {
@@ -750,6 +755,7 @@ public class CliTest {
          * Calculates the Levenshtein distance between two strings.<br/>
          * Uses a 2D array to represent individual changes, therefore the time complexity is quadratic
          * (in reference to the strings' length).
+         *
          * @param str1 the first string
          * @param str2 the second string
          * @return an integer representing the amount of atomic changes between {@code str1} and {@code str2}
