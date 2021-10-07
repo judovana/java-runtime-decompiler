@@ -1,11 +1,6 @@
 package org.jrd.backend.data;
 
-import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.frontend.frame.main.DecompilationController;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.Timeout;
@@ -15,11 +10,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -28,9 +20,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -40,66 +30,19 @@ import static org.jrd.backend.data.Help.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class CliTest {
-    private Model model;
+public class CliTest extends AbstractAgentNeedingTest {
     private String[] args;
     private Cli cli;
-    private AbstractSourceTestClass dummy;
 
-    private final StreamWrappers streams = new StreamWrappers();
 
     private static final String UNKNOWN_FLAG = "--zyxwvutsrqponmlqjihgfedcba";
 
-    @BeforeAll
-    static void startup() {
-        String agentPath = Config.getConfig().getAgentExpandedPath();
-
-        Assumptions.assumeTrue(
-                !agentPath.isEmpty(),
-                "Agent path is not set up, aborting CliTest."
-        );
-        Assumptions.assumeTrue(
-                new File(agentPath).exists(),
-                "Agent path is set up to nonexistent file, aborting CliTest."
-        );
-    }
-
-    @Timeout(5)
-    @BeforeEach
-    void setup() throws InterruptedException {
-        try {
-            dummy = new TestingDummyHelper()
-                    .writeDefault()
-                    .compile()
-                    .execute();
-        } catch (AbstractSourceTestClass.SourceTestClassWrapperException e) {
-            fail(e);
-        }
-        assertTrue(dummy.isAlive());
-
-        model = new Model(); // must be below dummy process execution to be aware of it during VmManager instantiation
-        while (model.getVmManager().findVmFromPidNoException(dummy.getPid()) == null) {
-            Thread.sleep(100);
-            model.getVmManager().updateLocalVMs();
-        }
-
-        streams.captureStreams(true);
-    }
-
-    @AfterEach
-    void cleanup() {
-        streams.captureStreams(false);
-
-        assertTrue(dummy.isAlive());
-        // halt agent, otherwise an open socket prevents termination of dummy process
-        AgentRequestAction request = DecompilationController.createRequest(
-                model.getVmManager().findVmFromPid(dummy.getPid()), AgentRequestAction.RequestAction.HALT, ""
-        );
-        String response = DecompilationController.submitRequest(model.getVmManager(), request);
-        assertEquals("ok", response);
-
-        assertTrue(dummy.isAlive());
-        dummy.terminate();
+    @Override
+    AbstractSourceTestClass dummyProvider() throws AbstractSourceTestClass.SourceTestClassWrapperException {
+        return new TestingDummyHelper()
+                .writeDefault()
+                .compile()
+                .execute();
     }
 
     private String prependSlashes(String original, int count) {
@@ -548,9 +491,22 @@ public class CliTest {
         bytecodeContainsNewString(pucComponent, newGreeting);
     }
 
+
+    /**
+     * Why this is passing:
+     * The TestingDummy never request new class definition.
+     * So yes, we change the bytecode, and that get changed.
+     * Then we can see the modified definition
+     *
+     * @throws Exception
+     */
     @Test
-    void testOverwrite() throws Exception {
+    void testOverwriteRunning() throws Exception {
         testOverwrite(dummy.getPid());
+    }
+
+    @Test
+    void testOverwriteCP() throws Exception {
         testOverwrite(dummy.getClasspath());
     }
 
@@ -577,9 +533,18 @@ public class CliTest {
         System.setIn(originalIn); // revert input stream
     }
 
+    /**
+     * Why this is passing:
+     *
+     * @throws Exception
+     */
     @Test
-    void testOverwriteStdIn() throws Exception {
+    void testOverwriteStdInRunning() throws Exception {
         testOverwriteStdIn(dummy.getPid());
+    }
+
+    @Test
+    void testOverwriteStdInCp() throws Exception {
         testOverwriteStdIn(dummy.getClasspath());
     }
 
@@ -722,121 +687,4 @@ public class CliTest {
         }
     }
 
-    private static boolean isDifferenceTolerable(double samenessPercentage, int actualChanges, int totalSize) {
-        assert samenessPercentage >= 0 && samenessPercentage <= 1.0;
-
-        double changesAllowed = (1.0 - samenessPercentage) * totalSize;
-        return actualChanges <= changesAllowed;
-    }
-
-    static void assertEqualsWithTolerance(String s1, String s2, double samenessPercentage) {
-        assertTrue(isDifferenceTolerable(
-                samenessPercentage,
-                LevenshteinDistance.calculate(s1, s2),
-                Math.max(s1.length(), s2.length())
-        ));
-    }
-
-    static void assertEqualsWithTolerance(List<String> l1, List<String> l2, double samenessPercentage) {
-        // symmetric difference
-        Set<String> intersection = new HashSet<>(l1);
-        intersection.retainAll(l2);
-
-        Set<String> difference = new HashSet<>();
-        difference.addAll(l1);
-        difference.addAll(l2);
-        difference.removeAll(intersection);
-
-        assertTrue(isDifferenceTolerable(samenessPercentage, difference.size(), Math.max(l1.size(), l2.size())));
-    }
-
-    private static final class LevenshteinDistance {
-        /**
-         * Calculates the Levenshtein distance between two strings.<br/>
-         * Uses a 2D array to represent individual changes, therefore the time complexity is quadratic
-         * (in reference to the strings' length).
-         *
-         * @param str1 the first string
-         * @param str2 the second string
-         * @return an integer representing the amount of atomic changes between {@code str1} and {@code str2}
-         */
-        public static int calculate(String str1, String str2) {
-            int[][] matrix = new int[str1.length() + 1][str2.length() + 1];
-
-            for (int i = 0; i <= str1.length(); i++) {
-                for (int j = 0; j <= str2.length(); j++) {
-                    if (i == 0) { // distance between "" and str2 == how long str2 is
-                        matrix[i][j] = j;
-                    } else if (j == 0) { // distance between str1 and "" == how long str1 is
-                        matrix[i][j] = i;
-                    } else {
-                        int substitution = matrix[i - 1][j - 1] +
-                                substitutionCost(str1.charAt(i - 1), str2.charAt(j - 1));
-                        int insertion = matrix[i][j - 1] + 1;
-                        int deletion = matrix[i - 1][j] + 1;
-
-                        matrix[i][j] = min3(substitution, insertion, deletion);
-                    }
-                }
-            }
-
-            return matrix[str1.length()][str2.length()]; // result is in the bottom-right corner
-        }
-
-        private static int substitutionCost(char a, char b) {
-            return (a == b) ? 0 : 1;
-        }
-
-        private static int min3(int a, int b, int c) {
-            return Math.min(a, Math.min(b, c));
-        }
-    }
-
-
-    private static class StreamWrappers {
-        private final ByteArrayOutputStream out;
-        private final ByteArrayOutputStream err;
-
-        private final PrintStream originalOut;
-        private final PrintStream originalErr;
-
-        StreamWrappers() {
-            out = new ByteArrayOutputStream();
-            err = new ByteArrayOutputStream();
-            originalOut = System.out;
-            originalErr = System.err;
-        }
-
-        public void captureStreams(boolean capture) {
-            if (capture) {
-                out.reset();
-                err.reset();
-            }
-
-            System.setOut(capture ? new PrintStream(out, true, StandardCharsets.UTF_8) : originalOut);
-            System.setErr(capture ? new PrintStream(err, true, StandardCharsets.UTF_8) : originalErr);
-        }
-
-        private String get(ByteArrayOutputStream which) {
-            String string = which.toString(StandardCharsets.UTF_8);
-            which.reset();
-
-            return string;
-        }
-
-        public String getOut() {
-            return get(out);
-        }
-
-        public byte[] getOutBytes() {
-            byte[] bytes = out.toByteArray();
-            out.reset();
-
-            return bytes;
-        }
-
-        public String getErr() {
-            return get(err);
-        }
-    }
 }
