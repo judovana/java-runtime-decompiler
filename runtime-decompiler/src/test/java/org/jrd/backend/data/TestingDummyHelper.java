@@ -18,7 +18,7 @@ class TestingDummyHelper extends AbstractSourceTestClass {
                 "    public static void main(String[] args) throws InterruptedException {\n" +
                 "        while(true) {\n" +
                 "            System.out.println(\"" + nwHello + "\");\n" +
-                "            Thread.sleep(1000);\n" +
+                "            Thread.sleep(100);\n" +
                 "        }\n" +
                 "    }\n" +
                 "}\n";

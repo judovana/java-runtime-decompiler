@@ -1,6 +1,7 @@
 package org.jrd.backend.data;
 
 import org.jrd.frontend.frame.main.DecompilationController;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.Timeout;
@@ -33,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class CliTest extends AbstractAgentNeedingTest {
     private String[] args;
     private Cli cli;
+    private static final String NEW_GREETINGS = "Greetings";
 
 
     private static final String UNKNOWN_FLAG = "--zyxwvutsrqponmlqjihgfedcba";
@@ -473,8 +475,7 @@ public class CliTest extends AbstractAgentNeedingTest {
     }
 
     void testOverwrite(String pucComponent) throws Exception {
-        String newGreeting = "Greetings";
-        createReplacement(newGreeting);
+        createReplacement(NEW_GREETINGS);
 
         args = new String[]{
                 OVERWRITE,
@@ -488,7 +489,7 @@ public class CliTest extends AbstractAgentNeedingTest {
         assertTrue(streams.getOut().contains("success"));
 
         // assert that change propagated, unfortunately we have to rely on another operation here
-        bytecodeContainsNewString(pucComponent, newGreeting);
+        bytecodeContainsNewString(pucComponent, NEW_GREETINGS);
     }
 
 
@@ -503,6 +504,7 @@ public class CliTest extends AbstractAgentNeedingTest {
     @Test
     void testOverwriteRunning() throws Exception {
         testOverwrite(dummy.getPid());
+        dummyOutputWasNotChanged(NEW_GREETINGS);
     }
 
     @Test
@@ -511,8 +513,7 @@ public class CliTest extends AbstractAgentNeedingTest {
     }
 
     void testOverwriteStdIn(String pucComponent) throws Exception {
-        String newGreeting = "Greetings";
-        createReplacement(newGreeting);
+        createReplacement(NEW_GREETINGS);
 
         args = new String[]{
                 OVERWRITE,
@@ -528,7 +529,7 @@ public class CliTest extends AbstractAgentNeedingTest {
 
         assertDoesNotThrow(() -> cli.consumeCli());
         assertTrue(streams.getOut().contains("success"));
-        bytecodeContainsNewString(pucComponent, newGreeting);
+        bytecodeContainsNewString(pucComponent, NEW_GREETINGS);
 
         System.setIn(originalIn); // revert input stream
     }
@@ -541,6 +542,7 @@ public class CliTest extends AbstractAgentNeedingTest {
     @Test
     void testOverwriteStdInRunning() throws Exception {
         testOverwriteStdIn(dummy.getPid());
+        dummyOutputWasNotChanged(NEW_GREETINGS);
     }
 
     @Test
@@ -548,7 +550,7 @@ public class CliTest extends AbstractAgentNeedingTest {
         testOverwriteStdIn(dummy.getClasspath());
     }
 
-    private void createReplacement(String newGreeting) {
+    private static void createReplacement(String newGreeting) {
         try {
             new TestingDummyHelper()
                     .write(newGreeting)
@@ -556,6 +558,20 @@ public class CliTest extends AbstractAgentNeedingTest {
         } catch (AbstractSourceTestClass.SourceTestClassWrapperException e) {
             fail("Failed to create data to be uploaded.", e);
         }
+    }
+
+    /**
+     * Although the class definition was transforemd, in OpenJDK HotSpot
+     * this implementation of dummy do not request the new definition,
+     * adn continues to spit out its jitted output
+     *
+     * @param newString
+     * @throws Exception
+     */
+    private void dummyOutputWasNotChanged(String newString) throws Exception {
+        Thread.sleep(1000); //the test must wait while reader do something
+        Assertions.assertTrue(dummy.getOutString().contains(dummy.getGreetings()));
+        Assertions.assertFalse(dummy.getOutString().contains(newString));
     }
 
     private void bytecodeContainsNewString(String pucComponent, String newString) throws Exception {

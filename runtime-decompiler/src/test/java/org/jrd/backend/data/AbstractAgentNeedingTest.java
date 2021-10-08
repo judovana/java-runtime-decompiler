@@ -21,7 +21,7 @@ public abstract class AbstractAgentNeedingTest {
 
     protected Model model;
     protected AbstractSourceTestClass dummy;
-    protected final StreamWrappers streams = new StreamWrappers();
+    protected final JunitStderrOutThief streams = new JunitStderrOutThief();
 
     abstract AbstractSourceTestClass dummyProvider() throws AbstractSourceTestClass.SourceTestClassWrapperException;
 
@@ -144,14 +144,15 @@ public abstract class AbstractAgentNeedingTest {
         }
     }
 
-    public static class StreamWrappers {
+
+    public static class JunitStderrOutThief {
         private final ByteArrayOutputStream out;
         private final ByteArrayOutputStream err;
 
         private final PrintStream originalOut;
         private final PrintStream originalErr;
 
-        StreamWrappers() {
+        JunitStderrOutThief() {
             out = new ByteArrayOutputStream();
             err = new ByteArrayOutputStream();
             originalOut = System.out;
