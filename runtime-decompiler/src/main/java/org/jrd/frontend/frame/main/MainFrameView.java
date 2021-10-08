@@ -84,17 +84,21 @@ public class MainFrameView {
     private static final String DECOMPILER_CARD = "decompilerView";
     @SuppressWarnings("LineLength") // string formatting
     private static final String WELCOME_MESSAGE =
-            "Welcome to Java-Runtime-Decompiler\n" +
+            "Welcome to Java-Runtime-Decompiler, or JRD for short.\n" +
             "\n" +
-            "Before using the app, the Decompiler Agent's path needs to be selected in 'Configure -> Decompiler Agent'.\n" +
+            "Before using JRD, the Decompiler Agent's path needs to be selected in 'Configure -> Settings'.\n" +
             "It's a built-in project and can usually be found at '" + ((Directories.isPortable()) ? "./libs/" : "./decompiler_agent/target/") + "decompiler-agent-*.jar'.\n" +
+            "On JDK 9 and higher, the agent is not allowed to attach by default.\n" +
+            "You must run the target process with '-Djdk.attach.allowAttachSelf=true'.\n" +
             "\n" +
-            "Internal javap decompiling tools are available by default.\n" +
-            "You can also download an external decompiler, e.g. via 'mvn clean install -PdownloadPlugins', and set it up in 'Configure -> Plugins'.\n" +
-            "Currently supported decompilers are: Fernflower, Procyon, jasm.\n" +
+            "Internal javap disassembling tools are available by default.\n" +
+            "You can also download external decompilers/disassemblers via 'mvn clean install -PdownloadPlugins'.\n" +
+            "We currently support the following plugins: Fernflower, Procyon, Cfr, Jasm & Jcoder.\n" +
+            "These can be easily setup with the 'Import' button in 'Configure -> Plugins', but nothing is stopping you from writing your own.\n" +
             "\n" +
-            "JRD is dangerous program, and as it allows you to overwrite classes in running JVM. By doing so, you can break the JVM .\n" +
-            "Use with caution.  jdk9+ is not allowed to attach by default. Run JVM with -Djdk.attach.allowAttachSelf=true.\n";
+            "JRD allows you to view loaded classes and their decompiled bytecode in either source code form or in a binary buffer.\n" +
+            "JRD can be a dangerous program, as it allows you to overwrite classes in a running JVM, which has the potential to break the JVM.\n" +
+            "Aside from local running JVMs, JRD can also interact with remote JMX processes and with JARs or class file trees on the filesystem.\n";
 
     public JFrame getMainFrame() {
         return mainFrame;
