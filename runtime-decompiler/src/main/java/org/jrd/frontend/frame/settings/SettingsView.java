@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class SettingsView extends JDialog {
 
@@ -177,13 +176,13 @@ public class SettingsView extends JDialog {
                     removeButton.setEnabled(!useDefaults.isSelected());
                     currentExtensionsList.setEnabled(!useDefaults.isSelected());
                     if (!useDefaults.isSelected() && newExtensionsTextField.getText().isEmpty()) {
-                        newExtensionsTextField.setText(ArchiveManagerOptions.DEFAULTS.stream().collect(Collectors.joining(" ")));
+                        newExtensionsTextField.setText(ArchiveManagerOptions.getExtensionString(" "));
                     }
                 }
             };
             useDefaults.addActionListener(a);
             useDefaults.setToolTipText(BytecodeDecompilerView.styleTooltip() +
-                    "Default extensions are: " + ArchiveManagerOptions.DEFAULTS.stream().collect(Collectors.joining(", ")));
+                    "Default extensions are: " + ArchiveManagerOptions.getExtensionString(", "));
 
             // Setup
             if (ArchiveManagerOptions.getInstance().areExtensionsEmpty()) {

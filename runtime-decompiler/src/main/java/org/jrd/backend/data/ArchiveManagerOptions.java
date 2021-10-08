@@ -25,6 +25,10 @@ public class ArchiveManagerOptions {
         return Collections.unmodifiableList(extensions);
     }
 
+    public static String getExtensionString(String delimiter) {
+        return String.join(delimiter, DEFAULTS);
+    }
+
     public boolean isInner(String n) {
         String name = n.toLowerCase();
 
