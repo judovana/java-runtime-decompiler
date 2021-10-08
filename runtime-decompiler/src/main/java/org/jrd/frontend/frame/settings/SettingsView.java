@@ -335,6 +335,6 @@ public class SettingsView extends JDialog {
         } else {
             extensions = nestedJarsSettingsPanel.getExtensions();
         }
-        ArchiveManagerOptions.getInstance().setExtension(extensions);
+        ArchiveManagerOptions.getInstance().setExtensions(extensions);
     }
 }
