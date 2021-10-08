@@ -153,19 +153,22 @@ public class SettingsView extends JDialog {
         void addAgent(GridBagConstraints gbc) {
             gbc.insets = new Insets(20, 20, 0, 0);
             gbc.gridx = 1;
+            gbc.gridy = 0;
             this.add(this.agentPathLabel, gbc);
 
-            gbc.insets = new Insets(5, 20, 0, 0);
+            gbc.insets = new Insets(5, 20, 0, 5);
             gbc.weightx = 1;
             gbc.gridx = 1;
+            gbc.gridy = 1;
             gbc.gridwidth = 2;
             this.add(agentPathTextField, gbc);
 
-            gbc.insets = new Insets(0, 20, 0, 20);
+            gbc.insets = new Insets(5, 5, 0, 20);
             gbc.weightx = 0;
             gbc.gridwidth = 1;
             gbc.gridx = 3;
             gbc.gridy = 1;
+            browseButton.setPreferredSize(BytecodeDecompilerView.buttonSizeBasedOnTextField(browseButton, agentPathTextField));
             this.add(browseButton, gbc);
 
             gbc.insets = new Insets(20, 20, 0, 0);
@@ -188,25 +191,29 @@ public class SettingsView extends JDialog {
             gbc.gridy = 6;
             this.add(useDefaults, gbc);
 
-            gbc.insets = new Insets(5, 20, 0, 20);
+            gbc.insets = new Insets(5, 20, 5, 20);
             gbc.gridy = 7;
             gbc.weighty = 1.0;
             gbc.gridwidth = 3;
             this.add(scrollPane, gbc);
 
-            gbc.insets = new Insets(5, 20, 0, 0);
+            gbc.insets = new Insets(5, 20, 20, 5);
             gbc.weightx = 1;
             gbc.weighty = 0;
             gbc.gridy = 8;
             gbc.gridwidth = 1;
             this.add(newExtensionsTextField, gbc);
 
-            gbc.insets = new Insets(5, 5, 0, 0);
-            gbc.weighty = 0;
+            Dimension fixedSize = BytecodeDecompilerView.buttonSizeBasedOnTextField(removeButton, newExtensionsTextField);
+            addButton.setPreferredSize(fixedSize);
+            removeButton.setPreferredSize(fixedSize);
+
+            gbc.insets = new Insets(5, 5, 20, 5);
+            gbc.weightx = 0;
             gbc.gridx = 2;
             this.add(addButton, gbc);
 
-            gbc.insets = new Insets(5, 5, 0, 20);  //top padding
+            gbc.insets = new Insets(5, 5, 20, 20);  // top padding
             gbc.gridx = 3;
             this.add(removeButton, gbc);
         }
