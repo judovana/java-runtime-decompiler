@@ -25,7 +25,7 @@ class ArchiveManagerOptionsTest {
     @Test
     void isInnerCustom() {
         ArchiveManagerOptions a1 = new ArchiveManagerOptions();
-        a1.setExtension(List.of("ZIP", "WAR"));
+        a1.setExtensions(List.of("ZIP", "WAR"));
         Assertions.assertTrue(a1.isInner("some/file/filer.zip"));
         Assertions.assertTrue(a1.isInner("filer.WAR"));
     }
@@ -33,7 +33,7 @@ class ArchiveManagerOptionsTest {
     @Test
     void isNotInnerCustom() {
         ArchiveManagerOptions a1 = new ArchiveManagerOptions();
-        a1.setExtension(List.of("Xzip", "xWAR"));
+        a1.setExtensions(List.of("Xzip", "xWAR"));
         Assertions.assertFalse(a1.isInner("some/file/filerzip"));
         Assertions.assertFalse(a1.isInner("filerWAR"));
     }
