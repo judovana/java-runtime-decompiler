@@ -274,7 +274,7 @@ public class MainFrameView {
         //westPanel End
 
         // centerPanel, welcomePanel
-        welcomeJTextArea = new JTextArea(9, 40);
+        welcomeJTextArea = new JTextArea((int) WELCOME_MESSAGE.chars().filter(ch -> ch == '\n').count(), 50);
         welcomeJTextArea.setText(WELCOME_MESSAGE);
         welcomeJTextArea.setFont(new Font(Font.SANS_SERIF, welcomeJTextArea.getFont().getStyle(), 20));
         welcomeJTextArea.setLineWrap(true);
