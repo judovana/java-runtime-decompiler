@@ -18,8 +18,13 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class SettingsView extends JDialog {
 
@@ -127,7 +132,7 @@ public class SettingsView extends JDialog {
         private JLabel nestedJars;
         private JButton addButton;
         private JButton removeButton;
-        private DefaultListModel<String> defaultListModel;
+        private DefaultListModel<String> uniqueListModel;
         private JList<String> currentExtensionsList;
         private JScrollPane scrollPane;
 
@@ -146,8 +151,19 @@ public class SettingsView extends JDialog {
                 }
             });
 
-            defaultListModel = new DefaultListModel<>();
-            currentExtensionsList = new JList<>(defaultListModel);
+            uniqueListModel = new DefaultListModel<>() {
+                @Override
+                public void addAll(Collection<? extends String> c) {
+                    Set<String> filter = new LinkedHashSet<>();
+
+                    filter.addAll(Collections.list(this.elements()));
+                    filter.addAll(c);
+
+                    super.clear();
+                    super.addAll(filter);
+                }
+            };
+            currentExtensionsList = new JList<>(uniqueListModel);
             currentExtensionsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             currentExtensionsList.setLayoutOrientation(JList.VERTICAL);
             currentExtensionsList.setVisibleRowCount(-1);
@@ -161,7 +177,7 @@ public class SettingsView extends JDialog {
             removeButton = new JButton("Remove");
             removeButton.addActionListener(actionEvent -> {
                 try {
-                    defaultListModel.removeElementAt(currentExtensionsList.getSelectedIndex());
+                    uniqueListModel.removeElementAt(currentExtensionsList.getSelectedIndex());
                 } catch (ArrayIndexOutOfBoundsException e) {
                     Logger.getLogger().log(Logger.Level.DEBUG, "Tried to remove extension out of bounds");
                 }
@@ -188,7 +204,7 @@ public class SettingsView extends JDialog {
             if (ArchiveManagerOptions.getInstance().areExtensionsEmpty()) {
                 useDefaults.setSelected(true);
             } else {
-                defaultListModel.addAll(ArchiveManagerOptions.getInstance().getExtensions());
+                uniqueListModel.addAll(ArchiveManagerOptions.getInstance().getExtensions());
             }
             a.actionPerformed(null);
 
@@ -228,18 +244,17 @@ public class SettingsView extends JDialog {
         }
 
         void confirmExtensions() {
-            for (String s : newExtensionsTextField.getText().split("\\s")) {
-                if ("".equals(s) || "\\s".equals(s)) {
-                    Logger.getLogger().log(Logger.Level.DEBUG, "Empty string when adding extension");
-                } else {
-                    defaultListModel.addElement(s);
-                }
-            }
+            uniqueListModel.addAll(
+                        Arrays.stream(newExtensionsTextField.getText().split("\\s"))
+                        .filter(s -> !s.isBlank())
+                        .collect(Collectors.toSet())
+            );
+
             newExtensionsTextField.setText("");
         }
 
         public List<String> getExtensions() {
-            return Collections.list(defaultListModel.elements());
+            return Collections.list(uniqueListModel.elements());
         }
 
         public boolean shouldUseDefaultExtensions() {
