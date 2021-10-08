@@ -261,7 +261,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
                 .filter(a -> !(a.trim().startsWith("/") || a.trim().startsWith("*")))
                 .collect(Collectors.joining("\n"));
         assertEqualsWithTolerance(sOrig, sNoCommnets, 0.9);
-        assertEqualsWithTolerance(sNoCommnets, dummy.getDefaultContentWithPackage(), 0.9);
+        assertEqualsWithTolerance(sNoCommnets, dummy.getDefaultContentWithPackage(), 0.85);
 
         File compiledFile = File.createTempFile("jrd", "test.class");
         args = new String[]{
@@ -302,7 +302,6 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
         Assertions.assertNotNull(ex);
     }
 
-
     @Test
     void testDecompileCompileJasm() throws Exception {
         final String plugin = "jasm";
@@ -334,7 +333,6 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
         Assertions.assertTrue(sLine.matches(".*private\\s+Method\\s+print.*"));
         Assertions.assertTrue(sLine.matches(".*getstatic\\s+Field\\s+java/lang/System.out:\"Ljava/io/PrintStream;\";.*"));
         Assertions.assertTrue(sLine.matches(".*ldc\\s+String\\s+\"Hello\";.*"));
-
 
         File compiledFile = File.createTempFile("jrd", "test.class");
         args = new String[]{
@@ -431,5 +429,82 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
             ex = eex;
         }
         Assertions.assertNotNull(ex);
+    }
+
+
+    @Test
+    void testGlobalApi() throws Exception {
+        args = new String[]{
+                Cli.API,
+                dummy.getPid()
+        };
+        cli = new Cli(args, model);
+        cli.consumeCli();
+        String apiHelp = streams.getOut();
+        Assertions.assertTrue(apiHelp.contains("org.jrd.agent.api.Variables.Global.get"));
+        Assertions.assertTrue(apiHelp.contains("org.jrd.agent.api.Variables.Global.set"));
+
+        File decompiledFile = File.createTempFile("jrd", "test.java");
+
+        String withNonsense = dummy.getDefaultContentWithPackage().replace("/*API_PLACEHOLDER*/", "some nonsese\n");
+        Files.write(decompiledFile.toPath(), withNonsense.getBytes(StandardCharsets.UTF_8));
+        File compiledFile = File.createTempFile("jrd", "test.class");
+        args = new String[]{
+                Cli.COMPILE,
+                Cli.CP, dummy.getPid(),
+                decompiledFile.getAbsolutePath(),
+                Cli.SAVE_LIKE, Cli.Saving.EXACT,
+                Cli.SAVE_AS, compiledFile.getAbsolutePath()
+        };
+        cli = new Cli(args, model);
+        Exception expectedEx = null;
+        try {
+            cli.consumeCli();
+        } catch (Exception ex) {
+            String afterCompilationsOut = streams.getOut();
+            String afterCompilationsErr = streams.getErr();
+            expectedEx = ex;
+        }
+        Assertions.assertNotNull(expectedEx);
+
+        String withApi = dummy.getDefaultContentWithPackage().replace("/*API_PLACEHOLDER*/", "" +
+                "Integer i = (Integer)(org.jrd.agent.api.Variables.Global.getOrCreate(\"counter\", new Integer(0)));\n" +
+                "i=i+1;\n" +
+                "org.jrd.agent.api.Variables.Global.set(\"counter\", i);\n" +
+                "System.out.println(\"API: \"+i+\" had spoken\");\n");
+        Files.write(decompiledFile.toPath(), withApi.getBytes(StandardCharsets.UTF_8));
+        args = new String[]{
+                Cli.COMPILE,
+                Cli.CP, dummy.getPid(),
+                decompiledFile.getAbsolutePath(),
+                Cli.SAVE_LIKE, Cli.Saving.EXACT,
+                Cli.SAVE_AS, compiledFile.getAbsolutePath()
+        };
+        cli = new Cli(args, model);
+        try {
+            cli.consumeCli();
+        } catch (Exception ex) {
+            String afterCompilationsOut = streams.getOut();
+            String afterCompilationsErr = streams.getErr();
+            throw ex;
+        }
+        String compiled = readBinaryAsString(compiledFile);
+        String original = readBinaryAsString(new File(dummy.getDotClassPath()));
+        assertEqualsWithTolerance(compiled, original, 0.4);
+
+        args = new String[]{
+                Cli.OVERWRITE,
+                dummy.getPid(),
+                dummy.getFqn(),
+                compiledFile.getAbsolutePath()
+        };
+        cli = new Cli(args, model);
+        cli.consumeCli();
+        Thread.sleep(1000);
+        String mainOutput = dummy.getOutString();
+        Assertions.assertTrue(mainOutput.contains("API: 1 had spoken"));
+        Assertions.assertTrue(mainOutput.contains("API: 2 had spoken"));
+        Assertions.assertTrue(mainOutput.contains("API: 3 had spoken"));
+        Assertions.assertTrue(mainOutput.contains("API: 4 had spoken"));
     }
 }
