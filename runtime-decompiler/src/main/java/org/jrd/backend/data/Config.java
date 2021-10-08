@@ -50,7 +50,22 @@ public final class Config {
     }
 
     private ExpandableUrl createAgentExpandableUrl() {
-        return ExpandableUrl.createFromPath((String) configMap.getOrDefault(AGENT_PATH_KEY, ""));
+        String configAgentPath = (String) configMap.getOrDefault(AGENT_PATH_KEY, "");
+        String potentialAgentPath = Directories.getPotentialAgentLocation(true);
+
+        // if config doesn't contain agent path, but agent jar is in a predictable place, use that
+        if (configAgentPath.isEmpty() && new File(potentialAgentPath).exists()) {
+            configAgentPath = potentialAgentPath;
+
+            configMap.put(AGENT_PATH_KEY, potentialAgentPath);
+            try {
+                saveConfigFile();
+            } catch (IOException e) {
+                Logger.getLogger().log(Logger.Level.ALL, e);
+            }
+        }
+
+        return ExpandableUrl.createFromPath(configAgentPath);
     }
 
     public String getAgentRawPath() {
