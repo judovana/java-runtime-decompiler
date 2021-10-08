@@ -11,6 +11,7 @@ public class ArchiveManagerOptions {
     }
 
     public static ArchiveManagerOptions getInstance() {
+        ArchiveManagerOptionsHolder.INSTANCE.setExtensions(Config.getConfig().getNestedJarExtensions());
         return ArchiveManagerOptionsHolder.INSTANCE;
     }
 
