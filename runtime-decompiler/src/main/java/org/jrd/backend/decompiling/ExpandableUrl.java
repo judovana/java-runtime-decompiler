@@ -28,7 +28,7 @@ public final class ExpandableUrl {
         String expandedPath = expandEnvVars(s);
         if (!new File(expandedPath).exists()) {
             String message = s.isEmpty() ? "Filename empty." : expandedPath;
-            Logger.getLogger().log(Logger.Level.ALL, new FileNotFoundException(message));
+            Logger.getLogger().log(Logger.Level.DEBUG, new FileNotFoundException(message));
         }
         this.path = s;
     }
