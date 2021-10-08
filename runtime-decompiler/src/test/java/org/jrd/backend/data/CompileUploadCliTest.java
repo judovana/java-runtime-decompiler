@@ -1,15 +1,6 @@
 package org.jrd.backend.data;
 
-import static org.jrd.backend.data.Cli.BASE64;
-import static org.jrd.backend.data.Cli.BYTES;
-import static org.jrd.backend.data.Cli.DECOMPILE;
-import static org.jrd.backend.data.Cli.OVERWRITE;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
-
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -29,17 +20,6 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
     private String[] args;
     private Cli cli;
 
-    void testBytes(String pucComponent) throws Exception {
-        args = new String[]{BYTES, pucComponent, dummy.getClassRegex()};
-        cli = new Cli(args, model);
-
-        cli.consumeCli();
-
-        byte[] bytes = streams.getOutBytes();
-        byte[] fileContents = Files.readAllBytes(Path.of(dummy.getDotClassPath()));
-
-        assertArrayEquals(fileContents, bytes);
-    }
 
     @Override
     AbstractSourceTestClass dummyProvider() throws AbstractSourceTestClass.SourceTestClassWrapperException {
@@ -49,6 +29,19 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
                 .execute();
     }
 
+    void testBytes(String pucComponent) throws Exception {
+        args = new String[]{Cli.BYTES, pucComponent, dummy.getClassRegex()};
+        cli = new Cli(args, model);
+
+        cli.consumeCli();
+
+        byte[] bytes = streams.getOutBytes();
+        byte[] fileContents = Files.readAllBytes(Path.of(dummy.getDotClassPath()));
+
+        Assertions.assertArrayEquals(fileContents, bytes);
+    }
+
+
     @Test
     void testBytes() throws Exception {
         testBytes(dummy.getPid());
@@ -56,7 +49,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
     }
 
     void testBase64Bytes(String pucComponent) throws Exception {
-        args = new String[]{BASE64, pucComponent, dummy.getClassRegex()};
+        args = new String[]{Cli.BASE64, pucComponent, dummy.getClassRegex()};
         cli = new Cli(args, model);
 
         cli.consumeCli();
@@ -65,7 +58,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
         byte[] fileContents = Files.readAllBytes(Path.of(dummy.getDotClassPath()));
         byte[] encoded = Base64.getEncoder().encode(fileContents);
 
-        assertArrayEquals(encoded, base64Bytes);
+        Assertions.assertArrayEquals(encoded, base64Bytes);
     }
 
     @Test
@@ -75,20 +68,20 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
     }
 
     void testBytesAndBase64BytesEqual(String pucComponent) throws Exception {
-        args = new String[]{BYTES, pucComponent, dummy.getClassRegex()};
+        args = new String[]{Cli.BYTES, pucComponent, dummy.getClassRegex()};
         cli = new Cli(args, model);
 
         cli.consumeCli();
         byte[] bytes = streams.getOutBytes();
 
-        args = new String[]{BASE64, pucComponent, dummy.getClassRegex()};
+        args = new String[]{Cli.BASE64, pucComponent, dummy.getClassRegex()};
         cli = new Cli(args, model);
 
         cli.consumeCli();
         String base64 = streams.getOut().trim();
         byte[] decoded = Base64.getDecoder().decode(base64);
 
-        assertArrayEquals(bytes, decoded);
+        Assertions.assertArrayEquals(bytes, decoded);
     }
 
     @Test
@@ -99,7 +92,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
 
 
     void testDecompileJavap(String pucComponent, String option) throws Exception {
-        args = new String[]{DECOMPILE, pucComponent, "javap" + option, dummy.getClassRegex()};
+        args = new String[]{Cli.DECOMPILE, pucComponent, "javap" + option, dummy.getClassRegex()};
         cli = new Cli(args, model);
 
         cli.consumeCli();
@@ -123,15 +116,15 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
         createReplacement(newGreeting);
 
         args = new String[]{
-                OVERWRITE,
+                Cli.OVERWRITE,
                 pucComponent,
                 dummy.getFqn(),
                 dummy.getDotClassPath() // contains newGreeting because of try-catch above
         };
         cli = new Cli(args, model);
 
-        assertDoesNotThrow(() -> cli.consumeCli());
-        assertTrue(streams.getOut().contains("success"));
+        Assertions.assertDoesNotThrow(() -> cli.consumeCli());
+        Assertions.assertTrue(streams.getOut().contains("success"));
 
         // assert that change propagated, unfortunately we have to rely on another operation here
         bytecodeContainsNewString(pucComponent, newGreeting);
@@ -152,7 +145,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
         createReplacement(newGreeting);
 
         args = new String[]{
-                OVERWRITE,
+                Cli.OVERWRITE,
                 pucComponent,
                 dummy.getFqn()
         };
@@ -163,8 +156,8 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
         final InputStream originalIn = System.in;
         System.setIn(fakeIn);
 
-        assertDoesNotThrow(() -> cli.consumeCli());
-        assertTrue(streams.getOut().contains("success"));
+        Assertions.assertDoesNotThrow(() -> cli.consumeCli());
+        Assertions.assertTrue(streams.getOut().contains("success"));
         bytecodeContainsNewString(pucComponent, newGreeting);
 
         System.setIn(originalIn); // revert input stream
@@ -172,7 +165,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
 
     /**
      * Why this have oposite definition then its soulmate in CliTest:
-     *
+     * <p>
      * Because TestingModifiableDummy keeps asking for new class definition
      * So immediately once we disconnect agent, the class get restored for original receipt
      */
@@ -192,41 +185,41 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
                     .write(newGreeting)
                     .compile();
         } catch (AbstractSourceTestClass.SourceTestClassWrapperException e) {
-            fail("Failed to create data to be uploaded.", e);
+            Assertions.fail("Failed to create data to be uploaded.", e);
         }
     }
 
     private void bytecodeContainsNewString(String pucComponent, String newString) throws Exception {
-        args = new String[]{DECOMPILE, pucComponent, "javap-v", dummy.getClassRegex()};
+        args = new String[]{Cli.DECOMPILE, pucComponent, "javap-v", dummy.getClassRegex()};
         cli = new Cli(args, model);
 
         cli.consumeCli();
         String overwrittenClassInVm = streams.getOut();
 
-        assertFalse(overwrittenClassInVm.contains(dummy.getGreetings()));
-        assertTrue(overwrittenClassInVm.contains(newString));
+        Assertions.assertFalse(overwrittenClassInVm.contains(dummy.getGreetings()));
+        Assertions.assertTrue(overwrittenClassInVm.contains(newString));
     }
 
     @Test
     void testOverwriteWarning() {
         String nonClassFile = dummy.getDotClassPath().replace(".class", "");
-        try {k
+        try {
             Files.copy(Path.of(dummy.getDotClassPath()), Path.of(nonClassFile), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            fail("Failed to copy file.", e);
+            Assertions.fail("Failed to copy file.", e);
         }
 
         args = new String[]{
-                OVERWRITE,
+                Cli.OVERWRITE,
                 dummy.getPid(),
                 dummy.getFqn(),
                 nonClassFile
         };
         cli = new Cli(args, model);
 
-        assertDoesNotThrow(() -> cli.consumeCli());
+        Assertions.assertDoesNotThrow(() -> cli.consumeCli());
         String output = streams.getErr();
-        assertTrue(output.contains("WARNING:"));
+        Assertions.assertTrue(output.contains("WARNING:"));
     }
 
 }

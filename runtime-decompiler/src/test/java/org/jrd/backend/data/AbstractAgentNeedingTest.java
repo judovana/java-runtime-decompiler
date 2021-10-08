@@ -1,12 +1,9 @@
 package org.jrd.backend.data;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
-
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.frontend.frame.main.DecompilationController;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,7 +19,7 @@ import java.util.Set;
 
 public abstract class AbstractAgentNeedingTest {
 
-    protected  Model model;
+    protected Model model;
     protected AbstractSourceTestClass dummy;
     protected final StreamWrappers streams = new StreamWrappers();
 
@@ -48,9 +45,9 @@ public abstract class AbstractAgentNeedingTest {
         try {
             dummy = dummyProvider();
         } catch (AbstractSourceTestClass.SourceTestClassWrapperException e) {
-            fail(e);
+            Assertions.fail(e);
         }
-        assertTrue(dummy.isAlive());
+        Assertions.assertTrue(dummy.isAlive());
 
         model = new Model(); // must be below dummy process execution to be aware of it during VmManager instantiation
         while (model.getVmManager().findVmFromPidNoException(dummy.getPid()) == null) {
@@ -65,15 +62,15 @@ public abstract class AbstractAgentNeedingTest {
     void cleanup() {
         streams.captureStreams(false);
 
-        assertTrue(dummy.isAlive());
+        Assertions.assertTrue(dummy.isAlive());
         // halt agent, otherwise an open socket prevents termination of dummy process
         AgentRequestAction request = DecompilationController.createRequest(
                 model.getVmManager().findVmFromPid(dummy.getPid()), AgentRequestAction.RequestAction.HALT, ""
         );
         String response = DecompilationController.submitRequest(model.getVmManager(), request);
-        assertEquals("ok", response);
+        Assertions.assertEquals("ok", response);
 
-        assertTrue(dummy.isAlive());
+        Assertions.assertTrue(dummy.isAlive());
         dummy.terminate();
     }
 
@@ -85,7 +82,7 @@ public abstract class AbstractAgentNeedingTest {
     }
 
     static void assertEqualsWithTolerance(String s1, String s2, double samenessPercentage) {
-        assertTrue(isDifferenceTolerable(
+        Assertions.assertTrue(isDifferenceTolerable(
                 samenessPercentage,
                 LevenshteinDistance.calculate(s1, s2),
                 Math.max(s1.length(), s2.length())
@@ -102,7 +99,7 @@ public abstract class AbstractAgentNeedingTest {
         difference.addAll(l2);
         difference.removeAll(intersection);
 
-        assertTrue(isDifferenceTolerable(samenessPercentage, difference.size(), Math.max(l1.size(), l2.size())));
+        Assertions.assertTrue(isDifferenceTolerable(samenessPercentage, difference.size(), Math.max(l1.size(), l2.size())));
     }
 
     public static final class LevenshteinDistance {
