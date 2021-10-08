@@ -54,21 +54,25 @@ public class Cli {
     protected static final String HELP = "-help";
     protected static final String H = "-h";
 
+    protected static final String R = "-r";
+    protected static final String P = "-p";
+    protected static final String CP = "-cp";
+
     private final List<String> filteredArgs;
     private final VmManager vmManager;
     private final PluginManager pluginManager;
     private Saving saving;
     private boolean isVerbose;
 
-    protected static class Saving implements CommonUtils.StatusKeeper {
-        protected static final String DEFAULT = "default";
-        protected static final String EXACT = "exact";
-        protected static final String FQN = "fqn";
-        protected static final String DIR = "dir";
+    static class Saving implements CommonUtils.StatusKeeper {
+        static final String DEFAULT = "default";
+        static final String EXACT = "exact";
+        static final String FQN = "fqn";
+        static final String DIR = "dir";
         private final String as;
         private final String like;
 
-        public Saving(String as, String like) {
+        Saving(String as, String like) {
             this.as = as;
             if (like == null) {
                 this.like = DEFAULT;
@@ -299,13 +303,13 @@ public class Cli {
             for (int i = 1; i < filteredArgs.size(); i++) {
                 String arg = filteredArgs.get(i);
 
-                if ("-p".equals(arg)) {
+                if (P.equals(arg)) {
                     wantedCustomCompiler = filteredArgs.get(i + 1);
                     i++; // shift
-                } else if ("-cp".equals(arg)) {
+                } else if (CP.equals(arg)) {
                     puc = filteredArgs.get(i + 1);
                     i++; // shift
-                } else if ("-r".equals(arg)) {
+                } else if (R.equals(arg)) {
                     isRecursive = true;
                 } else {
                     File fileToCompile = new File(arg);

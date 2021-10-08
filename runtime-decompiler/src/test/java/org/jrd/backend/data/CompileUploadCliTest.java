@@ -7,6 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -14,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Base64;
+import java.util.stream.Collectors;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class CompileUploadCliTest extends AbstractAgentNeedingTest {
@@ -236,4 +238,198 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
         Assertions.assertTrue(output.contains("WARNING:"));
     }
 
+
+    @Test
+    void testDecompileCompileCfr() throws Exception {
+        final String plugin = "Cfr";
+        File decompiledFile = File.createTempFile("jrd", "test.java");
+        args = new String[]{
+                Cli.DECOMPILE,
+                dummy.getPid(),
+                plugin,
+                dummy.getFqn(),
+                Cli.SAVE_LIKE, Cli.Saving.EXACT,
+                Cli.SAVE_AS, decompiledFile.getAbsolutePath()
+        };
+        cli = new Cli(args, model);
+        cli.consumeCli();
+        String sOrig = Files.readAllLines(
+                decompiledFile.toPath(), StandardCharsets.UTF_8).stream()
+                .collect(Collectors.joining("\n"));
+        String sNoCommnets = Files.readAllLines(
+                decompiledFile.toPath(), StandardCharsets.UTF_8).stream()
+                .filter(a -> !(a.trim().startsWith("/") || a.trim().startsWith("*")))
+                .collect(Collectors.joining("\n"));
+        assertEqualsWithTolerance(sOrig, sNoCommnets, 0.9);
+        assertEqualsWithTolerance(sNoCommnets, dummy.getDefaultContentWithPackage(), 0.9);
+
+        File compiledFile = File.createTempFile("jrd", "test.class");
+        args = new String[]{
+                Cli.COMPILE,
+                Cli.CP, dummy.getPid(),
+                decompiledFile.getAbsolutePath(),
+                Cli.SAVE_LIKE, Cli.Saving.EXACT,
+                Cli.SAVE_AS, compiledFile.getAbsolutePath()
+        };
+        cli = new Cli(args, model);
+        cli.consumeCli();
+        String compiled = readBinaryAsString(compiledFile);
+        String original = readBinaryAsString(new File(dummy.getDotClassPath()));
+        assertEqualsWithTolerance(compiled, original, 0.9);
+
+        args = new String[]{
+                Cli.OVERWRITE,
+                dummy.getPid(),
+                dummy.getFqn(),
+                compiledFile.getAbsolutePath()
+        };
+        cli = new Cli(args, model);
+        cli.consumeCli();
+
+        args = new String[]{
+                Cli.OVERWRITE,
+                dummy.getPid(),
+                dummy.getFqn(),
+                decompiledFile.getAbsolutePath()//nonsense, will not be accepted
+        };
+        cli = new Cli(args, model);
+        Exception ex = null;
+        try {
+            cli.consumeCli();
+        } catch (Exception eex) {
+            ex = eex;
+        }
+        Assertions.assertNotNull(ex);
+    }
+
+
+    @Test
+    void testDecompileCompileJasm() throws Exception {
+        final String plugin = "jasm";
+        File decompiledFile = File.createTempFile("jrd", "test.java");
+        args = new String[]{
+                Cli.DECOMPILE,
+                dummy.getPid(),
+                plugin,
+                dummy.getFqn(),
+                Cli.SAVE_LIKE, Cli.Saving.EXACT,
+                Cli.SAVE_AS, decompiledFile.getAbsolutePath()
+        };
+        cli = new Cli(args, model);
+        cli.consumeCli();
+        String sOrig = Files.readAllLines(decompiledFile.toPath(), StandardCharsets.UTF_8).stream().collect(Collectors.joining("\n"));
+        String sLine = Files.readAllLines(decompiledFile.toPath(), StandardCharsets.UTF_8).stream().collect(Collectors.joining(" "));
+        //unluckily there is nothing to compare to, unless we wish to call jasm from here "again"
+        //so at least some verifiers
+        Assertions.assertTrue(sOrig.contains("{"));
+        Assertions.assertTrue(sOrig.contains("}"));
+        Assertions.assertTrue(sOrig.contains("version"));
+        Assertions.assertTrue(sOrig.contains("invokevirtual"));
+        Assertions.assertTrue(sOrig.contains("invokestatic"));
+        Assertions.assertTrue(sOrig.contains("goto"));
+        Assertions.assertTrue(sLine.matches(".*package\\s+testing/modifiabledummy;.*"));
+        Assertions.assertTrue(sLine.matches(".*class\\s+TestingModifiableDummy.*"));
+        Assertions.assertTrue(sLine.matches(".*public\\s+Method\\s+\"<init>\".*"));
+        Assertions.assertTrue(sLine.matches(".*new\\s+class\\s+TestingModifiableDummy.*"));
+        Assertions.assertTrue(sLine.matches(".*private\\s+Method\\s+print.*"));
+        Assertions.assertTrue(sLine.matches(".*getstatic\\s+Field\\s+java/lang/System.out:\"Ljava/io/PrintStream;\";.*"));
+        Assertions.assertTrue(sLine.matches(".*ldc\\s+String\\s+\"Hello\";.*"));
+
+
+        File compiledFile = File.createTempFile("jrd", "test.class");
+        args = new String[]{
+                Cli.COMPILE,
+                Cli.CP, dummy.getPid(),
+                Cli.P, plugin,
+                decompiledFile.getAbsolutePath(),
+                Cli.SAVE_LIKE, Cli.Saving.EXACT,
+                Cli.SAVE_AS, compiledFile.getAbsolutePath()
+        };
+        cli = new Cli(args, model);
+        cli.consumeCli();
+        String compiled = readBinaryAsString(compiledFile);
+        String original = readBinaryAsString(new File(dummy.getDotClassPath()));
+        assertEqualsWithTolerance(compiled, original, 0.4); //yah, jasm performance is not greate
+
+        args = new String[]{
+                Cli.OVERWRITE,
+                dummy.getPid(),
+                dummy.getFqn(),
+                compiledFile.getAbsolutePath()
+        };
+        cli = new Cli(args, model);
+        cli.consumeCli();
+
+        args = new String[]{
+                Cli.OVERWRITE,
+                dummy.getPid(),
+                dummy.getFqn(),
+                decompiledFile.getAbsolutePath() //some nonsense, should fail
+        };
+        cli = new Cli(args, model);
+        Exception ex = null;
+        try {
+            cli.consumeCli();
+        } catch (Exception eex) {
+            ex = eex;
+        }
+        Assertions.assertNotNull(ex);
+    }
+
+    @Test
+    void testDecompileCompileJcoder() throws Exception {
+        final String plugin = "jcoder";
+        File decompiledFile = File.createTempFile("jrd", "test.java");
+        args = new String[]{
+                Cli.DECOMPILE,
+                dummy.getPid(),
+                plugin,
+                dummy.getFqn(),
+                Cli.SAVE_LIKE, Cli.Saving.EXACT,
+                Cli.SAVE_AS, decompiledFile.getAbsolutePath()
+        };
+        cli = new Cli(args, model);
+        cli.consumeCli();
+        String sOrig = Files.readAllLines(decompiledFile.toPath(), StandardCharsets.UTF_8).stream().collect(Collectors.joining("\n"));
+        //unluckily there is nothing to compare to, unless we wish to call jasm from here "again"
+
+        File compiledFile = File.createTempFile("jrd", "test.class");
+        args = new String[]{
+                Cli.COMPILE,
+                Cli.CP, dummy.getPid(),
+                Cli.P, plugin,
+                decompiledFile.getAbsolutePath(),
+                Cli.SAVE_LIKE, Cli.Saving.EXACT,
+                Cli.SAVE_AS, compiledFile.getAbsolutePath()
+        };
+        cli = new Cli(args, model);
+        cli.consumeCli();
+        String compiled = readBinaryAsString(compiledFile);
+        String original = readBinaryAsString(new File(dummy.getDotClassPath()));
+        assertEqualsWithTolerance(compiled, original, 0.4); //yah, jasm performance is not greate
+
+        args = new String[]{
+                Cli.OVERWRITE,
+                dummy.getPid(),
+                dummy.getFqn(),
+                compiledFile.getAbsolutePath()
+        };
+        cli = new Cli(args, model);
+        cli.consumeCli();
+
+        args = new String[]{
+                Cli.OVERWRITE,
+                dummy.getPid(),
+                dummy.getFqn(),
+                decompiledFile.getAbsolutePath() //some nonsense, should fail
+        };
+        cli = new Cli(args, model);
+        Exception ex = null;
+        try {
+            cli.consumeCli();
+        } catch (Exception eex) {
+            ex = eex;
+        }
+        Assertions.assertNotNull(ex);
+    }
 }
