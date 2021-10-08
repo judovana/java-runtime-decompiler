@@ -49,12 +49,16 @@ public final class Config {
         return ConfigHolder.INSTANCE;
     }
 
+    private ExpandableUrl createAgentExpandableUrl() {
+        return ExpandableUrl.createFromPath((String) configMap.getOrDefault(AGENT_PATH_KEY, ""));
+    }
+
     public String getAgentRawPath() {
-        return ExpandableUrl.createFromPath((String) configMap.get(AGENT_PATH_KEY)).getRawPath();
+        return createAgentExpandableUrl().getRawPath();
     }
 
     public String getAgentExpandedPath() {
-        String expandedPath = ExpandableUrl.createFromPath((String) configMap.get(AGENT_PATH_KEY)).getExpandedPath();
+        String expandedPath = createAgentExpandableUrl().getExpandedPath();
 
         // Agent attaching fails on Windows when path starts with a slash
         if (Directories.isOsWindows() && expandedPath.length() > 0 && expandedPath.charAt(0) == '/') {
@@ -122,12 +126,14 @@ public final class Config {
 
     private void loadConfigFile() throws IOException {
         configMap = new HashMap<>();
-        configMap.put(AGENT_PATH_KEY, "");
         File confFile = new File(CONFIG_PATH);
         File legacyConfFile = new File(LEGACY_CONFIG_PATH);
         if (confFile.exists()) {
             try (FileReader reader = new FileReader(confFile, StandardCharsets.UTF_8)) {
-                configMap = gson.fromJson(reader, configMap.getClass());
+                Map<String, Object> tempMap = gson.fromJson(reader, configMap.getClass());
+                if (tempMap != null) {
+                    configMap = tempMap;
+                }
             }
         } else if (legacyConfFile.exists()) {
             Files.readAllLines(Paths.get(LEGACY_CONFIG_PATH)).forEach(s -> {
