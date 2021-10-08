@@ -9,7 +9,7 @@ import org.jrd.frontend.frame.main.MainFrameView;
 import org.jrd.frontend.frame.plugins.FileSelectorArrayRow;
 
 import javax.swing.*;
-import javax.swing.border.EtchedBorder;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -25,50 +25,30 @@ import java.util.stream.Collectors;
 public class SettingsView extends JDialog {
 
     private JPanel mainPanel;
-    private SettingsPanel settingsPanel;
+    private AgentSettingsPanel agentSettingsPanel;
+    private CompilationSettingsPanel compilationSettingsPanel;
+    private NestedJarsSettingsPanel nestedJarsSettingsPanel;
     private JPanel okCancelPanel;
-    private JButton okButton;
-    private JButton cancelButton;
 
     private final Config config = Config.getConfig();
 
-    public static class SettingsPanel extends JPanel {
+    public static class AgentSettingsPanel extends JPanel {
 
         private JTextField agentPathTextField;
         private JLabel agentPathLabel;
         private JButton browseButton;
-        private JLabel compilationSettingsLabel;
-        private JCheckBox useHostSystemClassesCheckBox;
-
         private JFileChooser chooser;
 
-        private JCheckBox useDefaults;
-        private JTextField newExtensionsTextField;
-        private JLabel nestedJars;
-        private JButton addButton;
-        private JButton removeButton;
-        private DefaultListModel<String> defaultListModel;
-        private JList<String> currentExtensionsList;
-        private JScrollPane scrollPane;
-
-
-        SettingsPanel(String initialAgentPath, boolean initialUseHostSystemClasses) {
-
-            this.agentPathTextField = new JTextField();
-            this.agentPathTextField.setToolTipText(BytecodeDecompilerView.styleTooltip() +
+        AgentSettingsPanel(String initialAgentPath) {
+            agentPathTextField = new JTextField();
+            agentPathTextField.setToolTipText(BytecodeDecompilerView.styleTooltip() +
                     "Select a path to the Decompiler Agent.<br />" +
                     FileSelectorArrayRow.getTextFieldToolTip()
             );
-            this.agentPathTextField.setText(initialAgentPath);
+            agentPathTextField.setText(initialAgentPath);
 
-            this.agentPathLabel = new JLabel("Decompiler Agent path");
-            this.browseButton = new JButton("Browse");
-
-            this.compilationSettingsLabel = new JLabel("Compilation settings");
-            this.useHostSystemClassesCheckBox = new JCheckBox(
-                    "Use host system classes during compilation phase of class overwrite",
-                    initialUseHostSystemClasses
-            );
+            agentPathLabel = new JLabel("Decompiler Agent path");
+            browseButton = new JButton("Browse");
 
             chooser = new JFileChooser();
             File dir;
@@ -80,14 +60,81 @@ public class SettingsView extends JDialog {
             }
             chooser.setCurrentDirectory(FileSelectorArrayRow.fallback(dir));
 
+            browseButton.addActionListener(actionEvent -> {
+                int dialogResult = chooser.showOpenDialog(null);
+                if (dialogResult == JFileChooser.APPROVE_OPTION) {
+                    agentPathTextField.setText(chooser.getSelectedFile().getPath());
+                }
+            });
+
             this.setLayout(new GridBagLayout());
             GridBagConstraints gbc = new GridBagConstraints();
             gbc.anchor = GridBagConstraints.WEST;
             gbc.fill = GridBagConstraints.BOTH;
+            gbc.insets = new Insets(5, 5, 5, 5);
 
-            addAgent(gbc);
+            this.add(this.agentPathLabel, gbc);
 
-            // Nested Jars
+            gbc.weightx = 1;
+            gbc.gridy = 1;
+            gbc.gridwidth = 2;
+            this.add(agentPathTextField, gbc);
+
+            gbc.weightx = 0;
+            gbc.gridwidth = 1;
+            gbc.gridx = 2;
+            browseButton.setPreferredSize(BytecodeDecompilerView.buttonSizeBasedOnTextField(browseButton, agentPathTextField));
+            this.add(browseButton, gbc);
+        }
+
+        public String getAgentPath() {
+            return agentPathTextField.getText();
+        }
+    }
+
+    public static class CompilationSettingsPanel extends JPanel {
+
+        private JLabel compilationSettingsLabel;
+        private JCheckBox useHostSystemClassesCheckBox;
+
+        public CompilationSettingsPanel(boolean initialUseHostSystemClasses) {
+            compilationSettingsLabel = new JLabel("Compilation settings");
+            useHostSystemClassesCheckBox = new JCheckBox(
+                    "Use host system classes during compilation phase of class overwrite",
+                    initialUseHostSystemClasses
+            );
+
+            this.setLayout(new GridBagLayout());
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.anchor = GridBagConstraints.NORTHWEST;
+            gbc.fill = GridBagConstraints.BOTH;
+            gbc.insets = new Insets(5, 5, 5, 5);
+            gbc.weightx = 1; // required or else contents are centered
+
+            this.add(compilationSettingsLabel, gbc);
+
+            gbc.gridy = 1;
+            this.add(useHostSystemClassesCheckBox, gbc);
+        }
+
+        public boolean shouldUseHostSystemClassesCheckBox() {
+            return useHostSystemClassesCheckBox.isSelected();
+        }
+    }
+
+    public static class NestedJarsSettingsPanel extends JPanel {
+        private JCheckBox useDefaults;
+        private JTextField newExtensionsTextField;
+        private JLabel nestedJars;
+        private JButton addButton;
+        private JButton removeButton;
+        private DefaultListModel<String> defaultListModel;
+        private JList<String> currentExtensionsList;
+        private JScrollPane scrollPane;
+
+        NestedJarsSettingsPanel() {
+            this.setLayout(new GridBagLayout());
+
             nestedJars = new JLabel("Nested Jars Settings:");
             newExtensionsTextField = new JTextField();
             newExtensionsTextField.addKeyListener(new KeyAdapter() {
@@ -146,61 +193,24 @@ public class SettingsView extends JDialog {
             }
             a.actionPerformed(null);
 
-            addExtensions(gbc);
-            this.setPreferredSize(new Dimension(0, 400));
-        }
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.anchor = GridBagConstraints.WEST;
+            gbc.fill = GridBagConstraints.BOTH;
+            gbc.insets = new Insets(5, 5, 5, 5);
 
-        void addAgent(GridBagConstraints gbc) {
-            gbc.insets = new Insets(20, 20, 0, 0);
-            gbc.gridx = 1;
-            gbc.gridy = 0;
-            this.add(this.agentPathLabel, gbc);
-
-            gbc.insets = new Insets(5, 20, 0, 5);
-            gbc.weightx = 1;
-            gbc.gridx = 1;
-            gbc.gridy = 1;
-            gbc.gridwidth = 2;
-            this.add(agentPathTextField, gbc);
-
-            gbc.insets = new Insets(5, 5, 0, 20);
-            gbc.weightx = 0;
-            gbc.gridwidth = 1;
-            gbc.gridx = 3;
-            gbc.gridy = 1;
-            browseButton.setPreferredSize(BytecodeDecompilerView.buttonSizeBasedOnTextField(browseButton, agentPathTextField));
-            this.add(browseButton, gbc);
-
-            gbc.insets = new Insets(20, 20, 0, 0);
-            gbc.gridx = 1;
-            gbc.gridy = 3;
-            this.add(compilationSettingsLabel, gbc);
-
-            gbc.insets = new Insets(5, 20, 0, 0);
-            gbc.gridx = 1;
-            gbc.gridy = 4;
-            this.add(useHostSystemClassesCheckBox, gbc);
-        }
-
-        void addExtensions(GridBagConstraints gbc) {
-            gbc.insets = new Insets(30, 20, 0, 0);
-            gbc.gridy = 5;
             this.add(nestedJars, gbc);
 
-            gbc.insets = new Insets(10, 20, 0, 0);
-            gbc.gridy = 6;
+            gbc.gridy = 1;
             this.add(useDefaults, gbc);
 
-            gbc.insets = new Insets(5, 20, 5, 20);
-            gbc.gridy = 7;
-            gbc.weighty = 1.0;
+            gbc.gridy = 2;
+            gbc.weighty = 1;
             gbc.gridwidth = 3;
             this.add(scrollPane, gbc);
 
-            gbc.insets = new Insets(5, 20, 20, 5);
             gbc.weightx = 1;
             gbc.weighty = 0;
-            gbc.gridy = 8;
+            gbc.gridy = 3;
             gbc.gridwidth = 1;
             this.add(newExtensionsTextField, gbc);
 
@@ -208,14 +218,14 @@ public class SettingsView extends JDialog {
             addButton.setPreferredSize(fixedSize);
             removeButton.setPreferredSize(fixedSize);
 
-            gbc.insets = new Insets(5, 5, 20, 5);
             gbc.weightx = 0;
-            gbc.gridx = 2;
+            gbc.gridx = 1;
             this.add(addButton, gbc);
 
-            gbc.insets = new Insets(5, 5, 20, 20);  // top padding
-            gbc.gridx = 3;
+            gbc.gridx = 2;
             this.add(removeButton, gbc);
+
+            this.setPreferredSize(new Dimension(0, 400));
         }
 
         void confirmExtensions() {
@@ -228,30 +238,29 @@ public class SettingsView extends JDialog {
             }
             newExtensionsTextField.setText("");
         }
+
+        public List<String> getExtensions() {
+            return Collections.list(defaultListModel.elements());
+        }
+
+        public boolean shouldUseDefaultExtensions() {
+            return useDefaults.isSelected();
+        }
     }
 
     public SettingsView(MainFrameView mainFrameView) {
-        settingsPanel = new SettingsPanel(config.getAgentRawPath(), config.doUseHostSystemClasses());
-        settingsPanel.browseButton.addActionListener(actionEvent -> {
-            int dialogResult = settingsPanel.chooser.showOpenDialog(settingsPanel);
-            if (dialogResult == JFileChooser.APPROVE_OPTION) {
-                settingsPanel.agentPathTextField.setText(settingsPanel.chooser.getSelectedFile().getPath());
-            }
-        });
-
-        okButton = new JButton("OK");
+        JButton okButton = new JButton("OK");
         okButton.addActionListener(actionEvent -> {
             applySettings();
             dispose();
         });
         okButton.setPreferredSize(new Dimension(90, 30));
 
-        cancelButton = new JButton("Cancel");
+        JButton cancelButton = new JButton("Cancel");
         cancelButton.addActionListener(actionEvent -> dispose());
         cancelButton.setPreferredSize(new Dimension(90, 30));
 
         okCancelPanel = new JPanel(new GridBagLayout());
-        okCancelPanel.setBorder(new EtchedBorder());
         okCancelPanel.setPreferredSize(new Dimension(0, 60));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.EAST;
@@ -271,25 +280,32 @@ public class SettingsView extends JDialog {
         gbc.gridx = 3;
         okCancelPanel.add(cancelButton, gbc);
 
-        gbc.gridx = 4;
-        okCancelPanel.add(Box.createHorizontalStrut(20), gbc);
+        agentSettingsPanel = new AgentSettingsPanel(config.getAgentRawPath());
+        compilationSettingsPanel = new CompilationSettingsPanel(config.doUseHostSystemClasses());
+        nestedJarsSettingsPanel = new NestedJarsSettingsPanel();
 
         mainPanel = new JPanel(new GridBagLayout());
+        mainPanel.setBorder(new EmptyBorder(0, 15, 0, 15));
         gbc = new GridBagConstraints();
-        gbc.anchor = GridBagConstraints.NORTHWEST;
         gbc.fill = GridBagConstraints.BOTH;
-
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        gbc.insets = new Insets(10, 0, 10, 0);
         gbc.weightx = 1;
-        gbc.weighty = 0;
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        mainPanel.add(settingsPanel, gbc);
+
+        mainPanel.add(agentSettingsPanel, gbc);
 
         gbc.gridy = 1;
-        gbc.weighty = 1;
-        mainPanel.add(Box.createVerticalGlue(), gbc);
+        mainPanel.add(compilationSettingsPanel, gbc);
 
         gbc.gridy = 2;
+        gbc.weighty = 1;
+        mainPanel.add(nestedJarsSettingsPanel, gbc);
+
+        gbc.gridy = 3;
+        gbc.weighty = 0;
+        mainPanel.add(Box.createVerticalGlue(), gbc);
+
+        gbc.gridy = 4;
         gbc.weighty = 0;
         mainPanel.add(okCancelPanel, gbc);
 
@@ -304,8 +320,8 @@ public class SettingsView extends JDialog {
     }
 
     private void applySettings() {
-        config.setAgentPath(settingsPanel.agentPathTextField.getText());
-        config.setUseHostSystemClasses(settingsPanel.useHostSystemClassesCheckBox.isSelected());
+        config.setAgentPath(agentSettingsPanel.getAgentPath());
+        config.setUseHostSystemClasses(compilationSettingsPanel.shouldUseHostSystemClassesCheckBox());
 
         try {
             config.saveConfigFile();
@@ -314,10 +330,10 @@ public class SettingsView extends JDialog {
         }
 
         List<String> extensions;
-        if (settingsPanel.useDefaults.isSelected()) {
+        if (nestedJarsSettingsPanel.shouldUseDefaultExtensions()) {
             extensions = new ArrayList<>();
         } else {
-            extensions = Collections.list(settingsPanel.defaultListModel.elements());
+            extensions = nestedJarsSettingsPanel.getExtensions();
         }
         ArchiveManagerOptions.getInstance().setExtension(extensions);
     }
