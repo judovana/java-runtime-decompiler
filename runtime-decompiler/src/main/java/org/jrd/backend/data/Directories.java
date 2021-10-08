@@ -70,6 +70,14 @@ public final class Directories {
         }
     }
 
+    public static String getPotentialAgentLocation(boolean useFullPath) {
+        String agentFile = "decompiler-agent-" + MetadataProperties.getInstance().getVersion() + ".jar";
+        String rootPath = useFullPath ? getJrdLocation() : ".";
+        String projectPath = isPortable() ? "libs" : "decompiler_agent" + File.separator + "target";
+
+        return rootPath + File.separator + projectPath + File.separator + agentFile;
+    }
+
     public static boolean isPortable() {
         String purpose = System.getProperty("jrd.purpose");
         return "PORTABLE".equals(purpose);

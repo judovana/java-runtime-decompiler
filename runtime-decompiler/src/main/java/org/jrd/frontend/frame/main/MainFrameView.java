@@ -87,7 +87,7 @@ public class MainFrameView {
             "Welcome to Java-Runtime-Decompiler, or JRD for short.\n" +
             "\n" +
             "Before using JRD, the Decompiler Agent's path needs to be selected in 'Configure -> Settings'.\n" +
-            "It's a built-in project and can usually be found at '" + ((Directories.isPortable()) ? "./libs/" : "./decompiler_agent/target/") + "decompiler-agent-*.jar'.\n" +
+            "It's a built-in project and can usually be found at '" + Directories.getPotentialAgentLocation(false) + "'.\n" +
             "On JDK 9 and higher, the agent is not allowed to attach by default.\n" +
             "You must run the target process with '-Djdk.attach.allowAttachSelf=true'.\n" +
             "\n" +
