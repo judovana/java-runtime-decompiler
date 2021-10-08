@@ -76,4 +76,4 @@ jobs:
       - name: Test Cli
         run: |
           cd jrd
-          mvn --batch-mode test -Dtest=CliTest -DfailIfNoTests=false
+          mvn --batch-mode test -Dtest=*CliTest -DfailIfNoTests=false
