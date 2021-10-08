@@ -37,7 +37,7 @@ public class SettingsView extends JDialog {
         private JTextField agentPathTextField;
         private JLabel agentPathLabel;
         private JButton browseButton;
-        private JLabel checkBoxSettings;
+        private JLabel compilationSettingsLabel;
         private JCheckBox useHostSystemClassesCheckBox;
 
         private JFileChooser chooser;
@@ -64,7 +64,7 @@ public class SettingsView extends JDialog {
             this.agentPathLabel = new JLabel("Decompiler Agent path");
             this.browseButton = new JButton("Browse");
 
-            this.checkBoxSettings = new JLabel("Settings");
+            this.compilationSettingsLabel = new JLabel("Compilation settings");
             this.useHostSystemClassesCheckBox = new JCheckBox(
                     "Use host system classes during compilation phase of class overwrite",
                     initialUseHostSystemClasses
@@ -174,7 +174,7 @@ public class SettingsView extends JDialog {
             gbc.insets = new Insets(20, 20, 0, 0);
             gbc.gridx = 1;
             gbc.gridy = 3;
-            this.add(checkBoxSettings, gbc);
+            this.add(compilationSettingsLabel, gbc);
 
             gbc.insets = new Insets(5, 20, 0, 0);
             gbc.gridx = 1;
