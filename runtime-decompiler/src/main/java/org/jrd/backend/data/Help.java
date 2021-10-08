@@ -22,7 +22,7 @@ public final class Help {
     static final String LIST_JVMS_FORMAT = LIST_JVMS;
     static final String LIST_PLUGINS_FORMAT = LIST_PLUGINS;
     static final String LIST_CLASSES_FORMAT = LIST_CLASSES + " <PUC> [<CLASS REGEX>...]";
-    static final String COMPILE_FORMAT = COMPILE + " [-p <PLUGIN>] [-cp <PUC>] [-r] <PATH>...";
+    static final String COMPILE_FORMAT = COMPILE + " [" + P + " <PLUGIN>] [" + CP + " <PUC>] [" + R + "] <PATH>...";
     static final String DECOMPILE_FORMAT = DECOMPILE + " <PUC> <PLUGIN> <CLASS REGEX>...";
     static final String OVERWRITE_FORMAT = OVERWRITE + " <PUC> <FQN> [<CLASS FILE>]";
     static final String INIT_FORMAT = INIT + " <PUC> <FQN>";
@@ -40,9 +40,9 @@ public final class Help {
     private static final String LIST_CLASSES_TEXT = "List all loaded classes of a process, optionally filtering them.\n" +
             "Only '" + SAVE_LIKE + " " + Saving.EXACT + "' or '" + SAVE_LIKE + " " + Saving.DEFAULT +
             "' are allowed as saving modifiers.";
-    private static final String COMPILE_TEXT = "Compile local files against runtime classpath, specified by -cp.\n" +
-            "Use -p to utilize some plugins' (like jasm or jcoder) bundled compilers.\n" +
-            "Use -r for recursive search if <PATH> is a directory.\n" +
+    private static final String COMPILE_TEXT = "Compile local files against runtime classpath, specified by " + CP + ".\n" +
+            "Use " + P + " to utilize some plugins' (like jasm or jcoder) bundled compilers.\n" +
+            "Use " + R + " for recursive search if <PATH> is a directory.\n" +
             "If the argument of '" + SAVE_AS + "' is a valid PID or URL, " +
             "the compiled code will be attempted to be injected into that process.\n" +
             "If multiple PATHs were specified, but no '" + SAVE_AS + "', the process fails.";

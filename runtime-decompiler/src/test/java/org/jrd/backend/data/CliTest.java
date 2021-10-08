@@ -393,9 +393,9 @@ public class CliTest extends AbstractAgentNeedingTest {
                 new String[]{DECOMPILE, unimportantPid},
                 new String[]{DECOMPILE, unimportantPid, "javap"},
                 new String[]{COMPILE},
-                new String[]{COMPILE, "-r"},
-                new String[]{COMPILE, "-r", "-cp", unimportantPid},
-                new String[]{COMPILE, "-r", "-cp", unimportantPid, "-p", "unimportantPluginName"}
+                new String[]{COMPILE, R},
+                new String[]{COMPILE, R, CP, unimportantPid},
+                new String[]{COMPILE, R, CP, unimportantPid, Cli.P, "unimportantPluginName"}
         ).map(a -> (Object) a).map(Arguments::of); // cast needed because of varargs factory method .of()
     }
 

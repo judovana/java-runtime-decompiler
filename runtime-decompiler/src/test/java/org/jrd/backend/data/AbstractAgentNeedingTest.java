@@ -11,7 +11,13 @@ import org.junit.jupiter.api.Timeout;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.List;
@@ -190,5 +196,28 @@ public abstract class AbstractAgentNeedingTest {
         public String getErr() {
             return get(err);
         }
+    }
+
+
+    public static String readBinaryAsString(File f) throws IOException {
+        try (FileInputStream fis = new FileInputStream(f)) {
+            return readBinaryAsString(fis, "UTF-8", CodingErrorAction.REPLACE);
+        }
+    }
+
+    public static String readBinaryAsString(FileInputStream input, String charBase, CodingErrorAction action) throws IOException {
+        CharsetDecoder decoder = Charset.forName(charBase).newDecoder();
+        decoder.onMalformedInput(CodingErrorAction.IGNORE);
+        InputStreamReader reader = new InputStreamReader(input, decoder);
+        StringBuilder sb = new StringBuilder();
+        while (true) {
+            int i = reader.read();
+            if (i < 0) {
+                break;
+            }
+            sb.append((char) i);
+        }
+        reader.close();
+        return sb.toString();
     }
 }
