@@ -21,7 +21,7 @@ class ModifiableDummyTestingHelper extends AbstractSourceTestClass {
                 "            Thread.sleep(100);\n" +
                 "        }\n" +
                 "    }\n" +
-                "   private void print(){System.out.println(\"" + nwHello + "\");}\n" +
+                "   private void print(){\n/*API_PLACEHOLDER*/\nSystem.out.println(\"" + nwHello + "\");}\n" +
                 "}\n";
     }
 
