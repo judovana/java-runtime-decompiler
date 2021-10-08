@@ -19,6 +19,7 @@ import java.util.Base64;
 public class CompileUploadCliTest extends AbstractAgentNeedingTest {
     private String[] args;
     private Cli cli;
+    private static final String NEW_GREETING = "Greetings";
 
 
     @Override
@@ -112,8 +113,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
 
 
     void testOverwrite(String pucComponent) throws Exception {
-        String newGreeting = "Greetings";
-        createReplacement(newGreeting);
+        createReplacement(NEW_GREETING);
 
         args = new String[]{
                 Cli.OVERWRITE,
@@ -127,12 +127,13 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
         Assertions.assertTrue(streams.getOut().contains("success"));
 
         // assert that change propagated, unfortunately we have to rely on another operation here
-        bytecodeContainsNewString(pucComponent, newGreeting);
+        bytecodeContainsNewString(pucComponent, NEW_GREETING);
     }
 
     @Test
     void testOverwriteRunning() throws Exception {
         testOverwrite(dummy.getPid());
+        dummyOutputWasChanged(NEW_GREETING);
     }
 
     @Test
@@ -141,8 +142,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
     }
 
     void testOverwriteStdIn(String pucComponent) throws Exception {
-        String newGreeting = "Greetings";
-        createReplacement(newGreeting);
+        createReplacement(NEW_GREETING);
 
         args = new String[]{
                 Cli.OVERWRITE,
@@ -158,8 +158,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
 
         Assertions.assertDoesNotThrow(() -> cli.consumeCli());
         Assertions.assertTrue(streams.getOut().contains("success"));
-        bytecodeContainsNewString(pucComponent, newGreeting);
-
+        bytecodeContainsNewString(pucComponent, NEW_GREETING);
         System.setIn(originalIn); // revert input stream
     }
 
@@ -172,6 +171,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
     @Test
     void testOverwriteStdInRunning() throws Exception {
         testOverwriteStdIn(dummy.getPid());
+        dummyOutputWasChanged(NEW_GREETING);
     }
 
     @Test
@@ -179,7 +179,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
         testOverwriteStdIn(dummy.getClasspath());
     }
 
-    private void createReplacement(String newGreeting) {
+    private static void createReplacement(String newGreeting) {
         try {
             new ModifiableDummyTestingHelper()
                     .write(newGreeting)
@@ -187,6 +187,20 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
         } catch (AbstractSourceTestClass.SourceTestClassWrapperException e) {
             Assertions.fail("Failed to create data to be uploaded.", e);
         }
+    }
+
+    /**
+     * As the class definition was transforemd, in OpenJDK HotSpot
+     * this implementation of dummy did requested (by the call of new ..().print() )
+     * this new deffinition and so we can see the change
+     *
+     * @param newString
+     * @throws Exception
+     */
+    private void dummyOutputWasChanged(String newString) throws Exception {
+        Thread.sleep(1000); //the test must wait while reader do something
+        Assertions.assertTrue(dummy.getOutString().contains(dummy.getGreetings()));
+        Assertions.assertTrue(dummy.getOutString().contains(newString));
     }
 
     private void bytecodeContainsNewString(String pucComponent, String newString) throws Exception {

@@ -18,7 +18,7 @@ class ModifiableDummyTestingHelper extends AbstractSourceTestClass {
                 "    public static void main(String[] args) throws InterruptedException {\n" +
                 "        while(true) {\n" +
                 "            new " + getClassName() + "().print();\n" +
-                "            Thread.sleep(1000);\n" +
+                "            Thread.sleep(100);\n" +
                 "        }\n" +
                 "    }\n" +
                 "   private void print(){System.out.println(\"" + nwHello + "\");}\n" +
