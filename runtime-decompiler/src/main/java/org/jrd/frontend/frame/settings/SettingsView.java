@@ -175,7 +175,7 @@ public class SettingsView extends JDialog {
                     addButton.setEnabled(!useDefaults.isSelected());
                     removeButton.setEnabled(!useDefaults.isSelected());
                     currentExtensionsList.setEnabled(!useDefaults.isSelected());
-                    if (!useDefaults.isSelected() && newExtensionsTextField.getText().isEmpty()) {
+                    if (!useDefaults.isSelected() && newExtensionsTextField.getText().isEmpty() && actionEvent != null) {
                         newExtensionsTextField.setText(ArchiveManagerOptions.getExtensionString(" "));
                     }
                 }
