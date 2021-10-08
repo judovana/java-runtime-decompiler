@@ -334,15 +334,6 @@ public class SettingsView extends JDialog {
     }
 
     private void applySettings() {
-        config.setAgentPath(agentSettingsPanel.getAgentPath());
-        config.setUseHostSystemClasses(compilationSettingsPanel.shouldUseHostSystemClassesCheckBox());
-
-        try {
-            config.saveConfigFile();
-        } catch (IOException e) {
-            Logger.getLogger().log(Logger.Level.ALL, e);
-        }
-
         List<String> extensions;
         if (nestedJarsSettingsPanel.shouldUseDefaultExtensions()) {
             extensions = new ArrayList<>();
@@ -350,5 +341,15 @@ public class SettingsView extends JDialog {
             extensions = nestedJarsSettingsPanel.getExtensions();
         }
         ArchiveManagerOptions.getInstance().setExtensions(extensions);
+
+        config.setAgentPath(agentSettingsPanel.getAgentPath());
+        config.setUseHostSystemClasses(compilationSettingsPanel.shouldUseHostSystemClassesCheckBox());
+        config.setNestedJarExtensions(extensions);
+
+        try {
+            config.saveConfigFile();
+        } catch (IOException e) {
+            Logger.getLogger().log(Logger.Level.ALL, e);
+        }
     }
 }

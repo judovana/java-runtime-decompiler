@@ -30,6 +30,7 @@ public final class Config {
     private static final String AGENT_PATH_KEY = "AGENT_PATH";
     private static final String SAVED_FS_VMS_KEY = "FS_VMS";
     private static final String USE_HOST_SYSTEM_CLASSES_KEY = "USE_HOST_SYSTEM_CLASSES";
+    private static final String NESTED_JAR_EXTENSIONS = "NESTED_JAR_EXTENSIONS";
 
     private static class ConfigHolder {
         private static final Config INSTANCE = new Config();
@@ -123,6 +124,25 @@ public final class Config {
 
     public boolean doUseHostSystemClasses() {
         return (boolean) configMap.getOrDefault(USE_HOST_SYSTEM_CLASSES_KEY, true);
+    }
+
+    public void setNestedJarExtensions(List<String> extensions) {
+        if (extensions == null || extensions.isEmpty()) {
+            return;
+        }
+
+        configMap.put(NESTED_JAR_EXTENSIONS, extensions);
+    }
+
+    @SuppressWarnings("unchecked") // gson reads JSON arrays as List<String>
+    public List<String> getNestedJarExtensions() {
+        List<String> savedExtensions = (List<String>) configMap.get(NESTED_JAR_EXTENSIONS);
+
+        if (savedExtensions == null) {
+            return new ArrayList<>();
+        }
+
+        return Collections.unmodifiableList(savedExtensions);
     }
 
     public boolean isSavedFsVm(VmInfo vmInfo) {
