@@ -1,5 +1,6 @@
 package org.jrd.backend.data;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.ClassesProvider;
 import io.github.mkoncek.classpathless.api.ClasspathlessCompiler;
@@ -25,6 +26,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -119,6 +121,10 @@ public class Cli {
                 default:
                     throw new RuntimeException("Unknown saving type: " + like + ". Allowed are: " + FQN + "," + DIR + "," + EXACT);
             }
+        }
+
+        public PrintStream openPrintStream() throws IOException {
+            return new PrintStream(new FileOutputStream(this.as), true, "UTF-8");
         }
     }
 
@@ -262,13 +268,28 @@ public class Cli {
         }
     }
 
+    @SuppressFBWarnings(value = "OS_OPEN_STREAM", justification = "The stream is clsoed as conditionally as is created")
     private void api() throws Exception {
-        if (filteredArgs.size() != 2) {
-            throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.API_FORMAT + "'.");
+        PrintStream out = System.out;
+        try {
+            if (saving != null && saving.as != null) {
+                out = saving.openPrintStream();
+            }
+
+            if (filteredArgs.size() != 2) {
+                throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.API_FORMAT + "'.");
+            }
+
+            VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
+            AgentApiGenerator.initItems(vmInfo, vmManager, pluginManager);
+            out.println(AgentApiGenerator.getInterestingHelp());
+
+            out.flush();
+        } finally {
+            if (saving != null && saving.as != null) {
+                out.close();
+            }
         }
-        VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
-        AgentApiGenerator.initItems(vmInfo, vmManager, pluginManager);
-        System.out.println(AgentApiGenerator.getInterestingHelp());
     }
 
     private void init() throws Exception {
@@ -688,26 +709,54 @@ public class Cli {
         return false;
     }
 
-    private void listPlugins() {
+    @SuppressFBWarnings(value = "OS_OPEN_STREAM", justification = "The stream is clsoed as conditionally as is created")
+    private void listPlugins() throws IOException {
         if (filteredArgs.size() != 1) {
             throw new RuntimeException(LIST_PLUGINS + " does not expect arguments.");
         }
 
-        for (DecompilerWrapper dw : pluginManager.getWrappers()) {
-            System.out.printf(
-                    "%s %s/%s - %s%n",
-                    dw.getName(), dw.getScope(), invalidityToString(dw.isInvalidWrapper()), dw.getFileLocation()
-            );
+        PrintStream out = System.out;
+        try {
+            if (saving != null && saving.as != null) {
+                out = saving.openPrintStream();
+            }
+
+            for (DecompilerWrapper dw : pluginManager.getWrappers()) {
+                out.printf(
+                        "%s %s/%s - %s%n",
+                        dw.getName(), dw.getScope(), invalidityToString(dw.isInvalidWrapper()), dw.getFileLocation()
+                );
+            }
+
+            out.flush();
+        } finally {
+            if (saving != null && saving.as != null) {
+                out.close();
+            }
         }
     }
 
-    private void listJvms() {
+    @SuppressFBWarnings(value = "OS_OPEN_STREAM", justification = "The stream is clsoed as conditionally as is created")
+    private void listJvms() throws IOException {
         if (filteredArgs.size() != 1) {
             throw new RuntimeException(LIST_JVMS + " does not expect arguments.");
         }
 
-        for (VmInfo vmInfo : vmManager.getVmInfoSet()) {
-            System.out.println(vmInfo.getVmPid() + " " + vmInfo.getVmName());
+        PrintStream out = System.out;
+        try {
+            if (saving != null && saving.as != null) {
+                out = saving.openPrintStream();
+            }
+
+            for (VmInfo vmInfo : vmManager.getVmInfoSet()) {
+                out.println(vmInfo.getVmPid() + " " + vmInfo.getVmName());
+            }
+
+            out.flush();
+        } finally {
+            if (saving != null && saving.as != null) {
+                out.close();
+            }
         }
     }
 

@@ -109,8 +109,8 @@ public final class Help {
         NOTES.put(NOTES_SAVE, NOTES_SAVE_ITEMS);
     }
 
-    private static final String[] UNSAVABLE_OPTIONS = {HELP, H, LIST_JVMS, LIST_PLUGINS, OVERWRITE, INIT, API};
-    private static final String[] SAVABLE_OPTIONS = {LIST_CLASSES, BYTES, BASE64, COMPILE, DECOMPILE};
+    private static final String[] UNSAVABLE_OPTIONS = {HELP, H, OVERWRITE, INIT};
+    private static final String[] SAVABLE_OPTIONS = {LIST_CLASSES, BYTES, BASE64, COMPILE, DECOMPILE, API, LIST_JVMS, LIST_PLUGINS};
 
     private static final int LONGEST_FORMAT_LENGTH =
             Stream.of(ALL_OPTIONS.keySet(), SAVING_OPTIONS.keySet())
