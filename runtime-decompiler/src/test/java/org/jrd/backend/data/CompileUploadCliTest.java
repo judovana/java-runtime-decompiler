@@ -115,16 +115,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
 
     void testOverwrite(String pucComponent) throws Exception {
         createReplacement(NEW_GREETING);
-
-        String[] args = new String[]{
-                Cli.OVERWRITE,
-                pucComponent,
-                dummy.getFqn(),
-                dummy.getDotClassPath() // contains newGreeting because of try-catch above
-        };
-        Cli cli = new Cli(args, model);
-
-        Assertions.assertDoesNotThrow(() -> cli.consumeCli());
+        Assertions.assertDoesNotThrow(() -> overwrite(dummy, model, dummy.getDotClassPath()));
         Assertions.assertTrue(streams.getOut().contains("success"));
 
         // assert that change propagated, unfortunately we have to rely on another operation here
@@ -223,16 +214,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
         } catch (IOException e) {
             Assertions.fail("Failed to copy file.", e);
         }
-
-        String[] args = new String[]{
-                Cli.OVERWRITE,
-                dummy.getPid(),
-                dummy.getFqn(),
-                nonClassFile
-        };
-        Cli cli = new Cli(args, model);
-
-        Assertions.assertDoesNotThrow(() -> cli.consumeCli());
+        Assertions.assertDoesNotThrow(() -> overwrite(dummy, model, nonClassFile));
         String output = streams.getErr();
         Assertions.assertTrue(output.contains("WARNING:"));
     }
@@ -252,17 +234,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
     void testDecompileCompileCfr() throws Exception {
         final String plugin = "Cfr";
         Assumptions.assumeTrue(checkPlugin(plugin, model), "plugin: " + plugin + " not available");
-        File decompiledFile = File.createTempFile("jrd", "test.java");
-        String[] args = new String[]{
-                Cli.DECOMPILE,
-                dummy.getPid(),
-                plugin,
-                dummy.getFqn(),
-                Cli.SAVE_LIKE, Cli.Saving.EXACT,
-                Cli.SAVE_AS, decompiledFile.getAbsolutePath()
-        };
-        Cli cli = new Cli(args, model);
-        cli.consumeCli();
+        File decompiledFile = decompile(plugin, dummy, model);
         String sOrig = Files.readAllLines(
                 decompiledFile.toPath(), StandardCharsets.UTF_8).stream()
                 .collect(Collectors.joining("\n"));
@@ -273,49 +245,57 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
         assertEqualsWithTolerance(sOrig, sNoCommnets, 0.9);
         assertEqualsWithTolerance(sNoCommnets, dummy.getDefaultContentWithPackage(), 0.85);
 
-        File compiledFile = File.createTempFile("jrd", "test.class");
-        args = new String[]{
-                Cli.COMPILE,
-                Cli.CP, dummy.getPid(),
-                decompiledFile.getAbsolutePath(),
-                Cli.SAVE_LIKE, Cli.Saving.EXACT,
-                Cli.SAVE_AS, compiledFile.getAbsolutePath()
-        };
-        cli = new Cli(args, model);
-        cli.consumeCli();
+        File compiledFile = compile(null, dummy, model, decompiledFile);
         String compiled = readBinaryAsString(compiledFile);
         String original = readBinaryAsString(new File(dummy.getDotClassPath()));
         assertEqualsWithTolerance(compiled, original, 0.9);
 
-        args = new String[]{
-                Cli.OVERWRITE,
-                dummy.getPid(),
-                dummy.getFqn(),
-                compiledFile.getAbsolutePath()
-        };
-        cli = new Cli(args, model);
-        cli.consumeCli();
-
-        args = new String[]{
-                Cli.OVERWRITE,
-                dummy.getPid(),
-                dummy.getFqn(),
-                decompiledFile.getAbsolutePath()//nonsense, will not be accepted
-        };
-        cli = new Cli(args, model);
-        Exception ex = null;
-        try {
-            cli.consumeCli();
-        } catch (Exception eex) {
-            ex = eex;
-        }
-        Assertions.assertNotNull(ex);
+        Assertions.assertDoesNotThrow(() -> overwrite(dummy, model, compiledFile));
+        Assertions.assertThrows(Exception.class, () -> overwrite(dummy, model, decompiledFile)); //src instead of bin == nonsense
     }
 
-    @Test
-    void testDecompileCompileJasm() throws Exception {
-        final String plugin = "jasm";
-        Assumptions.assumeTrue(checkPlugin(plugin, model), "plugin: " + plugin + " not available");
+    private static void overwrite(AbstractSourceTestClass dummy, Model model, String bin) throws Exception {
+        overwrite(dummy, model, new File(bin));
+    }
+
+    private static void overwrite(AbstractSourceTestClass dummy, Model model, File bin) throws Exception {
+        String[] args = new String[]{
+                Cli.OVERWRITE,
+                dummy.getPid(),
+                dummy.getFqn(),
+                bin.getAbsolutePath()
+        };
+        Cli cli = new Cli(args, model);
+        cli.consumeCli();
+    }
+
+    private static File compile(String plugin, AbstractSourceTestClass dummy, Model model, File src) throws Exception {
+        File compiledFile = File.createTempFile("jrd", "test.class");
+        String[] args;
+        if (plugin != null) {
+            args = new String[]{
+                    Cli.COMPILE,
+                    Cli.P, plugin,
+                    Cli.CP, dummy.getPid(),
+                    src.getAbsolutePath(),
+                    Cli.SAVE_LIKE, Cli.Saving.EXACT,
+                    Cli.SAVE_AS, compiledFile.getAbsolutePath()
+            };
+        } else {
+            args = new String[]{
+                    Cli.COMPILE,
+                    Cli.CP, dummy.getPid(),
+                    src.getAbsolutePath(),
+                    Cli.SAVE_LIKE, Cli.Saving.EXACT,
+                    Cli.SAVE_AS, compiledFile.getAbsolutePath()
+            };
+        }
+        Cli cli = new Cli(args, model);
+        cli.consumeCli();
+        return compiledFile;
+    }
+
+    private static File decompile(String plugin, AbstractSourceTestClass dummy, Model model) throws Exception {
         File decompiledFile = File.createTempFile("jrd", "test.java");
         String[] args = new String[]{
                 Cli.DECOMPILE,
@@ -327,6 +307,14 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
         };
         Cli cli = new Cli(args, model);
         cli.consumeCli();
+        return decompiledFile;
+    }
+
+    @Test
+    void testDecompileCompileJasm() throws Exception {
+        final String plugin = "jasm";
+        Assumptions.assumeTrue(checkPlugin(plugin, model), "plugin: " + plugin + " not available");
+        File decompiledFile = decompile(plugin, dummy, model);
         String sOrig = Files.readAllLines(decompiledFile.toPath(), StandardCharsets.UTF_8).stream().collect(Collectors.joining("\n"));
         String sLine = Files.readAllLines(decompiledFile.toPath(), StandardCharsets.UTF_8).stream().collect(Collectors.joining(" "));
         //unluckily there is nothing to compare to, unless we wish to call jasm from here "again"
@@ -345,102 +333,31 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
         Assertions.assertTrue(sLine.matches(".*getstatic\\s+Field\\s+java/lang/System.out:\"Ljava/io/PrintStream;\";.*"));
         Assertions.assertTrue(sLine.matches(".*ldc\\s+String\\s+\"Hello\";.*"));
 
-        File compiledFile = File.createTempFile("jrd", "test.class");
-        args = new String[]{
-                Cli.COMPILE,
-                Cli.CP, dummy.getPid(),
-                Cli.P, plugin,
-                decompiledFile.getAbsolutePath(),
-                Cli.SAVE_LIKE, Cli.Saving.EXACT,
-                Cli.SAVE_AS, compiledFile.getAbsolutePath()
-        };
-        cli = new Cli(args, model);
-        cli.consumeCli();
+        File compiledFile = compile(plugin, dummy, model, decompiledFile);
         String compiled = readBinaryAsString(compiledFile);
         String original = readBinaryAsString(new File(dummy.getDotClassPath()));
-        assertEqualsWithTolerance(compiled, original, 0.4); //yah, jasm performance is not greate
+        assertEqualsWithTolerance(compiled, original, 0.4); //yah, jasm performance is not great
 
-        args = new String[]{
-                Cli.OVERWRITE,
-                dummy.getPid(),
-                dummy.getFqn(),
-                compiledFile.getAbsolutePath()
-        };
-        cli = new Cli(args, model);
-        cli.consumeCli();
-
-        args = new String[]{
-                Cli.OVERWRITE,
-                dummy.getPid(),
-                dummy.getFqn(),
-                decompiledFile.getAbsolutePath() //some nonsense, should fail
-        };
-        cli = new Cli(args, model);
-        Exception ex = null;
-        try {
-            cli.consumeCli();
-        } catch (Exception eex) {
-            ex = eex;
-        }
-        Assertions.assertNotNull(ex);
+        Assertions.assertDoesNotThrow(() -> overwrite(dummy, model, compiledFile));
+        Assertions.assertThrows(Exception.class, () -> overwrite(dummy, model, decompiledFile)); //src instead of bin == nonsense
     }
 
     @Test
     void testDecompileCompileJcoder() throws Exception {
         final String plugin = "jcoder";
         Assumptions.assumeTrue(checkPlugin(plugin, model), "plugin: " + plugin + " not available");
-        File decompiledFile = File.createTempFile("jrd", "test.java");
-        String[] args = new String[]{
-                Cli.DECOMPILE,
-                dummy.getPid(),
-                plugin,
-                dummy.getFqn(),
-                Cli.SAVE_LIKE, Cli.Saving.EXACT,
-                Cli.SAVE_AS, decompiledFile.getAbsolutePath()
-        };
-        Cli cli = new Cli(args, model);
-        cli.consumeCli();
+        File decompiledFile = decompile(plugin, dummy, model);
         String sOrig = Files.readAllLines(decompiledFile.toPath(), StandardCharsets.UTF_8).stream().collect(Collectors.joining("\n"));
-        //unluckily there is nothing to compare to, unless we wish to call jasm from here "again"
+        //unluckily there is nothing to compare to, unless we wish to call jcoder from here "again"
+        Assertions.assertTrue(sOrig.length() > 1000);
 
-        File compiledFile = File.createTempFile("jrd", "test.class");
-        args = new String[]{
-                Cli.COMPILE,
-                Cli.CP, dummy.getPid(),
-                Cli.P, plugin,
-                decompiledFile.getAbsolutePath(),
-                Cli.SAVE_LIKE, Cli.Saving.EXACT,
-                Cli.SAVE_AS, compiledFile.getAbsolutePath()
-        };
-        cli = new Cli(args, model);
-        cli.consumeCli();
+        File compiledFile = compile(plugin, dummy, model, decompiledFile);
         String compiled = readBinaryAsString(compiledFile);
         String original = readBinaryAsString(new File(dummy.getDotClassPath()));
         assertEqualsWithTolerance(compiled, original, 0.4); //yah, jasm performance is not greate
 
-        args = new String[]{
-                Cli.OVERWRITE,
-                dummy.getPid(),
-                dummy.getFqn(),
-                compiledFile.getAbsolutePath()
-        };
-        cli = new Cli(args, model);
-        cli.consumeCli();
-
-        args = new String[]{
-                Cli.OVERWRITE,
-                dummy.getPid(),
-                dummy.getFqn(),
-                decompiledFile.getAbsolutePath() //some nonsense, should fail
-        };
-        cli = new Cli(args, model);
-        Exception ex = null;
-        try {
-            cli.consumeCli();
-        } catch (Exception eex) {
-            ex = eex;
-        }
-        Assertions.assertNotNull(ex);
+        Assertions.assertDoesNotThrow(() -> overwrite(dummy, model, compiledFile));
+        Assertions.assertThrows(Exception.class, () -> overwrite(dummy, model, decompiledFile)); //src instead of bin == nonsense
     }
 
 
@@ -460,18 +377,9 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
 
         String withNonsense = dummy.getDefaultContentWithPackage().replace("/*API_PLACEHOLDER*/", "some nonsese\n");
         Files.write(decompiledFile.toPath(), withNonsense.getBytes(StandardCharsets.UTF_8));
-        File compiledFile = File.createTempFile("jrd", "test.class");
-        args = new String[]{
-                Cli.COMPILE,
-                Cli.CP, dummy.getPid(),
-                decompiledFile.getAbsolutePath(),
-                Cli.SAVE_LIKE, Cli.Saving.EXACT,
-                Cli.SAVE_AS, compiledFile.getAbsolutePath()
-        };
-        cli = new Cli(args, model);
         Exception expectedEx = null;
         try {
-            cli.consumeCli();
+            File compiledFile = compile(null, dummy, model, decompiledFile);
         } catch (Exception ex) {
             String afterCompilationsOut = streams.getOut();
             String afterCompilationsErr = streams.getErr();
@@ -485,33 +393,13 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
                 "org.jrd.agent.api.Variables.Global.set(\"counter\", i);\n" +
                 "System.out.println(\"API: \"+i+\" had spoken\");\n");
         Files.write(decompiledFile.toPath(), withApi.getBytes(StandardCharsets.UTF_8));
-        args = new String[]{
-                Cli.COMPILE,
-                Cli.CP, dummy.getPid(),
-                decompiledFile.getAbsolutePath(),
-                Cli.SAVE_LIKE, Cli.Saving.EXACT,
-                Cli.SAVE_AS, compiledFile.getAbsolutePath()
-        };
-        cli = new Cli(args, model);
-        try {
-            cli.consumeCli();
-        } catch (Exception ex) {
-            String afterCompilationsOut = streams.getOut();
-            String afterCompilationsErr = streams.getErr();
-            throw ex;
-        }
+        File compiledFile = compile(null, dummy, model, decompiledFile);
         String compiled = readBinaryAsString(compiledFile);
         String original = readBinaryAsString(new File(dummy.getDotClassPath()));
         assertEqualsWithTolerance(compiled, original, 0.4);
 
-        args = new String[]{
-                Cli.OVERWRITE,
-                dummy.getPid(),
-                dummy.getFqn(),
-                compiledFile.getAbsolutePath()
-        };
-        cli = new Cli(args, model);
-        cli.consumeCli();
+        Assertions.assertDoesNotThrow(() -> overwrite(dummy, model, compiledFile));
+
         Thread.sleep(1000);
         String mainOutput = dummy.getOutString();
         Assertions.assertTrue(mainOutput.contains("API: 1 had spoken"));
