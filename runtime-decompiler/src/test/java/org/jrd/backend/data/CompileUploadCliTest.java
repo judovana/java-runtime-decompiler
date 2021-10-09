@@ -1,6 +1,7 @@
 package org.jrd.backend.data;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -236,9 +237,21 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
         Assertions.assertTrue(output.contains("WARNING:"));
     }
 
+    public static boolean checkPlugin(String plugin, Model model) throws Exception {
+        File f = File.createTempFile("jrd", "plugins.txt");
+        String[] args = new String[]{
+                Cli.LIST_PLUGINS,
+                Cli.SAVE_AS, f.getAbsolutePath()
+        };
+        Cli cli = new Cli(args, model);
+        cli.consumeCli();
+        return Files.readAllLines(f.toPath()).stream().collect(Collectors.joining(" ")).contains(" " + plugin + " ");
+    }
+
     @Test
     void testDecompileCompileCfr() throws Exception {
         final String plugin = "Cfr";
+        Assumptions.assumeTrue(checkPlugin(plugin, model), "plugin: " + plugin + " not available");
         File decompiledFile = File.createTempFile("jrd", "test.java");
         String[] args = new String[]{
                 Cli.DECOMPILE,
@@ -302,6 +315,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
     @Test
     void testDecompileCompileJasm() throws Exception {
         final String plugin = "jasm";
+        Assumptions.assumeTrue(checkPlugin(plugin, model), "plugin: " + plugin + " not available");
         File decompiledFile = File.createTempFile("jrd", "test.java");
         String[] args = new String[]{
                 Cli.DECOMPILE,
@@ -374,6 +388,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
     @Test
     void testDecompileCompileJcoder() throws Exception {
         final String plugin = "jcoder";
+        Assumptions.assumeTrue(checkPlugin(plugin, model), "plugin: " + plugin + " not available");
         File decompiledFile = File.createTempFile("jrd", "test.java");
         String[] args = new String[]{
                 Cli.DECOMPILE,
