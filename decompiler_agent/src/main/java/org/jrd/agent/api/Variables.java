@@ -1,8 +1,13 @@
 package org.jrd.agent.api;
 
+import org.jrd.agent.AgentLogger;
+
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Variables {
 
@@ -15,6 +20,7 @@ public class Variables {
         FakeVariableAlreadyDeclaredException.init();
         Global.init();
         Local.init();
+        Clazzs.init();
     }
 
     protected Variables() {
@@ -168,6 +174,156 @@ public class Variables {
         }
 
         public static void removeAll(Object owner) {
+            LOCALS.removeAll(owner);
+        }
+
+        public static void destroy() {
+            LOCALS.destroy();
+        }
+    }
+
+    public static class Clazzs {
+
+        protected Clazzs() {
+        }
+
+        // todo, remove synchronisedMap, and create second, synchronised api
+        private static final AbstractMasterKeyMap<Class> LOCALS = new AbstractMasterKeyMap<>() {
+
+            @Override
+            protected synchronized Map<Class, Map<String, Object>> createMainMap() {
+                return Collections.synchronizedMap(new HashMap<>());
+            }
+
+            @Override
+            protected synchronized Map<String, Object> getSubMap(Class owner) {
+                if (owner == null) {
+                    owner = findCaller();
+                }
+                Map<String, Object> thisOnes = values.get(owner);
+                if (thisOnes == null) {
+                    thisOnes = new HashMap<>();
+                    values.put(owner, thisOnes);
+                }
+                return thisOnes;
+            }
+
+            private Class findCaller() throws FakeVariableException {
+                List<String> classes =
+                        Arrays.stream(Thread.currentThread().getStackTrace()).map(a -> a.getClassName()).collect(Collectors.toList());
+                //0 is alwways java.lang.Thread
+                for (int x = 1; x < classes.size(); x++) {
+                    String clazz = classes.get(x);
+                    if (!clazz.startsWith("org.jrd.agent.api.")) {
+                        AgentLogger.getLogger().log("Found: " + clazz);
+                        return classForName(clazz);
+                    }
+                }
+                String clazz = classes.get(classes.size() - 1);
+                AgentLogger.getLogger().log("Notfound, fallback: " + clazz);
+                return classForName(clazz);
+            }
+        };
+
+        public static void init() {
+        }
+
+        private static Class classForName(String clazz) throws FakeVariableException {
+            try {
+                return Class.forName(clazz);
+            } catch (ClassNotFoundException ex) {
+                throw new FakeVariableException(ex);
+            }
+        }
+
+        private static Class nullOrClass(String fqn) throws FakeVariableException {
+            if (fqn == null) {
+                return null;
+            }
+            return classForName(fqn);
+        }
+
+        public static Object set(String name, Object value) throws FakeVariableException {
+            return set((Class) null, name, value);
+        }
+
+        public static Object set(String owner, String name, Object value) throws FakeVariableException {
+            return set(nullOrClass(owner), name, value);
+        }
+
+        public static Object set(Class owner, String name, Object value) {
+            return LOCALS.set(owner, name, value);
+        }
+
+        public static Object setNoReplace(String name, Object value) throws FakeVariableException {
+            return setNoReplace((Class) null, name, value);
+        }
+
+        public static Object setNoReplace(String owner, String name, Object value) throws FakeVariableException {
+            return setNoReplace(nullOrClass(owner), name, value);
+        }
+
+        public static Object setNoReplace(Class owner, String name, Object value) throws NoSuchFakeVariableException {
+            return LOCALS.setNoReplace(owner, name, value);
+        }
+
+        public static Object get(String name) throws FakeVariableException {
+            return get((Class) null, name);
+        }
+
+        public static Object get(String owner, String name) throws FakeVariableException {
+            return get(nullOrClass(owner), name);
+        }
+
+        public static Object get(Class owner, String name) throws NoSuchFakeVariableException {
+            return LOCALS.get(owner, name);
+        }
+
+        public static Object getOrCreate(String name, Object defaultValue) throws FakeVariableException {
+            return getOrCreate((Class) null, name, defaultValue);
+        }
+
+        public static Object getOrCreate(String owner, String name, Object defaultValue) throws FakeVariableException {
+            return getOrCreate(nullOrClass(owner), name, defaultValue);
+        }
+
+        public static Object getOrCreate(Class owner, String name, Object defaultValue) {
+            return LOCALS.getOrCreate(owner, name, defaultValue);
+        }
+
+        public static Object create(String name, Object defaultValue) throws FakeVariableException {
+            return create((Class) null, name, defaultValue);
+        }
+
+        public static Object create(String owner, String name, Object defaultValue) throws FakeVariableException {
+            return create(nullOrClass(owner), name, defaultValue);
+        }
+
+        public static Object create(Class owner, String name, Object defaultValue) throws NoSuchFakeVariableException {
+            return LOCALS.getOrCreate(owner, name, defaultValue);
+        }
+
+        public static Object remove(String name) throws FakeVariableException {
+            return remove((Class) null, name);
+        }
+
+        public static Object remove(String owner, String name) throws FakeVariableException {
+            return remove(nullOrClass(owner), name);
+        }
+
+        public static Object remove(Class owner, String name) throws NoSuchFakeVariableException {
+            return LOCALS.remove(owner, name);
+        }
+
+        public static void removeAll() throws FakeVariableException {
+            removeAll((Class) null);
+        }
+
+        public static void removeAll(String owner) throws FakeVariableException {
+            removeAll(nullOrClass(owner));
+        }
+
+        public static void removeAll(Class owner) {
             LOCALS.removeAll(owner);
         }
 
