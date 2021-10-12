@@ -29,6 +29,10 @@ public class Variables {
             super(s);
         }
 
+        public FakeVariableException(Exception ex) {
+            super(ex);
+        }
+
         public static void init() {
         }
 
@@ -62,73 +66,53 @@ public class Variables {
 
     public static class Global {
 
-        protected Global() {
-        }
+        private static final AbstractMasterKeyMap<String> GLOBALS = new AbstractMasterKeyMap<>() {
 
-        // todo, remove synchronisedMap, and create second, synchronised api
-        private static final Map<String, Object> GLOBALS = Collections.synchronizedMap(new HashMap<>());
+            //globals do not have any granularity, so there is just one key to rule them all
+            private static final String THE_KEY = "THE_KEY";
+
+            @Override
+            protected synchronized Map<String, Map<String, Object>> createMainMap() {
+                Map<String, Map<String, Object>> mapWithSingleMaster = Collections.synchronizedMap(new HashMap<>());
+                mapWithSingleMaster.put(THE_KEY, new HashMap<>());
+                return mapWithSingleMaster;
+            }
+
+            @Override
+            protected synchronized Map<String, Object> getSubMap(String mainKey) {
+                return values.get(THE_KEY);
+            }
+        };
 
         public static void init() {
         }
 
         public static Object set(String name, Object value) {
-            Object old = GLOBALS.put(name, value);
-            if ("jrd.debug".equals(old)) {
-                System.err.println("We do not care about old.");
-            }
-            return value;
+            return GLOBALS.set(null, name, value);
         }
 
         public static Object setNoReplace(String name, Object value) throws NoSuchFakeVariableException {
-            if (GLOBALS.containsKey(name)) {
-                throw new FakeVariableAlreadyDeclaredException();
-            } else {
-                Object old = GLOBALS.put(name, value);
-                if (old != null) {
-                    throw new IllegalStateException("Map is broken!");
-                }
-                return value;
-            }
+            return GLOBALS.setNoReplace(null, name, value);
         }
 
         public static Object get(String name) throws NoSuchFakeVariableException {
-            if (GLOBALS.containsKey(name)) {
-                return GLOBALS.get(name);
-            } else {
-                throw new NoSuchFakeVariableException();
-            }
+            return GLOBALS.get(null, name);
         }
 
         public static Object getOrCreate(String name, Object defaultValue) {
-            if (GLOBALS.containsKey(name)) {
-                return GLOBALS.get(name);
-            } else {
-                Object old = GLOBALS.put(name, defaultValue);
-                if (old != null) {
-                    throw new IllegalStateException("Map is broken!");
-                }
-                return defaultValue;
-            }
+            return GLOBALS.getOrCreate(null, name, defaultValue);
         }
 
         public static Object create(String name, Object defaultValue) throws NoSuchFakeVariableException {
-            if (GLOBALS.containsKey(name)) {
-                throw new FakeVariableAlreadyDeclaredException();
-            } else {
-                return GLOBALS.put(name, defaultValue);
-            }
+            return GLOBALS.create(null, name, defaultValue);
         }
 
         public static Object remove(String name) throws NoSuchFakeVariableException {
-            if (GLOBALS.containsKey(name)) {
-                return GLOBALS.remove(name);
-            } else {
-                throw new NoSuchFakeVariableException();
-            }
+            return GLOBALS.remove(null, name);
         }
 
         public static void removeAll() {
-            GLOBALS.clear();
+            GLOBALS.removeAll(null);
         }
     }
 
@@ -138,90 +122,59 @@ public class Variables {
         }
 
         // todo, remove synchronisedMap, and create second, synchronised api
-        private static final Map<Object, Map<String, Object>> LOCALS = Collections.synchronizedMap(new HashMap<>());
+        private static final AbstractMasterKeyMap<Object> LOCALS = new AbstractMasterKeyMap<>() {
+
+            @Override
+            protected synchronized Map<Object, Map<String, Object>> createMainMap() {
+                return Collections.synchronizedMap(new HashMap<>());
+            }
+
+            @Override
+            protected synchronized Map<String, Object> getSubMap(Object owner) {
+                Map<String, Object> thisOnes = values.get(owner);
+                if (thisOnes == null) {
+                    thisOnes = new HashMap<>();
+                    values.put(owner, thisOnes);
+                }
+                return thisOnes;
+            }
+        };
 
         public static void init() {
         }
 
-        private static synchronized Map<String, Object> getCreateIfNecessary(Object owner) {
-            Map<String, Object> thisOnes = LOCALS.get(owner);
-            if (thisOnes == null) {
-                thisOnes = new HashMap<>();
-                LOCALS.put(owner, thisOnes);
-            }
-            return thisOnes;
-        }
-
         public static Object set(Object owner, String name, Object value) {
-            Map<String, Object> thisOnes = getCreateIfNecessary(owner);
-            Object old = thisOnes.put(name, value);
-            if ("jrd.debug".equals(old)) {
-                System.err.println("We do not care about old.");
-            }
-            return value;
+            return LOCALS.set(owner, name, value);
         }
 
         public static Object setNoReplace(Object owner, String name, Object value) throws NoSuchFakeVariableException {
-            Map<String, Object> thisOnes = getCreateIfNecessary(owner);
-            if (thisOnes.containsKey(name)) {
-                throw new FakeVariableAlreadyDeclaredException();
-            } else {
-                Object old = thisOnes.put(name, value);
-                if (old != null) {
-                    throw new IllegalStateException("Map is broken!");
-                }
-                return value;
-            }
+            return LOCALS.setNoReplace(owner, name, value);
         }
 
         public static Object get(Object owner, String name) throws NoSuchFakeVariableException {
-            Map<String, Object> thisOnes = getCreateIfNecessary(owner);
-            if (thisOnes.containsKey(name)) {
-                return thisOnes.get(name);
-            } else {
-                throw new NoSuchFakeVariableException();
-            }
+            return LOCALS.get(owner, name);
         }
 
         public static Object getOrCreate(Object owner, String name, Object defaultValue) {
-            Map<String, Object> thisOnes = getCreateIfNecessary(owner);
-            if (thisOnes.containsKey(name)) {
-                return thisOnes.get(name);
-            } else {
-                Object old = thisOnes.put(name, defaultValue);
-                if (old != null) {
-                    throw new IllegalStateException("Map is broken!");
-                }
-                return defaultValue;
-            }
+            return LOCALS.getOrCreate(owner, name, defaultValue);
         }
 
         public static Object create(Object owner, String name, Object defaultValue) throws NoSuchFakeVariableException {
-            Map<String, Object> thisOnes = getCreateIfNecessary(owner);
-            if (thisOnes.containsKey(name)) {
-                throw new FakeVariableAlreadyDeclaredException();
-            } else {
-                return thisOnes.put(name, defaultValue);
-            }
+            return LOCALS.getOrCreate(owner, name, defaultValue);
         }
 
         public static Object remove(Object owner, String name) throws NoSuchFakeVariableException {
-            Map<String, Object> thisOnes = getCreateIfNecessary(owner);
-            if (thisOnes.containsKey(name)) {
-                return thisOnes.remove(name);
-            } else {
-                throw new NoSuchFakeVariableException();
-            }
+            return LOCALS.remove(owner, name);
         }
 
         public static void removeAll(Object owner) {
-            Map<String, Object> thisOnes = getCreateIfNecessary(owner);
-            thisOnes.clear();
-            LOCALS.remove(owner);
+            LOCALS.removeAll(owner);
         }
 
-        public static void removeAll() {
-            LOCALS.clear();
+        public static void destroy() {
+            LOCALS.destroy();
         }
     }
+
+
 }
