@@ -125,6 +125,9 @@ public final class AgentApiGenerator {
                         Base64.getDecoder().decode(mainClazz),
                         new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager));
                 for (String innerClazzName : innerClazzes) {
+                    if (innerClazzName.matches(".*\\$[0-9]+$")) {
+                        continue;
+                    }
                     String innerClazz = Cli.obtainClass(vmInfo, innerClazzName, vmManager).getLoadedClassBytes();
                     if (withSignatures) {
                         DecompilerWrapper decompiler = Cli.findDecompiler(DecompilerWrapper.JAVAP_NAME, pluginManager);
