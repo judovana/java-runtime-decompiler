@@ -3,72 +3,28 @@ package org.jrd.agent.api;
 import org.jrd.agent.AgentLogger;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class Variables {
+import static org.jrd.agent.api.Variables.NoSuchFakeVariableException;
+import static org.jrd.agent.api.Variables.FakeVariableException;
+
+public class UnsafeVariables {
 
     /**
-     * We have to have all internal classes initialized so any later classes can use them without a manual init.
+     * unsafe variabels are nto synchronised at all. Use with care!
      */
     public static void init() {
-        FakeVariableException.init();
-        NoSuchFakeVariableException.init();
-        FakeVariableAlreadyDeclaredException.init();
         Global.init();
         Local.init();
         Clazzs.init();
     }
 
-    protected Variables() {
+    protected UnsafeVariables() {
     }
 
-    public static class FakeVariableException extends RuntimeException {
-
-        public FakeVariableException() {
-        }
-
-        public FakeVariableException(String s) {
-            super(s);
-        }
-
-        public FakeVariableException(Exception ex) {
-            super(ex);
-        }
-
-        public static void init() {
-        }
-
-    }
-
-    public static class NoSuchFakeVariableException extends FakeVariableException {
-
-        public NoSuchFakeVariableException() {
-        }
-
-        public NoSuchFakeVariableException(String s) {
-            super(s);
-        }
-
-        public static void init() {
-        }
-    }
-
-    public static class FakeVariableAlreadyDeclaredException extends RuntimeException {
-
-        public FakeVariableAlreadyDeclaredException() {
-        }
-
-        public FakeVariableAlreadyDeclaredException(String s) {
-            super(s);
-        }
-
-        public static void init() {
-        }
-    }
 
     public static class Global {
 
@@ -78,14 +34,14 @@ public class Variables {
             private static final String THE_KEY = "THE_KEY";
 
             @Override
-            protected synchronized Map<String, Map<String, Object>> createMainMap() {
-                Map<String, Map<String, Object>> mapWithSingleMaster = Collections.synchronizedMap(new HashMap<>());
+            protected Map<String, Map<String, Object>> createMainMap() {
+                Map<String, Map<String, Object>> mapWithSingleMaster = new HashMap<>();
                 mapWithSingleMaster.put(THE_KEY, new HashMap<>());
                 return mapWithSingleMaster;
             }
 
             @Override
-            protected synchronized Map<String, Object> getSubMap(String mainKey) {
+            protected Map<String, Object> getSubMap(String mainKey) {
                 return values.get(THE_KEY);
             }
         };
@@ -130,12 +86,12 @@ public class Variables {
         private static final AbstractMasterKeyMap<Object> LOCALS = new AbstractMasterKeyMap<>() {
 
             @Override
-            protected synchronized Map<Object, Map<String, Object>> createMainMap() {
-                return Collections.synchronizedMap(new HashMap<>());
+            protected Map<Object, Map<String, Object>> createMainMap() {
+                return new HashMap<>();
             }
 
             @Override
-            protected synchronized Map<String, Object> getSubMap(Object owner) {
+            protected Map<String, Object> getSubMap(Object owner) {
                 Map<String, Object> thisOnes = values.get(owner);
                 if (thisOnes == null) {
                     thisOnes = new HashMap<>();
@@ -189,12 +145,12 @@ public class Variables {
         private static final AbstractMasterKeyMap<Class> LOCALS = new AbstractMasterKeyMap<>() {
 
             @Override
-            protected synchronized Map<Class, Map<String, Object>> createMainMap() {
-                return Collections.synchronizedMap(new HashMap<>());
+            protected Map<Class, Map<String, Object>> createMainMap() {
+                return new HashMap<>();
             }
 
             @Override
-            protected synchronized Map<String, Object> getSubMap(Class owner) {
+            protected Map<String, Object> getSubMap(Class owner) {
                 if (owner == null) {
                     owner = findCaller();
                 }
