@@ -1,5 +1,6 @@
 package org.jrd.agent;
 
+import org.jrd.agent.api.UnsafeVariables;
 import org.jrd.agent.api.Variables;
 
 import java.lang.instrument.Instrumentation;
@@ -28,6 +29,7 @@ public final class Main {
      */
     public static void premain(String agentArgs, Instrumentation inst) {
         Variables.init();
+        UnsafeVariables.init();
         Transformer transformer = new Transformer();
         inst.addTransformer(transformer, true);
         InstrumentationProvider p = new InstrumentationProvider(inst, transformer);

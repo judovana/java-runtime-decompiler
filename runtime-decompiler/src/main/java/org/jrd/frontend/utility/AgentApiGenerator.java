@@ -120,36 +120,38 @@ public final class AgentApiGenerator {
         if (agentApi == null) {
             try {
                 agentApi = new ArrayList<>();
-                String mainClazz = Cli.obtainClass(vmInfo, "org.jrd.agent.api.Variables", vmManager).getLoadedClassBytes();
-                Set<String> innerClazzes = BytecodeExtractor.extractNestedClasses(
-                        Base64.getDecoder().decode(mainClazz),
-                        new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager));
-                for (String innerClazzName : innerClazzes) {
-                    if (innerClazzName.matches(".*\\$[0-9]+$")) {
-                        continue;
+                for (String clazz: new String[]{"org.jrd.agent.api.Variables", "org.jrd.agent.api.UnsafeVariables"}) {
+                    String mainClazz = Cli.obtainClass(vmInfo, clazz, vmManager).getLoadedClassBytes();
+                    Set<String> innerClazzes = BytecodeExtractor.extractNestedClasses(
+                            Base64.getDecoder().decode(mainClazz),
+                            new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager));
+                    for (String innerClazzName : innerClazzes) {
+                        if (innerClazzName.matches(".*\\$[0-9]+$")) {
+                            continue;
+                        }
+                        String innerClazz = Cli.obtainClass(vmInfo, innerClazzName, vmManager).getLoadedClassBytes();
+                        if (withSignatures) {
+                            DecompilerWrapper decompiler = Cli.findDecompiler(DecompilerWrapper.JAVAP_NAME, pluginManager);
+                            String decompilationResult = pluginManager.decompile(
+                                    decompiler,
+                                    innerClazzName,
+                                    Base64.getDecoder().decode(innerClazz),
+                                    new String[0], vmInfo, vmManager);
+                            Collection<ClazzMethod> methods = extractMethods(decompilationResult);
+                            agentApi.add(new ClazzWithMethods(innerClazzName, methods));
+                        } else {
+                            Collection<String> methods = BytecodeExtractor.extractMethods(Base64.getDecoder().decode(innerClazz));
+                            agentApi.add(new ClazzWithMethods(innerClazzName,
+                                    methods.stream().map(a -> new DummyClazzMethod(a)).collect(Collectors.toList())));
+                        }
                     }
-                    String innerClazz = Cli.obtainClass(vmInfo, innerClazzName, vmManager).getLoadedClassBytes();
-                    if (withSignatures) {
-                        DecompilerWrapper decompiler = Cli.findDecompiler(DecompilerWrapper.JAVAP_NAME, pluginManager);
-                        String decompilationResult = pluginManager.decompile(
-                                decompiler,
-                                innerClazzName,
-                                Base64.getDecoder().decode(innerClazz),
-                                new String[0], vmInfo, vmManager);
-                        Collection<ClazzMethod> methods = extractMethods(decompilationResult);
-                        agentApi.add(new ClazzWithMethods(innerClazzName, methods));
-                    } else {
-                        Collection<String> methods = BytecodeExtractor.extractMethods(Base64.getDecoder().decode(innerClazz));
-                        agentApi.add(new ClazzWithMethods(innerClazzName,
-                                methods.stream().map(a -> new DummyClazzMethod(a)).collect(Collectors.toList())));
-                    }
+                    Collections.sort(agentApi, new Comparator<ClazzWithMethods>() {
+                        @Override
+                        public int compare(ClazzWithMethods clazzWithMethods, ClazzWithMethods t1) {
+                            return clazzWithMethods.fqn.compareTo(t1.fqn);
+                        }
+                    });
                 }
-                Collections.sort(agentApi, new Comparator<ClazzWithMethods>() {
-                    @Override
-                    public int compare(ClazzWithMethods clazzWithMethods, ClazzWithMethods t1) {
-                        return clazzWithMethods.fqn.compareTo(t1.fqn);
-                    }
-                });
             } catch (Exception ex) {
                 ex.printStackTrace();
                 agentApi = null;
