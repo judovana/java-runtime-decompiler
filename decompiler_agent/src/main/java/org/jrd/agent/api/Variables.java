@@ -80,7 +80,7 @@ public class Variables {
             @Override
             protected synchronized Map<String, Map<String, Object>> createMainMap() {
                 Map<String, Map<String, Object>> mapWithSingleMaster = Collections.synchronizedMap(new HashMap<>());
-                mapWithSingleMaster.put(THE_KEY, new HashMap<>());
+                mapWithSingleMaster.put(THE_KEY, Collections.synchronizedMap(new HashMap<>()));
                 return mapWithSingleMaster;
             }
 
@@ -138,7 +138,7 @@ public class Variables {
             protected synchronized Map<String, Object> getSubMap(Object owner) {
                 Map<String, Object> thisOnes = values.get(owner);
                 if (thisOnes == null) {
-                    thisOnes = new HashMap<>();
+                    thisOnes = Collections.synchronizedMap(new HashMap<>());
                     values.put(owner, thisOnes);
                 }
                 return thisOnes;
@@ -200,7 +200,7 @@ public class Variables {
                 }
                 Map<String, Object> thisOnes = values.get(owner);
                 if (thisOnes == null) {
-                    thisOnes = new HashMap<>();
+                    thisOnes = Collections.synchronizedMap(new HashMap<>());
                     values.put(owner, thisOnes);
                 }
                 return thisOnes;
