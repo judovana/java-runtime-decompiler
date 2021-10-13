@@ -29,7 +29,7 @@ public final class Config {
     private static final String CONFIG_PATH = Directories.getConfigDirectory() + File.separator + "config.json";
     private static final String LEGACY_CONFIG_PATH = Directories.getConfigDirectory() + File.separator + "config.cfg";
 
-    private static final String AGENT_PATH_OVERWRITE_PROPERTY = "org.jrd.agent.jar";
+    public static final String AGENT_PATH_OVERWRITE_PROPERTY = "org.jrd.agent.jar";
     private static final String AGENT_PATH_KEY = "AGENT_PATH";
     private static final String SAVED_FS_VMS_KEY = "FS_VMS";
     private static final String USE_HOST_SYSTEM_CLASSES_KEY = "USE_HOST_SYSTEM_CLASSES";

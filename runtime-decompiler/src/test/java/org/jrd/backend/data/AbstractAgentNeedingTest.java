@@ -32,7 +32,12 @@ public abstract class AbstractAgentNeedingTest {
     abstract AbstractSourceTestClass dummyProvider() throws AbstractSourceTestClass.SourceTestClassWrapperException;
 
     @BeforeAll
-    static void startup() {
+    static void startup() throws IOException {
+        String maybeFreshAgent = findFreshAgent();
+        if (maybeFreshAgent != null) {
+            System.setProperty(Config.AGENT_PATH_OVERWRITE_PROPERTY, maybeFreshAgent);
+        }
+
         String agentPath = Config.getConfig().getAgentExpandedPath();
 
         Assumptions.assumeTrue(
@@ -219,5 +224,23 @@ public abstract class AbstractAgentNeedingTest {
         }
         reader.close();
         return sb.toString();
+    }
+
+    private static String findFreshAgent() throws IOException {
+        String cwd = System.getProperty("user.dir");
+        File agentDir = new File(cwd + File.separator + ".." + File.separator + "decompiler_agent" + File.separator + "target");
+
+        if (!agentDir.exists() || !agentDir.isDirectory()) {
+            return null;
+        }
+
+        File[] agentCandidates = agentDir.listFiles();
+        for (File agentCandidate : agentCandidates) {
+            if (agentCandidate.getName().matches("^decompiler-agent-.*.jar$")) {
+                return agentCandidate.getCanonicalPath();
+            }
+        }
+
+        return null;
     }
 }
