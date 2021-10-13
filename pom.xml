@@ -7,8 +7,8 @@
 
     <name>Java Runtime Decompiler</name>
     <modules>
-        <module>runtime-decompiler</module>
         <module>decompiler_agent</module>
+        <module>runtime-decompiler</module>
         <module>images</module>
     </modules>
     <groupId>java-runtime-decompiler</groupId>
