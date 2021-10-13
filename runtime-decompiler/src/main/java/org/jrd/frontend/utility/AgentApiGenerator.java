@@ -49,10 +49,18 @@ public final class AgentApiGenerator {
         private final String original;
         private final String resultType;
         private final String returnless;
+        private final String haveThrows;
         protected final String masterPattern;
 
         protected ClazzMethod(String model) {
             masterPattern = model;
+            haveThrows = model.trim()
+                    .replace("java.lang.", "")
+                    .replaceAll(".*\\)", "")
+                    .replaceAll(";", "")
+                    .replaceAll("\\$", ".")
+                    .replace("org.jrd.agent.api.", "")
+                    .trim();
             original = model.trim()
                     .replace("java.lang.", "")
                     .replace(PUBLIC_STATIC_PREFIX, "")
@@ -63,7 +71,7 @@ public final class AgentApiGenerator {
 
         @Override
         public String toString() {
-            return original;
+            return original + " " + haveThrows;
         }
 
         @Override
