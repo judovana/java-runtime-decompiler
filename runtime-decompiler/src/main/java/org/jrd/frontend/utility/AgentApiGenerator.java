@@ -195,7 +195,10 @@ public final class AgentApiGenerator {
                 p.add(methods);
             }
         }
+
+        p.addSeparator();
         p.add(createHelp(text));
+
         return p;
     }
 
