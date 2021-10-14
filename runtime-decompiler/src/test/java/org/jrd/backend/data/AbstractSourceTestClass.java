@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 abstract class AbstractSourceTestClass {
 
@@ -157,6 +156,7 @@ abstract class AbstractSourceTestClass {
         commands.add(getFqn());
 
         ProcessBuilder pb = new ProcessBuilder(commands);
+        pb.redirectErrorStream(true); // merge process stderr with stdout
         pb.directory(new File(getTargetDir()));
 
         Process javap;
@@ -165,15 +165,17 @@ abstract class AbstractSourceTestClass {
         } catch (IOException e) {
             throw new SourceTestClassWrapperException("Failed to execute javap on '" + getFqn() + "' class.", e);
         }
-        javap.waitFor();
 
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(
-                javap.getInputStream(), StandardCharsets.UTF_8
-        ))) {
-            String output = br.lines().collect(Collectors.joining("\n"));
-            javap.destroy();
-            return output;
+        StringBuilder sb = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(javap.getInputStream(), StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line).append(System.getProperty("line.separator", "\n"));
+            }
         }
+
+        javap.waitFor();
+        return sb.toString();
     }
 
     void terminate() {
