@@ -563,7 +563,11 @@ public class DecompilationController {
                 return org.jrd.frontend.utility.AgentApiGenerator.create(text);
             } else {
                 JPopupMenu p = new JPopupMenu();
-                p.add(new JMenuItem("Agent info is valid only for runnig vms!"));
+
+                JMenuItem infoItem = new JMenuItem("Agent API is only valid for running VMs!");
+                infoItem.setEnabled(false);
+
+                p.add(infoItem);
                 return p;
             }
         }
