@@ -298,9 +298,11 @@ public class BytecodeDecompilerView {
             @Override
             public void stateChanged(ChangeEvent changeEvent) {
                 if (isSourceBufferVisible()) {
-                    compileButton.setVisible(true);
+                    compileButton.setEnabled(true);
+                    insertButton.setEnabled(true);
                 } else {
-                    compileButton.setVisible(false);
+                    compileButton.setEnabled(false);
+                    insertButton.setEnabled(false);
                 }
             }
         });
