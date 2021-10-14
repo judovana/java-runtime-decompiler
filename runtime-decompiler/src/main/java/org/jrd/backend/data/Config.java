@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +32,7 @@ public final class Config {
     private static final String SAVED_FS_VMS_KEY = "FS_VMS";
     private static final String USE_HOST_SYSTEM_CLASSES_KEY = "USE_HOST_SYSTEM_CLASSES";
     private static final String NESTED_JAR_EXTENSIONS = "NESTED_JAR_EXTENSIONS";
+    private static final String COMPILER_ARGS = "COMPILER_ARGS";
 
     private static class ConfigHolder {
         private static final Config INSTANCE = new Config();
@@ -143,6 +145,25 @@ public final class Config {
         }
 
         return Collections.unmodifiableList(savedExtensions);
+    }
+
+    public String getCompilerArgsString() {
+        return String.join(" ", getCompilerArgs());
+    }
+
+    @SuppressWarnings("unchecked") // gson reads JSON arrays as List<String>
+    public List<String> getCompilerArgs() {
+        List<String> savedCompilerArgs = (List<String>) configMap.get(COMPILER_ARGS);
+
+        if (savedCompilerArgs == null) {
+            return new ArrayList<>();
+        }
+
+        return Collections.unmodifiableList(savedCompilerArgs);
+    }
+
+    public void setCompilerArguments(String argString) {
+        configMap.put(COMPILER_ARGS, Arrays.asList(argString.split("\\s+")));
     }
 
     public boolean isSavedFsVm(VmInfo vmInfo) {
