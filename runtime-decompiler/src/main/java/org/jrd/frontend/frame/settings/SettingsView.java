@@ -32,6 +32,7 @@ public class SettingsView extends JDialog {
     private AgentSettingsPanel agentSettingsPanel;
     private CompilationSettingsPanel compilationSettingsPanel;
     private NestedJarsSettingsPanel nestedJarsSettingsPanel;
+    private MiscellaneousSettingsPanel miscSettingsPanel;
     private JPanel okCancelPanel;
 
     private final Config config = Config.getConfig();
@@ -283,6 +284,37 @@ public class SettingsView extends JDialog {
         }
     }
 
+    public static class MiscellaneousSettingsPanel extends JPanel {
+
+        private JLabel miscSettingsLabel;
+        private JCheckBox useJavapSignaturesCheckBox;
+
+        public MiscellaneousSettingsPanel(boolean initialUseJavapSignatures) {
+            miscSettingsLabel = new JLabel("Miscellaneous settings");
+            useJavapSignaturesCheckBox = new JCheckBox(
+                "Use Javap signatures in Agent API insertion menu",
+                initialUseJavapSignatures
+            );
+
+            this.setLayout(new GridBagLayout());
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.anchor = GridBagConstraints.NORTHWEST;
+            gbc.fill = GridBagConstraints.BOTH;
+            gbc.insets = new Insets(5, 5, 5, 5);
+            gbc.gridwidth = 2;
+            gbc.weightx = 1; // required or else contents are centered
+
+            this.add(miscSettingsLabel, gbc);
+
+            gbc.gridy = 1;
+            this.add(useJavapSignaturesCheckBox, gbc);
+        }
+
+        public boolean shouldUseJavapSignatures() {
+            return useJavapSignaturesCheckBox.isSelected();
+        }
+    }
+
     public SettingsView(MainFrameView mainFrameView) {
         JButton okButton = new JButton("OK");
         okButton.addActionListener(actionEvent -> {
@@ -318,6 +350,7 @@ public class SettingsView extends JDialog {
         agentSettingsPanel = new AgentSettingsPanel(config.getAgentRawPath());
         compilationSettingsPanel = new CompilationSettingsPanel(config.doUseHostSystemClasses(), config.getCompilerArgsString());
         nestedJarsSettingsPanel = new NestedJarsSettingsPanel();
+        miscSettingsPanel = new MiscellaneousSettingsPanel(config.doUseJavapSignatures());
 
         mainPanel = new JPanel(new GridBagLayout());
         mainPanel.setBorder(new EmptyBorder(0, 15, 0, 15));
@@ -338,15 +371,17 @@ public class SettingsView extends JDialog {
 
         gbc.gridy = 3;
         gbc.weighty = 0;
-        mainPanel.add(Box.createVerticalGlue(), gbc);
+        mainPanel.add(miscSettingsPanel, gbc);
 
         gbc.gridy = 4;
-        gbc.weighty = 0;
+        mainPanel.add(Box.createVerticalGlue(), gbc);
+
+        gbc.gridy = 5;
         mainPanel.add(okCancelPanel, gbc);
 
         this.setTitle("Settings");
-        this.setSize(new Dimension(800, 500));
-        this.setMinimumSize(new Dimension(250, 500));
+        this.setSize(new Dimension(800, 600));
+        this.setMinimumSize(new Dimension(250, 600));
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setLocationRelativeTo(mainFrameView.getMainFrame());
         this.setModalityType(ModalityType.APPLICATION_MODAL);
@@ -366,6 +401,7 @@ public class SettingsView extends JDialog {
         config.setAgentPath(agentSettingsPanel.getAgentPath());
         config.setUseHostSystemClasses(compilationSettingsPanel.shouldUseHostSystemClassesCheckBox());
         config.setCompilerArguments(compilationSettingsPanel.getCompilerArgs());
+        config.setUseJavapSignatures(miscSettingsPanel.shouldUseJavapSignatures());
         config.setNestedJarExtensions(extensions);
 
         try {
