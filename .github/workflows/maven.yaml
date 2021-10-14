@@ -77,4 +77,4 @@ jobs:
         timeout-minutes: 10
         run: |
           cd jrd
-          mvn --batch-mode test -Dtest=*CliTest -DfailIfNoTests=false
+          mvn --batch-mode test -Dtest=*CliTest -DfailIfNoTests=false "-Dsurefire.reportFormat=plain"
