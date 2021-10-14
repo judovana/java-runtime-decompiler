@@ -135,7 +135,7 @@ public final class ImageButtonFactory {
     }
 
     public static JButton createBookButton(String tooltip) {
-        return createButton("book_24dp.png", "\u21BB", tooltip);
+        return createButton("book_24dp.png", "API", tooltip);
     }
 
     public static JButton createTrashButton() {
