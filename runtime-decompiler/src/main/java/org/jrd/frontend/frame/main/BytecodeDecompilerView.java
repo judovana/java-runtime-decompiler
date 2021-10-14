@@ -357,7 +357,6 @@ public class BytecodeDecompilerView {
             public void keyPressed(KeyEvent e) {
                 if ((e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) != 0) {
                     if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-                        System.out.println("ctrl+space");
                         popup.getFor(bytecodeSyntaxTextArea).show(insertButton, 0, 0);
                     }
                     if (e.getKeyCode() == KeyEvent.VK_F) {
