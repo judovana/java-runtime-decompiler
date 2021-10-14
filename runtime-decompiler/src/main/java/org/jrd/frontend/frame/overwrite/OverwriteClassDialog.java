@@ -46,6 +46,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 
@@ -500,9 +501,11 @@ public class OverwriteClassDialog extends JDialog {
             rc = new RuntimeCompilerConnector.ForeignCompilerWrapper(wrapper);
         } else {
             boolean useHostClasses = Config.getConfig().doUseHostSystemClasses();
+            List<String> compilerArgs = Config.getConfig().getCompilerArgs();
             ClasspathlessCompiler.Arguments arguments = new ClasspathlessCompiler
                     .Arguments()
-                    .useHostSystemClasses(useHostClasses);
+                    .useHostSystemClasses(useHostClasses)
+                    .compilerOptions(compilerArgs);
 
             rc = new io.github.mkoncek.classpathless.impl.CompilerJavac(arguments);
         }

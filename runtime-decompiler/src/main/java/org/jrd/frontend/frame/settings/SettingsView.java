@@ -103,14 +103,14 @@ public class SettingsView extends JDialog {
         private JLabel compilerArgsLabel;
         private JTextField compilerArgsTextField;
 
-        public CompilationSettingsPanel(boolean initialUseHostSystemClasses) {
+        public CompilationSettingsPanel(boolean initialUseHostSystemClasses, String initialCompilerArgs) {
             compilationSettingsLabel = new JLabel("Compilation settings");
             useHostSystemClassesCheckBox = new JCheckBox(
                     "Use host system classes during compilation phase of class overwrite",
                     initialUseHostSystemClasses
             );
             compilerArgsLabel = new JLabel("Compiler arguments");
-            compilerArgsTextField = new JTextField();
+            compilerArgsTextField = new JTextField(initialCompilerArgs);
             compilerArgsTextField.setToolTipText("Arguments that get passed to the compiler, eg. '-source 5 -target 8 -release 9 -Xlint'.");
 
             this.setLayout(new GridBagLayout());
@@ -141,6 +141,10 @@ public class SettingsView extends JDialog {
 
         public boolean shouldUseHostSystemClassesCheckBox() {
             return useHostSystemClassesCheckBox.isSelected();
+        }
+
+        public String getCompilerArgs() {
+            return compilerArgsTextField.getText();
         }
     }
 
@@ -313,7 +317,7 @@ public class SettingsView extends JDialog {
         okCancelPanel.add(cancelButton, gbc);
 
         agentSettingsPanel = new AgentSettingsPanel(config.getAgentRawPath());
-        compilationSettingsPanel = new CompilationSettingsPanel(config.doUseHostSystemClasses());
+        compilationSettingsPanel = new CompilationSettingsPanel(config.doUseHostSystemClasses(), config.getCompilerArgsString());
         nestedJarsSettingsPanel = new NestedJarsSettingsPanel();
 
         mainPanel = new JPanel(new GridBagLayout());
@@ -362,6 +366,7 @@ public class SettingsView extends JDialog {
 
         config.setAgentPath(agentSettingsPanel.getAgentPath());
         config.setUseHostSystemClasses(compilationSettingsPanel.shouldUseHostSystemClassesCheckBox());
+        config.setCompilerArguments(compilationSettingsPanel.getCompilerArgs());
         config.setNestedJarExtensions(extensions);
 
         try {
