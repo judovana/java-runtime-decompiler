@@ -327,7 +327,7 @@ public class BytecodeDecompilerView {
         insertButton = ImageButtonFactory.createBookButton("Insert agent API to current position");
         insertButton.addActionListener(actionEvent -> {
             if (isSourceBufferVisible()) {
-                popup.getFor(bytecodeSyntaxTextArea).show(insertButton, 0, 0);
+                showApiMenu();
             } else {
                 Logger.getLogger().log(Logger.Level.ALL, "Unable to insert agent API into binary buffer.");
             }
@@ -356,7 +356,7 @@ public class BytecodeDecompilerView {
             public void keyPressed(KeyEvent e) {
                 if ((e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) != 0) {
                     if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-                        popup.getFor(bytecodeSyntaxTextArea).show(insertButton, 0, 0);
+                        showApiMenu();
                     }
                     if (e.getKeyCode() == KeyEvent.VK_F) {
                         bytecodeSearchControls.focus();
@@ -812,6 +812,20 @@ public class BytecodeDecompilerView {
     private void deselectBytecodeSyntaxArea() {
         int newDot = bytecodeSyntaxTextArea.getSelectionStart();
         bytecodeSyntaxTextArea.select(newDot, newDot);
+    }
+
+    private void showApiMenu() {
+        Point caretPosition = bytecodeSyntaxTextArea.getCaret().getMagicCaretPosition();
+
+        if (caretPosition == null) { // syntax area has not been focused once yet
+            return;
+        }
+
+        popup.getFor(bytecodeSyntaxTextArea).show(
+            bytecodeSyntaxTextArea,
+            caretPosition.x,
+            caretPosition.y + bytecodeSyntaxTextArea.getFontMetrics(bytecodeSyntaxTextArea.getFont()).getHeight() // offset to the next row
+        );
     }
 
     public static Dimension buttonSizeBasedOnTextField(JButton originalButton, JTextField referenceTextField) {
