@@ -322,15 +322,12 @@ public class BytecodeDecompilerView {
             }
         });
 
-        insertButton = ImageButtonFactory.createBookButton("insert agent api to current position");
+        insertButton = ImageButtonFactory.createBookButton("Insert agent API to current position");
         insertButton.addActionListener(actionEvent -> {
             if (isSourceBufferVisible()) {
                 popup.getFor(bytecodeSyntaxTextArea).show(insertButton, 0, 0);
             } else {
-                //button should be disabled
-                if (false) {
-                    System.err.println("checkstyle can go fuck itself");
-                }
+                Logger.getLogger().log(Logger.Level.ALL, "Unable to insert agent API into binary buffer.");
             }
         });
 

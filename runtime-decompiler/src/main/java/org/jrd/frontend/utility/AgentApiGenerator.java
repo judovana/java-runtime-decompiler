@@ -200,20 +200,19 @@ public final class AgentApiGenerator {
     }
 
     private static JMenuItem createHelp(RSyntaxTextArea text) {
-        JMenuItem i = new JMenuItem("Help");
+        JMenuItem i = new JMenuItem("Show help for this feature");
         i.addActionListener(actionEvent -> {
-            JOptionPane.showMessageDialog(text,
-                    getPlainHelp() + "\n You can use" +
-                            " ctrl+spacebar to access code completion from editor." +
-                            " ctrl+f/esc should work for search");
+            JOptionPane.showMessageDialog(
+                text,
+                getPlainHelp() + "\n Use the API button or Ctrl+Space to bring up a selection of possible code insertions."
+            );
         });
         return i;
     }
 
     public static String getPlainHelp() {
-        return "This api allows you to \"insert fields\" and \"declare\" new methods (aka Runnable)\n" +
-                "into *running vm*. This api have no sense in filesystem jar/classes. To read more,\n" +
-                "try to decompile classes from package: \'org.jrd.agent.api\' to see full api and logic.";
+        return "This API allows you to insert new fields and declare new methods (Runnables) in a running JVM.\n" +
+            "To read more, decompile classes from package 'org.jrd.agent.api' to see the full source code and logic.";
     }
 
     public static String getInterestingHelp() {
