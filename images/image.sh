@@ -103,6 +103,8 @@ cp "$ASM_TREE" "$DEPS_DIR"
 cp "$ASM_JAR" "$DEPS_DIR"
 cp "$BYTEMAN" "$DEPS_DIR"
 cp "$JRD" "$DEPS_DIR"
+cp "$CPLC_API" "$DEPS_DIR"
+cp "$CPLC_UTIL" "$DEPS_DIR"
 cp "$CPLC" "$DEPS_DIR"
 cp "$SCRIPT_DIR/decompiler_agent/target/decompiler-agent-$VERSION.jar" "$LIB_DIR"
 echo "{\"AGENT_PATH\":\"\${JRD}/libs/decompiler-agent-$VERSION.jar\"}" > "$AGENT_CONF/config.json"
@@ -162,7 +164,7 @@ for extension in sh bat ; do
   chmod 755 "$IMAGE_DIR/start.$extension"
 done
 
-$javac_home/bin/java -cp $CPLC:$JUST_BUILD_JRD org.jrd.backend.data.Help > $IMAGE_DIR/jrd.man.1
+$javac_home/bin/java -cp $CPLC_API:$CLPC_UTIL:$CPLC:$JUST_BUILD_JRD org.jrd.backend.data.Help > $IMAGE_DIR/jrd.man.1
 
 pushd $TARGET_DIR
 cp -r $IMAGE_DIR $NAME$SUFFIX
