@@ -219,21 +219,17 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
         Assertions.assertTrue(output.contains("WARNING:"));
     }
 
-    public static boolean checkPlugin(String plugin, Model model) throws Exception {
-        File f = File.createTempFile("jrd", "plugins.txt");
-        String[] args = new String[]{
-                Cli.LIST_PLUGINS,
-                Cli.SAVE_AS, f.getAbsolutePath()
-        };
-        Cli cli = new Cli(args, model);
-        cli.consumeCli();
-        return Files.readAllLines(f.toPath()).stream().collect(Collectors.joining(" ")).contains(" " + plugin + " ");
+    public static boolean pluginExists(String plugin, Model model) throws Exception {
+        return model.getPluginManager()
+                .getWrappers()
+                .stream()
+                .anyMatch(wrapper -> wrapper.getName().equals(plugin));
     }
 
     @Test
     void testDecompileCompileCfr() throws Exception {
         final String plugin = "Cfr";
-        Assumptions.assumeTrue(checkPlugin(plugin, model), "plugin: " + plugin + " not available");
+        Assumptions.assumeTrue(pluginExists(plugin, model), "plugin: " + plugin + " not available");
         File decompiledFile = decompile(plugin, dummy, model);
         String sOrig = Files.readAllLines(
                 decompiledFile.toPath(), StandardCharsets.UTF_8).stream()
@@ -313,7 +309,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
     @Test
     void testDecompileCompileJasm() throws Exception {
         final String plugin = "jasm";
-        Assumptions.assumeTrue(checkPlugin(plugin, model), "plugin: " + plugin + " not available");
+        Assumptions.assumeTrue(pluginExists(plugin, model), "plugin: " + plugin + " not available");
         File decompiledFile = decompile(plugin, dummy, model);
         String sOrig = Files.readAllLines(decompiledFile.toPath(), StandardCharsets.UTF_8).stream().collect(Collectors.joining("\n"));
         String sLine = Files.readAllLines(decompiledFile.toPath(), StandardCharsets.UTF_8).stream().collect(Collectors.joining(" "));
@@ -345,7 +341,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
     @Test
     void testDecompileCompileJcoder() throws Exception {
         final String plugin = "jcoder";
-        Assumptions.assumeTrue(checkPlugin(plugin, model), "plugin: " + plugin + " not available");
+        Assumptions.assumeTrue(pluginExists(plugin, model), "plugin: " + plugin + " not available");
         File decompiledFile = decompile(plugin, dummy, model);
         String sOrig = Files.readAllLines(decompiledFile.toPath(), StandardCharsets.UTF_8).stream().collect(Collectors.joining("\n"));
         //unluckily there is nothing to compare to, unless we wish to call jcoder from here "again"
