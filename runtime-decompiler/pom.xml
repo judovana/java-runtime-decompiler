@@ -130,8 +130,18 @@
     <dependencies>
         <dependency>
             <groupId>io.github.mkoncek</groupId>
+            <artifactId>classpathless-compiler-api</artifactId>
+            <version>[1.0,)</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.mkoncek</groupId>
+            <artifactId>classpathless-compiler-util</artifactId>
+            <version>[1.0,)</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.mkoncek</groupId>
             <artifactId>classpathless-compiler</artifactId>
-            <version>[1.4,)</version>
+            <version>[1.7,)</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
