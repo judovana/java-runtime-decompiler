@@ -191,7 +191,6 @@ public class SettingsView extends JDialog {
             currentExtensionsList.setVisibleRowCount(-1);
 
             scrollPane = new JScrollPane(currentExtensionsList);
-            scrollPane.setPreferredSize(new Dimension(0, 200));
 
             addButton = new JButton("Add");
             addButton.addActionListener(actionEvent -> confirmExtensions());
