@@ -4,6 +4,7 @@ import io.github.mkoncek.classpathless.util.BytecodeExtractor;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.data.Cli;
+import org.jrd.backend.data.Config;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
 import org.jrd.backend.decompiling.DecompilerWrapper;
@@ -112,8 +113,7 @@ public final class AgentApiGenerator {
     }
 
     public static synchronized void initItems(VmInfo vmInfo, VmManager vmManager, PluginManager pluginManager) {
-        // todo, read from settings
-        initItems(vmInfo, vmManager, pluginManager, true);
+        initItems(vmInfo, vmManager, pluginManager, Config.getConfig().doUseJavapSignatures());
     }
 
     private static synchronized void initItems(VmInfo vmInfo, VmManager vmManager, PluginManager pluginManager, boolean withSignatures) {
@@ -152,6 +152,13 @@ public final class AgentApiGenerator {
                 agentApi = null;
             }
         }
+    }
+
+    /**
+     * Used to clear Agent API items in case their method/form of generation changes.
+     */
+    public static synchronized void clearItems() {
+        agentApi = null;
     }
 
     private static Collection<ClazzMethod> extractMethods(String decompilationResult) {

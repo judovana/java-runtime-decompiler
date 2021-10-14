@@ -3,6 +3,7 @@ package org.jrd.backend.data;
 import com.google.gson.Gson;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.decompiling.ExpandableUrl;
+import org.jrd.frontend.utility.AgentApiGenerator;
 
 import java.io.File;
 import java.io.FileReader;
@@ -33,6 +34,7 @@ public final class Config {
     private static final String USE_HOST_SYSTEM_CLASSES_KEY = "USE_HOST_SYSTEM_CLASSES";
     private static final String NESTED_JAR_EXTENSIONS = "NESTED_JAR_EXTENSIONS";
     private static final String COMPILER_ARGS = "COMPILER_ARGS";
+    private static final String USE_JAVAP_SIGNATURES = "USE_JAVAP_SIGNATURES";
 
     private static class ConfigHolder {
         private static final Config INSTANCE = new Config();
@@ -164,6 +166,20 @@ public final class Config {
 
     public void setCompilerArguments(String argString) {
         configMap.put(COMPILER_ARGS, Arrays.asList(argString.split("\\s+")));
+    }
+
+    public boolean doUseJavapSignatures() {
+        return (boolean) configMap.getOrDefault(USE_JAVAP_SIGNATURES, true);
+    }
+
+    public void setUseJavapSignatures(boolean shouldUseJavapSignatures) {
+        boolean originalValue = doUseJavapSignatures();
+
+        if (originalValue != shouldUseJavapSignatures) {
+            AgentApiGenerator.clearItems();
+        }
+
+        configMap.put(USE_JAVAP_SIGNATURES, shouldUseJavapSignatures);
     }
 
     public boolean isSavedFsVm(VmInfo vmInfo) {
