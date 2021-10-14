@@ -413,11 +413,11 @@ public class CliTest extends AbstractAgentNeedingTest {
         cli = new Cli(args, model);
 
         cli.consumeCli();
-        String jrdDisassembled = streams.getOut();
-        String javapDisassembled = dummy.executeJavaP(option);
+        String jrdDisassembled = streams.getOut().trim();
+        String javapDisassembled = dummy.executeJavaP(option).trim();
 
         // JRD javap has additional debug comment lines + header is different
-        assertEqualsWithTolerance(jrdDisassembled, javapDisassembled, 0.8);
+        assertEqualsWithTolerance(jrdDisassembled, javapDisassembled, 0.9);
     }
 
     @ParameterizedTest
