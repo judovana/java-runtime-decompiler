@@ -30,6 +30,7 @@ import org.jrd.frontend.utility.ScreenFinder;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -72,7 +73,14 @@ public class DecompilationController {
         mainFrameView.setRemoveVmDialogListener(this::removeVmDialog);
         bytecodeDecompilerView.setInitActionListener(e -> initClass(e.getActionCommand()));
         bytecodeDecompilerView.setClassesActionListener(e -> loadClassNames());
-        bytecodeDecompilerView.setBytesActionListener(e -> loadClassBytecode(e.getActionCommand()));
+        bytecodeDecompilerView.setBytesActionListener(e -> {
+            showLoadingDialog(a -> hideLoadingDialog());
+            try {
+                loadClassBytecode(e.getActionCommand());
+            } finally {
+                hideLoadingDialog();
+            }
+        });
         bytecodeDecompilerView.setOverwriteActionListener(new ClassOverwriter());
         bytecodeDecompilerView.setCompileListener(new QuickCompiler());
         bytecodeDecompilerView.setPopup(new AgentApiGenerator());
@@ -257,10 +265,13 @@ public class DecompilationController {
     }
 
     private void showLoadingDialog() {
+        showLoadingDialog(a -> abortClassLoading());
+    }
+
+    private void showLoadingDialog(ActionListener listener) {
         SwingUtilities.invokeLater(() -> {
             loadingDialog = new LoadingDialog();
-            loadingDialog.setAbortActionListener(e
-                    -> abortClassLoading());
+            loadingDialog.setAbortActionListener(listener);
             loadingDialog.setVisible(true);
         });
     }
