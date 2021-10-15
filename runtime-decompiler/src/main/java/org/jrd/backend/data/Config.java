@@ -63,7 +63,7 @@ public final class Config {
         }
 
         String configAgentPath = (String) configMap.getOrDefault(AGENT_PATH_KEY, "");
-        String potentialAgentPath = Directories.getPotentialAgentLocation(true);
+        String potentialAgentPath = Directories.getPotentialAgentLocation().getAbsolutePath();
 
         // if config doesn't contain agent path, but agent jar is in a predictable place, use that
         if (configAgentPath.isEmpty() && new File(potentialAgentPath).exists()) {

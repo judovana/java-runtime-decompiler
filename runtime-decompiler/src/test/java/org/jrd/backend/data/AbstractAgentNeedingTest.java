@@ -227,20 +227,10 @@ public abstract class AbstractAgentNeedingTest {
     }
 
     private static String findFreshAgent() throws IOException {
-        String cwd = System.getProperty("user.dir");
-        File agentDir = new File(cwd + File.separator + ".." + File.separator + "decompiler_agent" + File.separator + "target");
-
+        File agentDir = Directories.getFreshlyBuiltAgent();
         if (!agentDir.exists() || !agentDir.isDirectory()) {
             return null;
         }
-
-        File[] agentCandidates = agentDir.listFiles();
-        for (File agentCandidate : agentCandidates) {
-            if (agentCandidate.getName().matches("^decompiler-agent-.*.jar$")) {
-                return agentCandidate.getCanonicalPath();
-            }
-        }
-
-        return null;
+        return agentDir.getCanonicalPath();
     }
 }
