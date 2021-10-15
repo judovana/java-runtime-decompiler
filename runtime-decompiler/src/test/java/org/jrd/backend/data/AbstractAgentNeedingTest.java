@@ -32,10 +32,10 @@ public abstract class AbstractAgentNeedingTest {
     abstract AbstractSourceTestClass dummyProvider() throws AbstractSourceTestClass.SourceTestClassWrapperException;
 
     @BeforeAll
-    static void startup() throws IOException {
-        String maybeFreshAgent = findFreshAgent();
+    static void startup() {
+        File maybeFreshAgent = findFreshAgent();
         if (maybeFreshAgent != null) {
-            System.setProperty(Config.AGENT_PATH_OVERWRITE_PROPERTY, maybeFreshAgent);
+            System.setProperty(Config.AGENT_PATH_OVERWRITE_PROPERTY, maybeFreshAgent.getAbsolutePath());
         }
 
         String agentPath = Config.getConfig().getAgentExpandedPath();
@@ -226,19 +226,11 @@ public abstract class AbstractAgentNeedingTest {
         return sb.toString();
     }
 
-    private static String findFreshAgent() throws IOException {
-        String cwd = System.getProperty("user.dir");
-        File agentDir = new File(cwd + File.separator + ".." + File.separator + "decompiler_agent" + File.separator + "target");
+    private static File findFreshAgent() {
+        File agent = new File(Directories.getPotentialAgentLocation(true, false));
 
-        if (!agentDir.exists() || !agentDir.isDirectory()) {
-            return null;
-        }
-
-        File[] agentCandidates = agentDir.listFiles();
-        for (File agentCandidate : agentCandidates) {
-            if (agentCandidate.getName().matches("^decompiler-agent-.*.jar$")) {
-                return agentCandidate.getCanonicalPath();
-            }
+        if (agent.exists() && !agent.isDirectory()) {
+            return agent;
         }
 
         return null;
