@@ -70,12 +70,26 @@ public final class Directories {
         }
     }
 
-    public static String getPotentialAgentLocation(boolean useFullPath) {
-        String agentFile = "decompiler-agent-" + MetadataProperties.getInstance().getVersion() + ".jar";
-        String rootPath = useFullPath ? getJrdLocation() : ".";
-        String projectPath = isPortable() ? "libs" : "decompiler_agent" + File.separator + "target";
+    public static File getFreshlyBuiltAgent() {
+        return new File(
+            getJrdLocation() + File.separator + "decompiler_agent" + File.separator + "target" + File.separator + getAgentFile()
+        );
+    }
 
-        return rootPath + File.separator + projectPath + File.separator + agentFile;
+    public static File getPotentialAgentLocation() {
+        if (isPortable()) {
+            return new File(getJrdLocation() + File.separator + "libs" + File.separator + getAgentFile());
+        } else {
+            return getFreshlyBuiltAgent();
+        }
+    }
+
+    public static String getRelativePotentialAgentLocation() {
+        return getPotentialAgentLocation().getAbsolutePath().replace(getJrdLocation(), ".");
+    }
+
+    private static String getAgentFile() {
+        return "decompiler-agent-" + MetadataProperties.getInstance().getVersion() + ".jar";
     }
 
     public static boolean isPortable() {
