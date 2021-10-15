@@ -14,6 +14,7 @@ import org.fife.ui.rtextarea.SearchEngine;
 import org.fife.ui.rtextarea.SearchResult;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.decompiling.DecompilerWrapper;
+import org.jrd.frontend.frame.main.popup.ClassListPopupMenu;
 import org.jrd.frontend.utility.ImageButtonFactory;
 import org.jrd.frontend.utility.ScreenFinder;
 
@@ -25,8 +26,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.undo.UndoManager;
 import java.awt.*;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -58,7 +57,6 @@ public class BytecodeDecompilerView {
                 private JPanel classesToolBar;
                     private JButton reloadClassesButton;
                     private JTextField classesSortField;
-                    private JButton copyClassesButton;
                         private final Color classesSortFieldColor;
                 private JPanel classesPanel;
                     private JScrollPane classesScrollPane;
@@ -161,9 +159,16 @@ public class BytecodeDecompilerView {
         filteredClassesJList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                final String name = filteredClassesJList.getSelectedValue();
-                if (name != null || filteredClassesJList.getSelectedIndex() != -1) {
-                    classWorker(name);
+                if (SwingUtilities.isLeftMouseButton(e)) {
+                    final String name = filteredClassesJList.getSelectedValue();
+
+                    if (name != null || filteredClassesJList.getSelectedIndex() != -1) {
+                        classWorker(name);
+                    }
+                } else if (SwingUtilities.isRightMouseButton(e)) {
+                    ClassListPopupMenu
+                        .create(filteredClassesJList.getModel().getElementAt(filteredClassesJList.locationToIndex(e.getPoint())))
+                        .show(filteredClassesJList, e.getX(), e.getY());
                 }
             }
         });
@@ -278,21 +283,6 @@ public class BytecodeDecompilerView {
             }
         });
 
-        copyClassesButton = ImageButtonFactory.createDetachButton("C", "Copy class names");
-        copyClassesButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                List<String> l = filteredClassesJList.getSelectedValuesList();
-                if (l != null && !l.isEmpty()) {
-                    String s = String.join("\n", l);
-                    StringSelection selection = new StringSelection(s);
-                    Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-                    clipboard.setContents(selection, selection);
-                }
-            }
-        });
-
-
         buffers = new JTabbedPane();
         buffers.addChangeListener(new ChangeListener() {
             @Override
@@ -337,7 +327,6 @@ public class BytecodeDecompilerView {
         classesToolBar.setBorder(new EtchedBorder());
         classesToolBar.add(reloadClassesButton, BorderLayout.WEST);
         classesToolBar.add(classesSortField);
-        classesToolBar.add(copyClassesButton, BorderLayout.EAST);
 
         pluginComboBox = new JComboBox<DecompilerWrapper>();
         pluginComboBox.addActionListener(new ActionListener() {
