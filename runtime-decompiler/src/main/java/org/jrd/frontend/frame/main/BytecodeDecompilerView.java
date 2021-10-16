@@ -36,6 +36,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.ByteArrayInputStream;
@@ -164,23 +165,51 @@ public class BytecodeDecompilerView {
         filteredClassesJList = new JList<>();
         filteredClassesJList.setCellRenderer(filteredClassesRenderer);
         filteredClassesJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
         filteredClassesJList.addMouseListener(new MouseAdapter() {
+            private int originallySelected = -1;
+
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mousePressed(MouseEvent e) {
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    originallySelected = filteredClassesJList.getSelectedIndex(); // should be 1 index only, because of SINGLE_SELECTION
+                    filteredClassesJList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+                    filteredClassesJList.setSelectedIndex(filteredClassesJList.locationToIndex(e.getPoint()));
+                }
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
                 if (SwingUtilities.isLeftMouseButton(e)) {
                     final String name = filteredClassesJList.getSelectedValue().getName();
-
                     if (name != null || filteredClassesJList.getSelectedIndex() != -1) {
                         bytesWorker(name);
                     }
                 } else if (SwingUtilities.isRightMouseButton(e)) {
-                    ClassListPopupMenu
-                        .create(
-                            filteredClassesJList.getModel().getElementAt(filteredClassesJList.locationToIndex(e.getPoint())),
-                            doShowClassInfo()
-                        )
+                    ClassListPopupMenu.create(filteredClassesJList, originallySelected, doShowClassInfo())
                         .show(filteredClassesJList, e.getX(), e.getY());
                 }
+            }
+        });
+        // unfortunately MouseAdapter's mouseDragged() does not get triggered on a JList, hence this 2nd listener
+        filteredClassesJList.addMouseMotionListener(new MouseMotionListener() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    int indexUnderMouse = filteredClassesJList.locationToIndex(e.getPoint());
+                    int minSelectedIndex = filteredClassesJList.getMinSelectionIndex();
+                    int maxSelectedIndex = filteredClassesJList.getMaxSelectionIndex();
+
+                    if (minSelectedIndex < indexUnderMouse && indexUnderMouse < maxSelectedIndex) {
+                        filteredClassesJList.removeSelectionInterval(indexUnderMouse, maxSelectedIndex);
+                    } else {
+                        filteredClassesJList.addSelectionInterval(minSelectedIndex, indexUnderMouse);
+                    }
+                }
+            }
+
+            @Override
+            public void mouseMoved(MouseEvent mouseEvent) {
             }
         });
 
