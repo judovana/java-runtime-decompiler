@@ -44,6 +44,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -104,7 +105,7 @@ public class BytecodeDecompilerView {
     private final JFrame mainFrame;
     private JFrame detachedBytecodeFrame;
 
-    private static final List<Integer> CLASS_LIST_REGISTERED_KEY_CODES = List.of(
+    private static final Set<Integer> CLASS_LIST_REGISTERED_KEY_CODES = Set.of(
             KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_PAGE_UP, KeyEvent.VK_PAGE_DOWN, KeyEvent.VK_ENTER
     );
     private static final Insets PANEL_INSETS = new Insets(3, 3, 3, 3);
@@ -191,6 +192,8 @@ public class BytecodeDecompilerView {
                     if (name != null || filteredClassesJList.getSelectedIndex() != -1) {
                         bytesWorker(name);
                     }
+                } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    filteredClassesJList.clearSelection();
                 }
             }
         });
