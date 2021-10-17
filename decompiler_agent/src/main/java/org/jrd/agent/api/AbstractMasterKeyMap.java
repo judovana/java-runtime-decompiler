@@ -1,6 +1,7 @@
 package org.jrd.agent.api;
 
 import java.util.Map;
+import java.util.Set;
 
 public abstract class AbstractMasterKeyMap<T> {
 
@@ -84,4 +85,34 @@ public abstract class AbstractMasterKeyMap<T> {
     public void destroy() {
         values.clear();
     }
+
+    public String dump() {
+        Set<Map.Entry<T, Map<String, Object>>> main = values.entrySet();
+        StringBuilder sb = new StringBuilder("table " + this.getClass().getName() + ": " + main.size() + " groups");
+        sb.append("\n");
+        for (Map.Entry<T, Map<String, Object>> subtable : main) {
+            sb.append("  " + dumpKey(subtable.getKey()) + ": " + subtable.getValue().entrySet().size() + " items");
+            sb.append("\n");
+            for (Map.Entry<String, Object> leaf : subtable.getValue().entrySet()) {
+                sb.append("    " + dumpKey(subtable.getKey()) + "/" + leaf.getKey() + "=" + leaf.getValue());
+                sb.append("\n");
+            }
+        }
+        sb.append("end " + this.getClass().getName());
+        sb.append("\n");
+        return sb.toString();
+    }
+
+    protected String dumpKey(T key) {
+        if (key == null) {
+            return null;
+        }
+        if (key.toString().length() > 50) {
+            return key.getClass().getSimpleName() + "@" + key.hashCode();
+        } else {
+            return key.toString();
+        }
+    }
+
+
 }

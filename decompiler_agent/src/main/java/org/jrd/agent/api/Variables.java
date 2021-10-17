@@ -23,6 +23,14 @@ public class Variables {
         Clazzs.init();
     }
 
+    public static String dumpAll() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(Global.dump());
+        sb.append(Local.dump());
+        sb.append(Clazzs.dump());
+        return sb.toString();
+    }
+
     protected Variables() {
     }
 
@@ -75,7 +83,7 @@ public class Variables {
         private static final AbstractMasterKeyMap<String> GLOBALS = new AbstractMasterKeyMap<>() {
 
             //globals do not have any granularity, so there is just one key to rule them all
-            private static final String THE_KEY = "THE_KEY";
+            private static final String THE_KEY = "GLOBALS";
 
             @Override
             protected synchronized Map<String, Map<String, Object>> createMainMap() {
@@ -119,6 +127,10 @@ public class Variables {
 
         public static void removeAll() {
             GLOBALS.removeAll(null);
+        }
+
+        public static String dump() {
+            return GLOBALS.dump();
         }
     }
 
@@ -179,6 +191,10 @@ public class Variables {
         public static void destroy() {
             LOCALS.destroy();
         }
+
+        public static String dump() {
+            return LOCALS.dump();
+        }
     }
 
     public static class Clazzs {
@@ -186,7 +202,7 @@ public class Variables {
         protected Clazzs() {
         }
 
-        private static final AbstractMasterKeyMap<Class> LOCALS = new AbstractMasterKeyMap<>() {
+        private static final AbstractMasterKeyMap<Class> CLAZZS = new AbstractMasterKeyMap<>() {
 
             @Override
             protected synchronized Map<Class, Map<String, Object>> createMainMap() {
@@ -250,7 +266,7 @@ public class Variables {
         }
 
         public static Object set(Class owner, String name, Object value) {
-            return LOCALS.set(owner, name, value);
+            return CLAZZS.set(owner, name, value);
         }
 
         public static Object setNoReplace(String name, Object value) throws FakeVariableException {
@@ -262,7 +278,7 @@ public class Variables {
         }
 
         public static Object setNoReplace(Class owner, String name, Object value) throws NoSuchFakeVariableException {
-            return LOCALS.setNoReplace(owner, name, value);
+            return CLAZZS.setNoReplace(owner, name, value);
         }
 
         public static Object get(String name) throws FakeVariableException {
@@ -274,7 +290,7 @@ public class Variables {
         }
 
         public static Object get(Class owner, String name) throws NoSuchFakeVariableException {
-            return LOCALS.get(owner, name);
+            return CLAZZS.get(owner, name);
         }
 
         public static Object getOrCreate(String name, Object defaultValue) throws FakeVariableException {
@@ -286,7 +302,7 @@ public class Variables {
         }
 
         public static Object getOrCreate(Class owner, String name, Object defaultValue) {
-            return LOCALS.getOrCreate(owner, name, defaultValue);
+            return CLAZZS.getOrCreate(owner, name, defaultValue);
         }
 
         public static Object create(String name, Object defaultValue) throws FakeVariableException {
@@ -298,7 +314,7 @@ public class Variables {
         }
 
         public static Object create(Class owner, String name, Object defaultValue) throws NoSuchFakeVariableException {
-            return LOCALS.getOrCreate(owner, name, defaultValue);
+            return CLAZZS.getOrCreate(owner, name, defaultValue);
         }
 
         public static Object remove(String name) throws FakeVariableException {
@@ -310,7 +326,7 @@ public class Variables {
         }
 
         public static Object remove(Class owner, String name) throws NoSuchFakeVariableException {
-            return LOCALS.remove(owner, name);
+            return CLAZZS.remove(owner, name);
         }
 
         public static void removeAll() throws FakeVariableException {
@@ -322,11 +338,15 @@ public class Variables {
         }
 
         public static void removeAll(Class owner) {
-            LOCALS.removeAll(owner);
+            CLAZZS.removeAll(owner);
         }
 
         public static void destroy() {
-            LOCALS.destroy();
+            CLAZZS.destroy();
+        }
+
+        public static String dump() {
+            return CLAZZS.dump();
         }
     }
 
