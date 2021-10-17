@@ -10,6 +10,13 @@ public class ClassInfo {
 
     private static final Pattern INFO_DELIMITER_PATTERN = Pattern.compile("\\|");
 
+    public ClassInfo(String name, String location, String classLoader) {
+        this.name = name;
+        this.location = location;
+        this.classLoader = classLoader;
+
+    }
+
     public ClassInfo(String classString) {
         String[] splitClassString = INFO_DELIMITER_PATTERN.split(classString);
         this.name = splitClassString[0];
@@ -65,5 +72,15 @@ public class ClassInfo {
     @Override
     public int hashCode() {
         return Objects.hash(name);
+    }
+
+    public String toPrint(boolean details) {
+        if (!details) {
+            return name;
+        } else {
+            return name + "\n" +
+                    "  Location: " + location + "\n" +
+                    "  Class loader: " + classLoader;
+        }
     }
 }

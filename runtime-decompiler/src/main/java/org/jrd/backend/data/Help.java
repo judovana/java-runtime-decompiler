@@ -22,6 +22,7 @@ public final class Help {
     static final String LIST_JVMS_FORMAT = LIST_JVMS;
     static final String LIST_PLUGINS_FORMAT = LIST_PLUGINS;
     static final String LIST_CLASSES_FORMAT = LIST_CLASSES + " <PUC> [<CLASS REGEX>...]";
+    static final String LIST_CLASSESDETAILS_FORMAT = LIST_CLASSESDETAILS + " <PUC> [<CLASS REGEX>...]";
     static final String COMPILE_FORMAT = COMPILE + " [" + P + " <PLUGIN>] [" + CP + " <PUC>] [" + R + "] <PATH>...";
     static final String DECOMPILE_FORMAT = DECOMPILE + " <PUC> <PLUGIN> <CLASS REGEX>...";
     static final String OVERWRITE_FORMAT = OVERWRITE + " <PUC> <FQN> [<CLASS FILE>]";
@@ -40,6 +41,7 @@ public final class Help {
     private static final String LIST_CLASSES_TEXT = "List all loaded classes of a process, optionally filtering them.\n" +
             "Only '" + SAVE_LIKE + " " + Saving.EXACT + "' or '" + SAVE_LIKE + " " + Saving.DEFAULT +
             "' are allowed as saving modifiers.";
+    private static final String LIST_CLASSESDETAILS_TEXT = "Similar to " + LIST_CLASSES + ", only more details are printed about classes.";
     private static final String COMPILE_TEXT = "Compile local files against runtime classpath, specified by " + CP + ".\n" +
             "Use " + P + " to utilize some plugins' (like jasm or jcoder) bundled compilers.\n" +
             "Use " + R + " for recursive search if <PATH> is a directory.\n" +
@@ -89,6 +91,7 @@ public final class Help {
         ALL_OPTIONS.put(LIST_JVMS_FORMAT, LIST_JVMS_TEXT);
         ALL_OPTIONS.put(LIST_PLUGINS_FORMAT, LIST_PLUGINS_TEXT);
         ALL_OPTIONS.put(LIST_CLASSES_FORMAT, LIST_CLASSES_TEXT);
+        ALL_OPTIONS.put(LIST_CLASSESDETAILS_FORMAT, LIST_CLASSESDETAILS_TEXT);
         ALL_OPTIONS.put(BASE64_FORMAT, BASE64_TEXT);
         ALL_OPTIONS.put(BYTES_FORMAT, BYTES_TEXT);
         ALL_OPTIONS.put(COMPILE_FORMAT, COMPILE_TEXT);
@@ -110,7 +113,8 @@ public final class Help {
     }
 
     private static final String[] UNSAVABLE_OPTIONS = {HELP, H, OVERWRITE, INIT};
-    private static final String[] SAVABLE_OPTIONS = {LIST_CLASSES, BYTES, BASE64, COMPILE, DECOMPILE, API, LIST_JVMS, LIST_PLUGINS};
+    private static final String[] SAVABLE_OPTIONS = {
+            LIST_CLASSES, LIST_CLASSESDETAILS, BYTES, BASE64, COMPILE, DECOMPILE, API, LIST_JVMS, LIST_PLUGINS};
 
     private static final int LONGEST_FORMAT_LENGTH =
             Stream.of(ALL_OPTIONS.keySet(), SAVING_OPTIONS.keySet())
@@ -209,10 +213,12 @@ public final class Help {
     private static class CliHelpFormatter implements HelpFormatter {
 
         @Override
-        public void printTitle() { }
+        public void printTitle() {
+        }
 
         @Override
-        public void printName() { }
+        public void printName() {
+        }
 
         @Override
         public void printUsageHeading() {
@@ -220,7 +226,8 @@ public final class Help {
         }
 
         @Override
-        public void printOptionsHeading() { }
+        public void printOptionsHeading() {
+        }
 
         @Override
         public void printMainOptionsSubheading() {
@@ -336,8 +343,8 @@ public final class Help {
 
                 System.out.println(
                         ".HP\n" +
-                        manFormat(entry.getKey()) + "\n " +
-                        manFormat(manPageParagraphs)
+                                manFormat(entry.getKey()) + "\n " +
+                                manFormat(manPageParagraphs)
                 );
             }
         }
@@ -346,8 +353,8 @@ public final class Help {
         public String optionize(String[] options) {
             return "(" +
                     Stream.of(options)
-                        .map(s -> formatWrap('B', s))
-                        .collect(Collectors.joining("|")) +
+                            .map(s -> formatWrap('B', s))
+                            .collect(Collectors.joining("|")) +
                     ")";
         }
 
