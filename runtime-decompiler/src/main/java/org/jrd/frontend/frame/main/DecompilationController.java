@@ -594,6 +594,10 @@ public class DecompilationController {
             if ((text.charAt(start) + "").matches("\\s")) {
                 break;
             }
+            if (text.charAt(start) == '(' || text.charAt(start) == '{') {
+                start++;
+                break;
+            }
         }
         String sub = text.substring(Math.max(0, start), caretPosition).trim();
         return sub;
