@@ -8,6 +8,7 @@ import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.core.AgentRequestAction;
+import org.jrd.backend.core.ClassInfo;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.decompiling.DecompilerWrapper;
@@ -36,6 +37,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class Cli {
 
@@ -45,6 +47,7 @@ public class Cli {
     protected static final String LIST_JVMS = "-listjvms";
     protected static final String LIST_PLUGINS = "-listplugins";
     protected static final String LIST_CLASSES = "-listclasses";
+    protected static final String LIST_CLASSESDETAILS = "-listdetails";
     protected static final String BASE64 = "-base64bytes";
     protected static final String BYTES = "-bytes";
     protected static final String DECOMPILE = "-decompile";
@@ -191,7 +194,10 @@ public class Cli {
                 listPlugins();
                 break;
             case LIST_CLASSES:
-                listClasses();
+                listClasses(false);
+                break;
+            case LIST_CLASSESDETAILS:
+                listClasses(true);
                 break;
             case BYTES:
             case BASE64:
@@ -319,7 +325,8 @@ public class Cli {
         boolean isRecursive = false;
         List<File> filesToCompile = new ArrayList<>(1);
 
-        @SuppressWarnings("ModifiedControlVariable") // shifting arguments when parsing
+        @SuppressWarnings("ModifiedControlVariable")
+        // shifting arguments when parsing
         CompileArguments() throws FileNotFoundException {
             for (int i = 1; i < filteredArgs.size(); i++) {
                 String arg = filteredArgs.get(i);
@@ -521,7 +528,12 @@ public class Cli {
 
         for (int i = 3; i < filteredArgs.size(); i++) {
             String clazzRegex = filteredArgs.get(i);
-            List<String> classes = obtainFilteredClasses(vmInfo, vmManager, Arrays.asList(Pattern.compile(clazzRegex)));
+            List<String> classes =
+                    obtainFilteredClasses(
+                            vmInfo,
+                            vmManager,
+                            Arrays.asList(Pattern.compile(clazzRegex)),
+                            false).stream().map(a -> a.getName()).collect(Collectors.toList());
 
             for (String clazz : classes) {
                 classCount++;
@@ -621,7 +633,9 @@ public class Cli {
 
         for (int i = 2; i < filteredArgs.size(); i++) {
             String clazzRegex = filteredArgs.get(i);
-            List<String> classes = obtainFilteredClasses(vmInfo, vmManager, Arrays.asList(Pattern.compile(clazzRegex)));
+            List<String> classes =
+                    obtainFilteredClasses(vmInfo, vmManager, Arrays.asList(Pattern.compile(clazzRegex)), false)
+                            .stream().map(a -> a.getName()).collect(Collectors.toList());
 
             for (String clazz : classes) {
                 classCount++;
@@ -643,7 +657,7 @@ public class Cli {
         returnNonzero(failCount, classCount);
     }
 
-    private void listClasses() throws IOException {
+    private void listClasses(boolean details) throws IOException {
         if (filteredArgs.size() < 2) {
             throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.LIST_CLASSES_FORMAT + "'.");
         }
@@ -659,16 +673,25 @@ public class Cli {
             }
         }
 
-        listClassesFromVmInfo(vmInfo, classRegexes);
+        listClassesFromVmInfo(vmInfo, classRegexes, details);
     }
 
-    private static List<String> obtainFilteredClasses(
-            VmInfo vmInfo, VmManager vmManager, List<Pattern> filter
-    ) throws IOException {
-        String[] allClasses = obtainClasses(vmInfo, vmManager);
-        List<String> filteredClasses = new ArrayList<>(allClasses.length);
+    private static List<ClassInfo> obtainFilteredClasses(
+            VmInfo vmInfo,
+            VmManager vmManager,
+            List<Pattern> filter,
+            boolean details) throws IOException {
+        List<ClassInfo> allClasses;
+        if (details) {
+            allClasses = Arrays.stream(obtainClassesDetails(vmInfo, vmManager)).collect(Collectors.toList());
+        } else {
+            allClasses = Arrays.stream(obtainClasses(vmInfo, vmManager))
+                    .map(a -> new ClassInfo(a, null, null))
+                    .collect(Collectors.toList());
+        }
+        List<ClassInfo> filteredClasses = new ArrayList<>(allClasses.size());
 
-        for (String clazz : allClasses) {
+        for (ClassInfo clazz : allClasses) {
             if (matchesAtLeastOne(clazz, filter)) {
                 filteredClasses.add(clazz);
             }
@@ -677,31 +700,30 @@ public class Cli {
         return filteredClasses;
     }
 
-    private void listClassesFromVmInfo(VmInfo vmInfo, List<Pattern> filter) throws IOException {
-        List<String> classes = obtainFilteredClasses(vmInfo, vmManager, filter);
-
+    private void listClassesFromVmInfo(VmInfo vmInfo, List<Pattern> filter, boolean details) throws IOException {
+        List<ClassInfo> classes = obtainFilteredClasses(vmInfo, vmManager, filter, details);
         if (saving.shouldSave()) {
             if (saving.like.equals(Saving.DEFAULT) || saving.like.equals(Saving.EXACT)) {
                 try (PrintWriter pw = new PrintWriter(
                         new OutputStreamWriter(new FileOutputStream(saving.as), StandardCharsets.UTF_8)
                 )) {
-                    for (String clazz : classes) {
-                        pw.println(clazz);
+                    for (ClassInfo clazz : classes) {
+                        pw.println(clazz.toPrint(details));
                     }
                 }
             } else {
                 throw new RuntimeException("Only '" + Saving.DEFAULT + "' and '" + Saving.EXACT + "' are allowed for class listing saving.");
             }
         } else {
-            for (String clazz : classes) {
-                System.out.println(clazz);
+            for (ClassInfo clazz : classes) {
+                System.out.println(clazz.toPrint(details));
             }
         }
     }
 
-    private static boolean matchesAtLeastOne(String clazz, List<Pattern> filter) {
+    private static boolean matchesAtLeastOne(ClassInfo clazz, List<Pattern> filter) {
         for (Pattern p : filter) {
-            if (p.matcher(clazz).matches()) {
+            if (p.matcher(clazz.getName()).matches()) {
                 return true;
             }
         }
@@ -777,13 +799,22 @@ public class Cli {
     }
 
     public static String[] obtainClasses(VmInfo vmInfo, VmManager manager) {
-        AgentRequestAction request = DecompilationController.createRequest(
-                vmInfo, AgentRequestAction.RequestAction.CLASSES, null
-        );
+        AgentRequestAction.RequestAction requestType = AgentRequestAction.RequestAction.CLASSES;
+        AgentRequestAction request = DecompilationController.createRequest(vmInfo, requestType, null);
         String response = DecompilationController.submitRequest(manager, request);
-
         if ("ok".equals(response)) {
             return vmInfo.getVmDecompilerStatus().getLoadedClassNames();
+        } else {
+            throw new RuntimeException(DecompilationController.CLASSES_NOPE);
+        }
+    }
+
+    public static ClassInfo[] obtainClassesDetails(VmInfo vmInfo, VmManager manager) {
+        AgentRequestAction.RequestAction requestType = AgentRequestAction.RequestAction.CLASSES_WITH_INFO;
+        AgentRequestAction request = DecompilationController.createRequest(vmInfo, requestType, null);
+        String response = DecompilationController.submitRequest(manager, request);
+        if ("ok".equals(response)) {
+            return vmInfo.getVmDecompilerStatus().getLoadedClasses();
         } else {
             throw new RuntimeException(DecompilationController.CLASSES_NOPE);
         }
