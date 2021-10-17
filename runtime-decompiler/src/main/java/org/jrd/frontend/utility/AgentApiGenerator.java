@@ -1,5 +1,6 @@
 package org.jrd.frontend.utility;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.github.mkoncek.classpathless.util.BytecodeExtractor;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
@@ -10,6 +11,7 @@ import org.jrd.backend.data.VmManager;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
 
+import javax.swing.JComponent;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -28,6 +30,7 @@ import java.util.stream.Collectors;
 public final class AgentApiGenerator {
 
     public static final String PUBLIC_STATIC_PREFIX = "public static ";
+    private static final int MAX_NONLETERS_BETWEEN_MATCHES = 1;
 
     private static final class DummyClazzMethod extends ClazzMethod {
         private DummyClazzMethod(String method) {
@@ -130,6 +133,14 @@ public final class AgentApiGenerator {
                 agentApi = new ArrayList<>();
                 for (String clazz: new String[]{"org.jrd.agent.api.Variables", "org.jrd.agent.api.UnsafeVariables"}) {
                     String mainClazz = Cli.obtainClass(vmInfo, clazz, vmManager).getLoadedClassBytes();
+                    if (withSignatures) {
+                        Collection<ClazzMethod> mainMethods = getClazzMethods(vmInfo, vmManager, pluginManager, clazz, mainClazz);
+                        agentApi.add(new ClazzWithMethods(clazz, mainMethods));
+                    } else {
+                        Collection<String> methods = BytecodeExtractor.extractMethods(Base64.getDecoder().decode(mainClazz));
+                        agentApi.add(new ClazzWithMethods(clazz,
+                                methods.stream().map(a -> new DummyClazzMethod(a)).collect(Collectors.toList())));
+                    }
                     Set<String> innerClazzes = BytecodeExtractor.extractNestedClasses(
                             Base64.getDecoder().decode(mainClazz),
                             new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager));
@@ -139,13 +150,7 @@ public final class AgentApiGenerator {
                         }
                         String innerClazz = Cli.obtainClass(vmInfo, innerClazzName, vmManager).getLoadedClassBytes();
                         if (withSignatures) {
-                            DecompilerWrapper decompiler = Cli.findDecompiler(DecompilerWrapper.JAVAP_NAME, pluginManager);
-                            String decompilationResult = pluginManager.decompile(
-                                    decompiler,
-                                    innerClazzName,
-                                    Base64.getDecoder().decode(innerClazz),
-                                    new String[0], vmInfo, vmManager);
-                            Collection<ClazzMethod> methods = extractMethods(decompilationResult);
+                            Collection<ClazzMethod> methods = getClazzMethods(vmInfo, vmManager, pluginManager, innerClazzName, innerClazz);
                             agentApi.add(new ClazzWithMethods(innerClazzName, methods));
                         } else {
                             Collection<String> methods = BytecodeExtractor.extractMethods(Base64.getDecoder().decode(innerClazz));
@@ -156,7 +161,7 @@ public final class AgentApiGenerator {
                     Collections.sort(agentApi, new Comparator<ClazzWithMethods>() {
                         @Override
                         public int compare(ClazzWithMethods clazzWithMethods, ClazzWithMethods t1) {
-                            return clazzWithMethods.fqn.compareTo(t1.fqn);
+                            return t1.fqn.compareTo(clazzWithMethods.fqn);
                         }
                     });
                 }
@@ -165,6 +170,22 @@ public final class AgentApiGenerator {
                 agentApi = null;
             }
         }
+    }
+
+    private static Collection<ClazzMethod> getClazzMethods(
+            VmInfo vmInfo,
+            VmManager vmManager,
+            PluginManager pluginManager,
+            String innerClazzName,
+            String innerClazz) throws Exception {
+        DecompilerWrapper decompiler = Cli.findDecompiler(DecompilerWrapper.JAVAP_NAME, pluginManager);
+        String decompilationResult = pluginManager.decompile(
+                decompiler,
+                innerClazzName,
+                Base64.getDecoder().decode(innerClazz),
+                new String[0], vmInfo, vmManager);
+        Collection<ClazzMethod> methods = extractMethods(decompilationResult);
+        return methods;
     }
 
     /**
@@ -185,11 +206,23 @@ public final class AgentApiGenerator {
         return methods;
     }
 
+    private static void insertOrRepalce(final RSyntaxTextArea text, final String nw, final String filter) {
+        if (filter != null && !filter.trim().isEmpty()) {
+            text.replaceRange(nw, text.getCaretPosition() - filter.length(), text.getCaretPosition());
+        } else {
+            text.insert(nw, text.getCaretPosition());
+        }
+    }
 
-    public static JPopupMenu create(final RSyntaxTextArea text) {
+    public static JPopupMenu create(final RSyntaxTextArea text, String filter) {
         JPopupMenu p = new JPopupMenu();
-        p.add(createExact("System.out.println(String);", text));
-        p.add(createExact("System.err.println(String);", text));
+        if (filter != null && !filter.trim().isEmpty()) {
+            JMenuItem tool = new JMenuItem("Filtered by: " + filter);
+            tool.setEnabled(false);
+            p.add(tool);
+        }
+        add(filter, p, createExact("System.out.println(String);", text, filter), null);
+        add(filter, p, createExact("System.err.println(String);", text, filter), null);
         if (agentApi == null) {
             JMenuItem item = new JMenuItem("Agent api completion still initialising. Try later");
             p.add(item);
@@ -197,22 +230,24 @@ public final class AgentApiGenerator {
         }
         for (final ClazzWithMethods cwm : agentApi) {
             JMenuItem item = new JMenuItem(cwm.fqn);
-            p.add(item);
             item.addActionListener(actionEvent -> {
-                text.insert(cwm.fqn, text.getCaretPosition());
+                insertOrRepalce(text, cwm.fqn, filter);
                 text.requestFocusInWindow();
             });
+            add(filter, p, item, null);
             if (!cwm.methods.isEmpty()) {
                 JMenu methods = new JMenu(cwm.fqn);
                 for (final ClazzMethod methodName : cwm.methods) {
                     JMenuItem method = new JMenuItem(methodName.toString());
-                    methods.add(method);
                     method.addActionListener(actionEvent -> {
-                        text.insert(methodName.toOutput(cwm.fqn), text.getCaretPosition());
+                        insertOrRepalce(text, methodName.toOutput(cwm.fqn), filter);
                         text.requestFocusInWindow();
                     });
+                    add(filter, methods, method, methodName.toOutput(cwm.fqn));
                 }
-                p.add(methods);
+                if (methods.getMenuComponentCount() > 0) {
+                    p.add(methods);
+                }
             }
         }
 
@@ -222,12 +257,87 @@ public final class AgentApiGenerator {
         return p;
     }
 
+    private static void add(String filter, JComponent p, JMenuItem toAdd, String additionalText) {
+        if (additionalText == null) {
+            additionalText = toAdd.getText();
+        }
+        if (containsAllInOrder(filter, additionalText)) {
+            p.add(toAdd);
+        }
+    }
+
+    static boolean containsAllInOrder(String filter, String text) {
+        if (exitOnEmpty(filter, text) != null) {
+            return exitOnEmpty(filter, text);
+        }
+        String pattern = filter.toLowerCase().trim();
+        String where = text.toLowerCase().trim();
+        if (where.contains(pattern)) {
+            return true;
+        }
+        if (containsAll(pattern, where)) {
+            return true;
+        }
+        int index1 = 0;
+        int index2 = 0;
+        int nonLeters = 0;
+        while (true) {
+            if (!(where.charAt(index2) + "").matches("[a-zA-Z]")) {
+                nonLeters++;
+            }
+            if (pattern.charAt(index1) == where.charAt(index2)) {
+                if (nonLeters > MAX_NONLETERS_BETWEEN_MATCHES) {
+                    return false;
+                }
+                if (index1 == pattern.length() - 1) {
+                    return true;
+                }
+                nonLeters = 0;
+                index1++;
+                index2++;
+                if (index2 > where.length() - 1) {
+                    return false;
+                }
+            } else {
+                if (index2 == where.length() - 1) {
+                    return false;
+                }
+                index2++;
+
+            }
+        }
+    }
+
+    private static boolean containsAll(String pattern, String where) {
+        boolean foundAll = true;
+        for (String word : pattern.split("[^a-zA-Z]+")) {
+            if (!where.contains(word)) {
+                foundAll = false;
+            }
+        }
+        if (foundAll) {
+            return true;
+        }
+        return false;
+    }
+
+    @SuppressFBWarnings(value = "NP_BOOLEAN_RETURN_NULL", justification = "optional is not nice. Intentional null boolean")
+    private static Boolean exitOnEmpty(String filter, String text) {
+        if (filter == null || filter.trim().isEmpty()) {
+            return true;
+        }
+        if (text == null || text.trim().isEmpty()) {
+            return false;
+        }
+        return null;
+    }
+
     private static JMenuItem createHelp(RSyntaxTextArea text) {
         JMenuItem i = new JMenuItem("Show help for this feature");
         i.addActionListener(actionEvent -> {
             JOptionPane.showMessageDialog(
-                text,
-                getPlainHelp() + "\n Use the API button or Ctrl+Space to bring up a selection of possible code insertions."
+                    text,
+                    getPlainHelp() + "\n Use the API button or Ctrl+Space/Alt+Ins to bring up a selection of possible code insertions."
             );
         });
         return i;
@@ -258,10 +368,10 @@ public final class AgentApiGenerator {
         return sb.toString();
     }
 
-    private static JMenuItem createExact(String s, RSyntaxTextArea text) {
+    private static JMenuItem createExact(String s, RSyntaxTextArea text, String filter) {
         JMenuItem i = new JMenuItem(s);
         i.addActionListener(actionEvent -> {
-            text.insert(s + "\n", text.getCaretPosition());
+            insertOrRepalce(text, s + "\n", filter);
             text.requestFocusInWindow();
         });
         return i;

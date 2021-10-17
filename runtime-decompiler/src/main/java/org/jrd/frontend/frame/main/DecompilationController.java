@@ -568,19 +568,34 @@ public class DecompilationController {
     }
 
     public class AgentApiGenerator {
-        public JPopupMenu getFor(RSyntaxTextArea text) {
+        public JPopupMenu getFor(RSyntaxTextArea text, boolean filtered) {
             if (vmInfo.getVmPid() >= 0) {
                 org.jrd.frontend.utility.AgentApiGenerator.initItems(vmInfo, vmManager, pluginManager);
-                return org.jrd.frontend.utility.AgentApiGenerator.create(text);
+                return org.jrd.frontend.utility.AgentApiGenerator.create(
+                        text,
+                        filtered ? createFilter(text.getText(), text.getCaretPosition()) : null);
             } else {
                 JPopupMenu p = new JPopupMenu();
-
                 JMenuItem infoItem = new JMenuItem("Agent API is only valid for running VMs!");
                 infoItem.setEnabled(false);
-
                 p.add(infoItem);
                 return p;
             }
         }
+    }
+
+    private String createFilter(String text, int caretPosition) {
+        int start = caretPosition;
+        while (true) {
+            start = start - 1;
+            if (start < 0) {
+                break;
+            }
+            if ((text.charAt(start) + "").matches("\\s")) {
+                break;
+            }
+        }
+        String sub = text.substring(Math.max(0, start), caretPosition).trim();
+        return sub;
     }
 }

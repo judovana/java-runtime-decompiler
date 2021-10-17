@@ -284,7 +284,8 @@ public class MainFrameView {
         welcomeJTextArea.setLineWrap(true);
         welcomeJTextArea.setWrapStyleWord(true);
         welcomeJTextArea.setEditable(false);
-        welcomePanel = new JPanel(new GridBagLayout());
+        welcomePanel = new JPanel(new BorderLayout());
+        welcomePanel.setBorder(BorderFactory.createLineBorder(welcomePanel.getBackground(), 50));
         welcomeJTextArea.setBackground(new Color(welcomePanel.getBackground().getRGB()));
         welcomePanel.add(welcomeJTextArea);
         // welcomePanel End

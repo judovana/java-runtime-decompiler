@@ -317,7 +317,7 @@ public class BytecodeDecompilerView {
         insertButton = ImageButtonFactory.createBookButton("Insert agent API to current position");
         insertButton.addActionListener(actionEvent -> {
             if (isSourceBufferVisible()) {
-                showApiMenu();
+                showApiMenu(new Point(0, 0));
             } else {
                 Logger.getLogger().log(Logger.Level.ALL, "Unable to insert agent API into binary buffer.");
             }
@@ -343,9 +343,14 @@ public class BytecodeDecompilerView {
         bytecodeSyntaxTextArea.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
+                if ((e.getModifiersEx() & KeyEvent.ALT_DOWN_MASK) != 0) {
+                    if (e.getKeyCode() == KeyEvent.VK_INSERT) {
+                        showApiMenu(null);
+                    }
+                }
                 if ((e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) != 0) {
                     if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-                        showApiMenu();
+                        showApiMenu(null);
                     }
                     if (e.getKeyCode() == KeyEvent.VK_F) {
                         bytecodeSearchControls.focus();
@@ -803,17 +808,19 @@ public class BytecodeDecompilerView {
         bytecodeSyntaxTextArea.select(newDot, newDot);
     }
 
-    private void showApiMenu() {
+    private void showApiMenu(Point forcedLocation) {
         Point caretPosition = bytecodeSyntaxTextArea.getCaret().getMagicCaretPosition();
-
-        if (caretPosition == null) { // syntax area has not been focused once yet
+        if (caretPosition == null || forcedLocation != null) {
+            caretPosition = forcedLocation;
+        }
+        if (caretPosition == null) {
             return;
         }
-
-        popup.getFor(bytecodeSyntaxTextArea).show(
-            bytecodeSyntaxTextArea,
-            caretPosition.x,
-            caretPosition.y + bytecodeSyntaxTextArea.getFontMetrics(bytecodeSyntaxTextArea.getFont()).getHeight() // offset to the next row
+        popup.getFor(bytecodeSyntaxTextArea, forcedLocation == null).show(
+                bytecodeSyntaxTextArea,
+                caretPosition.x,
+                caretPosition.y + bytecodeSyntaxTextArea.getFontMetrics(
+                        bytecodeSyntaxTextArea.getFont()).getHeight() // offset to the next row
         );
     }
 
