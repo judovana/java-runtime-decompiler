@@ -8,7 +8,8 @@ public class ClassInfo {
     private String location;
     private String classLoader;
 
-    private static final Pattern INFO_DELIMITER_PATTERN = Pattern.compile("\\|");
+    private static final String INFO_DELIMITER_STRING = "|";
+    private static final Pattern INFO_DELIMITER_PATTERN = Pattern.compile("\\" + INFO_DELIMITER_STRING);
 
     public ClassInfo(String name, String location, String classLoader) {
         this.name = name;
@@ -21,16 +22,28 @@ public class ClassInfo {
         String[] splitClassString = INFO_DELIMITER_PATTERN.split(classString);
         this.name = splitClassString[0];
 
-        if (splitClassString.length >= 2) {
+        if (splitClassString.length >= 2 && !splitClassString[1].trim().isEmpty()) {
             this.location = splitClassString[1];
         } else { // backwards compatibility
             this.location = "unknown";
         }
 
-        if (splitClassString.length >= 3) {
+        if (splitClassString.length >= 3 && !splitClassString[2].trim().isEmpty()) {
             this.classLoader = splitClassString[2];
         } else { // backwards compatibility
             this.classLoader = "unknown";
+        }
+    }
+
+    public String toAgentLikeAnswer() {
+        return name + INFO_DELIMITER_STRING + deNull(location) + INFO_DELIMITER_STRING + deNull(classLoader);
+    }
+
+    private String deNull(String s) {
+        if (s == null) {
+            return null;
+        } else {
+            return s;
         }
     }
 
