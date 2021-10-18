@@ -1,5 +1,6 @@
 package org.jrd.frontend.frame.main;
 
+import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.Directories;
 import org.jrd.backend.data.MetadataProperties;
 import org.jrd.backend.data.VmInfo;
@@ -19,6 +20,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("Indentation") // indented Swing components greatly help with orientation
 public class MainFrameView {
@@ -132,6 +136,28 @@ public class MainFrameView {
         public String toString() {
             return getName() + " - size " + getModel().getSize();
         }
+    }
+
+    private void setImageIcon() {
+        final String iconPath = "/icons/main-icon.png";
+        URL imageResource = getClass().getResource(iconPath);
+        if (imageResource == null) {
+            Logger.getLogger().log(Logger.Level.ALL, "Resource \"" + iconPath + "\" not found");
+            return;
+        }
+        Image originalImage = new ImageIcon(imageResource).getImage();
+        int originalHeight = originalImage.getHeight(null);
+        int resolution = 32;
+        if (originalHeight < resolution) {
+            Logger.getLogger().log(Logger.Level.ALL, "Resource \"" + iconPath + "\" contains malformed data");
+            return;
+        }
+        List<Image> images = new ArrayList<>();
+        images.add(originalImage);
+        for (; resolution < originalHeight; resolution *= 2) {
+            images.add(originalImage.getScaledInstance(resolution, resolution, Image.SCALE_SMOOTH));
+        }
+        mainFrame.setIconImages(images);
     }
 
     public MainFrameView() {
@@ -292,6 +318,7 @@ public class MainFrameView {
         // welcomePanel End
 
         mainFrame = new JFrame();
+        setImageIcon();
         mainFrame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
