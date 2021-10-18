@@ -2,6 +2,7 @@ package org.jrd.backend.communication;
 
 
 import org.jrd.backend.core.AgentRequestAction;
+import org.jrd.backend.core.ClassInfo;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.ArchiveManager;
 import org.jrd.backend.data.VmInfo;
@@ -102,7 +103,9 @@ public final class FsAgent implements JrdAgent {
                     }
                     return "DONE";
                 case CLASSES:
-                    return readClasses();
+                    return readClasses(false);
+                case CLASSES_WITH_INFO:
+                    return readClasses(true);
                 case BYTES:
                     String classNameForBytes = q[1];
                     return sendByteCode(classNameForBytes);
@@ -146,9 +149,9 @@ public final class FsAgent implements JrdAgent {
         }
     }
 
-    private String readClasses() throws IOException {
+    private String readClasses(final boolean details) throws IOException {
         List<String> classes = new ArrayList<>();
-        new OperateOnCp<Void>(cp).operateOnCp(null, new ListingCpOperator(classes));
+        new OperateOnCp<Void>(cp).operateOnCp(null, new ListingCpOperator(classes, details));
         return String.join(";", classes);
     }
 
@@ -184,7 +187,7 @@ public final class FsAgent implements JrdAgent {
                 } else {
                     if (op instanceof ListingCpOperator) {
                         try (ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(c))) {
-                            T ret = onEntryList(zipInputStream, clazz, op);
+                            T ret = onEntryList(zipInputStream, clazz, op, c.getAbsolutePath() + "!");
                             if (ret != null) {
                                 return ret;
                             }
@@ -217,18 +220,18 @@ public final class FsAgent implements JrdAgent {
         }
 
         // Only Listing - no need to unpack
-        private T onEntryList(ZipInputStream zipInputStream, String clazz, CpOperator<T> op) throws IOException {
+        private T onEntryList(ZipInputStream zipInputStream, String clazz, CpOperator<T> op, String c) throws IOException {
             ZipEntry entry = null;
             while ((entry = zipInputStream.getNextEntry()) != null) {
                 if (ArchiveManager.shouldOpen(entry.getName())) {
-                    onEntryList(new ZipInputStream(zipInputStream), clazz, op);
+                    onEntryList(new ZipInputStream(zipInputStream), clazz, op, c + "/" + entry.getName() + "!");
                 } else {
                     if (clazz == null) {
-                        op.onJarEntry(null, null, entry);
+                        op.onJarEntry(new File(c), null, entry);
                     } else {
                         String clazzInJar = toClass(entry.getName());
                         if (clazzInJar.equals(clazz)) {
-                            return op.onJarEntry(null, null, entry);
+                            return op.onJarEntry(new File(c), null, entry);
                         }
                     }
                 }
@@ -252,9 +255,18 @@ public final class FsAgent implements JrdAgent {
         }
     }
 
-    private static void addJustClass(String s, List<String> classes, String root) {
+    private static void addJustClass(String s, List<String> classes, String root, boolean details, String detailsPath) {
         if (s.endsWith(".class")) {
-            classes.add(toClass(s.substring(root.length() + 1)));
+            if (details) {
+                classes.add(
+                        new ClassInfo(
+                                toClass(s.substring(root.length() + 1)),
+                                detailsPath,
+                                "class order in realvm may differ")
+                                .toAgentLikeAnswer());
+            } else {
+                classes.add(toClass(s.substring(root.length() + 1)));
+            }
         } else {
             Logger.getLogger().log(Logger.Level.DEBUG, "ignored non .class element on cp: " + s);
         }
@@ -322,9 +334,11 @@ public final class FsAgent implements JrdAgent {
 
     private static class ListingCpOperator implements CpOperator<Void> {
         private final List<String> classes;
+        private final boolean details;
 
-        ListingCpOperator(List<String> classes) {
+        ListingCpOperator(List<String> classes, boolean details) {
             this.classes = classes;
+            this.details = details;
         }
 
         @SuppressWarnings("AnonInnerLength") // already in an inner class, no need to extract it to another inner class
@@ -340,7 +354,7 @@ public final class FsAgent implements JrdAgent {
                 public FileVisitResult visitFile(Path path, BasicFileAttributes attributes) throws IOException {
                     String s = sanitize(path.toFile().getAbsolutePath());
                     String root = sanitize(c.getAbsolutePath());
-                    addJustClass(s, classes, root);
+                    addJustClass(s, classes, root, details, path.toFile().getAbsolutePath());
                     return FileVisitResult.CONTINUE;
                 }
 
@@ -359,7 +373,7 @@ public final class FsAgent implements JrdAgent {
 
         @Override
         public Void onJarEntry(File file, ZipFile zipFile, ZipEntry ze) throws IOException {
-            addJustClass("/" + ze.getName(), classes, "");
+            addJustClass("/" + ze.getName(), classes, "", details, file.getAbsolutePath() + "/" + ze.getName());
             return null;
         }
     }
