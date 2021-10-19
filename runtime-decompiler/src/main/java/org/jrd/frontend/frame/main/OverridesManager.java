@@ -102,7 +102,7 @@ public final class OverridesManager {
         close.addActionListener(a -> hide());
         window.pack();
         activeOverrides.setModel(new DefaultComboBoxModel());
-        ScreenFinder.centerWindowsToCurrentScreen(window);
+        ScreenFinder.centerWindowToCurrentScreen(window);
     }
 
     public void hide() {

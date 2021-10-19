@@ -104,7 +104,7 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
 
     public void show() {
         if (first) {
-            ScreenFinder.centerWindowsToCurrentScreen(frame);
+            ScreenFinder.centerWindowToCurrentScreen(frame);
             first = false;
         }
         frame.setVisible(true);

@@ -72,7 +72,7 @@ public final class ScreenFinder {
         centerWindowToBounds(centeredWindow, baseWindow.getBounds());
     }
 
-    public static void centerWindowsToCurrentScreen(final Window w) {
+    public static void centerWindowToCurrentScreen(Window w) {
         centerWindowToBounds(w, getCurrentScreenSizeWithoutBounds());
     }
 
