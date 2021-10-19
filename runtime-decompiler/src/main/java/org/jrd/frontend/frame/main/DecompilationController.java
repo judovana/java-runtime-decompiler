@@ -457,7 +457,7 @@ public class DecompilationController {
             final OverwriteClassDialog overwriteClassDialog = new OverwriteClassDialog(
                     name, lastLoaded, buffer, binBuffer, vmInfo, vmManager, pluginManager, selectedDecompiler, isBinary, isVerbose
             );
-            ScreenFinder.centerWindowsToCurrentScreen(overwriteClassDialog);
+            ScreenFinder.centerWindowToCurrentScreen(overwriteClassDialog);
             overwriteClassDialog.setVisible(true);
 
             lastLoaded.setLastManualUpload(overwriteClassDialog.getManualUploadPath());
