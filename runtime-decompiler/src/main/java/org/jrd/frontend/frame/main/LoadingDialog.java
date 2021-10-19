@@ -9,13 +9,12 @@ import java.awt.event.WindowEvent;
 
 public class LoadingDialog extends JDialog {
 
-    private JLabel infoLabel = new JLabel("Loading classes");
     private JProgressBar progressBar = new JProgressBar();
     private JButton abortButton = new JButton("Abort");
 
     private ActionListener abortActionListener;
 
-    public LoadingDialog() {
+    public LoadingDialog(String title) {
         this.setTitle("Connecting");
         this.setSize(new Dimension(256, 144));
         this.setResizable(false);
@@ -24,6 +23,7 @@ public class LoadingDialog extends JDialog {
         this.setLayout(new BorderLayout());
         this.setLocationRelativeTo(null);
 
+        JLabel infoLabel = new JLabel(title);
         infoLabel.setHorizontalAlignment(SwingConstants.CENTER);
         this.add(infoLabel, BorderLayout.NORTH);
         this.add(progressBar, BorderLayout.CENTER);
