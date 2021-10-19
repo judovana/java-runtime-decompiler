@@ -275,6 +275,7 @@ public class DecompilationController {
         SwingUtilities.invokeLater(() -> {
             loadingDialog = new LoadingDialog();
             loadingDialog.setAbortActionListener(listener);
+            ScreenFinder.centerWindowOnto(mainFrameView.getMainFrame(), loadingDialog);
             loadingDialog.setVisible(true);
         });
     }
