@@ -1,7 +1,5 @@
 package org.jrd.frontend.frame.main;
 
-import org.jrd.frontend.utility.ScreenFinder;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -31,7 +29,6 @@ public class LoadingDialog extends JDialog {
         this.add(progressBar, BorderLayout.CENTER);
         progressBar.setIndeterminate(true);
         this.add(abortButton, BorderLayout.SOUTH);
-        this.setLocation(ScreenFinder.getCurrentPoint());
 
         this.addWindowListener(new WindowAdapter() {
             @Override

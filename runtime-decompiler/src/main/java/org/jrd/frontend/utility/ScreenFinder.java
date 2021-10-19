@@ -68,10 +68,17 @@ public final class ScreenFinder {
         }
     }
 
+    public static void centerWindowOnto(Window baseWindow, Window centeredWindow) {
+        centerWindowToBounds(centeredWindow, baseWindow.getBounds());
+    }
+
     public static void centerWindowsToCurrentScreen(final Window w) {
-        final Rectangle bounds = getCurrentScreenSizeWithoutBounds();
+        centerWindowToBounds(w, getCurrentScreenSizeWithoutBounds());
+    }
+
+    private static void centerWindowToBounds(Window w, Rectangle bounds) {
         w.setLocation(bounds.x + (bounds.width - w.getWidth()) / 2,
-                bounds.y + (bounds.height - w.getHeight()) / 2);
+            bounds.y + (bounds.height - w.getHeight()) / 2);
     }
 
     public static void moveWindowNextTo(Window baseWindow, Window movedWindow) {
