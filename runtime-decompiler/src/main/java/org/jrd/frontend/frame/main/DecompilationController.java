@@ -77,7 +77,7 @@ public class DecompilationController {
         bytecodeDecompilerView.setInitActionListener(e -> initClass(e.getActionCommand()));
         bytecodeDecompilerView.setClassesActionListener(e -> loadClassNames());
         bytecodeDecompilerView.setBytesActionListener(e -> {
-            showLoadingDialog(a -> hideLoadingDialog());
+            showLoadingDialog(a -> hideLoadingDialog(), "Loading bytecode");
             try {
                 loadClassBytecode(e.getActionCommand());
             } finally {
@@ -267,13 +267,13 @@ public class DecompilationController {
         }
     }
 
-    private void showLoadingDialog() {
-        showLoadingDialog(a -> abortClassLoading());
+    private void showLoadingDialog(String title) {
+        showLoadingDialog(a -> abortClassLoading(), title);
     }
 
-    private void showLoadingDialog(ActionListener listener) {
+    private void showLoadingDialog(ActionListener listener, String title) {
         SwingUtilities.invokeLater(() -> {
-            loadingDialog = new LoadingDialog();
+            loadingDialog = new LoadingDialog(title);
             loadingDialog.setAbortActionListener(listener);
             ScreenFinder.centerWindowOnto(mainFrameView.getMainFrame(), loadingDialog);
             loadingDialog.setVisible(true);
@@ -306,7 +306,7 @@ public class DecompilationController {
             "On JDK 9 and higher, did you run the target process with '-Djdk.attach.allowAttachSelf=true'?";
 
     private void initClass(String fqn) {
-        showLoadingDialog();
+        showLoadingDialog("Initializing class");
         AgentRequestAction request = createRequest(RequestAction.INIT_CLASS, fqn);
         String response = submitRequest(request);
         hideLoadingDialog();
@@ -326,7 +326,7 @@ public class DecompilationController {
      * list. If "error" response is received shows an error dialog.
      */
     private void loadClassNames() {
-        showLoadingDialog();
+        showLoadingDialog("Loading classes");
         AgentRequestAction request = createRequest(
                 bytecodeDecompilerView.doShowClassInfo() ? RequestAction.CLASSES_WITH_INFO : RequestAction.CLASSES,
                 ""
