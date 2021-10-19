@@ -7,8 +7,8 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public final class ClassListPopupMenu extends JPopupMenu {
@@ -17,15 +17,30 @@ public final class ClassListPopupMenu extends JPopupMenu {
     }
 
     public static ClassListPopupMenu create(JList<ClassInfo> parentJList, int originallySelected, boolean doShowClassInfo) {
-        List<ClassInfo> classesToCopy = parentJList.getSelectedValuesList();
         ClassListPopupMenu result = new ClassListPopupMenu();
 
-        result.add(createCopyItem("Copy class name", classesToCopy, ClassInfo::getName));
+        JCheckBox copyName = new JCheckBox("Copy name(s)");
+        copyName.setSelected(true);
+        JCheckBox copyLocation = new JCheckBox("Copy class location(s)");
+        copyLocation.setSelected(false);
+        JCheckBox copyLoader = new JCheckBox("Copy class loader(s)");
+        copyLoader.setSelected(false);
+
+        result.add(createCopyItem("Copy selected", parentJList.getSelectedValuesList(), copyName, copyLocation, copyLoader));
+        result.add(createCopyItem("Copy all", allItems(parentJList.getModel()), copyName, copyLocation, copyLoader));
 
         if (doShowClassInfo) {
-            result.add(createCopyItem("Copy class location", classesToCopy, ClassInfo::getLocation));
-            result.add(createCopyItem("Copy class loader", classesToCopy, ClassInfo::getClassLoader));
+            result.add(copyName);
+            result.add(copyLocation);
+            result.add(copyLoader);
         }
+
+        JMenuItem help1 = new JMenuItem("If this menu is not visible, you can select");
+        JMenuItem help2 = new JMenuItem("multiple items by dragging with RIGHT mouse button down");
+        help1.setEnabled(false);
+        help2.setEnabled(false);
+        result.add(help1);
+        result.add(help2);
 
         result.addPopupMenuListener(new PopupMenuListener() {
             @Override
@@ -48,7 +63,21 @@ public final class ClassListPopupMenu extends JPopupMenu {
         return result;
     }
 
-    private static JMenuItem createCopyItem(String itemTitle, List<ClassInfo> classProperties, Function<ClassInfo, String> mapFunction) {
+    private static List<ClassInfo> allItems(ListModel<ClassInfo> model) {
+        List<ClassInfo> result = new ArrayList<>(model.getSize());
+        for (int i = 0; i < model.getSize(); i++) {
+            result.add(model.getElementAt(i));
+        }
+        return result;
+    }
+
+    private static JMenuItem createCopyItem(
+            String itemTitle,
+            List<ClassInfo> classProperties,
+            JCheckBox names,
+            JCheckBox locations,
+            JCheckBox loaders
+    ) {
         JMenuItem item = new JMenuItem(itemTitle);
 
         item.addActionListener(actionEvent -> {
@@ -57,11 +86,27 @@ public final class ClassListPopupMenu extends JPopupMenu {
             }
 
             StringSelection selection = new StringSelection(
-                classProperties.stream().map(mapFunction).collect(Collectors.joining(System.getProperty("line.separator", "\n")))
+                    classProperties.stream()
+                            .map(a -> classInfoToSelectedStrings(a, names, locations, loaders))
+                            .collect(Collectors.joining(""))
             );
             Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
         });
 
         return item;
+    }
+
+    private static String classInfoToSelectedStrings(ClassInfo a, JCheckBox names, JCheckBox locations, JCheckBox loaders) {
+        String s = "";
+        if (names.isSelected()) {
+            s = s + a.getName() + System.getProperty("line.separator", "\n");
+        }
+        if (locations.isSelected()) {
+            s = s + a.getLocation() + System.getProperty("line.separator", "\n");
+        }
+        if (loaders.isSelected()) {
+            s = s + a.getClassLoader() + System.getProperty("line.separator", "\n");
+        }
+        return s;
     }
 }
