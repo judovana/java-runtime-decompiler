@@ -637,8 +637,14 @@ public class BytecodeDecompilerView {
         public static SearchControlsPanel createBytecodeControls(BytecodeDecompilerView parent) {
             final JCheckBox regexCheckBox = new JCheckBox("Regex");
             regexCheckBox.setIconTextGap(3);
+            final JCheckBox caseCheckBox = new JCheckBox("Match case");
+            caseCheckBox.setIconTextGap(3);
 
-            SearchControlsPanel controls = new SearchControlsPanel(regexCheckBox, parent.bytecodeSyntaxTextArea);
+            JPanel checkboxes = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+            checkboxes.add(regexCheckBox);
+            checkboxes.add(caseCheckBox);
+
+            SearchControlsPanel controls = new SearchControlsPanel(checkboxes, parent.bytecodeSyntaxTextArea);
 
             DocumentListener listener = new DocumentListener() {
                 @Override
@@ -657,12 +663,13 @@ public class BytecodeDecompilerView {
                 }
 
                 private void invokeSearch() {
-                    SwingUtilities.invokeLater(() ->
-                            parent.initialSearchBytecode(controls.searchField.getText(), regexCheckBox.isSelected())
-                    );
+                    SwingUtilities.invokeLater(() -> parent.initialSearchBytecode(
+                                controls.searchField.getText(), regexCheckBox.isSelected(), caseCheckBox.isSelected()
+                    ));
                 }
             };
             regexCheckBox.addActionListener(actionEvent -> listener.changedUpdate(null));
+            caseCheckBox.addActionListener(actionEvent -> listener.changedUpdate(null));
 
             controls.searchField.getDocument().addDocumentListener(listener);
             controls.previousButton.addActionListener(e -> parent.searchBytecode(false));
@@ -853,13 +860,14 @@ public class BytecodeDecompilerView {
         return (DecompilerWrapper) pluginComboBox.getSelectedItem();
     }
 
-    private void initialSearchBytecode(String query, boolean isRegex) {
+    private void initialSearchBytecode(String query, boolean isRegex, boolean matchesCase) {
         searchContext = new SearchContext();
 
         searchContext.setSearchFor(query);
         searchContext.setWholeWord(false);
         searchContext.setSearchWrap(true);
         searchContext.setRegularExpression(isRegex);
+        searchContext.setMatchCase(matchesCase);
 
         deselectBytecodeSyntaxArea(); // avoid jumping to next location while typing one char at a time
         searchBytecode(true);
