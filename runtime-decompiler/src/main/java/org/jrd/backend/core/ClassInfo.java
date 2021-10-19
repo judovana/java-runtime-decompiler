@@ -41,7 +41,7 @@ public class ClassInfo {
 
     private String deNull(String s) {
         if (s == null) {
-            return null;
+            return "";
         } else {
             return s;
         }
