@@ -764,6 +764,11 @@ public class BytecodeDecompilerView {
         ClassInfo originalSelection = filteredClassesJList.getSelectedValue();
         filteredClassesJList.setListData(filtered.toArray(new ClassInfo[0]));
         filteredClassesJList.setSelectedValue(originalSelection, true);
+
+        // setSelectedValue with null or a value that isn't in the list results in the selection being cleared
+        if (filteredClassesJList.getSelectedIndex() == -1) {
+            classesScrollPane.getVerticalScrollBar().setValue(0);
+        }
     }
 
     /**
