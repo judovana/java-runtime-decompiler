@@ -43,9 +43,14 @@ public class RuntimeCompilerConnector {
                 try {
                     result = Cli.obtainClass(vmInfo, clazz.getFullName(), vmManager);
                 } catch (Exception ex) {
-                    Logger.getLogger().log(ex);
-                    Logger.getLogger().log("Attempting to init the class and load again");
-                    Cli.initClass(vmInfo, vmManager, clazz.getFullName());
+                    Logger.getLogger().log(Logger.Level.DEBUG, ex);
+                    Logger.getLogger().log(Logger.Level.DEBUG, "Attempting to init the class and load again");
+                    try {
+                        Cli.initClass(vmInfo, vmManager, clazz.getFullName());
+                    } catch (RuntimeException e) {
+                        Logger.getLogger().log(Logger.Level.DEBUG, "Init of class '" + clazz.getFullName() + "' failed, not obtaining.");
+                        continue;
+                    }
                     result = Cli.obtainClass(vmInfo, clazz.getFullName(), vmManager);
                 }
                 byte[] ba = Base64.getDecoder().decode(result.getLoadedClassBytes());
