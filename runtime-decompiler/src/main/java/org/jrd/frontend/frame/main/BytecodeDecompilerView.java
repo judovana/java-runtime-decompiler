@@ -343,7 +343,7 @@ public class BytecodeDecompilerView {
             }
         });
 
-        insertButton = ImageButtonFactory.createBookButton("Insert agent API to current position");
+        insertButton = ImageButtonFactory.createEditButton("Insert agent API to current position");
         insertButton.addActionListener(actionEvent -> {
             if (isSourceBufferVisible()) {
                 showApiMenu(new Point(0, 0));
