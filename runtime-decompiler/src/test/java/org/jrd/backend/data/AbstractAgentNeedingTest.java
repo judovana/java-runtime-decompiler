@@ -33,6 +33,10 @@ public abstract class AbstractAgentNeedingTest {
 
     @BeforeAll
     static void startup() throws IOException {
+        setupAgentLocations();
+    }
+
+    static void setupAgentLocations() throws IOException {
         String maybeFreshAgent = findFreshAgent();
         if (maybeFreshAgent != null) {
             System.setProperty(Config.AGENT_PATH_OVERWRITE_PROPERTY, maybeFreshAgent);

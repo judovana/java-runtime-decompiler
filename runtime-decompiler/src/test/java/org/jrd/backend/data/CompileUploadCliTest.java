@@ -255,10 +255,14 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
     }
 
     private static void overwrite(AbstractSourceTestClass dummy, Model model, File bin) throws Exception {
+        overwrite(dummy.getPid(), dummy.getFqn(), model, bin);
+    }
+
+    static void overwrite(String pid, String fqn, Model model, File bin) throws Exception {
         String[] args = new String[]{
                 Cli.OVERWRITE,
-                dummy.getPid(),
-                dummy.getFqn(),
+                pid,
+                fqn,
                 bin.getAbsolutePath()
         };
         Cli cli = new Cli(args, model);
@@ -266,13 +270,17 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
     }
 
     private static File compile(String plugin, AbstractSourceTestClass dummy, Model model, File src) throws Exception {
+        return compile(plugin, dummy.getPid(), model, src);
+    }
+
+    static File compile(String plugin, String pid, Model model, File src) throws Exception {
         File compiledFile = File.createTempFile("jrd", "test.class");
         String[] args;
         if (plugin != null) {
             args = new String[]{
                     Cli.COMPILE,
                     Cli.P, plugin,
-                    Cli.CP, dummy.getPid(),
+                    Cli.CP, pid,
                     src.getAbsolutePath(),
                     Cli.SAVE_LIKE, Cli.Saving.EXACT,
                     Cli.SAVE_AS, compiledFile.getAbsolutePath()
@@ -280,7 +288,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
         } else {
             args = new String[]{
                     Cli.COMPILE,
-                    Cli.CP, dummy.getPid(),
+                    Cli.CP, pid,
                     src.getAbsolutePath(),
                     Cli.SAVE_LIKE, Cli.Saving.EXACT,
                     Cli.SAVE_AS, compiledFile.getAbsolutePath()
