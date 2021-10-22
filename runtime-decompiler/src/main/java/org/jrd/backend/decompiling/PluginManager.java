@@ -271,9 +271,8 @@ public class PluginManager {
             for (ExpandableUrl url : wrapper.getDependencyUrls()) {
                 classPathList.add(url.getExpandedUrl());
             }
-            classPathList.add(new URL(
-                    ExpandableUrl.prependFileProtocol(System.getProperty("java.io.tmpdir")) + "/"
-            )); // trailing slash just in case
+            // trailing slash just in case
+            classPathList.add(new URL(ExpandableUrl.prependFileProtocol(System.getProperty("java.io.tmpdir")) + "/"));
 
             // Reflect classes & methods and store them in DecompilerWrapper for later use
             ClassLoader loader = URLClassLoader.newInstance(

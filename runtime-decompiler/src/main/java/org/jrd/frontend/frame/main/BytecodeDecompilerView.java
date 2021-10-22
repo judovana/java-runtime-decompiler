@@ -926,11 +926,13 @@ public class BytecodeDecompilerView {
         if (caretPosition == null) {
             return;
         }
+
+        // y is offset to the next row
         popup.getFor(bytecodeSyntaxTextArea, forcedLocation == null).show(
                 bytecodeSyntaxTextArea,
                 caretPosition.x,
                 caretPosition.y + bytecodeSyntaxTextArea.getFontMetrics(
-                        bytecodeSyntaxTextArea.getFont()).getHeight() // offset to the next row
+                        bytecodeSyntaxTextArea.getFont()).getHeight()
         );
     }
 
