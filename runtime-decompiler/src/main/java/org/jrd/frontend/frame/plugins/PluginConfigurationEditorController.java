@@ -7,7 +7,8 @@ import org.jrd.backend.decompiling.ExpandableUrl;
 import org.jrd.backend.decompiling.ImportUtils;
 import org.jrd.backend.decompiling.PluginManager;
 
-import javax.swing.*;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -17,7 +18,10 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class PluginConfigurationEditorController {
 

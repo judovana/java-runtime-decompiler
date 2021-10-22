@@ -29,7 +29,12 @@ import org.jrd.frontend.frame.remote.NewConnectionView;
 import org.jrd.frontend.utility.CommonUtils;
 import org.jrd.frontend.utility.ScreenFinder;
 
-import javax.swing.*;
+import javax.swing.JFrame;
+import javax.swing.JList;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
+import javax.swing.SwingUtilities;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.ByteArrayOutputStream;

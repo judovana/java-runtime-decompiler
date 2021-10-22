@@ -2,9 +2,16 @@ package org.jrd.frontend.frame.main.renderer;
 
 import org.jrd.backend.core.ClassInfo;
 
-import javax.swing.*;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.ListCellRenderer;
 import javax.swing.border.EtchedBorder;
-import java.awt.*;
+import java.awt.Component;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 
 public class ClassListRenderer extends JPanel implements ListCellRenderer<ClassInfo> {
 

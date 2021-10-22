@@ -3,7 +3,7 @@ package org.jrd.frontend.frame.remote;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.VmManager;
 
-import javax.swing.*;
+import javax.swing.JOptionPane;
 
 public class NewConnectionController {
 

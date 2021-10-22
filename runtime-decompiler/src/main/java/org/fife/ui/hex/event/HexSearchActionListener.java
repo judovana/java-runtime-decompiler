@@ -3,7 +3,8 @@ package org.fife.ui.hex.event;
 import org.fife.ui.hex.swing.HexSearch;
 import org.jrd.backend.core.Logger;
 
-import javax.swing.*;
+import javax.swing.JComboBox;
+import javax.swing.JTextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 

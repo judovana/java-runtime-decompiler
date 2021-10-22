@@ -1,7 +1,11 @@
 package org.jrd.frontend.frame.plugins;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JButton;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.ListSelectionModel;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 
 public class PluginListPanel extends JPanel {
 

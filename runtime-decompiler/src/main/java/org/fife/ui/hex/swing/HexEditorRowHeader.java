@@ -4,12 +4,16 @@
 
 package org.fife.ui.hex.swing;
 
-import javax.swing.*;
+import javax.swing.AbstractListModel;
+import javax.swing.BorderFactory;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.JList;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import java.awt.*;
+import java.awt.Component;
+import java.awt.Graphics;
 
 public class HexEditorRowHeader extends JList implements TableModelListener {
     private static final long serialVersionUID = 1L;
