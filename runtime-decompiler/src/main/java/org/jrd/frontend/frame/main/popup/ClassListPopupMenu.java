@@ -35,12 +35,10 @@ public final class ClassListPopupMenu extends JPopupMenu {
             result.add(copyLoader);
         }
 
-        JMenuItem help1 = new JMenuItem("If this menu is not visible, you can select");
-        JMenuItem help2 = new JMenuItem("multiple items by dragging with RIGHT mouse button down");
-        help1.setEnabled(false);
-        help2.setEnabled(false);
-        result.add(help1);
-        result.add(help2);
+        JMenuItem helpItem = new JMenuItem("TIP: Drag with RMB to multi-select");
+        helpItem.setEnabled(false);
+        result.addSeparator();
+        result.add(helpItem);
 
         result.addPopupMenuListener(new PopupMenuListener() {
             @Override
