@@ -1,8 +1,6 @@
 package org.jrd.frontend.frame.main.popup;
 
 import javax.swing.*;
-import javax.swing.event.PopupMenuEvent;
-import javax.swing.event.PopupMenuListener;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.util.ArrayList;
@@ -18,7 +16,7 @@ public class JListPopupMenu<T> extends JPopupMenu {
     Map<String, CheckboxGetterPair<T>> checkboxes = new LinkedHashMap<>();
     boolean showCheckBoxes;
 
-    public JListPopupMenu(JList<T> parentJList, int originallySelected, boolean showCheckboxes) {
+    public JListPopupMenu(JList<T> parentJList, boolean showCheckboxes) {
         this.showCheckBoxes = showCheckboxes;
 
         add(createCopyItem("Copy selected", parentJList.getSelectedValuesList()));
@@ -28,24 +26,6 @@ public class JListPopupMenu<T> extends JPopupMenu {
         helpItem.setEnabled(false);
         addSeparator();
         add(helpItem);
-
-        addPopupMenuListener(new PopupMenuListener() {
-            @Override
-            public void popupMenuWillBecomeVisible(PopupMenuEvent popupMenuEvent) {
-            }
-
-            @Override
-            public void popupMenuWillBecomeInvisible(PopupMenuEvent popupMenuEvent) {
-                parentJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-                parentJList.setSelectedIndex(originallySelected);
-                parentJList.requestFocusInWindow();
-            }
-
-            @Override
-            public void popupMenuCanceled(PopupMenuEvent popupMenuEvent) {
-                // ...Canceled is called only when it gets dismissed, whereas ...WillBecomeInvisible is called everytime the menu disappears
-            }
-        });
     }
 
     public JListPopupMenu<T> addItem(String fieldName, Function<T, String> getter, boolean isSelected) {
