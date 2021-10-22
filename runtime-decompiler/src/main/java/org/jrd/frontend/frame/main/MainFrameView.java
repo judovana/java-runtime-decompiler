@@ -6,6 +6,7 @@ import org.jrd.backend.data.MetadataProperties;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.frontend.frame.about.AboutView;
 import org.jrd.frontend.frame.license.LicenseView;
+import org.jrd.frontend.frame.main.popup.JListPopupMenu;
 import org.jrd.frontend.frame.main.renderer.VmListRenderer;
 import org.jrd.frontend.frame.settings.SettingsView;
 import org.jrd.frontend.utility.ImageButtonFactory;
@@ -172,13 +173,17 @@ public class MainFrameView {
         localVmList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
-                if (mouseEvent.getButton() == MouseEvent.BUTTON1) {
+                if (SwingUtilities.isLeftMouseButton(mouseEvent)) {
                     ActionEvent event = new ActionEvent(localVmList, 0, null);
                     vmChangingListener.actionPerformed(event);
+                } else if (SwingUtilities.isRightMouseButton(mouseEvent)) {
+                    new JListPopupMenu<>(localVmList, true)
+                        .addItem("name(s)", VmInfo::getVmName, true)
+                        .addItem("PID(s)", vmInfo -> String.valueOf(vmInfo.getVmPid()), false)
+                        .show(localVmList, mouseEvent.getX(), mouseEvent.getY());
                 }
             }
         });
-        //localVmList End
 
         localVmRefreshButton = ImageButtonFactory.createRefreshButton("Refresh local VMs");
         localVmRefreshButton.addActionListener(actionEvent -> {
@@ -234,8 +239,17 @@ public class MainFrameView {
         remoteVmList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
-                ActionEvent event = new ActionEvent(remoteVmList, 0, null);
-                vmChangingListener.actionPerformed(event);
+                if (SwingUtilities.isLeftMouseButton(mouseEvent)) {
+                    ActionEvent event = new ActionEvent(remoteVmList, 0, null);
+                    vmChangingListener.actionPerformed(event);
+                } else if (SwingUtilities.isRightMouseButton(mouseEvent)) {
+                    new JListPopupMenu<>(remoteVmList, true)
+                        .addItem(
+                            "address(es)",
+                            vmInfo -> vmInfo.getVmDecompilerStatus().getHostname() + ":" + vmInfo.getVmDecompilerStatus().getListenPort(),
+                            true
+                        ).show(remoteVmList, mouseEvent.getX(), mouseEvent.getY());
+                }
             }
         });
         // remoteVmList
@@ -258,9 +272,15 @@ public class MainFrameView {
         fsVmList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
-                if (mouseEvent.getButton() == MouseEvent.BUTTON1) {
+                if (SwingUtilities.isLeftMouseButton(mouseEvent)) {
                     ActionEvent event = new ActionEvent(fsVmList, 0, null);
                     vmChangingListener.actionPerformed(event);
+                } else if (SwingUtilities.isRightMouseButton(mouseEvent)) {
+                    new JListPopupMenu<>(fsVmList, true)
+                        .addItem("name(s)", VmInfo::getVmName, false)
+                        .addItem("classpath(s)", VmInfo::getCpString, true)
+                        .addItem("ID(s)", VmInfo::getVmId, false)
+                        .show(fsVmList, mouseEvent.getX(), mouseEvent.getY());
                 }
             }
         });
