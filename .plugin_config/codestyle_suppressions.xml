@@ -17,4 +17,8 @@
     <suppress-xpath
             checks="HideUtilityClassConstructor"
             query="//CLASS_DEF[//METHOD_DEF[./IDENT[@text='main']]]"/>
+
+    <!-- Suppress all checks for Maven-generated code -->
+    <suppress files="[/\\]target[/\\]" checks=".*"/>
+
 </suppressions>

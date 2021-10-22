@@ -8,6 +8,12 @@
     <!-- Enable annotations -->
     <module name="SuppressWarningsFilter"/>
 
+    <!-- Allow supressions per file -->
+    <module name="SuppressionFilter">
+        <property name="file" value=".plugin_config/codestyle_suppressions.xml"/>
+        <property name="optional" value="false"/>
+    </module>
+
     <!-- Disable checks for plugin .json files -->
     <module name="BeforeExecutionExclusionFileFilter">
         <property name="fileNamePattern" value="Wrapper\.json$"/>
