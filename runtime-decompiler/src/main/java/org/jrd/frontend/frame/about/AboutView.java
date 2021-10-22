@@ -4,9 +4,14 @@ import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.MetadataProperties;
 import org.jrd.frontend.frame.main.MainFrameView;
 
-import javax.swing.*;
+import javax.swing.JDialog;
+import javax.swing.JEditorPane;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.event.HyperlinkEvent;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Desktop;
+import java.awt.Font;
 import java.io.IOException;
 import java.net.URISyntaxException;
 

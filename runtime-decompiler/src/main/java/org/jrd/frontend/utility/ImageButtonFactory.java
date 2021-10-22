@@ -4,9 +4,10 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jrd.backend.core.Logger;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.border.EmptyBorder;
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.LookupOp;
 import java.awt.image.ShortLookupTable;

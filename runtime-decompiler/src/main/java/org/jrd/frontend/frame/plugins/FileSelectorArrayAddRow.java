@@ -2,8 +2,11 @@ package org.jrd.frontend.frame.plugins;
 
 import org.jrd.frontend.utility.ImageButtonFactory;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 
 public class FileSelectorArrayAddRow extends JPanel {
 

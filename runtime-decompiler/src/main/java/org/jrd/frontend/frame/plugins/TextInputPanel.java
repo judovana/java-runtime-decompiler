@@ -1,7 +1,11 @@
 package org.jrd.frontend.frame.plugins;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 
 public class TextInputPanel extends JPanel {
 

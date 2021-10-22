@@ -5,8 +5,14 @@ import org.jrd.backend.decompiling.ExpandableUrl;
 import org.jrd.frontend.frame.main.BytecodeDecompilerView;
 import org.jrd.frontend.utility.ImageButtonFactory;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.io.File;
 
 public class FileSelectorArrayRow extends JPanel {

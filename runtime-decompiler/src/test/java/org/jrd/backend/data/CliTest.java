@@ -26,9 +26,35 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static org.jrd.backend.data.Cli.*;
-import static org.jrd.backend.data.Help.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.jrd.backend.data.Cli.BASE64;
+import static org.jrd.backend.data.Cli.BYTES;
+import static org.jrd.backend.data.Cli.COMPILE;
+import static org.jrd.backend.data.Cli.CP;
+import static org.jrd.backend.data.Cli.DECOMPILE;
+import static org.jrd.backend.data.Cli.H;
+import static org.jrd.backend.data.Cli.HELP;
+import static org.jrd.backend.data.Cli.INIT;
+import static org.jrd.backend.data.Cli.LIST_CLASSES;
+import static org.jrd.backend.data.Cli.LIST_JVMS;
+import static org.jrd.backend.data.Cli.LIST_PLUGINS;
+import static org.jrd.backend.data.Cli.OVERWRITE;
+import static org.jrd.backend.data.Cli.R;
+import static org.jrd.backend.data.Cli.VERBOSE;
+import static org.jrd.backend.data.Cli.VERSION;
+import static org.jrd.backend.data.Help.BASE64_FORMAT;
+import static org.jrd.backend.data.Help.BYTES_FORMAT;
+import static org.jrd.backend.data.Help.DECOMPILE_FORMAT;
+import static org.jrd.backend.data.Help.INIT_FORMAT;
+import static org.jrd.backend.data.Help.LIST_CLASSES_FORMAT;
+import static org.jrd.backend.data.Help.OVERWRITE_FORMAT;
+import static org.jrd.backend.data.Help.printHelpText;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class CliTest extends AbstractAgentNeedingTest {

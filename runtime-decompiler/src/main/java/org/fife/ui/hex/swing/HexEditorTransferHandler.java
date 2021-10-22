@@ -4,7 +4,8 @@
 
 package org.fife.ui.hex.swing;
 
-import javax.swing.*;
+import javax.swing.JComponent;
+import javax.swing.TransferHandler;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;

@@ -3,8 +3,14 @@ package org.jrd.frontend.frame.plugins;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.frontend.frame.main.MainFrameView;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JDialog;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
 
 public class PluginConfigurationEditorView extends JDialog {
 

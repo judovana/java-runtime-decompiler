@@ -3,8 +3,15 @@ package org.jrd.frontend.frame.plugins;
 import org.jrd.backend.data.Directories;
 import org.jrd.frontend.frame.main.BytecodeDecompilerView;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.io.File;
 
 public class FileSelectorPanel extends JPanel {

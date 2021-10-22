@@ -7,7 +7,27 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.jrd.backend.data.Cli.*;
+import static org.jrd.backend.data.Cli.API;
+import static org.jrd.backend.data.Cli.BASE64;
+import static org.jrd.backend.data.Cli.BYTES;
+import static org.jrd.backend.data.Cli.COMPILE;
+import static org.jrd.backend.data.Cli.CP;
+import static org.jrd.backend.data.Cli.DECOMPILE;
+import static org.jrd.backend.data.Cli.H;
+import static org.jrd.backend.data.Cli.HELP;
+import static org.jrd.backend.data.Cli.INIT;
+import static org.jrd.backend.data.Cli.LIST_CLASSES;
+import static org.jrd.backend.data.Cli.LIST_CLASSESDETAILS;
+import static org.jrd.backend.data.Cli.LIST_JVMS;
+import static org.jrd.backend.data.Cli.LIST_PLUGINS;
+import static org.jrd.backend.data.Cli.OVERWRITE;
+import static org.jrd.backend.data.Cli.P;
+import static org.jrd.backend.data.Cli.R;
+import static org.jrd.backend.data.Cli.SAVE_AS;
+import static org.jrd.backend.data.Cli.SAVE_LIKE;
+import static org.jrd.backend.data.Cli.Saving;
+import static org.jrd.backend.data.Cli.VERBOSE;
+import static org.jrd.backend.data.Cli.VERSION;
 
 /**
  * Class for relaying help texts to the user.

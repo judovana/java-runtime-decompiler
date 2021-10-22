@@ -100,13 +100,7 @@
         <module name="UpperEll" />
 
         <!-- Import checks, see https://checkstyle.org/config_imports.html, especially "IDEA formatter" -->
-        <module name="AvoidStarImport">
-            <property name="excludes" value="java.awt,javax.swing,java.util"/>
-
-            <property name="excludes" value="org.junit.jupiter.api.Assertions.*"/>
-            <property name="excludes" value="org.jrd.backend.data.Cli.*"/>
-            <property name="excludes" value="org.jrd.backend.data.Help.*"/>
-        </module>
+        <module name="AvoidStarImport" />
         <module name="AvoidStaticImport">
             <property name="excludes" value="org.junit.jupiter.api.Assertions.*"/>
             <property name="excludes" value="org.jrd.backend.data.Cli.*"/>

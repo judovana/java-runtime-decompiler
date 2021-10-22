@@ -1,8 +1,13 @@
 package org.jrd.frontend.frame.plugins;
 
-import javax.swing.*;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.UIManager;
 import javax.swing.border.MatteBorder;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 
 /**
  * Panel with three buttons "Validate", "OK" and "Cancel"

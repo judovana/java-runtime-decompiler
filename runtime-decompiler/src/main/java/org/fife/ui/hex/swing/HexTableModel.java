@@ -6,13 +6,13 @@ package org.fife.ui.hex.swing;
 
 import org.fife.ui.hex.ByteBuffer;
 
-import javax.swing.*;
+import javax.swing.UIManager;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.undo.AbstractUndoableEdit;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
-import java.awt.*;
+import java.awt.Point;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;

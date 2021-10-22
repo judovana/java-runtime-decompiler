@@ -3,10 +3,18 @@ package org.jrd.frontend.frame.main.renderer;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.frontend.frame.main.BytecodeDecompilerView;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.ListCellRenderer;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 
 public class VmListRenderer extends JPanel implements ListCellRenderer<VmInfo> {
 

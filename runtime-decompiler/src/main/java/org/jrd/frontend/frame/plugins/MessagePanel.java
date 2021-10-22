@@ -1,7 +1,10 @@
 package org.jrd.frontend.frame.plugins;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
 
 public class MessagePanel extends JPanel {
 

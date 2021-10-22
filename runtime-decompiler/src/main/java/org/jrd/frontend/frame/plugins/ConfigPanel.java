@@ -1,7 +1,11 @@
 package org.jrd.frontend.frame.plugins;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.Box;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 
 public class ConfigPanel extends JPanel {
 
