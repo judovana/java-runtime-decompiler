@@ -15,7 +15,7 @@ import org.fife.ui.rtextarea.SearchResult;
 import org.jrd.backend.core.ClassInfo;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.decompiling.DecompilerWrapper;
-import org.jrd.frontend.frame.main.popup.JListPopupMenu;
+import org.jrd.frontend.frame.main.popup.ClassListPopupMenu;
 import org.jrd.frontend.frame.main.renderer.ClassListRenderer;
 import org.jrd.frontend.utility.ImageButtonFactory;
 import org.jrd.frontend.utility.ScreenFinder;
@@ -186,7 +186,7 @@ public class BytecodeDecompilerView {
                         bytesWorker(name);
                     }
                 } else if (SwingUtilities.isRightMouseButton(e)) {
-                    new JListPopupMenu<>(filteredClassesJList, originallySelected, doShowClassInfo())
+                    new ClassListPopupMenu<>(filteredClassesJList, originallySelected, doShowClassInfo())
                         .addItem("name(s)", ClassInfo::getName, true)
                         .addItem("location(s)", ClassInfo::getLocation, false)
                         .addItem("class loader(s)", ClassInfo::getClassLoader, false)
