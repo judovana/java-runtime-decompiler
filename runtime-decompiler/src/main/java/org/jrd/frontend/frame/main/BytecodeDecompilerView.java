@@ -186,7 +186,10 @@ public class BytecodeDecompilerView {
                         bytesWorker(name);
                     }
                 } else if (SwingUtilities.isRightMouseButton(e)) {
-                    ClassListPopupMenu.create(filteredClassesJList, originallySelected, doShowClassInfo())
+                    new ClassListPopupMenu<>(filteredClassesJList, originallySelected, doShowClassInfo())
+                        .addItem("name(s)", ClassInfo::getName, true)
+                        .addItem("location(s)", ClassInfo::getLocation, false)
+                        .addItem("class loader(s)", ClassInfo::getClassLoader, false)
                         .show(filteredClassesJList, e.getX(), e.getY());
                 }
             }
