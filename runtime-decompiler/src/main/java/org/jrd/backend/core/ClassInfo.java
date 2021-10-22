@@ -91,9 +91,7 @@ public class ClassInfo {
         if (!details) {
             return name;
         } else {
-            return name + "\n" +
-                    "  Location: " + location + "\n" +
-                    "  Class loader: " + classLoader;
+            return name + "\n" + "  Location: " + location + "\n" + "  Class loader: " + classLoader;
         }
     }
 }

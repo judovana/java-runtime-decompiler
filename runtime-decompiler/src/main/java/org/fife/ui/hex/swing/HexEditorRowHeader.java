@@ -123,9 +123,7 @@ public class HexEditorRowHeader extends JList implements TableModelListener {
         }
 
         @Override
-        public void paintBorder(
-                final Component c, final Graphics g, int x, final int y, final int width, final int height
-        ) {
+        public void paintBorder(final Component c, final Graphics g, int x, final int y, final int width, final int height) {
             x = x + width - this.right;
             g.setColor(HexEditorRowHeader.this.table.getGridColor());
             g.drawLine(x, y, x, y + height);

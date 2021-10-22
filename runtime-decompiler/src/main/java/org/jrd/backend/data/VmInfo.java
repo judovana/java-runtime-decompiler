@@ -24,7 +24,9 @@ import java.util.stream.Collectors;
 public class VmInfo implements Serializable {
 
     public enum Type {
-        LOCAL, REMOTE, FS
+        LOCAL,
+        REMOTE,
+        FS
     }
 
     private static final long serialVersionUID = 111L;
@@ -36,12 +38,9 @@ public class VmInfo implements Serializable {
     private Type type;
     private java.util.List<File> cp;
 
-    private static final Comparator<VmInfo> HOSTNAME_COMPARATOR = Comparator.comparing(
-            info -> info.getVmDecompilerStatus().getHostname(), String::compareTo
-    );
-    private static final Comparator<VmInfo> PORT_COMPARATOR = Comparator.comparingInt(
-            info -> info.getVmDecompilerStatus().getListenPort()
-    );
+    private static final Comparator<VmInfo> HOSTNAME_COMPARATOR =
+            Comparator.comparing(info -> info.getVmDecompilerStatus().getHostname(), String::compareTo);
+    private static final Comparator<VmInfo> PORT_COMPARATOR = Comparator.comparingInt(info -> info.getVmDecompilerStatus().getListenPort());
     public static final Comparator<VmInfo> LOCAL_VM_COMPARATOR = Comparator.comparingInt(VmInfo::getVmPid);
     public static final Comparator<VmInfo> REMOTE_VM_COMPARATOR = HOSTNAME_COMPARATOR.thenComparing(PORT_COMPARATOR);
     public static final Comparator<VmInfo> FS_VM_COMPARATOR = LOCAL_VM_COMPARATOR.reversed();
@@ -139,10 +138,7 @@ public class VmInfo implements Serializable {
 
     @Override
     public String toString() {
-        return String.format(
-                "%s %s (type %s",
-                vmId, vmName, type
-        ) + (type == Type.FS ? ", classpath: " + getCpString() : "") + ")";
+        return String.format("%s %s (type %s", vmId, vmName, type) + (type == Type.FS ? ", classpath: " + getCpString() : "") + ")";
     }
 
     @Override
@@ -155,8 +151,7 @@ public class VmInfo implements Serializable {
         }
 
         VmInfo vmInfo = (VmInfo) o;
-        return vmPid == vmInfo.vmPid &&
-                Objects.equals(vmId, vmInfo.vmId) &&
+        return vmPid == vmInfo.vmPid && Objects.equals(vmId, vmInfo.vmId) &&
                 Objects.equals(vmName, vmInfo.vmName) &&
                 type == vmInfo.type &&
                 Objects.equals(cp, vmInfo.cp);
@@ -168,10 +163,7 @@ public class VmInfo implements Serializable {
     }
 
     private byte[] serialize() throws IOException {
-        try (
-                ByteArrayOutputStream bo = new ByteArrayOutputStream(1024);
-                ObjectOutputStream so = new ObjectOutputStream(bo)
-        ) {
+        try (ByteArrayOutputStream bo = new ByteArrayOutputStream(1024); ObjectOutputStream so = new ObjectOutputStream(bo)) {
             so.writeObject(this);
             so.flush();
             return bo.toByteArray();
@@ -183,9 +175,7 @@ public class VmInfo implements Serializable {
     }
 
     static VmInfo base64Deserialize(String base64Representation) throws IOException, ClassNotFoundException {
-        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(
-                Base64.getDecoder().decode(base64Representation)
-        ));
+        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(Base64.getDecoder().decode(base64Representation)));
         return (VmInfo) ois.readObject();
     }
 }

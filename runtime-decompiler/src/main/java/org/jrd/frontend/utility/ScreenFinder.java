@@ -77,15 +77,11 @@ public final class ScreenFinder {
     }
 
     private static void centerWindowToBounds(Window w, Rectangle bounds) {
-        w.setLocation(bounds.x + (bounds.width - w.getWidth()) / 2,
-            bounds.y + (bounds.height - w.getHeight()) / 2);
+        w.setLocation(bounds.x + (bounds.width - w.getWidth()) / 2, bounds.y + (bounds.height - w.getHeight()) / 2);
     }
 
     public static void moveWindowNextTo(Window baseWindow, Window movedWindow) {
-        movedWindow.setLocation(
-                baseWindow.getX() + baseWindow.getWidth(),
-                baseWindow.getY()
-        );
+        movedWindow.setLocation(baseWindow.getX() + baseWindow.getWidth(), baseWindow.getY());
     }
 
     private static GraphicsDevice getScreenOnCoords(final Point point) {
@@ -117,9 +113,7 @@ public final class ScreenFinder {
             final Insets insets = Toolkit.getDefaultToolkit().getScreenInsets(device.getDefaultConfiguration());
 
             return new Rectangle(
-                    (int) screenSize.getX() + insets.left,
-                    (int) screenSize.getY() + insets.top,
-                    (int) screenSize.getWidth() - insets.left,
+                    (int) screenSize.getX() + insets.left, (int) screenSize.getY() + insets.top, (int) screenSize.getWidth() - insets.left,
                     (int) screenSize.getHeight() - insets.bottom
             );
         } catch (HeadlessException | IllegalArgumentException ex) {

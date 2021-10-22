@@ -1,6 +1,5 @@
 package org.jrd.backend.communication;
 
-
 import org.jrd.backend.core.Logger;
 
 import java.io.IOException;

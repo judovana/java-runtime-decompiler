@@ -54,50 +54,50 @@ public class MainFrameView {
     public static final String FS_VM_COMMAND = "FS VM";
     public static final String REMOTE_VM_ACTION = "remote VM";
     private JFrame mainFrame;
-        private JPanel mainPanel;
-            private JTabbedPane tabbedPane;
-                private JPanel localVmPanel;
-                    private JPanel localVmLabelPanel;
-                        private JPanel localVmButtonPanel;
-                            private JButton localVmRefreshButton;
-                    private JScrollPane localVmScrollPane;
-                        private JList<VmInfo> localVmList;
+    private JPanel mainPanel;
+    private JTabbedPane tabbedPane;
+    private JPanel localVmPanel;
+    private JPanel localVmLabelPanel;
+    private JPanel localVmButtonPanel;
+    private JButton localVmRefreshButton;
+    private JScrollPane localVmScrollPane;
+    private JList<VmInfo> localVmList;
 
-                private JPanel remoteVmPanel;
-                    private JPanel remoteVmLabelPanel;
-                        private JPanel remoteVmButtonPanel;
-                            private JButton remoteVmAddButton;
-                            private JButton remoteVmRemoveButton;
-                    private JScrollPane remoteVmScrollPane;
-                        private JList<VmInfo> remoteVmList;
+    private JPanel remoteVmPanel;
+    private JPanel remoteVmLabelPanel;
+    private JPanel remoteVmButtonPanel;
+    private JButton remoteVmAddButton;
+    private JButton remoteVmRemoveButton;
+    private JScrollPane remoteVmScrollPane;
+    private JList<VmInfo> remoteVmList;
 
-                private JPanel fsVmPanel;
-                    private JPanel fsVmLabelPanel;
-                        private JPanel fsVmButtonPanel;
-                            private JButton fsVmAddButton;
-                            private JButton fsVmRemoveButton;
-                    private JScrollPane fsVmScrollPane;
-                        private JList<VmInfo> fsVmList;
+    private JPanel fsVmPanel;
+    private JPanel fsVmLabelPanel;
+    private JPanel fsVmButtonPanel;
+    private JButton fsVmAddButton;
+    private JButton fsVmRemoveButton;
+    private JScrollPane fsVmScrollPane;
+    private JList<VmInfo> fsVmList;
 
-            private JPanel centerPanel;
-                private JPanel welcomePanel;
-                    private JTextArea welcomeJTextArea;
-                private BytecodeDecompilerView bytecodeDecompilerView;
+    private JPanel centerPanel;
+    private JPanel welcomePanel;
+    private JTextArea welcomeJTextArea;
+    private BytecodeDecompilerView bytecodeDecompilerView;
 
-                private CardLayout cardLayout;
+    private CardLayout cardLayout;
 
     private JMenuBar menuBar;
-        private JMenu jMenuConnect;
-            private JMenuItem jMenuItemNewConnection;
-        private JMenu jMenuConfig;
-            private JMenuItem jMenuSettings;
-            private JMenuItem jMenuPluginEditor;
-            private JMenuItem jMenuOverrides;
-        private JMenu jMenuHelp;
-            private JMenuItem jMenuItemAbout;
-            private JMenuItem jMenuItemUsage;
-            private JMenuItem jMenuItemLicense;
-            private JMenuItem jMenuItemLog;
+    private JMenu jMenuConnect;
+    private JMenuItem jMenuItemNewConnection;
+    private JMenu jMenuConfig;
+    private JMenuItem jMenuSettings;
+    private JMenuItem jMenuPluginEditor;
+    private JMenuItem jMenuOverrides;
+    private JMenu jMenuHelp;
+    private JMenuItem jMenuItemAbout;
+    private JMenuItem jMenuItemUsage;
+    private JMenuItem jMenuItemLicense;
+    private JMenuItem jMenuItemLog;
 
     private ActionListener vmChangingListener;
     private ActionListener refreshLocalVmsListener;
@@ -112,14 +112,11 @@ public class MainFrameView {
     private static final String WELCOME_CARD = "welcomePanel";
     private static final String DECOMPILER_CARD = "decompilerView";
     @SuppressWarnings("LineLength") // string formatting
-    private static final String WELCOME_MESSAGE =
-            "Welcome to Java-Runtime-Decompiler, or JRD for short.\n" +
-            "\n" +
+    private static final String WELCOME_MESSAGE = "Welcome to Java-Runtime-Decompiler, or JRD for short.\n" + "\n" +
             "Before using JRD, the Decompiler Agent's path needs to be selected in 'Configure -> Settings'.\n" +
             "It's a built-in project and can usually be found at '" + Directories.getRelativePotentialAgentLocation() + "'.\n" +
             "On JDK 9 and higher, the agent is not allowed to attach by default.\n" +
-            "You must run the target process with '-Djdk.attach.allowAttachSelf=true'.\n" +
-            "\n" +
+            "You must run the target process with '-Djdk.attach.allowAttachSelf=true'.\n" + "\n" +
             "Internal javap disassembling tools are available by default.\n" +
             "You can also download external decompilers/disassemblers via 'mvn clean install -PdownloadPlugins'.\n" +
             "We currently support the following plugins: Fernflower, Procyon, Cfr, Jasm & Jcoder.\n" +
@@ -200,10 +197,9 @@ public class MainFrameView {
                     ActionEvent event = new ActionEvent(localVmList, 0, null);
                     vmChangingListener.actionPerformed(event);
                 } else if (SwingUtilities.isRightMouseButton(mouseEvent)) {
-                    new JListPopupMenu<>(localVmList, true)
-                        .addItem("name(s)", VmInfo::getVmName, true)
-                        .addItem("PID(s)", vmInfo -> String.valueOf(vmInfo.getVmPid()), false)
-                        .show(localVmList, mouseEvent.getX(), mouseEvent.getY());
+                    new JListPopupMenu<>(localVmList, true).addItem("name(s)", VmInfo::getVmName, true)
+                            .addItem("PID(s)", vmInfo -> String.valueOf(vmInfo.getVmPid()), false)
+                            .show(localVmList, mouseEvent.getX(), mouseEvent.getY());
                 }
             }
         });
@@ -218,9 +214,9 @@ public class MainFrameView {
         localVmButtonPanel = new JPanel();
         localVmButtonPanel.add(localVmRefreshButton);
 
-        localVmScrollPane = new JScrollPane(localVmList,
-                ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
-                ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        localVmScrollPane = new JScrollPane(
+                localVmList, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER
+        );
         // localVmScrollPane End
         localVmLabelPanel = new JPanel(new BorderLayout());
         localVmLabelPanel.add(new JLabel("Local Processes", SwingConstants.CENTER), BorderLayout.CENTER);
@@ -266,19 +262,18 @@ public class MainFrameView {
                     ActionEvent event = new ActionEvent(remoteVmList, 0, null);
                     vmChangingListener.actionPerformed(event);
                 } else if (SwingUtilities.isRightMouseButton(mouseEvent)) {
-                    new JListPopupMenu<>(remoteVmList, true)
-                        .addItem(
+                    new JListPopupMenu<>(remoteVmList, true).addItem(
                             "address(es)",
                             vmInfo -> vmInfo.getVmDecompilerStatus().getHostname() + ":" + vmInfo.getVmDecompilerStatus().getListenPort(),
                             true
-                        ).show(remoteVmList, mouseEvent.getX(), mouseEvent.getY());
+                    ).show(remoteVmList, mouseEvent.getX(), mouseEvent.getY());
                 }
             }
         });
         // remoteVmList
-        remoteVmScrollPane = new JScrollPane(remoteVmList,
-                ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
-                ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        remoteVmScrollPane = new JScrollPane(
+                remoteVmList, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER
+        );
         // remoteVmScrollPane end
 
         remoteVmPanel = new JPanel(new BorderLayout());
@@ -299,17 +294,14 @@ public class MainFrameView {
                     ActionEvent event = new ActionEvent(fsVmList, 0, null);
                     vmChangingListener.actionPerformed(event);
                 } else if (SwingUtilities.isRightMouseButton(mouseEvent)) {
-                    new JListPopupMenu<>(fsVmList, true)
-                        .addItem("name(s)", VmInfo::getVmName, false)
-                        .addItem("classpath(s)", VmInfo::getCpString, true)
-                        .addItem("ID(s)", VmInfo::getVmId, false)
-                        .show(fsVmList, mouseEvent.getX(), mouseEvent.getY());
+                    new JListPopupMenu<>(fsVmList, true).addItem("name(s)", VmInfo::getVmName, false)
+                            .addItem("classpath(s)", VmInfo::getCpString, true).addItem("ID(s)", VmInfo::getVmId, false)
+                            .show(fsVmList, mouseEvent.getX(), mouseEvent.getY());
                 }
             }
         });
-        fsVmScrollPane = new JScrollPane(fsVmList,
-                ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
-                ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        fsVmScrollPane =
+                new JScrollPane(fsVmList, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
         fsVmAddButton = ImageButtonFactory.createAddButton();
         fsVmAddButton.addActionListener(actionEvent -> newFsVmDialogListener.actionPerformed(actionEvent));
@@ -326,10 +318,7 @@ public class MainFrameView {
 
         fsVmLabelPanel = new JPanel(new BorderLayout());
         fsVmLabelPanel.add(fsVmButtonPanel, BorderLayout.EAST);
-        fsVmLabelPanel.add(
-                new JLabel("Local Filesystem Classpath Elements", SwingConstants.CENTER),
-                BorderLayout.CENTER
-        );
+        fsVmLabelPanel.add(new JLabel("Local Filesystem Classpath Elements", SwingConstants.CENTER), BorderLayout.CENTER);
         fsVmPanel = new JPanel(new BorderLayout());
         fsVmPanel.setName("Local FS");
         fsVmPanel.add(fsVmLabelPanel, BorderLayout.NORTH);
@@ -384,7 +373,6 @@ public class MainFrameView {
         centerPanel.add(welcomePanel, WELCOME_CARD);
         centerPanel.add(bytecodeDecompilerView.getBytecodeDecompilerPanel(), DECOMPILER_CARD);
         // centerPanel End
-
 
         mainPanel = new JPanel(new BorderLayout());
         mainPanel.add(tabbedPane, BorderLayout.WEST);
@@ -450,7 +438,6 @@ public class MainFrameView {
         menuBar.add(jMenuHelp);
         // menuBar end
 
-
         mainFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         mainFrame.setTitle(MetadataProperties.getInstance().getName());
         mainFrame.setSize(1366, 768);
@@ -461,7 +448,6 @@ public class MainFrameView {
         mainFrame.add(mainPanel, BorderLayout.CENTER);
         mainFrame.setVisible(true);
         // mainFrame End
-
 
         // Tell server to shut down before exiting
         mainFrame.addWindowListener(new WindowAdapter() {
@@ -500,7 +486,6 @@ public class MainFrameView {
             haltAgentListener.actionPerformed(event);
         }
     }
-
 
     public void setRefreshLocalVmsListener(ActionListener listener) {
         this.refreshLocalVmsListener = listener;

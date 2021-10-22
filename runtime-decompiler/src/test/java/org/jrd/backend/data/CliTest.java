@@ -62,15 +62,11 @@ public class CliTest extends AbstractAgentNeedingTest {
     private Cli cli;
     private static final String NEW_GREETINGS = "Greetings";
 
-
     private static final String UNKNOWN_FLAG = "--zyxwvutsrqponmlqjihgfedcba";
 
     @Override
     AbstractSourceTestClass dummyProvider() throws AbstractSourceTestClass.SourceTestClassWrapperException {
-        return new TestingDummyHelper()
-                .writeDefault()
-                .compile()
-                .execute();
+        return new TestingDummyHelper().writeDefault().compile().execute();
     }
 
     private String prependSlashes(String original, int count) {
@@ -160,22 +156,14 @@ public class CliTest extends AbstractAgentNeedingTest {
 
     private String processFormatDefault(String original) {
         return processFormat(
-                original,
-                dummy.getPid(),
-                new String[]{dummy.getClassRegex()},
-                dummy.getFqn(),
-                dummy.getDotClassPath(),
-                "javap"
+                original, dummy.getPid(), new String[]{dummy.getClassRegex()}, dummy.getFqn(), dummy.getDotClassPath(), "javap"
         );
     }
 
-    private static String processFormat(
-            String original, String puc, String[] classRegex, String className, String classFile, String plugin
-    ) {
-        String result = original
-                .replace("...", "")
-                .replace("<PUC>", puc)
-                .replace("<PLUGIN>", plugin);
+    private static
+            String
+            processFormat(String original, String puc, String[] classRegex, String className, String classFile, String plugin) {
+        String result = original.replace("...", "").replace("<PUC>", puc).replace("<PLUGIN>", plugin);
 
         if (classRegex != null) {
             result = result.replace("<CLASS REGEX>", String.join(" ", classRegex));
@@ -187,8 +175,7 @@ public class CliTest extends AbstractAgentNeedingTest {
             result = result.replace("<CLASS FILE>", classFile);
         }
 
-        return result
-                .replaceAll("\\[.*?<.*?>.*?]", "") //remove unused optional arguments
+        return result.replaceAll("\\[.*?<.*?>.*?]", "") //remove unused optional arguments
                 .replaceAll("\\[(.*?)]", "$1"); //remove brackets around used optional arguments
     }
 
@@ -203,8 +190,8 @@ public class CliTest extends AbstractAgentNeedingTest {
     // temporarily missing COMPILE
     private static Stream<String> validOperationSource() {
         return Stream.of(
-                H, HELP, VERBOSE, VERSION, LIST_JVMS, LIST_PLUGINS, INIT_FORMAT,
-                LIST_CLASSES_FORMAT, BYTES_FORMAT, BASE64_FORMAT, DECOMPILE_FORMAT, OVERWRITE_FORMAT
+                H, HELP, VERBOSE, VERSION, LIST_JVMS, LIST_PLUGINS, INIT_FORMAT, LIST_CLASSES_FORMAT, BYTES_FORMAT, BASE64_FORMAT,
+                DECOMPILE_FORMAT, OVERWRITE_FORMAT
         );
     }
 
@@ -403,22 +390,11 @@ public class CliTest extends AbstractAgentNeedingTest {
     private Stream<Arguments> tooFewArgumentsSource() {
         String unimportantPid = "123456";
         return Stream.of(
-                new String[]{LIST_CLASSES},
-                new String[]{BYTES},
-                new String[]{BYTES, unimportantPid},
-                new String[]{BASE64},
-                new String[]{BASE64, unimportantPid},
-                new String[]{INIT},
-                new String[]{INIT, unimportantPid},
-                new String[]{OVERWRITE},
-                new String[]{OVERWRITE, unimportantPid},
-                new String[]{DECOMPILE},
-                new String[]{DECOMPILE, unimportantPid},
-                new String[]{DECOMPILE, unimportantPid, "javap"},
-                new String[]{COMPILE},
-                new String[]{COMPILE, R},
-                new String[]{COMPILE, R, CP, unimportantPid},
-                new String[]{COMPILE, R, CP, unimportantPid, Cli.P, "unimportantPluginName"}
+                new String[]{LIST_CLASSES}, new String[]{BYTES}, new String[]{BYTES, unimportantPid}, new String[]{BASE64},
+                new String[]{BASE64, unimportantPid}, new String[]{INIT}, new String[]{INIT, unimportantPid}, new String[]{OVERWRITE},
+                new String[]{OVERWRITE, unimportantPid}, new String[]{DECOMPILE}, new String[]{DECOMPILE, unimportantPid},
+                new String[]{DECOMPILE, unimportantPid, "javap"}, new String[]{COMPILE}, new String[]{COMPILE, R},
+                new String[]{COMPILE, R, CP, unimportantPid}, new String[]{COMPILE, R, CP, unimportantPid, Cli.P, "unimportantPluginName"}
         ).map(a -> (Object) a).map(Arguments::of); // cast needed because of varargs factory method .of()
     }
 
@@ -500,12 +476,7 @@ public class CliTest extends AbstractAgentNeedingTest {
     void testOverwrite(String pucComponent) throws Exception {
         createReplacement(NEW_GREETINGS);
 
-        args = new String[]{
-                OVERWRITE,
-                pucComponent,
-                dummy.getFqn(),
-                dummy.getDotClassPath()
-        };
+        args = new String[]{OVERWRITE, pucComponent, dummy.getFqn(), dummy.getDotClassPath()};
         cli = new Cli(args, model);
 
         assertDoesNotThrow(() -> cli.consumeCli());
@@ -514,7 +485,6 @@ public class CliTest extends AbstractAgentNeedingTest {
         // assert that change propagated, unfortunately we have to rely on another operation here
         bytecodeContainsNewString(pucComponent, NEW_GREETINGS);
     }
-
 
     /**
      * Why this is passing:
@@ -538,11 +508,7 @@ public class CliTest extends AbstractAgentNeedingTest {
     void testOverwriteStdIn(String pucComponent) throws Exception {
         createReplacement(NEW_GREETINGS);
 
-        args = new String[]{
-                OVERWRITE,
-                pucComponent,
-                dummy.getFqn()
-        };
+        args = new String[]{OVERWRITE, pucComponent, dummy.getFqn()};
         cli = new Cli(args, model);
 
         // setup input stream
@@ -575,9 +541,7 @@ public class CliTest extends AbstractAgentNeedingTest {
 
     private static void createReplacement(String newGreeting) {
         try {
-            new TestingDummyHelper()
-                    .write(newGreeting)
-                    .compile();
+            new TestingDummyHelper().write(newGreeting).compile();
         } catch (AbstractSourceTestClass.SourceTestClassWrapperException e) {
             fail("Failed to create data to be uploaded.", e);
         }
@@ -617,12 +581,7 @@ public class CliTest extends AbstractAgentNeedingTest {
             fail("Failed to copy file.", e);
         }
 
-        args = new String[]{
-                OVERWRITE,
-                dummy.getPid(),
-                dummy.getFqn(),
-                nonClassFile
-        };
+        args = new String[]{OVERWRITE, dummy.getPid(), dummy.getFqn(), nonClassFile};
         cli = new Cli(args, model);
 
         assertDoesNotThrow(() -> cli.consumeCli());
@@ -632,12 +591,7 @@ public class CliTest extends AbstractAgentNeedingTest {
 
     @Test
     void testOverwriteError() {
-        args = new String[]{
-                OVERWRITE,
-                dummy.getPid(),
-                dummy.getFqn(),
-                dummy.getTargetDir()
-        };
+        args = new String[]{OVERWRITE, dummy.getPid(), dummy.getFqn(), dummy.getTargetDir()};
         cli = new Cli(args, model);
 
         assertThrows(RuntimeException.class, () -> cli.consumeCli()); // wrapped IOException
@@ -647,12 +601,8 @@ public class CliTest extends AbstractAgentNeedingTest {
 
     @Test
     void testOverwriteAgentError() {
-        args = new String[]{
-                OVERWRITE,
-                dummy.getPid(),
-                UNKNOWN_FLAG, // non-FQN makes agent not find the class
-                dummy.getDotClassPath()
-        };
+        args = new String[]{OVERWRITE, dummy.getPid(), UNKNOWN_FLAG, // non-FQN makes agent not find the class
+                dummy.getDotClassPath()};
         cli = new Cli(args, model);
 
         RuntimeException e = assertThrows(RuntimeException.class, () -> cli.consumeCli());
@@ -662,11 +612,7 @@ public class CliTest extends AbstractAgentNeedingTest {
     @Test
     void testInit() throws Exception {
         String targetClass = "java.lang.Override";
-        args = new String[]{
-                INIT,
-                dummy.getPid(),
-                targetClass
-        };
+        args = new String[]{INIT, dummy.getPid(), targetClass};
         cli = new Cli(args, model);
 
         assertDoesNotThrow(() -> cli.consumeCli());
@@ -677,11 +623,7 @@ public class CliTest extends AbstractAgentNeedingTest {
 
     @Test
     void testInitAgentError() {
-        args = new String[]{
-                INIT,
-                dummy.getPid(),
-                UNKNOWN_FLAG
-        };
+        args = new String[]{INIT, dummy.getPid(), UNKNOWN_FLAG};
         cli = new Cli(args, model);
 
         assertThrows(RuntimeException.class, () -> cli.consumeCli());
@@ -705,22 +647,16 @@ public class CliTest extends AbstractAgentNeedingTest {
         assertThrows(RuntimeException.class, () -> Cli.guessName(contents));
     }
 
-
     private Stream<byte[]> correctClassContents() {
-        return Stream.of(
-                new TestingDummyHelper().getDefaultContentWithPackage(),
-                new TestingDummyHelper().getEmptyClassWithPackage()
-        ).map(s -> s.getBytes(StandardCharsets.UTF_8));
+        return Stream.of(new TestingDummyHelper().getDefaultContentWithPackage(), new TestingDummyHelper().getEmptyClassWithPackage())
+                .map(s -> s.getBytes(StandardCharsets.UTF_8));
     }
 
     @ParameterizedTest(name = "[{index}]")
     @MethodSource("correctClassContents")
     void testGuessNameCorrect(byte[] contents) {
         try {
-            assertEquals(
-                    dummy.getPackageName() + "." + dummy.getClassName(),
-                    Cli.guessName(contents)
-            );
+            assertEquals(dummy.getPackageName() + "." + dummy.getClassName(), Cli.guessName(contents));
         } catch (IOException e) {
             fail(e);
         }

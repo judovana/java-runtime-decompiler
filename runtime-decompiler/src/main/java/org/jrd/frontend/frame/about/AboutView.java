@@ -21,17 +21,17 @@ public class AboutView extends JDialog {
         JLabel label = new JLabel();
         Font font = label.getFont();
 
-        String style = "font-family:" + font.getFamily() + ";" +
-                "font-weight:" + (font.isBold() ? "bold" : "normal") + ";" +
-                "font-size:" + font.getSize() + "pt;";
+        String style = "font-family:" + font.getFamily() + ";" + "font-weight:" + (font.isBold() ? "bold" : "normal") + ";" + "font-size:" +
+                font.getSize() + "pt;";
 
-        JEditorPane editorPane = new JEditorPane("text/html", "<html><body style=\"" + style + "\">" +
-            "<h2>Java-Runtime-Decompiler</h2>" +
-            "Version " + MetadataProperties.getInstance().getVersion() + "<br />" +
-            "Licenced under the GNU General Public License v3.0<br />" +
-            "Visit <a href=\"https://github.com/pmikova/java-runtime-decompiler\">the GitHub repository</a>" +
-            " for more information.<br />" +
-            "</body></html>");
+        JEditorPane editorPane = new JEditorPane(
+                "text/html",
+                "<html><body style=\"" + style + "\">" + "<h2>Java-Runtime-Decompiler</h2>" + "Version " +
+                        MetadataProperties.getInstance().getVersion() + "<br />" +
+                        "Licenced under the GNU General Public License v3.0<br />" +
+                        "Visit <a href=\"https://github.com/pmikova/java-runtime-decompiler\">the GitHub repository</a>" +
+                        " for more information.<br />" + "</body></html>"
+        );
 
         editorPane.addHyperlinkListener(event -> {
             if (event.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED)) {
@@ -49,10 +49,7 @@ public class AboutView extends JDialog {
         editorPane.setBackground(new Color(label.getBackground().getRGB()));
 
         JOptionPane.showMessageDialog(
-                mainFrameView.getMainFrame(),
-                editorPane,
-                "About Java-Runtime-Decompiler",
-                JOptionPane.INFORMATION_MESSAGE
+                mainFrameView.getMainFrame(), editorPane, "About Java-Runtime-Decompiler", JOptionPane.INFORMATION_MESSAGE
         );
     }
 }

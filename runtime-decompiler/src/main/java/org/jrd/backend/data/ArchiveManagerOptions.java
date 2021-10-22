@@ -41,8 +41,7 @@ public class ArchiveManagerOptions {
     }
 
     public boolean areExtensionsEmpty() {
-        return extensions == null || extensions.isEmpty() ||
-                extensions.size() == 1 && extensions.get(0).trim().isEmpty();
+        return extensions == null || extensions.isEmpty() || extensions.size() == 1 && extensions.get(0).trim().isEmpty();
     }
 
     private boolean oneEnds(List<String> suffixes, String name) {

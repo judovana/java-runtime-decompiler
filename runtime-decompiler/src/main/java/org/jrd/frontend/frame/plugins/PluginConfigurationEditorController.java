@@ -52,7 +52,7 @@ public class PluginConfigurationEditorController {
         view.getPluginTopOptionPanel().getOpenWebsiteButton().addActionListener(actionEvent -> openDownloadUrl());
         view.getPluginTopOptionPanel().getImportButton().addActionListener(actionEvent -> openImportDialog());
         view.getOkCancelPanel().getOkButton().addActionListener(actionEvent -> {
-            for (DecompilerWrapper wrapper: configPanelHashMap.keySet()) {
+            for (DecompilerWrapper wrapper : configPanelHashMap.keySet()) {
                 applyWrapperChange(wrapper);
             }
             view.dispose();
@@ -82,14 +82,13 @@ public class PluginConfigurationEditorController {
             }
         }
 
-        Object selected = JOptionPane.showInputDialog(this.view,
-                "Which decompiler would you like to import?\n" +
-                        "The selected option will be copied to " + Directories.getPluginDirectory() + ".",
-                "Import decompiler files",
-                JOptionPane.QUESTION_MESSAGE,
-                null,
-                availableDecompilerNames.toArray(),
-                availableDecompilerNames.toArray()[0]);
+        Object selected = JOptionPane.showInputDialog(
+                this.view,
+                "Which decompiler would you like to import?\n" + "The selected option will be copied to " +
+                        Directories.getPluginDirectory() + ".",
+                "Import decompiler files", JOptionPane.QUESTION_MESSAGE, null, availableDecompilerNames.toArray(),
+                availableDecompilerNames.toArray()[0]
+        );
 
         if (selected != null) { // null if the user cancels
             URL selectedUrl = availableDecompilers.get(availableDecompilerNames.indexOf(selected.toString()));
@@ -119,15 +118,12 @@ public class PluginConfigurationEditorController {
 
     private int confirmWrapperOverwrite() {
         String[] options = {"Yes", "No"};
-        return JOptionPane.showOptionDialog(this.view,
+        return JOptionPane.showOptionDialog(
+                this.view,
                 "An identical file already exists in " + Directories.getPluginDirectory() + ".\n" +
                         "Do you want to continue and overwrite the file?",
-                "Confirmation",
-                JOptionPane.DEFAULT_OPTION,
-                JOptionPane.WARNING_MESSAGE,
-                null,
-                options,
-                options[1]);
+                "Confirmation", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[1]
+        );
     }
 
     void onPluginJListChange() {
@@ -149,13 +145,12 @@ public class PluginConfigurationEditorController {
             view.getPluginTopOptionPanel().getOpenWebsiteButton().setToolTipText(null);
         } else {
             view.getPluginTopOptionPanel().getOpenWebsiteButton().setEnabled(false);
-            view.getPluginTopOptionPanel().getOpenWebsiteButton().setToolTipText("<html>" +
-                    "Button disabled by default on user-created plugins.<br />" +
-                    "You can manually set the download URL in this plugin's JSON file to enable this button." +
-                    "</html>");
+            view.getPluginTopOptionPanel().getOpenWebsiteButton().setToolTipText(
+                    "<html>" + "Button disabled by default on user-created plugins.<br />" +
+                            "You can manually set the download URL in this plugin's JSON file to enable this button." + "</html>"
+            );
         }
     }
-
 
     public void openDownloadUrl() {
         DecompilerWrapper wrapper = view.getSelectedWrapper();
@@ -168,9 +163,8 @@ public class PluginConfigurationEditorController {
                 Logger.getLogger().log(Logger.Level.ALL, e);
             } catch (UnsupportedOperationException e) {
                 JOptionPane.showMessageDialog(
-                        view,
-                        "Website could not be opened automatically. Go to: " +
-                            wrapper.getDecompilerDownloadUrl().toString());
+                        view, "Website could not be opened automatically. Go to: " + wrapper.getDecompilerDownloadUrl().toString()
+                );
             }
         }
     }
@@ -188,8 +182,8 @@ public class PluginConfigurationEditorController {
         }
 
         String name = wrapper.toString();
-        int dialogResult = JOptionPane.showConfirmDialog(view, "Are you sure you want to remove " +
-                name + "?", "Warning", JOptionPane.OK_CANCEL_OPTION);
+        int dialogResult = JOptionPane
+                .showConfirmDialog(view, "Are you sure you want to remove " + name + "?", "Warning", JOptionPane.OK_CANCEL_OPTION);
         if (dialogResult == JOptionPane.CANCEL_OPTION) {
             return;
         }
@@ -214,14 +208,9 @@ public class PluginConfigurationEditorController {
         String result = pluginManager.validatePlugin(getDataFromPanel(view.getSelectedWrapper()));
 
         if (result != null) {
-            JOptionPane.showMessageDialog(view,
-                    "Validation failed: " + result,
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(view, "Validation failed: " + result, "Error", JOptionPane.ERROR_MESSAGE);
         } else {
-            JOptionPane.showMessageDialog(
-                    view, "This plugin is valid.", "Success", JOptionPane.INFORMATION_MESSAGE
-            );
+            JOptionPane.showMessageDialog(view, "This plugin is valid.", "Success", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
@@ -245,10 +234,9 @@ public class PluginConfigurationEditorController {
         try {
             pluginManager.saveWrapper(clonedWrapper);
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(view,
-                    "Cloned decompiler configuration could not be saved.",
-                    "Saving error",
-                    JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    view, "Cloned decompiler configuration could not be saved.", "Saving error", JOptionPane.ERROR_MESSAGE
+            );
         }
         pluginManager.addWrapper(clonedWrapper);
         return clonedWrapper;
@@ -269,10 +257,10 @@ public class PluginConfigurationEditorController {
         try {
             pluginManager.replace(oldWrapper, newWrapper);
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(view,
-                    "Your changes could not be saved. Please check your permissions to edit given files.",
-                    "Saving error",
-                    JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    view, "Your changes could not be saved. Please check your permissions to edit given files.", "Saving error",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
     }
 

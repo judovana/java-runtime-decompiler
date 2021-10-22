@@ -58,20 +58,18 @@ public final class Help {
     private static final String BYTES_TEXT = "Print binary form of requested classes of a process";
     private static final String LIST_JVMS_TEXT = "List all local Java processes and their PIDs.";
     private static final String LIST_PLUGINS_TEXT = "List all currently configured decompiler plugins and their statuses.";
-    private static final String LIST_CLASSES_TEXT = "List all loaded classes of a process, optionally filtering them.\n" +
-            "Only '" + SAVE_LIKE + " " + Saving.EXACT + "' or '" + SAVE_LIKE + " " + Saving.DEFAULT +
-            "' are allowed as saving modifiers.";
+    private static final String LIST_CLASSES_TEXT = "List all loaded classes of a process, optionally filtering them.\n" + "Only '" +
+            SAVE_LIKE + " " + Saving.EXACT + "' or '" + SAVE_LIKE + " " + Saving.DEFAULT + "' are allowed as saving modifiers.";
     private static final String LIST_CLASSESDETAILS_TEXT = "Similar to " + LIST_CLASSES + ", only more details are printed about classes.";
-    private static final String COMPILE_TEXT = "Compile local files against runtime classpath, specified by " + CP + ".\n" +
-            "Use " + P + " to utilize some plugins' (like jasm or jcoder) bundled compilers.\n" +
-            "Use " + R + " for recursive search if <PATH> is a directory.\n" +
-            "If the argument of '" + SAVE_AS + "' is a valid PID or URL, " +
-            "the compiled code will be attempted to be injected into that process.\n" +
-            "If multiple PATHs were specified, but no '" + SAVE_AS + "', the process fails.";
+    private static final String COMPILE_TEXT = "Compile local files against runtime classpath, specified by " + CP + ".\n" + "Use " + P +
+            " to utilize some plugins' (like jasm or jcoder) bundled compilers.\n" + "Use " + R +
+            " for recursive search if <PATH> is a directory.\n" + "If the argument of '" + SAVE_AS + "' is a valid PID or URL, " +
+            "the compiled code will be attempted to be injected into that process.\n" + "If multiple PATHs were specified, but no '" +
+            SAVE_AS + "', the process fails.";
     private static final String DECOMPILE_TEXT = "Decompile and print classes of a process with the specified decompiler plugin.\n" +
-            "Javap can be passed options by appending them without spaces: " +
-            "'javap-v-public ...' executes as 'javap -v -public ...'";
-    private static final String OVERWRITE_TEXT = "Overwrite class of a process with new bytecode. If <CLASS FILE> is not set, standard input is used.";
+            "Javap can be passed options by appending them without spaces: " + "'javap-v-public ...' executes as 'javap -v -public ...'";
+    private static final String OVERWRITE_TEXT =
+            "Overwrite class of a process with new bytecode. If <CLASS FILE> is not set, standard input is used.";
     private static final String INIT_TEXT = "Try to initialize a class in a running JVM (has no effect in FS VMs). " +
             "Because class loading is lazy, the class you need might be missing, eg. java.lang.Override.";
     private static final String API_TEXT = "Will print out which can be used to insert fields/methods to running vm";
@@ -79,22 +77,21 @@ public final class Help {
     private static final String SAVE_LIKE_TEXT = "Specify how saving will behave.";
 
     private static final String NOTES_SLASH = "All options can be with either one or two leading slashes ('-').";
-    private static final String NOTES_REGEX = "When using <CLASS REGEX>, escape dollar signs '$' of inner classes to '\\$'; otherwise they mean the end-of-line.";
+    private static final String NOTES_REGEX =
+            "When using <CLASS REGEX>, escape dollar signs '$' of inner classes to '\\$'; otherwise they mean the end-of-line.";
     private static final String NOTES_FQN = "<FQN> is the fully qualified name of a class as per the Java Language Specification §6.7.";
     private static final String NOTES_PUC = "<PUC>, short for PidUrlClasspath, can be one of:";
     private static final String NOTES_SAVE = "<SAVE METHOD> can be one of:";
-    private static final String[] NOTES_PUC_ITEMS = new String[]{
-            "local process PID",
-            "remote process URL, in the format of 'hostname:port'",
-            "classpath of JAR on the filesystem (classpath separator is '" + File.pathSeparator + "')"
+    private static final String[] NOTES_PUC_ITEMS =
+            new String[]{"local process PID", "remote process URL, in the format of 'hostname:port'",
+                    "classpath of JAR on the filesystem (classpath separator is '" + File.pathSeparator + "')"
 
-    };
-    private static final String[] NOTES_SAVE_ITEMS = new String[]{
-            "'" + Saving.DIR + "' - Result will be saved as '<PATH>/fully/qualified/name.class'. Default for .class binaries.",
-            "'" + Saving.FQN + "' - Result will be saved as '<PATH>/fully.qualified.name.java'. Default for .java sources.",
-            "'" + Saving.EXACT + "' - Result will be saved exactly to '<PATH>'. Default for everything else.",
-            "'" + Saving.DEFAULT + "' - Saving uses the defaults mentioned above."
-    };
+            };
+    private static final String[] NOTES_SAVE_ITEMS =
+            new String[]{"'" + Saving.DIR + "' - Result will be saved as '<PATH>/fully/qualified/name.class'. Default for .class binaries.",
+                    "'" + Saving.FQN + "' - Result will be saved as '<PATH>/fully.qualified.name.java'. Default for .java sources.",
+                    "'" + Saving.EXACT + "' - Result will be saved exactly to '<PATH>'. Default for everything else.",
+                    "'" + Saving.DEFAULT + "' - Saving uses the defaults mentioned above."};
 
     private static final String LAUNCHER_LINUX = "./start.sh";
     private static final String LAUNCHER_WINDOWS = "start.bat";
@@ -134,14 +131,10 @@ public final class Help {
 
     private static final String[] UNSAVABLE_OPTIONS = new String[]{HELP, H, OVERWRITE, INIT};
     private static final String[] SAVABLE_OPTIONS =
-        new String[]{LIST_CLASSES, LIST_CLASSESDETAILS, BYTES, BASE64, COMPILE, DECOMPILE, API, LIST_JVMS, LIST_PLUGINS};
+            new String[]{LIST_CLASSES, LIST_CLASSESDETAILS, BYTES, BASE64, COMPILE, DECOMPILE, API, LIST_JVMS, LIST_PLUGINS};
 
-    private static final int LONGEST_FORMAT_LENGTH =
-            Stream.of(ALL_OPTIONS.keySet(), SAVING_OPTIONS.keySet())
-                    .flatMap(Collection::stream)
-                    .map(String::length)
-                    .max(Integer::compare)
-                    .orElse(30) + 1; // at least one space between format and text
+    private static final int LONGEST_FORMAT_LENGTH = Stream.of(ALL_OPTIONS.keySet(), SAVING_OPTIONS.keySet()).flatMap(Collection::stream)
+            .map(String::length).max(Integer::compare).orElse(30) + 1; // at least one space between format and text
 
     private Help() {
     }
@@ -214,11 +207,7 @@ public final class Help {
         }
 
         default String[] launchOptions() {
-            return new String[]{
-                    "# launches GUI",
-                    optionize(UNSAVABLE_OPTIONS),
-                    optionize(SAVABLE_OPTIONS) + savingModifiers()
-            };
+            return new String[]{"# launches GUI", optionize(UNSAVABLE_OPTIONS), optionize(SAVABLE_OPTIONS) + savingModifiers()};
         }
 
         String launcher();
@@ -266,8 +255,7 @@ public final class Help {
                 String initialSpacing = " ".repeat(LONGEST_FORMAT_LENGTH - format.length());
                 String interlineSpacing = "\n" + indent(1) + " ".repeat(LONGEST_FORMAT_LENGTH);
 
-                System.out.println(indent(1) + format + initialSpacing +
-                        entry.getValue().replaceAll("\n", interlineSpacing));
+                System.out.println(indent(1) + format + initialSpacing + entry.getValue().replaceAll("\n", interlineSpacing));
             }
         }
 
@@ -361,30 +349,20 @@ public final class Help {
             for (Map.Entry<String, String> entry : map.entrySet()) {
                 String manPageParagraphs = entry.getValue().replaceAll("\n", "\n\n ");
 
-                System.out.println(
-                        ".HP\n" +
-                                manFormat(entry.getKey()) + "\n " +
-                                manFormat(manPageParagraphs)
-                );
+                System.out.println(".HP\n" + manFormat(entry.getKey()) + "\n " + manFormat(manPageParagraphs));
             }
         }
 
         @Override
         public String optionize(String[] options) {
-            return "(" +
-                    Stream.of(options)
-                            .map(s -> formatWrap('B', s))
-                            .collect(Collectors.joining("|")) +
-                    ")";
+            return "(" + Stream.of(options).map(s -> formatWrap('B', s)).collect(Collectors.joining("|")) + ")";
         }
-
 
         @Override
         public String launcher() {
             // initial \n is for paragraph separation
             // the trailing space separates from rest of line
-            return "\n" +
-                    optionize(new String[]{LAUNCHER_LINUX, LAUNCHER_WINDOWS}) + " [" + formatWrap('I', VERBOSE) + "] ";
+            return "\n" + optionize(new String[]{LAUNCHER_LINUX, LAUNCHER_WINDOWS}) + " [" + formatWrap('I', VERBOSE) + "] ";
         }
 
         @Override

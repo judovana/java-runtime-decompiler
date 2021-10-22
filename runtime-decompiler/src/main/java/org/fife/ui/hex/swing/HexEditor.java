@@ -21,7 +21,6 @@ import java.awt.event.KeyListener;
 import java.io.IOException;
 import java.io.InputStream;
 
-
 public class HexEditor extends JScrollPane {
     private static final long serialVersionUID = 1L;
     public static final String PROPERTY_ALTERNATE_COLUMN_BG = "alternateColBG";
@@ -138,9 +137,7 @@ public class HexEditor extends JScrollPane {
     }
 
     private void invokeAction(final Action a) {
-        a.actionPerformed(new ActionEvent(
-                this, 1001, (String) a.getValue("Name"), EventQueue.getMostRecentEventTime(), 0
-        ));
+        a.actionPerformed(new ActionEvent(this, 1001, (String) a.getValue("Name"), EventQueue.getMostRecentEventTime(), 0));
     }
 
     public Point offsetToCell(final int offset) {

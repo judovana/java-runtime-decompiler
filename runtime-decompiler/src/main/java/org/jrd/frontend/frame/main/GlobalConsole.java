@@ -24,7 +24,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 
-
 public class GlobalConsole implements MessagesListener, OverwriteClassDialog.TextLog {
 
     private static GlobalConsole console = new GlobalConsole();
@@ -100,10 +99,7 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
         return r.toArray(new String[0]);
     }
 
-    @SuppressFBWarnings(
-            value = "MS_EXPOSE_REP",
-            justification = "Public encapsulated singleton."
-    )
+    @SuppressFBWarnings(value = "MS_EXPOSE_REP", justification = "Public encapsulated singleton.")
     public static GlobalConsole getConsole() {
         return console;
     }

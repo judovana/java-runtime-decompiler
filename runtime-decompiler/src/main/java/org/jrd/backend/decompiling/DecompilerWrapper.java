@@ -31,9 +31,7 @@ public class DecompilerWrapper {
      * @param dependencyUrls        location of wrapper dependencies
      * @param decompilerDownloadUrl decompiler download URL
      */
-    public DecompilerWrapper(
-            String name, String wrapperUrl, List<String> dependencyUrls, String decompilerDownloadUrl
-    ) {
+    public DecompilerWrapper(String name, String wrapperUrl, List<String> dependencyUrls, String decompilerDownloadUrl) {
         setName(name);
         setWrapperUrlFromUrl(wrapperUrl);
         setFullyQualifiedClassName();

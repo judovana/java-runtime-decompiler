@@ -15,7 +15,6 @@ public final class Directories {
     private static final String XDG_PLUGIN_SUFFIX = File.separator + "plugins";
     private static final String XDG_JRD_HOME = File.separator + ".config" + XDG_JRD_SUFFIX;
 
-
     private Directories() {
     }
 
@@ -72,7 +71,7 @@ public final class Directories {
 
     public static File getFreshlyBuiltAgent() {
         return new File(
-            getJrdLocation() + File.separator + "decompiler_agent" + File.separator + "target" + File.separator + getAgentFile()
+                getJrdLocation() + File.separator + "decompiler_agent" + File.separator + "target" + File.separator + getAgentFile()
         );
     }
 

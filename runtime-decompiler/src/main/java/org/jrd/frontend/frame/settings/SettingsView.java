@@ -60,9 +60,9 @@ public class SettingsView extends JDialog {
 
         AgentSettingsPanel(String initialAgentPath) {
             agentPathTextField = new JTextField();
-            agentPathTextField.setToolTipText(BytecodeDecompilerView.styleTooltip() +
-                    "Select a path to the Decompiler Agent.<br />" +
-                    FileSelectorArrayRow.getTextFieldToolTip()
+            agentPathTextField.setToolTipText(
+                    BytecodeDecompilerView.styleTooltip() + "Select a path to the Decompiler Agent.<br />" +
+                            FileSelectorArrayRow.getTextFieldToolTip()
             );
             agentPathTextField.setText(initialAgentPath);
 
@@ -74,8 +74,7 @@ public class SettingsView extends JDialog {
             if (Directories.isPortable()) {
                 dir = new File(Directories.getJrdLocation() + File.separator + "libs");
             } else {
-                dir = new File(Directories.getJrdLocation() + File.separator +
-                        "decompiler_agent" + File.separator + "target");
+                dir = new File(Directories.getJrdLocation() + File.separator + "decompiler_agent" + File.separator + "target");
             }
             chooser.setCurrentDirectory(FileSelectorArrayRow.fallback(dir));
 
@@ -120,10 +119,8 @@ public class SettingsView extends JDialog {
 
         public CompilationSettingsPanel(boolean initialUseHostSystemClasses, String initialCompilerArgs) {
             compilationSettingsLabel = new JLabel("Compilation settings");
-            useHostSystemClassesCheckBox = new JCheckBox(
-                    "Use host system classes during compilation phase of class overwrite",
-                    initialUseHostSystemClasses
-            );
+            useHostSystemClassesCheckBox =
+                    new JCheckBox("Use host system classes during compilation phase of class overwrite", initialUseHostSystemClasses);
             compilerArgsLabel = new JLabel("Compiler arguments");
             compilerArgsTextField = new JTextField(initialCompilerArgs);
             compilerArgsTextField.setToolTipText("Arguments that get passed to the compiler, eg. '-source 5 -target 8 -release 9 -Xlint'.");
@@ -233,8 +230,9 @@ public class SettingsView extends JDialog {
                 }
             };
             useDefaults.addActionListener(a);
-            useDefaults.setToolTipText(BytecodeDecompilerView.styleTooltip() +
-                    "Default extensions are: " + ArchiveManagerOptions.getExtensionString(", "));
+            useDefaults.setToolTipText(
+                    BytecodeDecompilerView.styleTooltip() + "Default extensions are: " + ArchiveManagerOptions.getExtensionString(", ")
+            );
 
             // Setup
             if (ArchiveManagerOptions.getInstance().areExtensionsEmpty()) {
@@ -281,9 +279,7 @@ public class SettingsView extends JDialog {
 
         void confirmExtensions() {
             uniqueListModel.addAll(
-                        Arrays.stream(newExtensionsTextField.getText().split("\\s"))
-                        .filter(s -> !s.isBlank())
-                        .collect(Collectors.toSet())
+                    Arrays.stream(newExtensionsTextField.getText().split("\\s")).filter(s -> !s.isBlank()).collect(Collectors.toSet())
             );
 
             newExtensionsTextField.setText("");
@@ -305,10 +301,7 @@ public class SettingsView extends JDialog {
 
         public MiscellaneousSettingsPanel(boolean initialUseJavapSignatures) {
             miscSettingsLabel = new JLabel("Miscellaneous settings");
-            useJavapSignaturesCheckBox = new JCheckBox(
-                "Use Javap signatures in Agent API insertion menu",
-                initialUseJavapSignatures
-            );
+            useJavapSignaturesCheckBox = new JCheckBox("Use Javap signatures in Agent API insertion menu", initialUseJavapSignatures);
 
             this.setLayout(new GridBagLayout());
             GridBagConstraints gbc = new GridBagConstraints();

@@ -46,13 +46,10 @@ public class JListPopupMenu<T> extends JPopupMenu {
 
     protected List<T> allItems(ListModel<T> model) {
         return IntStream.range(0, model.getSize()).mapToObj(model::getElementAt)
-            .collect(Collectors.toCollection(() -> new ArrayList<>(model.getSize())));
+                .collect(Collectors.toCollection(() -> new ArrayList<>(model.getSize())));
     }
 
-    protected JMenuItem createCopyItem(
-        String itemTitle,
-        List<T> selectedValues
-    ) {
+    protected JMenuItem createCopyItem(String itemTitle, List<T> selectedValues) {
         JMenuItem item = new JMenuItem(itemTitle);
 
         item.addActionListener(actionEvent -> {
@@ -60,11 +57,8 @@ public class JListPopupMenu<T> extends JPopupMenu {
                 return;
             }
 
-            StringSelection selection = new StringSelection(
-                selectedValues.stream()
-                    .map(this::stringsFromValue)
-                    .collect(Collectors.joining(""))
-            );
+            StringSelection selection =
+                    new StringSelection(selectedValues.stream().map(this::stringsFromValue).collect(Collectors.joining("")));
             Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
         });
 
@@ -84,7 +78,6 @@ public class JListPopupMenu<T> extends JPopupMenu {
 
         return s.toString();
     }
-
 
     private static class CheckboxGetterPair<T> {
         JCheckBox checkBox;

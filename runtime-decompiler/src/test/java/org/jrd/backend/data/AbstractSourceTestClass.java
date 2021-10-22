@@ -29,10 +29,9 @@ abstract class AbstractSourceTestClass {
     protected AbstractSourceTestClass() {
         String tmpDir;
         try {
-            tmpDir = Files.createDirectories(Path.of(
-                    System.getProperty("java.io.tmpdir"), getClassName(),
-                    "src", "main", "java", getPackageDirs()
-            )).toAbsolutePath().toString();
+            tmpDir = Files.createDirectories(
+                    Path.of(System.getProperty("java.io.tmpdir"), getClassName(), "src", "main", "java", getPackageDirs())
+            ).toAbsolutePath().toString();
         } catch (IOException e) {
             e.printStackTrace();
             tmpDir = System.getProperty("java.io.tmpdir");
@@ -40,9 +39,8 @@ abstract class AbstractSourceTestClass {
         srcDir = tmpDir;
 
         try {
-            tmpDir = Files.createDirectories(Path.of(
-                    System.getProperty("java.io.tmpdir"), getClassName(), "target"
-            )).toAbsolutePath().toString();
+            tmpDir = Files.createDirectories(Path.of(System.getProperty("java.io.tmpdir"), getClassName(), "target")).toAbsolutePath()
+                    .toString();
         } catch (IOException e) {
             e.printStackTrace();
             tmpDir = System.getProperty("java.io.tmpdir");
@@ -57,7 +55,6 @@ abstract class AbstractSourceTestClass {
     abstract String getGreetings();
 
     abstract String getContentWithoutPackage(String nwHello);
-
 
     public String getSrcDir() {
         return srcDir;
@@ -75,7 +72,6 @@ abstract class AbstractSourceTestClass {
         return getPackageName() + "." + getClassName();
     }
 
-
     String getDotJavaPath() {
         return getSrcDir() + File.separator + getClassName() + ".java";
     }
@@ -89,17 +85,11 @@ abstract class AbstractSourceTestClass {
     }
 
     Pattern getJvmListRegex() {
-        return Pattern.compile(
-                String.format("^(\\d+).*%s.*$", getClassName()),
-                Pattern.MULTILINE
-        );
+        return Pattern.compile(String.format("^(\\d+).*%s.*$", getClassName()), Pattern.MULTILINE);
     }
 
     Pattern getExactClassRegex() {
-        return Pattern.compile(
-                String.format("^%s$", getFqn()),
-                Pattern.MULTILINE
-        );
+        return Pattern.compile(String.format("^%s$", getFqn()), Pattern.MULTILINE);
     }
 
     AbstractSourceTestClass writeDefault() throws SourceTestClassWrapperException {
@@ -120,10 +110,7 @@ abstract class AbstractSourceTestClass {
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         ByteArrayOutputStream errStream = new ByteArrayOutputStream();
 
-        int errLevel = compiler.run(null, null, errStream,
-                "-d", getTargetDir(),
-                getDotJavaPath()
-        );
+        int errLevel = compiler.run(null, null, errStream, "-d", getTargetDir(), getDotJavaPath());
         String errMessage = errStream.toString(StandardCharsets.UTF_8);
 
         if (errLevel != 0 || !errMessage.isEmpty()) {
@@ -202,10 +189,8 @@ abstract class AbstractSourceTestClass {
         return getContentWithPackage(getGreetings());
     }
 
-
     String getContentWithPackage(String nwHello) {
-        return "package " + getPackageName() + ";\n\n" +
-                getContentWithoutPackage(nwHello);
+        return "package " + getPackageName() + ";\n\n" + getContentWithoutPackage(nwHello);
     }
 
     public String getEmptyClassWithPackage() {
@@ -213,8 +198,7 @@ abstract class AbstractSourceTestClass {
     }
 
     public static String getEmptyClassWithPackage(String pkg, String name) {
-        return "package " + pkg + ";\n" +
-                "public class " + name + " {}";
+        return "package " + pkg + ";\n" + "public class " + name + " {}";
     }
 
     public byte[] getErrBytes() {

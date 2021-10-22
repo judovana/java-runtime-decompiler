@@ -19,8 +19,9 @@ public class ConfigPanel extends JPanel {
         this.setLayout(new GridBagLayout());
 
         jsonFileUrl = new JLabel();
-        messagePanel = new MessagePanel("<html><b>Info:</b> You don't have permissions to save this configuration! " +
-                "You can clone it and save the copy.</html>");
+        messagePanel = new MessagePanel(
+                "<html><b>Info:</b> You don't have permissions to save this configuration! " + "You can clone it and save the copy.</html>"
+        );
         messagePanel.setVisible(false);
         namePanel = new TextInputPanel("Name");
         wrapperUrlPanel = new FileSelectorPanel("Decompiler wrapper");

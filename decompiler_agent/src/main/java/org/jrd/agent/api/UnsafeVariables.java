@@ -33,7 +33,6 @@ public class UnsafeVariables {
     protected UnsafeVariables() {
     }
 
-
     public static class Global {
 
         private static final AbstractMasterKeyMap<String> GLOBALS = new AbstractMasterKeyMap<>() {
@@ -305,6 +304,5 @@ public class UnsafeVariables {
             return CLAZZS.dump();
         }
     }
-
 
 }

@@ -74,7 +74,8 @@ public final class ImageButtonFactory {
         try {
             result = createButton(loadResourceIcon(iconResourceName));
         } catch (IOException e) {
-            Logger.getLogger().log(Logger.Level.ALL, "Unable to load icon image resource '" + iconResourceName + "' as an image, using backup text.");
+            Logger.getLogger()
+                    .log(Logger.Level.ALL, "Unable to load icon image resource '" + iconResourceName + "' as an image, using backup text.");
             result = new JButton(backupButtonText);
         }
 
@@ -95,8 +96,7 @@ public final class ImageButtonFactory {
                 throw new IOException("Image file has unrecognized number of components.");
         }
 
-        return new LookupOp(new ShortLookupTable(0, tableData), null)
-                .filter(src, src);
+        return new LookupOp(new ShortLookupTable(0, tableData), null).filter(src, src);
     }
 
     public static JButton createUndoButton() {

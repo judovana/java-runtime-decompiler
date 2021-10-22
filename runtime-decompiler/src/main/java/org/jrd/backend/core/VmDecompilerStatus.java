@@ -1,6 +1,5 @@
 package org.jrd.backend.core;
 
-
 import java.util.Arrays;
 
 /**

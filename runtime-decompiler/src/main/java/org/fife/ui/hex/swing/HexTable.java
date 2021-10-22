@@ -217,9 +217,7 @@ public class HexTable extends JTable {
                     break;
                 }
                 case 39: {
-                    processKeyPressedEvent(
-                            e, extend, Math.min(this.leadSelectionIndex + 1, this.model.getByteCount() - 1)
-                    );
+                    processKeyPressedEvent(e, extend, Math.min(this.leadSelectionIndex + 1, this.model.getByteCount() - 1));
                     break;
                 }
                 case 38: {
@@ -227,16 +225,12 @@ public class HexTable extends JTable {
                     break;
                 }
                 case 40: {
-                    processKeyPressedEvent(
-                            e, extend, Math.min(this.leadSelectionIndex + 16, this.model.getByteCount() - 1)
-                    );
+                    processKeyPressedEvent(e, extend, Math.min(this.leadSelectionIndex + 16, this.model.getByteCount() - 1));
                     break;
                 }
                 case 34: {
                     final int visibleRowCount = this.getVisibleRect().height / this.getRowHeight();
-                    final int offs = Math.min(
-                            this.leadSelectionIndex + visibleRowCount * 16, this.model.getByteCount() - 1
-                    );
+                    final int offs = Math.min(this.leadSelectionIndex + visibleRowCount * 16, this.model.getByteCount() - 1);
 
                     processKeyPressedEvent(e, extend, offs);
                     break;
@@ -385,12 +379,7 @@ public class HexTable extends JTable {
 
         @Override
         public Component getTableCellRendererComponent(
-                final JTable table,
-                final Object value,
-                final boolean selected,
-                final boolean focus,
-                final int row,
-                final int column
+                final JTable table, final Object value, final boolean selected, final boolean focus, final int row, final int column
         ) {
             super.getTableCellRendererComponent(table, sanitize(value, row, column), selected, focus, row, column);
             this.highlight.setLocation(-1, -1);
@@ -465,9 +454,8 @@ public class HexTable extends JTable {
         }
 
         @Override
-        public void insertString(
-                final FilterBypass fb, final int offs, final String string, final AttributeSet attr
-        ) throws BadLocationException {
+        public void insertString(final FilterBypass fb, final int offs, final String string, final AttributeSet attr)
+                throws BadLocationException {
             final Document doc = fb.getDocument();
             final String temp = doc.getText(0, offs) + string + doc.getText(offs, doc.getLength() - offs);
             if (this.ensureByteRepresented(temp)) {
@@ -476,9 +464,8 @@ public class HexTable extends JTable {
         }
 
         @Override
-        public void replace(
-                final FilterBypass fb, final int offs, final int len, final String text, final AttributeSet attrs
-        ) throws BadLocationException {
+        public void replace(final FilterBypass fb, final int offs, final int len, final String text, final AttributeSet attrs)
+                throws BadLocationException {
             final Document doc = fb.getDocument();
             final String temp = doc.getText(0, offs) + text + doc.getText(offs + len, doc.getLength() - (offs + len));
             if (this.ensureByteRepresented(temp)) {

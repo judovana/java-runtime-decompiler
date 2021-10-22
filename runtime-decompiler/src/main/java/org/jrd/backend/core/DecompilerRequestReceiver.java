@@ -1,6 +1,5 @@
 package org.jrd.backend.core;
 
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jrd.backend.communication.CallDecompilerAgent;
 import org.jrd.backend.communication.ErrorCandidate;
@@ -27,7 +26,6 @@ public class DecompilerRequestReceiver {
     private static final String OK_RESPONSE = "ok";
     private static final int NOT_ATTACHED = -1;
 
-
     public DecompilerRequestReceiver(VmManager vmManager) {
         this.attachManager = new AgentAttachManager(vmManager);
         this.vmManager = vmManager;
@@ -53,7 +51,10 @@ public class DecompilerRequestReceiver {
         vmPid = tryParseInt(vmPidStr, "VM PID is not a number!");
 
         if (vmPid >= 0 || port >= 0) {
-            Logger.getLogger().log(Logger.Level.DEBUG, "Processing request. VM ID: " + vmId + ", PID: " + vmPid + ", action: " + action + ", port: " + portStr);
+            Logger.getLogger().log(
+                    Logger.Level.DEBUG,
+                    "Processing request. VM ID: " + vmId + ", PID: " + vmPid + ", action: " + action + ", port: " + portStr
+            );
         } else {
             Logger.getLogger().log(Logger.Level.DEBUG, "Processing request. VM ID: " + vmId + ", action: " + action);
         }
@@ -115,7 +116,9 @@ public class DecompilerRequestReceiver {
             actualListenPort = listenPort;
         }
         if (actualListenPort == NOT_ATTACHED) {
-            throw new RuntimeException("Failed to attach agent. On JDK 9 and higher, you must run the target process with '-Djdk.attach.allowAttachSelf=true'.");
+            throw new RuntimeException(
+                    "Failed to attach agent. On JDK 9 and higher, you must run the target process with '-Djdk.attach.allowAttachSelf=true'."
+            );
         }
         return actualListenPort;
     }
@@ -144,18 +147,17 @@ public class DecompilerRequestReceiver {
         String reply = nativeAgent.submitRequest(requestBody);
         ErrorCandidate errorCandidate = new ErrorCandidate(reply);
         if (errorCandidate.isError()) {
-            throw new RuntimeException("Agent returned error response '" + errorCandidate.getErrorMessage() + "' for request '" + requestBody.replace("\n", "\\n") + "'.");
+            throw new RuntimeException(
+                    "Agent returned error response '" + errorCandidate.getErrorMessage() + "' for request '" +
+                            requestBody.replace("\n", "\\n") + "'."
+            );
         }
         return new ResponseWithPort(reply, actualListenPort);
     }
 
-    private String getOverwriteAction(
-            String hostname, int listenPort, String vmId, int vmPid, String className, String newBody
-    ) {
+    private String getOverwriteAction(String hostname, int listenPort, String vmId, int vmPid, String className, String newBody) {
         try {
-            ResponseWithPort reply = getResponse(
-                    hostname, listenPort, vmId, vmPid, "OVERWRITE\n" + className + "\n" + newBody
-            );
+            ResponseWithPort reply = getResponse(hostname, listenPort, vmId, vmPid, "OVERWRITE\n" + className + "\n" + newBody);
             VmDecompilerStatus status = new VmDecompilerStatus();
             status.setHostname(hostname);
             status.setListenPort(reply.port);
@@ -253,9 +255,7 @@ public class DecompilerRequestReceiver {
 
     private ClassInfo[] parseClasses(String classes) {
         // filter: not null && backwards compatibility && name is not empty
-        return Arrays.stream(classes.split(";"))
-                .filter(s -> s != null && !s.isEmpty() && !s.startsWith("|"))
-                .map(ClassInfo::new)
+        return Arrays.stream(classes.split(";")).filter(s -> s != null && !s.isEmpty() && !s.startsWith("|")).map(ClassInfo::new)
                 .toArray(ClassInfo[]::new);
     }
 
