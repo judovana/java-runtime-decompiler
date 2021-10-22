@@ -19,11 +19,8 @@ jobs:
       fail-fast: false
 
     steps:
-      - name: Checkout CPLC repo
+      - name: Checkout JRD repo
         uses: actions/checkout@v2
-        with:
-          path: cplc
-          repository: mkoncek/classpathless-compiler
 
       - name: Set up JDK 11
         uses: actions/setup-java@v2
@@ -32,26 +29,13 @@ jobs:
           distribution: 'adopt'
           cache: maven
 
-      - name: Build CPLC with Maven
-        run: |
-          cd cplc
-          mvn --batch-mode --update-snapshots clean install
-
-      - name: Checkout JRD repo
-        uses: actions/checkout@v2
-        with:
-          path: jrd
-
       - name: Build JRD with Maven
-        run: |
-          cd jrd
-          mvn --batch-mode --update-snapshots clean install
+        run: mvn --batch-mode --update-snapshots clean install
 
       - name: Create and populate config file on Linux
         if: matrix.os == 'ubuntu-latest'
         run: |
           set -x
-          cd jrd
           CONFIG_HOME="$HOME/.config/java-runtime-decompiler/conf"
           mkdir -p -v "$CONFIG_HOME"
           AGENT_PATH=$(find "${{ github.workspace }}" -name "decompiler-agent-*.jar" | head -n 1)
@@ -63,7 +47,6 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           @echo on
-          cd jrd
           setLocal EnableDelayedExpansion
           set "CONFIG_HOME=%UserProfile%\.config\java-runtime-decompiler\conf"
           md %CONFIG_HOME%
@@ -75,6 +58,4 @@ jobs:
 
       - name: Test Cli
         timeout-minutes: 10
-        run: |
-          cd jrd
-          mvn --batch-mode test -Dtest=*CliTest -DfailIfNoTests=false "-Dsurefire.reportFormat=plain"
+        run: mvn --batch-mode test -Dtest=*CliTest -DfailIfNoTests=false "-Dsurefire.reportFormat=plain"
