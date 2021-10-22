@@ -79,7 +79,7 @@ public final class Help {
     private static final String SAVE_LIKE_TEXT = "Specify how saving will behave.";
 
     private static final String NOTES_SLASH = "All options can be with either one or two leading slashes ('-').";
-    private static final String NOTES_REGEX = "When using <CLASS REGEX>, don't forget to escape dollar signs '$' of inner classes to '\\$', as otherwise they are treated as end-of-line by REGEX.";
+    private static final String NOTES_REGEX = "When using <CLASS REGEX>, escape dollar signs '$' of inner classes to '\\$'; otherwise they mean the end-of-line.";
     private static final String NOTES_FQN = "<FQN> is the fully qualified name of a class as per the Java Language Specification §6.7.";
     private static final String NOTES_PUC = "<PUC>, short for PidUrlClasspath, can be one of:";
     private static final String NOTES_SAVE = "<SAVE METHOD> can be one of:";
@@ -132,9 +132,9 @@ public final class Help {
         NOTES.put(NOTES_SAVE, NOTES_SAVE_ITEMS);
     }
 
-    private static final String[] UNSAVABLE_OPTIONS = {HELP, H, OVERWRITE, INIT};
-    private static final String[] SAVABLE_OPTIONS = {
-            LIST_CLASSES, LIST_CLASSESDETAILS, BYTES, BASE64, COMPILE, DECOMPILE, API, LIST_JVMS, LIST_PLUGINS};
+    private static final String[] UNSAVABLE_OPTIONS = new String[]{HELP, H, OVERWRITE, INIT};
+    private static final String[] SAVABLE_OPTIONS =
+        new String[]{LIST_CLASSES, LIST_CLASSESDETAILS, BYTES, BASE64, COMPILE, DECOMPILE, API, LIST_JVMS, LIST_PLUGINS};
 
     private static final int LONGEST_FORMAT_LENGTH =
             Stream.of(ALL_OPTIONS.keySet(), SAVING_OPTIONS.keySet())
@@ -381,9 +381,10 @@ public final class Help {
 
         @Override
         public String launcher() {
-            return "\n" + // paragraph separation
-                    optionize(new String[]{LAUNCHER_LINUX, LAUNCHER_WINDOWS}) +
-                    " [" + formatWrap('I', VERBOSE) + "] "; // trailing space separates from rest of line
+            // initial \n is for paragraph separation
+            // the trailing space separates from rest of line
+            return "\n" +
+                    optionize(new String[]{LAUNCHER_LINUX, LAUNCHER_WINDOWS}) + " [" + formatWrap('I', VERBOSE) + "] ";
         }
 
         @Override

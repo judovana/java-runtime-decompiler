@@ -298,11 +298,8 @@ public class CliTest extends AbstractAgentNeedingTest {
             fail("Class " + dummy.getClassName() + " not found when listing all classes via .* regex.");
         }
 
-        assertEqualsWithTolerance(
-                Arrays.asList(allClassesDefault.split("\n")),
-                Arrays.asList(allClassesRegex.split("\n")),
-                0.9
-        ); // exact class list differs between dummy process executions
+        // exact class list differs between dummy process executions
+        assertEqualsWithTolerance(Arrays.asList(allClassesDefault.split("\n")), Arrays.asList(allClassesRegex.split("\n")), 0.9);
 
         // specific regex
         classListMatchesExactly(pucComponent, dummy.getExactClassRegex());
@@ -507,7 +504,7 @@ public class CliTest extends AbstractAgentNeedingTest {
                 OVERWRITE,
                 pucComponent,
                 dummy.getFqn(),
-                dummy.getDotClassPath() // contains newGreeting because of try-catch above
+                dummy.getDotClassPath()
         };
         cli = new Cli(args, model);
 
