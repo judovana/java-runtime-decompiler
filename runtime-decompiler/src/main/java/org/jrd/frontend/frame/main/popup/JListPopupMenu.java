@@ -13,12 +13,12 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class ClassListPopupMenu<T> extends JPopupMenu {
+public class JListPopupMenu<T> extends JPopupMenu {
 
     Map<String, CheckboxGetterPair<T>> checkboxes = new LinkedHashMap<>();
     boolean showCheckBoxes;
 
-    public ClassListPopupMenu(JList<T> parentJList, int originallySelected, boolean showCheckboxes) {
+    public JListPopupMenu(JList<T> parentJList, int originallySelected, boolean showCheckboxes) {
         this.showCheckBoxes = showCheckboxes;
 
         add(createCopyItem("Copy selected", parentJList.getSelectedValuesList()));
@@ -48,7 +48,7 @@ public class ClassListPopupMenu<T> extends JPopupMenu {
         });
     }
 
-    public ClassListPopupMenu<T> addItem(String fieldName, Function<T, String> getter, boolean isSelected) {
+    public JListPopupMenu<T> addItem(String fieldName, Function<T, String> getter, boolean isSelected) {
         JCheckBox checkBox = new JCheckBox("Copy " + fieldName);
 
         checkBox.setSelected(isSelected);
