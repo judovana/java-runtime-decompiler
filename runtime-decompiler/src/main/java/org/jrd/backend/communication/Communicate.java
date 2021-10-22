@@ -114,7 +114,7 @@ public class Communicate {
         // parse body based on header
         ErrorCandidate errorCandidate = new ErrorCandidate(initLine);
         if (errorCandidate.isError()) {
-            Logger.getLogger().log(Logger.Level.ALL, new RuntimeException("Agent returned error: " + errorCandidate.getErrorMessage()));
+            Logger.getLogger().log(Logger.Level.ALL, new RuntimeException("Agent returned error in response header: " + errorCandidate.getErrorMessage()));
             return initLine;
         }
         //non executive commands. Move to enum?
