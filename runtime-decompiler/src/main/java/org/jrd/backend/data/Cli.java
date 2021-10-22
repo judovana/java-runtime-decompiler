@@ -244,14 +244,14 @@ public class Cli {
             newBytecodeFile = filteredArgs.get(3);
         }
 
-        String classStr = filteredArgs.get(2);
+        String className = filteredArgs.get(2);
         VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
         String clazz;
 
         if (newBytecodeFile == null) {
             clazz = DecompilationController.stdinToBase64();
         } else { // validate first
-            FileToClassValidator.StringAndScore r = FileToClassValidator.validate(classStr, newBytecodeFile);
+            FileToClassValidator.StringAndScore r = FileToClassValidator.validate(className, newBytecodeFile);
 
             if (r.getScore() > 0 && r.getScore() < 10) {
                 Logger.getLogger().log(Logger.Level.ALL, "WARNING: " + r.getMessage());
@@ -262,13 +262,15 @@ public class Cli {
 
             clazz = DecompilationController.fileToBase64(newBytecodeFile);
         }
+
         AgentRequestAction request = DecompilationController.createRequest(vmInfo,
                 AgentRequestAction.RequestAction.OVERWRITE,
-                classStr,
+                className,
                 clazz);
         String response = DecompilationController.submitRequest(vmManager, request);
+
         if ("ok".equals(response)) {
-            System.out.println("Overwrite done successfully.");
+            System.out.println("Overwrite of class '" + className + "' successful.");
         } else {
             throw new RuntimeException(DecompilationController.CLASSES_NOPE);
         }
@@ -308,12 +310,15 @@ public class Cli {
     }
 
     public static void initClass(VmInfo vmInfo, VmManager vmManager, String fqn) {
-        AgentRequestAction request = DecompilationController.createRequest(vmInfo,
-                AgentRequestAction.RequestAction.INIT_CLASS,
-                fqn);
+        AgentRequestAction request = DecompilationController.createRequest(
+            vmInfo,
+            AgentRequestAction.RequestAction.INIT_CLASS,
+            fqn
+        );
         String response = DecompilationController.submitRequest(vmManager, request);
+
         if ("ok".equals(response)) {
-            System.out.println("Class initialization done successfully.");
+            System.out.println("Initialization of class '" + fqn + "' successful.");
         } else {
             throw new RuntimeException(DecompilationController.CLASSES_NOPE);
         }
