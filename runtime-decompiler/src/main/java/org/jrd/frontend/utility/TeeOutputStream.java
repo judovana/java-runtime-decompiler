@@ -1,10 +1,8 @@
 package org.jrd.frontend.utility;
 
-
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
-
 
 /**
  * Behaves like the 'tee' command, sends output to both actual std stream and a

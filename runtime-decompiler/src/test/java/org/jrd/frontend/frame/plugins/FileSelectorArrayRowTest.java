@@ -12,8 +12,7 @@ import java.io.File;
 import java.nio.file.Paths;
 
 @SuppressFBWarnings(
-        value = "DMI_HARDCODED_ABSOLUTE_FILENAME",
-        justification = "Hardcoded paths aren't used for manipulating with an actual filesystem."
+        value = "DMI_HARDCODED_ABSOLUTE_FILENAME", justification = "Hardcoded paths aren't used for manipulating with an actual filesystem."
 )
 class FileSelectorArrayRowTest {
     @BeforeAll

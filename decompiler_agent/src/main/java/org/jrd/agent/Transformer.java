@@ -22,9 +22,8 @@ public class Transformer implements ClassFileTransformer {
     private Map<String, byte[]> overrides = new HashMap<>();
 
     @Override
-    public byte[] transform(
-            ClassLoader loader, String className, Class<?> clazz, ProtectionDomain domain, byte[] classfileBuffer
-    ) throws IllegalClassFormatException {
+    public byte[] transform(ClassLoader loader, String className, Class<?> clazz, ProtectionDomain domain, byte[] classfileBuffer)
+            throws IllegalClassFormatException {
         if (allowToSaveBytecode) {
             byte[] b = null;
             //some parts of instrumentation works on p/k/g/class some on p.l.g.class, lets unify that

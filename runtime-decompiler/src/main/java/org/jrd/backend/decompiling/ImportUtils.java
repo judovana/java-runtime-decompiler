@@ -63,8 +63,8 @@ public final class ImportUtils {
 
     private static void copyBetweenStreams(URL wrapperJsonUrl, String filename) throws IOException {
         try (
-            InputStream is = wrapperJsonUrl.openStream();
-            OutputStream os = new FileOutputStream(Directories.getPluginDirectory() + File.separator + filename)
+                InputStream is = wrapperJsonUrl.openStream();
+                OutputStream os = new FileOutputStream(Directories.getPluginDirectory() + File.separator + filename)
         ) {
             byte[] buffer = new byte[1024];
             int length;

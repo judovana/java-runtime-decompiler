@@ -100,7 +100,10 @@ public final class ExpandableUrl {
     public static String unifySlashes(String dir, boolean prependSlash) {
         dir = dir.replaceAll("\\\\", "/");
         if (prependSlash && Directories.isOsWindows() &&
-            !dir.startsWith("file") && dir.length() > 0 && dir.charAt(0) != '/' && dir.charAt(0) != '$'
+                !dir.startsWith("file") &&
+                dir.length() > 0 &&
+                dir.charAt(0) != '/' &&
+                dir.charAt(0) != '$'
         ) {
             dir = "/" + dir;
         }

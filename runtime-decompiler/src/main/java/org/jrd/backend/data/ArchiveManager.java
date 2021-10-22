@@ -117,9 +117,7 @@ public class ArchiveManager {
     public File unpack(File c) throws IOException {
         File f = new File(jrdFolder);
         if (f.exists() && !delete()) { // do not log if it didn't even exist before
-            Logger.getLogger().log(
-                    Logger.Level.ALL,
-                    "Could not delete jrd temp directory at '" + f.getAbsolutePath() + "'!");
+            Logger.getLogger().log(Logger.Level.ALL, "Could not delete jrd temp directory at '" + f.getAbsolutePath() + "'!");
         }
 
         // Create my dir in tmpdir
@@ -231,9 +229,9 @@ public class ArchiveManager {
             // Move it into the temp file if it's not last, so it can be packaged
             if (i > 0) {
                 Files.copy(
-                        Path.of(path),
-                        Path.of(jrdFolder + (i - 1) + FILE_SEPARATOR + pathManager.get(i)),
-                        StandardCopyOption.REPLACE_EXISTING);
+                        Path.of(path), Path.of(jrdFolder + (i - 1) + FILE_SEPARATOR + pathManager.get(i)),
+                        StandardCopyOption.REPLACE_EXISTING
+                );
             } else {
                 // It's the last, replace the original
                 Files.copy(Path.of(path), c.toPath(), StandardCopyOption.REPLACE_EXISTING);

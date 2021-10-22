@@ -22,13 +22,9 @@ import java.util.stream.Collectors;
 public class CompileUploadCliTest extends AbstractAgentNeedingTest {
     private static final String NEW_GREETING = "Greetings";
 
-
     @Override
     AbstractSourceTestClass dummyProvider() throws AbstractSourceTestClass.SourceTestClassWrapperException {
-        return new ModifiableDummyTestingHelper()
-                .writeDefault()
-                .compile()
-                .execute();
+        return new ModifiableDummyTestingHelper().writeDefault().compile().execute();
     }
 
     void testBytes(String pucComponent) throws Exception {
@@ -42,7 +38,6 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
 
         Assertions.assertArrayEquals(fileContents, bytes);
     }
-
 
     @Test
     void testBytes() throws Exception {
@@ -92,7 +87,6 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
         testBytesAndBase64BytesEqual(dummy.getClasspath());
     }
 
-
     void testDecompileJavap(String pucComponent, String option) throws Exception {
         String[] args = new String[]{Cli.DECOMPILE, pucComponent, "javap" + option, dummy.getClassRegex()};
         Cli cli = new Cli(args, model);
@@ -111,7 +105,6 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
         testDecompileJavap(dummy.getPid(), option);
         testDecompileJavap(dummy.getClasspath(), option);
     }
-
 
     void testOverwrite(String pucComponent) throws Exception {
         createReplacement(NEW_GREETING);
@@ -136,11 +129,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
     void testOverwriteStdIn(String pucComponent) throws Exception {
         createReplacement(NEW_GREETING);
 
-        String[] args = new String[]{
-                Cli.OVERWRITE,
-                pucComponent,
-                dummy.getFqn()
-        };
+        String[] args = new String[]{Cli.OVERWRITE, pucComponent, dummy.getFqn()};
         Cli cli = new Cli(args, model);
 
         // setup input stream
@@ -173,9 +162,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
 
     private static void createReplacement(String newGreeting) {
         try {
-            new ModifiableDummyTestingHelper()
-                    .write(newGreeting)
-                    .compile();
+            new ModifiableDummyTestingHelper().write(newGreeting).compile();
         } catch (AbstractSourceTestClass.SourceTestClassWrapperException e) {
             Assertions.fail("Failed to create data to be uploaded.", e);
         }
@@ -220,10 +207,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
     }
 
     public static boolean pluginExists(String plugin, Model model) throws Exception {
-        return model.getPluginManager()
-                .getWrappers()
-                .stream()
-                .anyMatch(wrapper -> wrapper.getName().equals(plugin));
+        return model.getPluginManager().getWrappers().stream().anyMatch(wrapper -> wrapper.getName().equals(plugin));
     }
 
     @Test
@@ -231,13 +215,9 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
         final String plugin = "Cfr";
         Assumptions.assumeTrue(pluginExists(plugin, model), "plugin: " + plugin + " not available");
         File decompiledFile = decompile(plugin, dummy, model);
-        String sOrig = Files.readAllLines(
-                decompiledFile.toPath(), StandardCharsets.UTF_8).stream()
-                .collect(Collectors.joining("\n"));
-        String sNoCommnets = Files.readAllLines(
-                decompiledFile.toPath(), StandardCharsets.UTF_8).stream()
-                .filter(a -> !(a.trim().startsWith("/") || a.trim().startsWith("*")))
-                .collect(Collectors.joining("\n"));
+        String sOrig = Files.readAllLines(decompiledFile.toPath(), StandardCharsets.UTF_8).stream().collect(Collectors.joining("\n"));
+        String sNoCommnets = Files.readAllLines(decompiledFile.toPath(), StandardCharsets.UTF_8).stream()
+                .filter(a -> !(a.trim().startsWith("/") || a.trim().startsWith("*"))).collect(Collectors.joining("\n"));
         assertEqualsWithTolerance(sOrig, sNoCommnets, 0.9);
         assertEqualsWithTolerance(sNoCommnets, dummy.getDefaultContentWithPackage(), 0.85);
 
@@ -259,12 +239,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
     }
 
     static void overwrite(String pid, String fqn, Model model, File bin) throws Exception {
-        String[] args = new String[]{
-                Cli.OVERWRITE,
-                pid,
-                fqn,
-                bin.getAbsolutePath()
-        };
+        String[] args = new String[]{Cli.OVERWRITE, pid, fqn, bin.getAbsolutePath()};
         Cli cli = new Cli(args, model);
         cli.consumeCli();
     }
@@ -277,22 +252,11 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
         File compiledFile = File.createTempFile("jrd", "test.class");
         String[] args;
         if (plugin != null) {
-            args = new String[]{
-                    Cli.COMPILE,
-                    Cli.P, plugin,
-                    Cli.CP, pid,
-                    src.getAbsolutePath(),
-                    Cli.SAVE_LIKE, Cli.Saving.EXACT,
-                    Cli.SAVE_AS, compiledFile.getAbsolutePath()
-            };
+            args = new String[]{Cli.COMPILE, Cli.P, plugin, Cli.CP, pid, src.getAbsolutePath(), Cli.SAVE_LIKE, Cli.Saving.EXACT,
+                    Cli.SAVE_AS, compiledFile.getAbsolutePath()};
         } else {
-            args = new String[]{
-                    Cli.COMPILE,
-                    Cli.CP, pid,
-                    src.getAbsolutePath(),
-                    Cli.SAVE_LIKE, Cli.Saving.EXACT,
-                    Cli.SAVE_AS, compiledFile.getAbsolutePath()
-            };
+            args = new String[]{Cli.COMPILE, Cli.CP, pid, src.getAbsolutePath(), Cli.SAVE_LIKE, Cli.Saving.EXACT, Cli.SAVE_AS,
+                    compiledFile.getAbsolutePath()};
         }
         Cli cli = new Cli(args, model);
         cli.consumeCli();
@@ -301,14 +265,8 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
 
     private static File decompile(String plugin, AbstractSourceTestClass dummy, Model model) throws Exception {
         File decompiledFile = File.createTempFile("jrd", "test.java");
-        String[] args = new String[]{
-                Cli.DECOMPILE,
-                dummy.getPid(),
-                plugin,
-                dummy.getFqn(),
-                Cli.SAVE_LIKE, Cli.Saving.EXACT,
-                Cli.SAVE_AS, decompiledFile.getAbsolutePath()
-        };
+        String[] args = new String[]{Cli.DECOMPILE, dummy.getPid(), plugin, dummy.getFqn(), Cli.SAVE_LIKE, Cli.Saving.EXACT, Cli.SAVE_AS,
+                decompiledFile.getAbsolutePath()};
         Cli cli = new Cli(args, model);
         cli.consumeCli();
         return decompiledFile;
@@ -364,13 +322,9 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
         Assertions.assertThrows(Exception.class, () -> overwrite(dummy, model, decompiledFile)); //src instead of bin == nonsense
     }
 
-
     @Test
     void testGlobalApi() throws Exception {
-        String[] args = new String[]{
-                Cli.API,
-                dummy.getPid()
-        };
+        String[] args = new String[]{Cli.API, dummy.getPid()};
         Cli cli = new Cli(args, model);
         cli.consumeCli();
         String apiHelp = streams.getOut();
@@ -391,11 +345,11 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
         }
         Assertions.assertNotNull(expectedEx);
 
-        String withApi = dummy.getDefaultContentWithPackage().replace("/*API_PLACEHOLDER*/", "" +
-                "Integer i = (Integer)(org.jrd.agent.api.Variables.Global.getOrCreate(\"counter\", new Integer(0)));\n" +
-                "i=i+1;\n" +
-                "org.jrd.agent.api.Variables.Global.set(\"counter\", i);\n" +
-                "System.out.println(\"API: \"+i+\" had spoken\");\n");
+        String withApi = dummy.getDefaultContentWithPackage().replace(
+                "/*API_PLACEHOLDER*/",
+                "" + "Integer i = (Integer)(org.jrd.agent.api.Variables.Global.getOrCreate(\"counter\", new Integer(0)));\n" + "i=i+1;\n" +
+                        "org.jrd.agent.api.Variables.Global.set(\"counter\", i);\n" + "System.out.println(\"API: \"+i+\" had spoken\");\n"
+        );
         Files.write(decompiledFile.toPath(), withApi.getBytes(StandardCharsets.UTF_8));
         File compiledFile = compile(null, dummy, model, decompiledFile);
         String compiled = readBinaryAsString(compiledFile);

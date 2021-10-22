@@ -44,14 +44,8 @@ public abstract class AbstractAgentNeedingTest {
 
         String agentPath = Config.getConfig().getAgentExpandedPath();
 
-        Assumptions.assumeTrue(
-                !agentPath.isEmpty(),
-                "Agent path is not set up, aborting CliTest."
-        );
-        Assumptions.assumeTrue(
-                new File(agentPath).exists(),
-                "Agent path is set up to nonexistent file, aborting CliTest."
-        );
+        Assumptions.assumeTrue(!agentPath.isEmpty(), "Agent path is not set up, aborting CliTest.");
+        Assumptions.assumeTrue(new File(agentPath).exists(), "Agent path is set up to nonexistent file, aborting CliTest.");
     }
 
     @Timeout(5)
@@ -79,9 +73,8 @@ public abstract class AbstractAgentNeedingTest {
 
         Assertions.assertTrue(dummy.isAlive());
         // halt agent, otherwise an open socket prevents termination of dummy process
-        AgentRequestAction request = DecompilationController.createRequest(
-                model.getVmManager().findVmFromPid(dummy.getPid()), AgentRequestAction.RequestAction.HALT, ""
-        );
+        AgentRequestAction request = DecompilationController
+                .createRequest(model.getVmManager().findVmFromPid(dummy.getPid()), AgentRequestAction.RequestAction.HALT, "");
         String response = DecompilationController.submitRequest(model.getVmManager(), request);
         Assertions.assertEquals("ok", response);
 
@@ -97,11 +90,9 @@ public abstract class AbstractAgentNeedingTest {
     }
 
     static void assertEqualsWithTolerance(String s1, String s2, double samenessPercentage) {
-        Assertions.assertTrue(isDifferenceTolerable(
-                samenessPercentage,
-                LevenshteinDistance.calculate(s1, s2),
-                Math.max(s1.length(), s2.length())
-        ));
+        Assertions.assertTrue(
+                isDifferenceTolerable(samenessPercentage, LevenshteinDistance.calculate(s1, s2), Math.max(s1.length(), s2.length()))
+        );
     }
 
     static void assertEqualsWithTolerance(List<String> l1, List<String> l2, double samenessPercentage) {
@@ -137,8 +128,7 @@ public abstract class AbstractAgentNeedingTest {
                     } else if (j == 0) { // distance between str1 and "" == how long str1 is
                         matrix[i][j] = i;
                     } else {
-                        int substitution = matrix[i - 1][j - 1] +
-                                substitutionCost(str1.charAt(i - 1), str2.charAt(j - 1));
+                        int substitution = matrix[i - 1][j - 1] + substitutionCost(str1.charAt(i - 1), str2.charAt(j - 1));
                         int insertion = matrix[i][j - 1] + 1;
                         int deletion = matrix[i - 1][j] + 1;
 
@@ -158,7 +148,6 @@ public abstract class AbstractAgentNeedingTest {
             return Math.min(a, Math.min(b, c));
         }
     }
-
 
     public static class JunitStderrOutThief {
         private final ByteArrayOutputStream out;
@@ -206,7 +195,6 @@ public abstract class AbstractAgentNeedingTest {
             return get(err);
         }
     }
-
 
     public static String readBinaryAsString(File f) throws IOException {
         try (FileInputStream fis = new FileInputStream(f)) {

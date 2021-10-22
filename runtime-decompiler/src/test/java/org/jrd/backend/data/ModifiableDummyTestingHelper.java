@@ -14,14 +14,9 @@ class ModifiableDummyTestingHelper extends AbstractSourceTestClass {
 
     @Override
     String getContentWithoutPackage(String nwHello) {
-        return "public class " + getClassName() + " {\n" +
-                "    public static void main(String[] args) throws InterruptedException {\n" +
-                "        while(true) {\n" +
-                "            new " + getClassName() + "().print();\n" +
-                "            Thread.sleep(100);\n" +
-                "        }\n" +
-                "    }\n" +
-                "   private void print(){\n/*API_PLACEHOLDER*/\nSystem.out.println(\"" + nwHello + "\");}\n" +
+        return "public class " + getClassName() + " {\n" + "    public static void main(String[] args) throws InterruptedException {\n" +
+                "        while(true) {\n" + "            new " + getClassName() + "().print();\n" + "            Thread.sleep(100);\n" +
+                "        }\n" + "    }\n" + "   private void print(){\n/*API_PLACEHOLDER*/\nSystem.out.println(\"" + nwHello + "\");}\n" +
                 "}\n";
     }
 
@@ -29,6 +24,5 @@ class ModifiableDummyTestingHelper extends AbstractSourceTestClass {
     String getGreetings() {
         return "Hello";
     }
-
 
 }

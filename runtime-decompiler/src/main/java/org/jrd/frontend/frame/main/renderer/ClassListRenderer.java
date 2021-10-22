@@ -90,5 +90,4 @@ public class ClassListRenderer extends JPanel implements ListCellRenderer<ClassI
         this.doShowInfo = doShowInfo;
     }
 
-
 }

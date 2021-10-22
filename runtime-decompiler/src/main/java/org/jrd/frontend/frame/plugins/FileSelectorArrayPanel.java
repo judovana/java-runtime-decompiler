@@ -62,7 +62,6 @@ public class FileSelectorArrayPanel extends JPanel {
         return fileSelectorArrayRow;
     }
 
-
     public void removeRow(FileSelectorArrayRow fileSelectorArrayRow) {
         if (pathTextFields.size() > 1) {
             pathTextFields.remove(fileSelectorArrayRow.getTextField());

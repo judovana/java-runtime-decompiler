@@ -11,9 +11,7 @@ import java.lang.reflect.Type;
 public class DecompilerWrapperSerializer implements JsonSerializer<DecompilerWrapper> {
 
     @Override
-    public JsonElement serialize(
-            DecompilerWrapper decompilerWrapper, Type type, JsonSerializationContext jsonSerializationContext
-    ) {
+    public JsonElement serialize(DecompilerWrapper decompilerWrapper, Type type, JsonSerializationContext jsonSerializationContext) {
         final JsonObject jsonObject = new JsonObject();
 
         jsonObject.addProperty("Name", decompilerWrapper.getName());

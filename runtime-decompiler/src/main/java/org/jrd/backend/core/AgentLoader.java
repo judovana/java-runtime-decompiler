@@ -22,7 +22,6 @@ public class AgentLoader {
 
     private static final String AGENT_PORT_PROPERTY = "com.redhat.decompiler.thermostat.port";
 
-
     AgentLoader() {
     }
 
@@ -35,17 +34,15 @@ public class AgentLoader {
         int port = findPort();
         String[] installProps = createProperties(port);
 
-        Logger.getLogger().log(
-                Logger.Level.DEBUG,
-                "Attempting to attach decompiler agent for VM '" + pid + "' on port '" + port + "'"
-        );
+        Logger.getLogger().log(Logger.Level.DEBUG, "Attempting to attach decompiler agent for VM '" + pid + "' on port '" + port + "'");
 
         try {
-            InstallDecompilerAgentImpl.install(
-                    Integer.toString(pid), false, false, "localhost", port, installProps
-            );
-        } catch (IllegalArgumentException | IOException | AttachNotSupportedException |
-                AgentLoadException | AgentInitializationException ex) {
+            InstallDecompilerAgentImpl.install(Integer.toString(pid), false, false, "localhost", port, installProps);
+        } catch (IllegalArgumentException |
+                IOException |
+                AttachNotSupportedException |
+                AgentLoadException |
+                AgentInitializationException ex) {
             Logger.getLogger().log(Logger.Level.ALL, new RuntimeException("Attach failed!! Cause: ", ex));
             return INVALID_PORT;
         }
@@ -65,10 +62,8 @@ public class AgentLoader {
                     return i;
                 }
             } catch (IOException e) {
-                Logger.getLogger().log(
-                        Logger.Level.DEBUG,
-                        new RuntimeException("Could not open socket on port " + i + ". Trying again.", e)
-                );
+                Logger.getLogger()
+                        .log(Logger.Level.DEBUG, new RuntimeException("Could not open socket on port " + i + ". Trying again.", e));
             }
         }
 

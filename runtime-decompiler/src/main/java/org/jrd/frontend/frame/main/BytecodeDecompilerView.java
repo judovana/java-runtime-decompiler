@@ -79,36 +79,36 @@ import java.util.regex.Pattern;
 public class BytecodeDecompilerView {
 
     private JPanel bytecodeDecompilerPanel;
-        private JSplitPane splitPane;
-            private JPanel classes;
-                private JPanel classesToolBar;
-                    private JButton reloadClassesButton;
-                    private JCheckBox showInfoCheckBox;
-                    private JTextField classesSortField;
-                        private final Color classesSortFieldColor;
-                private JPanel classesPanel;
-                    private JScrollPane classesScrollPane;
-                        private JList<ClassInfo> filteredClassesJList;
-                            private ClassListRenderer filteredClassesRenderer;
-            private JPanel buffersPanel;
-                private JPanel buffersToolBar;
-                    private JButton undoButton;
-                    private JButton redoButton;
-                    private JButton insertButton;
-                    private JButton detachButton;
-                    private JButton initClassButton;
-                    private JButton overwriteButton;
-                    private JButton compileButton;
-                    private JButton compileAndUploadButton;
-                    private JComboBox<DecompilerWrapper> pluginComboBox;
-                private final JTabbedPane buffers;
-                    private JPanel sourceBuffer;
-                        private RTextScrollPane bytecodeScrollPane;
-                            private RSyntaxTextArea bytecodeSyntaxTextArea;
-                        private SearchControlsPanel bytecodeSearchControls;
-                    private JPanel binaryBuffer;
-                        private HexEditor hex;
-                        private SearchControlsPanel hexSearchControls;
+    private JSplitPane splitPane;
+    private JPanel classes;
+    private JPanel classesToolBar;
+    private JButton reloadClassesButton;
+    private JCheckBox showInfoCheckBox;
+    private JTextField classesSortField;
+    private final Color classesSortFieldColor;
+    private JPanel classesPanel;
+    private JScrollPane classesScrollPane;
+    private JList<ClassInfo> filteredClassesJList;
+    private ClassListRenderer filteredClassesRenderer;
+    private JPanel buffersPanel;
+    private JPanel buffersToolBar;
+    private JButton undoButton;
+    private JButton redoButton;
+    private JButton insertButton;
+    private JButton detachButton;
+    private JButton initClassButton;
+    private JButton overwriteButton;
+    private JButton compileButton;
+    private JButton compileAndUploadButton;
+    private JComboBox<DecompilerWrapper> pluginComboBox;
+    private final JTabbedPane buffers;
+    private JPanel sourceBuffer;
+    private RTextScrollPane bytecodeScrollPane;
+    private RSyntaxTextArea bytecodeSyntaxTextArea;
+    private SearchControlsPanel bytecodeSearchControls;
+    private JPanel binaryBuffer;
+    private HexEditor hex;
+    private SearchControlsPanel hexSearchControls;
 
     private ActionListener bytesActionListener;
     private ActionListener classesActionListener;
@@ -129,9 +129,8 @@ public class BytecodeDecompilerView {
     private final JFrame mainFrame;
     private JFrame detachedBytecodeFrame;
 
-    private static final Set<Integer> CLASS_LIST_REGISTERED_KEY_CODES = Set.of(
-            KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_PAGE_UP, KeyEvent.VK_PAGE_DOWN, KeyEvent.VK_ENTER
-    );
+    private static final Set<Integer> CLASS_LIST_REGISTERED_KEY_CODES =
+            Set.of(KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_PAGE_UP, KeyEvent.VK_PAGE_DOWN, KeyEvent.VK_ENTER);
     private static final Insets PANEL_INSETS = new Insets(3, 3, 3, 3);
     private static final String DETACH_BUTTON_TEXT = "Detach";
     private static final String ATTACH_BUTTON_TEXT = "Attach";
@@ -146,7 +145,6 @@ public class BytecodeDecompilerView {
         return bytecodeDecompilerPanel;
     }
 
-
     public BytecodeDecompilerView(JFrame mainFrameReference) {
         mainFrame = mainFrameReference;
 
@@ -156,11 +154,12 @@ public class BytecodeDecompilerView {
 
         classesSortField = new JTextField(".*");
         classesSortFieldColor = classesSortField.getForeground();
-        classesSortField.setToolTipText(styleTooltip() + "Search for classes using regular expressions.<br/>" +
-                "Look for specific classes or packages using '.*SomeClass.*' or '.*some.package.*'<br/>" +
-                "Don't forget to escape dollar signs '$' of inner classes to '\\$'.<br/>" +
-                "For negation use the negative lookahead '^(?!.*unwanted).*$' syntax." +
-                "</div><html>");
+        classesSortField.setToolTipText(
+                styleTooltip() + "Search for classes using regular expressions.<br/>" +
+                        "Look for specific classes or packages using '.*SomeClass.*' or '.*some.package.*'<br/>" +
+                        "Don't forget to escape dollar signs '$' of inner classes to '\\$'.<br/>" +
+                        "For negation use the negative lookahead '^(?!.*unwanted).*$' syntax." + "</div><html>"
+        );
         classesSortField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent documentEvent) {
@@ -210,10 +209,8 @@ public class BytecodeDecompilerView {
                     }
                 } else if (SwingUtilities.isRightMouseButton(e)) {
                     new ClassListPopupMenu<>(filteredClassesJList, originallySelected, doShowClassInfo())
-                        .addItem("name(s)", ClassInfo::getName, true)
-                        .addItem("location(s)", ClassInfo::getLocation, false)
-                        .addItem("class loader(s)", ClassInfo::getClassLoader, false)
-                        .show(filteredClassesJList, e.getX(), e.getY());
+                            .addItem("name(s)", ClassInfo::getName, true).addItem("location(s)", ClassInfo::getLocation, false)
+                            .addItem("class loader(s)", ClassInfo::getClassLoader, false).show(filteredClassesJList, e.getX(), e.getY());
                 }
             }
         });
@@ -260,9 +257,8 @@ public class BytecodeDecompilerView {
         initClassButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                final String fqn = JOptionPane.showInputDialog(
-                        mainFrameReference, "Enter the fully qualified name of a class to initialize", lastFqn
-                );
+                final String fqn =
+                        JOptionPane.showInputDialog(mainFrameReference, "Enter the fully qualified name of a class to initialize", lastFqn);
 
                 if (fqn != null) {
                     lastFqn = fqn;
@@ -308,10 +304,11 @@ public class BytecodeDecompilerView {
             public void actionPerformed(ActionEvent actionEvent) {
                 GlobalConsole.getConsole().show();
                 compileAction.run(
-                        (DecompilerWrapper) pluginComboBox.getSelectedItem(),
-                        false,
-                        new IdentifiedSource(new ClassIdentifier(lastDecompiledClass),
-                                bytecodeSyntaxTextArea.getText().getBytes(StandardCharsets.UTF_8)));
+                        (DecompilerWrapper) pluginComboBox.getSelectedItem(), false,
+                        new IdentifiedSource(
+                                new ClassIdentifier(lastDecompiledClass), bytecodeSyntaxTextArea.getText().getBytes(StandardCharsets.UTF_8)
+                        )
+                );
             }
         });
 
@@ -324,10 +321,12 @@ public class BytecodeDecompilerView {
                     compileAction.upload(lastDecompiledClass, hex.get());
                 } else {
                     compileAction.run(
-                            (DecompilerWrapper) pluginComboBox.getSelectedItem(),
-                            true,
-                            new IdentifiedSource(new ClassIdentifier(lastDecompiledClass),
-                                    bytecodeSyntaxTextArea.getText().getBytes(StandardCharsets.UTF_8)));
+                            (DecompilerWrapper) pluginComboBox.getSelectedItem(), true,
+                            new IdentifiedSource(
+                                    new ClassIdentifier(lastDecompiledClass),
+                                    bytecodeSyntaxTextArea.getText().getBytes(StandardCharsets.UTF_8)
+                            )
+                    );
                 }
             }
         });
@@ -519,8 +518,7 @@ public class BytecodeDecompilerView {
         buffersPanel.add(buffersToolBar, BorderLayout.NORTH);
         buffersPanel.add(buffers, BorderLayout.CENTER);
 
-        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-                classes, buffersPanel);
+        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, classes, buffersPanel);
 
         splitPane.addComponentListener(new ComponentAdapter() {
             @Override
@@ -593,9 +591,7 @@ public class BytecodeDecompilerView {
                     }
                 }
             });
-            Timer wasNotFoundTimer = new Timer(
-                    250, (ActionEvent e) -> searchField.setForeground(originalSearchFieldColor)
-            );
+            Timer wasNotFoundTimer = new Timer(250, (ActionEvent e) -> searchField.setForeground(originalSearchFieldColor));
             wasNotFoundTimer.setRepeats(false);
             wasNotFoundActionListener = e -> {
                 searchField.setForeground(Color.RED);
@@ -635,25 +631,24 @@ public class BytecodeDecompilerView {
         public static SearchControlsPanel createHexControls(HexEditor hex) {
             HexSearch hexSearchEngine = new HexSearch(hex);
             JComboBox<HexSearch.HexSearchOptions> hexSearchType = new JComboBox<>(HexSearch.HexSearchOptions.values());
-            hexSearchType.setToolTipText(styleTooltip() +
-                    "Set search type:<br/>" +
-                    " - " + HexSearch.HexSearchOptions.HEX + ": Space-delimited hexadecimal bytes, e.g. '6A 72 64'.<br/>" +
-                    " - " + HexSearch.HexSearchOptions.INT + ": Space-delimited integers, e.g. '106 114 100'.<br/>" +
-                    " - " + HexSearch.HexSearchOptions.TEXT + ": Strings, e.g. 'jrd'.</div><html>"
+            hexSearchType.setToolTipText(
+                    styleTooltip() + "Set search type:<br/>" + " - " + HexSearch.HexSearchOptions.HEX +
+                            ": Space-delimited hexadecimal bytes, e.g. '6A 72 64'.<br/>" + " - " + HexSearch.HexSearchOptions.INT +
+                            ": Space-delimited integers, e.g. '106 114 100'.<br/>" + " - " + HexSearch.HexSearchOptions.TEXT +
+                            ": Strings, e.g. 'jrd'.</div><html>"
             );
             hexSearchType.setPrototypeDisplayValue(HexSearch.HexSearchOptions.TEXT);
 
             SearchControlsPanel controls = new SearchControlsPanel(hexSearchType, hex.getTableFocus());
 
-            DocumentListener hexSearchDocumentListener = new HexSearchDocumentListener(
-                    hexSearchEngine, controls.searchField, hexSearchType, controls.wasNotFoundActionListener
-            );
+            DocumentListener hexSearchDocumentListener =
+                    new HexSearchDocumentListener(hexSearchEngine, controls.searchField, hexSearchType, controls.wasNotFoundActionListener);
             controls.searchField.getDocument().addDocumentListener(hexSearchDocumentListener);
-            controls.previousButton.addActionListener(new HexSearchActionListener(
-                    hexSearchEngine, controls.searchField, hexSearchType, HexSearchActionListener.Method.PREV)
+            controls.previousButton.addActionListener(
+                    new HexSearchActionListener(hexSearchEngine, controls.searchField, hexSearchType, HexSearchActionListener.Method.PREV)
             );
-            controls.nextButton.addActionListener(new HexSearchActionListener(
-                    hexSearchEngine, controls.searchField, hexSearchType, HexSearchActionListener.Method.NEXT)
+            controls.nextButton.addActionListener(
+                    new HexSearchActionListener(hexSearchEngine, controls.searchField, hexSearchType, HexSearchActionListener.Method.NEXT)
             );
             hexSearchType.addActionListener(event -> hexSearchDocumentListener.changedUpdate(null));
 
@@ -689,9 +684,11 @@ public class BytecodeDecompilerView {
                 }
 
                 private void invokeSearch() {
-                    SwingUtilities.invokeLater(() -> parent.initialSearchBytecode(
-                                controls.searchField.getText(), regexCheckBox.isSelected(), caseCheckBox.isSelected()
-                    ));
+                    SwingUtilities.invokeLater(
+                            () -> parent.initialSearchBytecode(
+                                    controls.searchField.getText(), regexCheckBox.isSelected(), caseCheckBox.isSelected()
+                            )
+                    );
                 }
             };
             regexCheckBox.addActionListener(actionEvent -> listener.changedUpdate(null));
@@ -865,10 +862,8 @@ public class BytecodeDecompilerView {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             worker.overwriteClass(
-                    getSelectedDecompiler(),
-                    BytecodeDecompilerView.this.lastDecompiledClass,
-                    BytecodeDecompilerView.this.bytecodeSyntaxTextArea.getText(),
-                    BytecodeDecompilerView.this.hex.get(),
+                    getSelectedDecompiler(), BytecodeDecompilerView.this.lastDecompiledClass,
+                    BytecodeDecompilerView.this.bytecodeSyntaxTextArea.getText(), BytecodeDecompilerView.this.hex.get(),
                     !isSourceBufferVisible()
             );
         }
@@ -929,10 +924,8 @@ public class BytecodeDecompilerView {
 
         // y is offset to the next row
         popup.getFor(bytecodeSyntaxTextArea, forcedLocation == null).show(
-                bytecodeSyntaxTextArea,
-                caretPosition.x,
-                caretPosition.y + bytecodeSyntaxTextArea.getFontMetrics(
-                        bytecodeSyntaxTextArea.getFont()).getHeight()
+                bytecodeSyntaxTextArea, caretPosition.x,
+                caretPosition.y + bytecodeSyntaxTextArea.getFontMetrics(bytecodeSyntaxTextArea.getFont()).getHeight()
         );
     }
 

@@ -14,20 +14,14 @@ class TestingDummyHelper extends AbstractSourceTestClass {
 
     @Override
     String getContentWithoutPackage(String nwHello) {
-        return "public class " + getClassName() + " {\n" +
-                "    public static void main(String[] args) throws InterruptedException {\n" +
-                "        while(true) {\n" +
-                "            System.out.println(\"" + nwHello + "\");\n" +
-                "            Thread.sleep(100);\n" +
-                "        }\n" +
-                "    }\n" +
-                "}\n";
+        return "public class " + getClassName() + " {\n" + "    public static void main(String[] args) throws InterruptedException {\n" +
+                "        while(true) {\n" + "            System.out.println(\"" + nwHello + "\");\n" + "            Thread.sleep(100);\n" +
+                "        }\n" + "    }\n" + "}\n";
     }
 
     @Override
     String getGreetings() {
         return "Hello";
     }
-
 
 }

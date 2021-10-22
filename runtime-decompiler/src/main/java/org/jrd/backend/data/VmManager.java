@@ -101,9 +101,7 @@ public class VmManager {
         Set<VmInfo> forRemoval = new HashSet<>();
         while (iterator.hasNext()) {
             VmInfo vmInfo = iterator.next();
-            boolean noLongerExists = newVmInfoSet
-                    .stream()
-                    .noneMatch(info -> info.getVmId().equals(vmInfo.getVmId()));
+            boolean noLongerExists = newVmInfoSet.stream().noneMatch(info -> info.getVmId().equals(vmInfo.getVmId()));
 
             if (vmInfo.getType() == VmInfo.Type.LOCAL && noLongerExists) {
                 setChanged();
@@ -127,7 +125,6 @@ public class VmManager {
         notifyListeners();
         return vmInfo;
     }
-
 
     public VmInfo createFsVM(List<File> cp, String name, boolean shouldBeSaved) {
         int pid = getNextAvailableFsVmPid();
@@ -157,11 +154,8 @@ public class VmManager {
     }
 
     private int getNextAvailableFsVmPid() {
-        return vmInfoSet.stream()
-                .filter(vmInfo -> vmInfo.getType().equals(VmInfo.Type.FS))
-                .map(VmInfo::getVmPid)
-                .min(Comparator.naturalOrder())
-                .orElse(0) - 1;
+        return vmInfoSet.stream().filter(vmInfo -> vmInfo.getType().equals(VmInfo.Type.FS)).map(VmInfo::getVmPid)
+                .min(Comparator.naturalOrder()).orElse(0) - 1;
     }
 
     public boolean removeVm(VmInfo target) {
@@ -217,7 +211,7 @@ public class VmManager {
     public void notifyListeners() {
         if (hasChanged()) {
             clearChanged();
-            for (ActionListener listener: actionListeners) {
+            for (ActionListener listener : actionListeners) {
                 listener.actionPerformed(new ActionEvent(this, 0, null));
             }
         }

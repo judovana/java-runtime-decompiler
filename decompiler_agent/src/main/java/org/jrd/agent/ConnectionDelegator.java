@@ -32,8 +32,7 @@ public final class ConnectionDelegator extends Thread {
      *
      * @return boolean true if ran correctly, else false
      */
-    public static synchronized boolean initialize(String hostname, Integer port,
-                                                  InstrumentationProvider provider) {
+    public static synchronized boolean initialize(String hostname, Integer port, InstrumentationProvider provider) {
         ServerSocket initServerSocket = null;
         try {
             if (port == null) {
@@ -75,8 +74,7 @@ public final class ConnectionDelegator extends Thread {
                 }
                 return;
             }
-            new Thread(
-                    new AgentActionWorker(clientSocket, provider)).start();
+            new Thread(new AgentActionWorker(clientSocket, provider)).start();
         }
 
         if (!theServerSocket.isClosed()) {

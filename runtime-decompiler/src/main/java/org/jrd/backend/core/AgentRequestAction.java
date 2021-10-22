@@ -42,7 +42,6 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
 
-
 /**
  *
  * @author pmikova
@@ -79,9 +78,7 @@ public class AgentRequestAction {
         }
 
         private static RequestAction fromInt(int action) {
-            return Arrays.stream(RequestAction.values())
-                    .filter(v -> v.intVal == action)
-                    .findFirst()
+            return Arrays.stream(RequestAction.values()).filter(v -> v.intVal == action).findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("unknown value: " + action));
         }
 
@@ -90,9 +87,7 @@ public class AgentRequestAction {
         }
 
         public static RequestAction fromString(String s) throws IllegalArgumentException {
-            return Arrays.stream(RequestAction.values())
-                    .filter(v -> v.toString().equals(s))
-                    .findFirst()
+            return Arrays.stream(RequestAction.values()).filter(v -> v.toString().equals(s)).findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("unknown value: " + s));
         }
 
@@ -112,17 +107,15 @@ public class AgentRequestAction {
 
     public static final String CLASS_TO_OVERWRITE_BODY = "body-to-overwrite";
 
-    public static AgentRequestAction create(
-            VmInfo vmInfo, String hostname, int listenPort, RequestAction action, String name, String base64body
-    ) {
+    public static
+            AgentRequestAction
+            create(VmInfo vmInfo, String hostname, int listenPort, RequestAction action, String name, String base64body) {
         AgentRequestAction req = create(vmInfo, hostname, listenPort, action, name);
         req.setParameter(CLASS_TO_OVERWRITE_BODY, base64body);
         return req;
     }
 
-    public static AgentRequestAction create(
-            VmInfo vmInfo, String hostname, int listenPort, RequestAction action, String name
-    ) {
+    public static AgentRequestAction create(VmInfo vmInfo, String hostname, int listenPort, RequestAction action, String name) {
         AgentRequestAction req = create(vmInfo, hostname, listenPort, action);
         req.setParameter(CLASS_NAME_PARAM, name);
         return req;

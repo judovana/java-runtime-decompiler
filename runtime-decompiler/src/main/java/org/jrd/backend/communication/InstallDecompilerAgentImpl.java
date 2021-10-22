@@ -22,10 +22,8 @@ import java.util.List;
  */
 public final class InstallDecompilerAgentImpl {
 
-    public static void install(
-            String pid, boolean addToBoot, boolean setPolicy, String host, int port, String[] properties
-    ) throws IllegalArgumentException, IOException, AttachNotSupportedException,
-            AgentLoadException, AgentInitializationException {
+    public static void install(String pid, boolean addToBoot, boolean setPolicy, String host, int port, String[] properties)
+            throws IllegalArgumentException, IOException, AttachNotSupportedException, AgentLoadException, AgentInitializationException {
 
         if (port < 0) {
             throw new IllegalArgumentException("Install : port cannot be negative");
@@ -41,9 +39,7 @@ public final class InstallDecompilerAgentImpl {
             }
         }
 
-        InstallDecompilerAgentImpl install = new InstallDecompilerAgentImpl(
-                pid, addToBoot, setPolicy, host, port, properties
-        );
+        InstallDecompilerAgentImpl install = new InstallDecompilerAgentImpl(pid, addToBoot, setPolicy, host, port, properties);
         install.locateAgent();
         install.attach();
         install.injectAgent();
@@ -59,8 +55,7 @@ public final class InstallDecompilerAgentImpl {
     private VirtualMachine vm;
     private Config config = Config.getConfig();
 
-    private InstallDecompilerAgentImpl(String pid, boolean addToBoot, boolean setPolicy,
-            String host, int port, String[] properties) {
+    private InstallDecompilerAgentImpl(String pid, boolean addToBoot, boolean setPolicy, String host, int port, String[] properties) {
 
         agentJar = null;
         this.id = pid;

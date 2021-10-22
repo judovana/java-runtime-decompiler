@@ -16,18 +16,14 @@ public class HexSearchDocumentListener implements DocumentListener {
     private final JComboBox<HexSearch.HexSearchOptions> hexSearchType;
     private ActionListener wasNotFoundListener;
 
-    public HexSearchDocumentListener(
-            HexSearch hexSearchEngine, JTextField hexSearch, JComboBox<HexSearch.HexSearchOptions> hexSearchType
-    ) {
+    public HexSearchDocumentListener(HexSearch hexSearchEngine, JTextField hexSearch, JComboBox<HexSearch.HexSearchOptions> hexSearchType) {
         this.hexSearchEngine = hexSearchEngine;
         this.hexSearch = hexSearch;
         this.hexSearchType = hexSearchType;
     }
 
     public HexSearchDocumentListener(
-            HexSearch hexSearchEngine,
-            JTextField hexSearch,
-            JComboBox<HexSearch.HexSearchOptions> hexSearchType,
+            HexSearch hexSearchEngine, JTextField hexSearch, JComboBox<HexSearch.HexSearchOptions> hexSearchType,
             ActionListener wasNotFoundListener
     ) {
         this(hexSearchEngine, hexSearch, hexSearchType);
@@ -51,9 +47,8 @@ public class HexSearchDocumentListener implements DocumentListener {
 
     private void find() {
         try {
-            boolean wasFound = hexSearchEngine.searchHexCode(
-                    hexSearch.getText(), (HexSearch.HexSearchOptions) hexSearchType.getSelectedItem()
-            );
+            boolean wasFound =
+                    hexSearchEngine.searchHexCode(hexSearch.getText(), (HexSearch.HexSearchOptions) hexSearchType.getSelectedItem());
 
             if (!wasFound && wasNotFoundListener != null) {
                 wasNotFoundListener.actionPerformed(null);

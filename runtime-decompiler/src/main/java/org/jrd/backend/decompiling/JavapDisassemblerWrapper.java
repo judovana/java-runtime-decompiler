@@ -24,14 +24,12 @@ public class JavapDisassemblerWrapper {
             PrintWriter printWriter = new PrintWriter(tempOutputFile, StandardCharsets.UTF_8);
             StringBuilder optionsString = new StringBuilder();
             if (options != null) {
-                for (String option: options) {
+                for (String option : options) {
                     optionsString.append(option);
                 }
             }
 
-            com.sun.tools.javap.Main.run(
-                    new String[]{otherArgs + optionsString, tempByteFile.getAbsolutePath()}, printWriter
-            );
+            com.sun.tools.javap.Main.run(new String[]{otherArgs + optionsString, tempByteFile.getAbsolutePath()}, printWriter);
 
             return readStringFromFile(tempOutputFile.getAbsolutePath());
         } catch (Exception e) {

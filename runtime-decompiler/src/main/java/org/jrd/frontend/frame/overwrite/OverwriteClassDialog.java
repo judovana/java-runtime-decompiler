@@ -50,7 +50,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 
-
 public class OverwriteClassDialog extends JDialog {
 
     public interface TextLog {
@@ -79,11 +78,7 @@ public class OverwriteClassDialog extends JDialog {
         }
     }
 
-    private static final String[] SAVE_OPTIONS = new String[]{
-            "fully qualified name",
-            "src subdirectories name",
-            "custom name"
-    };
+    private static final String[] SAVE_OPTIONS = new String[]{"fully qualified name", "src subdirectories name", "custom name"};
     private final JTabbedPane dualPane;
 
     private final JPanel currentBufferPane;
@@ -139,15 +134,8 @@ public class OverwriteClassDialog extends JDialog {
     private final VmManager vmManager;
 
     public OverwriteClassDialog(
-            final String name,
-            final LatestPaths latestPaths,
-            final String currentBuffer,
-            final byte[] cBinBuffer,
-            VmInfo vmInfo,
-            VmManager vmManager,
-            PluginManager pluginManager,
-            DecompilerWrapper selectedDecompiler,
-            boolean isBinaryVisible,
+            final String name, final LatestPaths latestPaths, final String currentBuffer, final byte[] cBinBuffer, VmInfo vmInfo,
+            VmManager vmManager, PluginManager pluginManager, DecompilerWrapper selectedDecompiler, boolean isBinaryVisible,
             boolean isVerbose
     ) {
         super((JFrame) null, "Specify class and selectSrc its bytecode", true);
@@ -273,12 +261,8 @@ public class OverwriteClassDialog extends JDialog {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 CommonUtils.saveByGui(
-                        futureSrcTarget.getText(),
-                        namingSource.getSelectedIndex(),
-                        ".java",
-                        new TextFieldBasedStus(statusCompileCurrentBuffer),
-                        origName,
-                        origBuffer.getBytes(StandardCharsets.UTF_8)
+                        futureSrcTarget.getText(), namingSource.getSelectedIndex(), ".java",
+                        new TextFieldBasedStus(statusCompileCurrentBuffer), origName, origBuffer.getBytes(StandardCharsets.UTF_8)
                 );
             }
         });
@@ -287,12 +271,8 @@ public class OverwriteClassDialog extends JDialog {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 CommonUtils.saveByGui(
-                        outputBinaries.getText(),
-                        namingBinaryView.getSelectedIndex(),
-                        ".class",
-                        new TextFieldBasedStus(statusBinary),
-                        origName,
-                        origBin
+                        outputBinaries.getText(), namingBinaryView.getSelectedIndex(), ".class", new TextFieldBasedStus(statusBinary),
+                        origName, origBin
                 );
             }
         });
@@ -322,7 +302,6 @@ public class OverwriteClassDialog extends JDialog {
             }
         });
     }
-
 
     private static void setSelectSaveListener(JButton selectTarget, JTextField futureTarget, JComboBox<String> naming) {
         selectTarget.addActionListener(e -> {
@@ -360,9 +339,7 @@ public class OverwriteClassDialog extends JDialog {
                     if (filesToCompile.getText().trim().isEmpty()) {
                         filesToCompile.setText(jf.getSelectedFile().getAbsolutePath());
                     } else {
-                        filesToCompile.setText(
-                                filesToCompile.getText() + File.pathSeparator + jf.getSelectedFile().getAbsolutePath()
-                        );
+                        filesToCompile.setText(filesToCompile.getText() + File.pathSeparator + jf.getSelectedFile().getAbsolutePath());
                     }
                 }
             }
@@ -373,16 +350,11 @@ public class OverwriteClassDialog extends JDialog {
             public void actionPerformed(ActionEvent e) {
                 try {
                     String response = CommonUtils.uploadBytecode(
-                            className.getText(),
-                            vmManager,
-                            vmInfo,
-                            DecompilationController.fileToBytes(filePath.getText())
+                            className.getText(), vmManager, vmInfo, DecompilationController.fileToBytes(filePath.getText())
                     );
 
                     if (new TopLevelErrorCandidate(response).isError()) {
-                        JOptionPane.showMessageDialog(
-                                null, response + "\nClass overwrite failed.", "Error", JOptionPane.ERROR_MESSAGE
-                        );
+                        JOptionPane.showMessageDialog(null, response + "\nClass overwrite failed.", "Error", JOptionPane.ERROR_MESSAGE);
                     } else {
                         validation.setForeground(Color.black);
                         validation.setText("Upload looks ok");
@@ -397,20 +369,12 @@ public class OverwriteClassDialog extends JDialog {
         compileAndSave.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                IdentifiedSource currentIs = new IdentifiedSource(
-                        new ClassIdentifier(origName), origBuffer.getBytes(StandardCharsets.UTF_8)
-                );
+                IdentifiedSource currentIs =
+                        new IdentifiedSource(new ClassIdentifier(origName), origBuffer.getBytes(StandardCharsets.UTF_8));
 
                 new SavingCompilerOutputAction(
-                        statusCompileCurrentBuffer,
-                        vmInfo,
-                        vmManager,
-                        pluginManager,
-                        decompiler,
-                        haveCompiler.isEmbedded(),
-                        isVerbose,
-                        namingBinary.getSelectedIndex(),
-                        futureBinTarget.getText()
+                        statusCompileCurrentBuffer, vmInfo, vmManager, pluginManager, decompiler, haveCompiler.isEmbedded(), isVerbose,
+                        namingBinary.getSelectedIndex(), futureBinTarget.getText()
                 ).run(currentIs);
             }
         });
@@ -418,20 +382,12 @@ public class OverwriteClassDialog extends JDialog {
         compileAndUpload.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                IdentifiedSource currentIs = new IdentifiedSource(
-                        new ClassIdentifier(origName), origBuffer.getBytes(StandardCharsets.UTF_8)
-                );
+                IdentifiedSource currentIs =
+                        new IdentifiedSource(new ClassIdentifier(origName), origBuffer.getBytes(StandardCharsets.UTF_8));
 
                 new UploadingCompilerOutputAction(
-                        statusCompileCurrentBuffer,
-                        vmInfo,
-                        vmManager,
-                        pluginManager,
-                        decompiler,
-                        haveCompiler.isEmbedded(),
-                        isVerbose,
-                        namingBinary.getSelectedIndex(),
-                        futureBinTarget.getText()
+                        statusCompileCurrentBuffer, vmInfo, vmManager, pluginManager, decompiler, haveCompiler.isEmbedded(), isVerbose,
+                        namingBinary.getSelectedIndex(), futureBinTarget.getText()
                 ).run(currentIs);
             }
         });
@@ -444,15 +400,8 @@ public class OverwriteClassDialog extends JDialog {
                 try {
                     IdentifiedSource[] loaded = CommonUtils.toIdentifiedSources(recursive.isSelected(), sources);
                     new SavingCompilerOutputAction(
-                            statusExternalFiles,
-                            vmInfo,
-                            vmManager,
-                            pluginManager,
-                            decompiler,
-                            haveCompiler.isEmbedded(),
-                            isVerbose,
-                            namingExternal.getSelectedIndex(),
-                            outputExternalFilesDir.getText()
+                            statusExternalFiles, vmInfo, vmManager, pluginManager, decompiler, haveCompiler.isEmbedded(), isVerbose,
+                            namingExternal.getSelectedIndex(), outputExternalFilesDir.getText()
                     ).run(loaded);
                 } catch (Exception ex) {
                     Logger.getLogger().log(ex);
@@ -463,13 +412,8 @@ public class OverwriteClassDialog extends JDialog {
         });
     }
 
-
     private static OverwriteClassDialog.CompilationWithResult compileWithGui(
-            VmInfo vmInfo,
-            VmManager vmManager,
-            DecompilerWrapper wrapper,
-            boolean hasCompiler,
-            boolean isVerbose,
+            VmInfo vmInfo, VmManager vmManager, DecompilerWrapper wrapper, boolean hasCompiler, boolean isVerbose,
             IdentifiedSource... sources
     ) {
         ClassesProvider cp = new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager);
@@ -479,19 +423,17 @@ public class OverwriteClassDialog extends JDialog {
         compilationRunningDialog.setSize(300, 400);
         compilationRunningDialog.add(new JScrollPane(compilationLog));
 
-        OverwriteClassDialog.CompilationWithResult compiler = new OverwriteClassDialog.CompilationWithResult(rc, cp,
-                new TextLog() {
-                    @Override
-                    public void setText(String s) {
-                        compilationLog.setText(s);
-                    }
+        OverwriteClassDialog.CompilationWithResult compiler = new OverwriteClassDialog.CompilationWithResult(rc, cp, new TextLog() {
+            @Override
+            public void setText(String s) {
+                compilationLog.setText(s);
+            }
 
-                    @Override
-                    public String getText() {
-                        return compilationLog.getText();
-                    }
-                }, sources
-        );
+            @Override
+            public String getText() {
+                return compilationLog.getText();
+            }
+        }, sources);
         Thread t = new Thread(compiler);
         t.start();
         compilationRunningDialog.setLocationRelativeTo(null);
@@ -512,10 +454,8 @@ public class OverwriteClassDialog extends JDialog {
                 compilerArgs.add("-verbose");
             }
 
-            ClasspathlessCompiler.Arguments arguments = new ClasspathlessCompiler
-                    .Arguments()
-                    .useHostSystemClasses(useHostClasses)
-                    .compilerOptions(compilerArgs);
+            ClasspathlessCompiler.Arguments arguments =
+                    new ClasspathlessCompiler.Arguments().useHostSystemClasses(useHostClasses).compilerOptions(compilerArgs);
 
             rc = new io.github.mkoncek.classpathless.impl.CompilerJavac(arguments);
         }
@@ -592,10 +532,7 @@ public class OverwriteClassDialog extends JDialog {
         private Exception ex;
         private Collection<IdentifiedBytecode> result;
 
-
-        public CompilationWithResult(
-                ClasspathlessCompiler rc, ClassesProvider cp, TextLog compilationLog, IdentifiedSource... sources
-        ) {
+        public CompilationWithResult(ClasspathlessCompiler rc, ClassesProvider cp, TextLog compilationLog, IdentifiedSource... sources) {
             this.rc = rc;
             this.cp = cp;
             this.compilationLog = compilationLog;
@@ -623,8 +560,7 @@ public class OverwriteClassDialog extends JDialog {
                     //CompilerJavac is able to log throug above listener.
                     //others may not. Eg our plugins - ForeignCompilerWrapper - can log only to stderr
                     if (!(rc instanceof io.github.mkoncek.classpathless.impl.CompilerJavac)) {
-                        compilationLog.setText(
-                                compilationLog.getText() + new String(tee.getByteArray(), StandardCharsets.UTF_8) + "\n");
+                        compilationLog.setText(compilationLog.getText() + new String(tee.getByteArray(), StandardCharsets.UTF_8) + "\n");
                     }
                 }
             } catch (Exception e) {
@@ -634,8 +570,7 @@ public class OverwriteClassDialog extends JDialog {
             } finally {
                 String s = "Attempt to compile finished";
                 Logger.getLogger().log(Logger.Level.DEBUG, s + ".");
-                compilationLog.setText(
-                        compilationLog.getText() + s + ", you may close dialog\n");
+                compilationLog.setText(compilationLog.getText() + s + ", you may close dialog\n");
             }
 
         }
@@ -662,15 +597,8 @@ public class OverwriteClassDialog extends JDialog {
         protected final boolean isVerbose;
 
         CompilerOutputActionFields(
-                JTextField status,
-                VmInfo vmInfo,
-                VmManager vmManager,
-                PluginManager pm,
-                DecompilerWrapper dwi,
-                boolean haveCompiler,
-                boolean isVerbose,
-                int namingSchema,
-                String destination
+                JTextField status, VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapper dwi, boolean haveCompiler,
+                boolean isVerbose, int namingSchema, String destination
         ) {
             this.status = status;
             this.vmInfo = vmInfo;
@@ -687,23 +615,15 @@ public class OverwriteClassDialog extends JDialog {
     private static class SavingCompilerOutputAction extends CompilerOutputActionFields {
 
         SavingCompilerOutputAction(
-                JTextField status,
-                VmInfo vmInfo,
-                VmManager vmManager,
-                PluginManager pm,
-                DecompilerWrapper dwi,
-                boolean hasCompiler,
-                boolean isVerbose,
-                int namingSchema,
-                String destination
+                JTextField status, VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapper dwi, boolean hasCompiler,
+                boolean isVerbose, int namingSchema, String destination
         ) {
             super(status, vmInfo, vmManager, pm, dwi, hasCompiler, isVerbose, namingSchema, destination);
         }
 
         public void run(IdentifiedSource... sources) {
-            OverwriteClassDialog.CompilationWithResult compiler = compileWithGui(
-                    this.vmInfo, this.vmManager, decompilerWrapper, haveCompiler, isVerbose, sources
-            );
+            OverwriteClassDialog.CompilationWithResult compiler =
+                    compileWithGui(this.vmInfo, this.vmManager, decompilerWrapper, haveCompiler, isVerbose, sources);
 
             if (compiler.ex == null && compiler.getResult() == null) {
                 String s = "No output from compiler, maybe still running?";
@@ -735,11 +655,7 @@ public class OverwriteClassDialog extends JDialog {
                 int saved = 0;
                 for (IdentifiedBytecode clazz : compiler.getResult()) {
                     boolean r = CommonUtils.saveByGui(
-                            destination,
-                            namingSchema,
-                            ".class",
-                            new TextFieldBasedStus(status),
-                            clazz.getClassIdentifier().getFullName(),
+                            destination, namingSchema, ".class", new TextFieldBasedStus(status), clazz.getClassIdentifier().getFullName(),
                             clazz.getFile()
                     );
                     if (r) {
@@ -750,10 +666,7 @@ public class OverwriteClassDialog extends JDialog {
                     if (saved == compiler.getResult().size()) {
                         status.setText("Saved all " + saved + "classes to" + destination);
                     } else {
-                        status.setText("Saved only " + saved +
-                                " out of " + compiler.getResult().size() +
-                                " classes to" + destination
-                        );
+                        status.setText("Saved only " + saved + " out of " + compiler.getResult().size() + " classes to" + destination);
                     }
                 }
             }
@@ -763,22 +676,15 @@ public class OverwriteClassDialog extends JDialog {
     private static class UploadingCompilerOutputAction extends CompilerOutputActionFields {
 
         UploadingCompilerOutputAction(
-                JTextField status,
-                VmInfo vmInfo,
-                VmManager vmManager,
-                PluginManager pm,
-                DecompilerWrapper wrapper,
-                boolean hasCompiler,
-                boolean isVerbose,
-                int namingSchema,
-                String destination) {
+                JTextField status, VmInfo vmInfo, VmManager vmManager, PluginManager pm, DecompilerWrapper wrapper, boolean hasCompiler,
+                boolean isVerbose, int namingSchema, String destination
+        ) {
             super(status, vmInfo, vmManager, pm, wrapper, hasCompiler, isVerbose, namingSchema, destination);
         }
 
         public void run(IdentifiedSource... sources) {
-            OverwriteClassDialog.CompilationWithResult compiler = compileWithGui(
-                    this.vmInfo, this.vmManager, decompilerWrapper, haveCompiler, isVerbose, sources
-            );
+            OverwriteClassDialog.CompilationWithResult compiler =
+                    compileWithGui(this.vmInfo, this.vmManager, decompilerWrapper, haveCompiler, isVerbose, sources);
 
             if (compiler.ex == null && compiler.getResult() == null) {
                 String s = "No output from compiler, maybe still running?";
@@ -800,11 +706,7 @@ public class OverwriteClassDialog extends JDialog {
                 int saved = 0;
                 for (IdentifiedBytecode clazz : compiler.getResult()) {
                     boolean r = CommonUtils.uploadByGui(
-                            vmInfo,
-                            vmManager,
-                            new TextFieldBasedStus(status),
-                            clazz.getClassIdentifier().getFullName(),
-                            clazz.getFile()
+                            vmInfo, vmManager, new TextFieldBasedStus(status), clazz.getClassIdentifier().getFullName(), clazz.getFile()
                     );
 
                     if (r) {
@@ -816,9 +718,8 @@ public class OverwriteClassDialog extends JDialog {
                     if (saved == compiler.getResult().size()) {
                         status.setText("Uploaded all " + saved + " classes to " + vmInfo.getVmId());
                     } else {
-                        status.setText("Uploaded only " + saved +
-                                " out of " + compiler.getResult().size() +
-                                " classes to " + vmInfo.getVmId()
+                        status.setText(
+                                "Uploaded only " + saved + " out of " + compiler.getResult().size() + " classes to " + vmInfo.getVmId()
                         );
                     }
                 }

@@ -1,6 +1,5 @@
 package org.jrd.backend.communication;
 
-
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.ClassInfo;
 import org.jrd.backend.core.Logger;
@@ -259,11 +258,9 @@ public final class FsAgent implements JrdAgent {
         if (s.endsWith(".class")) {
             if (details) {
                 classes.add(
-                        new ClassInfo(
-                                toClass(s.substring(root.length() + 1)),
-                                detailsPath,
-                                "class order in realvm may differ")
-                                .toAgentLikeAnswer());
+                        new ClassInfo(toClass(s.substring(root.length() + 1)), detailsPath, "class order in realvm may differ")
+                                .toAgentLikeAnswer()
+                );
             } else {
                 classes.add(toClass(s.substring(root.length() + 1)));
             }

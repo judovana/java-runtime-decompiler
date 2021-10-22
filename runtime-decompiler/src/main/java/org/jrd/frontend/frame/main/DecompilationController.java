@@ -108,9 +108,7 @@ public class DecompilationController {
     // Method for opening plugin configuration window
     private void createConfigurationEditor() {
         pluginConfigurationEditorView = new PluginConfigurationEditorView(mainFrameView);
-        pluginConfigurationEditorController = new PluginConfigurationEditorController(
-                pluginConfigurationEditorView, pluginManager
-        );
+        pluginConfigurationEditorController = new PluginConfigurationEditorController(pluginConfigurationEditorView, pluginManager);
         pluginConfigurationEditorController.setPluginsConfiguredListener(actionEvent -> {
             bytecodeDecompilerView.refreshComboBox(pluginManager.getWrappers());
         });
@@ -139,12 +137,7 @@ public class DecompilationController {
 
         if (selectedVm == null) {
             Logger.getLogger().log(Logger.Level.ALL, "Attempted to remove " + vmType + " with none selected.");
-            JOptionPane.showMessageDialog(
-                    mainFrameView.getMainFrame(),
-                    "No " + vmType + " selected.",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
+            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), "No " + vmType + " selected.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -154,9 +147,8 @@ public class DecompilationController {
             confirmMessage += "\nRemoving it will also no longer keep it saved between JRD instances.";
         }
 
-        int dialogResult = JOptionPane.showConfirmDialog(
-                mainFrameView.getMainFrame(), confirmMessage, "Warning", JOptionPane.OK_CANCEL_OPTION
-        );
+        int dialogResult =
+                JOptionPane.showConfirmDialog(mainFrameView.getMainFrame(), confirmMessage, "Warning", JOptionPane.OK_CANCEL_OPTION);
         if (dialogResult == JOptionPane.CANCEL_OPTION || dialogResult < 0) {
             return;
         }
@@ -168,9 +160,7 @@ public class DecompilationController {
         if (!vmManager.removeVm(selectedVm)) {
             String removeFailMessage = "Failed to remove VM: " + selectedVm;
             Logger.getLogger().log(Logger.Level.ALL, removeFailMessage);
-            JOptionPane.showMessageDialog(
-                    mainFrameView.getMainFrame(), removeFailMessage, "Error", JOptionPane.ERROR_MESSAGE
-            );
+            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), removeFailMessage, "Error", JOptionPane.ERROR_MESSAGE);
         }
 
         if (isSavedFsVm) {
@@ -201,8 +191,7 @@ public class DecompilationController {
             }
             omessage = omessage + "\n Where running JVM can restore original classes by design, FS ones are now permanently overridden." +
                     "\nPress Cancel to restore them manually";
-            int r = JOptionPane.showConfirmDialog(parent, omessage, "Warning", JOptionPane.OK_CANCEL_OPTION
-            );
+            int r = JOptionPane.showConfirmDialog(parent, omessage, "Warning", JOptionPane.OK_CANCEL_OPTION);
             if (r != JOptionPane.OK_OPTION) {
                 return true;
             }
@@ -306,8 +295,7 @@ public class DecompilationController {
         hideLoadingDialog();
     }
 
-    public static final String CLASSES_NOPE = "Classes couldn't be loaded." +
-            "Do you have agent configured?" +
+    public static final String CLASSES_NOPE = "Classes couldn't be loaded." + "Do you have agent configured?" +
             "On JDK 9 and higher, did you run the target process with '-Djdk.attach.allowAttachSelf=true'?";
 
     private void initClass(String fqn) {
@@ -319,10 +307,7 @@ public class DecompilationController {
             loadClassNames();
         }
         if (new TopLevelErrorCandidate(response).isError()) {
-            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(),
-                    response + "\n" + CLASSES_NOPE,
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), response + "\n" + CLASSES_NOPE, "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -332,20 +317,15 @@ public class DecompilationController {
      */
     private void loadClassNames() {
         showLoadingDialog("Loading classes");
-        AgentRequestAction request = createRequest(
-                bytecodeDecompilerView.doShowClassInfo() ? RequestAction.CLASSES_WITH_INFO : RequestAction.CLASSES,
-                ""
-        );
+        AgentRequestAction request =
+                createRequest(bytecodeDecompilerView.doShowClassInfo() ? RequestAction.CLASSES_WITH_INFO : RequestAction.CLASSES, "");
         String response = submitRequest(request);
         if ("ok".equals(response)) {
             bytecodeDecompilerView.reloadClassList(vmInfo.getVmDecompilerStatus().getLoadedClasses());
         }
         hideLoadingDialog();
         if (new TopLevelErrorCandidate(response).isError()) {
-            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(),
-                    response + "\n" + CLASSES_NOPE,
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), response + "\n" + CLASSES_NOPE, "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -354,19 +334,16 @@ public class DecompilationController {
         String response = submitRequest(request);
         String decompiledClass = "";
         if (new TopLevelErrorCandidate(response).isError()) {
-            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(),
-                    response + "\nBytecode couldn't be loaded.",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    mainFrameView.getMainFrame(), response + "\nBytecode couldn't be loaded.", "Error", JOptionPane.ERROR_MESSAGE
+            );
             return;
         }
         VmDecompilerStatus vmStatus = vmInfo.getVmDecompilerStatus();
         String bytesInString = vmStatus.getLoadedClassBytes();
         byte[] bytes = Base64.getDecoder().decode(bytesInString);
         try {
-            decompiledClass = pluginManager.decompile(
-                    bytecodeDecompilerView.getSelectedDecompiler(), name, bytes, null, vmInfo, vmManager
-            );
+            decompiledClass = pluginManager.decompile(bytecodeDecompilerView.getSelectedDecompiler(), name, bytes, null, vmInfo, vmManager);
         } catch (Exception e) {
             Logger.getLogger().log(Logger.Level.ALL, e);
         }
@@ -422,8 +399,8 @@ public class DecompilationController {
             GlobalConsole.getConsole().addMessage(Level.ALL, internalCompiler.getStatus());
             OverwriteClassDialog.CompilationWithResult compiler = new OverwriteClassDialog.CompilationWithResult(
                     OverwriteClassDialog.getClasspathlessCompiler(wrapper, internalCompiler.isEmbedded(), isVerbose),
-                    new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager),
-                    GlobalConsole.getConsole(), srcs) {
+                    new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager), GlobalConsole.getConsole(), srcs
+            ) {
 
                 @Override
                 public void run() {
@@ -431,12 +408,10 @@ public class DecompilationController {
                     if (this.getResult() != null && !this.getResult().isEmpty()) {
                         for (IdentifiedBytecode bin : this.getResult()) {
                             if (upload) {
-                                GlobalConsole.getConsole().addMessage(Level.ALL,
-                                        "Uploading: " + bin.getClassIdentifier().getFullName());
+                                GlobalConsole.getConsole().addMessage(Level.ALL, "Uploading: " + bin.getClassIdentifier().getFullName());
                                 upload(bin.getClassIdentifier().getFullName(), bin.getFile());
                             } else {
-                                GlobalConsole.getConsole().addMessage(Level.ALL,
-                                        "Compiled " + bin.getClassIdentifier().getFullName());
+                                GlobalConsole.getConsole().addMessage(Level.ALL, "Compiled " + bin.getClassIdentifier().getFullName());
                             }
                         }
                     } else {
@@ -452,9 +427,7 @@ public class DecompilationController {
     class ClassOverwriter {
         private LatestPaths lastLoaded = new LatestPaths();
 
-        void overwriteClass(
-                DecompilerWrapper selectedDecompiler, String name, String buffer, byte[] binBuffer, boolean isBinary
-        ) {
+        void overwriteClass(DecompilerWrapper selectedDecompiler, String name, String buffer, byte[] binBuffer, boolean isBinary) {
             if (name == null || name.trim().isEmpty()) {
                 name = "???";
             }
@@ -555,8 +528,7 @@ public class DecompilationController {
                 break;
             case OVERWRITE:
                 try {
-                    request = AgentRequestAction.create(vmInfo, hostname, listenPort, action,
-                            commands[0], commands[1]);
+                    request = AgentRequestAction.create(vmInfo, hostname, listenPort, action, commands[0], commands[1]);
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
@@ -582,9 +554,8 @@ public class DecompilationController {
         public JPopupMenu getFor(RSyntaxTextArea text, boolean filtered) {
             if (vmInfo.getVmPid() >= 0) {
                 org.jrd.frontend.utility.AgentApiGenerator.initItems(vmInfo, vmManager, pluginManager);
-                return org.jrd.frontend.utility.AgentApiGenerator.create(
-                        text,
-                        filtered ? createFilter(text.getText(), text.getCaretPosition()) : null);
+                return org.jrd.frontend.utility.AgentApiGenerator
+                        .create(text, filtered ? createFilter(text.getText(), text.getCaretPosition()) : null);
             } else {
                 JPopupMenu p = new JPopupMenu();
                 JMenuItem infoItem = new JMenuItem("Agent API is only valid for running VMs!");

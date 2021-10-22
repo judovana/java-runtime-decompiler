@@ -57,17 +57,9 @@ public final class AgentApiGenerator {
 
         protected ClazzMethod(String model) {
             masterPattern = model;
-            haveThrows = model.trim()
-                    .replace("java.lang.", "")
-                    .replaceAll(".*\\)", "")
-                    .replaceAll(";", "")
-                    .replaceAll("\\$", ".")
-                    .replace("org.jrd.agent.api.", "")
-                    .trim();
-            original = model.trim()
-                    .replace("java.lang.", "")
-                    .replace(PUBLIC_STATIC_PREFIX, "")
-                    .replaceAll("\\).*", ")");
+            haveThrows = model.trim().replace("java.lang.", "").replaceAll(".*\\)", "").replaceAll(";", "").replaceAll("\\$", ".")
+                    .replace("org.jrd.agent.api.", "").trim();
+            original = model.trim().replace("java.lang.", "").replace(PUBLIC_STATIC_PREFIX, "").replaceAll("\\).*", ")");
             resultType = original.trim().replaceAll(" .*", "");
             returnless = original.replaceFirst(resultType, "").trim();
         }
@@ -131,19 +123,20 @@ public final class AgentApiGenerator {
         if (agentApi == null) {
             try {
                 agentApi = new ArrayList<>();
-                for (String clazz: new String[]{"org.jrd.agent.api.Variables", "org.jrd.agent.api.UnsafeVariables"}) {
+                for (String clazz : new String[]{"org.jrd.agent.api.Variables", "org.jrd.agent.api.UnsafeVariables"}) {
                     String mainClazz = Cli.obtainClass(vmInfo, clazz, vmManager).getLoadedClassBytes();
                     if (withSignatures) {
                         Collection<ClazzMethod> mainMethods = getClazzMethods(vmInfo, vmManager, pluginManager, clazz, mainClazz);
                         agentApi.add(new ClazzWithMethods(clazz, mainMethods));
                     } else {
                         Collection<String> methods = BytecodeExtractor.extractMethods(Base64.getDecoder().decode(mainClazz));
-                        agentApi.add(new ClazzWithMethods(clazz,
-                                methods.stream().map(a -> new DummyClazzMethod(a)).collect(Collectors.toList())));
+                        agentApi.add(
+                                new ClazzWithMethods(clazz, methods.stream().map(a -> new DummyClazzMethod(a)).collect(Collectors.toList()))
+                        );
                     }
                     Set<String> innerClazzes = BytecodeExtractor.extractNestedClasses(
-                            Base64.getDecoder().decode(mainClazz),
-                            new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager));
+                            Base64.getDecoder().decode(mainClazz), new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager)
+                    );
                     for (String innerClazzName : innerClazzes) {
                         if (innerClazzName.matches(".*\\$[0-9]+$")) {
                             continue;
@@ -154,8 +147,11 @@ public final class AgentApiGenerator {
                             agentApi.add(new ClazzWithMethods(innerClazzName, methods));
                         } else {
                             Collection<String> methods = BytecodeExtractor.extractMethods(Base64.getDecoder().decode(innerClazz));
-                            agentApi.add(new ClazzWithMethods(innerClazzName,
-                                    methods.stream().map(a -> new DummyClazzMethod(a)).collect(Collectors.toList())));
+                            agentApi.add(
+                                    new ClazzWithMethods(
+                                            innerClazzName, methods.stream().map(a -> new DummyClazzMethod(a)).collect(Collectors.toList())
+                                    )
+                            );
                         }
                     }
                     Collections.sort(agentApi, new Comparator<ClazzWithMethods>() {
@@ -173,17 +169,11 @@ public final class AgentApiGenerator {
     }
 
     private static Collection<ClazzMethod> getClazzMethods(
-            VmInfo vmInfo,
-            VmManager vmManager,
-            PluginManager pluginManager,
-            String innerClazzName,
-            String innerClazz) throws Exception {
+            VmInfo vmInfo, VmManager vmManager, PluginManager pluginManager, String innerClazzName, String innerClazz
+    ) throws Exception {
         DecompilerWrapper decompiler = Cli.findDecompiler(DecompilerWrapper.JAVAP_NAME, pluginManager);
-        String decompilationResult = pluginManager.decompile(
-                decompiler,
-                innerClazzName,
-                Base64.getDecoder().decode(innerClazz),
-                new String[0], vmInfo, vmManager);
+        String decompilationResult = pluginManager
+                .decompile(decompiler, innerClazzName, Base64.getDecoder().decode(innerClazz), new String[0], vmInfo, vmManager);
         Collection<ClazzMethod> methods = extractMethods(decompilationResult);
         return methods;
     }
@@ -345,7 +335,7 @@ public final class AgentApiGenerator {
 
     public static String getPlainHelp() {
         return "This API allows you to insert new fields and declare new methods (Runnables) in a running JVM.\n" +
-            "To read more, decompile classes from package 'org.jrd.agent.api' to see the full source code and logic.";
+                "To read more, decompile classes from package 'org.jrd.agent.api' to see the full source code and logic.";
     }
 
     public static String getInterestingHelp() {
