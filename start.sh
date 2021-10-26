@@ -49,9 +49,9 @@ readonly GSON=$(findLib "com/google/code/gson/gson" "gson-.*\.jar")
 readonly ASM_TREE=$(findLib "org/ow2/asm/asm-tree" "asm-tree-.*\.jar")
 readonly ASM_JAR=$(findLib "org/ow2/asm/asm" "asm-.*\.jar")
 readonly BYTEMAN=$(findLib "org/jboss/byteman/byteman-install" "byteman-install-.*\.jar")
-readonly CPLC_API=$(findLib "io/github/mkoncek/classpathless-compiler-api" "classpathless-compiler-api.*\.jar")
-readonly CPLC_UTIL=$(findLib "io/github/mkoncek/classpathless-compiler-util" "classpathless-compiler-util.*\.jar")
-readonly CPLC=$(findLib "io/github/mkoncek/classpathless-compiler" "classpathless-compiler.*\.jar")
+readonly CPLC_API=$(findLib "io/github/mkoncek/classpathless-compiler-api" "classpathless-compiler-api-.*\.jar")
+readonly CPLC_UTIL=$(findLib "io/github/mkoncek/classpathless-compiler-util" "classpathless-compiler-util-.*\.jar")
+readonly CPLC=$(findLib "io/github/mkoncek/classpathless-compiler" "classpathless-compiler-[[:digit:]].*\.jar")
 readonly JUST_BUILD_JRD=`find "$PORTABLE_JRD_HOME"/runtime-decompiler/target/runtime-decompiler-*-SNAPSHOT.jar 2> /dev/null`
 if [ -f "$JUST_BUILD_JRD" ] ; then
   readonly JRD="$JUST_BUILD_JRD"
