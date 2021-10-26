@@ -67,6 +67,6 @@ readonly PROPERTY_LOCATION="-Djrd.location=$PORTABLE_JRD_HOME"
 readonly PROPERTY_PURPOSE="-Djrd.purpose=$PURPOSE"
 
 # launch application
-"$javac_home"/bin/java -Djdk.attach.allowAttachSelf=true  "$PROPERTY_LOCATION" "$PROPERTY_PURPOSE" -cp "$TOOLS":\
-"$JRD":"$RSYNTAXTEXTAREA":"$GSON":"$BYTEMAN":"$CPLC_API:$CPLC_UTIL:$CPLC:$ASM_TREE:$ASM_JAR" \
- org.jrd.backend.data.Main "$@"
+"$javac_home"/bin/java -Djdk.attach.allowAttachSelf=true "$PROPERTY_LOCATION" "$PROPERTY_PURPOSE" \
+-cp "$TOOLS:$JRD:$RSYNTAXTEXTAREA:$GSON:$BYTEMAN:$CPLC_API:$CPLC_UTIL:$CPLC:$ASM_TREE:$ASM_JAR" \
+org.jrd.backend.data.Main "$@"
