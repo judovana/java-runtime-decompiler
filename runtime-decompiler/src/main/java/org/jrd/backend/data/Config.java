@@ -164,7 +164,7 @@ public final class Config {
     public List<String> getCompilerArgs() {
         List<String> savedCompilerArgs = (List<String>) configMap.get(COMPILER_ARGS);
 
-        if (savedCompilerArgs == null) {
+        if (savedCompilerArgs == null || savedCompilerArgs.size() == 1 && savedCompilerArgs.get(0).isBlank()) {
             return new ArrayList<>();
         }
 
@@ -172,7 +172,15 @@ public final class Config {
     }
 
     public void setCompilerArguments(String argString) {
-        configMap.put(COMPILER_ARGS, Arrays.asList(argString.split("\\s+")));
+        List<String> argList;
+
+        if (argString.isBlank()) {
+            argList = new ArrayList<>();
+        } else {
+            argList = Arrays.asList(argString.split("\\s+"));
+        }
+
+        configMap.put(COMPILER_ARGS, argList);
     }
 
     public boolean doUseJavapSignatures() {
