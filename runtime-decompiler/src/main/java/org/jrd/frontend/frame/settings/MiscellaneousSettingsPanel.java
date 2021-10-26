@@ -6,8 +6,9 @@ import javax.swing.JPanel;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionListener;
 
-public class MiscellaneousSettingsPanel extends JPanel {
+public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter {
 
     private JLabel miscSettingsLabel;
     private JCheckBox useJavapSignaturesCheckBox;
@@ -32,5 +33,10 @@ public class MiscellaneousSettingsPanel extends JPanel {
 
     public boolean shouldUseJavapSignatures() {
         return useJavapSignaturesCheckBox.isSelected();
+    }
+
+    @Override
+    public void setChangeReporter(ActionListener listener) {
+        ChangeReporter.addCheckboxListener(listener, useJavapSignaturesCheckBox);
     }
 }
