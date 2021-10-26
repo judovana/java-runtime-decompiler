@@ -7,8 +7,9 @@ import javax.swing.JTextField;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionListener;
 
-public class CompilationSettingsPanel extends JPanel {
+public class CompilationSettingsPanel extends JPanel implements ChangeReporter {
 
     private JLabel compilationSettingsLabel;
     private JCheckBox useHostSystemClassesCheckBox;
@@ -55,5 +56,11 @@ public class CompilationSettingsPanel extends JPanel {
 
     public String getCompilerArgs() {
         return compilerArgsTextField.getText();
+    }
+
+    @Override
+    public void setChangeReporter(ActionListener listener) {
+        ChangeReporter.addCheckboxListener(listener, useHostSystemClassesCheckBox);
+        ChangeReporter.addTextChangeListener(listener, compilerArgsTextField);
     }
 }

@@ -8,12 +8,13 @@ import javax.swing.JTextField;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionListener;
 import java.io.File;
 import org.jrd.backend.data.Directories;
 import org.jrd.frontend.frame.main.BytecodeDecompilerView;
 import org.jrd.frontend.frame.plugins.FileSelectorArrayRow;
 
-public class AgentSettingsPanel extends JPanel {
+public class AgentSettingsPanel extends JPanel implements ChangeReporter {
 
     private JTextField agentPathTextField;
     private JLabel agentPathLabel;
@@ -69,5 +70,10 @@ public class AgentSettingsPanel extends JPanel {
 
     public String getAgentPath() {
         return agentPathTextField.getText();
+    }
+
+    @Override
+    public void setChangeReporter(ActionListener listener) {
+        ChangeReporter.addTextChangeListener(listener, agentPathTextField);
     }
 }

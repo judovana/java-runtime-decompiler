@@ -28,7 +28,7 @@ import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.ArchiveManagerOptions;
 import org.jrd.frontend.frame.main.BytecodeDecompilerView;
 
-public class NestedJarsSettingsPanel extends JPanel {
+public class NestedJarsSettingsPanel extends JPanel implements ChangeReporter {
     private JCheckBox useDefaults;
     private JTextField newExtensionsTextField;
     private JLabel nestedJars;
@@ -159,5 +159,11 @@ public class NestedJarsSettingsPanel extends JPanel {
 
     public boolean shouldUseDefaultExtensions() {
         return useDefaults.isSelected();
+    }
+
+    @Override
+    public void setChangeReporter(ActionListener listener) {
+        ChangeReporter.addCheckboxListener(listener, useDefaults);
+        ChangeReporter.addJListListener(listener, currentExtensionsList);
     }
 }

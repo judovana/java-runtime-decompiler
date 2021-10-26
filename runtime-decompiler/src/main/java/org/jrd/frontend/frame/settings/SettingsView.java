@@ -8,24 +8,29 @@ import org.jrd.frontend.frame.main.MainFrameView;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SettingsView extends JDialog {
 
-    private JPanel mainPanel;
-    private AgentSettingsPanel agentSettingsPanel;
-    private CompilationSettingsPanel compilationSettingsPanel;
-    private NestedJarsSettingsPanel nestedJarsSettingsPanel;
-    private MiscellaneousSettingsPanel miscSettingsPanel;
-    private JPanel okCancelPanel;
+    private final JPanel mainPanel;
+    private final AgentSettingsPanel agentSettingsPanel;
+    private final CompilationSettingsPanel compilationSettingsPanel;
+    private final NestedJarsSettingsPanel nestedJarsSettingsPanel;
+    private final MiscellaneousSettingsPanel miscSettingsPanel;
+    private final JPanel okCancelPanel;
+
+    private boolean isChanged = false;
 
     private final Config config = Config.getConfig();
 
@@ -38,8 +43,27 @@ public class SettingsView extends JDialog {
         okButton.setPreferredSize(new Dimension(90, 30));
 
         JButton cancelButton = new JButton("Cancel");
-        cancelButton.addActionListener(actionEvent -> dispose());
         cancelButton.setPreferredSize(new Dimension(90, 30));
+        cancelButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                if (isChanged) {
+                    int confirmationResult = JOptionPane.showConfirmDialog(
+                        SettingsView.this,
+                        "You have unsaved changes. Do you wish to discard them and leave?",
+                        "Unsaved settings",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE
+                    );
+
+                    if (confirmationResult == JOptionPane.NO_OPTION) {
+                        return;
+                    }
+                }
+
+                SettingsView.this.dispose();
+            }
+        });
 
         okCancelPanel = new JPanel(new GridBagLayout());
         okCancelPanel.setPreferredSize(new Dimension(0, 60));
@@ -65,6 +89,12 @@ public class SettingsView extends JDialog {
         compilationSettingsPanel = new CompilationSettingsPanel(config.doUseHostSystemClasses(), config.getCompilerArgsString());
         nestedJarsSettingsPanel = new NestedJarsSettingsPanel();
         miscSettingsPanel = new MiscellaneousSettingsPanel(config.doUseJavapSignatures());
+
+        for (ChangeReporter panel : new ChangeReporter[]{
+                agentSettingsPanel, compilationSettingsPanel, nestedJarsSettingsPanel, miscSettingsPanel
+        }) {
+            panel.setChangeReporter(e -> isChanged = true);
+        }
 
         mainPanel = new JPanel(new GridBagLayout());
         mainPanel.setBorder(new EmptyBorder(0, 15, 0, 15));
