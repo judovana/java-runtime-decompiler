@@ -31,7 +31,7 @@ public class ArchiveManager {
     private static final String TMP_DIR = System.getProperty("java.io.tmpdir");
     private static final String FILE_SEPARATOR = System.getProperty("file.separator");
     private ArchivePathManager pathManager = new ArchivePathManager();
-    final String jrdFolder = TMP_DIR + FILE_SEPARATOR + "jrd-" + UUID.randomUUID().toString() + FILE_SEPARATOR;
+    final String jrdFolder = TMP_DIR + FILE_SEPARATOR + "jrd-" + UUID.randomUUID() + FILE_SEPARATOR;
     private int currentD = 0;
 
     /**
