@@ -2,6 +2,7 @@ package org.jrd.agent;
 
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.regex.Pattern;
 
@@ -119,13 +120,21 @@ public class InstrumentationProvider {
     }
 
     public void getOverrides(BlockingQueue<String> queue) throws InterruptedException {
-        for (String override : transformer.getOverrides()) {
+        for (String override : transformer.getOverriddenFqns()) {
             queue.put(override);
         }
         queue.put("---END---");
     }
 
     public int cleanOverrides(String pattern) {
-        return transformer.cleanOverrides(Pattern.compile(pattern));
+        List<String> removed = transformer.cleanOverrides(Pattern.compile(pattern));
+
+        try {
+            instrumentation.retransformClasses(removed.stream().map(this::findClass).toArray(Class[]::new));
+        } catch (RuntimeException | UnmodifiableClassException e) {
+            AgentLogger.getLogger().log(e);
+        }
+
+        return removed.size();
     }
 }
