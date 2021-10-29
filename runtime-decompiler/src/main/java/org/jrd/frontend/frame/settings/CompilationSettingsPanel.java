@@ -19,7 +19,7 @@ public class CompilationSettingsPanel extends JPanel implements ChangeReporter {
     public CompilationSettingsPanel(boolean initialUseHostSystemClasses, String initialCompilerArgs) {
         compilationSettingsLabel = new JLabel("Compilation settings");
         useHostSystemClassesCheckBox =
-            new JCheckBox("Use host system classes during compilation phase of class overwrite", initialUseHostSystemClasses);
+                new JCheckBox("Use host system classes during compilation phase of class overwrite", initialUseHostSystemClasses);
         compilerArgsLabel = new JLabel("Compiler arguments");
         compilerArgsTextField = new JTextField(initialCompilerArgs);
         compilerArgsTextField.setToolTipText("Arguments that get passed to the compiler, eg. '-source 5 -target 8 -release 9 -Xlint'.");

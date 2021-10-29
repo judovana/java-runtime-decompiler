@@ -24,8 +24,8 @@ public class AgentSettingsPanel extends JPanel implements ChangeReporter {
     AgentSettingsPanel(String initialAgentPath) {
         agentPathTextField = new JTextField();
         agentPathTextField.setToolTipText(
-            BytecodeDecompilerView.styleTooltip() + "Select a path to the Decompiler Agent.<br />" +
-                FileSelectorArrayRow.getTextFieldToolTip()
+                BytecodeDecompilerView.styleTooltip() + "Select a path to the Decompiler Agent.<br />" +
+                        FileSelectorArrayRow.getTextFieldToolTip()
         );
         agentPathTextField.setText(initialAgentPath);
 

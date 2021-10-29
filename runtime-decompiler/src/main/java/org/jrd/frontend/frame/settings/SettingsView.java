@@ -49,11 +49,8 @@ public class SettingsView extends JDialog {
             public void actionPerformed(ActionEvent actionEvent) {
                 if (isChanged) {
                     int confirmationResult = JOptionPane.showConfirmDialog(
-                        SettingsView.this,
-                        "You have unsaved changes. Do you wish to discard them and leave?",
-                        "Unsaved settings",
-                        JOptionPane.YES_NO_OPTION,
-                        JOptionPane.WARNING_MESSAGE
+                            SettingsView.this, "You have unsaved changes. Do you wish to discard them and leave?", "Unsaved settings",
+                            JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE
                     );
 
                     if (confirmationResult == JOptionPane.NO_OPTION) {
@@ -90,9 +87,10 @@ public class SettingsView extends JDialog {
         nestedJarsSettingsPanel = new NestedJarsSettingsPanel();
         miscSettingsPanel = new MiscellaneousSettingsPanel(config.doUseJavapSignatures());
 
-        for (ChangeReporter panel : new ChangeReporter[]{
-                agentSettingsPanel, compilationSettingsPanel, nestedJarsSettingsPanel, miscSettingsPanel
-        }) {
+        for (
+            ChangeReporter panel : new ChangeReporter[]{agentSettingsPanel, compilationSettingsPanel, nestedJarsSettingsPanel,
+                    miscSettingsPanel}
+        ) {
             panel.setChangeReporter(e -> isChanged = true);
         }
 
