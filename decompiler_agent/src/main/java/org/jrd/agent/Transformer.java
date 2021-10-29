@@ -55,7 +55,7 @@ public class Transformer implements ClassFileTransformer {
         overrides.put(name, body);
     }
 
-    public List<String> getOverrides() {
+    public List<String> getOverriddenFqns() {
         return Collections.unmodifiableList(new ArrayList<>(overrides.keySet()));
     }
 
@@ -84,14 +84,15 @@ public class Transformer implements ClassFileTransformer {
         overrides.remove(clazz);
     }
 
-    public synchronized int cleanOverrides(Pattern pattern) {
-        int removed = 0;
-        List<String> keys = getOverrides();
-        for (String key : keys) {
-            if (pattern.matcher(key).matches()) {
-                removeOverride(key);
-                removed++;
-                AgentLogger.getLogger().log("Removed " + key + " override");
+    public synchronized List<String> cleanOverrides(Pattern cleanPattern) {
+        List<String> fqns = getOverriddenFqns();
+        List<String> removed = new ArrayList<>();
+
+        for (String fqn : fqns) {
+            if (cleanPattern.matcher(fqn).matches()) {
+                removeOverride(fqn);
+                removed.add(fqn);
+                AgentLogger.getLogger().log("Removed " + fqn + " override");
             }
         }
         return removed;
