@@ -83,6 +83,8 @@ call :findLib "com\google\code\gson\gson","*gson-*.jar",GSON
 call :findLib "org\jboss\byteman\byteman-install","*byteman-install-*.jar",BYTEMAN
 call :findLib "java-runtime-decompiler\runtime-decompiler","*runtime-decompiler-*.jar",JRD
 call :findLib "io\github\mkoncek\classpathless-compiler","*classpathless-compiler-*.jar",CPLC
+call :findLib "io\github\mkoncek\classpathless-compiler-api","*classpathless-compiler-api-*.jar",CPLC_API
+call :findLib "io\github\mkoncek\classpathless-compiler-util","*classpathless-compiler-util-*.jar",CPLC_UTIL
 call :findLib "org\ow2\asm\asm-tree","asm-tree-*.jar",ASM_TREE
 call :findLib "org\ow2\asm\asm","asm-*.jar",ASM_JAR
 
@@ -98,7 +100,7 @@ rem Create environment variable pointing to script's location
 set "PROPERTY_PURPOSE=-Djrd.purpose=%PURPOSE%"
 
 rem Concatenate classpath and launch the app
-set CLASSPATH=%TOOLS%;%RSYNTAXTEXTAREA%;%GSON%;%BYTEMAN%;%JRD%;%CPLC%;%ASM_TREE%;%ASM_JAR%
+set CLASSPATH=%TOOLS%;%RSYNTAXTEXTAREA%;%GSON%;%BYTEMAN%;%JRD%;%CPLC%;%CPLC_API%;%CPLC_UTIL%;%ASM_TREE%;%ASM_JAR%
 "%JDK_LOCATION%\bin\java.exe" -Djdk.attach.allowAttachSelf=true %PROPERTY_LOCATION% %PROPERTY_PURPOSE% -cp %CLASSPATH% org.jrd.backend.data.Main %*
 
 if "%PORTABLE_JRD_HOME:~0,2%"=="//" (
