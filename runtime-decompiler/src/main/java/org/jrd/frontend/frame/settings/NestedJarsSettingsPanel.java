@@ -99,7 +99,7 @@ public class NestedJarsSettingsPanel extends JPanel implements ChangeReporter {
         };
         useDefaults.addActionListener(a);
         useDefaults.setToolTipText(
-            BytecodeDecompilerView.styleTooltip() + "Default extensions are: " + ArchiveManagerOptions.getExtensionString(", ")
+                BytecodeDecompilerView.styleTooltip() + "Default extensions are: " + ArchiveManagerOptions.getExtensionString(", ")
         );
 
         // Setup
@@ -146,9 +146,8 @@ public class NestedJarsSettingsPanel extends JPanel implements ChangeReporter {
     }
 
     void confirmExtensions() {
-        uniqueListModel.addAll(
-            Arrays.stream(newExtensionsTextField.getText().split("\\s")).filter(s -> !s.isBlank()).collect(Collectors.toSet())
-        );
+        uniqueListModel
+                .addAll(Arrays.stream(newExtensionsTextField.getText().split("\\s")).filter(s -> !s.isBlank()).collect(Collectors.toSet()));
 
         newExtensionsTextField.setText("");
     }
