@@ -46,7 +46,7 @@ public class RuntimeCompilerConnector {
                     Logger.getLogger().log(Logger.Level.DEBUG, ex);
                     Logger.getLogger().log(Logger.Level.DEBUG, "Attempting to init the class and load again");
                     try {
-                        Cli.initClass(vmInfo, vmManager, clazz.getFullName());
+                        Cli.initClass(vmInfo, vmManager, clazz.getFullName(), System.err);
                     } catch (RuntimeException e) {
                         Logger.getLogger().log(Logger.Level.DEBUG, "Init of class '" + clazz.getFullName() + "' failed, not obtaining.");
                         continue;

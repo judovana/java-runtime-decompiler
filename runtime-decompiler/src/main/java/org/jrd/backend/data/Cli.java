@@ -304,15 +304,15 @@ public class Cli {
         }
         String fqn = filteredArgs.get(2);
         VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
-        initClass(vmInfo, vmManager, fqn);
+        initClass(vmInfo, vmManager, fqn, System.out);
     }
 
-    public static void initClass(VmInfo vmInfo, VmManager vmManager, String fqn) {
+    public static void initClass(VmInfo vmInfo, VmManager vmManager, String fqn, PrintStream outputMessageStream) {
         AgentRequestAction request = DecompilationController.createRequest(vmInfo, AgentRequestAction.RequestAction.INIT_CLASS, fqn);
         String response = DecompilationController.submitRequest(vmManager, request);
 
         if ("ok".equals(response)) {
-            System.out.println("Initialization of class '" + fqn + "' successful.");
+            outputMessageStream.println("Initialization of class '" + fqn + "' successful.");
         } else {
             throw new RuntimeException(DecompilationController.CLASSES_NOPE);
         }
