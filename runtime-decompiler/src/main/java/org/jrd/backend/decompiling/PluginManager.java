@@ -159,7 +159,7 @@ public class PluginManager {
                         .extractNestedClasses(bytecode, new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager));
                 //this loop may be redundant, as JrdClassesProvider init all what fails to load (and try to laod again), but...
                 for (String inner : inners) {
-                    Cli.initClass(vmInfo, vmManager, inner);
+                    Cli.initClass(vmInfo, vmManager, inner, System.err);
                 }
                 String[] allClasses = Cli.obtainClasses(vmInfo, vmManager);
                 Map<String, byte[]> innerClasses = new HashMap<>();
