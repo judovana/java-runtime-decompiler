@@ -211,6 +211,7 @@ public final class Config {
         getOrCreateSavedFsVms().remove(vmInfo.base64Serialize());
     }
 
+    @SuppressWarnings("unchecked") // gson.fromJson returns a Map<String, Object> when called with configMap.getClass()
     private void loadConfigFile() throws IOException {
         configMap = new HashMap<>();
         File confFile = new File(CONFIG_PATH);

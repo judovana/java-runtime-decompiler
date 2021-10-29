@@ -132,11 +132,11 @@ public class AgentActionWorker extends Thread {
         }
     }
 
-    private interface ListInjector {
-        void inject(BlockingQueue target) throws InterruptedException;
+    private interface ListInjector<T> {
+        void inject(BlockingQueue<T> target) throws InterruptedException;
     }
 
-    private void getList(BufferedWriter out, String id, ListInjector injector) throws IOException {
+    private void getList(BufferedWriter out, String id, ListInjector<String> injector) throws IOException {
         out.write(id);
         out.newLine();
         BlockingQueue<String> classNames = new LinkedBlockingQueue<String>(1024);
@@ -163,18 +163,18 @@ public class AgentActionWorker extends Thread {
     }
 
     private void getAllLoadedClasses(BufferedWriter out, boolean doGetInfo) throws IOException {
-        getList(out, "CLASSES", new ListInjector() {
+        getList(out, "CLASSES", new ListInjector<String>() {
             @Override
-            public void inject(BlockingQueue target) throws InterruptedException {
+            public void inject(BlockingQueue<String> target) throws InterruptedException {
                 provider.getClasses(target, abort, doGetInfo);
             }
         });
     }
 
     private void getAllOverridesClasses(BufferedWriter out) throws IOException {
-        getList(out, "OVERRIDES", new ListInjector() {
+        getList(out, "OVERRIDES", new ListInjector<String>() {
             @Override
-            public void inject(BlockingQueue target) throws InterruptedException {
+            public void inject(BlockingQueue<String> target) throws InterruptedException {
                 provider.getOverrides(target);
             }
         });

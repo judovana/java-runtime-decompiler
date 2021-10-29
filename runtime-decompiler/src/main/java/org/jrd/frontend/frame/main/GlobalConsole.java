@@ -1,13 +1,5 @@
 package org.jrd.frontend.frame.main;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import io.github.mkoncek.classpathless.api.MessagesListener;
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
-import org.jrd.backend.core.Logger;
-import org.jrd.frontend.frame.overwrite.OverwriteClassDialog;
-import org.jrd.frontend.utility.ScreenFinder;
-
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -23,6 +15,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import io.github.mkoncek.classpathless.api.MessagesListener;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.jrd.backend.core.Logger;
+import org.jrd.frontend.frame.overwrite.OverwriteClassDialog;
+import org.jrd.frontend.utility.ScreenFinder;
 
 public class GlobalConsole implements MessagesListener, OverwriteClassDialog.TextLog {
 
@@ -89,7 +88,7 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
     }
 
     private String[] getAllLexers() throws IllegalAccessException {
-        List<String> r = new ArrayList();
+        List<String> r = new ArrayList<>();
         Field[] fields = SyntaxConstants.class.getDeclaredFields();
         for (Field field : fields) {
             if (field.getType().equals(String.class)) {
