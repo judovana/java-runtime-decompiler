@@ -15,10 +15,10 @@ import javax.swing.event.TableModelListener;
 import java.awt.Component;
 import java.awt.Graphics;
 
-public class HexEditorRowHeader extends JList implements TableModelListener {
+public class HexEditorRowHeader extends JList<String> implements TableModelListener {
     private static final long serialVersionUID = 1L;
-    private HexTable table;
-    private RowHeaderListModel model;
+    private final HexTable table;
+    private final RowHeaderListModel model;
     private static final Border CELL_BORDER;
 
     public HexEditorRowHeader(final HexTable table) {
@@ -91,11 +91,11 @@ public class HexEditorRowHeader extends JList implements TableModelListener {
         }
     }
 
-    private static class RowHeaderListModel extends AbstractListModel {
+    private static class RowHeaderListModel extends AbstractListModel<String> {
         private static final long serialVersionUID = 1L;
         private int size;
 
-        public Object getElementAt(final int index) {
+        public String getElementAt(final int index) {
             return "0x" + Integer.toHexString(index * 16);
         }
 

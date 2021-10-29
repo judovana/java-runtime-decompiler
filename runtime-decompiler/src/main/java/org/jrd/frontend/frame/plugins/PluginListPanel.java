@@ -6,10 +6,11 @@ import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import org.jrd.backend.decompiling.DecompilerWrapper;
 
 public class PluginListPanel extends JPanel {
 
-    private final JList wrapperJList;
+    private final JList<DecompilerWrapper> wrapperJList;
     private final JButton addWrapperButton;
 
     PluginListPanel() {
@@ -26,7 +27,7 @@ public class PluginListPanel extends JPanel {
         this.add(addWrapperButton, BorderLayout.NORTH);
     }
 
-    public JList getWrapperJList() {
+    public JList<DecompilerWrapper> getWrapperJList() {
         return wrapperJList;
     }
 
