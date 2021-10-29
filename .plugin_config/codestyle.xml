@@ -10,7 +10,7 @@
 
     <!-- Allow supressions per file -->
     <module name="SuppressionFilter">
-        <property name="file" value=".plugin_config/codestyle_suppressions.xml"/>
+        <property name="file" value="./target/checkstyle-suppressions.xml"/>
         <property name="optional" value="false"/>
     </module>
 
@@ -57,7 +57,7 @@
 
         <!-- Allow supressions per file -->
         <module name="SuppressionXpathFilter">
-            <property name="file" value=".plugin_config/codestyle_suppressions.xml"/> <!-- from project root -->
+            <property name="file" value="./target/checkstyle-suppressions.xml"/>
             <property name="optional" value="false"/>
         </module>
 
