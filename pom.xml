@@ -16,7 +16,8 @@
     <version>5.2-SNAPSHOT</version>
 
     <properties>
-        <plugin.configuration.directory>./.plugin_config</plugin.configuration.directory>
+        <jrd.root.directory>${project.basedir}</jrd.root.directory>
+        <plugin.configuration.directory>${jrd.root.directory}/.plugin_config</plugin.configuration.directory>
     </properties>
 
     <build>
@@ -66,6 +67,8 @@
                         <configuration>
                             <encoding>UTF-8</encoding>
                             <configLocation>${plugin.configuration.directory}/codestyle.xml</configLocation>
+                            <!-- ${project.build.directory}/checkstyle-suppressions.xml -->
+                            <suppressionsLocation>${plugin.configuration.directory}/codestyle_suppressions.xml</suppressionsLocation>
                             <failOnViolation>true</failOnViolation>
                             <violationSeverity>warning</violationSeverity>
                             <includeTestSourceDirectory>true</includeTestSourceDirectory>

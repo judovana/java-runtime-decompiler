@@ -13,7 +13,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <licenseDir>${basedir}/../</licenseDir>
+        <jrd.root.directory>${project.parent.basedir}</jrd.root.directory>
         <jrd.client.main.class>org.jrd.backend.data.Main</jrd.client.main.class>
         <jrd.jdk.version>11</jrd.jdk.version>
         <jrd.jdk.arg1>--add-modules</jrd.jdk.arg1>
@@ -120,7 +120,7 @@
                 </includes>
             </resource>
             <resource>
-                <directory>${licenseDir}</directory>
+                <directory>${jrd.root.directory}</directory>
                 <includes>
                     <include>LICENSE</include>
                 </includes>

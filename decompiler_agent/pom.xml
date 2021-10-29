@@ -14,13 +14,14 @@
     <name>Decompiler Agent</name>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <licenseDir>${basedir}/../</licenseDir>
+        <jrd.root.directory>${project.parent.basedir}</jrd.root.directory>
         <jrd.jdk.version>11</jrd.jdk.version>
         <jrd.jdk.arg1>--add-modules</jrd.jdk.arg1>
         <jrd.jdk.arg2>jdk.jdeps,jdk.attach,jdk.hotspot.agent</jrd.jdk.arg2>
         <jrd.jdk.arg3>--add-exports</jrd.jdk.arg3>
         <jrd.jdk.arg4>jdk.jdeps/com.sun.tools.javap=ALL-UNNAMED</jrd.jdk.arg4>
     </properties>
+
     <build>
         <plugins>
             <plugin>
@@ -56,7 +57,7 @@
         </plugins>
         <resources>
         <resource>
-            <directory>${licenseDir}</directory>
+            <directory>${jrd.root.directory}</directory>
             <includes>
                 <include>LICENSE</include>
             </includes>
