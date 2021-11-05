@@ -23,13 +23,15 @@ public class KnownAgents {
 
     public static void markDead(String hostname, int listenPort, String vmId, int vmPid) {
         for(KnownAgent agent: agents) {
-            if (agent.agent.matches(hostname, listenPort, vmId, vmPid)){
+            if (agent.agent.matches(hostname, listenPort, vmId, vmPid) && agent.live){
                 agent.live = false;
+                System.err.println("killing " + agent.agent.toString());
             }
         }
     }
 
     public static void injected(InstallDecompilerAgentImpl install) {
         agents.add(new KnownAgent(install));
+        System.err.println("storing " + install.toString());
     }
 }
