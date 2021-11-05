@@ -238,6 +238,7 @@ public class DecompilerRequestReceiver {
         } finally {
             vmManager.getVmInfoByID(vmId).removeVmDecompilerStatus();
         }
+        KnownAgents.markDead(hostname, listenPort, vmId, vmPid);
         return OK_RESPONSE;
     }
 
