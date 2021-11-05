@@ -26,7 +26,7 @@ public class JListPopupMenu<T> extends JPopupMenu {
         add(createCopyItem("Copy selected", parentJList.getSelectedValuesList()));
         add(createCopyItem("Copy all", allItems(parentJList.getModel())));
 
-        JMenuItem helpItem = new JMenuItem("TIP: Drag with RMB to multi-select");
+        JMenuItem helpItem = new JMenuItem("In class-list, drag with right-mouse-button to multi-select");
         helpItem.setEnabled(false);
         addSeparator();
         add(helpItem);
