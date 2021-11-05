@@ -5,6 +5,7 @@ import com.sun.tools.attach.AgentLoadException;
 import com.sun.tools.attach.AttachNotSupportedException;
 import com.sun.tools.attach.VirtualMachine;
 import com.sun.tools.attach.VirtualMachineDescriptor;
+import org.jrd.backend.core.KnownAgents;
 import org.jrd.backend.data.Config;
 
 import java.io.IOException;
@@ -43,6 +44,7 @@ public final class InstallDecompilerAgentImpl {
         install.locateAgent();
         install.attach();
         install.injectAgent();
+        KnownAgents.injected(install);
     }
 
     private String agentJar;
@@ -160,5 +162,9 @@ public final class InstallDecompilerAgentImpl {
 
     private void locateAgent() throws IOException {
         agentJar = config.getAgentExpandedPath();
+    }
+
+    public boolean matches(String hostname, int listenPort, String vmId, int vmPid) {
+        return true;
     }
 }
