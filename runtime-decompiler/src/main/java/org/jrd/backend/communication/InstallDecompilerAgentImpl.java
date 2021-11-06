@@ -167,4 +167,19 @@ public final class InstallDecompilerAgentImpl {
     public boolean matches(String hostname, int listenPort, String vmId, int vmPid) {
         return this.host.equals(hostname) && this.port == listenPort && this.id.equals(vmId) && Integer.valueOf(this.id) == vmPid;
     }
+
+    @Override
+    public String toString() {
+        return super.toString()+" {" +
+                "  id='" + id + '\'' +
+                ", port=" + port +
+                ", host='" + host + '\'' +
+                ", addToBoot=" + addToBoot +
+                ", setPolicy=" + setPolicy +
+                ", props='" + props + '\'' +
+                ", vm=" + vm +
+                ", config=" + config +
+                ", agentJar='" + agentJar + '\'' +
+                '}';
+    }
 }
