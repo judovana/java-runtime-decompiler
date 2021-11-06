@@ -170,16 +170,8 @@ public final class InstallDecompilerAgentImpl {
 
     @Override
     public String toString() {
-        return super.toString()+" {" +
-                "  id='" + id + '\'' +
-                ", port=" + port +
-                ", host='" + host + '\'' +
-                ", addToBoot=" + addToBoot +
-                ", setPolicy=" + setPolicy +
-                ", props='" + props + '\'' +
-                ", vm=" + vm +
-                ", config=" + config +
-                ", agentJar='" + agentJar + '\'' +
-                '}';
+        return super.toString() + " {" + "  id='" + id + '\'' + ", port=" + port + ", host='" + host + '\'' + ", addToBoot=" + addToBoot +
+                ", setPolicy=" + setPolicy + ", props='" + props + '\'' + ", vm=" + vm + ", config=" + config + ", agentJar='" + agentJar +
+                '\'' + '}';
     }
 }
