@@ -231,14 +231,16 @@ public class DecompilerRequestReceiver {
     }
 
     private String getHaltAction(String hostname, int listenPort, String vmId, int vmPid) {
-        try {
-            getResponse(hostname, listenPort, vmId, vmPid, "HALT");
-        } catch (Exception e) {
-            Logger.getLogger().log(Logger.Level.ALL, new RuntimeException("Exception when calling halt action", e));
-        } finally {
-            vmManager.getVmInfoByID(vmId).removeVmDecompilerStatus();
+        if (!KnownAgents.isSessionPermanent(hostname, listenPort, vmId, vmPid)) {
+            try {
+                getResponse(hostname, listenPort, vmId, vmPid, "HALT");
+            } catch (Exception e) {
+                Logger.getLogger().log(Logger.Level.ALL, new RuntimeException("Exception when calling halt action", e));
+            } finally {
+                vmManager.getVmInfoByID(vmId).removeVmDecompilerStatus();
+            }
+            KnownAgents.markDead(hostname, listenPort, vmId, vmPid);
         }
-        KnownAgents.markDead(hostname, listenPort, vmId, vmPid);
         return OK_RESPONSE;
     }
 

@@ -8,10 +8,17 @@ import java.util.List;
 
 public class KnownAgents {
 
+    private enum AgentLiveliness {
+        ONE_SHOT,
+        SESSION,
+        PERNAMENT
+    }
+
     private static class KnownAgent {
 
         private final InstallDecompilerAgentImpl agent;
         private boolean live;
+        private final AgentLiveliness ttl = AgentLiveliness.SESSION; //all agents are now sessioned
 
         public KnownAgent(InstallDecompilerAgentImpl install) {
             this.agent = install;
@@ -33,5 +40,15 @@ public class KnownAgents {
     public static void injected(InstallDecompilerAgentImpl install) {
         agents.add(new KnownAgent(install));
         System.err.println("storing " + install.toString());
+    }
+
+    public static boolean isSessionPermanent(String hostname, int listenPort, String vmId, int vmPid) {
+        for (KnownAgent agent : agents) {
+            if (agent.agent.matches(hostname, listenPort, vmId, vmPid) && agent.live && agent.ttl == AgentLiveliness.SESSION) {
+                System.err.println("session agent " + agent.agent.toString());
+                return true;
+            }
+        }
+        return false;
     }
 }
