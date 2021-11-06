@@ -17,6 +17,9 @@ public final class Main {
     private static String hostname;
     private static Integer port;
 
+    public static boolean firstTime = true;
+    public final static String JRD_AGENT_LOADED = "org.jrd.agent.loaded";
+
     private Main() {
     }
 
@@ -25,9 +28,18 @@ public final class Main {
      * host name from agentArgs and starts the listener thread.
      *
      * @param agentArgs arguments with parameters for listener
-     * @param inst instance of instrumentation of given VM
+     * @param inst      instance of instrumentation of given VM
      */
     public static void premain(String agentArgs, Instrumentation inst) {
+        // guard against the agent being loaded twice
+        synchronized (Main.class) {
+            if (firstTime) {
+                firstTime = false;
+                System.setProperty(JRD_AGENT_LOADED, Boolean.TRUE.toString());
+            } else {
+                throw new RuntimeException("Main : attempting to load JRD agent more than once");
+            }
+        }
         Variables.init();
         UnsafeVariables.init();
         Transformer transformer = new Transformer();
