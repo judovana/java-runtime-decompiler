@@ -7,8 +7,10 @@ import io.github.mkoncek.classpathless.api.ClasspathlessCompiler;
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
+import org.jrd.backend.core.AgentAttachManager;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.ClassInfo;
+import org.jrd.backend.core.KnownAgents;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.decompiling.DecompilerWrapper;
@@ -55,6 +57,8 @@ public class Cli {
     protected static final String COMPILE = "-compile";
     protected static final String OVERWRITE = "-overwrite";
     protected static final String INIT = "-init";
+    protected static final String ATTACH = "-attach";
+    protected static final String DETTACH = "-dettach";
     protected static final String API = "-api";
     protected static final String VERSION = "-version";
     protected static final String HELP = "-help";
@@ -217,6 +221,11 @@ public class Cli {
             case INIT:
                 init();
                 break;
+            case ATTACH:
+                attach();
+                break;
+            case DETTACH:
+                dettach();
             case API:
                 api();
                 break;
@@ -317,6 +326,53 @@ public class Cli {
         } else {
             throw new RuntimeException(DecompilationController.CLASSES_NOPE);
         }
+    }
+
+    private void attach() throws Exception {
+        if (filteredArgs.size() < 2) {
+            throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.ATTACH_FORMAT + "'.");
+        }
+        if (guessType(filteredArgs.get(1)) != VmInfo.Type.LOCAL) {
+            throw new IllegalArgumentException("Sorry, first argument must be running jvm PID, nothing else.");
+        }
+        VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
+        String futureType = null;
+        if (filteredArgs.size() > 2) {
+            futureType = filteredArgs.get(2);
+        }
+        KnownAgents.AgentLiveliness liveliness =
+                futureType == null ? KnownAgents.AgentLiveliness.SESSION : KnownAgents.AgentLiveliness.fromString(futureType);
+        VmDecompilerStatus status =
+                new AgentAttachManager(vmManager).attachAgentToVm(vmInfo.getVmId(), vmInfo.getVmPid(), Optional.empty()/*todo*/);
+        System.out.println("Attached. Listening on: " + status.getListenPort());
+        if (liveliness == KnownAgents.AgentLiveliness.SESSION) {
+            System.out.println(" kill this process (" + ProcessHandle.current().pid() + ") to dettach agent");
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                @Override
+                public void run() {
+                   dettach(status.getListenPort());
+                }
+            });
+            while (true) {
+                Thread.sleep(1000);
+            }
+        }
+        if (liveliness == KnownAgents.AgentLiveliness.ONE_SHOT) {
+            System.out.println("agent attached, and is detaching");
+            //TODO detach()
+        } else {
+            System.out.println("agent agent is permanently attached to " + vmInfo.getVmPid());
+        }
+    }
+
+    private void dettach() {
+        throw new RuntimeException("not yet implemented");
+        //detach(port)
+    }
+    private void dettach(int port) {
+        //FIXME! No operation in cli, is detaching....
+        //note  that decompilationController().haltAgent is most likely last private method here
+        System.out.println("Detaching is todo");
     }
 
     private final class CompileArguments {
@@ -818,7 +874,6 @@ public class Cli {
         try {
             Integer.valueOf(input);
             Logger.getLogger().log("Interpreting '" + input + "' as PID. To use numbers as filenames, try './" + input + "'.");
-
             return VmInfo.Type.LOCAL;
         } catch (NumberFormatException e) {
             Logger.getLogger().log("Interpretation of '" + input + "' as PID failed because it is not a number.");
@@ -828,7 +883,6 @@ public class Cli {
             if (input.split(":").length == 2) {
                 Integer.valueOf(input.split(":")[1]);
                 Logger.getLogger().log("Interpreting '" + input + "' as hostname:port. To use colons as filenames, try './" + input + "'.");
-
                 return VmInfo.Type.REMOTE;
             } else {
                 Logger.getLogger()
@@ -841,7 +895,6 @@ public class Cli {
         try {
             NewFsVmController.cpToFiles(input);
             Logger.getLogger().log("Interpreting " + input + " as FS VM classpath.");
-
             return VmInfo.Type.FS;
         } catch (NewFsVmController.InvalidClasspathException e) {
             Logger.getLogger().log("Interpretation of '" + input + "' as FS VM classpath. failed. Cause: " + e.getMessage());
@@ -852,7 +905,6 @@ public class Cli {
 
     VmInfo getVmInfo(String param) {
         VmInfo.Type puc = guessType(param);
-
         switch (puc) {
             case LOCAL:
                 return vmManager.findVmFromPid(param);
