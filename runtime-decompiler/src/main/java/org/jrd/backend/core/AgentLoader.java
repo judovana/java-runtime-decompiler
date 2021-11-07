@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * This class contains methods for attaching the agent.
@@ -30,8 +31,8 @@ public class AgentLoader {
      * @param pid PID of the VM
      * @return port number if successful, else {@link #INVALID_PORT}
      */
-    public int attach(int pid) {
-        int port = findPort();
+    public int attach(int pid, Optional<Integer> userPort) {
+        int port = userPort.orElse(findPort());
         String[] installProps = createProperties(port);
 
         Logger.getLogger().log(Logger.Level.DEBUG, "Attempting to attach decompiler agent for VM '" + pid + "' on port '" + port + "'");

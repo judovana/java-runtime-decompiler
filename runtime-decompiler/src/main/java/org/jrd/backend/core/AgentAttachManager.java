@@ -2,6 +2,8 @@ package org.jrd.backend.core;
 
 import org.jrd.backend.data.VmManager;
 
+import java.util.Optional;
+
 /**
  * Attach manager for agent contains utility methods and information about
  * attach.
@@ -16,11 +18,11 @@ public class AgentAttachManager {
         this.loader = new AgentLoader();
     }
 
-    VmDecompilerStatus attachAgentToVm(String vmId, int vmPid) {
+    public VmDecompilerStatus attachAgentToVm(String vmId, int vmPid, Optional<Integer> port) {
         Logger.getLogger().log(Logger.Level.DEBUG, "Attaching agent to VM '" + vmPid + "'");
         int attachedPort = AgentLoader.INVALID_PORT;
         try {
-            attachedPort = loader.attach(vmPid);
+            attachedPort = loader.attach(vmPid, port);
         } catch (Exception ex) {
             Logger.getLogger().log(Logger.Level.ALL, ex);
         }
