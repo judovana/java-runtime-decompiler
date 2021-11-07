@@ -14,6 +14,7 @@ import org.jrd.backend.decompiling.PluginManager;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Optional;
 
 /**
  * This class manages the requests that are put in queue by the controller.
@@ -24,7 +25,6 @@ public class DecompilerRequestReceiver {
     private VmManager vmManager;
 
     private static final String OK_RESPONSE = "ok";
-    private static final int NOT_ATTACHED = -1;
 
     public DecompilerRequestReceiver(VmManager vmManager) {
         this.attachManager = new AgentAttachManager(vmManager);
@@ -100,7 +100,7 @@ public class DecompilerRequestReceiver {
         } catch (NumberFormatException e) {
             Logger.getLogger().log(Logger.Level.DEBUG, msg);
             Logger.getLogger().log(Logger.Level.ALL, e);
-            return NOT_ATTACHED;
+            return AgentRequestAction.NOT_ATTACHED_PORT;
         }
     }
 
@@ -115,7 +115,7 @@ public class DecompilerRequestReceiver {
         } else {
             actualListenPort = listenPort;
         }
-        if (actualListenPort == NOT_ATTACHED) {
+        if (actualListenPort == AgentRequestAction.NOT_ATTACHED_PORT) {
             throw new RuntimeException(
                     "Failed to attach agent. On JDK 9 and higher, you must run the target process with '-Djdk.attach.allowAttachSelf=true'."
             );
@@ -245,11 +245,11 @@ public class DecompilerRequestReceiver {
     }
 
     private int checkIfAgentIsLoaded(int port, String vmId, int vmPid) {
-        if (port != NOT_ATTACHED) {
+        if (port != AgentRequestAction.NOT_ATTACHED_PORT) {
             return port;
         }
-        int actualListenPort = NOT_ATTACHED;
-        VmDecompilerStatus status = attachManager.attachAgentToVm(vmId, vmPid);
+        int actualListenPort = AgentRequestAction.NOT_ATTACHED_PORT;
+        VmDecompilerStatus status = attachManager.attachAgentToVm(vmId, vmPid, Optional.empty());
         if (status != null) {
             actualListenPort = status.getListenPort();
         }

@@ -3,15 +3,61 @@ package org.jrd.backend.core;
 import org.jrd.backend.communication.InstallDecompilerAgentImpl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 public class KnownAgents {
 
-    private enum AgentLiveliness {
+    public enum AgentLiveliness {
         ONE_SHOT,
         SESSION,
-        PERNAMENT
+        PERMANENT;
+
+        @Override
+        public String toString() {
+            return super.toString();
+        }
+
+        public String toHelp() {
+            switch (this) {
+                case ONE_SHOT:
+                    return "Agent will connect, do its job and disconnect.";
+                case SESSION:
+                    return "Agent will connect and will remain connected untill end of session.";
+                case PERMANENT:
+                    return "Agent will attach, and will disconnect only manually or on death of target process";
+            }
+            throw new RuntimeException("Unknown " + AgentLiveliness.class.getSimpleName() + " value " + this);
+        }
+
+        public static AgentLiveliness fromString(String s) throws IllegalArgumentException {
+            return Arrays.stream(AgentLiveliness.values()).filter(v -> v.toString().equals(s)).findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("unknown value: " + s));
+        }
+    }
+
+    public enum AgentLoneliness {
+        SINGLE_INSTANCE,
+        ANONYMOUS,
+        FORCING;
+
+        @Override
+        public String toString() {
+            return super.toString();
+        }
+
+        public String toHelp() {
+            switch (this) {
+                case SINGLE_INSTANCE:
+                    return "Agent be allowed to attach to each process only once, unless " + FORCING + " is put to following attachment";
+                case ANONYMOUS:
+                    return "Agent will attach, but will not set the flag about its presence. Still, the property will be set.";
+                case FORCING:
+                    return "Agent will attach, but will skip the check for single instance";
+            }
+            throw new RuntimeException("Unknown " + AgentLoneliness.class.getSimpleName() + " value " + this);
+        }
     }
 
     private static class KnownAgent {
