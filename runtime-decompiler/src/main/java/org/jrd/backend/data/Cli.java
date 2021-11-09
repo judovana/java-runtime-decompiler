@@ -227,6 +227,7 @@ public class Cli {
                 break;
             case DETTACH:
                 dettach();
+                break;
             case API:
                 api();
                 break;
