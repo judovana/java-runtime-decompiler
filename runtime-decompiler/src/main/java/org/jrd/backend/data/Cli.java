@@ -331,21 +331,86 @@ public class Cli {
     }
 
     private void attach() throws Exception {
-        if (filteredArgs.size() < 2) {
+        final int mandatoryParam = 2;
+        if (filteredArgs.size() < mandatoryParam) {
             throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.ATTACH_FORMAT + "'.");
         }
         if (guessType(filteredArgs.get(1)) != VmInfo.Type.LOCAL) {
             throw new IllegalArgumentException("Sorry, first argument must be running jvm PID, nothing else.");
         }
         VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
-        String futureType = null;
-        if (filteredArgs.size() > 2) {
-            futureType = filteredArgs.get(2);
+        String[] futureType = new String[]{null, null, null};
+        int[] futureTypeUnderstood = new int[]{0, 0, 0};
+        for (int i = 0; i < 3; i++) {
+            if (filteredArgs.size() > i + mandatoryParam) {
+                futureType[i] = filteredArgs.get(i + mandatoryParam);
+            }
         }
-        KnownAgents.AgentLiveliness liveliness =
-                futureType == null ? KnownAgents.AgentLiveliness.SESSION : KnownAgents.AgentLiveliness.fromString(futureType);
+        KnownAgents.AgentLiveliness liveliness = null;
+        for (int i = 0; i < 3; i++) {
+            if (futureTypeUnderstood[i] == 0) {
+                try {
+                    liveliness = KnownAgents.AgentLiveliness.fromString(futureType[i]);
+                    futureTypeUnderstood[i]++;
+                    break;
+                } catch (Exception e) {
+                    //no interest, will just remain null
+                }
+            }
+        }
+        KnownAgents.AgentLoneliness loneliness = null;
+        for (int i = 0; i < 3; i++) {
+            if (futureTypeUnderstood[i] == 0) {
+                try {
+                    loneliness = KnownAgents.AgentLoneliness.fromString(futureType[i]);
+                    futureTypeUnderstood[i]++;
+                    break;
+                } catch (Exception e) {
+                    //no interest, will just remain null
+                }
+            }
+        }
+        Integer port = null;
+        for (int i = 0; i < 3; i++) {
+            if (futureTypeUnderstood[i] == 0) {
+                try {
+                    port = Integer.valueOf(futureType[i]);
+                    futureTypeUnderstood[i]++;
+                    break;
+                } catch (Exception e) {
+                    //no interest, will just remain null
+                }
+            }
+        }
+        boolean failed = false;
+        for (int i = 0; i < 3; i++) {
+            if (i + mandatoryParam >= filteredArgs.size()) {
+                break;
+            }
+            if (futureTypeUnderstood[i] == 0) {
+                failed = true;
+                System.out.println("Cant parse " + (i + 1) + ".:" + futureType[i]);
+            } else if (futureTypeUnderstood[i] > 1) {
+                failed = true;
+                System.out.println("applied more then once " + (i + 1) + ".:" + futureType[i]);
+            }
+        }
+        if (failed) {
+            System.out.println(Help.ATTACH_TEXT);
+            System.out.println("exiting without action");
+            return;
+        }
+        if (liveliness == null) {
+            liveliness = KnownAgents.AgentLiveliness.SESSION;
+        }
+        if (loneliness == null) {
+            loneliness = KnownAgents.AgentLoneliness.SINGLE_INSTANCE;
+        }
+        System.out.println(
+                String.format("Attempt to attach %s, %s and port=%s", liveliness, loneliness, port == null ? "guessed" : port.toString())
+        );
         VmDecompilerStatus status =
-                new AgentAttachManager(vmManager).attachAgentToVm(vmInfo.getVmId(), vmInfo.getVmPid(), Optional.empty()/*todo*/);
+                new AgentAttachManager(vmManager).attachAgentToVm(vmInfo.getVmId(), vmInfo.getVmPid(), Optional.ofNullable(port));
         System.out.println("Attached. Listening on: " + status.getListenPort());
         if (liveliness == KnownAgents.AgentLiveliness.SESSION) {
             System.out.println(" kill this process (" + ProcessHandle.current().pid() + ") to dettach agent");
@@ -371,12 +436,22 @@ public class Cli {
         if (filteredArgs.size() < 2) {
             throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.DETTACH_FORMAT + "'.");
         }
-        dettach(Integer.valueOf(filteredArgs.get(1)));
+        if (filteredArgs.get(1).contains(":")) {
+            String[] hostPort = filteredArgs.get(1).split(":");
+            dettach(hostPort[0], Integer.valueOf(hostPort[1]));
+        } else {
+            //is pid?
+            dettach(Integer.valueOf(filteredArgs.get(1)));
+        }
     }
 
     private void dettach(int port) {
-        System.out.println("Detaching is todo");
-        DecompilerRequestReceiver.getHaltAction("localhost", port, "none", 0, new AgentAttachManager(vmManager), vmManager, false);
+        dettach("localhost", port);
+    }
+
+    private void dettach(String host, int port) {
+        DecompilerRequestReceiver.getHaltAction(host, port, "none", 0, new AgentAttachManager(vmManager), vmManager, false);
+        System.out.println("Should be detached successfully");
     }
 
     private final class CompileArguments {

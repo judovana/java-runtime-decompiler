@@ -52,8 +52,8 @@ public final class Help {
     static final String DECOMPILE_FORMAT = DECOMPILE + " <PUC> <PLUGIN> <CLASS REGEX>...";
     static final String OVERWRITE_FORMAT = OVERWRITE + " <PUC> <FQN> [<CLASS FILE>]";
     static final String INIT_FORMAT = INIT + " <PUC> <FQN>";
-    static final String ATTACH_FORMAT = ATTACH + " <PID> <" + KnownAgents.AgentLiveliness.class.getSimpleName() + "> <" +
-            KnownAgents.AgentLoneliness.class.getSimpleName() + "> <port>";
+    static final String ATTACH_FORMAT = ATTACH + " <PID> <" + KnownAgents.AgentLiveliness.class.getSimpleName() + "> " + "<" +
+            KnownAgents.AgentLoneliness.class.getSimpleName() + "> " + "<port>";
     static final String DETTACH_FORMAT = DETTACH + " URL xor PORT xor PID";
     static final String API_FORMAT = API + " <PUC>";
     static final String SAVE_AS_FORMAT = SAVE_AS + " <PATH>";
@@ -80,7 +80,7 @@ public final class Help {
             "Overwrite class of a process with new bytecode. If <CLASS FILE> is not set, standard input is used.";
     private static final String INIT_TEXT = "Try to initialize a class in a running JVM (has no effect in FS VMs). " +
             "Because class loading is lazy, the class you need might be missing, eg. java.lang.Override.";
-    private static final String ATTACH_TEXT =
+    static final String ATTACH_TEXT =
             "Will only attach the agent to selected pid. Prints out the port for future usage. Possible values of " +
                     KnownAgents.AgentLiveliness.class.getSimpleName() + ":\n" +
                     Arrays.stream(KnownAgents.AgentLiveliness.values()).map(i -> "  " + i.toString() + " - " + i.toHelp())

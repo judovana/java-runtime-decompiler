@@ -58,6 +58,11 @@ public class KnownAgents {
             }
             throw new RuntimeException("Unknown " + AgentLoneliness.class.getSimpleName() + " value " + this);
         }
+
+        public static AgentLoneliness fromString(String s) throws IllegalArgumentException {
+            return Arrays.stream(AgentLoneliness.values()).filter(v -> v.toString().equals(s)).findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("unknown value: " + s));
+        }
     }
 
     private static class KnownAgent {
