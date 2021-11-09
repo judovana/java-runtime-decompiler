@@ -10,6 +10,7 @@ import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.core.AgentAttachManager;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.ClassInfo;
+import org.jrd.backend.core.DecompilerRequestReceiver;
 import org.jrd.backend.core.KnownAgents;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
@@ -350,29 +351,31 @@ public class Cli {
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 @Override
                 public void run() {
-                   dettach(status.getListenPort());
+                    dettach(status.getListenPort());
                 }
             });
             while (true) {
                 Thread.sleep(1000);
             }
-        }
-        if (liveliness == KnownAgents.AgentLiveliness.ONE_SHOT) {
-            System.out.println("agent attached, and is detaching");
-            //TODO detach()
+        } else if (liveliness == KnownAgents.AgentLiveliness.ONE_SHOT) {
+            System.out.println("agent attached, and is detaching right away");
+            dettach(status.getListenPort());
         } else {
-            System.out.println("agent agent is permanently attached to " + vmInfo.getVmPid());
+            System.out.println("agent agent is permanently attached to " + vmInfo.getVmPid() + " on " + status.getListenPort());
+            System.out.println("exiting");
         }
     }
 
     private void dettach() {
-        throw new RuntimeException("not yet implemented");
-        //detach(port)
+        if (filteredArgs.size() < 2) {
+            throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.DETTACH_FORMAT + "'.");
+        }
+        dettach(Integer.valueOf(filteredArgs.get(1)));
     }
+
     private void dettach(int port) {
-        //FIXME! No operation in cli, is detaching....
-        //note  that decompilationController().haltAgent is most likely last private method here
         System.out.println("Detaching is todo");
+        DecompilerRequestReceiver.getHaltAction("localhost", port, "none", 0, new AgentAttachManager(vmManager), vmManager, false);
     }
 
     private final class CompileArguments {

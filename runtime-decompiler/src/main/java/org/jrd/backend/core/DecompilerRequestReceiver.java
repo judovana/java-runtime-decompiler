@@ -104,11 +104,11 @@ public class DecompilerRequestReceiver {
         }
     }
 
-    private int getPort(String hostname, int listenPort, String vmId, int vmPid) {
+    private static int getPort(String hostname, int listenPort, String vmId, int vmPid, AgentAttachManager attachManager) {
         int actualListenPort;
         if ("localhost".equals(hostname)) {
             try {
-                actualListenPort = checkIfAgentIsLoaded(listenPort, vmId, vmPid);
+                actualListenPort = checkIfAgentIsLoaded(listenPort, vmId, vmPid, attachManager);
             } catch (Exception ex) {
                 throw ex;
             }
@@ -135,10 +135,17 @@ public class DecompilerRequestReceiver {
     }
 
     private ResponseWithPort getResponse(String hostname, int listenPort, String vmId, int vmPid, String requestBody) {
+        return getResponse(hostname, listenPort, vmId, vmPid, requestBody, attachManager, vmManager);
+    }
+
+    private static ResponseWithPort getResponse(
+            String hostname, int listenPort, String vmId, int vmPid, String requestBody, AgentAttachManager attachManager,
+            VmManager vmManager
+    ) {
         int actualListenPort = -1;
         JrdAgent nativeAgent;
         if (listenPort >= 0 || vmPid >= 0) {
-            actualListenPort = getPort(hostname, listenPort, vmId, vmPid);
+            actualListenPort = getPort(hostname, listenPort, vmId, vmPid, attachManager);
             nativeAgent = new CallDecompilerAgent(actualListenPort, hostname);
         } else {
             VmInfo vmInfo = vmManager.findVmFromPid(vmId);
@@ -231,20 +238,31 @@ public class DecompilerRequestReceiver {
     }
 
     private String getHaltAction(String hostname, int listenPort, String vmId, int vmPid) {
+        return getHaltAction(hostname, listenPort, vmId, vmPid, attachManager, vmManager, true);
+    }
+
+    public static String getHaltAction(
+            String hostname, int listenPort, String vmId, int vmPid, AgentAttachManager attachManager, VmManager vmManager,
+            boolean removeVmDecompilerStatus
+    ) {
         if (!KnownAgents.isSessionPermanent(hostname, listenPort, vmId, vmPid)) {
             try {
-                getResponse(hostname, listenPort, vmId, vmPid, "HALT");
+                getResponse(hostname, listenPort, vmId, vmPid, "HALT", attachManager, vmManager);
             } catch (Exception e) {
                 Logger.getLogger().log(Logger.Level.ALL, new RuntimeException("Exception when calling halt action", e));
             } finally {
-                vmManager.getVmInfoByID(vmId).removeVmDecompilerStatus();
+                if (removeVmDecompilerStatus) {
+                    vmManager.getVmInfoByID(vmId).removeVmDecompilerStatus();
+                }
             }
             KnownAgents.markDead(hostname, listenPort, vmId, vmPid);
+        } else {
+            KnownAgents.checkDead(hostname, listenPort, vmId, vmPid);
         }
         return OK_RESPONSE;
     }
 
-    private int checkIfAgentIsLoaded(int port, String vmId, int vmPid) {
+    private static int checkIfAgentIsLoaded(int port, String vmId, int vmPid, AgentAttachManager attachManager) {
         if (port != AgentRequestAction.NOT_ATTACHED_PORT) {
             return port;
         }

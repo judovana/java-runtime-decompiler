@@ -137,4 +137,10 @@ public class InstrumentationProvider {
 
         return removed.size();
     }
+
+    public void dettach() {
+        instrumentation.removeTransformer(transformer);
+        Main.firstTime = true;
+        AgentLogger.getLogger().log("done");
+    }
 }

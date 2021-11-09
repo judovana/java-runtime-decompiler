@@ -38,7 +38,7 @@ public class AgentActionWorker extends Thread {
         this.provider = provider;
 
         try {
-            executeRequest(socket);
+            executeRequest(socket, provider);
         } catch (Exception e) {
             AgentLogger.getLogger().log(new RuntimeException("Error when trying to execute the request. Cause: ", e));
             try {
@@ -49,7 +49,7 @@ public class AgentActionWorker extends Thread {
         }
     }
 
-    private void executeRequest(Socket socket) {
+    private void executeRequest(Socket socket, InstrumentationProvider provider) {
         InputStream is = null;
         try {
             is = socket.getInputStream();
@@ -91,8 +91,10 @@ public class AgentActionWorker extends Thread {
             } else {
                 switch (line) {
                     case "HALT":
+                        AgentLogger.getLogger().log("Agent received HALT command, closing socket.");
                         closeSocket(outputStream, socket);
-                        AgentLogger.getLogger().log("Agent received HALT command, closing socket and exiting.");
+                        AgentLogger.getLogger().log("Agent received HALT command, removing instrumentation");
+                        provider.dettach();
                         break;
                     case "CLASSES":
                         getAllLoadedClasses(outputStream, false);
@@ -266,5 +268,6 @@ public class AgentActionWorker extends Thread {
         out.flush();
         socket.close();
         ConnectionDelegator.gracefulShutdown();
+        AgentLogger.getLogger().log("done");
     }
 }
