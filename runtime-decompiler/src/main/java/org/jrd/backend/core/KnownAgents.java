@@ -74,12 +74,41 @@ public class KnownAgents {
 
     private static List<KnownAgent> agents = Collections.synchronizedList(new ArrayList<>());
 
+    public static void checkDead(String hostname, int listenPort, String vmId, int vmPid) {
+        markDead(hostname, listenPort, vmId, vmPid, false);
+    }
+
     public static void markDead(String hostname, int listenPort, String vmId, int vmPid) {
+        markDead(hostname, listenPort, vmId, vmPid, true);
+    }
+
+    private static void markDead(String hostname, int listenPort, String vmId, int vmPid, boolean action) {
+        int found = 0;
         for (KnownAgent agent : agents) {
             if (agent.agent.matches(hostname, listenPort, vmId, vmPid) && agent.live) {
-                agent.live = false;
-                System.err.println("killing " + agent.agent.toString());
+                found++;
+                if (action) {
+                    agent.live = false;
+                    System.err.println("killing " + agent.agent.toString());
+                }
+                System.err.println("not killing " + agent.agent.toString());
             }
+        }
+        if (found == 0) {
+            System.err.println(
+                    String.format(
+                            "not found agent for hostname=%s port=%d vmId=%s vmPid=%d in list of %d agents", hostname, listenPort, vmId,
+                            vmPid, agents.size()
+                    )
+            );
+        }
+        if (found > 1) {
+            System.err.println(
+                    String.format(
+                            "found %d agents for hostname=%s port=%d vmId=%s vmPid=%d in list of %d agents", found, hostname, listenPort,
+                            vmId, vmPid, agents.size()
+                    )
+            );
         }
     }
 
