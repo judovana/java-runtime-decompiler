@@ -42,7 +42,7 @@ public class DecompilerRequestReceiver {
         int port;
 
         try {
-            action = RequestAction.returnAction(actionStr);
+            action = RequestAction.fromString(actionStr);
         } catch (IllegalArgumentException e) {
             Logger.getLogger().log(Logger.Level.DEBUG, new RuntimeException("Illegal action in request", e));
             return TopLevelErrorCandidate.toError(e);
