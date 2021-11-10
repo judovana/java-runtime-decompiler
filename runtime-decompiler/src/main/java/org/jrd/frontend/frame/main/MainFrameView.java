@@ -247,7 +247,7 @@ public class MainFrameView {
 
         // remoteConnectionButton End
         remoteVmLabelPanel = new JPanel(new BorderLayout());
-        remoteVmLabelPanel.add(new JLabel("Remote Processes", SwingConstants.CENTER), BorderLayout.CENTER);
+        remoteVmLabelPanel.add(new JLabel("Remote Processes with agent", SwingConstants.CENTER), BorderLayout.CENTER);
         remoteVmLabelPanel.add(remoteVmButtonPanel, BorderLayout.EAST);
         // remoteVmLabelPanel end
         remoteVmList = new UndraggableJList();
@@ -277,7 +277,7 @@ public class MainFrameView {
         // remoteVmScrollPane end
 
         remoteVmPanel = new JPanel(new BorderLayout());
-        remoteVmPanel.setName("Remote VMs");
+        remoteVmPanel.setName("Remote VMs with attached agent");
         remoteVmPanel.add(remoteVmLabelPanel, BorderLayout.NORTH);
         remoteVmPanel.add(remoteVmScrollPane, BorderLayout.CENTER);
         // remoteVmPanel End
