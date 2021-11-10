@@ -51,40 +51,14 @@ public class AgentRequestAction {
     private final Map<String, String> parameters;
 
     public enum RequestAction {
-        CLASSES(0),
-        BYTES(1),
-        HALT(2),
-        OVERWRITE(3),
-        INIT_CLASS(4),
-        OVERRIDES(5),
-        REMOVE_OVERRIDES(6),
-        CLASSES_WITH_INFO(7);
-
-        private final int intVal;
-
-        RequestAction(int intVal) {
-            this.intVal = intVal;
-        }
-
-        @SuppressWarnings("ReturnCount") // returns in switch cases
-        public static RequestAction returnAction(String act) {
-            int action;
-            try {
-                action = Integer.parseInt(act);
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("Unknown action: " + act);
-            }
-            return RequestAction.fromInt(action);
-        }
-
-        private static RequestAction fromInt(int action) {
-            return Arrays.stream(RequestAction.values()).filter(v -> v.intVal == action).findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("unknown value: " + action));
-        }
-
-        private String toIntString() {
-            return Integer.toString(intVal);
-        }
+        CLASSES,
+        BYTES,
+        HALT,
+        OVERWRITE,
+        INIT_CLASS,
+        OVERRIDES,
+        REMOVE_OVERRIDES,
+        CLASSES_WITH_INFO;
 
         public static RequestAction fromString(String s) throws IllegalArgumentException {
             return Arrays.stream(RequestAction.values()).filter(v -> v.toString().equals(s)).findFirst()
@@ -125,7 +99,7 @@ public class AgentRequestAction {
         AgentRequestAction req = new AgentRequestAction();
         req.setParameter(VM_ID_PARAM_NAME, vmInfo.getVmId());
         req.setParameter(VM_PID_PARAM_NAME, Integer.toString(vmInfo.getVmPid()));
-        req.setParameter(ACTION_PARAM_NAME, action.toIntString());
+        req.setParameter(ACTION_PARAM_NAME, action.toString());
         req.setParameter(HOSTNAME_PARAM_NAME, hostname);
         req.setParameter(LISTEN_PORT_PARAM_NAME, Integer.toString(listenPort));
         return req;
