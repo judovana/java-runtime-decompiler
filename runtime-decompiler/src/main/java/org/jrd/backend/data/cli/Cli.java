@@ -1,12 +1,10 @@
 package org.jrd.backend.data.cli;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.ClassesProvider;
 import io.github.mkoncek.classpathless.api.ClasspathlessCompiler;
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
-import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.core.AgentAttachManager;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.ClassInfo;
@@ -23,14 +21,12 @@ import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.filesystem.NewFsVmController;
 import org.jrd.frontend.frame.main.DecompilationController;
 import org.jrd.frontend.frame.overwrite.FileToClassValidator;
-import org.jrd.frontend.frame.overwrite.OverwriteClassDialog;
 import org.jrd.frontend.utility.AgentApiGenerator;
 import org.jrd.frontend.utility.CommonUtils;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -80,148 +76,6 @@ public class Cli {
     private Saving saving;
     private AgentConfig agent;
     private boolean isVerbose;
-
-    private static class AgentConfig {
-
-        private final KnownAgents.AgentLoneliness loneliness;
-        private final Optional<Integer> port;
-        private final KnownAgents.AgentLiveliness liveliness;
-
-        private AgentConfig(KnownAgents.AgentLoneliness loneliness, KnownAgents.AgentLiveliness liveliness, Optional<Integer> port) {
-            this.loneliness = loneliness;
-            this.port = port;
-            this.liveliness = liveliness;
-        }
-
-        public static AgentConfig create(List<String> agentArgs) {
-            int[] futureTypeUnderstood = new int[]{0, 0, 0};
-            KnownAgents.AgentLiveliness liveliness = null;
-            for (int i = 0; i < agentArgs.size(); i++) {
-                if (futureTypeUnderstood[i] == 0) {
-                    try {
-                        liveliness = KnownAgents.AgentLiveliness.fromString(agentArgs.get(i));
-                        futureTypeUnderstood[i]++;
-                        break;
-                    } catch (Exception e) {
-                        //no interest, will just remain null
-                    }
-                }
-            }
-            KnownAgents.AgentLoneliness loneliness = null;
-            for (int i = 0; i < agentArgs.size(); i++) {
-                if (futureTypeUnderstood[i] == 0) {
-                    try {
-                        loneliness = KnownAgents.AgentLoneliness.fromString(agentArgs.get(i));
-                        futureTypeUnderstood[i]++;
-                        break;
-                    } catch (Exception e) {
-                        //no interest, will just remain null
-                    }
-                }
-            }
-            Integer port = null;
-            for (int i = 0; i < agentArgs.size(); i++) {
-                if (futureTypeUnderstood[i] == 0) {
-                    try {
-                        port = Integer.valueOf(agentArgs.get(i));
-                        futureTypeUnderstood[i]++;
-                        break;
-                    } catch (Exception e) {
-                        //no interest, will just remain null
-                    }
-                }
-            }
-            boolean failed = false;
-            for (int i = 0; i < agentArgs.size(); i++) {
-                if (futureTypeUnderstood[i] == 0) {
-                    failed = true;
-                    Logger.getLogger().log(Logger.Level.ALL, "Cant parse " + (i + 1) + ".:" + agentArgs.get(i));
-                } else if (futureTypeUnderstood[i] > 1) {
-                    failed = true;
-                    Logger.getLogger().log(Logger.Level.ALL, "applied more then once " + (i + 1) + ".:" + agentArgs.get(i));
-                }
-            }
-            if (failed) {
-                Logger.getLogger().log(Logger.Level.ALL, Help.AGENT_TEXT);
-                throw new RuntimeException("parsing of agent params failed, exiting without action");
-            }
-            if (liveliness == null) {
-                liveliness = KnownAgents.AgentLiveliness.SESSION;
-            }
-            if (loneliness == null) {
-                loneliness = KnownAgents.AgentLoneliness.SINGLE_INSTANCE;
-            }
-            Logger.getLogger().log(
-                    Logger.Level.DEBUG,
-                    String.format(
-                            "Agent set to attach %s, %s and port=%s", liveliness, loneliness, port == null ? "guessed" : port.toString()
-                    )
-            );
-            return new AgentConfig(loneliness, liveliness, Optional.ofNullable(port));
-        }
-    }
-
-    static class Saving implements CommonUtils.StatusKeeper {
-        static final String DEFAULT = "default";
-        static final String EXACT = "exact";
-        static final String FQN = "fqn";
-        static final String DIR = "dir";
-        private final String as;
-        private final String like;
-
-        Saving(String as, String like) {
-            this.as = as;
-            if (like == null) {
-                this.like = DEFAULT;
-            } else {
-                this.like = like;
-            }
-        }
-
-        public boolean shouldSave() {
-            return as != null;
-        }
-
-        @Override
-        public void setText(String s) {
-            if (shouldSave()) {
-                System.out.println(s);
-            } else {
-                System.err.println(s);
-            }
-        }
-
-        @Override
-        public void onException(Exception ex) {
-            Logger.getLogger().log(ex);
-        }
-
-        @SuppressWarnings("ReturnCount") // returns in switch cases
-        public int toInt(String suffix) {
-            switch (like) {
-                case FQN:
-                    return CommonUtils.FULLY_QUALIFIED_NAME;
-                case EXACT:
-                    return CommonUtils.CUSTOM_NAME;
-                case DIR:
-                    return CommonUtils.SRC_SUBDIRS_NAME;
-                case DEFAULT:
-                    if (".java".equals(suffix)) {
-                        return CommonUtils.FULLY_QUALIFIED_NAME;
-                    }
-                    if (".class".equals(suffix)) {
-                        return CommonUtils.SRC_SUBDIRS_NAME;
-                    }
-                    return CommonUtils.CUSTOM_NAME;
-                default:
-                    throw new RuntimeException("Unknown saving type: " + like + ". Allowed are: " + FQN + "," + DIR + "," + EXACT);
-            }
-        }
-
-        public PrintStream openPrintStream() throws IOException {
-            return new PrintStream(new FileOutputStream(this.as), true, "UTF-8");
-        }
-    }
 
     public Cli(String[] orig, Model model) {
         this.filteredArgs = prefilterArgs(orig);
@@ -333,7 +187,7 @@ public class Cli {
                 decompile();
                 break;
             case COMPILE:
-                compile(new CompileArguments());
+                compile(new CompileArguments(filteredArgs, pluginManager, vmManager));
                 break;
             case OVERWRITE:
                 overwrite();
@@ -502,84 +356,12 @@ public class Cli {
         System.out.println("Should be detached successfully");
     }
 
-    private final class CompileArguments {
-        String wantedCustomCompiler;
-        String puc;
-        boolean isRecursive = false;
-        List<File> filesToCompile = new ArrayList<>(1);
-
-        @SuppressWarnings("ModifiedControlVariable")
-        // shifting arguments when parsing
-        CompileArguments() throws FileNotFoundException {
-            for (int i = 1; i < filteredArgs.size(); i++) {
-                String arg = filteredArgs.get(i);
-
-                if (P.equals(arg)) {
-                    wantedCustomCompiler = filteredArgs.get(i + 1);
-                    i++; // shift
-                } else if (CP.equals(arg)) {
-                    puc = filteredArgs.get(i + 1);
-                    i++; // shift
-                } else if (R.equals(arg)) {
-                    isRecursive = true;
-                } else {
-                    File fileToCompile = new File(arg);
-
-                    if (!fileToCompile.exists()) {
-                        throw new FileNotFoundException(fileToCompile.getAbsolutePath());
-                    }
-
-                    filesToCompile.add(fileToCompile);
-                }
-            }
-
-            if (filesToCompile.isEmpty()) {
-                throw new IllegalArgumentException("Expected at least one file for compile.");
-            }
-        }
-
-        public ClassesProvider getClassesProvider() {
-            if (puc == null) {
-                return new ClassesProvider() {
-                    @Override
-                    public Collection<IdentifiedBytecode> getClass(ClassIdentifier... names) {
-                        return new ArrayList<>();
-                    }
-
-                    @Override
-                    public List<String> getClassPathListing() {
-                        return new ArrayList<>();
-                    }
-                };
-            } else {
-                return new RuntimeCompilerConnector.JrdClassesProvider(getVmInfo(puc), vmManager);
-            }
-        }
-
-        public ClasspathlessCompiler getCompiler() {
-            DecompilerWrapper decompiler = null;
-            boolean hasCompiler = false;
-            String compilerLogMessage = "Default runtime compiler will be used for overwrite.";
-
-            if (wantedCustomCompiler != null) {
-                decompiler = findDecompiler(wantedCustomCompiler);
-
-                if (pluginManager.hasBundledCompiler(decompiler)) {
-                    compilerLogMessage = wantedCustomCompiler + "'s bundled compiler will be used for overwrite.";
-                    hasCompiler = true;
-                }
-            }
-            Logger.getLogger().log(compilerLogMessage);
-            return OverwriteClassDialog.getClasspathlessCompiler(decompiler, hasCompiler, isVerbose);
-        }
-    }
-
     private void compile(CompileArguments args) throws Exception {
         // handle -cp
         ClassesProvider provider = args.getClassesProvider();
 
         // handle -p
-        ClasspathlessCompiler compiler = args.getCompiler();
+        ClasspathlessCompiler compiler = args.getCompiler(isVerbose);
 
         IdentifiedSource[] identifiedSources = CommonUtils.toIdentifiedSources(args.isRecursive, args.filesToCompile);
         Collection<IdentifiedBytecode> allBytecode =
@@ -993,7 +775,7 @@ public class Cli {
         }
     }
 
-    private VmInfo.Type guessType(String input) {
+    private static VmInfo.Type guessType(String input) {
         if (input == null || input.trim().isEmpty()) {
             throw new RuntimeException("Unable to interpret PUC because it is empty.");
         }
@@ -1031,6 +813,10 @@ public class Cli {
     }
 
     VmInfo getVmInfo(String param) {
+        return getVmInfo(param, vmManager);
+    }
+
+    static VmInfo getVmInfo(String param, VmManager vmManager) {
         VmInfo.Type puc = guessType(param);
         switch (puc) {
             case LOCAL:

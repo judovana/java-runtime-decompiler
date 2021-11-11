@@ -33,7 +33,7 @@ import static org.jrd.backend.data.cli.Cli.P;
 import static org.jrd.backend.data.cli.Cli.R;
 import static org.jrd.backend.data.cli.Cli.SAVE_AS;
 import static org.jrd.backend.data.cli.Cli.SAVE_LIKE;
-import static org.jrd.backend.data.cli.Cli.Saving;
+
 import static org.jrd.backend.data.cli.Cli.VERBOSE;
 import static org.jrd.backend.data.cli.Cli.VERSION;
 
