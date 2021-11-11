@@ -242,14 +242,11 @@ public class DecompilerRequestReceiver {
     }
 
     public static String getHaltAction(
-            String hostname,
-            int listenPort,
-            String vmId,
-            int vmPid,
-            AgentAttachManager attachManager,
-            VmManager vmManager,
-            boolean removeVmDecompilerStatus) {
-        if (KnownAgents.findAgents(hostname, listenPort, vmId, vmPid).size() == 0 || KnownAgents.isOneShot(hostname, listenPort, vmId, vmPid)) {
+            String hostname, int listenPort, String vmId, int vmPid, AgentAttachManager attachManager, VmManager vmManager,
+            boolean removeVmDecompilerStatus
+    ) {
+        if (KnownAgents.findAgents(hostname, listenPort, vmId, vmPid).size() == 0 ||
+                KnownAgents.isOneShot(hostname, listenPort, vmId, vmPid)) {
             try {
                 getResponse(hostname, listenPort, vmId, vmPid, "HALT", attachManager, vmManager);
             } catch (Exception e) {

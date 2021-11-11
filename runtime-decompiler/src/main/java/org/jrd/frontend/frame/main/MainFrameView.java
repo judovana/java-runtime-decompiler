@@ -239,7 +239,7 @@ public class MainFrameView {
 
         remoteVmRemoveButton = ImageButtonFactory.createRemoveButton();
         remoteVmRemoveButton.addActionListener(actionEvent -> {
-            ActionEvent event = new ActionEvent(remoteVmList, 0, REMOTE_VM_ACTION, remoteVmDetach.isSelected()?1:0);
+            ActionEvent event = new ActionEvent(remoteVmList, 0, REMOTE_VM_ACTION, remoteVmDetach.isSelected() ? 1 : 0);
             removeVmDialogListener.actionPerformed(event);
         });
 

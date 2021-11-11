@@ -58,6 +58,7 @@ public class Cli {
     protected static final String COMPILE = "-compile";
     protected static final String OVERWRITE = "-overwrite";
     protected static final String INIT = "-init";
+    protected static final String AGENT = "-agent";
     protected static final String ATTACH = "-attach";
     protected static final String DETACH = "-detach";
     protected static final String API = "-api";
@@ -73,7 +74,88 @@ public class Cli {
     private final VmManager vmManager;
     private final PluginManager pluginManager;
     private Saving saving;
+    private AgentConfig agent;
     private boolean isVerbose;
+
+    private static class AgentConfig {
+
+        private final KnownAgents.AgentLoneliness loneliness;
+        private final Optional<Integer> port;
+        private final KnownAgents.AgentLiveliness liveliness;
+
+        private AgentConfig(KnownAgents.AgentLoneliness loneliness, KnownAgents.AgentLiveliness liveliness, Optional<Integer> port) {
+            this.loneliness = loneliness;
+            this.port = port;
+            this.liveliness = liveliness;
+        }
+
+        public static AgentConfig create(List<String> agentArgs) {
+            int[] futureTypeUnderstood = new int[]{0, 0, 0};
+            KnownAgents.AgentLiveliness liveliness = null;
+            for (int i = 0; i < agentArgs.size(); i++) {
+                if (futureTypeUnderstood[i] == 0) {
+                    try {
+                        liveliness = KnownAgents.AgentLiveliness.fromString(agentArgs.get(i));
+                        futureTypeUnderstood[i]++;
+                        break;
+                    } catch (Exception e) {
+                        //no interest, will just remain null
+                    }
+                }
+            }
+            KnownAgents.AgentLoneliness loneliness = null;
+            for (int i = 0; i < agentArgs.size(); i++) {
+                if (futureTypeUnderstood[i] == 0) {
+                    try {
+                        loneliness = KnownAgents.AgentLoneliness.fromString(agentArgs.get(i));
+                        futureTypeUnderstood[i]++;
+                        break;
+                    } catch (Exception e) {
+                        //no interest, will just remain null
+                    }
+                }
+            }
+            Integer port = null;
+            for (int i = 0; i < agentArgs.size(); i++) {
+                if (futureTypeUnderstood[i] == 0) {
+                    try {
+                        port = Integer.valueOf(agentArgs.get(i));
+                        futureTypeUnderstood[i]++;
+                        break;
+                    } catch (Exception e) {
+                        //no interest, will just remain null
+                    }
+                }
+            }
+            boolean failed = false;
+            for (int i = 0; i < agentArgs.size(); i++) {
+                if (futureTypeUnderstood[i] == 0) {
+                    failed = true;
+                    Logger.getLogger().log(Logger.Level.ALL, "Cant parse " + (i + 1) + ".:" + agentArgs.get(i));
+                } else if (futureTypeUnderstood[i] > 1) {
+                    failed = true;
+                    Logger.getLogger().log(Logger.Level.ALL, "applied more then once " + (i + 1) + ".:" + agentArgs.get(i));
+                }
+            }
+            if (failed) {
+                Logger.getLogger().log(Logger.Level.ALL, Help.AGENT_TEXT);
+                throw new RuntimeException("parsing of agent params failed, exiting without action");
+            }
+            if (liveliness == null) {
+                liveliness = KnownAgents.AgentLiveliness.SESSION;
+            }
+            if (loneliness == null) {
+                loneliness = KnownAgents.AgentLoneliness.SINGLE_INSTANCE;
+            }
+            Logger.getLogger().log(
+                    Logger.Level.DEBUG,
+                    String.format(
+                            "Agent set to attach %s, %s and port=%s", liveliness, loneliness, port == null ? "guessed" : port.toString()
+                    )
+            );
+            return new AgentConfig(loneliness, liveliness, Optional.ofNullable(port));
+        }
+    }
 
     static class Saving implements CommonUtils.StatusKeeper {
         static final String DEFAULT = "default";
@@ -164,6 +246,7 @@ public class Cli {
         List<String> args = new ArrayList<>(originalArgs.length);
         String saveAs = null;
         String saveLike = null;
+        List<String> agentArgs = new ArrayList<>();
 
         for (int i = 0; i < originalArgs.length; i++) {
             String arg = originalArgs[i];
@@ -171,18 +254,50 @@ public class Cli {
 
             if (cleanedArg.equals(VERBOSE)) {
                 isVerbose = true;
+                Logger.getLogger().setVerbose(true);
             } else if (cleanedArg.equals(SAVE_AS)) {
                 saveAs = originalArgs[i + 1];
                 i++;
             } else if (cleanedArg.equals(SAVE_LIKE)) {
                 saveLike = originalArgs[i + 1];
                 i++;
+            } else if (cleanedArg.equals(AGENT)) {
+                if (!agentArgs.isEmpty()) {
+                    throw new RuntimeException("You had set second " + AGENT + ". Not allowed.");
+                }
+                while (true) {
+                    if (i == originalArgs.length - 1) {
+                        if (agentArgs.isEmpty()) {
+                            throw new RuntimeException(
+                                    AGENT + " should have at least one parameter otherwise it is nonsense. Use: " + Help.AGENT_FORMAT
+                            );
+                        } else {
+                            break;
+                        }
+                    }
+                    String agentArg = originalArgs[i + 1];
+                    if (agentArg.startsWith("-")) {
+                        if (agentArgs.isEmpty()) {
+                            throw new RuntimeException(
+                                    AGENT + " should have at least one parameter otherwise it is nonsense. Use: " + Help.AGENT_FORMAT
+                            );
+                        } else {
+                            break;
+                        }
+                    } else {
+                        agentArgs.add(agentArg);
+                        i++;
+                    }
+                }
             } else {
                 args.add(arg);
             }
         }
-
         this.saving = new Saving(saveAs, saveLike);
+        this.agent = AgentConfig.create(agentArgs);
+        if (!agentArgs.isEmpty() && args.isEmpty()) {
+            throw new RuntimeException("It is not allowed to set " + AGENT + " in gui mode");
+        }
         return args;
     }
 
@@ -339,80 +454,9 @@ public class Cli {
             throw new IllegalArgumentException("Sorry, first argument must be running jvm PID, nothing else.");
         }
         VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
-        String[] futureType = new String[]{null, null, null};
-        int[] futureTypeUnderstood = new int[]{0, 0, 0};
-        for (int i = 0; i < 3; i++) {
-            if (filteredArgs.size() > i + mandatoryParam) {
-                futureType[i] = filteredArgs.get(i + mandatoryParam);
-            }
-        }
-        KnownAgents.AgentLiveliness liveliness = null;
-        for (int i = 0; i < 3; i++) {
-            if (futureTypeUnderstood[i] == 0) {
-                try {
-                    liveliness = KnownAgents.AgentLiveliness.fromString(futureType[i]);
-                    futureTypeUnderstood[i]++;
-                    break;
-                } catch (Exception e) {
-                    //no interest, will just remain null
-                }
-            }
-        }
-        KnownAgents.AgentLoneliness loneliness = null;
-        for (int i = 0; i < 3; i++) {
-            if (futureTypeUnderstood[i] == 0) {
-                try {
-                    loneliness = KnownAgents.AgentLoneliness.fromString(futureType[i]);
-                    futureTypeUnderstood[i]++;
-                    break;
-                } catch (Exception e) {
-                    //no interest, will just remain null
-                }
-            }
-        }
-        Integer port = null;
-        for (int i = 0; i < 3; i++) {
-            if (futureTypeUnderstood[i] == 0) {
-                try {
-                    port = Integer.valueOf(futureType[i]);
-                    futureTypeUnderstood[i]++;
-                    break;
-                } catch (Exception e) {
-                    //no interest, will just remain null
-                }
-            }
-        }
-        boolean failed = false;
-        for (int i = 0; i < 3; i++) {
-            if (i + mandatoryParam >= filteredArgs.size()) {
-                break;
-            }
-            if (futureTypeUnderstood[i] == 0) {
-                failed = true;
-                System.out.println("Cant parse " + (i + 1) + ".:" + futureType[i]);
-            } else if (futureTypeUnderstood[i] > 1) {
-                failed = true;
-                System.out.println("applied more then once " + (i + 1) + ".:" + futureType[i]);
-            }
-        }
-        if (failed) {
-            System.out.println(Help.ATTACH_TEXT);
-            System.out.println("exiting without action");
-            return;
-        }
-        if (liveliness == null) {
-            liveliness = KnownAgents.AgentLiveliness.SESSION;
-        }
-        if (loneliness == null) {
-            loneliness = KnownAgents.AgentLoneliness.SINGLE_INSTANCE;
-        }
-        System.out.println(
-                String.format("Attempt to attach %s, %s and port=%s", liveliness, loneliness, port == null ? "guessed" : port.toString())
-        );
-        VmDecompilerStatus status =
-                new AgentAttachManager(vmManager).attachAgentToVm(vmInfo.getVmId(), vmInfo.getVmPid(), Optional.ofNullable(port));
+        VmDecompilerStatus status = new AgentAttachManager(vmManager).attachAgentToVm(vmInfo.getVmId(), vmInfo.getVmPid(), agent.port);
         System.out.println("Attached. Listening on: " + status.getListenPort());
-        if (liveliness == KnownAgents.AgentLiveliness.SESSION) {
+        if (agent.liveliness == KnownAgents.AgentLiveliness.SESSION) {
             System.out.println(" kill this process (" + ProcessHandle.current().pid() + ") to detach agent");
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 @Override
@@ -423,7 +467,7 @@ public class Cli {
             while (true) {
                 Thread.sleep(1000);
             }
-        } else if (liveliness == KnownAgents.AgentLiveliness.ONE_SHOT) {
+        } else if (agent.liveliness == KnownAgents.AgentLiveliness.ONE_SHOT) {
             System.out.println("agent attached, and is detaching right away");
             detach(status.getListenPort());
         } else {
