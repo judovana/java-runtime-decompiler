@@ -69,10 +69,11 @@ public class KnownAgents {
 
         private final InstallDecompilerAgentImpl agent;
         private boolean live;
-        private final AgentLiveliness ttl = AgentLiveliness.SESSION; //all agents are now sessioned
+        private final AgentLiveliness ttl;
 
-        public KnownAgent(InstallDecompilerAgentImpl install) {
+        public KnownAgent(InstallDecompilerAgentImpl install, AgentLiveliness ttl) {
             this.agent = install;
+            this.ttl = ttl;
             this.live = true;
         }
     }
@@ -80,45 +81,50 @@ public class KnownAgents {
     private static List<KnownAgent> agents = Collections.synchronizedList(new ArrayList<>());
 
     public static void checkDead(String hostname, int listenPort, String vmId, int vmPid) {
-        markDead(hostname, listenPort, vmId, vmPid, false);
+        markDead(hostname, listenPort, vmId, vmPid, false,  findAgents(hostname, listenPort, vmId, vmPid), true);
     }
 
     public static void markDead(String hostname, int listenPort, String vmId, int vmPid) {
-        markDead(hostname, listenPort, vmId, vmPid, true);
+        markDead(hostname, listenPort, vmId, vmPid, true, findAgents(hostname, listenPort, vmId, vmPid), true);
     }
 
-    private static void markDead(String hostname, int listenPort, String vmId, int vmPid, boolean action) {
-        int found = 0;
-        for (KnownAgent agent : agents) {
-            if (agent.agent.matches(hostname, listenPort, vmId, vmPid) && agent.live) {
-                found++;
-                if (action) {
-                    agent.live = false;
-                    System.err.println("killing " + agent.agent.toString());
-                }
+    private static void markDead(String hostname, int listenPort, String vmId, int vmPid, boolean action, List<KnownAgent> matchingAgents, boolean all) {
+        if (matchingAgents.size() == 0) {
+            System.err.println(String.format(
+                    "not found agent for hostname=%s port=%d vmId=%s vmPid=%d in list of %d agents",
+                    hostname, listenPort, vmId, vmPid, agents.size()));
+            return;
+        }
+        if (matchingAgents.size() > 1) {
+            System.err.println(String.format(
+                    "found %d agents for hostname=%s port=%d vmId=%s vmPid=%d in list of %d agents",
+                    matchingAgents.size(), hostname, listenPort, vmId, vmPid, agents.size()));
+            if (!all) {
+                return;
+            }
+        }
+        for (KnownAgent agent : matchingAgents) {
+            if (action) {
+                agent.live = false;
+                System.err.println("killing " + agent.agent.toString());
+            } else {
                 System.err.println("not killing " + agent.agent.toString());
             }
         }
-        if (found == 0) {
-            System.err.println(
-                    String.format(
-                            "not found agent for hostname=%s port=%d vmId=%s vmPid=%d in list of %d agents", hostname, listenPort, vmId,
-                            vmPid, agents.size()
-                    )
-            );
-        }
-        if (found > 1) {
-            System.err.println(
-                    String.format(
-                            "found %d agents for hostname=%s port=%d vmId=%s vmPid=%d in list of %d agents", found, hostname, listenPort,
-                            vmId, vmPid, agents.size()
-                    )
-            );
-        }
     }
 
-    public static void injected(InstallDecompilerAgentImpl install) {
-        agents.add(new KnownAgent(install));
+    public static List<KnownAgent> findAgents(String hostname, int listenPort, String vmId, int vmPid) {
+        List<KnownAgent> result = new ArrayList<>();
+        for (KnownAgent agent : agents) {
+            if (agent.agent.matches(hostname, listenPort, vmId, vmPid) && agent.live) {
+                result.add(agent);
+            }
+        }
+        return result;
+    }
+
+    public static void injected(InstallDecompilerAgentImpl install, AgentLiveliness ttl) {
+        agents.add(new KnownAgent(install, ttl));
         System.err.println("storing " + install.toString());
     }
 
@@ -126,6 +132,26 @@ public class KnownAgents {
         for (KnownAgent agent : agents) {
             if (agent.agent.matches(hostname, listenPort, vmId, vmPid) && agent.live && agent.ttl == AgentLiveliness.SESSION) {
                 System.err.println("session agent " + agent.agent.toString());
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean isPermanent(String hostname, int listenPort, String vmId, int vmPid) {
+        for (KnownAgent agent : agents) {
+            if (agent.agent.matches(hostname, listenPort, vmId, vmPid) && agent.live && agent.ttl == AgentLiveliness.PERMANENT) {
+                System.err.println("permanent agent " + agent.agent.toString());
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean isOneShot(String hostname, int listenPort, String vmId, int vmPid) {
+        for (KnownAgent agent : agents) {
+            if (agent.agent.matches(hostname, listenPort, vmId, vmPid) && agent.live && agent.ttl == AgentLiveliness.ONE_SHOT) {
+                System.err.println("single usage agent " + agent.agent.toString());
                 return true;
             }
         }
