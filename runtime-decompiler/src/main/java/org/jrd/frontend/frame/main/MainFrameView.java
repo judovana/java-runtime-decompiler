@@ -1,5 +1,6 @@
 package org.jrd.frontend.frame.main;
 
+import org.jrd.backend.core.KnownAgents;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.Directories;
 import org.jrd.backend.data.MetadataProperties;
@@ -456,7 +457,7 @@ public class MainFrameView {
         mainFrame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                sendHaltRequest();
+                KnownAgents.killAllSessionAgents();
             }
         });
     }
