@@ -27,12 +27,15 @@ public class NewConnectionView extends JDialog {
 
     public static class HostnamePortInputPanel extends JPanel {
 
+        private static String lastHost="localhost";
+        private static String lastPort="10900";
+
         JTextField hostnameTextField;
         JTextField portTextField;
 
         HostnamePortInputPanel() {
-            this.hostnameTextField = new JTextField();
-            this.portTextField = new JTextField();
+            this.hostnameTextField = new JTextField(lastHost);
+            this.portTextField = new JTextField(lastPort);
             this.portTextField.setPreferredSize(new Dimension(90, 0));
 
             this.setLayout(new GridBagLayout());
@@ -133,8 +136,16 @@ public class NewConnectionView extends JDialog {
         return hostnamePortInputPanel.hostnameTextField.getText();
     }
 
+    void reSetLastHostname() {
+        HostnamePortInputPanel.lastHost = hostnamePortInputPanel.hostnameTextField.getText();
+    }
+
     String getPortString() throws NumberFormatException {
         return hostnamePortInputPanel.portTextField.getText();
+    }
+
+    void reSetLastPort() {
+        HostnamePortInputPanel.lastPort = hostnamePortInputPanel.portTextField.getText();
     }
 
     void setAddButtonListener(ActionListener addButtonListener) {
