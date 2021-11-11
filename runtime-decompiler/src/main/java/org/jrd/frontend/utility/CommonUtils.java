@@ -5,7 +5,7 @@ import io.github.mkoncek.classpathless.api.IdentifiedSource;
 import org.jrd.backend.communication.TopLevelErrorCandidate;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.Logger;
-import org.jrd.backend.data.Cli;
+import org.jrd.backend.data.cli.Cli;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
 import org.jrd.frontend.frame.main.DecompilationController;

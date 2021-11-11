@@ -9,7 +9,7 @@ import io.github.mkoncek.classpathless.api.MessagesListener;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
-import org.jrd.backend.data.Cli;
+import org.jrd.backend.data.cli.Cli;
 import org.jrd.backend.data.Config;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;

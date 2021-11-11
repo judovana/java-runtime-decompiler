@@ -1,5 +1,6 @@
-package org.jrd.backend.data;
+package org.jrd.backend.data.cli;
 
+import org.jrd.backend.data.Model;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;

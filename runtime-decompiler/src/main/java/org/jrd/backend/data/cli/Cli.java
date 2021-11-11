@@ -1,4 +1,4 @@
-package org.jrd.backend.data;
+package org.jrd.backend.data.cli;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.github.mkoncek.classpathless.api.ClassIdentifier;
@@ -14,6 +14,10 @@ import org.jrd.backend.core.DecompilerRequestReceiver;
 import org.jrd.backend.core.KnownAgents;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
+import org.jrd.backend.data.MetadataProperties;
+import org.jrd.backend.data.Model;
+import org.jrd.backend.data.VmInfo;
+import org.jrd.backend.data.VmManager;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.filesystem.NewFsVmController;
