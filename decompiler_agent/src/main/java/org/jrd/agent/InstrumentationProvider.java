@@ -141,6 +141,8 @@ public class InstrumentationProvider {
     public void detach() {
         instrumentation.removeTransformer(transformer);
         Main.firstTime = true;
+        int loader = Integer.valueOf(System.getProperty(Main.JRD_AGENT_LOADED, "0")) - 1;
+        System.setProperty(Main.JRD_AGENT_LOADED, String.valueOf(loader));
         AgentLogger.getLogger().log("done");
     }
 }
