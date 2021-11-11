@@ -163,8 +163,11 @@ public class DecompilationController {
             }
         }
 
-        if (shouldRemoteDetachAgent){
-            DecompilerRequestReceiver.getHaltAction(selectedVm.getVmName(), selectedVm.getVmDecompilerStatus().getListenPort(), selectedVm.getVmId(), selectedVm.getVmPid(), new AgentAttachManager(vmManager), vmManager, false);
+        if (shouldRemoteDetachAgent) {
+            DecompilerRequestReceiver.getHaltAction(
+                    selectedVm.getVmName(), selectedVm.getVmDecompilerStatus().getListenPort(), selectedVm.getVmId(), selectedVm.getVmPid(),
+                    new AgentAttachManager(vmManager), vmManager, false
+            );
         }
 
         if (!vmManager.removeVm(selectedVm)) {

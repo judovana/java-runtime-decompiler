@@ -81,24 +81,32 @@ public class KnownAgents {
     private static List<KnownAgent> agents = Collections.synchronizedList(new ArrayList<>());
 
     public static void checkDead(String hostname, int listenPort, String vmId, int vmPid) {
-        markDead(hostname, listenPort, vmId, vmPid, false,  findAgents(hostname, listenPort, vmId, vmPid), true);
+        markDead(hostname, listenPort, vmId, vmPid, false, findAgents(hostname, listenPort, vmId, vmPid), true);
     }
 
     public static void markDead(String hostname, int listenPort, String vmId, int vmPid) {
         markDead(hostname, listenPort, vmId, vmPid, true, findAgents(hostname, listenPort, vmId, vmPid), true);
     }
 
-    private static void markDead(String hostname, int listenPort, String vmId, int vmPid, boolean action, List<KnownAgent> matchingAgents, boolean all) {
+    private static void markDead(
+            String hostname, int listenPort, String vmId, int vmPid, boolean action, List<KnownAgent> matchingAgents, boolean all
+    ) {
         if (matchingAgents.size() == 0) {
-            System.err.println(String.format(
-                    "not found agent for hostname=%s port=%d vmId=%s vmPid=%d in list of %d agents",
-                    hostname, listenPort, vmId, vmPid, agents.size()));
+            System.err.println(
+                    String.format(
+                            "not found agent for hostname=%s port=%d vmId=%s vmPid=%d in list of %d agents", hostname, listenPort, vmId,
+                            vmPid, agents.size()
+                    )
+            );
             return;
         }
         if (matchingAgents.size() > 1) {
-            System.err.println(String.format(
-                    "found %d agents for hostname=%s port=%d vmId=%s vmPid=%d in list of %d agents",
-                    matchingAgents.size(), hostname, listenPort, vmId, vmPid, agents.size()));
+            System.err.println(
+                    String.format(
+                            "found %d agents for hostname=%s port=%d vmId=%s vmPid=%d in list of %d agents", matchingAgents.size(),
+                            hostname, listenPort, vmId, vmPid, agents.size()
+                    )
+            );
             if (!all) {
                 return;
             }

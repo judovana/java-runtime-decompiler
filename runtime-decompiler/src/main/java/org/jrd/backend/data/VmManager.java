@@ -229,5 +229,4 @@ public class VmManager {
         changed = false;
     }
 
-
 }

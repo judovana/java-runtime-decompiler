@@ -27,8 +27,8 @@ public class NewConnectionView extends JDialog {
 
     public static class HostnamePortInputPanel extends JPanel {
 
-        private static String lastHost="localhost";
-        private static String lastPort="10900";
+        private static String lastHost = "localhost";
+        private static String lastPort = "10900";
 
         JTextField hostnameTextField;
         JTextField portTextField;
