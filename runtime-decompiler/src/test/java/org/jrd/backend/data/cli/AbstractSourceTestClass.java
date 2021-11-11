@@ -1,4 +1,4 @@
-package org.jrd.backend.data;
+package org.jrd.backend.data.cli;
 
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;

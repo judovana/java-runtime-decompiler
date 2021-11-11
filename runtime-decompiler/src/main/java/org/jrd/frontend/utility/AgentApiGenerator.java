@@ -4,10 +4,10 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.github.mkoncek.classpathless.util.BytecodeExtractor;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
-import org.jrd.backend.data.Cli;
 import org.jrd.backend.data.Config;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
+import org.jrd.backend.data.cli.Cli;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
 

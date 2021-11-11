@@ -1,4 +1,4 @@
-package org.jrd.backend.data;
+package org.jrd.backend.data.cli;
 
 class ModifiableDummyTestingHelper extends AbstractSourceTestClass {
 

@@ -1,6 +1,9 @@
-package org.jrd.backend.data;
+package org.jrd.backend.data.cli;
 
 import org.jrd.backend.core.AgentRequestAction;
+import org.jrd.backend.data.Config;
+import org.jrd.backend.data.Directories;
+import org.jrd.backend.data.Model;
 import org.jrd.frontend.frame.main.DecompilationController;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
