@@ -35,11 +35,11 @@ public final class Main {
         synchronized (Main.class) {
             if (firstTime) {
                 firstTime = false;
-                System.setProperty(JRD_AGENT_LOADED, Boolean.TRUE.toString());
             } else {
                 throw new RuntimeException("Main : attempting to load JRD agent more than once");
             }
         }
+        System.setProperty(JRD_AGENT_LOADED, String.valueOf(Integer.valueOf(System.getProperty(JRD_AGENT_LOADED, "0")) + 1));
         Variables.init();
         UnsafeVariables.init();
         Transformer transformer = new Transformer();
