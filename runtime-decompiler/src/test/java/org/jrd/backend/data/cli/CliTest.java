@@ -1,5 +1,6 @@
-package org.jrd.backend.data;
+package org.jrd.backend.data.cli;
 
+import org.jrd.backend.data.MetadataProperties;
 import org.jrd.frontend.frame.main.DecompilationController;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -26,28 +27,27 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static org.jrd.backend.data.Cli.BASE64;
-import static org.jrd.backend.data.Cli.BYTES;
-import static org.jrd.backend.data.Cli.COMPILE;
-import static org.jrd.backend.data.Cli.CP;
-import static org.jrd.backend.data.Cli.DECOMPILE;
-import static org.jrd.backend.data.Cli.H;
-import static org.jrd.backend.data.Cli.HELP;
-import static org.jrd.backend.data.Cli.INIT;
-import static org.jrd.backend.data.Cli.LIST_CLASSES;
-import static org.jrd.backend.data.Cli.LIST_JVMS;
-import static org.jrd.backend.data.Cli.LIST_PLUGINS;
-import static org.jrd.backend.data.Cli.OVERWRITE;
-import static org.jrd.backend.data.Cli.R;
-import static org.jrd.backend.data.Cli.VERBOSE;
-import static org.jrd.backend.data.Cli.VERSION;
-import static org.jrd.backend.data.Help.BASE64_FORMAT;
-import static org.jrd.backend.data.Help.BYTES_FORMAT;
-import static org.jrd.backend.data.Help.DECOMPILE_FORMAT;
-import static org.jrd.backend.data.Help.INIT_FORMAT;
-import static org.jrd.backend.data.Help.LIST_CLASSES_FORMAT;
-import static org.jrd.backend.data.Help.OVERWRITE_FORMAT;
-import static org.jrd.backend.data.Help.printHelpText;
+import static org.jrd.backend.data.cli.Cli.BASE64;
+import static org.jrd.backend.data.cli.Cli.BYTES;
+import static org.jrd.backend.data.cli.Cli.COMPILE;
+import static org.jrd.backend.data.cli.Cli.CP;
+import static org.jrd.backend.data.cli.Cli.DECOMPILE;
+import static org.jrd.backend.data.cli.Cli.H;
+import static org.jrd.backend.data.cli.Cli.HELP;
+import static org.jrd.backend.data.cli.Cli.INIT;
+import static org.jrd.backend.data.cli.Cli.LIST_CLASSES;
+import static org.jrd.backend.data.cli.Cli.LIST_JVMS;
+import static org.jrd.backend.data.cli.Cli.LIST_PLUGINS;
+import static org.jrd.backend.data.cli.Cli.OVERWRITE;
+import static org.jrd.backend.data.cli.Cli.R;
+import static org.jrd.backend.data.cli.Cli.VERBOSE;
+import static org.jrd.backend.data.cli.Cli.VERSION;
+import static org.jrd.backend.data.cli.Help.BASE64_FORMAT;
+import static org.jrd.backend.data.cli.Help.BYTES_FORMAT;
+import static org.jrd.backend.data.cli.Help.DECOMPILE_FORMAT;
+import static org.jrd.backend.data.cli.Help.INIT_FORMAT;
+import static org.jrd.backend.data.cli.Help.LIST_CLASSES_FORMAT;
+import static org.jrd.backend.data.cli.Help.OVERWRITE_FORMAT;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -137,7 +137,7 @@ public class CliTest extends AbstractAgentNeedingTest {
         cli.consumeCli();
         String cliResult = streams.getOut();
 
-        printHelpText();
+        Help.printHelpText();
         String methodResult = streams.getOut();
 
         assertEquals(cliResult, methodResult);
@@ -151,7 +151,7 @@ public class CliTest extends AbstractAgentNeedingTest {
         cli.consumeCli();
         String cliResult = streams.getOut();
 
-        assertEquals(cliResult.trim(), MetadataProperties.getInstance().toString());
+        Assertions.assertEquals(cliResult.trim(), MetadataProperties.getInstance().toString());
     }
 
     private String processFormatDefault(String original) {

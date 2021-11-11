@@ -4,10 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.core.Logger;
-import org.jrd.backend.data.Cli;
 import org.jrd.backend.data.Directories;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
+import org.jrd.backend.data.cli.Cli;
 import org.jrd.frontend.frame.main.GlobalConsole;
 import org.jrd.frontend.utility.TeeOutputStream;
 
