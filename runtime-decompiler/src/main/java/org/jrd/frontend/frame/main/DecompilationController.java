@@ -186,7 +186,7 @@ public class DecompilationController {
             }
         }
 
-        cleanup();
+        cleanup(true);
     }
 
     private boolean warnOnOvveridesOfFsVm(VmInfo selectedVm) {
@@ -241,7 +241,6 @@ public class DecompilationController {
         VmInfo selectedVmInfo = vmList.getSelectedValue();
         mainFrameView.switchPanel(selectedVmInfo != null);
         clearOtherList(vmList);
-        haltAgent();
         if (selectedVmInfo != null) {
             new Thread(() -> {
                 this.vmInfo = selectedVmInfo;
@@ -292,16 +291,17 @@ public class DecompilationController {
         SwingUtilities.invokeLater(() -> loadingDialog.dispose());
     }
 
-    private void cleanup() {
+    private void cleanup(boolean halt) {
         mainFrameView.switchPanel(false);
         mainFrameView.getBytecodeDecompilerView().reloadClassList(new ClassInfo[0]);
         mainFrameView.getBytecodeDecompilerView().reloadTextField("", "", new byte[16]);
-        haltAgent();
+        if (halt) {
+            haltAgent();
+        }
     }
 
     private void abortClassLoading() {
-        cleanup();
-
+        cleanup(false);
         updateVmLists();
         mainFrameView.clearLocalListSelection();
         mainFrameView.clearRemoteListSelection();

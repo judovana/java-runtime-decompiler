@@ -9,6 +9,11 @@ import java.util.List;
 
 public class KnownAgents {
 
+    public static void killAllSessionAgents() {
+        //TODO
+        System.err.println("TODO kill all session agents");
+    }
+
     public enum AgentLiveliness {
         ONE_SHOT,
         SESSION,
