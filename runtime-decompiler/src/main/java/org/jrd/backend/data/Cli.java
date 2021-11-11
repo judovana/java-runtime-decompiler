@@ -59,7 +59,7 @@ public class Cli {
     protected static final String OVERWRITE = "-overwrite";
     protected static final String INIT = "-init";
     protected static final String ATTACH = "-attach";
-    protected static final String DETTACH = "-dettach";
+    protected static final String DETACH = "-detach";
     protected static final String API = "-api";
     protected static final String VERSION = "-version";
     protected static final String HELP = "-help";
@@ -225,8 +225,8 @@ public class Cli {
             case ATTACH:
                 attach();
                 break;
-            case DETTACH:
-                dettach();
+            case DETACH:
+                detach();
                 break;
             case API:
                 api();
@@ -413,11 +413,11 @@ public class Cli {
                 new AgentAttachManager(vmManager).attachAgentToVm(vmInfo.getVmId(), vmInfo.getVmPid(), Optional.ofNullable(port));
         System.out.println("Attached. Listening on: " + status.getListenPort());
         if (liveliness == KnownAgents.AgentLiveliness.SESSION) {
-            System.out.println(" kill this process (" + ProcessHandle.current().pid() + ") to dettach agent");
+            System.out.println(" kill this process (" + ProcessHandle.current().pid() + ") to detach agent");
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 @Override
                 public void run() {
-                    dettach(status.getListenPort());
+                    detach(status.getListenPort());
                 }
             });
             while (true) {
@@ -425,31 +425,31 @@ public class Cli {
             }
         } else if (liveliness == KnownAgents.AgentLiveliness.ONE_SHOT) {
             System.out.println("agent attached, and is detaching right away");
-            dettach(status.getListenPort());
+            detach(status.getListenPort());
         } else {
             System.out.println("agent agent is permanently attached to " + vmInfo.getVmPid() + " on " + status.getListenPort());
             System.out.println("exiting");
         }
     }
 
-    private void dettach() {
+    private void detach() {
         if (filteredArgs.size() < 2) {
-            throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.DETTACH_FORMAT + "'.");
+            throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.DETACH_FORMAT + "'.");
         }
         if (filteredArgs.get(1).contains(":")) {
             String[] hostPort = filteredArgs.get(1).split(":");
-            dettach(hostPort[0], Integer.valueOf(hostPort[1]));
+            detach(hostPort[0], Integer.valueOf(hostPort[1]));
         } else {
             //is pid?
-            dettach(Integer.valueOf(filteredArgs.get(1)));
+            detach(Integer.valueOf(filteredArgs.get(1)));
         }
     }
 
-    private void dettach(int port) {
-        dettach("localhost", port);
+    private void detach(int port) {
+        detach("localhost", port);
     }
 
-    private void dettach(String host, int port) {
+    private void detach(String host, int port) {
         DecompilerRequestReceiver.getHaltAction(host, port, "none", 0, new AgentAttachManager(vmManager), vmManager, false);
         System.out.println("Should be detached successfully");
     }

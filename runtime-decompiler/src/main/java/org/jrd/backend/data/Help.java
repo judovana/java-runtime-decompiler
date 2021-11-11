@@ -17,7 +17,7 @@ import static org.jrd.backend.data.Cli.BYTES;
 import static org.jrd.backend.data.Cli.COMPILE;
 import static org.jrd.backend.data.Cli.CP;
 import static org.jrd.backend.data.Cli.DECOMPILE;
-import static org.jrd.backend.data.Cli.DETTACH;
+import static org.jrd.backend.data.Cli.DETACH;
 import static org.jrd.backend.data.Cli.H;
 import static org.jrd.backend.data.Cli.HELP;
 import static org.jrd.backend.data.Cli.INIT;
@@ -54,7 +54,7 @@ public final class Help {
     static final String INIT_FORMAT = INIT + " <PUC> <FQN>";
     static final String ATTACH_FORMAT = ATTACH + " <PID> <" + KnownAgents.AgentLiveliness.class.getSimpleName() + "> " + "<" +
             KnownAgents.AgentLoneliness.class.getSimpleName() + "> " + "<port>";
-    static final String DETTACH_FORMAT = DETTACH + " URL xor PORT xor PID";
+    static final String DETACH_FORMAT = DETACH + " URL xor PORT xor PID";
     static final String API_FORMAT = API + " <PUC>";
     static final String SAVE_AS_FORMAT = SAVE_AS + " <PATH>";
     static final String SAVE_LIKE_FORMAT = SAVE_LIKE + " <SAVE METHOD>";
@@ -92,7 +92,7 @@ public final class Help {
                     "\n" + "optional, defaults to " + KnownAgents.AgentLoneliness.SINGLE_INSTANCE + "\n" +
                     "You can also specify port where the agent will listen, otherwise default port is calculated TODO" +
                     "JRD keep record of all permanent and session agents, so they can be listed/reused/removed. This list is usually checked for consistency. File is still TODO";
-    private static final String DETTACH_TEXT = "Will close and detach " + KnownAgents.AgentLiveliness.PERMANENT +
+    private static final String DETACH_TEXT = "Will close and detach " + KnownAgents.AgentLiveliness.PERMANENT +
             " agent from given localhost:port or url. To detach from PID, a valid mapping in TODO file is needed";
     private static final String API_TEXT = "Will print out which can be used to insert fields/methods to running vm";
     private static final String SAVE_AS_TEXT = "All outputs will be written to PATH instead of to standard output.";
@@ -138,7 +138,7 @@ public final class Help {
         ALL_OPTIONS.put(OVERWRITE_FORMAT, OVERWRITE_TEXT);
         ALL_OPTIONS.put(INIT_FORMAT, INIT_TEXT);
         ALL_OPTIONS.put(ATTACH_FORMAT, ATTACH_TEXT);
-        ALL_OPTIONS.put(DETTACH_FORMAT, DETTACH_TEXT);
+        ALL_OPTIONS.put(DETACH_FORMAT, DETACH_TEXT);
         ALL_OPTIONS.put(API_FORMAT, API_TEXT);
 
         SAVING_OPTIONS = new LinkedHashMap<>();

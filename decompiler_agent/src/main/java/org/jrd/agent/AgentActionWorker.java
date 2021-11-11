@@ -94,7 +94,7 @@ public class AgentActionWorker extends Thread {
                         AgentLogger.getLogger().log("Agent received HALT command, closing socket.");
                         closeSocket(outputStream, socket);
                         AgentLogger.getLogger().log("Agent received HALT command, removing instrumentation");
-                        provider.dettach();
+                        provider.detach();
                         break;
                     case "CLASSES":
                         getAllLoadedClasses(outputStream, false);
