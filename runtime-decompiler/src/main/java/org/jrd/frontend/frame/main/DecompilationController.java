@@ -6,6 +6,7 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.jrd.backend.communication.FsAgent;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.communication.TopLevelErrorCandidate;
+import org.jrd.backend.core.AgentAttachManager;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.AgentRequestAction.RequestAction;
 import org.jrd.backend.core.ClassInfo;
@@ -134,6 +135,7 @@ public class DecompilationController {
         String vmType = event.getActionCommand();
         JList<VmInfo> sourceList = (JList<VmInfo>) event.getSource();
         VmInfo selectedVm = sourceList.getSelectedValue();
+        boolean shouldRemoteDetachAgent = event.getModifiers() == 1 && selectedVm.getType() == VmInfo.Type.REMOTE;
 
         if (selectedVm == null) {
             Logger.getLogger().log(Logger.Level.ALL, "Attempted to remove " + vmType + " with none selected.");
@@ -147,6 +149,9 @@ public class DecompilationController {
             confirmMessage += "\nRemoving it will also no longer keep it saved between JRD instances.";
         }
 
+        if (shouldRemoteDetachAgent) {
+            confirmMessage += "\nKilling the agent will prohibit any other connection in future. You will need to attach it again";
+        }
         int dialogResult =
                 JOptionPane.showConfirmDialog(mainFrameView.getMainFrame(), confirmMessage, "Warning", JOptionPane.OK_CANCEL_OPTION);
         if (dialogResult == JOptionPane.CANCEL_OPTION || dialogResult < 0) {
@@ -157,6 +162,11 @@ public class DecompilationController {
                 return;
             }
         }
+
+        if (shouldRemoteDetachAgent){
+            DecompilerRequestReceiver.getHaltAction(selectedVm.getVmName(), selectedVm.getVmDecompilerStatus().getListenPort(), selectedVm.getVmId(), selectedVm.getVmPid(), new AgentAttachManager(vmManager), vmManager, false);
+        }
+
         if (!vmManager.removeVm(selectedVm)) {
             String removeFailMessage = "Failed to remove VM: " + selectedVm;
             Logger.getLogger().log(Logger.Level.ALL, removeFailMessage);

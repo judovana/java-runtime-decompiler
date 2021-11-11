@@ -15,6 +15,7 @@ import org.jrd.frontend.utility.ScreenFinder;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -66,6 +67,7 @@ public class MainFrameView {
     private JPanel remoteVmPanel;
     private JPanel remoteVmLabelPanel;
     private JPanel remoteVmButtonPanel;
+    private JCheckBox remoteVmDetach;
     private JButton remoteVmAddButton;
     private JButton remoteVmRemoveButton;
     private JScrollPane remoteVmScrollPane;
@@ -237,7 +239,7 @@ public class MainFrameView {
 
         remoteVmRemoveButton = ImageButtonFactory.createRemoveButton();
         remoteVmRemoveButton.addActionListener(actionEvent -> {
-            ActionEvent event = new ActionEvent(remoteVmList, 0, REMOTE_VM_ACTION);
+            ActionEvent event = new ActionEvent(remoteVmList, 0, REMOTE_VM_ACTION, remoteVmDetach.isSelected()?1:0);
             removeVmDialogListener.actionPerformed(event);
         });
 
@@ -247,7 +249,8 @@ public class MainFrameView {
 
         // remoteConnectionButton End
         remoteVmLabelPanel = new JPanel(new BorderLayout());
-        remoteVmLabelPanel.add(new JLabel("Remote Processes with agent", SwingConstants.CENTER), BorderLayout.CENTER);
+        remoteVmDetach = new JCheckBox("Kill agent on removal", false);
+        remoteVmLabelPanel.add(remoteVmDetach);
         remoteVmLabelPanel.add(remoteVmButtonPanel, BorderLayout.EAST);
         // remoteVmLabelPanel end
         remoteVmList = new UndraggableJList();
