@@ -26,6 +26,8 @@ public class NewConnectionController {
         }
         if (isValidPort(portString)) {
             int port = Integer.parseInt(portString);
+            newConnectionView.reSetLastHostname();
+            newConnectionView.reSetLastPort();
             vmManager.createRemoteVM(hostname, port);
             newConnectionView.dispose();
         } else {
