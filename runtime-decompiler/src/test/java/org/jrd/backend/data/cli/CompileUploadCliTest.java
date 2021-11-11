@@ -253,10 +253,10 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
         File compiledFile = File.createTempFile("jrd", "test.class");
         String[] args;
         if (plugin != null) {
-            args = new String[]{Cli.COMPILE, Cli.P, plugin, Cli.CP, pid, src.getAbsolutePath(), Cli.SAVE_LIKE, Cli.Saving.EXACT,
-                    Cli.SAVE_AS, compiledFile.getAbsolutePath()};
+            args = new String[]{Cli.COMPILE, Cli.P, plugin, Cli.CP, pid, src.getAbsolutePath(), Cli.SAVE_LIKE, Saving.EXACT, Cli.SAVE_AS,
+                    compiledFile.getAbsolutePath()};
         } else {
-            args = new String[]{Cli.COMPILE, Cli.CP, pid, src.getAbsolutePath(), Cli.SAVE_LIKE, Cli.Saving.EXACT, Cli.SAVE_AS,
+            args = new String[]{Cli.COMPILE, Cli.CP, pid, src.getAbsolutePath(), Cli.SAVE_LIKE, Saving.EXACT, Cli.SAVE_AS,
                     compiledFile.getAbsolutePath()};
         }
         Cli cli = new Cli(args, model);
@@ -266,7 +266,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
 
     private static File decompile(String plugin, AbstractSourceTestClass dummy, Model model) throws Exception {
         File decompiledFile = File.createTempFile("jrd", "test.java");
-        String[] args = new String[]{Cli.DECOMPILE, dummy.getPid(), plugin, dummy.getFqn(), Cli.SAVE_LIKE, Cli.Saving.EXACT, Cli.SAVE_AS,
+        String[] args = new String[]{Cli.DECOMPILE, dummy.getPid(), plugin, dummy.getFqn(), Cli.SAVE_LIKE, Saving.EXACT, Cli.SAVE_AS,
                 decompiledFile.getAbsolutePath()};
         Cli cli = new Cli(args, model);
         cli.consumeCli();
