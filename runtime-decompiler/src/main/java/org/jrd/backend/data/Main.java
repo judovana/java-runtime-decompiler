@@ -4,14 +4,13 @@ import org.jrd.backend.core.Logger;
 import org.jrd.frontend.frame.main.DecompilationController;
 import org.jrd.frontend.frame.main.MainFrameView;
 
+import java.util.Arrays;
+
 public class Main {
 
     public static void main(String[] allArgs) throws Exception {
         Model model = new Model();
         Cli cli = new Cli(allArgs, model);
-        if (cli.shouldBeVerbose()) {
-            Logger.getLogger().setVerbose(true);
-        }
         if (cli.isGui()) {
             setLookAndFeel();
             MainFrameView mainView = new MainFrameView();
