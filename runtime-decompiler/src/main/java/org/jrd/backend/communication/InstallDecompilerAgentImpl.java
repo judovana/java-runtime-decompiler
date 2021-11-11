@@ -44,7 +44,7 @@ public final class InstallDecompilerAgentImpl {
         install.locateAgent();
         install.attach();
         install.injectAgent();
-        KnownAgents.injected(install);
+        KnownAgents.injected(install, KnownAgents.AgentLiveliness.SESSION);
     }
 
     private String agentJar;
