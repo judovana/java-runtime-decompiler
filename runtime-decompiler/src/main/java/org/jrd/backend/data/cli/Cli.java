@@ -120,33 +120,7 @@ public class Cli {
                 saveLike = originalArgs[i + 1];
                 i++;
             } else if (cleanedArg.equals(AGENT)) {
-                if (!agentArgs.isEmpty()) {
-                    throw new RuntimeException("You had set second " + AGENT + ". Not allowed.");
-                }
-                while (true) {
-                    if (i == originalArgs.length - 1) {
-                        if (agentArgs.isEmpty()) {
-                            throw new RuntimeException(
-                                    AGENT + " should have at least one parameter otherwise it is nonsense. Use: " + Help.AGENT_FORMAT
-                            );
-                        } else {
-                            break;
-                        }
-                    }
-                    String agentArg = originalArgs[i + 1];
-                    if (agentArg.startsWith("-")) {
-                        if (agentArgs.isEmpty()) {
-                            throw new RuntimeException(
-                                    AGENT + " should have at least one parameter otherwise it is nonsense. Use: " + Help.AGENT_FORMAT
-                            );
-                        } else {
-                            break;
-                        }
-                    } else {
-                        agentArgs.add(agentArg);
-                        i++;
-                    }
-                }
+                i = readAgentParams(originalArgs, agentArgs, i);
             } else {
                 args.add(arg);
             }
@@ -164,6 +138,38 @@ public class Cli {
         return args;
     }
 
+    private int readAgentParams(String[] originalArgs, List<String> agentArgs, int i) {
+        if (!agentArgs.isEmpty()) {
+            throw new RuntimeException("You had set second " + AGENT + ". Not allowed.");
+        }
+        while (true) {
+            if (i == originalArgs.length - 1) {
+                if (agentArgs.isEmpty()) {
+                    throw new RuntimeException(
+                            AGENT + " should have at least one parameter otherwise it is nonsense. Use: " + Help.AGENT_FORMAT
+                    );
+                } else {
+                    break;
+                }
+            }
+            String agentArg = originalArgs[i + 1];
+            if (agentArg.startsWith("-")) {
+                if (agentArgs.isEmpty()) {
+                    throw new RuntimeException(
+                            AGENT + " should have at least one parameter otherwise it is nonsense. Use: " + Help.AGENT_FORMAT
+                    );
+                } else {
+                    break;
+                }
+            } else {
+                agentArgs.add(agentArg);
+                i++;
+            }
+        }
+        return i;
+    }
+
+    @SuppressWarnings({"CyclomaticComplexity", "JavaNCSS", "ExecutableStatementCount"}) // un-refactorable
     public void consumeCli() throws Exception {
         if (filteredArgs.isEmpty()) { // impossible in org.jrd.backend.Main#Main() control flow, but possible in tests
             return;

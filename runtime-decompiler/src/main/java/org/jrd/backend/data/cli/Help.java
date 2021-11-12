@@ -96,7 +96,8 @@ public final class Help {
                     .collect(Collectors.joining("\n")) +
             "\n" + "optional, defaults to " + KnownAgents.AgentLoneliness.SINGLE_INSTANCE + "\n" +
             "You can also specify port where the agent will listen, otherwise default port is calculated TODO" +
-            "JRD keep record of all permanent and session agents, so they can be listed/reused/removed. This list is usually checked for consistency. File is still TODO";
+            "JRD keep record of all permanent and session agents, so they can be listed/reused/removed." +
+            "This list is usually checked for consistency. File is still TODO";
     private static final String DETACH_TEXT = "Will close and detach " + KnownAgents.AgentLiveliness.PERMANENT +
             " agent from given localhost:port or url. To detach from PID, a valid mapping in TODO file is needed";
     private static final String API_TEXT = "Will print out which can be used to insert fields/methods to running vm";

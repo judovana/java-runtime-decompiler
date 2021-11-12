@@ -117,7 +117,8 @@ public class DecompilerRequestReceiver {
         }
         if (actualListenPort == AgentRequestAction.NOT_ATTACHED_PORT) {
             throw new RuntimeException(
-                    "Failed to attach agent. You must run the target process with '-Djdk.attach.allowAttachSelf=true'. Or agent is already attached? Or Bad agent?"
+                    "Failed to attach agent. You must run the target process with '-Djdk.attach.allowAttachSelf=true'." +
+                            "Or agent is already attached? Or Bad agent?"
             );
         }
         return actualListenPort;
