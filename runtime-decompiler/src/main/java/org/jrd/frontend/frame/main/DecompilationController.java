@@ -130,16 +130,14 @@ public class DecompilationController {
         newFsVmDialog.setVisible(true);
     }
 
-    @SuppressWarnings("unchecked") // event.getSource() is always of type JList<VmInfo>
+    @SuppressWarnings({"unchecked", "CyclomaticComplexity"}) // event.getSource() is always of type JList<VmInfo>
     private void removeVmDialog(ActionEvent event) {
         String vmType = event.getActionCommand();
         JList<VmInfo> sourceList = (JList<VmInfo>) event.getSource();
         VmInfo selectedVm = sourceList.getSelectedValue();
         boolean shouldRemoteDetachAgent = event.getModifiers() == 1 && selectedVm.getType() == VmInfo.Type.REMOTE;
 
-        if (selectedVm == null) {
-            Logger.getLogger().log(Logger.Level.ALL, "Attempted to remove " + vmType + " with none selected.");
-            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), "No " + vmType + " selected.", "Error", JOptionPane.ERROR_MESSAGE);
+        if (exitOnEmpty(vmType, selectedVm)) {
             return;
         }
 
@@ -187,6 +185,15 @@ public class DecompilationController {
         }
 
         cleanup(true);
+    }
+
+    private boolean exitOnEmpty(String vmType, VmInfo selectedVm) {
+        if (selectedVm == null) {
+            Logger.getLogger().log(Logger.Level.ALL, "Attempted to remove " + vmType + " with none selected.");
+            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), "No " + vmType + " selected.", "Error", JOptionPane.ERROR_MESSAGE);
+            return true;
+        }
+        return false;
     }
 
     private boolean warnOnOvveridesOfFsVm(VmInfo selectedVm) {

@@ -6,7 +6,7 @@ import org.jrd.backend.core.Logger;
 import java.util.List;
 import java.util.Optional;
 
-class AgentConfig {
+public final class AgentConfig {
 
     final KnownAgents.AgentLoneliness loneliness;
     final Optional<Integer> port;
@@ -18,6 +18,7 @@ class AgentConfig {
         this.liveliness = liveliness;
     }
 
+    @SuppressWarnings({"CyclomaticComplexity"}) // un-refactorable
     public static AgentConfig create(List<String> agentArgs, boolean session) {
         int[] futureTypeUnderstood = new int[]{0, 0, 0};
         KnownAgents.AgentLiveliness liveliness = null;

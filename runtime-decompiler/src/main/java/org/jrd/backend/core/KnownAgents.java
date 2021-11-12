@@ -7,12 +7,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class KnownAgents {
-
-    public static void killAllSessionAgents() {
-        //TODO
-        System.err.println("TODO kill all session agents");
-    }
+public final class KnownAgents {
 
     public enum AgentLiveliness {
         ONE_SHOT,
@@ -32,8 +27,9 @@ public class KnownAgents {
                     return "Agent will connect and will remain connected untill end of session.";
                 case PERMANENT:
                     return "Agent will attach, and will disconnect only manually or on death of target process";
+                default:
+                    throw new RuntimeException("Unknown " + AgentLiveliness.class.getSimpleName() + " value " + this);
             }
-            throw new RuntimeException("Unknown " + AgentLiveliness.class.getSimpleName() + " value " + this);
         }
 
         public static AgentLiveliness fromString(String s) throws IllegalArgumentException {
@@ -60,8 +56,9 @@ public class KnownAgents {
                     return "Agent will attach, but will not set the flag about its presence. Still, the property will be set.";
                 case FORCING:
                     return "Agent will attach, but will skip the check for single instance";
+                default:
+                    throw new RuntimeException("Unknown " + AgentLoneliness.class.getSimpleName() + " value " + this);
             }
-            throw new RuntimeException("Unknown " + AgentLoneliness.class.getSimpleName() + " value " + this);
         }
 
         public static AgentLoneliness fromString(String s) throws IllegalArgumentException {
@@ -76,7 +73,7 @@ public class KnownAgents {
         private boolean live;
         private final AgentLiveliness ttl;
 
-        public KnownAgent(InstallDecompilerAgentImpl install, AgentLiveliness ttl) {
+        KnownAgent(InstallDecompilerAgentImpl install, AgentLiveliness ttl) {
             this.agent = install;
             this.ttl = ttl;
             this.live = true;
@@ -169,5 +166,13 @@ public class KnownAgents {
             }
         }
         return false;
+    }
+
+    public static void killAllSessionAgents() {
+        //TODO
+        System.err.println("TODO kill all session agents");
+    }
+
+    private KnownAgents() {
     }
 }
