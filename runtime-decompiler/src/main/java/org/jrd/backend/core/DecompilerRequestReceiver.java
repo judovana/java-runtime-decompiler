@@ -243,22 +243,16 @@ public class DecompilerRequestReceiver {
 
     public static String getHaltAction(
             String hostname, int listenPort, String vmId, int vmPid, AgentAttachManager attachManager, VmManager vmManager,
-            boolean removeVmDecompilerStatus
-    ) {
-        if (KnownAgents.findAgents(hostname, listenPort, vmId, vmPid).size() == 0 ||
-                KnownAgents.isOneShot(hostname, listenPort, vmId, vmPid)) {
-            try {
-                getResponse(hostname, listenPort, vmId, vmPid, "HALT", attachManager, vmManager);
-            } catch (Exception e) {
-                Logger.getLogger().log(Logger.Level.ALL, new RuntimeException("Exception when calling halt action", e));
-            } finally {
-                if (removeVmDecompilerStatus) {
-                    vmManager.getVmInfoByID(vmId).removeVmDecompilerStatus();
-                }
-            }
+            boolean removeVmDecompilerStatus) {
+        try {
+            getResponse(hostname, listenPort, vmId, vmPid, "HALT", attachManager, vmManager);
+        } catch (Exception e) {
+            Logger.getLogger().log(Logger.Level.ALL, new RuntimeException("Exception when calling halt action", e));
+        } finally {
             KnownAgents.markDead(hostname, listenPort, vmId, vmPid);
-        } else {
-            KnownAgents.checkDead(hostname, listenPort, vmId, vmPid);
+            if (removeVmDecompilerStatus) {
+                vmManager.getVmInfoByID(vmId).removeVmDecompilerStatus();
+            }
         }
         return OK_RESPONSE;
     }
