@@ -49,7 +49,7 @@ public class AgentActionWorker extends Thread {
         }
     }
 
-    private void executeRequest(Socket socket, InstrumentationProvider provider) {
+    private void executeRequest(Socket socket, InstrumentationProvider localProvider) {
         InputStream is = null;
         try {
             is = socket.getInputStream();
@@ -94,7 +94,7 @@ public class AgentActionWorker extends Thread {
                         AgentLogger.getLogger().log("Agent received HALT command, closing socket.");
                         closeSocket(outputStream, socket);
                         AgentLogger.getLogger().log("Agent received HALT command, removing instrumentation");
-                        provider.detach();
+                        localProvider.detach();
                         break;
                     case "CLASSES":
                         getAllLoadedClasses(outputStream, false);

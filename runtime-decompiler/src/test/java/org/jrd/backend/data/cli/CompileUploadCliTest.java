@@ -1,5 +1,6 @@
 package org.jrd.backend.data.cli;
 
+import org.jrd.backend.core.KnownAgents;
 import org.jrd.backend.data.Model;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
@@ -130,7 +131,8 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
     void testOverwriteStdIn(String pucComponent) throws Exception {
         createReplacement(NEW_GREETING);
 
-        String[] args = new String[]{Cli.OVERWRITE, pucComponent, dummy.getFqn()};
+        String[] args =
+                new String[]{Cli.OVERWRITE, pucComponent, dummy.getFqn(), Cli.AGENT, KnownAgents.AgentLiveliness.ONE_SHOT.toString()};
         Cli cli = new Cli(args, model);
 
         // setup input stream
@@ -240,7 +242,8 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
     }
 
     static void overwrite(String pid, String fqn, Model model, File bin) throws Exception {
-        String[] args = new String[]{Cli.OVERWRITE, pid, fqn, bin.getAbsolutePath()};
+        String[] args =
+                new String[]{Cli.OVERWRITE, pid, fqn, bin.getAbsolutePath(), Cli.AGENT, KnownAgents.AgentLiveliness.ONE_SHOT.toString()};
         Cli cli = new Cli(args, model);
         cli.consumeCli();
     }

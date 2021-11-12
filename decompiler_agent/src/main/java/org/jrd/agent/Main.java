@@ -12,13 +12,13 @@ import java.lang.instrument.Instrumentation;
  */
 public final class Main {
 
+    public static final String JRD_AGENT_LOADED = "org.jrd.agent.loaded";
+
     private static final String ADDRESS_STRING = "address:";
     private static final String PORT_STRING = "port:";
     private static String hostname;
     private static Integer port;
-
-    public static boolean firstTime = true;
-    public final static String JRD_AGENT_LOADED = "org.jrd.agent.loaded";
+    private static boolean firstTime = true;
 
     private Main() {
     }
@@ -39,7 +39,7 @@ public final class Main {
                 throw new RuntimeException("Main : attempting to load JRD agent more than once");
             }
         }
-        System.setProperty(JRD_AGENT_LOADED, String.valueOf(Integer.valueOf(System.getProperty(JRD_AGENT_LOADED, "0")) + 1));
+        System.setProperty(JRD_AGENT_LOADED, String.valueOf(Integer.parseInt(System.getProperty(JRD_AGENT_LOADED, "0")) + 1));
         Variables.init();
         UnsafeVariables.init();
         Transformer transformer = new Transformer();
@@ -80,4 +80,7 @@ public final class Main {
         premain(args, inst);
     }
 
+    public static void setFirstTime(boolean b) {
+        firstTime = b;
+    }
 }
