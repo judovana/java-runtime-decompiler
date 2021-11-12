@@ -128,7 +128,6 @@ public class InstrumentationProvider {
 
     public int cleanOverrides(String pattern) {
         List<String> removed = transformer.cleanOverrides(Pattern.compile(pattern));
-
         try {
             instrumentation.retransformClasses(removed.stream().map(this::findClass).toArray(Class[]::new));
         } catch (RuntimeException | UnmodifiableClassException e) {
@@ -139,6 +138,7 @@ public class InstrumentationProvider {
     }
 
     public void detach() {
+        cleanOverrides(".*"); //optional?
         instrumentation.removeTransformer(transformer);
         Main.firstTime = true;
         int loader = Integer.valueOf(System.getProperty(Main.JRD_AGENT_LOADED, "0")) - 1;
