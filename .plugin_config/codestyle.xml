@@ -109,8 +109,8 @@
         <module name="AvoidStarImport" />
         <module name="AvoidStaticImport">
             <property name="excludes" value="org.junit.jupiter.api.Assertions.*"/>
-            <property name="excludes" value="org.jrd.backend.data.Cli.*"/>
-            <property name="excludes" value="org.jrd.backend.data.Help.*"/>
+            <property name="excludes" value="org.jrd.backend.data.cli.Cli.*"/>
+            <property name="excludes" value="org.jrd.backend.data.cli.Help.*"/>
             <property name="excludes" value="org.jrd.agent.api.UnsafeVariables.*"/>
             <property name="excludes" value="org.jrd.agent.api.Variables.*"/>
         </module>

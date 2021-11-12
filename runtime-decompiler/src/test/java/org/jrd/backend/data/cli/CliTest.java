@@ -1,5 +1,6 @@
 package org.jrd.backend.data.cli;
 
+import org.jrd.backend.core.KnownAgents;
 import org.jrd.backend.data.MetadataProperties;
 import org.jrd.frontend.frame.main.DecompilationController;
 import org.junit.jupiter.api.Assertions;
@@ -27,6 +28,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static org.jrd.backend.data.cli.Cli.AGENT;
 import static org.jrd.backend.data.cli.Cli.BASE64;
 import static org.jrd.backend.data.cli.Cli.BYTES;
 import static org.jrd.backend.data.cli.Cli.COMPILE;
@@ -191,7 +193,7 @@ public class CliTest extends AbstractAgentNeedingTest {
     private static Stream<String> validOperationSource() {
         return Stream.of(
                 H, HELP, VERBOSE, VERSION, LIST_JVMS, LIST_PLUGINS, INIT_FORMAT, LIST_CLASSES_FORMAT, BYTES_FORMAT, BASE64_FORMAT,
-                DECOMPILE_FORMAT, OVERWRITE_FORMAT
+                DECOMPILE_FORMAT
         );
     }
 
@@ -199,6 +201,14 @@ public class CliTest extends AbstractAgentNeedingTest {
     @MethodSource("validOperationSource")
     void testValidOperation(String operation) {
         args = processArgs(operation);
+        cli = new Cli(args, model);
+
+        assertDoesNotThrow(cli::consumeCli);
+    }
+
+    @Test
+    void testValidOperationOverwrite() {
+        args = processArgs(OVERWRITE_FORMAT + " " + AGENT + " " + KnownAgents.AgentLiveliness.ONE_SHOT);
         cli = new Cli(args, model);
 
         assertDoesNotThrow(cli::consumeCli);
@@ -392,7 +402,7 @@ public class CliTest extends AbstractAgentNeedingTest {
         return Stream.of(
                 new String[]{LIST_CLASSES}, new String[]{BYTES}, new String[]{BYTES, unimportantPid}, new String[]{BASE64},
                 new String[]{BASE64, unimportantPid}, new String[]{INIT}, new String[]{INIT, unimportantPid}, new String[]{OVERWRITE},
-                new String[]{OVERWRITE, unimportantPid}, new String[]{DECOMPILE}, new String[]{DECOMPILE, unimportantPid},
+                new String[]{OVERWRITE, unimportantPid, AGENT}, new String[]{DECOMPILE}, new String[]{DECOMPILE, unimportantPid},
                 new String[]{DECOMPILE, unimportantPid, "javap"}, new String[]{COMPILE}, new String[]{COMPILE, R},
                 new String[]{COMPILE, R, CP, unimportantPid}, new String[]{COMPILE, R, CP, unimportantPid, Cli.P, "unimportantPluginName"}
         ).map(a -> (Object) a).map(Arguments::of); // cast needed because of varargs factory method .of()
@@ -403,7 +413,6 @@ public class CliTest extends AbstractAgentNeedingTest {
     void testTooFewArguments(String[] wrongArgs) {
         args = wrongArgs;
         cli = new Cli(args, model);
-
         assertThrows(IllegalArgumentException.class, () -> cli.consumeCli());
     }
 
@@ -476,7 +485,8 @@ public class CliTest extends AbstractAgentNeedingTest {
     void testOverwrite(String pucComponent) throws Exception {
         createReplacement(NEW_GREETINGS);
 
-        args = new String[]{OVERWRITE, pucComponent, dummy.getFqn(), dummy.getDotClassPath()};
+        args = new String[]{OVERWRITE, pucComponent, dummy.getFqn(), dummy.getDotClassPath(), AGENT,
+                KnownAgents.AgentLiveliness.ONE_SHOT.toString()};
         cli = new Cli(args, model);
 
         assertDoesNotThrow(() -> cli.consumeCli());
@@ -508,7 +518,7 @@ public class CliTest extends AbstractAgentNeedingTest {
     void testOverwriteStdIn(String pucComponent) throws Exception {
         createReplacement(NEW_GREETINGS);
 
-        args = new String[]{OVERWRITE, pucComponent, dummy.getFqn()};
+        args = new String[]{OVERWRITE, pucComponent, dummy.getFqn(), AGENT, KnownAgents.AgentLiveliness.ONE_SHOT.toString()};
         cli = new Cli(args, model);
 
         // setup input stream
@@ -581,7 +591,8 @@ public class CliTest extends AbstractAgentNeedingTest {
             fail("Failed to copy file.", e);
         }
 
-        args = new String[]{OVERWRITE, dummy.getPid(), dummy.getFqn(), nonClassFile};
+        args = new String[]{OVERWRITE, dummy.getPid(), dummy.getFqn(), nonClassFile, AGENT,
+                KnownAgents.AgentLiveliness.ONE_SHOT.toString()};
         cli = new Cli(args, model);
 
         assertDoesNotThrow(() -> cli.consumeCli());
