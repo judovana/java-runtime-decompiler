@@ -1,10 +1,10 @@
 package org.jrd.backend.data.cli;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import io.github.mkoncek.classpathless.api.ClassesProvider;
 import io.github.mkoncek.classpathless.api.ClasspathlessCompiler;
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
+import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.core.AgentAttachManager;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.ClassInfo;
@@ -152,7 +152,12 @@ public class Cli {
             }
         }
         this.saving = new Saving(saveAs, saveLike);
-        this.agent = AgentConfig.create(agentArgs);
+        this.agent = AgentConfig.create(
+                agentArgs,
+                args.stream().map(a -> cleanParameter(a)).anyMatch(a -> a.equals(OVERWRITE)) ||
+                        args.stream().map(a -> cleanParameter(a)).anyMatch(a -> a.equals(ATTACH)) ||
+                        (args.stream().map(a -> cleanParameter(a)).anyMatch(a -> a.equals(COMPILE) && shouldUpload()))
+        );
         if (!agentArgs.isEmpty() && args.isEmpty()) {
             throw new RuntimeException("It is not allowed to set " + AGENT + " in gui mode");
         }
@@ -163,61 +168,127 @@ public class Cli {
         if (filteredArgs.isEmpty()) { // impossible in org.jrd.backend.Main#Main() control flow, but possible in tests
             return;
         }
-
-        String operation = cleanParameter(filteredArgs.get(0));
-        switch (operation) {
-            case LIST_JVMS:
-                listJvms();
-                break;
-            case LIST_PLUGINS:
-                listPlugins();
-                break;
-            case LIST_CLASSES:
-                listClasses(false);
-                break;
-            case LIST_CLASSESDETAILS:
-                listClasses(true);
-                break;
-            case BYTES:
-            case BASE64:
-                boolean bytes = operation.equals(BYTES);
-                printBytes(bytes);
-                break;
-            case DECOMPILE:
-                decompile();
-                break;
-            case COMPILE:
-                compile(new CompileArguments(filteredArgs, pluginManager, vmManager));
-                break;
-            case OVERWRITE:
-                overwrite();
-                break;
-            case INIT:
-                init();
-                break;
-            case ATTACH:
-                attach();
-                break;
-            case DETACH:
-                detach();
-                break;
-            case API:
-                api();
-                break;
-            case HELP:
-            case H:
-                printHelp();
-                break;
-            case VERSION:
-                printVersion();
-                break;
-            default:
-                printHelp();
-                throw new IllegalArgumentException("Unknown commandline argument '" + operation + "'.");
+        final String operation = cleanParameter(filteredArgs.get(0));
+        final List<VmInfo> operatedOn = new ArrayList<>(2);
+        try {
+            switch (operation) {
+                case LIST_JVMS:
+                    listJvms();
+                    break;
+                case LIST_PLUGINS:
+                    listPlugins();
+                    break;
+                case LIST_CLASSES:
+                    VmInfo vmInfo1 = listClasses(false);
+                    operatedOn.add(vmInfo1);
+                    break;
+                case LIST_CLASSESDETAILS:
+                    VmInfo vmInfo2 = listClasses(true);
+                    operatedOn.add(vmInfo2);
+                    break;
+                case BYTES:
+                case BASE64:
+                    boolean bytes = operation.equals(BYTES);
+                    VmInfo vmInfo3 = printBytes(bytes);
+                    operatedOn.add(vmInfo3);
+                    break;
+                case DECOMPILE:
+                    VmInfo vmInfo4 = decompile();
+                    operatedOn.add(vmInfo4);
+                    break;
+                case COMPILE:
+                    VmInfo[] sourceTarget = compile(new CompileArguments(filteredArgs, pluginManager, vmManager));
+                    if (sourceTarget[0] != null) {
+                        operatedOn.add(sourceTarget[0]);
+                    }
+                    if (sourceTarget[1] != null) {
+                        operatedOn.add(sourceTarget[1]);
+                    }
+                    break;
+                case OVERWRITE:
+                    VmInfo vmInfo5 = overwrite();
+                    operatedOn.add(vmInfo5);
+                    break;
+                case INIT:
+                    VmInfo vmInfo6 = init();
+                    operatedOn.add(vmInfo6);
+                    break;
+                case ATTACH:
+                    VmInfo vmInfo7 = attach();
+                    operatedOn.add(vmInfo7);
+                    break;
+                case DETACH:
+                    detach();
+                    break;
+                case API:
+                    VmInfo vmInfo8 = api();
+                    operatedOn.add(vmInfo8);
+                    break;
+                case HELP:
+                case H:
+                    printHelp();
+                    break;
+                case VERSION:
+                    printVersion();
+                    break;
+                default:
+                    printHelp();
+                    throw new IllegalArgumentException("Unknown commandline argument '" + operation + "'.");
+            }
+        } finally {
+            boolean localAgent = false;
+            for (VmInfo status : operatedOn) {
+                if (status.getType() == VmInfo.Type.LOCAL) {
+                    localAgent = true;
+                }
+            }
+            if (agent.liveliness == KnownAgents.AgentLiveliness.SESSION) {
+                Runtime.getRuntime().addShutdownHook(new Thread() {
+                    @Override
+                    public void run() {
+                        for (VmInfo status : operatedOn) {
+                            if (status.getType() == VmInfo.Type.LOCAL) {
+                                detach(status.getVmDecompilerStatus().getListenPort());
+                            }
+                        }
+                    }
+                });
+                if (localAgent) {
+                    System.out.println(
+                            " kill this process (" + ProcessHandle.current().pid() + ") to detach agent(s) on port: " +
+                                    operatedOn.stream().map(a -> a.getVmDecompilerStatus().getListenPort() + "")
+                                            .collect(Collectors.joining(","))
+                    );
+                    while (true) {
+                        Thread.sleep(1000);
+                    }
+                }
+            } else if (agent.liveliness == KnownAgents.AgentLiveliness.ONE_SHOT) {
+                for (VmInfo status : operatedOn) {
+                    if (operation.equals(ATTACH)) {
+                        System.out.println("agent was justattached.. and is detaching right away. Weird, yah?");
+                    } else {
+                        Logger.getLogger().log("Detaching single attach agent(s), if any");
+                    }
+                    if (status.getType() == VmInfo.Type.LOCAL) {
+                        detach(status.getVmDecompilerStatus().getListenPort());
+                    }
+                }
+            } else {
+                for (VmInfo status : operatedOn) {
+                    if (localAgent) {
+                        System.err.println(
+                                "agent agent is permanently attached to " + status.getVmPid() + " on port " +
+                                        status.getVmDecompilerStatus().getListenPort()
+                        );
+                    }
+                }
+                System.err.println("exiting");
+            }
         }
     }
 
-    private void overwrite() throws Exception {
+    private VmInfo overwrite() throws Exception {
         String newBytecodeFile;
         if (filteredArgs.size() == 3) {
             Logger.getLogger().log("Reading class for overwrite from stdin.");
@@ -257,10 +328,11 @@ public class Cli {
         } else {
             throw new RuntimeException(DecompilationController.CLASSES_NOPE);
         }
+        return vmInfo;
     }
 
     @SuppressFBWarnings(value = "OS_OPEN_STREAM", justification = "The stream is clsoed as conditionally as is created")
-    private void api() throws Exception {
+    private VmInfo api() throws Exception {
         PrintStream out = System.out;
         try {
             if (saving != null && saving.as != null) {
@@ -274,8 +346,8 @@ public class Cli {
             VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
             AgentApiGenerator.initItems(vmInfo, vmManager, pluginManager);
             out.println(AgentApiGenerator.getInterestingHelp());
-
             out.flush();
+            return vmInfo;
         } finally {
             if (saving != null && saving.as != null) {
                 out.close();
@@ -283,13 +355,14 @@ public class Cli {
         }
     }
 
-    private void init() throws Exception {
+    private VmInfo init() throws Exception {
         if (filteredArgs.size() != 3) {
             throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.INIT_FORMAT + "'.");
         }
         String fqn = filteredArgs.get(2);
         VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
         initClass(vmInfo, vmManager, fqn, System.out);
+        return vmInfo;
     }
 
     public static void initClass(VmInfo vmInfo, VmManager vmManager, String fqn, PrintStream outputMessageStream) {
@@ -303,7 +376,7 @@ public class Cli {
         }
     }
 
-    private void attach() throws Exception {
+    private VmInfo attach() throws Exception {
         final int mandatoryParam = 2;
         if (filteredArgs.size() < mandatoryParam) {
             throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.ATTACH_FORMAT + "'.");
@@ -314,24 +387,7 @@ public class Cli {
         VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
         VmDecompilerStatus status = new AgentAttachManager(vmManager).attachAgentToVm(vmInfo.getVmId(), vmInfo.getVmPid(), agent.port);
         System.out.println("Attached. Listening on: " + status.getListenPort());
-        if (agent.liveliness == KnownAgents.AgentLiveliness.SESSION) {
-            System.out.println(" kill this process (" + ProcessHandle.current().pid() + ") to detach agent");
-            Runtime.getRuntime().addShutdownHook(new Thread() {
-                @Override
-                public void run() {
-                    detach(status.getListenPort());
-                }
-            });
-            while (true) {
-                Thread.sleep(1000);
-            }
-        } else if (agent.liveliness == KnownAgents.AgentLiveliness.ONE_SHOT) {
-            System.out.println("agent attached, and is detaching right away");
-            detach(status.getListenPort());
-        } else {
-            System.out.println("agent agent is permanently attached to " + vmInfo.getVmPid() + " on " + status.getListenPort());
-            System.out.println("exiting");
-        }
+        return vmInfo;
     }
 
     private void detach() {
@@ -353,12 +409,12 @@ public class Cli {
 
     private void detach(String host, int port) {
         DecompilerRequestReceiver.getHaltAction(host, port, "none", 0, new AgentAttachManager(vmManager), vmManager, false);
-        System.out.println("Should be detached successfully");
+        Logger.getLogger().log(host + ":" + port + " should be detached successfully");
     }
 
-    private void compile(CompileArguments args) throws Exception {
+    private VmInfo[] compile(CompileArguments args) throws Exception {
         // handle -cp
-        ClassesProvider provider = args.getClassesProvider();
+        RuntimeCompilerConnector.JrdClassesProvider provider = args.getClassesProvider();
 
         // handle -p
         ClasspathlessCompiler compiler = args.getCompiler(isVerbose);
@@ -367,22 +423,11 @@ public class Cli {
         Collection<IdentifiedBytecode> allBytecode =
                 compiler.compileClass(provider, Optional.of((level, message) -> Logger.getLogger().log(message)), identifiedSources);
 
-        boolean shouldUpload = false;
+        boolean shouldUpload = shouldUpload();
 
-        // determine uploading
-        if (saving.shouldSave()) {
-            try {
-                VmInfo.Type t = guessType(saving.as);
-                if (t == VmInfo.Type.LOCAL || t == VmInfo.Type.REMOTE) {
-                    shouldUpload = true;
-                }
-            } catch (Exception ex) {
-                Logger.getLogger().log(ex);
-            }
-        }
-
+        VmInfo targetVm = null;
         if (shouldUpload) {
-            VmInfo targetVm = getVmInfo(saving.as);
+            targetVm = getVmInfo(saving.as);
             int failCount = 0;
 
             for (IdentifiedBytecode bytecode : allBytecode) {
@@ -419,6 +464,25 @@ public class Cli {
                 outOrSave(bytecode.getClassIdentifier().getFullName(), ".class", bytecode.getFile(), true);
             }
         }
+        if (provider.getVmInfo().equals(targetVm)) {
+            return new VmInfo[]{provider.getVmInfo(), null};
+        } else {
+            return new VmInfo[]{provider.getVmInfo(), targetVm};
+        }
+    }
+
+    private boolean shouldUpload() {
+        if (saving.shouldSave()) {
+            try {
+                VmInfo.Type t = guessType(saving.as);
+                if (t == VmInfo.Type.LOCAL || t == VmInfo.Type.REMOTE) {
+                    return true;
+                }
+            } catch (Exception ex) {
+                Logger.getLogger().log(ex);
+            }
+        }
+        return false;
     }
 
     @SuppressWarnings("CyclomaticComplexity") // un-refactorable
@@ -474,7 +538,7 @@ public class Cli {
         }
     }
 
-    private void decompile() throws Exception {
+    private VmInfo decompile() throws Exception {
         if (filteredArgs.size() < 4) {
             throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.DECOMPILE_FORMAT + "'.");
         }
@@ -519,8 +583,8 @@ public class Cli {
                 }
             }
         }
-
         returnNonzero(failCount, classCount);
+        return vmInfo;
     }
 
     private void returnNonzero(int failures, int total) {
@@ -572,7 +636,7 @@ public class Cli {
         return decompiler;
     }
 
-    private void printBytes(boolean justBytes) throws Exception {
+    private VmInfo printBytes(boolean justBytes) throws Exception {
         if (filteredArgs.size() < 3) {
             throw new IllegalArgumentException(
                     "Incorrect argument count! Please use '" + (justBytes ? Help.BYTES_FORMAT : Help.BASE64_FORMAT) + "'."
@@ -591,7 +655,6 @@ public class Cli {
             for (String clazz : classes) {
                 classCount++;
                 VmDecompilerStatus result = obtainClass(vmInfo, clazz, vmManager);
-
                 byte[] bytes;
                 if (justBytes) {
                     bytes = Base64.getDecoder().decode(result.getLoadedClassBytes());
@@ -604,11 +667,11 @@ public class Cli {
                 }
             }
         }
-
         returnNonzero(failCount, classCount);
+        return vmInfo;
     }
 
-    private void listClasses(boolean details) throws IOException {
+    private VmInfo listClasses(boolean details) throws IOException {
         if (filteredArgs.size() < 2) {
             throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.LIST_CLASSES_FORMAT + "'.");
         }
@@ -625,6 +688,7 @@ public class Cli {
         }
 
         listClassesFromVmInfo(vmInfo, classRegexes, details);
+        return vmInfo;
     }
 
     private static List<ClassInfo> obtainFilteredClasses(VmInfo vmInfo, VmManager vmManager, List<Pattern> filter, boolean details)

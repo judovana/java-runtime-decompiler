@@ -117,7 +117,7 @@ public class DecompilerRequestReceiver {
         }
         if (actualListenPort == AgentRequestAction.NOT_ATTACHED_PORT) {
             throw new RuntimeException(
-                    "Failed to attach agent. On JDK 9 and higher, you must run the target process with '-Djdk.attach.allowAttachSelf=true'."
+                    "Failed to attach agent. You must run the target process with '-Djdk.attach.allowAttachSelf=true'. Or agent is already attached? Or Bad agent?"
             );
         }
         return actualListenPort;
@@ -243,7 +243,8 @@ public class DecompilerRequestReceiver {
 
     public static String getHaltAction(
             String hostname, int listenPort, String vmId, int vmPid, AgentAttachManager attachManager, VmManager vmManager,
-            boolean removeVmDecompilerStatus) {
+            boolean removeVmDecompilerStatus
+    ) {
         try {
             getResponse(hostname, listenPort, vmId, vmPid, "HALT", attachManager, vmManager);
         } catch (Exception e) {

@@ -1,9 +1,6 @@
 package org.jrd.backend.data.cli;
 
-import io.github.mkoncek.classpathless.api.ClassIdentifier;
-import io.github.mkoncek.classpathless.api.ClassesProvider;
 import io.github.mkoncek.classpathless.api.ClasspathlessCompiler;
-import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.VmManager;
@@ -14,7 +11,6 @@ import org.jrd.frontend.frame.overwrite.OverwriteClassDialog;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 final class CompileArguments {
@@ -57,22 +53,8 @@ final class CompileArguments {
         }
     }
 
-    public ClassesProvider getClassesProvider() {
-        if (puc == null) {
-            return new ClassesProvider() {
-                @Override
-                public Collection<IdentifiedBytecode> getClass(ClassIdentifier... names) {
-                    return new ArrayList<>();
-                }
-
-                @Override
-                public List<String> getClassPathListing() {
-                    return new ArrayList<>();
-                }
-            };
-        } else {
-            return new RuntimeCompilerConnector.JrdClassesProvider(Cli.getVmInfo(puc, vmManager), vmManager);
-        }
+    public RuntimeCompilerConnector.JrdClassesProvider getClassesProvider() {
+        return new RuntimeCompilerConnector.JrdClassesProvider(Cli.getVmInfo(puc, vmManager), vmManager);
     }
 
     public ClasspathlessCompiler getCompiler(boolean isVerbose) {
