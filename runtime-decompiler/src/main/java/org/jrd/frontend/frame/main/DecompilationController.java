@@ -309,7 +309,8 @@ public class DecompilationController {
     }
 
     public static final String CLASSES_NOPE = "Classes couldn't be loaded." + "Do you have agent configured?" +
-            "On JDK 9 and higher, did you run the target process with '-Djdk.attach.allowAttachSelf=true'?";
+            "On JDK 9 and higher, did you run the target process with '-Djdk.attach.allowAttachSelf=true'?" +
+            "Or maybe agent is not loaded? Or bad agent?";
 
     private void initClass(String fqn) {
         showLoadingDialog("Initializing class");

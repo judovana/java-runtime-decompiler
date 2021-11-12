@@ -18,7 +18,7 @@ class AgentConfig {
         this.liveliness = liveliness;
     }
 
-    public static AgentConfig create(List<String> agentArgs) {
+    public static AgentConfig create(List<String> agentArgs, boolean session) {
         int[] futureTypeUnderstood = new int[]{0, 0, 0};
         KnownAgents.AgentLiveliness liveliness = null;
         for (int i = 0; i < agentArgs.size(); i++) {
@@ -71,7 +71,11 @@ class AgentConfig {
             throw new RuntimeException("parsing of agent params failed, exiting without action");
         }
         if (liveliness == null) {
-            liveliness = KnownAgents.AgentLiveliness.SESSION;
+            if (session) {
+                liveliness = KnownAgents.AgentLiveliness.SESSION;
+            } else {
+                liveliness = KnownAgents.AgentLiveliness.ONE_SHOT;
+            }
         }
         if (loneliness == null) {
             loneliness = KnownAgents.AgentLoneliness.SINGLE_INSTANCE;

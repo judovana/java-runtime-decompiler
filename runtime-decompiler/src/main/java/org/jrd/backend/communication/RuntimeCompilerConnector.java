@@ -36,6 +36,14 @@ public class RuntimeCompilerConnector {
             this.vmManager = vmManager;
         }
 
+        public VmInfo getVmInfo() {
+            return vmInfo;
+        }
+
+        public VmManager getVmManager() {
+            return vmManager;
+        }
+
         @Override
         public Collection<IdentifiedBytecode> getClass(ClassIdentifier... classIdentifiers) {
             List<IdentifiedBytecode> results = new ArrayList<>(classIdentifiers.length);
