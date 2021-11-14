@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 public class KnownAgent {
 
@@ -55,6 +56,10 @@ public class KnownAgent {
 
     public AgentLiveliness getLiveliness() {
         return ttl;
+    }
+
+    public long getOwner() {
+        return owner;
     }
 
     public boolean isVerified() {
@@ -108,5 +113,27 @@ public class KnownAgent {
                 }
             }
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        KnownAgent that = (KnownAgent) o;
+        return port == that.port && pid == that.pid &&
+                owner == that.owner &&
+                live == that.live &&
+                verified == that.verified &&
+                Objects.equals(host, that.host) &&
+                ttl == that.ttl;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(port, pid, host, owner, live, ttl, verified);
     }
 }
