@@ -1,5 +1,6 @@
 package org.jrd.backend.communication;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.ClassesProvider;
 import io.github.mkoncek.classpathless.api.ClasspathlessCompiler;
@@ -36,6 +37,7 @@ public class RuntimeCompilerConnector {
             this.vmManager = vmManager;
         }
 
+        @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "vm info is know everywhere")
         public VmInfo getVmInfo() {
             return vmInfo;
         }

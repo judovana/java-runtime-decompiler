@@ -1,5 +1,6 @@
 package org.jrd.frontend.frame.remote;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jrd.frontend.frame.main.MainFrameView;
 
 import javax.swing.Box;
@@ -136,6 +137,7 @@ public class NewConnectionView extends JDialog {
         return hostnamePortInputPanel.hostnameTextField.getText();
     }
 
+    @SuppressFBWarnings(value = "ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD", justification = "Storing for future global usage")
     void reSetLastHostname() {
         HostnamePortInputPanel.lastHost = hostnamePortInputPanel.hostnameTextField.getText();
     }
@@ -144,6 +146,7 @@ public class NewConnectionView extends JDialog {
         return hostnamePortInputPanel.portTextField.getText();
     }
 
+    @SuppressFBWarnings(value = "ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD", justification = "Storing for future global usage")
     void reSetLastPort() {
         HostnamePortInputPanel.lastPort = hostnamePortInputPanel.portTextField.getText();
     }
