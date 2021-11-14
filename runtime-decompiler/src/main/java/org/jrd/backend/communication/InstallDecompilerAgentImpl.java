@@ -6,6 +6,7 @@ import com.sun.tools.attach.AttachNotSupportedException;
 import com.sun.tools.attach.VirtualMachine;
 import com.sun.tools.attach.VirtualMachineDescriptor;
 import org.jrd.backend.core.agentstore.AgentLiveliness;
+import org.jrd.backend.core.agentstore.AgentLoneliness;
 import org.jrd.backend.core.agentstore.KnownAgents;
 import org.jrd.backend.data.Config;
 
@@ -24,8 +25,11 @@ import java.util.List;
  */
 public final class InstallDecompilerAgentImpl {
 
-    public static void install(String pid, boolean addToBoot, boolean setPolicy, String host, int port, String[] properties)
-            throws IllegalArgumentException, IOException, AttachNotSupportedException, AgentLoadException, AgentInitializationException {
+    @SuppressWarnings("ParameterNumber")
+    public static void install(
+            String pid, boolean addToBoot, boolean setPolicy, String host, int port, AgentLoneliness loneliness, AgentLiveliness liveliness,
+            String[] properties
+    ) throws IllegalArgumentException, IOException, AttachNotSupportedException, AgentLoadException, AgentInitializationException {
 
         if (port < 0) {
             throw new IllegalArgumentException("Install : port cannot be negative");
@@ -40,25 +44,28 @@ public final class InstallDecompilerAgentImpl {
                 throw new IllegalArgumentException("Install : properties may not contain ','");
             }
         }
-
-        InstallDecompilerAgentImpl install = new InstallDecompilerAgentImpl(pid, addToBoot, setPolicy, host, port, properties);
+        InstallDecompilerAgentImpl install = new InstallDecompilerAgentImpl(pid, addToBoot, setPolicy, host, port, loneliness, properties);
         install.locateAgent();
         install.attach();
         install.injectAgent();
-        KnownAgents.getInstance().injected(install, AgentLiveliness.SESSION);
+        KnownAgents.getInstance().injected(install, liveliness);
+
     }
 
     private String agentJar;
-    private String id;
-    private int port;
-    private String host;
-    private boolean addToBoot;
-    private boolean setPolicy;
-    private String props;
+    private final String id;
+    private final int port;
+    private final String host;
+    private final boolean addToBoot;
+    private final boolean setPolicy;
+    private final String props;
     private VirtualMachine vm;
-    private Config config = Config.getConfig();
+    private final AgentLoneliness loneliness;
+    private final Config config = Config.getConfig();
 
-    private InstallDecompilerAgentImpl(String pid, boolean addToBoot, boolean setPolicy, String host, int port, String[] properties) {
+    private InstallDecompilerAgentImpl(
+            String pid, boolean addToBoot, boolean setPolicy, String host, int port, AgentLoneliness loneliness, String[] properties
+    ) {
 
         agentJar = null;
         this.id = pid;
@@ -66,6 +73,7 @@ public final class InstallDecompilerAgentImpl {
         this.addToBoot = addToBoot;
         this.setPolicy = setPolicy;
         this.host = host;
+        this.loneliness = loneliness;
         if (properties != null) {
             StringBuilder builder = new StringBuilder();
             for (int i = 0; i < properties.length; i++) {
@@ -154,6 +162,9 @@ public final class InstallDecompilerAgentImpl {
             }
             if (props != null) {
                 agentOptions += props;
+            }
+            if (loneliness != null) {
+                agentOptions += ",loneliness:" + loneliness.toString();
             }
             vm.loadAgent(agentJar, agentOptions);
         } finally {

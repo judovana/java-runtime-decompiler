@@ -402,10 +402,10 @@ public class Cli {
         }
         if (filteredArgs.get(1).contains(":")) {
             String[] hostPort = filteredArgs.get(1).split(":");
-            detach(hostPort[0], Integer.valueOf(hostPort[1]));
+            detach(hostPort[0], Integer.parseInt(hostPort[1]));
         } else {
             //is pid?
-            detach(Integer.valueOf(filteredArgs.get(1)));
+            detach(Integer.parseInt(filteredArgs.get(1)));
         }
     }
 

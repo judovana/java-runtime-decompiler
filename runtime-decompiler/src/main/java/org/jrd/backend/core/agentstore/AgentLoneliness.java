@@ -5,7 +5,8 @@ import java.util.Arrays;
 public enum AgentLoneliness {
     SINGLE_INSTANCE,
     ANONYMOUS,
-    FORCING;
+    FORCING,
+    AF;
 
     @Override
     public String toString() {
@@ -20,6 +21,9 @@ public enum AgentLoneliness {
                 return "Agent will attach, but will not set the flag about its presence. Still, the property will be set.";
             case FORCING:
                 return "Agent will attach, but will skip the check for single instance";
+            case AF:
+                return "Agent will attach, but will skip the check for single instance" +
+                        "and will not set the flag about its presence. Still, the property will be set.";
             default:
                 throw new RuntimeException("Unknown " + AgentLoneliness.class.getSimpleName() + " value " + this);
         }
