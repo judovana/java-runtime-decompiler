@@ -9,7 +9,7 @@ import org.jrd.backend.core.AgentAttachManager;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.ClassInfo;
 import org.jrd.backend.core.DecompilerRequestReceiver;
-import org.jrd.backend.core.KnownAgents;
+import org.jrd.backend.core.agentstore.AgentLiveliness;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.data.MetadataProperties;
@@ -248,7 +248,7 @@ public class Cli {
                     localAgent = true;
                 }
             }
-            if (agent.liveliness == KnownAgents.AgentLiveliness.SESSION) {
+            if (agent.liveliness == AgentLiveliness.SESSION) {
                 Runtime.getRuntime().addShutdownHook(new Thread() {
                     @Override
                     public void run() {
@@ -269,7 +269,7 @@ public class Cli {
                         Thread.sleep(1000);
                     }
                 }
-            } else if (agent.liveliness == KnownAgents.AgentLiveliness.ONE_SHOT) {
+            } else if (agent.liveliness == AgentLiveliness.ONE_SHOT) {
                 for (VmInfo status : operatedOn) {
                     if (operation.equals(ATTACH)) {
                         System.out.println("agent was justattached.. and is detaching right away. Weird, yah?");

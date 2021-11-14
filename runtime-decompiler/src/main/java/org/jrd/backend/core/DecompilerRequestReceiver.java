@@ -7,6 +7,7 @@ import org.jrd.backend.communication.FsAgent;
 import org.jrd.backend.communication.JrdAgent;
 import org.jrd.backend.communication.TopLevelErrorCandidate;
 import org.jrd.backend.core.AgentRequestAction.RequestAction;
+import org.jrd.backend.core.agentstore.KnownAgents;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
 import org.jrd.backend.decompiling.PluginManager;
@@ -251,7 +252,7 @@ public class DecompilerRequestReceiver {
         } catch (Exception e) {
             Logger.getLogger().log(Logger.Level.ALL, new RuntimeException("Exception when calling halt action", e));
         } finally {
-            KnownAgents.markDead(hostname, listenPort, vmId, vmPid);
+            KnownAgents.getInstance().markDead(hostname, listenPort, vmPid);
             if (removeVmDecompilerStatus) {
                 vmManager.getVmInfoByID(vmId).removeVmDecompilerStatus();
             }

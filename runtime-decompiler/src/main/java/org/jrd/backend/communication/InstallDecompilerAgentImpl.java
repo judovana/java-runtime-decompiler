@@ -5,7 +5,8 @@ import com.sun.tools.attach.AgentLoadException;
 import com.sun.tools.attach.AttachNotSupportedException;
 import com.sun.tools.attach.VirtualMachine;
 import com.sun.tools.attach.VirtualMachineDescriptor;
-import org.jrd.backend.core.KnownAgents;
+import org.jrd.backend.core.agentstore.AgentLiveliness;
+import org.jrd.backend.core.agentstore.KnownAgents;
 import org.jrd.backend.data.Config;
 
 import java.io.IOException;
@@ -44,7 +45,7 @@ public final class InstallDecompilerAgentImpl {
         install.locateAgent();
         install.attach();
         install.injectAgent();
-        KnownAgents.injected(install, KnownAgents.AgentLiveliness.SESSION);
+        KnownAgents.getInstance().injected(install, AgentLiveliness.SESSION);
     }
 
     private String agentJar;
@@ -164,14 +165,23 @@ public final class InstallDecompilerAgentImpl {
         agentJar = config.getAgentExpandedPath();
     }
 
-    public boolean matches(String hostname, int listenPort, String vmId, int vmPid) {
-        return this.host.equals(hostname) && this.port == listenPort && this.id.equals(vmId) && Integer.valueOf(this.id) == vmPid;
-    }
-
     @Override
     public String toString() {
         return super.toString() + " {" + "  id='" + id + '\'' + ", port=" + port + ", host='" + host + '\'' + ", addToBoot=" + addToBoot +
                 ", setPolicy=" + setPolicy + ", props='" + props + '\'' + ", vm=" + vm + ", config=" + config + ", agentJar='" + agentJar +
                 '\'' + '}';
     }
+
+    public int getPort() {
+        return port;
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public String getPid() {
+        return id;
+    }
+
 }
