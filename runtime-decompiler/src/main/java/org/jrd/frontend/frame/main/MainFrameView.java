@@ -358,7 +358,7 @@ public class MainFrameView {
         mainFrame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                //todo disconect pernament agents
+                //TODO disconnect permanent agents
                 //check fs vm overrides
                 for (int i = 0; i < fsVmList.getModel().getSize(); i++) {
                     VmInfo vm = fsVmList.getModel().getElementAt(i);

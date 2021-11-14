@@ -2,6 +2,7 @@ package org.jrd.backend.data.cli;
 
 import org.jrd.backend.core.agentstore.AgentLiveliness;
 import org.jrd.backend.core.agentstore.AgentLoneliness;
+import org.jrd.backend.core.agentstore.KnownAgents;
 import org.jrd.backend.data.Directories;
 import org.jrd.backend.data.MetadataProperties;
 
@@ -93,11 +94,12 @@ public final class Help {
             " for read. Followed one of " + AgentLoneliness.class.getSimpleName() + ":\n" +
             Arrays.stream(AgentLoneliness.values()).map(i -> "  " + i.toString() + " - " + i.toHelp()).collect(Collectors.joining("\n")) +
             "\n" + "optional, defaults to " + AgentLoneliness.SINGLE_INSTANCE + "\n" +
-            "You can also specify port where the agent will listen, otherwise default port is calculated TODO" +
+            "You can also specify port where the agent will listen, otherwise default port is calculated." +
             "JRD keep record of all permanent and session agents, so they can be listed/reused/removed." +
-            "This list is usually checked for consistency. File is still TODO";
+            "This list is usually checked for consistency. File is " + KnownAgents.JRD_TMP_FILE.toFile().getAbsolutePath();
     private static final String DETACH_TEXT = "Will close and detach " + AgentLiveliness.PERMANENT +
-            " agent from given localhost:port or url. To detach from PID, a valid mapping in TODO file is needed";
+            " agent from given localhost:port or url. To detach from PID, a valid mapping in " +
+            KnownAgents.JRD_TMP_FILE.toFile().getAbsolutePath() + " file is needed";
     private static final String API_TEXT = "Will print out which can be used to insert fields/methods to running vm";
     private static final String SAVE_AS_TEXT = "All outputs will be written to PATH instead of to standard output.";
     private static final String SAVE_LIKE_TEXT = "Specify how saving will behave.";
