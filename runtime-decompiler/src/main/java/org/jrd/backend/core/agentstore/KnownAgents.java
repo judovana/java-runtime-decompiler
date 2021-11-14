@@ -24,7 +24,7 @@ public final class KnownAgents {
         return KnownAgentsHolder.INSTANCE;
     }
 
-    private static final Path JRD_TMP_FILE = new File(System.getProperty("java.io.tmpdir") + "/jrdAgents").toPath();
+    public static final Path JRD_TMP_FILE = new File(System.getProperty("java.io.tmpdir") + "/jrdAgents").toPath();
     private final List<KnownAgent> agents;
 
     public void markDead(String hostname, int listenPort, int vmPid) {
