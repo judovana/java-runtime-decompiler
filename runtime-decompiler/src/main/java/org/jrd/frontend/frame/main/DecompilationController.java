@@ -13,6 +13,7 @@ import org.jrd.backend.core.ClassInfo;
 import org.jrd.backend.core.DecompilerRequestReceiver;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
+import org.jrd.backend.core.agentstore.KnownAgents;
 import org.jrd.backend.data.Config;
 import org.jrd.backend.data.Model;
 import org.jrd.backend.data.VmInfo;
@@ -96,6 +97,7 @@ public class DecompilationController {
 
         mainFrameView.setVmChanging(this::changeVm);
         mainFrameView.setHaltAgentListener(e -> haltAgent());
+        mainFrameView.setKillAllSessionListener(e -> killAllSession());
         mainFrameView.setPluginConfigurationEditorListener(actionEvent -> createConfigurationEditor());
         mainFrameView.setManageOverrides(new Runnable() {
             @Override
@@ -515,6 +517,10 @@ public class DecompilationController {
         } catch (Exception e) {
             Logger.getLogger().log(Logger.Level.ALL, new RuntimeException("Error when sending request to halt agent", e));
         }
+    }
+
+    private void killAllSession() {
+        KnownAgents.getInstance().killAllSessionAgents(vmManager);
     }
 
     private AgentRequestAction createRequest(RequestAction action, String... commands) {

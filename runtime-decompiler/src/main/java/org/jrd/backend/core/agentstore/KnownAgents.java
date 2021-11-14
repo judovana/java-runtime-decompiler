@@ -4,7 +4,10 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.jrd.backend.communication.InstallDecompilerAgentImpl;
+import org.jrd.backend.core.AgentAttachManager;
+import org.jrd.backend.core.DecompilerRequestReceiver;
 import org.jrd.backend.core.Logger;
+import org.jrd.backend.data.VmManager;
 
 import java.io.File;
 import java.io.Reader;
@@ -116,9 +119,21 @@ public final class KnownAgents {
         }
     }
 
-    public void killAllSessionAgents() {
-        //TODO
-        System.err.println("TODO kill all session agents");
+    @SuppressWarnings("ModifiedControlVariable")
+    public void killAllSessionAgents(VmManager vmManager) {
+        long currentPid = ProcessHandle.current().pid();
+        for (int i = 0; i < agents.size(); i++) {
+            KnownAgent agent = agents.get(i);
+            if (agent.getLiveliness() == AgentLiveliness.SESSION && agent.isLive() && agent.getOwner() == currentPid) {
+                agents.remove(i);
+                i--;
+                Logger.getLogger().log("detaching session agent " + i + "/" + agents.size());
+                DecompilerRequestReceiver
+                        .getHaltAction(agent.getHost(), agent.getPort(), "none", 0, new AgentAttachManager(vmManager), vmManager, false);
+                Logger.getLogger().log(agent.getHost() + ":" + agent.getPort() + " should be detached successfully");
+            }
+        }
+        save();
     }
 
     private KnownAgents() {
@@ -152,6 +167,7 @@ public final class KnownAgents {
             boolean isVerified = agent.verify();
             if (!isVerified) {
                 agents.remove(i);
+                Logger.getLogger().log("removed " + i + "/" + agents.size());
                 i--;
             }
         }

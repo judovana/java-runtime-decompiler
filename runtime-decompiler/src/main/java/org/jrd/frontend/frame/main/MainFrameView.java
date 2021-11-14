@@ -1,6 +1,5 @@
 package org.jrd.frontend.frame.main;
 
-import org.jrd.backend.core.agentstore.KnownAgents;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.Directories;
 import org.jrd.backend.data.MetadataProperties;
@@ -109,6 +108,7 @@ public class MainFrameView {
     private ActionListener removeVmDialogListener;
     private ActionListener pluginConfigurationEditorListener;
     private ActionListener haltAgentListener;
+    private ActionListener killAllSession;
     private Runnable manageOverrides;
 
     private static final Dimension BUTTON_SIZE = new Dimension(35, 35);
@@ -139,6 +139,10 @@ public class MainFrameView {
 
     void setHaltAgentListener(ActionListener listener) {
         haltAgentListener = listener;
+    }
+
+    void setKillAllSessionListener(ActionListener listener) {
+        killAllSession = listener;
     }
 
     void setVmChanging(ActionListener listener) {
@@ -457,7 +461,7 @@ public class MainFrameView {
         mainFrame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                KnownAgents.getInstance().killAllSessionAgents();
+                killAllSession.actionPerformed(null);
             }
         });
     }
