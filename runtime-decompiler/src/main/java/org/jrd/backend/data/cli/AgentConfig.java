@@ -1,6 +1,7 @@
 package org.jrd.backend.data.cli;
 
-import org.jrd.backend.core.KnownAgents;
+import org.jrd.backend.core.agentstore.AgentLiveliness;
+import org.jrd.backend.core.agentstore.AgentLoneliness;
 import org.jrd.backend.core.Logger;
 
 import java.util.List;
@@ -8,11 +9,11 @@ import java.util.Optional;
 
 public final class AgentConfig {
 
-    final KnownAgents.AgentLoneliness loneliness;
+    final AgentLoneliness loneliness;
     final Optional<Integer> port;
-    final KnownAgents.AgentLiveliness liveliness;
+    final AgentLiveliness liveliness;
 
-    private AgentConfig(KnownAgents.AgentLoneliness loneliness, KnownAgents.AgentLiveliness liveliness, Optional<Integer> port) {
+    private AgentConfig(AgentLoneliness loneliness, AgentLiveliness liveliness, Optional<Integer> port) {
         this.loneliness = loneliness;
         this.port = port;
         this.liveliness = liveliness;
@@ -21,11 +22,11 @@ public final class AgentConfig {
     @SuppressWarnings({"CyclomaticComplexity"}) // un-refactorable
     public static AgentConfig create(List<String> agentArgs, boolean session) {
         int[] futureTypeUnderstood = new int[]{0, 0, 0};
-        KnownAgents.AgentLiveliness liveliness = null;
+        AgentLiveliness liveliness = null;
         for (int i = 0; i < agentArgs.size(); i++) {
             if (futureTypeUnderstood[i] == 0) {
                 try {
-                    liveliness = KnownAgents.AgentLiveliness.fromString(agentArgs.get(i));
+                    liveliness = AgentLiveliness.fromString(agentArgs.get(i));
                     futureTypeUnderstood[i]++;
                     break;
                 } catch (Exception e) {
@@ -33,11 +34,11 @@ public final class AgentConfig {
                 }
             }
         }
-        KnownAgents.AgentLoneliness loneliness = null;
+        AgentLoneliness loneliness = null;
         for (int i = 0; i < agentArgs.size(); i++) {
             if (futureTypeUnderstood[i] == 0) {
                 try {
-                    loneliness = KnownAgents.AgentLoneliness.fromString(agentArgs.get(i));
+                    loneliness = AgentLoneliness.fromString(agentArgs.get(i));
                     futureTypeUnderstood[i]++;
                     break;
                 } catch (Exception e) {
@@ -73,13 +74,13 @@ public final class AgentConfig {
         }
         if (liveliness == null) {
             if (session) {
-                liveliness = KnownAgents.AgentLiveliness.SESSION;
+                liveliness = AgentLiveliness.SESSION;
             } else {
-                liveliness = KnownAgents.AgentLiveliness.ONE_SHOT;
+                liveliness = AgentLiveliness.ONE_SHOT;
             }
         }
         if (loneliness == null) {
-            loneliness = KnownAgents.AgentLoneliness.SINGLE_INSTANCE;
+            loneliness = AgentLoneliness.SINGLE_INSTANCE;
         }
         Logger.getLogger().log(
                 Logger.Level.DEBUG,

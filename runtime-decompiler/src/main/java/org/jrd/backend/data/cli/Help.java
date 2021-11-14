@@ -1,6 +1,7 @@
 package org.jrd.backend.data.cli;
 
-import org.jrd.backend.core.KnownAgents;
+import org.jrd.backend.core.agentstore.AgentLiveliness;
+import org.jrd.backend.core.agentstore.AgentLoneliness;
 import org.jrd.backend.data.Directories;
 import org.jrd.backend.data.MetadataProperties;
 
@@ -55,8 +56,8 @@ public final class Help {
     static final String DECOMPILE_FORMAT = DECOMPILE + " <PUC> <PLUGIN> <CLASS REGEX>...";
     static final String OVERWRITE_FORMAT = OVERWRITE + " <PUC> <FQN> [<CLASS FILE>]";
     static final String INIT_FORMAT = INIT + " <PUC> <FQN>";
-    static final String AGENT_FORMAT = AGENT + " <" + KnownAgents.AgentLiveliness.class.getSimpleName() + "> " + "<" +
-            KnownAgents.AgentLoneliness.class.getSimpleName() + "> " + "<port>";
+    static final String AGENT_FORMAT =
+            AGENT + " <" + AgentLiveliness.class.getSimpleName() + "> " + "<" + AgentLoneliness.class.getSimpleName() + "> " + "<port>";
     static final String ATTACH_FORMAT = ATTACH + " <PID>";
     static final String DETACH_FORMAT = DETACH + " URL xor PORT xor PID";
     static final String API_FORMAT = API + " <PUC>";
@@ -86,19 +87,16 @@ public final class Help {
             "Because class loading is lazy, the class you need might be missing, eg. java.lang.Override.";
     static final String ATTACH_TEXT = "Will only attach the agent to selected pid. Prints out the port for future usage.";
     static final String AGENT_TEXT = "Control how agent is attached. Have sense only in operations attaching to PID. Possible values of " +
-            KnownAgents.AgentLiveliness.class.getSimpleName() + ":\n" +
-            Arrays.stream(KnownAgents.AgentLiveliness.values()).map(i -> "  " + i.toString() + " - " + i.toHelp())
-                    .collect(Collectors.joining("\n")) +
-            "\n" + "optional, defaults to " + KnownAgents.AgentLiveliness.SESSION + " for override and attach," + " to " +
-            KnownAgents.AgentLiveliness.ONE_SHOT + " for read. Followed one of " + KnownAgents.AgentLoneliness.class.getSimpleName() +
-            ":\n" +
-            Arrays.stream(KnownAgents.AgentLoneliness.values()).map(i -> "  " + i.toString() + " - " + i.toHelp())
-                    .collect(Collectors.joining("\n")) +
-            "\n" + "optional, defaults to " + KnownAgents.AgentLoneliness.SINGLE_INSTANCE + "\n" +
+            AgentLiveliness.class.getSimpleName() + ":\n" +
+            Arrays.stream(AgentLiveliness.values()).map(i -> "  " + i.toString() + " - " + i.toHelp()).collect(Collectors.joining("\n")) +
+            "\n" + "optional, defaults to " + AgentLiveliness.SESSION + " for override and attach," + " to " + AgentLiveliness.ONE_SHOT +
+            " for read. Followed one of " + AgentLoneliness.class.getSimpleName() + ":\n" +
+            Arrays.stream(AgentLoneliness.values()).map(i -> "  " + i.toString() + " - " + i.toHelp()).collect(Collectors.joining("\n")) +
+            "\n" + "optional, defaults to " + AgentLoneliness.SINGLE_INSTANCE + "\n" +
             "You can also specify port where the agent will listen, otherwise default port is calculated TODO" +
             "JRD keep record of all permanent and session agents, so they can be listed/reused/removed." +
             "This list is usually checked for consistency. File is still TODO";
-    private static final String DETACH_TEXT = "Will close and detach " + KnownAgents.AgentLiveliness.PERMANENT +
+    private static final String DETACH_TEXT = "Will close and detach " + AgentLiveliness.PERMANENT +
             " agent from given localhost:port or url. To detach from PID, a valid mapping in TODO file is needed";
     private static final String API_TEXT = "Will print out which can be used to insert fields/methods to running vm";
     private static final String SAVE_AS_TEXT = "All outputs will be written to PATH instead of to standard output.";
