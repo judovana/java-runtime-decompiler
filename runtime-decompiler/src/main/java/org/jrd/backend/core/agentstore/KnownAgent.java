@@ -1,15 +1,23 @@
 package org.jrd.backend.core.agentstore;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.jrd.backend.communication.InstallDecompilerAgentImpl;
+import org.jrd.backend.core.Logger;
 
-class KnownAgent {
+import javax.net.SocketFactory;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+
+public class KnownAgent {
 
     private final int port;
     private final int pid;
     private final String host;
-    private final long owner;
+    private final long owner; //to close only my connections on exit
 
     private boolean live;
     private final AgentLiveliness ttl;
@@ -33,14 +41,72 @@ class KnownAgent {
         this.live = live;
     }
 
+    public int getPid() {
+        return pid;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public AgentLiveliness getLiveliness() {
+        return ttl;
+    }
+
+    public boolean isVerified() {
+        return verified;
+    }
+
     public boolean matches(String hostname, int listenPort, int vmPid) {
         return this.host.equals(hostname) && this.port == listenPort && this.pid == vmPid;
     }
 
     @Override
     public String toString() {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        Gson gson = new Gson();
         String json = gson.toJson(this);
         return json;
+    }
+
+    public boolean verify() {
+        Socket socket = null;
+        try {
+            socket = SocketFactory.getDefault().createSocket(host, port);
+            socket.setSoTimeout(5000); //if buffered reader do not get newline
+            if (!socket.isConnected()) {
+                throw new RuntimeException("connection to " + host + ":" + port + " failed");
+            }
+            Logger.getLogger().log(" restoring agent verified on : " + host + ":" + port);
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8));
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
+            //TODO, repalce with handshake
+            out.write("BLAH\n");
+            out.flush();
+            String reply = in.readLine();
+            if ("ERROR Agent received unknown command: 'BLAH'.".equals(reply)) {
+                Logger.getLogger().log(" restored agent verified on : " + host + ":" + port);
+                verified = true;
+                return true;
+            } else {
+                throw new RuntimeException(host + ":" + port + " is not our agent. Returned unexpected: " + reply);
+            }
+        } catch (Exception ex) {
+            Logger.getLogger().log(ex);
+            Logger.getLogger().log(" removing unresponsive agent: " + host + ":" + port);
+            verified = false;
+            return false;
+        } finally {
+            if (socket != null) {
+                try {
+                    socket.close();
+                } catch (Exception eex) {
+                    Logger.getLogger().log(eex);
+                }
+            }
+        }
     }
 }

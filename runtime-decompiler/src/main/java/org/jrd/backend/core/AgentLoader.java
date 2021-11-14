@@ -4,6 +4,8 @@ import com.sun.tools.attach.AgentInitializationException;
 import com.sun.tools.attach.AgentLoadException;
 import com.sun.tools.attach.AttachNotSupportedException;
 import org.jrd.backend.communication.InstallDecompilerAgentImpl;
+import org.jrd.backend.core.agentstore.AgentLiveliness;
+import org.jrd.backend.core.agentstore.AgentLoneliness;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -38,7 +40,10 @@ public class AgentLoader {
         Logger.getLogger().log(Logger.Level.DEBUG, "Attempting to attach decompiler agent for VM '" + pid + "' on port '" + port + "'");
 
         try {
-            InstallDecompilerAgentImpl.install(Integer.toString(pid), false, false, "localhost", port, installProps);
+            InstallDecompilerAgentImpl.install(
+                    Integer.toString(pid), false, false, "localhost", port, AgentLoneliness.SINGLE_INSTANCE, AgentLiveliness.SESSION,
+                    installProps
+            );
         } catch (IllegalArgumentException |
                 IOException |
                 AttachNotSupportedException |

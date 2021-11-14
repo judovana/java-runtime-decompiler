@@ -28,7 +28,13 @@ public final class KnownAgents {
     private final List<KnownAgent> agents;
 
     public void markDead(String hostname, int listenPort, int vmPid) {
-        markDead(hostname, listenPort, vmPid, true, findAgents(hostname, listenPort, vmPid), true);
+        List<KnownAgent> found = findAgents(hostname, listenPort, vmPid);
+        if (vmPid <= 0) {
+            found = findAgents(hostname, listenPort);
+        } else if (hostname == null || hostname.trim().isEmpty() || listenPort <= 0) {
+            found = findAgents(vmPid);
+        }
+        markDead(hostname, listenPort, vmPid, true, found, true);
     }
 
     private void markDead(String hostname, int listenPort, int vmPid, boolean action, List<KnownAgent> matchingAgents, boolean all) {
@@ -73,6 +79,26 @@ public final class KnownAgents {
         return result;
     }
 
+    public List<KnownAgent> findAgents(int vmPid) {
+        List<KnownAgent> result = new ArrayList<>();
+        for (KnownAgent agent : agents) {
+            if (agent.getPid() == vmPid && agent.isLive()) {
+                result.add(agent);
+            }
+        }
+        return result;
+    }
+
+    public List<KnownAgent> findAgents(String hostname, int listenPort) {
+        List<KnownAgent> result = new ArrayList<>();
+        for (KnownAgent agent : agents) {
+            if (agent.getHost().equals(hostname) && agent.getPort() == listenPort && agent.isLive()) {
+                result.add(agent);
+            }
+        }
+        return result;
+    }
+
     public void injected(InstallDecompilerAgentImpl install, AgentLiveliness ttl) {
         agents.add(new KnownAgent(install, ttl));
         System.err.println("storing " + install.toString());
@@ -80,6 +106,8 @@ public final class KnownAgents {
     }
 
     private void save() {
+        //TODO lock
+        //TODO before save, load an merge
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         try {
             Files.writeString(JRD_TMP_FILE, gson.toJson(agents));
@@ -94,6 +122,12 @@ public final class KnownAgents {
     }
 
     private KnownAgents() {
+        agents = load();
+        verifyAgents(); //in each load?
+    }
+
+    private List<KnownAgent> load() {
+        //TODO lock
         List<KnownAgent> lagents = null;
         if (JRD_TMP_FILE.toFile().exists()) {
             try {
@@ -108,6 +142,19 @@ public final class KnownAgents {
         } else {
             lagents = Collections.synchronizedList(new ArrayList<>());
         }
-        agents = lagents;
+        return lagents;
+    }
+
+    @SuppressWarnings("ModifiedControlVariable")
+    private void verifyAgents() {
+        for (int i = 0; i < agents.size(); i++) {
+            KnownAgent agent = agents.get(i);
+            boolean isVerified = agent.verify();
+            if (!isVerified) {
+                agents.remove(i);
+                i--;
+            }
+        }
+        save();
     }
 }
