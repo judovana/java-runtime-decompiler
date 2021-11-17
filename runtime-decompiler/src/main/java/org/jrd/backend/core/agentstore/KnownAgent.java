@@ -22,6 +22,8 @@ public class KnownAgent {
     private final long owner; //to close only my connections on exit
 
     private final AgentLiveliness ttl;
+
+    @SuppressWarnings("ExplicitInitialization") //the null have its meaning here
     private Long deadSince = null;
 
     KnownAgent(InstallDecompilerAgentImpl install, AgentLiveliness ttl) {

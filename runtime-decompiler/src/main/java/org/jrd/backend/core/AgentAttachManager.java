@@ -5,7 +5,6 @@ import org.jrd.backend.core.agentstore.KnownAgents;
 import org.jrd.backend.data.VmManager;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Attach manager for agent contains utility methods and information about
@@ -21,7 +20,7 @@ public class AgentAttachManager {
         this.loader = new AgentLoader();
     }
 
-    public VmDecompilerStatus attachAgentToVm(String vmId, int vmPid, Optional<Integer> port) {
+    public VmDecompilerStatus attachAgentToVm(String vmId, int vmPid) {
         List<KnownAgent> knownAgentsOnPid = KnownAgents.getInstance().findAgents(vmPid);
         if (knownAgentsOnPid.size() == 1) {
             System.err.println("reusing " + knownAgentsOnPid.get(0).toString());
@@ -35,7 +34,7 @@ public class AgentAttachManager {
             Logger.getLogger().log(Logger.Level.DEBUG, "Attaching agent to VM '" + vmPid + "'");
             int attachedPort = AgentLoader.INVALID_PORT;
             try {
-                attachedPort = loader.attach(vmPid, port);
+                attachedPort = loader.attach(vmPid);
             } catch (Exception ex) {
                 Logger.getLogger().log(Logger.Level.ALL, ex);
             }
