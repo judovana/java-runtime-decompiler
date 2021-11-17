@@ -6,6 +6,7 @@ import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.core.AgentAttachManager;
+import org.jrd.backend.core.AgentLoader;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.ClassInfo;
 import org.jrd.backend.core.DecompilerRequestReceiver;
@@ -74,7 +75,6 @@ public class Cli {
     private final VmManager vmManager;
     private final PluginManager pluginManager;
     private Saving saving;
-    private AgentConfig agent;
     private boolean isVerbose;
 
     public Cli(String[] orig, Model model) {
@@ -126,11 +126,13 @@ public class Cli {
             }
         }
         this.saving = new Saving(saveAs, saveLike);
-        this.agent = AgentConfig.create(
-                agentArgs,
-                args.stream().map(a -> cleanParameter(a)).anyMatch(a -> a.equals(OVERWRITE)) ||
-                        args.stream().map(a -> cleanParameter(a)).anyMatch(a -> a.equals(ATTACH)) ||
-                        (args.stream().map(a -> cleanParameter(a)).anyMatch(a -> a.equals(COMPILE) && shouldUpload()))
+        AgentLoader.setDefaultConfig(
+                AgentConfig.create(
+                        agentArgs,
+                        args.stream().map(a -> cleanParameter(a)).anyMatch(a -> a.equals(OVERWRITE)) ||
+                                args.stream().map(a -> cleanParameter(a)).anyMatch(a -> a.equals(ATTACH)) ||
+                                (args.stream().map(a -> cleanParameter(a)).anyMatch(a -> a.equals(COMPILE) && shouldUpload()))
+                )
         );
         if (!agentArgs.isEmpty() && args.isEmpty()) {
             throw new RuntimeException("It is not allowed to set " + AGENT + " in gui mode");
@@ -248,7 +250,7 @@ public class Cli {
                     localAgent = true;
                 }
             }
-            if (agent.liveliness == AgentLiveliness.SESSION) {
+            if (AgentLoader.getDefaultConfig().liveliness == AgentLiveliness.SESSION) {
                 Runtime.getRuntime().addShutdownHook(new Thread() {
                     @Override
                     public void run() {
@@ -269,7 +271,7 @@ public class Cli {
                         Thread.sleep(1000);
                     }
                 }
-            } else if (agent.liveliness == AgentLiveliness.ONE_SHOT) {
+            } else if (AgentLoader.getDefaultConfig().liveliness == AgentLiveliness.ONE_SHOT) {
                 for (VmInfo status : operatedOn) {
                     if (operation.equals(ATTACH)) {
                         System.out.println("agent was justattached.. and is detaching right away. Weird, yah?");
@@ -391,7 +393,7 @@ public class Cli {
             throw new IllegalArgumentException("Sorry, first argument must be running jvm PID, nothing else.");
         }
         VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
-        VmDecompilerStatus status = new AgentAttachManager(vmManager).attachAgentToVm(vmInfo.getVmId(), vmInfo.getVmPid(), agent.port);
+        VmDecompilerStatus status = new AgentAttachManager(vmManager).attachAgentToVm(vmInfo.getVmId(), vmInfo.getVmPid());
         System.out.println("Attached. Listening on: " + status.getListenPort());
         return vmInfo;
     }

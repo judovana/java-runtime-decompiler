@@ -13,7 +13,11 @@ public final class AgentConfig {
     final Optional<Integer> port;
     final AgentLiveliness liveliness;
 
-    private AgentConfig(AgentLoneliness loneliness, AgentLiveliness liveliness, Optional<Integer> port) {
+    public AgentConfig() {
+        this(AgentLoneliness.SINGLE_INSTANCE, AgentLiveliness.SESSION, Optional.empty());
+    }
+
+    public AgentConfig(AgentLoneliness loneliness, AgentLiveliness liveliness, Optional<Integer> port) {
         this.loneliness = loneliness;
         this.port = port;
         this.liveliness = liveliness;
@@ -87,5 +91,17 @@ public final class AgentConfig {
                 String.format("Agent set to attach %s, %s and port=%s", liveliness, loneliness, port == null ? "guessed" : port.toString())
         );
         return new AgentConfig(loneliness, liveliness, Optional.ofNullable(port));
+    }
+
+    public AgentLiveliness getLiveliness() {
+        return liveliness;
+    }
+
+    public AgentLoneliness getLoneliness() {
+        return loneliness;
+    }
+
+    public Optional<Integer> getPort() {
+        return port;
     }
 }
