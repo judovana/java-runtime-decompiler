@@ -63,7 +63,7 @@ public final class KnownAgents {
         }
         for (KnownAgent agent : matchingAgents) {
             if (action) {
-                agent.setLive(false);
+                agent.markKilled();
                 System.err.println("killing " + agent.toString());
             } else {
                 System.err.println("not killing " + agent.toString());

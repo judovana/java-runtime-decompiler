@@ -76,7 +76,7 @@ public final class AgentConfig {
             if (session) {
                 liveliness = AgentLiveliness.SESSION;
             } else {
-                liveliness = AgentLiveliness.ONE_SHOT;
+                liveliness = AgentLiveliness.PERMANENT;
             }
         }
         if (loneliness == null) {

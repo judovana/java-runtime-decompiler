@@ -25,7 +25,7 @@ public class AgentAttachManager {
         List<KnownAgent> knownAgentsOnPid = KnownAgents.getInstance().findAgents(vmPid);
         if (knownAgentsOnPid.size() == 1) {
             System.err.println("reusing " + knownAgentsOnPid.get(0).toString());
-            VmDecompilerStatus status = new VmDecompilerStatus();
+            VmDecompilerStatus status = new VmDecompilerStatus(true);
             status.setHostname(knownAgentsOnPid.get(0).getHost());
             status.setListenPort(knownAgentsOnPid.get(0).getPort());
             status.setVmId(vmId);

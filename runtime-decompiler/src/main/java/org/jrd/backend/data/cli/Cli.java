@@ -244,7 +244,7 @@ public class Cli {
         } finally {
             boolean localAgent = false;
             for (VmInfo status : operatedOn) {
-                if (status.getType() == VmInfo.Type.LOCAL) {
+                if (status.getType() == VmInfo.Type.LOCAL && !status.getVmDecompilerStatus().isReused()) {
                     localAgent = true;
                 }
             }
@@ -253,7 +253,7 @@ public class Cli {
                     @Override
                     public void run() {
                         for (VmInfo status : operatedOn) {
-                            if (status.getType() == VmInfo.Type.LOCAL) {
+                            if (status.getType() == VmInfo.Type.LOCAL && !status.getVmDecompilerStatus().isReused()) {
                                 detach(status.getVmDecompilerStatus().getListenPort());
                             }
                         }
@@ -284,7 +284,7 @@ public class Cli {
                 for (VmInfo status : operatedOn) {
                     if (localAgent) {
                         System.err.println(
-                                "agent agent is permanently attached to " + status.getVmPid() + " on port " +
+                                "agent is permanently attached to " + status.getVmPid() + " on port " +
                                         status.getVmDecompilerStatus().getListenPort()
                         );
                     }
