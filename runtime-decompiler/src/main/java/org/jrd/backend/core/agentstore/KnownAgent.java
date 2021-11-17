@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.Objects;
 
 public class KnownAgent {
@@ -20,26 +21,19 @@ public class KnownAgent {
     private final String host;
     private final long owner; //to close only my connections on exit
 
-    private boolean live;
     private final AgentLiveliness ttl;
-    private boolean verified;
+    private Long deadSince = null;
 
     KnownAgent(InstallDecompilerAgentImpl install, AgentLiveliness ttl) {
         this.pid = Integer.parseInt(install.getPid());
         this.port = install.getPort();
         this.host = install.getHost();
         this.ttl = ttl;
-        this.live = true;
-        this.verified = true;
         this.owner = ProcessHandle.current().pid();
     }
 
     public boolean isLive() {
-        return live;
-    }
-
-    public void setLive(boolean live) {
-        this.live = live;
+        return deadSince == null;
     }
 
     public int getPid() {
@@ -60,10 +54,6 @@ public class KnownAgent {
 
     public long getOwner() {
         return owner;
-    }
-
-    public boolean isVerified() {
-        return verified;
     }
 
     public boolean matches(String hostname, int listenPort, int vmPid) {
@@ -94,7 +84,7 @@ public class KnownAgent {
             String reply = in.readLine();
             if ("ERROR Agent received unknown command: 'BLAH'.".equals(reply)) {
                 Logger.getLogger().log(" restored agent verified on : " + host + ":" + port);
-                verified = true;
+                deadSince = null;
                 return true;
             } else {
                 throw new RuntimeException(host + ":" + port + " is not our agent. Returned unexpected: " + reply);
@@ -102,7 +92,7 @@ public class KnownAgent {
         } catch (Exception ex) {
             Logger.getLogger().log(ex);
             Logger.getLogger().log(" removing unresponsive agent: " + host + ":" + port);
-            verified = false;
+            deadSince = new Date().getTime();
             return false;
         } finally {
             if (socket != null) {
@@ -124,16 +114,15 @@ public class KnownAgent {
             return false;
         }
         KnownAgent that = (KnownAgent) o;
-        return port == that.port && pid == that.pid &&
-                owner == that.owner &&
-                live == that.live &&
-                verified == that.verified &&
-                Objects.equals(host, that.host) &&
-                ttl == that.ttl;
+        return port == that.port && pid == that.pid && owner == that.owner && Objects.equals(host, that.host) && ttl == that.ttl;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(port, pid, host, owner, live, ttl, verified);
+        return Objects.hash(port, pid, host, owner, ttl);
+    }
+
+    public void markKilled() {
+        deadSince = new Date().getTime();
     }
 }
