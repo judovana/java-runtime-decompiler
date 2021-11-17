@@ -208,7 +208,7 @@ public class CliTest extends AbstractAgentNeedingTest {
 
     @Test
     void testValidOperationOverwrite() {
-        args = processArgs(OVERWRITE_FORMAT + " " + AGENT + " " + AgentLiveliness.ONE_SHOT);
+        args = processArgs(OVERWRITE_FORMAT + " " + AGENT + " " + AgentLiveliness.PERMANENT);
         cli = new Cli(args, model);
 
         assertDoesNotThrow(cli::consumeCli);
@@ -485,7 +485,7 @@ public class CliTest extends AbstractAgentNeedingTest {
     void testOverwrite(String pucComponent) throws Exception {
         createReplacement(NEW_GREETINGS);
 
-        args = new String[]{OVERWRITE, pucComponent, dummy.getFqn(), dummy.getDotClassPath(), AGENT, AgentLiveliness.ONE_SHOT.toString()};
+        args = new String[]{OVERWRITE, pucComponent, dummy.getFqn(), dummy.getDotClassPath(), AGENT, AgentLiveliness.PERMANENT.toString()};
         cli = new Cli(args, model);
 
         assertDoesNotThrow(() -> cli.consumeCli());
@@ -517,7 +517,7 @@ public class CliTest extends AbstractAgentNeedingTest {
     void testOverwriteStdIn(String pucComponent) throws Exception {
         createReplacement(NEW_GREETINGS);
 
-        args = new String[]{OVERWRITE, pucComponent, dummy.getFqn(), AGENT, AgentLiveliness.ONE_SHOT.toString()};
+        args = new String[]{OVERWRITE, pucComponent, dummy.getFqn(), AGENT, AgentLiveliness.PERMANENT.toString()};
         cli = new Cli(args, model);
 
         // setup input stream
@@ -590,7 +590,7 @@ public class CliTest extends AbstractAgentNeedingTest {
             fail("Failed to copy file.", e);
         }
 
-        args = new String[]{OVERWRITE, dummy.getPid(), dummy.getFqn(), nonClassFile, AGENT, AgentLiveliness.ONE_SHOT.toString()};
+        args = new String[]{OVERWRITE, dummy.getPid(), dummy.getFqn(), nonClassFile, AGENT, AgentLiveliness.PERMANENT.toString()};
         cli = new Cli(args, model);
 
         assertDoesNotThrow(() -> cli.consumeCli());
