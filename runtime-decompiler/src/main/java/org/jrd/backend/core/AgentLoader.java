@@ -3,21 +3,21 @@ package org.jrd.backend.core;
 import com.sun.tools.attach.AgentInitializationException;
 import com.sun.tools.attach.AgentLoadException;
 import com.sun.tools.attach.AttachNotSupportedException;
+
 import org.jrd.backend.communication.InstallDecompilerAgentImpl;
-import org.jrd.backend.core.agentstore.AgentLiveliness;
-import org.jrd.backend.core.agentstore.AgentLoneliness;
+import org.jrd.backend.data.cli.AgentConfig;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * This class contains methods for attaching the agent.
  */
 public class AgentLoader {
 
+    private static AgentConfig defaultConfig = new AgentConfig();
     static final int INVALID_PORT = -1;
     private static final int PORT_MIN = 10900;
     private static final int MAX_PORT_SLOTS = 200;
@@ -30,18 +30,19 @@ public class AgentLoader {
 
     /**
      * This method handles the attachment of a decompiler agent to given VM.
+     *
      * @param pid PID of the VM
      * @return port number if successful, else {@link #INVALID_PORT}
      */
-    public int attach(int pid, Optional<Integer> userPort) {
-        int port = userPort.orElse(findPort());
+    public int attach(int pid) {
+        int port = defaultConfig.getPort().orElse(findPort());
         String[] installProps = createProperties(port);
 
         Logger.getLogger().log(Logger.Level.DEBUG, "Attempting to attach decompiler agent for VM '" + pid + "' on port '" + port + "'");
 
         try {
             InstallDecompilerAgentImpl.install(
-                    Integer.toString(pid), false, false, "localhost", port, AgentLoneliness.SINGLE_INSTANCE, AgentLiveliness.SESSION,
+                    Integer.toString(pid), false, false, "localhost", port, defaultConfig.getLoneliness(), defaultConfig.getLiveliness(),
                     installProps
             );
         } catch (IllegalArgumentException |
@@ -82,5 +83,13 @@ public class AgentLoader {
         properties.add(AGENT_PORT_PROPERTY + "=" + port);
 
         return properties.toArray(new String[]{});
+    }
+
+    public static void setDefaultConfig(AgentConfig defaultConfig) {
+        AgentLoader.defaultConfig = defaultConfig;
+    }
+
+    public static AgentConfig getDefaultConfig() {
+        return defaultConfig;
     }
 }

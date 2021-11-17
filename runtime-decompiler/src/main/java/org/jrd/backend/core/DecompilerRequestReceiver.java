@@ -15,7 +15,6 @@ import org.jrd.backend.decompiling.PluginManager;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Optional;
 
 /**
  * This class manages the requests that are put in queue by the controller.
@@ -265,7 +264,7 @@ public class DecompilerRequestReceiver {
             return port;
         }
         int actualListenPort = AgentRequestAction.NOT_ATTACHED_PORT;
-        VmDecompilerStatus status = attachManager.attachAgentToVm(vmId, vmPid, Optional.empty());
+        VmDecompilerStatus status = attachManager.attachAgentToVm(vmId, vmPid);
         if (status != null) {
             actualListenPort = status.getListenPort();
         }
