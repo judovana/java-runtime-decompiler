@@ -402,7 +402,7 @@ public class CliTest extends AbstractAgentNeedingTest {
         return Stream.of(
                 new String[]{LIST_CLASSES}, new String[]{BYTES}, new String[]{BYTES, unimportantPid}, new String[]{BASE64},
                 new String[]{BASE64, unimportantPid}, new String[]{INIT}, new String[]{INIT, unimportantPid}, new String[]{OVERWRITE},
-                new String[]{OVERWRITE, unimportantPid, AGENT}, new String[]{DECOMPILE}, new String[]{DECOMPILE, unimportantPid},
+                new String[]{OVERWRITE, unimportantPid}, new String[]{DECOMPILE}, new String[]{DECOMPILE, unimportantPid},
                 new String[]{DECOMPILE, unimportantPid, "javap"}, new String[]{COMPILE}, new String[]{COMPILE, R},
                 new String[]{COMPILE, R, CP, unimportantPid}, new String[]{COMPILE, R, CP, unimportantPid, Cli.P, "unimportantPluginName"}
         ).map(a -> (Object) a).map(Arguments::of); // cast needed because of varargs factory method .of()
