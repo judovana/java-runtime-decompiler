@@ -9,6 +9,7 @@ import java.util.Arrays;
 
 public class VmDecompilerStatus {
 
+    private final boolean reused;
     private String vmId;
     private String hostname;
     private int listenPort;
@@ -16,8 +17,13 @@ public class VmDecompilerStatus {
     private String loadedClassBytes;
 
     public VmDecompilerStatus() {
+        this(false);
+    }
+
+    public VmDecompilerStatus(boolean reused) {
         this.loadedClassBytes = "";
         this.loadedClasses = new ClassInfo[]{};
+        this.reused = reused;
     }
 
     public String getVmId() {
@@ -62,5 +68,9 @@ public class VmDecompilerStatus {
 
     public void setLoadedClassBytes(String value) {
         loadedClassBytes = value;
+    }
+
+    public boolean isReused() {
+        return reused;
     }
 }

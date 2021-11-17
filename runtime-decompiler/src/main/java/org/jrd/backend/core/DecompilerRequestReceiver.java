@@ -167,7 +167,7 @@ public class DecompilerRequestReceiver {
     private String getOverwriteAction(String hostname, int listenPort, String vmId, int vmPid, String className, String newBody) {
         try {
             ResponseWithPort reply = getResponse(hostname, listenPort, vmId, vmPid, "OVERWRITE\n" + className + "\n" + newBody);
-            VmDecompilerStatus status = new VmDecompilerStatus();
+            VmDecompilerStatus status = vmManager.getVmInfoByID(vmId).getVmDecompilerStatus();
             status.setHostname(hostname);
             status.setListenPort(reply.port);
             status.setVmId(vmId);
@@ -191,7 +191,7 @@ public class DecompilerRequestReceiver {
     private String getNoReplyValue(String hostname, int listenPort, String vmId, int vmPid, String argument, RequestAction action) {
         try {
             ResponseWithPort reply = getResponse(hostname, listenPort, vmId, vmPid, action + "\n" + argument);
-            VmDecompilerStatus status = new VmDecompilerStatus();
+            VmDecompilerStatus status = vmManager.getVmInfoByID(vmId).getVmDecompilerStatus();
             status.setHostname(hostname);
             status.setListenPort(reply.port);
             status.setVmId(vmId);
@@ -206,7 +206,7 @@ public class DecompilerRequestReceiver {
     private String getByteCodeAction(String hostname, int listenPort, String vmId, int vmPid, String className) {
         try {
             ResponseWithPort reply = getResponse(hostname, listenPort, vmId, vmPid, RequestAction.BYTES + "\n" + className);
-            VmDecompilerStatus status = new VmDecompilerStatus();
+            VmDecompilerStatus status = vmManager.getVmInfoByID(vmId).getVmDecompilerStatus();
             status.setHostname(hostname);
             status.setListenPort(reply.port);
             status.setVmId(vmId);
@@ -225,7 +225,7 @@ public class DecompilerRequestReceiver {
             ClassInfo[] arrayOfClasses = parseClasses(reply.response);
             Arrays.sort(arrayOfClasses, new ClassesComparator());
 
-            VmDecompilerStatus status = new VmDecompilerStatus();
+            VmDecompilerStatus status = vmManager.getVmInfoByID(vmId).getVmDecompilerStatus();
             status.setHostname(hostname);
             status.setListenPort(reply.port);
             status.setVmId(vmId);
