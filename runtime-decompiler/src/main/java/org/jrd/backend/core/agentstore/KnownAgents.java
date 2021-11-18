@@ -45,8 +45,8 @@ public final class KnownAgents {
         if (matchingAgents.size() == 0) {
             System.err.println(
                     String.format(
-                            "not found agent for hostname=%s port=%d vmPid=%d in list of %d live agents (total agents %d)", hostname, listenPort, vmPid,
-                            agents.stream().filter(a->a.isLive()).collect(Collectors.toList()).size(), agents.size()
+                            "not found agent for hostname=%s port=%d vmPid=%d in list of %d live agents (total agents %d)", hostname,
+                            listenPort, vmPid, agents.stream().filter(a -> a.isLive()).collect(Collectors.toList()).size(), agents.size()
                     )
             );
             return;
@@ -54,8 +54,9 @@ public final class KnownAgents {
         if (matchingAgents.size() > 1) {
             System.err.println(
                     String.format(
-                            "found %d agents for hostname=%s port=%d vmPid=%d in list of %d live agents (total agents %d)", matchingAgents.size(), hostname,
-                            listenPort, vmPid,agents.stream().filter(a->a.isLive()).collect(Collectors.toList()).size(), agents.size()
+                            "found %d agents for hostname=%s port=%d vmPid=%d in list of %d live agents (total agents %d)",
+                            matchingAgents.size(), hostname, listenPort, vmPid,
+                            agents.stream().filter(a -> a.isLive()).collect(Collectors.toList()).size(), agents.size()
                     )
             );
             if (!all) {
