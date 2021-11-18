@@ -1,10 +1,8 @@
 package org.jrd.backend.data.cli;
 
-import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.data.Config;
 import org.jrd.backend.data.Directories;
 import org.jrd.backend.data.Model;
-import org.jrd.frontend.frame.main.DecompilationController;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
@@ -75,12 +73,6 @@ public abstract class AbstractAgentNeedingTest {
         streams.captureStreams(false);
 
         Assertions.assertTrue(dummy.isAlive());
-        // halt agent, otherwise an open socket prevents termination of dummy process
-        AgentRequestAction request = DecompilationController
-                .createRequest(model.getVmManager().findVmFromPid(dummy.getPid()), AgentRequestAction.RequestAction.HALT, "");
-        String response = DecompilationController.submitRequest(model.getVmManager(), request);
-        Assertions.assertEquals("ok", response);
-
         Assertions.assertTrue(dummy.isAlive());
         dummy.terminate();
     }
