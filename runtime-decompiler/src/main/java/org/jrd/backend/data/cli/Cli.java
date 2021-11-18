@@ -262,7 +262,7 @@ public class Cli {
                     }
                 });
                 if (localAgent) {
-                    System.out.println(
+                    System.err.println(
                             " kill this process (" + ProcessHandle.current().pid() + ") to detach agent(s) on port: " +
                                     operatedOn.stream().map(a -> a.getVmDecompilerStatus().getListenPort() + "")
                                             .collect(Collectors.joining(","))
@@ -274,7 +274,7 @@ public class Cli {
             } else if (AgentLoader.getDefaultConfig().liveliness == AgentLiveliness.ONE_SHOT) {
                 for (VmInfo status : operatedOn) {
                     if (operation.equals(ATTACH)) {
-                        System.out.println("agent was justattached.. and is detaching right away. Weird, yah?");
+                        System.err.println("agent was just attached.. and is detaching right away. Weird, yah?");
                     } else {
                         Logger.getLogger().log("Detaching single attach agent(s), if any");
                     }
