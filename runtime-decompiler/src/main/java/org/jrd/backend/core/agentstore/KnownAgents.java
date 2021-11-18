@@ -43,7 +43,7 @@ public final class KnownAgents {
 
     private void markDead(String hostname, int listenPort, int vmPid, boolean action, List<KnownAgent> matchingAgents, boolean all) {
         if (matchingAgents.size() == 0) {
-            System.err.println(
+            Logger.getLogger().log(
                     String.format(
                             "not found agent for hostname=%s port=%d vmPid=%d in list of %d live agents (total agents %d)", hostname,
                             listenPort, vmPid, agents.stream().filter(a -> a.isLive()).collect(Collectors.toList()).size(), agents.size()
@@ -52,7 +52,7 @@ public final class KnownAgents {
             return;
         }
         if (matchingAgents.size() > 1) {
-            System.err.println(
+            Logger.getLogger().log(
                     String.format(
                             "found %d agents for hostname=%s port=%d vmPid=%d in list of %d live agents (total agents %d)",
                             matchingAgents.size(), hostname, listenPort, vmPid,
@@ -66,9 +66,9 @@ public final class KnownAgents {
         for (KnownAgent agent : matchingAgents) {
             if (action) {
                 agent.markKilled();
-                System.err.println("killing " + agent.toString());
+                Logger.getLogger().log("killing " + agent.toString());
             } else {
-                System.err.println("not killing " + agent.toString());
+                Logger.getLogger().log("not killing " + agent.toString());
             }
         }
         save();
