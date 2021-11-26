@@ -413,13 +413,13 @@ public class PluginManager {
             return "";
         }
 
-        String out = "";
+        StringBuilder out = new StringBuilder("");
         for (ExpandableUrl url : list) {
-            out += url.getExpandedPath() + delimiter;
+            out.append(url.getExpandedPath()).append(delimiter);
         }
 
         if (out.length() == 0) {
-            return out;
+            return out.toString();
         } else {
             return out.substring(0, out.length() - 1);
         }
