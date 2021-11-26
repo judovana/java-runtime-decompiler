@@ -81,9 +81,9 @@ public class RuntimeCompilerConnector {
 
         @SuppressWarnings("unchecked") // wrapper compile method always returns Map<String, byte[]>
         @Override
-        public Collection<IdentifiedBytecode> compileClass(
-            ClassesProvider provider, Optional<MessagesListener> messagesConsumer, IdentifiedSource... sources
-        ) {
+        public
+                Collection<IdentifiedBytecode>
+                compileClass(ClassesProvider provider, Optional<MessagesListener> messagesConsumer, IdentifiedSource... sources) {
             try {
                 Map<String, String> inputs = new HashMap<>();
                 for (IdentifiedSource is : sources) {

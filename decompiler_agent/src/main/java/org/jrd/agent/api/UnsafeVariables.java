@@ -35,7 +35,7 @@ public class UnsafeVariables {
 
     public static class Global {
 
-        private static final AbstractMasterKeyMap<String> GLOBALS = new AbstractMasterKeyMap<>() {
+        private static final AbstractMasterKeyMap<String> GLOBALS = new AbstractMasterKeyMap<String>() {
 
             //globals do not have any granularity, so there is just one key to rule them all
             private static final String THE_KEY = "GLOBALS_UNSAFE";
@@ -94,7 +94,7 @@ public class UnsafeVariables {
         protected Local() {
         }
 
-        private static final AbstractMasterKeyMap<Object> LOCALS = new AbstractMasterKeyMap<>() {
+        private static final AbstractMasterKeyMap<Object> LOCALS = new AbstractMasterKeyMap<Object>() {
 
             @Override
             protected Map<Object, Map<String, Object>> createMainMap() {
@@ -157,7 +157,7 @@ public class UnsafeVariables {
         protected Clazzs() {
         }
 
-        private static final AbstractMasterKeyMap<Class> CLAZZS = new AbstractMasterKeyMap<>() {
+        private static final AbstractMasterKeyMap<Class> CLAZZS = new AbstractMasterKeyMap<Class>() {
 
             @Override
             protected Map<Class, Map<String, Object>> createMainMap() {

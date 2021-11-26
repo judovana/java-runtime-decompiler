@@ -80,7 +80,7 @@ public class Variables {
 
     public static class Global {
 
-        private static final AbstractMasterKeyMap<String> GLOBALS = new AbstractMasterKeyMap<>() {
+        private static final AbstractMasterKeyMap<String> GLOBALS = new AbstractMasterKeyMap<String>() {
 
             //globals do not have any granularity, so there is just one key to rule them all
             private static final String THE_KEY = "GLOBALS";
@@ -139,7 +139,7 @@ public class Variables {
         protected Local() {
         }
 
-        private static final AbstractMasterKeyMap<Object> LOCALS = new AbstractMasterKeyMap<>() {
+        private static final AbstractMasterKeyMap<Object> LOCALS = new AbstractMasterKeyMap<Object>() {
 
             @Override
             protected synchronized Map<Object, Map<String, Object>> createMainMap() {
@@ -202,7 +202,7 @@ public class Variables {
         protected Clazzs() {
         }
 
-        private static final AbstractMasterKeyMap<Class> CLAZZS = new AbstractMasterKeyMap<>() {
+        private static final AbstractMasterKeyMap<Class> CLAZZS = new AbstractMasterKeyMap<Class>() {
 
             @Override
             protected synchronized Map<Class, Map<String, Object>> createMainMap() {

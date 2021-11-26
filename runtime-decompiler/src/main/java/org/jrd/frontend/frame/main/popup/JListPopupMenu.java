@@ -68,8 +68,8 @@ public class JListPopupMenu<T> extends JPopupMenu {
     protected String stringsFromValue(T a) {
         StringBuilder s = new StringBuilder();
 
-        for (var entry : checkboxes.entrySet()) {
-            var checkbox = checkboxes.get(entry.getKey());
+        for (Map.Entry entry : checkboxes.entrySet()) {
+            CheckboxGetterPair<T> checkbox = checkboxes.get(entry.getKey());
 
             if (checkbox.isSelected()) {
                 s.append(checkbox.apply(a)).append(System.getProperty("line.separator", "\n"));

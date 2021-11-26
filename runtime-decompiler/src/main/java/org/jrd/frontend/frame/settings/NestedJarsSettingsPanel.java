@@ -53,7 +53,7 @@ public class NestedJarsSettingsPanel extends JPanel implements ChangeReporter {
             }
         });
 
-        uniqueListModel = new DefaultListModel<>() {
+        uniqueListModel = new DefaultListModel<String>() {
             @Override
             public void addAll(Collection<? extends String> c) {
                 Set<String> filter = new LinkedHashSet<>();
