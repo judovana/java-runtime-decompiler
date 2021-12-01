@@ -302,7 +302,7 @@ public final class FsAgent implements JrdAgent {
         public Void onJarEntry(File file, ZipFile zipFile, ZipEntry ze) throws IOException {
             zipFile.close(); // caused java.nio.file.FileSystemException when closing fs after try-with-resources
 
-            try (FileSystem fs = FileSystems.newFileSystem(file.toPath(), null)) {
+            try (FileSystem fs = FileSystems.newFileSystem(file.toPath(), (ClassLoader) null)) {
                 Path fileInsideZipPath = fs.getPath(ze.getName());
                 Files.write(fileInsideZipPath, Base64.getDecoder().decode(body));
                 Logger.getLogger().log(Logger.Level.DEBUG, "written " + file.getAbsolutePath() + "!" + fileInsideZipPath);
