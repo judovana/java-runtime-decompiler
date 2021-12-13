@@ -10,6 +10,7 @@ import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.data.Cli;
+import org.jrd.backend.data.Config;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
 import org.jrd.backend.decompiling.DecompilerWrapper;
@@ -51,7 +52,17 @@ public class RuntimeCompilerConnector {
                         Logger.getLogger().log(Logger.Level.DEBUG, "Init of class '" + clazz.getFullName() + "' failed, not obtaining.");
                         continue;
                     }
-                    result = Cli.obtainClass(vmInfo, clazz.getFullName(), vmManager);
+                    //if we are using host classes, the class may still by on host
+                    if (Config.getConfig().doUseHostSystemClasses()) {
+                        try {
+                            result = Cli.obtainClass(vmInfo, clazz.getFullName(), vmManager);
+                        } catch (Exception consumedExceptionOnUseHostClasses) {
+                            Logger.getLogger().log(consumedExceptionOnUseHostClasses);
+                            continue;
+                        }
+                    } else {
+                        result = Cli.obtainClass(vmInfo, clazz.getFullName(), vmManager);
+                    }
                 }
                 byte[] ba = Base64.getDecoder().decode(result.getLoadedClassBytes());
                 results.add(new IdentifiedBytecode(new ClassIdentifier(clazz.getFullName()), ba));

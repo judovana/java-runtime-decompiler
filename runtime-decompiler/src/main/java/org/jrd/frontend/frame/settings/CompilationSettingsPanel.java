@@ -1,9 +1,12 @@
 package org.jrd.frontend.frame.settings;
 
+import org.jrd.frontend.frame.main.BytecodeDecompilerView;
+
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -20,9 +23,20 @@ public class CompilationSettingsPanel extends JPanel implements ChangeReporter {
         compilationSettingsLabel = new JLabel("Compilation settings");
         useHostSystemClassesCheckBox =
                 new JCheckBox("Use host system classes during compilation phase of class overwrite", initialUseHostSystemClasses);
+        useHostSystemClassesCheckBox.setToolTipText(
+                BytecodeDecompilerView.styleTooltip() + "<b>very tricky switch</b><br>" +
+                        "If true, then (should be default) then system classes (like java.lang) are loaded from THIS jvm<br>" +
+                        "If false, then all classes are onl from remote vm. Where this is more correct, it slower and may have issues<br>" +
+                        "Note, that even true, may bring some unexpected behavior, and is hard to determine what is better." +
+                        " With false on FS, you have to provide also system classes to cp!"
+        );
         compilerArgsLabel = new JLabel("Compiler arguments");
         compilerArgsTextField = new JTextField(initialCompilerArgs);
-        compilerArgsTextField.setToolTipText("Arguments that get passed to the compiler, eg. '-source 5 -target 8 -release 9 -Xlint'.");
+        compilerArgsTextField.setToolTipText(
+                BytecodeDecompilerView.styleTooltip() +
+                        "Arguments that get passed to the compiler, eg. '-source 5 -target 8 -release 9 -Xlint'."
+        );
+        compilerArgsLabel.setToolTipText(compilerArgsTextField.getToolTipText());
 
         this.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
