@@ -81,55 +81,47 @@ Commandline interface is powerful and allows for bulk processing of VM's, jars a
 Enter `./start.sh --help` in a *Linux terminal* or `start.bat --help` in a *Windows CMD* to get started.
 Decompile:
 ```
-$ ./start.sh  -decompile ~/git/jc/tool/target/tool-1.0.jar  Cfr  '.*'  -saveas /tmp/jc -savelike dir
-INFO:  Decompiling class org/jc/Tool
-INFO:  ... done
-Saved: /tmp/jc/org/jc/Tool.java
+$ ./start.sh -decompile classpathless-compiler-api-2.1.jar Cfr '.*' -saveas /tmp/cplc -savelike dir
+Processing io.github.mkoncek.classpathless.api.ClassIdentifier
+Saved: /tmp/cplc/io/github/mkoncek/classpathless/api/ClassIdentifier.java
 ...
-Saved: /tmp/jc/org/jc/impl/InMemoryJavaClassFileObject.java
-INFO:  Decompiling class org/jc/impl/InMemoryJavaSourceFileObject
-INFO:  ... done
-Saved: /tmp/jc/org/jc/impl/InMemoryJavaSourceFileObject.java
+Saved: /tmp/cplc/io/github/mkoncek/classpathless/api/MessagesListener.java
+
 ```
 
 Compile:
 ```
-$ ./start.sh -compile -cp  ~/git/classpathless-compiler/target/classpathless-compiler-1.0-SNAPSHOT.jar  /tmp/jc/org/terminusbrut/classpathless/impl/DebugPrinter.java -savelike fqn -saveas .
-Default runtime compiler will be used
-Saved: ./org.terminusbrut.classpathless.impl.DebugPrinter.class
+$ ./start.sh -compile -cp classpathless-compiler-api-2.1.jar /tmp/cplc/io/github/mkoncek/classpathless/api/ClassIdentifier.java -savelike fqn -saveas .
+...
+Saved: ./io.github.mkoncek.classpathless.api.ClassIdentifier.class
 ```
 
 Upload:
 ```
-$ ./start.sh  -overwrite  ~/git/classpathless-compiler/target/classpathless-compiler-1.0-SNAPSHOT.jar org.terminusbrut.classpathless.impl.DebugPrinter  org.terminusbrut.classpathless.impl.DebugPrinter.class
-WARNING:Class package do not match directories. 
-Most likely done successfully.
+$ ./start.sh -overwrite classpathless-compiler-api-2.1.jar io.github.mkoncek.classpathless.api.ClassIdentifier io.github.mkoncek.classpathless.api.ClassIdentifier.class
+WARNING: Class package do not match directories.
+Overwrite of class 'io.github.mkoncek.classpathless.api.ClassIdentifier' successful.
 ```
 
 Disassemble:
 ```
-$ ./start.sh  -decompile ~/git/jc/tool/target/tool-1.0.jar  jasm  '.*'  -saveas /tmp/jc -savelike dir 
-Note: /home/.../plugins/JasmDecompilerWrapper.java uses unchecked or unsafe operations.
-Note: Recompile with -Xlint:unchecked for details.
-Saved: /tmp/jc/org/jc/Tool.java
-Saved: /tmp/jc/org/jc/Tool$Arguments.java
+$ ./start.sh  -decompile classpathless-compiler-api-2.1.jar jasm '.*' -saveas /tmp/cplc -savelike dir
+Saved: /tmp/cplc/io/github/mkoncek/classpathless/api/ClassIdentifier.java
 ...
-Saved: /tmp/jc/org/jc/impl/InMemoryJavaClassFileObject.java
-Saved: /tmp/jc/org/jc/impl/InMemoryJavaSourceFileObject.java
+Saved: /tmp/cplc/io/github/mkoncek/classpathless/api/IdentifiedSource.java
+Saved: /tmp/cplc/io/github/mkoncek/classpathless/api/MessagesListener.java
 ```
 
 Assemble:
 ```
-$ ./start.sh  -compile  -p jasm   /tmp/jc -r   -saveas /tmp/bin 
-Note: /home/.../plugins/JasmDecompilerWrapper.java uses unchecked or unsafe operations.
-Note: Recompile with -Xlint:unchecked for details.
-jasm plugin is delivered with its own compiler!!
-jasm compiler caled with input of: 16
+$ ./start.sh -compile -p jasm /tmp/cplc -r -saveas /tmp/bin
 ...
-Saved: /tmp/bin/org/jc/api/MessagesListener.class
-Saved: /tmp/bin/org/jc/impl/Compiler$1.class
-Saved: /tmp/bin/org/jc/impl/InMemoryJavaSourceFileObject.class
-Saved: /tmp/bin/org/jc/api/InMemoryCompiler.class
+jasm compiler caled with input of: 8
+entering into /tmp/jrd-jasm14590159245433727064tmp.dir
+writing tmp file into /tmp/jrd-jasm14590159245433727064tmp.dir/src/io.github.mkoncek.classpathless.api.IdentifiedBytecode.java
+...
+Saved: /tmp/bin/io/github/mkoncek/classpathless/api/ClassIdentifier.class
+Saved: /tmp/bin/io/github/mkoncek/classpathless/api/MessagesListener.class
 ```
 
 Don't forget that all operations are same over classpath, remote vm, or process of VM - *runtime* compiler/decompiler!
