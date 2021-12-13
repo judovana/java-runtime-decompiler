@@ -16,6 +16,7 @@ import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.filesystem.NewFsVmController;
 import org.jrd.frontend.frame.main.DecompilationController;
 import org.jrd.frontend.frame.overwrite.FileToClassValidator;
+import org.jrd.frontend.frame.overwrite.OverwriteClassDialog;
 import org.jrd.frontend.utility.AgentApiGenerator;
 import org.jrd.frontend.utility.CommonUtils;
 
@@ -386,12 +387,7 @@ public class Cli {
                 }
             }
             Logger.getLogger().log(compilerLogMessage);
-
-            if (hasCompiler) {
-                return new RuntimeCompilerConnector.ForeignCompilerWrapper(decompiler);
-            } else {
-                return new io.github.mkoncek.classpathless.impl.CompilerJavac();
-            }
+            return OverwriteClassDialog.getClasspathlessCompiler(decompiler, hasCompiler, isVerbose);
         }
     }
 
