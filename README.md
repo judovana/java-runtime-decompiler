@@ -48,6 +48,7 @@ Currently supported decompilers are:
 * [Fernflower](https://github.com/JetBrains/intellij-community/tree/master/plugins/java-decompiler/engine)
 * [Procyon](https://bitbucket.org/mstrobel/procyon/downloads/)
 * [CFR](https://github.com/leibnitz27/cfr/)
+* [JD](https://github.com/java-decompiler/jd-core/)
 
 Assemblers/Disassemblers
 * [jasm](https://github.com/openjdk/asmtools)
