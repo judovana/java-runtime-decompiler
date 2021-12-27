@@ -48,7 +48,7 @@ Assemblers/Disassemblers
 
    **Temporary solution**: Use `mvn clean install -DskipTests` to not run test classes when building.
 ### From Fedora repositories
-The Java-Runtime-Decompiler is packed together with Fernflower and Procyon decompilers in the main Fedora repositories and in EPEL 7.
+The Java-Runtime-Decompiler is packed together with Fernflower and Procyon decompilers in the main Fedora repositories and in EPEL 7 and EPEL 8.
 ```
 dnf install java-runtime-decompiler
 ```
