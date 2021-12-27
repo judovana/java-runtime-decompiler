@@ -73,7 +73,7 @@ Different results may be achieved with different decompilers; you can select the
 ### Overwriting classes
 Using the *Overwrite button* at the top, you can replace the currently selected class' bytecode with your own compiled .class file via a dialog.
 
-![](https://user-images.githubusercontent.com/47597303/63510098-01977e00-c4de-11e9-8a72-24cec35bbc79.png)
+![](https://user-images.githubusercontent.com/2904395/147475825-973679fe-585b-4afd-bff6-a7b19f02660c.png)
 
 ### CLI
 Commandline interface is powerful and allows for bulk processing of VM's, jars and much more...\
