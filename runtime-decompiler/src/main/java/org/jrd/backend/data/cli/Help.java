@@ -5,6 +5,7 @@ import org.jrd.backend.core.agentstore.AgentLoneliness;
 import org.jrd.backend.core.agentstore.KnownAgents;
 import org.jrd.backend.data.Directories;
 import org.jrd.backend.data.MetadataProperties;
+import org.jrd.frontend.frame.main.GlobalConsole;
 
 import java.io.File;
 import java.util.Arrays;
@@ -79,7 +80,9 @@ public final class Help {
             " to utilize some plugins' (like jasm or jcoder) bundled compilers.\n" + "Use " + R +
             " for recursive search if <PATH> is a directory.\n" + "If the argument of '" + SAVE_AS + "' is a valid PID or URL, " +
             "the compiled code will be attempted to be injected into that process.\n" + "If multiple PATHs were specified, but no '" +
-            SAVE_AS + "', the process fails.";
+            SAVE_AS + "', the process fails.\n" + "use: -D of " + GlobalConsole.CPLC_DUPLICATED_CODE_VERBOSITY_CONSTANT +
+            "= any subset of" + Arrays.stream(GlobalConsole.CPLC_ITEMS).collect(Collectors.joining(",")) + "\n" +
+            "to see what is CPLC reolver doing";
     private static final String DECOMPILE_TEXT = "Decompile and print classes of a process with the specified decompiler plugin.\n" +
             "Javap can be passed options by appending them without spaces: " + "'javap-v-public ...' executes as 'javap -v -public ...'";
     private static final String OVERWRITE_TEXT =

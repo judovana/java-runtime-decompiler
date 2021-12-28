@@ -40,7 +40,8 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
     public static final String CPLC_SO = "SKIPPING_OVER";
     public static final String CPLC_AC = "ADDING_CLASS";
     public static final String CPLC_R = "INTERESTING";
-    static final String[] CPLC_ITEMS =
+    @SuppressFBWarnings(value = "MS_MUTABLE_ARRAY", justification = "who cares.. but the sort is important as binary search is used later")
+    public static final String[] CPLC_ITEMS =
             Arrays.stream(new String[]{CPLC_IL, CPLC_IA, CPLC_SO, CPLC_AC, CPLC_R}).sorted().toArray(String[]::new);
     private static GlobalConsole console = new GlobalConsole();
     private final RSyntaxTextArea log;
