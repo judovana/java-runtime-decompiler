@@ -16,13 +16,16 @@ public class CompilationSettingsPanel extends JPanel implements ChangeReporter {
 
     private JLabel compilationSettingsLabel;
     private JCheckBox useHostSystemClassesCheckBox;
+    private JCheckBox useHostJavaLangObjectCheckBox;
     private JLabel compilerArgsLabel;
     private JTextField compilerArgsTextField;
 
-    public CompilationSettingsPanel(boolean initialUseHostSystemClasses, String initialCompilerArgs) {
+    public CompilationSettingsPanel(boolean initialUseHostSystemClasses, String initialCompilerArgs, boolean initialUseHostJavaObject) {
         compilationSettingsLabel = new JLabel("Compilation settings");
         useHostSystemClassesCheckBox =
                 new JCheckBox("Use host system classes during compilation phase of class overwrite", initialUseHostSystemClasses);
+        useHostJavaLangObjectCheckBox =
+                new JCheckBox("Always enforce java.lang.Object from host (eg DCEVM requires this to work)", initialUseHostJavaObject);
         useHostSystemClassesCheckBox.setToolTipText(
                 BytecodeDecompilerView.styleTooltip() + "<b>very tricky switch</b><br>" +
                         "If true, then (should be default) then system classes (like java.lang) are loaded from THIS jvm<br>" +
@@ -50,11 +53,13 @@ public class CompilationSettingsPanel extends JPanel implements ChangeReporter {
 
         gbc.gridy = 1;
         this.add(useHostSystemClassesCheckBox, gbc);
+        gbc.gridy = 2;
+        this.add(useHostJavaLangObjectCheckBox, gbc);
 
         gbc.insets = new Insets(5, 5 + useHostSystemClassesCheckBox.getInsets().left, 5, 5);
         gbc.gridwidth = 1;
         gbc.weightx = 0;
-        gbc.gridy = 2;
+        gbc.gridy = 3;
         this.add(compilerArgsLabel, gbc);
 
         gbc.insets = new Insets(5, 5, 5, 5);
@@ -68,6 +73,10 @@ public class CompilationSettingsPanel extends JPanel implements ChangeReporter {
         return useHostSystemClassesCheckBox.isSelected();
     }
 
+    public boolean shouldUseHostJavaLangObjectCheckBox() {
+        return useHostJavaLangObjectCheckBox.isSelected();
+    }
+
     public String getCompilerArgs() {
         return compilerArgsTextField.getText();
     }
@@ -75,6 +84,7 @@ public class CompilationSettingsPanel extends JPanel implements ChangeReporter {
     @Override
     public void setChangeReporter(ActionListener listener) {
         ChangeReporter.addCheckboxListener(listener, useHostSystemClassesCheckBox);
+        ChangeReporter.addCheckboxListener(listener, useHostJavaLangObjectCheckBox);
         ChangeReporter.addTextChangeListener(listener, compilerArgsTextField);
     }
 }
