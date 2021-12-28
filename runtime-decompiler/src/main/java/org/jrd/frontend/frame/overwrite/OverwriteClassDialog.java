@@ -550,6 +550,28 @@ public class OverwriteClassDialog extends JDialog {
                     result = rc.compileClass(cp, Optional.of(new MessagesListener() {
                         @Override
                         public void addMessage(Level level, String s) {
+                            if (System.getProperty(GlobalConsole.CPLC_DUPLICATED_CODE_VERBOSITY_CONSTANT) != null) {
+                                if (s.startsWith("Ignoring lambda") &&
+                                        !System.getProperty(GlobalConsole.CPLC_DUPLICATED_CODE_VERBOSITY_CONSTANT)
+                                                .contains(GlobalConsole.CPLC_IL)) {
+                                    return;
+                                }
+                                if (s.startsWith("Ignoring array") &&
+                                        !System.getProperty(GlobalConsole.CPLC_DUPLICATED_CODE_VERBOSITY_CONSTANT)
+                                                .contains(GlobalConsole.CPLC_IA)) {
+                                    return;
+                                }
+                                if (s.startsWith("Skipping over") &&
+                                        !System.getProperty(GlobalConsole.CPLC_DUPLICATED_CODE_VERBOSITY_CONSTANT)
+                                                .contains(GlobalConsole.CPLC_SO)) {
+                                    return;
+                                }
+                                if (s.startsWith("Adding class") &&
+                                        !System.getProperty(GlobalConsole.CPLC_DUPLICATED_CODE_VERBOSITY_CONSTANT)
+                                                .contains(GlobalConsole.CPLC_AC)) {
+                                    return;
+                                }
+                            }
                             Logger.getLogger().log(Logger.Level.ALL, s);
                             compilationLog.setText(compilationLog.getText() + s + "\n");
                             GlobalConsole.getConsole().addMessage(level, s);
