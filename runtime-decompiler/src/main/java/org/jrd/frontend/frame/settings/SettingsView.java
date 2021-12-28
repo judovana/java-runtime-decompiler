@@ -83,7 +83,9 @@ public class SettingsView extends JDialog {
         okCancelPanel.add(cancelButton, gbc);
 
         agentSettingsPanel = new AgentSettingsPanel(config.getAgentRawPath());
-        compilationSettingsPanel = new CompilationSettingsPanel(config.doUseHostSystemClasses(), config.getCompilerArgsString());
+        compilationSettingsPanel = new CompilationSettingsPanel(
+                config.doUseHostSystemClasses(), config.getCompilerArgsString(), config.doUseHostJavaLangObject()
+        );
         nestedJarsSettingsPanel = new NestedJarsSettingsPanel();
         miscSettingsPanel = new MiscellaneousSettingsPanel(config.doUseJavapSignatures());
 
@@ -142,6 +144,7 @@ public class SettingsView extends JDialog {
 
         config.setAgentPath(agentSettingsPanel.getAgentPath());
         config.setUseHostSystemClasses(compilationSettingsPanel.shouldUseHostSystemClassesCheckBox());
+        config.setUseHostJavaLangObject(compilationSettingsPanel.shouldUseHostJavaLangObjectCheckBox());
         config.setCompilerArguments(compilationSettingsPanel.getCompilerArgs());
         config.setUseJavapSignatures(miscSettingsPanel.shouldUseJavapSignatures());
         config.setNestedJarExtensions(extensions);
