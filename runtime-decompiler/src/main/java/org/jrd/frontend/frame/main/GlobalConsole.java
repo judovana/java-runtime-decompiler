@@ -45,18 +45,18 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
     private static GlobalConsole console = new GlobalConsole();
     private final RSyntaxTextArea log;
     private final JButton clean; //assigned by inherited listner
-    private final JList<String> verboseCplc;
+    private JList<String> verboseCplc;
     private final JFrame frame;
     private boolean first = true;
 
     public GlobalConsole() {
-        verboseCplc = new JList(CPLC_ITEMS);
         JButton tmpClean;
         RSyntaxTextArea tmpLog;
         JFrame tmpFrame;
         Logger.getLogger().disableGuiLogging();
         if (!GraphicsEnvironment.isHeadless()) {
             try {
+                verboseCplc = new JList(CPLC_ITEMS);
                 tmpLog = new RSyntaxTextArea();
                 tmpLog.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_SAS);
                 tmpClean = new JButton("Clean log");
