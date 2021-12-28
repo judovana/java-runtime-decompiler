@@ -448,14 +448,15 @@ public class OverwriteClassDialog extends JDialog {
             rc = new RuntimeCompilerConnector.ForeignCompilerWrapper(wrapper);
         } else {
             boolean useHostClasses = Config.getConfig().doUseHostSystemClasses();
+            boolean useHostObject = Config.getConfig().doUseHostJavaLangObject();
             List<String> compilerArgs = Config.getConfig().getCompilerArgs();
 
             if (isVerbose) {
                 compilerArgs.add("-verbose");
             }
 
-            ClasspathlessCompiler.Arguments arguments =
-                    new ClasspathlessCompiler.Arguments().useHostSystemClasses(useHostClasses).compilerOptions(compilerArgs);
+            ClasspathlessCompiler.Arguments arguments = new ClasspathlessCompiler.Arguments().useHostSystemClasses(useHostClasses)
+                    .compilerOptions(compilerArgs).useHostJavaLangObject(useHostObject);
 
             rc = new io.github.mkoncek.classpathless.impl.CompilerJavac(arguments);
         }

@@ -33,6 +33,7 @@ public final class Config {
     private static final String AGENT_PATH_KEY = "AGENT_PATH";
     private static final String SAVED_FS_VMS_KEY = "FS_VMS";
     private static final String USE_HOST_SYSTEM_CLASSES_KEY = "USE_HOST_SYSTEM_CLASSES";
+    private static final String USE_HOST_JAVA_LANG_OBJECT = "USE_HOST_JAVA_LANG_OBJECT";
     private static final String NESTED_JAR_EXTENSIONS = "NESTED_JAR_EXTENSIONS";
     private static final String COMPILER_ARGS = "COMPILER_ARGS";
     private static final String USE_JAVAP_SIGNATURES = "USE_JAVAP_SIGNATURES";
@@ -133,8 +134,16 @@ public final class Config {
         configMap.put(USE_HOST_SYSTEM_CLASSES_KEY, useHostJavaClasses);
     }
 
+    public void setUseHostJavaLangObject(boolean useHostJavaLangObject) {
+        configMap.put(USE_HOST_JAVA_LANG_OBJECT, useHostJavaLangObject);
+    }
+
     public boolean doUseHostSystemClasses() {
         return (boolean) configMap.getOrDefault(USE_HOST_SYSTEM_CLASSES_KEY, true);
+    }
+
+    public boolean doUseHostJavaLangObject() {
+        return (boolean) configMap.getOrDefault(USE_HOST_JAVA_LANG_OBJECT, true);
     }
 
     public void setNestedJarExtensions(List<String> extensions) {
