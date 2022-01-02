@@ -25,7 +25,7 @@ public class CompilationSettingsPanel extends JPanel implements ChangeReporter {
         useHostSystemClassesCheckBox =
                 new JCheckBox("Use host system classes during compilation phase of class overwrite", initialUseHostSystemClasses);
         useHostJavaLangObjectCheckBox =
-                new JCheckBox("Always enforce java.lang.Object from host (eg DCEVM requires this to work)", initialUseHostJavaObject);
+                new JCheckBox("Always use host class java.lang.Object (e.g. DCEVM requires this to work)", initialUseHostJavaObject);
         useHostSystemClassesCheckBox.setToolTipText(
                 BytecodeDecompilerView.styleTooltip() + "<b>very tricky switch</b><br>" +
                         "If true, then (should be default) then system classes (like java.lang) are loaded from THIS jvm<br>" +
