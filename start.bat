@@ -32,15 +32,15 @@ if not "%JAVA_HOME%" == "" (
 rem Attempt to find java.exe from registry keys
 if "%JDK_LOCATION%" == "" (
   rem First, find the version
-  for /f "tokens=*" %%a in ('%windir%\System32\reg query "HKLM\SOFTWARE\JavaSoft\Java Development Kit" 2^>nul') do set "_version_key=%%a"
+  for /f "tokens=*" %%a in ('%windir%\System32\reg query "HKLM\SOFTWARE\JavaSoft\JDK" 2^>nul') do set "_version_key=%%a"
 
-  rem Remove the first 57 chars, the length of "HKEY_LOCAL_MACHINE\SOFTWARE\JavaSoft\Java Development Kit"
-  set "_version=!_version_key:~58!"
+  rem Remove the first 40 chars, the length of "HKEY_LOCAL_MACHINE\SOFTWARE\JavaSoft\JDK"
+  set "_version=!_version_key:~41!"
 
   rem Second, query for a specific registry key value of JavaHome
-  for /f "tokens=*" %%a in ('%windir%\System32\reg query "HKLM\SOFTWARE\JavaSoft\Java Development Kit\!_version!" /v JavaHome 2^>nul') do set "_jh_key=%%a"
+  for /f "tokens=*" %%a in ('%windir%\System32\reg query "HKLM\SOFTWARE\JavaSoft\JDK\!_version!" /v JavaHome 2^>nul') do set "_jh_key=%%a"
 
-  rem Remove the first 21 chars, the length of ???
+  rem Remove the first 21 chars, the length of "JavaHome    REG_SZ"
   set "_BAD_SLASH_JAVA_HOME=!_jh_key:~22!"
 
   rem Replace backslashes with forward slashes
@@ -53,7 +53,7 @@ if "%JDK_LOCATION%" == "" (
     if errorlevel 0 if not errorlevel 1 (
       set JDK_LOCATION=!_REG_JAVA_HOME!
     ) else (
-      echo Your JDK [!_REG_JAVA_HOME!] read from Registry HKLM\SOFTWARE\JavaSoft\Java Development Kit is not valid. Please fix this.
+      echo Your JDK [!_REG_JAVA_HOME!] read from Registry HKLM\SOFTWARE\JavaSoft\JDK is not valid. Please fix this.
 
       rem Terminate script
       goto:eof
