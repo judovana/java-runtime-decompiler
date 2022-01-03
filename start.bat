@@ -1,5 +1,5 @@
-rem Turn off debugging output (essentially 'set +x')
 @echo off
+rem Turned off debugging output (essentially 'set +x')
 
 rem If any argument case-insensitively matches "-verbose" toggle debugging output and assign the VERBOSE variable
 echo.%* | find /I "-verbose">nul && ( @echo on & set "VERBOSE=TRUE") || ( @echo off & set "VERBOSE=FALSE")
@@ -73,9 +73,9 @@ if "%JDK_LOCATION%" == "" (
   rem Split PATH on ";" (Windows' path separator), iterate over the chunks
   for %%a in ("%PATH:;=";"%") do (
     if exist "%%~a/javac.exe" (
-      rem Somehow get parent directory (from ."/bin/" to "./")? Might be a typo/oversight with both calls getting the drive+path of %%a, might not
-      for %%a in ("%%~a!") do set "_parent=%%~dpa"
-      for %%a in ("!_parent!.") do set "_PATH_JAVA_HOME=%%~dpa"
+      rem remnove x/bin/ to x/, x/bin to x
+      set "_tmp_a=%%~a"
+      set "_PATH_JAVA_HOME=!_tmp_a:~0,-4!"
     )
   )
 
@@ -87,7 +87,7 @@ if "%JDK_LOCATION%" == "" (
       echo Your JDK [!_PATH_JAVA_HOME!] read from the PATH environment variable is not valid. Please fix this.
       goto:eof
     )
-    set "_parent=" & set "_PATH_JAVA_HOME="
+    set "_tmp_a=" & set "_PATH_JAVA_HOME="
 )
 
 rem If no JDK has been found in any of the ways, terminate the script
