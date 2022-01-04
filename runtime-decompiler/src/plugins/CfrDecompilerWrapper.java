@@ -7,6 +7,8 @@ import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,7 +91,14 @@ public class CfrDecompilerWrapper {
                     }
                 });
             }
-            String decompiledString = readStringFromFile(decompiledFiles.get(0));
+            Collections.sort(decompiledFiles, new Comparator<File>() {
+                @Override
+                public int compare(File file, File file2) {
+                    //we need all inner classes behind the mainclass
+                    return file.getName().length() - file2.getName().length();
+                }
+            });
+            String decompiledString = readStringFromFile(decompiledFiles.get(0)); //as sorted, shoud work also for dirrectly inner classes
             return new Object[]{decompiledFiles.get(0), decompiledString};
         } finally {
             System.setOut(old);
