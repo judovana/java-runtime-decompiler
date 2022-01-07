@@ -1,6 +1,7 @@
 package org.jrd.backend.data.cli;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.ClasspathlessCompiler;
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
@@ -55,6 +56,7 @@ public class Cli {
     protected static final String LIST_CLASSESDETAILS = "-listdetails";
     protected static final String BASE64 = "-base64bytes";
     protected static final String BYTES = "-bytes";
+    protected static final String DEPS = "-deps";
     protected static final String DECOMPILE = "-decompile";
     protected static final String COMPILE = "-compile";
     protected static final String OVERWRITE = "-overwrite";
@@ -196,8 +198,8 @@ public class Cli {
                     break;
                 case BYTES:
                 case BASE64:
-                    boolean bytes = operation.equals(BYTES);
-                    VmInfo vmInfo3 = printBytes(bytes);
+                case DEPS:
+                    VmInfo vmInfo3 = printBytes(operation);
                     operatedOn.add(vmInfo3);
                     break;
                 case DECOMPILE:
@@ -205,7 +207,7 @@ public class Cli {
                     operatedOn.add(vmInfo4);
                     break;
                 case COMPILE:
-                    VmInfo[] sourceTarget = compile(new CompileArguments(filteredArgs, pluginManager, vmManager));
+                    VmInfo[] sourceTarget = compile(new CompileArguments(filteredArgs, pluginManager, vmManager, true));
                     if (sourceTarget[0] != null) {
                         operatedOn.add(sourceTarget[0]);
                     }
@@ -644,13 +646,17 @@ public class Cli {
         return decompiler;
     }
 
-    private VmInfo printBytes(boolean justBytes) throws Exception {
+    private VmInfo printBytes(String operation) throws Exception {
         if (filteredArgs.size() < 3) {
-            throw new IllegalArgumentException(
-                    "Incorrect argument count! Please use '" + (justBytes ? Help.BYTES_FORMAT : Help.BASE64_FORMAT) + "'."
-            );
+            throw new IllegalArgumentException("Incorrect argument count! Please use '" + (Help.BASE_SHARED_FORMAT) + "'.");
         }
-
+        CompileArguments args = null;
+        if (operation.equals(DEPS)) {
+            List nwArgs = new ArrayList<>(filteredArgs);
+            nwArgs.set(0, CP); //faking a bit
+            nwArgs.add(0, "dummy"); //faking a bit more
+            args = new CompileArguments(nwArgs, pluginManager, vmManager, false);
+        }
         VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
         int failCount = 0;
         int classCount = 0;
@@ -664,13 +670,18 @@ public class Cli {
                 classCount++;
                 VmDecompilerStatus result = obtainClass(vmInfo, clazz, vmManager);
                 byte[] bytes;
-                if (justBytes) {
+                if (operation.equals(BYTES)) {
                     bytes = Base64.getDecoder().decode(result.getLoadedClassBytes());
+                } else if (operation.equals(DEPS)) {
+                    byte[] bbytes = Base64.getDecoder().decode(result.getLoadedClassBytes());
+                    Collection<String> deps = io.github.mkoncek.classpathless.util.BytecodeExtractor
+                            .extractDependencies(new IdentifiedBytecode(new ClassIdentifier(clazz), bbytes), args.getClassesProvider());
+                    bytes = deps.stream().collect(Collectors.joining("\n")).getBytes(StandardCharsets.UTF_8);
                 } else {
                     bytes = result.getLoadedClassBytes().getBytes(StandardCharsets.UTF_8);
                 }
 
-                if (!outOrSave(clazz, ".class", bytes, justBytes)) {
+                if (!outOrSave(clazz, ".class", bytes, operation.equals(BYTES))) {
                     failCount++;
                 }
             }

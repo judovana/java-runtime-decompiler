@@ -23,7 +23,8 @@ final class CompileArguments {
 
     @SuppressWarnings("ModifiedControlVariable")
     // shifting arguments when parsing
-    CompileArguments(List<String> filteredArgs, PluginManager pluginManager, VmManager vmManager) throws FileNotFoundException {
+    CompileArguments(List<String> filteredArgs, PluginManager pluginManager, VmManager vmManager, boolean checkFile)
+            throws FileNotFoundException {
         this.pluginManager = pluginManager;
         this.vmManager = vmManager;
         for (int i = 1; i < filteredArgs.size(); i++) {
@@ -40,7 +41,7 @@ final class CompileArguments {
             } else {
                 File fileToCompile = new File(arg);
 
-                if (!fileToCompile.exists()) {
+                if (!fileToCompile.exists() && checkFile) {
                     throw new FileNotFoundException(fileToCompile.getAbsolutePath());
                 }
 
