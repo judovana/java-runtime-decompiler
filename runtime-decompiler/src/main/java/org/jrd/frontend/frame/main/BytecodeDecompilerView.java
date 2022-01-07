@@ -14,6 +14,7 @@ import org.fife.ui.rtextarea.SearchEngine;
 import org.fife.ui.rtextarea.SearchResult;
 import org.jrd.backend.core.ClassInfo;
 import org.jrd.backend.core.Logger;
+import org.jrd.backend.data.DependenciesReader;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.frontend.frame.main.popup.ClassListPopupMenu;
 import org.jrd.frontend.frame.main.renderer.ClassListRenderer;
@@ -116,6 +117,7 @@ public class BytecodeDecompilerView {
     private DecompilationController.QuickCompiler compileAction;
     private OverwriteActionListener overwriteActionListener;
     private DecompilationController.AgentApiGenerator popup;
+    private DependenciesReader dependenciesReader;
 
     private ClassInfo[] loadedClasses;
     private String lastDecompiledClass = "";
@@ -208,7 +210,7 @@ public class BytecodeDecompilerView {
                         bytesWorker(name);
                     }
                 } else if (SwingUtilities.isRightMouseButton(e)) {
-                    new ClassListPopupMenu<>(filteredClassesJList, originallySelected, doShowClassInfo())
+                    new ClassListPopupMenu<>(filteredClassesJList, originallySelected, doShowClassInfo(), getDependenciesReader())
                             .addItem("name(s)", ClassInfo::getName, true).addItem("location(s)", ClassInfo::getLocation, false)
                             .addItem("class loader(s)", ClassInfo::getClassLoader, false).show(filteredClassesJList, e.getX(), e.getY());
                 }
@@ -551,6 +553,14 @@ public class BytecodeDecompilerView {
         filteredClassesJList.repaint();
 
         updateClassList(); // reinterpret current search
+    }
+
+    public DependenciesReader getDependenciesReader() {
+        return dependenciesReader;
+    }
+
+    public void setDepsProvider(DependenciesReader depsReader) {
+        this.dependenciesReader = depsReader;
     }
 
     private static class UndoRedoKeyAdapter extends KeyAdapter {

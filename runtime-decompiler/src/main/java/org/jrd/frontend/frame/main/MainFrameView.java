@@ -204,7 +204,8 @@ public class MainFrameView {
                     ActionEvent event = new ActionEvent(localVmList, 0, null);
                     vmChangingListener.actionPerformed(event);
                 } else if (SwingUtilities.isRightMouseButton(mouseEvent)) {
-                    new JListPopupMenu<>(localVmList, true).addItem("name(s)", VmInfo::getVmName, true)
+                    new JListPopupMenu<>(localVmList, true, bytecodeDecompilerView.getDependenciesReader())
+                            .addItem("name(s)", VmInfo::getVmName, true)
                             .addItem("PID(s)", vmInfo -> String.valueOf(vmInfo.getVmPid()), false)
                             .show(localVmList, mouseEvent.getX(), mouseEvent.getY());
                 }
@@ -270,7 +271,7 @@ public class MainFrameView {
                     ActionEvent event = new ActionEvent(remoteVmList, 0, null);
                     vmChangingListener.actionPerformed(event);
                 } else if (SwingUtilities.isRightMouseButton(mouseEvent)) {
-                    new JListPopupMenu<>(remoteVmList, true).addItem(
+                    new JListPopupMenu<>(remoteVmList, true, bytecodeDecompilerView.getDependenciesReader()).addItem(
                             "address(es)",
                             vmInfo -> vmInfo.getVmDecompilerStatus().getHostname() + ":" + vmInfo.getVmDecompilerStatus().getListenPort(),
                             true
@@ -302,9 +303,9 @@ public class MainFrameView {
                     ActionEvent event = new ActionEvent(fsVmList, 0, null);
                     vmChangingListener.actionPerformed(event);
                 } else if (SwingUtilities.isRightMouseButton(mouseEvent)) {
-                    new JListPopupMenu<>(fsVmList, true).addItem("name(s)", VmInfo::getVmName, false)
-                            .addItem("classpath(s)", VmInfo::getCpString, true).addItem("ID(s)", VmInfo::getVmId, false)
-                            .show(fsVmList, mouseEvent.getX(), mouseEvent.getY());
+                    new JListPopupMenu<>(fsVmList, true, bytecodeDecompilerView.getDependenciesReader())
+                            .addItem("name(s)", VmInfo::getVmName, false).addItem("classpath(s)", VmInfo::getCpString, true)
+                            .addItem("ID(s)", VmInfo::getVmId, false).show(fsVmList, mouseEvent.getX(), mouseEvent.getY());
                 }
             }
         });

@@ -1,7 +1,6 @@
 package org.jrd.backend.data.cli;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.ClasspathlessCompiler;
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
@@ -14,6 +13,7 @@ import org.jrd.backend.core.DecompilerRequestReceiver;
 import org.jrd.backend.core.agentstore.AgentLiveliness;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
+import org.jrd.backend.data.DependenciesReader;
 import org.jrd.backend.data.MetadataProperties;
 import org.jrd.backend.data.Model;
 import org.jrd.backend.data.VmInfo;
@@ -22,6 +22,8 @@ import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.filesystem.NewFsVmController;
 import org.jrd.frontend.frame.main.DecompilationController;
+import org.jrd.frontend.frame.main.LoadingDialogProvider;
+import org.jrd.frontend.frame.main.ModelProvider;
 import org.jrd.frontend.frame.overwrite.FileToClassValidator;
 import org.jrd.frontend.utility.AgentApiGenerator;
 import org.jrd.frontend.utility.CommonUtils;
@@ -293,7 +295,9 @@ public class Cli {
                         );
                     }
                 }
-                System.err.println("exiting");
+                if (operation.equals(ATTACH) || operation.equals(DETACH) || isVerbose) {
+                    System.err.println("exiting");
+                }
             }
         }
     }
@@ -650,12 +654,14 @@ public class Cli {
         if (filteredArgs.size() < 3) {
             throw new IllegalArgumentException("Incorrect argument count! Please use '" + (Help.BASE_SHARED_FORMAT) + "'.");
         }
-        CompileArguments args = null;
+        final CompileArguments args;
         if (operation.equals(DEPS)) {
             List nwArgs = new ArrayList<>(filteredArgs);
             nwArgs.set(0, CP); //faking a bit
             nwArgs.add(0, "dummy"); //faking a bit more
             args = new CompileArguments(nwArgs, pluginManager, vmManager, false);
+        } else {
+            args = null;
         }
         VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
         int failCount = 0;
@@ -673,9 +679,23 @@ public class Cli {
                 if (operation.equals(BYTES)) {
                     bytes = Base64.getDecoder().decode(result.getLoadedClassBytes());
                 } else if (operation.equals(DEPS)) {
-                    byte[] bbytes = Base64.getDecoder().decode(result.getLoadedClassBytes());
-                    Collection<String> deps = io.github.mkoncek.classpathless.util.BytecodeExtractor
-                            .extractDependencies(new IdentifiedBytecode(new ClassIdentifier(clazz), bbytes), args.getClassesProvider());
+                    Collection<String> deps = new DependenciesReader(new ModelProvider() {
+                        @Override
+                        public VmInfo getVmInfo() {
+                            return vmInfo;
+                        }
+
+                        @Override
+                        public VmManager getVmManager() {
+                            return vmManager;
+                        }
+
+                        @Override
+                        public RuntimeCompilerConnector.JrdClassesProvider getClassesProvider() {
+                            return args.getClassesProvider();
+                        }
+                    }, new LoadingDialogProvider() {
+                    }).resolve(clazz, result.getLoadedClassBytes());
                     bytes = deps.stream().collect(Collectors.joining("\n")).getBytes(StandardCharsets.UTF_8);
                 } else {
                     bytes = result.getLoadedClassBytes().getBytes(StandardCharsets.UTF_8);
