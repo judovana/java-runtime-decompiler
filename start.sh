@@ -52,11 +52,11 @@ readonly BYTEMAN=$(findLib "org/jboss/byteman/byteman-install" "byteman-install-
 readonly CPLC_API=$(findLib "io/github/mkoncek/classpathless-compiler-api" "classpathless-compiler-api-.*\.jar")
 readonly CPLC_UTIL=$(findLib "io/github/mkoncek/classpathless-compiler-util" "classpathless-compiler-util-.*\.jar")
 readonly CPLC=$(findLib "io/github/mkoncek/classpathless-compiler" "classpathless-compiler-[[:digit:]].*\.jar")
-readonly JUST_BUILD_JRD=`find "$PORTABLE_JRD_HOME"/runtime-decompiler/target/runtime-decompiler-6.0-0.pre.3.jar 2> /dev/null`
+readonly JUST_BUILD_JRD=`find "$PORTABLE_JRD_HOME"/runtime-decompiler/target/runtime-decompiler-*.jar | grep -v jar-with-dependencies 2> /dev/null`
 if [ -f "$JUST_BUILD_JRD" ] ; then
   readonly JRD="$JUST_BUILD_JRD"
 else
-  readonly JRD=$(findLib "java-runtime-decompiler/runtime-decompiler" "runtime-decompiler-6\.0-0\.pre\.3\.jar")
+  readonly JRD=$(findLib "java-runtime-decompiler/runtime-decompiler" "runtime-decompiler-[[:digit:]].*\.jar")
 fi
 
 if [ "x$THE_TERRIBLE_INTERNAL_JRD" == "xtrue" ] ; then
