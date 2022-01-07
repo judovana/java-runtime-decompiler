@@ -164,7 +164,7 @@ for extension in sh bat ; do
   chmod 755 "$IMAGE_DIR/start.$extension"
 done
 
-$javac_home/bin/java -cp $CPLC_API:$CPLC_UTIL:$CPLC:$JUST_BUILD_JRD org.jrd.backend.data.Help > $IMAGE_DIR/jrd.man.1
+$javac_home/bin/java -cp $CPLC_API:$CPLC_UTIL:$CPLC:$JUST_BUILD_JRD org.jrd.backend.data.cli.Help > $IMAGE_DIR/jrd.man.1
 cp $SCRIPT_DIR/README.md $IMAGE_DIR
 
 pushd $TARGET_DIR
