@@ -10,12 +10,28 @@
 ```
 $ git clone https://github.com/pmikova/java-runtime-decompiler.git
 $ cd java-runtime-decompiler
-$ mvn clean install  # builds the runtime decpompiler
-$ mvn clean install -PdownloadPlugins # builds the decompiler and downloads the decompiler plugins for future use
-$ mvn clean install -Pimages # on Linux, bundles the plugins and JRD into a standalone portable image
+$ mvn clean install  # builds the runtime decpompiler and agent, downloads also plugins
+$ mvn clean install -PdownloadPlugins # builds the decompiler and downloads the decompiler plugins for future use, if not already downloaded
+$ mvn clean install -Pimages # on Linux, bundles the plugins and JRD into a standalone portable image. Make some basic verifications
+$ mvn clean install -Plegacy # take care to build agent in oldest resonable way
 
 # $PLUGINS and $VERIFY_CP variables may help to solve some weird image building issues.
 ```
+usually the development command is:
+```
+$ mvn clean install -Dcheckstyle.skip -Dspotbugs.skip=true 
+```
+Which downloads also te plugins.
+usually the release command is:
+```
+$ mvn clean install -DskipTests -Pimages -Plegacy
+```
+if the development command was never run, then  plugins profile must be included
+```
+$ mvn clean install -DskipTests -Pimages -Plegacy -PdownloadPlugins
+```
+Note, that tests requires valid DISPLAY, to have some top level components (like HexEditor) pass
+
 Then, in images/target/runtime-decompiler... `./start.sh` in a *Linux terminal* or `start.bat` in a *Windows CMD* to start the application. The usage of top level start.sh/bat is only for development purposes.
 
 #### Configuring decompiler agent
