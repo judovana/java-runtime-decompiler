@@ -1,5 +1,6 @@
 package org.jrd.frontend.frame.main;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
@@ -15,6 +16,7 @@ import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.core.agentstore.KnownAgents;
 import org.jrd.backend.data.Config;
+import org.jrd.backend.data.DependenciesReader;
 import org.jrd.backend.data.Model;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
@@ -52,7 +54,7 @@ import java.util.logging.Level;
  * This class provides Action listeners and request handling for
  * the GUI.
  */
-public class DecompilationController {
+public class DecompilationController implements ModelProvider, LoadingDialogProvider {
 
     private final MainFrameView mainFrameView;
     private final BytecodeDecompilerView bytecodeDecompilerView;
@@ -94,7 +96,7 @@ public class DecompilationController {
         bytecodeDecompilerView.setOverwriteActionListener(new ClassOverwriter());
         bytecodeDecompilerView.setCompileListener(new QuickCompiler());
         bytecodeDecompilerView.setPopup(new AgentApiGenerator());
-
+        bytecodeDecompilerView.setDepsProvider(new DependenciesReader(this, this));
         mainFrameView.setVmChanging(this::changeVm);
         mainFrameView.setHaltAgentListener(e -> haltAgent());
         mainFrameView.setKillAllSessionListener(e -> killAllSession());
@@ -286,7 +288,8 @@ public class DecompilationController {
         showLoadingDialog(a -> abortClassLoading(), title);
     }
 
-    private void showLoadingDialog(ActionListener listener, String title) {
+    @Override
+    public void showLoadingDialog(ActionListener listener, String title) {
         SwingUtilities.invokeLater(() -> {
             loadingDialog = new LoadingDialog(title);
             loadingDialog.setAbortActionListener(listener);
@@ -295,7 +298,8 @@ public class DecompilationController {
         });
     }
 
-    private void hideLoadingDialog() {
+    @Override
+    public void hideLoadingDialog() {
         // Avoid race-conditions by queueing closing after opening
         SwingUtilities.invokeLater(() -> loadingDialog.dispose());
     }
@@ -400,6 +404,22 @@ public class DecompilationController {
         }
     }
 
+    @Override
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "vm info is know everywhere")
+    public VmInfo getVmInfo() {
+        return vmInfo;
+    }
+
+    @Override
+    public VmManager getVmManager() {
+        return vmManager;
+    }
+
+    @Override
+    public RuntimeCompilerConnector.JrdClassesProvider getClassesProvider() {
+        return new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager);
+    }
+
     class QuickCompiler {
 
         public void upload(String clazz, byte[] body) {
@@ -421,8 +441,8 @@ public class DecompilationController {
             PluginManager.BundledCompilerStatus internalCompiler = pluginManager.getBundledCompilerStatus(wrapper);
             GlobalConsole.getConsole().addMessage(Level.ALL, internalCompiler.getStatus());
             OverwriteClassDialog.CompilationWithResult compiler = new OverwriteClassDialog.CompilationWithResult(
-                    OverwriteClassDialog.getClasspathlessCompiler(wrapper, internalCompiler.isEmbedded(), isVerbose),
-                    new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager), GlobalConsole.getConsole(), srcs
+                    OverwriteClassDialog.getClasspathlessCompiler(wrapper, internalCompiler.isEmbedded(), isVerbose), getClassesProvider(),
+                    GlobalConsole.getConsole(), srcs
             ) {
 
                 @Override

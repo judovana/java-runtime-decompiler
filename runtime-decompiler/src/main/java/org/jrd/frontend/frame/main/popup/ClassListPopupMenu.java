@@ -1,5 +1,7 @@
 package org.jrd.frontend.frame.main.popup;
 
+import org.jrd.backend.data.DependenciesReader;
+
 import javax.swing.JList;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.PopupMenuEvent;
@@ -7,8 +9,8 @@ import javax.swing.event.PopupMenuListener;
 
 public class ClassListPopupMenu<T> extends JListPopupMenu<T> {
 
-    public ClassListPopupMenu(JList<T> parentJList, int originallySelected, boolean showCheckboxes) {
-        super(parentJList, showCheckboxes);
+    public ClassListPopupMenu(JList<T> parentJList, int originallySelected, boolean showCheckboxes, DependenciesReader dr) {
+        super(parentJList, showCheckboxes, dr);
 
         addPopupMenuListener(new PopupMenuListener() {
             @Override

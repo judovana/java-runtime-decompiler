@@ -1,16 +1,35 @@
 package org.jrd.frontend.frame.main.popup;
 
+import org.jrd.backend.core.VmDecompilerStatus;
+import org.jrd.backend.data.DependenciesReader;
+import org.jrd.backend.data.cli.Cli;
+import org.jrd.frontend.utility.ScreenFinder;
+
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.ListModel;
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
+
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -20,7 +39,7 @@ public class JListPopupMenu<T> extends JPopupMenu {
     Map<String, CheckboxGetterPair<T>> checkboxes = new LinkedHashMap<>();
     boolean showCheckBoxes;
 
-    public JListPopupMenu(JList<T> parentJList, boolean showCheckboxes) {
+    public JListPopupMenu(JList<T> parentJList, boolean showCheckboxes, DependenciesReader dependenciesReader) {
         this.showCheckBoxes = showCheckboxes;
 
         add(createCopyItem("Copy selected", parentJList.getSelectedValuesList()));
@@ -30,6 +49,10 @@ public class JListPopupMenu<T> extends JPopupMenu {
         helpItem.setEnabled(false);
         addSeparator();
         add(helpItem);
+        addSeparator();
+        JMenuItem deps = new JMenuItem("Print dependencies");
+        add(deps);
+        deps.addActionListener(new DepndencyResolverListener(dependenciesReader, parentJList));
     }
 
     public JListPopupMenu<T> addItem(String fieldName, Function<T, String> getter, boolean isSelected) {
@@ -94,6 +117,61 @@ public class JListPopupMenu<T> extends JPopupMenu {
 
         String apply(T t) {
             return getter.apply(t);
+        }
+    }
+
+    private class DepndencyResolverListener implements ActionListener {
+        private final DependenciesReader mDependenciesReader;
+        private final JList<T> mParentJList;
+
+        DepndencyResolverListener(DependenciesReader dependenciesReader, JList<T> parentJList) {
+            mDependenciesReader = dependenciesReader;
+            mParentJList = parentJList;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            mDependenciesReader.getGui().showLoadingDialog(a -> mDependenciesReader.getGui().hideLoadingDialog(), "Resolving dependencies");
+            new SwingWorker<String, Void>() {
+                @Override
+                protected String doInBackground() throws Exception {
+                    final StringBuilder r = new StringBuilder("");
+                    try {
+                        List<String> classes = mParentJList.getSelectedValuesList().stream().map(JListPopupMenu.this::stringsFromValue)
+                                .collect(Collectors.toList());
+                        Set<String> allDeps = new HashSet<>();
+                        for (String clazz : classes) {
+                            VmDecompilerStatus result =
+                                    Cli.obtainClass(mDependenciesReader.getVmInfo(), clazz, mDependenciesReader.getVmManager());
+                            Collection<String> deps1 = mDependenciesReader.resolve(clazz, result.getLoadedClassBytes());
+                            allDeps.addAll(deps1);
+                        }
+                        r.append(allDeps.stream().sorted().collect(Collectors.joining("\n")));
+                    } finally {
+                        mDependenciesReader.getGui().hideLoadingDialog();
+                    }
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            JFrame wind = new JFrame();
+                            wind.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                            wind.setSize(new Dimension(800, 600));
+                            wind.add(new JScrollPane(new JTextArea(r.toString())));
+                            JButton jb = new JButton("close");
+                            jb.addActionListener(new ActionListener() {
+                                @Override
+                                public void actionPerformed(ActionEvent actionEvent) {
+                                    wind.dispose();
+                                }
+                            });
+                            wind.add(jb, BorderLayout.SOUTH);
+                            ScreenFinder.centerWindowToCurrentScreen(wind);
+                            wind.setVisible(true);
+                        }
+                    });
+                    return r.toString();
+                }
+            }.execute();
         }
     }
 }
