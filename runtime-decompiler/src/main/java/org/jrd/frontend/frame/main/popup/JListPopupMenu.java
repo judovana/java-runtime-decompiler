@@ -13,6 +13,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.ListModel;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
@@ -52,7 +53,7 @@ public class JListPopupMenu<T> extends JPopupMenu {
         addSeparator();
         JMenuItem deps = new JMenuItem("Print dependencies");
         add(deps);
-        deps.addActionListener(new DepndencyResolverListener(dependenciesReader, parentJList));
+        deps.addActionListener(new DepndencyResolverListener(dependenciesReader, parentJList.getSelectedValuesList()));
     }
 
     public JListPopupMenu<T> addItem(String fieldName, Function<T, String> getter, boolean isSelected) {
@@ -122,9 +123,9 @@ public class JListPopupMenu<T> extends JPopupMenu {
 
     private class DepndencyResolverListener implements ActionListener {
         private final DependenciesReader mDependenciesReader;
-        private final JList<T> mParentJList;
+        private final List<T> mParentJList;
 
-        DepndencyResolverListener(DependenciesReader dependenciesReader, JList<T> parentJList) {
+        DepndencyResolverListener(DependenciesReader dependenciesReader, List<T> parentJList) {
             mDependenciesReader = dependenciesReader;
             mParentJList = parentJList;
         }
@@ -132,46 +133,57 @@ public class JListPopupMenu<T> extends JPopupMenu {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             mDependenciesReader.getGui().showLoadingDialog(a -> mDependenciesReader.getGui().hideLoadingDialog(), "Resolving dependencies");
-            new SwingWorker<String, Void>() {
-                @Override
-                protected String doInBackground() throws Exception {
-                    final StringBuilder r = new StringBuilder("");
-                    try {
-                        List<String> classes = mParentJList.getSelectedValuesList().stream().map(JListPopupMenu.this::stringsFromValue)
-                                .collect(Collectors.toList());
-                        Set<String> allDeps = new HashSet<>();
-                        for (String clazz : classes) {
-                            VmDecompilerStatus result =
-                                    Cli.obtainClass(mDependenciesReader.getVmInfo(), clazz, mDependenciesReader.getVmManager());
-                            Collection<String> deps1 = mDependenciesReader.resolve(clazz, result.getLoadedClassBytes());
-                            allDeps.addAll(deps1);
-                        }
-                        r.append(allDeps.stream().sorted().collect(Collectors.joining("\n")));
-                    } finally {
-                        mDependenciesReader.getGui().hideLoadingDialog();
+            new ClassResolutionInBackground().execute();
+        }
+
+        private class ClassResolutionInBackground extends SwingWorker<String, Void> {
+            @Override
+            protected String doInBackground() throws Exception {
+                final StringBuilder r = new StringBuilder("");
+                List<String> classes = new ArrayList<>();
+                Set<String> allDeps = new HashSet<>();
+                try {
+                    classes.addAll(mParentJList.stream().map(JListPopupMenu.this::stringsFromValue).collect(Collectors.toList()));
+                    for (String clazz : classes) {
+                        VmDecompilerStatus result =
+                                Cli.obtainClass(mDependenciesReader.getVmInfo(), clazz, mDependenciesReader.getVmManager());
+                        Collection<String> deps1 = mDependenciesReader.resolve(clazz, result.getLoadedClassBytes());
+                        allDeps.addAll(deps1);
                     }
-                    SwingUtilities.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            JFrame wind = new JFrame();
-                            wind.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                            wind.setSize(new Dimension(800, 600));
-                            wind.add(new JScrollPane(new JTextArea(r.toString())));
-                            JButton jb = new JButton("close");
-                            jb.addActionListener(new ActionListener() {
-                                @Override
-                                public void actionPerformed(ActionEvent actionEvent) {
-                                    wind.dispose();
-                                }
-                            });
-                            wind.add(jb, BorderLayout.SOUTH);
-                            ScreenFinder.centerWindowToCurrentScreen(wind);
-                            wind.setVisible(true);
-                        }
-                    });
-                    return r.toString();
+                    r.append(allDeps.stream().sorted().collect(Collectors.joining("\n")));
+                } finally {
+                    mDependenciesReader.getGui().hideLoadingDialog();
                 }
-            }.execute();
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        JFrame wind = new JFrame();
+                        wind.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                        wind.setSize(new Dimension(800, 600));
+                        wind.add(new JScrollPane(new JTextArea(r.toString())));
+                        JButton jb = new JButton("close");
+                        jb.addActionListener(new ActionListener() {
+                            @Override
+                            public void actionPerformed(ActionEvent actionEvent) {
+                                wind.dispose();
+                            }
+                        });
+                        wind.add(jb, BorderLayout.SOUTH);
+                        JTextField jtf;
+                        if (classes.size() == 1) {
+                            jtf = new JTextField(classes.get(0) + " has deps: " + allDeps.size());
+                        } else {
+                            jtf = new JTextField(classes.size() + " classes have deps: " + allDeps.size());
+                        }
+                        wind.setTitle(jtf.getText());
+                        jtf.setEditable(false);
+                        wind.add(jtf, BorderLayout.NORTH);
+                        ScreenFinder.centerWindowToCurrentScreen(wind);
+                        wind.setVisible(true);
+                    }
+                });
+                return r.toString();
+            }
         }
     }
 }
