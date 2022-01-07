@@ -23,6 +23,7 @@ import static org.jrd.backend.data.cli.Cli.BYTES;
 import static org.jrd.backend.data.cli.Cli.COMPILE;
 import static org.jrd.backend.data.cli.Cli.CP;
 import static org.jrd.backend.data.cli.Cli.DECOMPILE;
+import static org.jrd.backend.data.cli.Cli.DEPS;
 import static org.jrd.backend.data.cli.Cli.DETACH;
 import static org.jrd.backend.data.cli.Cli.H;
 import static org.jrd.backend.data.cli.Cli.HELP;
@@ -48,8 +49,10 @@ public final class Help {
     static final String HELP_FORMAT = HELP + ", " + H;
     static final String VERBOSE_FORMAT = VERBOSE;
     static final String VERSION_FORMAT = VERSION;
-    static final String BASE64_FORMAT = BASE64 + " <PUC> <CLASS REGEX>...";
-    static final String BYTES_FORMAT = BYTES + " <PUC> <CLASS REGEX>...";
+    static final String BASE_SHARED_FORMAT = " <PUC> <CLASS REGEX>...";
+    static final String BASE64_FORMAT = BASE64 + BASE_SHARED_FORMAT;
+    static final String BYTES_FORMAT = BYTES + BASE_SHARED_FORMAT;
+    static final String DEPS_FORMAT = DEPS + BASE_SHARED_FORMAT;
     static final String LIST_JVMS_FORMAT = LIST_JVMS;
     static final String LIST_PLUGINS_FORMAT = LIST_PLUGINS;
     static final String LIST_CLASSES_FORMAT = LIST_CLASSES + " <PUC> [<CLASS REGEX>...]";
@@ -71,6 +74,7 @@ public final class Help {
     private static final String VERSION_TEXT = "Print version project name, version and build timestamp.";
     private static final String BASE64_TEXT = "Print Base64 encoded binary form of requested classes of a process.";
     private static final String BYTES_TEXT = "Print binary form of requested classes of a process";
+    private static final String DEPS_TEXT = "Print all deps of the selected class(es).";
     private static final String LIST_JVMS_TEXT = "List all local Java processes and their PIDs.";
     private static final String LIST_PLUGINS_TEXT = "List all currently configured decompiler plugins and their statuses.";
     private static final String LIST_CLASSES_TEXT = "List all loaded classes of a process, optionally filtering them.\n" + "Only '" +
@@ -142,6 +146,7 @@ public final class Help {
         ALL_OPTIONS.put(LIST_CLASSESDETAILS_FORMAT, LIST_CLASSESDETAILS_TEXT);
         ALL_OPTIONS.put(BASE64_FORMAT, BASE64_TEXT);
         ALL_OPTIONS.put(BYTES_FORMAT, BYTES_TEXT);
+        ALL_OPTIONS.put(DEPS_FORMAT, DEPS_TEXT);
         ALL_OPTIONS.put(COMPILE_FORMAT, COMPILE_TEXT);
         ALL_OPTIONS.put(DECOMPILE_FORMAT, DECOMPILE_TEXT);
         ALL_OPTIONS.put(OVERWRITE_FORMAT, OVERWRITE_TEXT);
@@ -165,7 +170,7 @@ public final class Help {
 
     private static final String[] UNSAVABLE_OPTIONS = new String[]{HELP, H, OVERWRITE, INIT};
     private static final String[] SAVABLE_OPTIONS =
-            new String[]{LIST_CLASSES, LIST_CLASSESDETAILS, BYTES, BASE64, COMPILE, DECOMPILE, API, LIST_JVMS, LIST_PLUGINS};
+            new String[]{LIST_CLASSES, LIST_CLASSESDETAILS, BYTES, BASE64, DEPS, COMPILE, DECOMPILE, API, LIST_JVMS, LIST_PLUGINS};
 
     private static final int LONGEST_FORMAT_LENGTH = Stream.of(ALL_OPTIONS.keySet(), SAVING_OPTIONS.keySet()).flatMap(Collection::stream)
             .map(String::length).max(Integer::compare).orElse(30) + 1; // at least one space between format and text
