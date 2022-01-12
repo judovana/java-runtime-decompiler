@@ -49,3 +49,10 @@
 		* no rules, but you must compile
 			* decopilers suck (source path, JRD 7)
 		* just java, you can do everthing, you can break a lot
+--PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
+# hands on!
+	* jdk11 x 8 comaptibility getting worse
+		=> 11
+	* https://github.com/judovana/JrdBytemanExamples/blob/master/btmn/
+	* https://github.com/judovana/JrdBytemanExamples/releases/tag/0.1
+		https://github.com/judovana/JrdBytemanExamples/releases/download/0.1/cdist.tar.xz
