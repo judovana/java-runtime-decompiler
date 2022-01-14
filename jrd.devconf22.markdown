@@ -39,7 +39,7 @@
 	* the modified parts needs a motivations to take effect
 		* call of the changed method is usually enough also for jitted code
 --PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
-# standalon bytecode replacement
+# standalone bytecode replacement
 	* byteman - https://byteman.jboss.org/
 		* rules
 			* simple: https://github.com/judovana/JrdBytemanExamples/blob/master/btmn/date.btm
