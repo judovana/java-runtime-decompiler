@@ -6,6 +6,9 @@
 	jvanek@redhat.com
 	OpenJDK QA engineer
 
+ * https://github.com/pmikova/java-runtime-decompiler
+  * https://github.com/pmikova/java-runtime-decompiler/releases/tag/java-runtime-decompiler-6.1
+  * https://github.com/pmikova/java-runtime-decompiler/releases/tag/7.0-snapshot.1
 
 --PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
 # java agents
