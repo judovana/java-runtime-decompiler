@@ -7,8 +7,11 @@
 	OpenJDK QA engineer
 
  * https://github.com/pmikova/java-runtime-decompiler
+  * https://github.com/pmikova/java-runtime-decompiler/blob/devconf2022/jrd.devconf22.markdown
   * https://github.com/pmikova/java-runtime-decompiler/releases/tag/java-runtime-decompiler-6.1
   * https://github.com/pmikova/java-runtime-decompiler/releases/tag/7.0-snapshot.1
+
+Week point: https://github.com/tisnik/vim-weakpoint
 
 --PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
 # java agents
