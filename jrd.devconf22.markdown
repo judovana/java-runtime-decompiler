@@ -40,8 +40,10 @@ Week point: https://github.com/tisnik/vim-weakpoint
 --PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
 # hotswap
 	* byte[] -> byte[]
+		* see "java agents" slide
 	* moreover only bodies of methods are allowed to change
 		* unless you have DCEVM pached jdk
+		* https://dcevm.github.io/
 	* the modified parts needs a motivations to take effect
 		* call of the changed method is usually enough also for jitted code
 --PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
@@ -57,6 +59,7 @@ Week point: https://github.com/tisnik/vim-weakpoint
 		* just java, you can do everthing, you can break a lot
 --PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
 # hands on!
+	* pre reqs:
 	* https://github.com/pmikova/java-runtime-decompiler/releases/tag/java-runtime-decompiler-6.1
 		* https://github.com/pmikova/java-runtime-decompiler/releases/download/java-runtime-decompiler-6.1/runtime-decompiler-6.1-with-decompilers.tar.xz
 		* https://github.com/pmikova/java-runtime-decompiler/releases/download/java-runtime-decompiler-6.1/runtime-decompiler-6.1-with-decompilers.zip
@@ -66,3 +69,16 @@ Week point: https://github.com/tisnik/vim-weakpoint
 		* https://github.com/judovana/JrdBytemanExamples/blob/master/btmn/
 		* https://github.com/judovana/JrdBytemanExamples/releases/tag/0.1
 			* https://github.com/judovana/JrdBytemanExamples/releases/download/0.1/cdist.tar.xz
+--PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
+# calc
+	* java -Djdk.attach.allowAttachSelf=true -jar cdist/nodebugBuild/EthernalCrashes.jar  math
+    * jrd x byteman
+--PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
+# calc
+	* java -Djdk.attach.allowAttachSelf=true -jar cdist/fulldebugBuild/EthernalCrashes.jar  math
+	* fix mult -> mul
+	* fix div by zero exception to N/A
+--PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
+# date
+	* java -Djdk.attach.allowAttachSelf=true -jar cdist/fulldebugBuild/EthernalCrashes.jar date1
+
