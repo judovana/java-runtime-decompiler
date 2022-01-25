@@ -36,6 +36,7 @@ Week point: https://github.com/tisnik/vim-weakpoint
 	* agent can not bee detached
 		* can only stop working (eg remove transformer, close server socket)
 		* critical bug in JRD
+			* was k for decompiler
 	* JVM must have "motivation" to relaod bytecode
 --PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
 # hotswap
@@ -57,6 +58,16 @@ Week point: https://github.com/tisnik/vim-weakpoint
 		* no rules, but you must compile
 			* decopilers suck (source path, JRD 7)
 		* just java, you can do everthing, you can break a lot
+--PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
+# hands on!
+	* warm up
+--PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
+# jrd itself
+	* cli
+	* overwrite, api and init dialogues
+	* `.*jrd.*Renderer.*`
+    * bad java?
+	* -source 8 -target 8
 --PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
 # hands on!
 	* pre reqs:
