@@ -6,13 +6,19 @@
 	jvanek@redhat.com
 	OpenJDK QA engineer
 
+
+Week point: https://github.com/tisnik/vim-weakpoint
+--PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
+# JRD
  * https://github.com/pmikova/java-runtime-decompiler
   * https://github.com/pmikova/java-runtime-decompiler/blob/devconf2022/jrd.devconf22.markdown
   * https://github.com/pmikova/java-runtime-decompiler/releases/tag/java-runtime-decompiler-6.1
+  * https://github.com/pmikova/java-runtime-decompiler/releases/download/java-runtime-decompiler-6.1/runtime-decompiler-6.1-with-decompilers.tar.xz
   * https://github.com/pmikova/java-runtime-decompiler/releases/tag/7.0-snapshot.1
 
-Week point: https://github.com/tisnik/vim-weakpoint
+Hot patching, instrumentation effect, investigations, reaching "unreachable: code
 
+(Cli/Gui) + agent
 --PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
 # java agents
 	* native (jvmti) x java
@@ -66,6 +72,8 @@ Week point: https://github.com/tisnik/vim-weakpoint
 	* cli
 	* overwrite, api and init dialogues
 	* `.*jrd.*Renderer.*`
+--PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
+# jrd itself
     * bad java?
 	* -source 8 -target 8
 --PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
@@ -84,12 +92,33 @@ Week point: https://github.com/tisnik/vim-weakpoint
 # calc
 	* java -Djdk.attach.allowAttachSelf=true -jar cdist/nodebugBuild/EthernalCrashes.jar  math
     * jrd x byteman
+	* missing lines?
 --PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
 # calc
 	* java -Djdk.attach.allowAttachSelf=true -jar cdist/fulldebugBuild/EthernalCrashes.jar  math
 	* fix mult -> mul
 	* fix div by zero exception to N/A
 --PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
+# calc
+	* java -Djdk.attach.allowAttachSelf=true -jar cdist/fulldebugBuild/EthernalCrashes.jar  math
+	* attach byteman
+	* show rule
+--PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
 # date
 	* java -Djdk.attach.allowAttachSelf=true -jar cdist/fulldebugBuild/EthernalCrashes.jar date1
-
+	* 
+--PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
+# date
+	* java -Djdk.attach.allowAttachSelf=true -jar cdist/fulldebugBuild/EthernalCrashes.jar date1
+	* No change? Lack of motivation to relaod definition?
+--PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
+# date
+	* java -Djdk.attach.allowAttachSelf=true -jar cdist/fulldebugBuild/EthernalCrashes.jar date1
+	* show byteman in action
+--PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
+# memory leak?
+	* java -Djdk.attach.allowAttachSelf=true -jar cdist/fulldebugBuild/EthernalCrashes.jar row
+--PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
+# memory leak?
+	* java -Djdk.attach.allowAttachSelf=true -jar cdist/fulldebugBuild/EthernalCrashes.jar row
+	* jmap -histo <pid>
