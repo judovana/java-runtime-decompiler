@@ -7,7 +7,7 @@
 	OpenJDK QA engineer
 
 
-Week point: https://github.com/tisnik/vim-weakpoint
+Weak point: https://github.com/tisnik/vim-weakpoint
 
 --PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
 # JRD
@@ -41,12 +41,12 @@ Hot patching, instrumentation effect, investigations, reaching "unreachable" cod
 		-  original bytecodes -> incapable agents -> saved bytecodes
 		-> saved bytecodes -> capable agents -> running bytecodes
 		=> every time definition of class is requested, the pipe is run again
-		=> no pernamently stored tranformed code!
-	* agent can not bee detached
+		=> no pernamently stored transformed code!
+	* agent can not be detached
 		* can only stop working (eg remove transformer, close server socket)
 		* critical bug in JRD
 			* was decompiler only
-	* JVM must have "motivation" to relaod bytecode
+	* JVM must have "motivation" to reload bytecode
 
 --PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
 # hotswap
@@ -67,8 +67,8 @@ Hot patching, instrumentation effect, investigations, reaching "unreachable" cod
 		* stable, safe
 	* JRD
 		* no rules, but you must compile
-			* decopilers suck (source path, JRD 7)
-		* just java, you can do everthing, you can break a lot
+			* decompilers suck (source path, JRD 7)
+		* just java, you can do everything, you can break a lot
 
 --PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
 # hands on!
@@ -92,7 +92,7 @@ Hot patching, instrumentation effect, investigations, reaching "unreachable" cod
 	* https://github.com/pmikova/java-runtime-decompiler/releases/tag/java-runtime-decompiler-6.1
 		* https://github.com/pmikova/java-runtime-decompiler/releases/download/java-runtime-decompiler-6.1/runtime-decompiler-6.1-with-decompilers.tar.xz
 		* https://github.com/pmikova/java-runtime-decompiler/releases/download/java-runtime-decompiler-6.1/runtime-decompiler-6.1-with-decompilers.zip
-	* jdk11 x 8 comaptibility getting worse
+	* jdk11 x 8 compatibility getting worse
 		=> 11
 	* https://github.com/judovana/JrdBytemanExamples.git
 		* https://github.com/judovana/JrdBytemanExamples/blob/master/btmn/
@@ -124,7 +124,7 @@ Hot patching, instrumentation effect, investigations, reaching "unreachable" cod
 --PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
 # date
 	* java -Djdk.attach.allowAttachSelf=true -jar cdist/fulldebugBuild/EthernalCrashes.jar date1
-	* No change? Lack of motivation to relaod definition?
+	* No change? Lack of motivation to reload definition?
 
 --PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
 # date
