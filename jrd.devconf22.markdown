@@ -17,7 +17,7 @@ Week point: https://github.com/tisnik/vim-weakpoint
   * https://github.com/pmikova/java-runtime-decompiler/releases/download/java-runtime-decompiler-6.1/runtime-decompiler-6.1-with-decompilers.tar.xz
   * https://github.com/pmikova/java-runtime-decompiler/releases/tag/7.0-snapshot.1
 
-Hot patching, instrumentation effect, investigations, reaching "unreachable: code
+Hot patching, instrumentation effect, investigations, reaching "unreachable" code
 
 (Cli/Gui) + agent
 
@@ -45,7 +45,7 @@ Hot patching, instrumentation effect, investigations, reaching "unreachable: cod
 	* agent can not bee detached
 		* can only stop working (eg remove transformer, close server socket)
 		* critical bug in JRD
-			* was k for decompiler
+			* was decompiler only
 	* JVM must have "motivation" to relaod bytecode
 
 --PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
@@ -73,11 +73,13 @@ Hot patching, instrumentation effect, investigations, reaching "unreachable: cod
 --PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
 # hands on!
 	* warm up
+
 --PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
 # jrd itself
 	* cli
 	* overwrite, api and init dialogues
 	* `.*jrd.*Renderer.*`
+    * decompiler, asms...
 
 --PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
 # jrd itself
