@@ -130,6 +130,8 @@ Hot patching, instrumentation effect, investigations, reaching "unreachable" cod
 # date
 	* java -Djdk.attach.allowAttachSelf=true -jar cdist/fulldebugBuild/EthernalCrashes.jar date1
 	* show byteman in action
+	* show obfuscator in action
+
 --PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
 # memory leak?
 	* java -Djdk.attach.allowAttachSelf=true -jar cdist/fulldebugBuild/EthernalCrashes.jar row
