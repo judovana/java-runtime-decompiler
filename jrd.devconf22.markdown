@@ -72,6 +72,19 @@ Hot patching, instrumentation effect, investigations, reaching "unreachable" cod
 
 --PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
 # hands on!
+	* pre reqs:
+	* https://github.com/pmikova/java-runtime-decompiler/releases/tag/java-runtime-decompiler-6.1
+		* https://github.com/pmikova/java-runtime-decompiler/releases/download/java-runtime-decompiler-6.1/runtime-decompiler-6.1-with-decompilers.tar.xz
+		* https://github.com/pmikova/java-runtime-decompiler/releases/download/java-runtime-decompiler-6.1/runtime-decompiler-6.1-with-decompilers.zip
+	* jdk11 x 8 compatibility getting worse
+		=> 11
+	* https://github.com/judovana/JrdBytemanExamples.git
+		* https://github.com/judovana/JrdBytemanExamples/blob/master/btmn/
+		* https://github.com/judovana/JrdBytemanExamples/releases/tag/0.1
+			* https://github.com/judovana/JrdBytemanExamples/releases/download/0.1/cdist.tar.xz
+
+--PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
+# hands on!
 	* warm up
 
 --PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
@@ -85,19 +98,6 @@ Hot patching, instrumentation effect, investigations, reaching "unreachable" cod
 # jrd itself
     * bad java?
 	* -source 8 -target 8
-
---PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
-# hands on!
-	* pre reqs:
-	* https://github.com/pmikova/java-runtime-decompiler/releases/tag/java-runtime-decompiler-6.1
-		* https://github.com/pmikova/java-runtime-decompiler/releases/download/java-runtime-decompiler-6.1/runtime-decompiler-6.1-with-decompilers.tar.xz
-		* https://github.com/pmikova/java-runtime-decompiler/releases/download/java-runtime-decompiler-6.1/runtime-decompiler-6.1-with-decompilers.zip
-	* jdk11 x 8 compatibility getting worse
-		=> 11
-	* https://github.com/judovana/JrdBytemanExamples.git
-		* https://github.com/judovana/JrdBytemanExamples/blob/master/btmn/
-		* https://github.com/judovana/JrdBytemanExamples/releases/tag/0.1
-			* https://github.com/judovana/JrdBytemanExamples/releases/download/0.1/cdist.tar.xz
 
 --PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
 # calc
