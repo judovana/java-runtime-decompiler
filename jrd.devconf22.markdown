@@ -27,10 +27,12 @@ Hot patching, instrumentation effect, investigations, reaching "unreachable" cod
 	* Can be injected into fresh JVM
 		* java -cp ${PWD} -javaagent:${PWD}/agent.jar=arg:value...  my.main
 		* eg code coverage
+		* agentmain
 	* can be injected into running JVM
 		* https://docs.oracle.com/javase/8/docs/jdk/api/attach/spec/com/sun/tools/attach/VirtualMachine.html
 		* vm.loadAgent(agentJar, agentOptions);
 		* eg IDEs
+		* premain
 	* fun parts
 		* https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/Instrumentation.html
 		* https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/ClassFileTransformer.html
