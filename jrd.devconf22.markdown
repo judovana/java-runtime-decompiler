@@ -71,6 +71,16 @@ Hot patching, instrumentation effect, investigations, reaching "unreachable" cod
 		* just java, you can do everything, you can break a lot
 
 --PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
+# classpathless compiler
+	* https://github.com/mkoncek/classpathless-compiler
+	* https://github.com/mkoncek/classpathless-compiler/blob/master/api/src/main/java/io/github/mkoncek/classpathless/api/ClasspathlessCompiler.java#L93
+		* Collection<IdentifiedBytecode> compileClass(classesProvider, messagesListener, javaSourceFiles...);
+		* byte[]
+	* https://github.com/mkoncek/classpathless-compiler/blob/master/api/src/main/java/io/github/mkoncek/classpathless/api/ClassesProvider.java#L29
+		*  Collection<IdentifiedBytecode> getClass(ClassIdentifier... names);
+		* byte[]
+
+--PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
 # hands on!
 	* pre reqs:
 	* https://github.com/pmikova/java-runtime-decompiler/releases/tag/java-runtime-decompiler-6.1
