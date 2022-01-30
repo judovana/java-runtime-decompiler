@@ -112,6 +112,15 @@ Hot patching, instrumentation effect, investigations, reaching "unreachable" cod
 	* -source 8 -target 8
 
 --PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
+# binaries fo following examples
+
+ * download:
+   * https://github.com/judovana/JrdBytemanExamples/releases/download/0.1/cdist.tar.xz
+ * unpack.
+   * Inside are examples
+   * each jar is same application with different types of debug and obfuscation
+	
+--PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
 # calc
 	* java -Djdk.attach.allowAttachSelf=true -jar cdist/nodebugBuild/EthernalCrashes.jar  math
     * jrd x byteman
