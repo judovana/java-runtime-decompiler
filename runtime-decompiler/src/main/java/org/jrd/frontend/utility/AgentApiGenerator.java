@@ -213,6 +213,7 @@ public final class AgentApiGenerator {
         }
         add(filter, p, createExact("System.out.println(String);", text, filter), null);
         add(filter, p, createExact("System.err.println(String);", text, filter), null);
+        add(filter, p, createExact("ex.printStackTrace();", text, filter), null);
         if (agentApi == null) {
             JMenuItem item = new JMenuItem("Agent api completion still initialising. Try later");
             p.add(item);
