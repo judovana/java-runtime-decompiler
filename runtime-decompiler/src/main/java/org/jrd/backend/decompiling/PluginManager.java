@@ -72,7 +72,6 @@ public class PluginManager {
         return PluginManager.LAMBDA_FORM.matcher(s).matches();
     }
 
-
     public PluginManager() {
         wrappers = new LinkedList<>();
 
@@ -154,6 +153,7 @@ public class PluginManager {
      * @return Decompiled bytecode or exception String
      * @throws Exception the exception String
      */
+    @SuppressWarnings({"CyclomaticComplexity", "LineLength", "TodoComment"}) // TODO: fix this
     public synchronized String decompile(
             DecompilerWrapper wrapper, String name, byte[] bytecode, String[] options, VmInfo vmInfo, VmManager vmManager
     ) throws Exception {
@@ -204,14 +204,17 @@ public class PluginManager {
                     for (String clazz : deps1) {
                         if (!(isLambdaForm(clazz) || isArrayForm(clazz) || isUndecompilableLambda(clazz))) {
                             //init it?
-                            innerClasses.put(clazz, Base64.getDecoder().decode(Cli.obtainClass(vmInfo, clazz, vmManager).getLoadedClassBytes()));
+                            innerClasses.put(
+                                    clazz, Base64.getDecoder().decode(Cli.obtainClass(vmInfo, clazz, vmManager).getLoadedClassBytes())
+                            );
                         }
                     }
                 } else {
                     for (String clazz : allClasses) {
                         if (isDecompilableInnerClass(name, clazz)) {
-                            innerClasses
-                                    .put(clazz, Base64.getDecoder().decode(Cli.obtainClass(vmInfo, clazz, vmManager).getLoadedClassBytes()));
+                            innerClasses.put(
+                                    clazz, Base64.getDecoder().decode(Cli.obtainClass(vmInfo, clazz, vmManager).getLoadedClassBytes())
+                            );
                         }
                     }
                 }
@@ -274,7 +277,7 @@ public class PluginManager {
     /**
      * Compiles wrapper plugin, loads it into JVM and stores it for later.
      */
-    private void initializeWrapper(DecompilerWrapper wrapper) {
+    public void initializeWrapper(DecompilerWrapper wrapper) {
         if (wrapper.isJavap() || wrapper.isJavapVerbose()) {
             try {
                 wrapper.setInstance(new JavapDisassemblerWrapper(wrapper.isJavap() ? "" : "-v"));
