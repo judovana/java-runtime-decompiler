@@ -299,22 +299,22 @@ public class DecompilerRequestReceiver {
             String o1 = c1.getName();
             String o2 = c2.getName();
 
-            if (o1.startsWith("[") && !o2.startsWith("[")) {
+            if (PluginManager.isArrayForm(o1) && !PluginManager.isArrayForm(o2)) {
                 return 1;
             }
-            if (!o1.startsWith("[") && o2.startsWith("[")) {
+            if (!PluginManager.isArrayForm(o1) && PluginManager.isArrayForm(o2)) {
                 return -1;
             }
-            if (o1.contains(PluginManager.UNDECOMPILABLE_LAMBDA) && !o2.contains(PluginManager.UNDECOMPILABLE_LAMBDA)) {
+            if (PluginManager.isUndecompilableLambda(o1) && !PluginManager.isUndecompilableLambda(o2)) {
                 return 1;
             }
-            if (!o1.contains(PluginManager.UNDECOMPILABLE_LAMBDA) && o2.contains(PluginManager.UNDECOMPILABLE_LAMBDA)) {
+            if (!PluginManager.isUndecompilableLambda(o1) && PluginManager.isUndecompilableLambda(o2)) {
                 return -1;
             }
-            if (PluginManager.LAMBDA_FORM.matcher(o1).matches() && !PluginManager.LAMBDA_FORM.matcher(o2).matches()) {
+            if (PluginManager.isLambdaForm(o1) && !PluginManager.isLambdaForm(o2)) {
                 return 1;
             }
-            if (!PluginManager.LAMBDA_FORM.matcher(o1).matches() && PluginManager.LAMBDA_FORM.matcher(o2).matches()) {
+            if (!PluginManager.isLambdaForm(o1) && PluginManager.isLambdaForm(o2)) {
                 return -1;
             }
 
