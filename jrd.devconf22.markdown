@@ -112,7 +112,7 @@ Hot patching, instrumentation effect, investigations, reaching "unreachable" cod
 	* -source 8 -target 8
 
 --PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
-# binaries fo following examples
+# binaries for following examples
 
  * download:
    * https://github.com/judovana/JrdBytemanExamples/releases/download/0.1/cdist.tar.xz
@@ -123,8 +123,9 @@ Hot patching, instrumentation effect, investigations, reaching "unreachable" cod
 --PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
 # calc
 	* java -Djdk.attach.allowAttachSelf=true -jar cdist/nodebugBuild/EthernalCrashes.jar  math
-    * jrd x byteman
+   	* jrd x byteman
 	* missing lines?
+		* jsut recompile in JRD
 
 --PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE----PAGE--
 # calc
