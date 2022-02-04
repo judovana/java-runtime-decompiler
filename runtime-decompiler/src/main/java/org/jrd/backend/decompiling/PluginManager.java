@@ -4,11 +4,14 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.core.Logger;
+import org.jrd.backend.core.VmDecompilerStatus;
+import org.jrd.backend.data.DependenciesReader;
 import org.jrd.backend.data.Directories;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
 import org.jrd.backend.data.cli.Cli;
 import org.jrd.frontend.frame.main.GlobalConsole;
+import org.jrd.frontend.frame.main.ModelProvider;
 import org.jrd.frontend.utility.TeeOutputStream;
 
 import javax.tools.JavaCompiler;
@@ -27,6 +30,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -52,8 +56,21 @@ public class PluginManager {
 
     Gson gson;
 
+    public static final String ARRAY_FORM = "[";
     public static final String UNDECOMPILABLE_LAMBDA = "$$Lambda";
     public static final Pattern LAMBDA_FORM = Pattern.compile("java.lang.invoke.LambdaForm\\$.*/.*0x.*");
+
+    public static boolean isArrayForm(String s) {
+        return s.startsWith(ARRAY_FORM);
+    }
+
+    public static boolean isUndecompilableLambda(String s) {
+        return s.contains(UNDECOMPILABLE_LAMBDA);
+    }
+
+    public static boolean isLambdaForm(String s) {
+        return PluginManager.LAMBDA_FORM.matcher(s).matches();
+    }
 
     public PluginManager() {
         wrappers = new LinkedList<>();
@@ -136,6 +153,7 @@ public class PluginManager {
      * @return Decompiled bytecode or exception String
      * @throws Exception the exception String
      */
+    @SuppressWarnings({"CyclomaticComplexity", "LineLength", "TodoComment"}) // TODO: fix this
     public synchronized String decompile(
             DecompilerWrapper wrapper, String name, byte[] bytecode, String[] options, VmInfo vmInfo, VmManager vmManager
     ) throws Exception {
@@ -164,13 +182,42 @@ public class PluginManager {
                 String[] allClasses = Cli.obtainClasses(vmInfo, vmManager);
                 Map<String, byte[]> innerClasses = new HashMap<>();
 
-                for (String clazz : allClasses) {
-                    if (isDecompilableInnerClass(name, clazz)) {
-                        innerClasses
-                                .put(clazz, Base64.getDecoder().decode(Cli.obtainClass(vmInfo, clazz, vmManager).getLoadedClassBytes()));
+                if (true) {
+                    DependenciesReader dr = new DependenciesReader(new ModelProvider() {
+                        @Override
+                        public VmInfo getVmInfo() {
+                            return vmInfo;
+                        }
+
+                        @Override
+                        public VmManager getVmManager() {
+                            return vmManager;
+                        }
+
+                        @Override
+                        public RuntimeCompilerConnector.JrdClassesProvider getClassesProvider() {
+                            return new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager);
+                        }
+                    }, null);
+                    VmDecompilerStatus result = Cli.obtainClass(dr.getVmInfo(), name, dr.getVmManager());
+                    Collection<String> deps1 = dr.resolve(name, result.getLoadedClassBytes());
+                    for (String clazz : deps1) {
+                        if (!(isLambdaForm(clazz) || isArrayForm(clazz) || isUndecompilableLambda(clazz))) {
+                            //init it?
+                            innerClasses.put(
+                                    clazz, Base64.getDecoder().decode(Cli.obtainClass(vmInfo, clazz, vmManager).getLoadedClassBytes())
+                            );
+                        }
+                    }
+                } else {
+                    for (String clazz : allClasses) {
+                        if (isDecompilableInnerClass(name, clazz)) {
+                            innerClasses.put(
+                                    clazz, Base64.getDecoder().decode(Cli.obtainClass(vmInfo, clazz, vmManager).getLoadedClassBytes())
+                            );
+                        }
                     }
                 }
-
                 return (String) wrapper.getDecompileMethodWithInners().invoke(wrapper.getInstance(), name, bytecode, innerClasses, options);
             } else if (wrapper.getDecompileMethodNoInners() != null) {
                 return (String) wrapper.getDecompileMethodNoInners().invoke(wrapper.getInstance(), bytecode, options);
@@ -230,7 +277,7 @@ public class PluginManager {
     /**
      * Compiles wrapper plugin, loads it into JVM and stores it for later.
      */
-    private void initializeWrapper(DecompilerWrapper wrapper) {
+    public void initializeWrapper(DecompilerWrapper wrapper) {
         if (wrapper.isJavap() || wrapper.isJavapVerbose()) {
             try {
                 wrapper.setInstance(new JavapDisassemblerWrapper(wrapper.isJavap() ? "" : "-v"));
@@ -280,6 +327,11 @@ public class PluginManager {
 
             try {
                 wrapper.setCompileMethod(decompilerClass.getMethod("compile", Map.class, String[].class, Object.class));
+            } catch (Exception e) {
+                Logger.getLogger().log(Logger.Level.DEBUG, "No custom compile method: " + e.getMessage());
+            }
+            try {
+                wrapper.setHelpMethod(decompilerClass.getMethod("decompilerHelp"));
             } catch (Exception e) {
                 Logger.getLogger().log(Logger.Level.DEBUG, "No custom compile method: " + e.getMessage());
             }

@@ -100,7 +100,7 @@ public class Logger {
         DEBUG // log in verbose/debug mode
     }
 
-    private String exToString(Throwable e) {
+    public static String exToString(Throwable e) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         e.printStackTrace(new PrintStream(out, true, StandardCharsets.UTF_8));
         return new String(out.toByteArray(), StandardCharsets.UTF_8);

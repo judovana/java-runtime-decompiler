@@ -1,5 +1,6 @@
 import org.benf.cfr.reader.Main;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -56,7 +57,7 @@ public class CfrDecompilerWrapper {
         File decompiledFile = null;
         String decompiledString;
         try {
-            Object[] o = cfr(out, args);
+            Object[] o = cfr(name, out, args);
             decompiledFile = (File) o[0];
             decompiledString = (String) o[1];
         } catch (IOException e) {
@@ -78,31 +79,21 @@ public class CfrDecompilerWrapper {
         return decompile("unknow.cfr.class" + bytecode.length, bytecode, new HashMap<String, byte[]>(), options);
     }
 
-    private Object[] cfr(File decompiledDir, String... args) throws IOException {
+    private Object[] cfr(String mainFile, File decompiledDir, String... args) throws IOException {
         PrintStream old = System.out;
         System.setOut(System.err);
         try {
             Main.main(args);
-            List<File> decompiledFiles = new ArrayList<>();
-            try (Stream<Path> walkStream = Files.walk(decompiledDir.toPath())) {
-                walkStream.filter(p -> p.toFile().isFile()).forEach(f -> {
-                    if (f.toString().endsWith(".java")) {
-                        decompiledFiles.add(f.toFile());
-                    }
-                });
-            }
-            Collections.sort(decompiledFiles, new Comparator<File>() {
-                @Override
-                public int compare(File file, File file2) {
-                    //we need all inner classes behind the mainclass
-                    return file.getName().length() - file2.getName().length();
-                }
-            });
-            String decompiledString = readStringFromFile(decompiledFiles.get(0)); //as sorted, shoud work also for dirrectly inner classes
-            return new Object[]{decompiledFiles.get(0), decompiledString};
+            File mainDecompiledFile = getFileFrom(decompiledDir, mainFile);
+            String decompiledString = readStringFromFile(mainDecompiledFile);
+            return new Object[]{mainDecompiledFile, decompiledString};
         } finally {
             System.setOut(old);
         }
+    }
+
+    private File getFileFrom(File dir, String fqn) {
+        return new File(dir.getAbsolutePath() + File.separator + fqn.replace('.', File.separatorChar)+".java");
     }
 
     private String readStringFromFile(File filePath) throws IOException {
@@ -124,4 +115,21 @@ public class CfrDecompilerWrapper {
         fos.close();
         return tempFile;
     }
+
+
+    public String decompilerHelp() throws IOException {
+        PrintStream oldo = System.out;
+        PrintStream olde = System.err;
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(bos));
+        System.setErr(new PrintStream(bos));
+        try {
+            Main.main(new String[]{"--help"});
+            return bos.toString("utf-8");
+        } finally {
+            System.setOut(oldo);
+            System.setOut(olde);
+        }
+    }
+
 }
