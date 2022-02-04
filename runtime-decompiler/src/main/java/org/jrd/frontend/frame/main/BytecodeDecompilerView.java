@@ -37,6 +37,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.Timer;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -52,6 +53,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Point;
+import java.awt.Toolkit;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -96,6 +99,7 @@ public class BytecodeDecompilerView {
     private JButton undoButton;
     private JButton redoButton;
     private JButton insertButton;
+    private JButton bytecodeButton;
     private JButton detachButton;
     private JButton initClassButton;
     private JButton overwriteButton;
@@ -379,6 +383,9 @@ public class BytecodeDecompilerView {
             }
         });
 
+        bytecodeButton = new JButton("0");
+        bytecodeButton.setBorder(new EmptyBorder(5, 5, 5, 5));
+
         classesToolBar = new JPanel(new GridBagLayout());
         classesToolBar.setBorder(new EtchedBorder());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -475,24 +482,27 @@ public class BytecodeDecompilerView {
         gbc.gridx = 2;
         buffersToolBar.add(insertButton, gbc);
 
+        gbc.gridx = 3;
+        buffersToolBar.add(bytecodeButton, gbc);
+
         gbc.weightx = 1;
         gbc.insets = new Insets(0, 0, 0, 0); // prevent double padding when no glue is utilized
-        gbc.gridx = 2;
+        gbc.gridx = 3;
         buffersToolBar.add(Box.createHorizontalGlue(), gbc);
 
         gbc.insets = PANEL_INSETS;
         gbc.weightx = 0;
-        gbc.gridx = 3;
-        buffersToolBar.add(detachButton, gbc);
         gbc.gridx = 4;
-        buffersToolBar.add(initClassButton, gbc);
+        buffersToolBar.add(detachButton, gbc);
         gbc.gridx = 5;
-        buffersToolBar.add(overwriteButton, gbc);
+        buffersToolBar.add(initClassButton, gbc);
         gbc.gridx = 6;
-        buffersToolBar.add(compileButton, gbc);
+        buffersToolBar.add(overwriteButton, gbc);
         gbc.gridx = 7;
-        buffersToolBar.add(compileAndUploadButton, gbc);
+        buffersToolBar.add(compileButton, gbc);
         gbc.gridx = 8;
+        buffersToolBar.add(compileAndUploadButton, gbc);
+        gbc.gridx = 9;
         buffersToolBar.add(pluginComboBox, gbc);
 
         classesScrollPane = new JScrollPane(filteredClassesJList);
@@ -832,13 +842,51 @@ public class BytecodeDecompilerView {
         bytecodeSyntaxTextArea.setText(data);
         bytecodeSyntaxTextArea.discardAllEdits(); // makes the bytecode upload not undoable
         bytecodeSyntaxTextArea.setCaretPosition(0);
-
+        int bytecodeVersion = getByteCodeVersion(source);
+        int buildJavaPerVersion = getJavaFromBytelevel(bytecodeVersion);
+        bytecodeButton.setText(buildJavaPerVersion + "");
+        bytecodeButton.setToolTipText("bytecode java version:" + buildJavaPerVersion + ". Click here to  copy it as source/target");
+        ActionListener[] ls = bytecodeButton.getActionListeners();
+        for (ActionListener l : ls) {
+            bytecodeButton.removeActionListener(l);
+        }
+        bytecodeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                StringSelection selection = new StringSelection(" -source " + buildJavaPerVersion + " -target " + buildJavaPerVersion + " ");
+                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
+            }
+        });
         try {
             hex.open(new ByteArrayInputStream(source));
         } catch (IOException ex) {
             Logger.getLogger().log(ex);
         }
         this.lastDecompiledClass = name;
+    }
+
+    private static int getJavaFromBytelevel(int bytecodeVersion) {
+        int r = bytecodeVersion - 44;
+        if (r <= 1) {
+            r = 1;
+        }
+        return r;
+    }
+
+    private static int getByteCodeVersion(byte[] source) {
+        if (source == null || source.length < 8) {
+            return 0;
+        }
+        /*
+        u4             magic;
+        u2             minor_version;
+        u2             major_version;
+         */
+        int b1 = source[4]; //minor
+        int b2 = source[5]; //minor
+        int b3 = source[6]; //major
+        int b4 = source[7]; //major
+        return b4;
     }
 
     public void setClassesActionListener(ActionListener listener) {
