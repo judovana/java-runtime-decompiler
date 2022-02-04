@@ -1,5 +1,6 @@
 import org.benf.cfr.reader.Main;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -114,4 +115,21 @@ public class CfrDecompilerWrapper {
         fos.close();
         return tempFile;
     }
+
+
+    public String decompilerHelp() throws IOException {
+        PrintStream oldo = System.out;
+        PrintStream olde = System.err;
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(bos));
+        System.setErr(new PrintStream(bos));
+        try {
+            Main.main(new String[]{"--help"});
+            return bos.toString("utf-8");
+        } finally {
+            System.setOut(oldo);
+            System.setOut(olde);
+        }
+    }
+
 }
