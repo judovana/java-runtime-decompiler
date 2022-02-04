@@ -330,6 +330,11 @@ public class PluginManager {
             } catch (Exception e) {
                 Logger.getLogger().log(Logger.Level.DEBUG, "No custom compile method: " + e.getMessage());
             }
+            try {
+                wrapper.setHelpMethod(decompilerClass.getMethod("decompilerHelp"));
+            } catch (Exception e) {
+                Logger.getLogger().log(Logger.Level.DEBUG, "No custom compile method: " + e.getMessage());
+            }
         } catch (InstantiationException |
                 IllegalAccessException |
                 InvocationTargetException |
