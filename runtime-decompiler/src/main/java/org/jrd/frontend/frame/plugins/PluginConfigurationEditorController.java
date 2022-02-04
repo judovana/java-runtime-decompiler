@@ -6,7 +6,6 @@ import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.ExpandableUrl;
 import org.jrd.backend.decompiling.ImportUtils;
 import org.jrd.backend.decompiling.PluginManager;
-import org.jrd.frontend.utility.TeeOutputStream;
 
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -14,7 +13,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -129,7 +127,6 @@ public class PluginConfigurationEditorController {
     }
 
     void onPluginJListChange() {
-        view.removeValidations();
         if (view.getPluginListPanel().getWrapperJList().getSelectedIndex() == -1) {
             return;
         }
@@ -207,37 +204,13 @@ public class PluginConfigurationEditorController {
         if (view.getPluginListPanel().getWrapperJList().getSelectedIndex() == -1) {
             return;
         }
-        String result = null;
-        Throwable mainEx = null;
-        PrintStream ser = System.err;
-        PrintStream out = System.out;
-        TeeOutputStream teer = new TeeOutputStream(System.err);
-        TeeOutputStream tees = new TeeOutputStream(System.out);
-        DecompilerWrapper w = null;
-        try {
-            System.setErr(teer);
-            System.setOut(tees);
-            result = pluginManager.validatePlugin(getDataFromPanel(view.getSelectedWrapper()));
-            w = getDataFromPanel(view.getSelectedWrapper());
-            pluginManager.initializeWrapper(w);
 
-        } catch (Exception ex) {
-            Logger.getLogger().log(Logger.Level.ALL, ex);
-            mainEx = ex;
-        } finally {
-            System.setOut(out);
-            System.setErr(ser);
-        }
+        String result = pluginManager.validatePlugin(getDataFromPanel(view.getSelectedWrapper()));
+
         if (result != null) {
-            result += "\n";
-            result += " - sout:\n" + new String(tees.getByteArray());
-            result += " - serr:\n" + new String(teer.getByteArray());
-            if (mainEx != null) {
-                result += " - Exception:\n" + Logger.exToString(mainEx);
-            }
-            view.setValidation(false, result, null);
+            JOptionPane.showMessageDialog(view, "Validation failed: " + result, "Error", JOptionPane.ERROR_MESSAGE);
         } else {
-            view.setValidation(true, null, w);
+            JOptionPane.showMessageDialog(view, "This plugin is valid.", "Success", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 

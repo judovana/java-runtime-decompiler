@@ -1,11 +1,9 @@
 import org.jetbrains.java.decompiler.main.decompiler.ConsoleDecompiler;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -121,60 +119,5 @@ public class FernflowerDecompilerWrapper {
         fos.flush();
         fos.close();
         return tempFile;
-    }
-
-    public String decompilerHelp() throws IOException {
-        PrintStream oldo = System.out;
-        PrintStream olde = System.err;
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(bos));
-        System.setErr(new PrintStream(bos));
-        try {
-            ConsoleDecompiler.main((new String[]{"--help"}));
-            System.out.println("");
-            System.out.println("See detailed options from remote content: ");
-            try {
-                URL u = new URL("https://raw.githubusercontent.com/JetBrains/intellij-community/master/plugins/java-decompiler/engine/README.md");
-                bos.writeBytes(u.openStream().readAllBytes());
-            }catch(Exception ex){
-                System.out.println("fetching remote content failed:");
-                System.out.println(ex.toString());
-            }
-            System.out.println("");
-            System.out.println("Hardcoded copy:");
-            System.out.println("-rbr (1): hide bridge methods\n" +
-                    "-rsy (0): hide synthetic class members\n" +
-                    "-din (1): decompile inner classes\n" +
-                    "-dc4 (1): collapse 1.4 class references\n" +
-                    "-das (1): decompile assertions\n" +
-                    "-hes (1): hide empty super invocation\n" +
-                    "-hdc (1): hide empty default constructor\n" +
-                    "-dgs (0): decompile generic signatures\n" +
-                    "-ner (1): assume return not throwing exceptions\n" +
-                    "-den (1): decompile enumerations\n" +
-                    "-rgn (1): remove getClass() invocation, when it is part of a qualified new statement\n" +
-                    "-lit (0): output numeric literals \"as-is\"\n" +
-                    "-asc (0): encode non-ASCII characters in string and character literals as Unicode escapes\n" +
-                    "-bto (1): interpret int 1 as boolean true (workaround to a compiler bug)\n" +
-                    "-nns (0): allow for not set synthetic attribute (workaround to a compiler bug)\n" +
-                    "-uto (1): consider nameless types as java.lang.Object (workaround to a compiler architecture flaw)\n" +
-                    "-udv (1): reconstruct variable names from debug information, if present\n" +
-                    "-ump (1): reconstruct parameter names from corresponding attributes, if present\n" +
-                    "-rer (1): remove empty exception ranges\n" +
-                    "-fdi (1): de-inline finally structures\n" +
-                    "-mpm (0): maximum allowed processing time per decompiled method, in seconds. 0 means no upper limit\n" +
-                    "-ren (0): rename ambiguous (resp. obfuscated) classes and class elements\n" +
-                    "-urc (-): full name of a user-supplied class implementing IIdentifierRenamer interface. It is used to determine which class identifiers\n" +
-                    "          should be renamed and provides new identifier names (see \"Renaming identifiers\")\n" +
-                    "-inn (1): check for IntelliJ IDEA-specific @NotNull annotation and remove inserted code if found\n" +
-                    "-lac (0): decompile lambda expressions to anonymous classes\n" +
-                    "-nls (0): define new line character to be used for output. 0 - '\\r\\n' (Windows), 1 - '\\n' (Unix), default is OS-dependent\n" +
-                    "-ind: indentation string (default is 3 spaces)\n" +
-                    "-log (INFO): a logging level, possible values are TRACE, INFO, WARN, ERROR");
-            return bos.toString("utf-8");
-        } finally {
-            System.setOut(oldo);
-            System.setOut(olde);
-        }
     }
 }

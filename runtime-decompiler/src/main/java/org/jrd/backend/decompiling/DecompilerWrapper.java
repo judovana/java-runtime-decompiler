@@ -64,7 +64,6 @@ public class DecompilerWrapper {
     private Method decompileMethodNoInners;
     private Method decompileMethodWithInners;
     private Method compileMethod;
-    private Method helpMethod;
     private Object instance;
     private boolean invalidWrapper = false;
 
@@ -154,10 +153,6 @@ public class DecompilerWrapper {
         return decompileMethodWithInners;
     }
 
-    public Method getHelpMethod() {
-        return helpMethod;
-    }
-
     public void setDecompileMethodWithInners(Method decompileMethodWithInners) {
         this.decompileMethodWithInners = decompileMethodWithInners;
     }
@@ -168,10 +163,6 @@ public class DecompilerWrapper {
 
     public void setCompileMethod(Method compileMethod) {
         this.compileMethod = compileMethod;
-    }
-
-    public void setHelpMethod(Method helpMethod) {
-        this.helpMethod = helpMethod;
     }
 
     public String getName() {

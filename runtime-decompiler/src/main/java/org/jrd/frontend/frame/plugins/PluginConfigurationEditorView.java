@@ -93,12 +93,4 @@ public class PluginConfigurationEditorView extends JDialog {
     DecompilerWrapper getSelectedWrapper() {
         return (DecompilerWrapper) getPluginListPanel().getWrapperJList().getSelectedValue();
     }
-
-    public void removeValidations() {
-        okCancelPanel.removeValidations();
-    }
-
-    public void setValidation(boolean ok, String errors, DecompilerWrapper w) {
-        okCancelPanel.setValidations(ok, errors, w);
-    }
 }
