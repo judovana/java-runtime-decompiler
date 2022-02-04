@@ -1,9 +1,12 @@
 package org.jrd.frontend.frame.plugins;
 
+import org.jrd.backend.core.Logger;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 
 import javax.swing.Box;
 import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -13,9 +16,14 @@ import javax.swing.UIManager;
 import javax.swing.border.MatteBorder;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dialog;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Window;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 /**
  * Panel with three buttons "Validate", "OK" and "Cancel"
@@ -28,7 +36,7 @@ public class OkCancelPanel extends JPanel {
     private final JSplitPane validations = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 
     OkCancelPanel() {
-        this.setPreferredSize(new Dimension(0, 75));
+        this.setPreferredSize(new Dimension(0, 90));
         setBorder(new MatteBorder(1, 0, 0, 0, UIManager.getColor("Separator.shadow")));
         this.setLayout(new BorderLayout());
 
@@ -104,6 +112,31 @@ public class OkCancelPanel extends JPanel {
                 p2.add(new JLabel("have multi class decompile method"), BorderLayout.CENTER);
             } else {
                 p2.add(new JLabel("!missing! multi class decompile method"), BorderLayout.CENTER);
+            }
+            if (w.getHelpMethod() != null) {
+                JLabel help = new JLabel("have help method - click here to print help");
+                p2.add(help, BorderLayout.SOUTH);
+                help.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        JDialog a = new JDialog((Window)null,  w.getName() + " help", Dialog.ModalityType.TOOLKIT_MODAL);
+                        a.setSize(new Dimension(800, 600));
+                        try {
+                            String s = (String) w.getHelpMethod().invoke(w.getInstance());
+                            JTextArea t = new JTextArea(s);
+                            JScrollPane js = new JScrollPane(t);
+                            Font f = new Font(Font.MONOSPACED, Font.PLAIN, 12);
+                            t.setFont(f);
+                            js.setFont(f);
+                            a.add(js);
+                            a.setVisible(true);
+                        } catch (Exception ex) {
+                            Logger.getLogger().log(ex);
+                        }
+                    }
+                });
+            } else {
+                p2.add(new JLabel("no help method"), BorderLayout.SOUTH);
             }
             validations.setDividerLocation(0.5);
         } else {
