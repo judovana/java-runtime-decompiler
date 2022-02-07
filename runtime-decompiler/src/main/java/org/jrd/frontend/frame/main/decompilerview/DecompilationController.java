@@ -1,4 +1,4 @@
-package org.jrd.frontend.frame.main;
+package org.jrd.frontend.frame.main.decompilerview;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
@@ -24,6 +24,12 @@ import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.filesystem.NewFsVmController;
 import org.jrd.frontend.frame.filesystem.NewFsVmView;
+import org.jrd.frontend.frame.main.GlobalConsole;
+import org.jrd.frontend.frame.main.LoadingDialog;
+import org.jrd.frontend.frame.main.LoadingDialogProvider;
+import org.jrd.frontend.frame.main.MainFrameView;
+import org.jrd.frontend.frame.main.ModelProvider;
+import org.jrd.frontend.frame.main.OverridesManager;
 import org.jrd.frontend.frame.overwrite.LatestPaths;
 import org.jrd.frontend.frame.overwrite.OverwriteClassDialog;
 import org.jrd.frontend.frame.plugins.PluginConfigurationEditorController;

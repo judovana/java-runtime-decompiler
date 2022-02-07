@@ -1,7 +1,7 @@
 package org.jrd.frontend.frame.main.renderer;
 
 import org.jrd.backend.data.VmInfo;
-import org.jrd.frontend.frame.main.BytecodeDecompilerView;
+import org.jrd.frontend.frame.main.decompilerview.BytecodeDecompilerView;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;

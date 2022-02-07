@@ -6,7 +6,6 @@ import org.jrd.backend.decompiling.DecompilerWrapper;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -14,6 +13,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.UIManager;
 import javax.swing.border.MatteBorder;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dialog;
@@ -119,7 +119,7 @@ public class OkCancelPanel extends JPanel {
                 help.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
-                        JDialog a = new JDialog((Window)null,  w.getName() + " help", Dialog.ModalityType.TOOLKIT_MODAL);
+                        JDialog a = new JDialog((Window) null, w.getName() + " help", Dialog.ModalityType.TOOLKIT_MODAL);
                         a.setSize(new Dimension(800, 600));
                         try {
                             String s = (String) w.getHelpMethod().invoke(w.getInstance());

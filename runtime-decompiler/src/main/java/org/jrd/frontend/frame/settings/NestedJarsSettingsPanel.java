@@ -26,7 +26,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.ArchiveManagerOptions;
-import org.jrd.frontend.frame.main.BytecodeDecompilerView;
+import org.jrd.frontend.frame.main.decompilerview.BytecodeDecompilerView;
 
 public class NestedJarsSettingsPanel extends JPanel implements ChangeReporter {
     private JCheckBox useDefaults;

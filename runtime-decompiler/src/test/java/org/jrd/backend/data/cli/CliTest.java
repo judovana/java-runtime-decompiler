@@ -2,7 +2,7 @@ package org.jrd.backend.data.cli;
 
 import org.jrd.backend.core.agentstore.AgentLiveliness;
 import org.jrd.backend.data.MetadataProperties;
-import org.jrd.frontend.frame.main.DecompilationController;
+import org.jrd.frontend.frame.main.decompilerview.DecompilationController;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;

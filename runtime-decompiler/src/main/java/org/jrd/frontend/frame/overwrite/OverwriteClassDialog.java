@@ -14,7 +14,7 @@ import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
-import org.jrd.frontend.frame.main.DecompilationController;
+import org.jrd.frontend.frame.main.decompilerview.DecompilationController;
 import org.jrd.frontend.frame.main.GlobalConsole;
 import org.jrd.frontend.utility.CommonUtils;
 import org.jrd.frontend.utility.TeeOutputStream;

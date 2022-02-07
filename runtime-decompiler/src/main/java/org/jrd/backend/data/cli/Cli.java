@@ -21,7 +21,7 @@ import org.jrd.backend.data.VmManager;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.filesystem.NewFsVmController;
-import org.jrd.frontend.frame.main.DecompilationController;
+import org.jrd.frontend.frame.main.decompilerview.DecompilationController;
 import org.jrd.frontend.frame.main.LoadingDialogProvider;
 import org.jrd.frontend.frame.main.ModelProvider;
 import org.jrd.frontend.frame.overwrite.FileToClassValidator;

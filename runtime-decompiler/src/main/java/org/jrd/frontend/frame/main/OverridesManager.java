@@ -1,5 +1,6 @@
 package org.jrd.frontend.frame.main;
 
+import org.jrd.frontend.frame.main.decompilerview.DecompilationController;
 import org.jrd.frontend.utility.ScreenFinder;
 
 import javax.swing.BorderFactory;

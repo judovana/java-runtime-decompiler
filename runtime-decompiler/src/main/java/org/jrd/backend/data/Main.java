@@ -2,7 +2,7 @@ package org.jrd.backend.data;
 
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.cli.Cli;
-import org.jrd.frontend.frame.main.DecompilationController;
+import org.jrd.frontend.frame.main.decompilerview.DecompilationController;
 import org.jrd.frontend.frame.main.MainFrameView;
 
 public class Main {

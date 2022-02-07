@@ -15,7 +15,7 @@ import org.jrd.backend.data.Config;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
 import org.jrd.backend.decompiling.DecompilerWrapper;
-import org.jrd.frontend.frame.main.DecompilationController;
+import org.jrd.frontend.frame.main.decompilerview.DecompilationController;
 
 import java.util.ArrayList;
 import java.util.Arrays;

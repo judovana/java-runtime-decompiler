@@ -1,7 +1,7 @@
 package org.jrd.frontend.frame.plugins;
 
 import org.jrd.backend.data.Directories;
-import org.jrd.frontend.frame.main.BytecodeDecompilerView;
+import org.jrd.frontend.frame.main.decompilerview.BytecodeDecompilerView;
 
 import javax.swing.Box;
 import javax.swing.JButton;

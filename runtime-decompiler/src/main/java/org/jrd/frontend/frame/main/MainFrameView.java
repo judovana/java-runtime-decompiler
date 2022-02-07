@@ -6,6 +6,8 @@ import org.jrd.backend.data.MetadataProperties;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.frontend.frame.about.AboutView;
 import org.jrd.frontend.frame.license.LicenseView;
+import org.jrd.frontend.frame.main.decompilerview.BytecodeDecompilerView;
+import org.jrd.frontend.frame.main.decompilerview.DecompilationController;
 import org.jrd.frontend.frame.main.popup.JListPopupMenu;
 import org.jrd.frontend.frame.main.renderer.VmListRenderer;
 import org.jrd.frontend.frame.settings.SettingsView;
@@ -32,6 +34,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EtchedBorder;
+
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
@@ -133,19 +136,19 @@ public class MainFrameView {
         return mainFrame;
     }
 
-    BytecodeDecompilerView getBytecodeDecompilerView() {
+    public BytecodeDecompilerView getBytecodeDecompilerView() {
         return bytecodeDecompilerView;
     }
 
-    void setHaltAgentListener(ActionListener listener) {
+    public void setHaltAgentListener(ActionListener listener) {
         haltAgentListener = listener;
     }
 
-    void setKillAllSessionListener(ActionListener listener) {
+    public void setKillAllSessionListener(ActionListener listener) {
         killAllSession = listener;
     }
 
-    void setVmChanging(ActionListener listener) {
+    public void setVmChanging(ActionListener listener) {
         vmChangingListener = listener;
     }
 
@@ -467,11 +470,11 @@ public class MainFrameView {
         });
     }
 
-    void clearLocalListSelection() {
+    public void clearLocalListSelection() {
         localVmList.clearSelection();
     }
 
-    void clearRemoteListSelection() {
+    public void clearRemoteListSelection() {
         remoteVmList.clearSelection();
     }
 
@@ -481,7 +484,7 @@ public class MainFrameView {
      * @param isVmSelected True - Decompiler view
      *                     / False - Welcome view
      */
-    void switchPanel(boolean isVmSelected) {
+    public void switchPanel(boolean isVmSelected) {
         if (isVmSelected) {
             cardLayout.show(centerPanel, DECOMPILER_CARD);
         } else {
@@ -500,7 +503,7 @@ public class MainFrameView {
         this.refreshLocalVmsListener = listener;
     }
 
-    void setNewConnectionDialogListener(ActionListener listener) {
+    public void setNewConnectionDialogListener(ActionListener listener) {
         this.newConnectionDialogListener = listener;
     }
 
@@ -516,19 +519,19 @@ public class MainFrameView {
         this.pluginConfigurationEditorListener = pluginConfigurationEditorListener;
     }
 
-    void setLocalVmList(VmInfo[] vmInfos) {
+    public void setLocalVmList(VmInfo[] vmInfos) {
         setVmList(localVmList, vmInfos);
     }
 
-    void setRemoteVmList(VmInfo[] vmInfos) {
+    public void setRemoteVmList(VmInfo[] vmInfos) {
         setVmList(remoteVmList, vmInfos);
     }
 
-    void setFsVmList(VmInfo[] vmInfos) {
+    public void setFsVmList(VmInfo[] vmInfos) {
         setVmList(fsVmList, vmInfos);
     }
 
-    void setManageOverrides(Runnable action) {
+    public void setManageOverrides(Runnable action) {
         this.manageOverrides = action;
     }
 
@@ -540,7 +543,7 @@ public class MainFrameView {
         }
     }
 
-    protected void switchTabsToRemoteVms() {
+    public void switchTabsToRemoteVms() {
         this.tabbedPane.setSelectedComponent(remoteVmPanel);
     }
 }

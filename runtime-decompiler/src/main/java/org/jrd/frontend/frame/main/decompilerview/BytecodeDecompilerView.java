@@ -1,11 +1,9 @@
-package org.jrd.frontend.frame.main;
+package org.jrd.frontend.frame.main.decompilerview;
 
 import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
-import org.fife.ui.hex.event.HexSearchActionListener;
-import org.fife.ui.hex.event.HexSearchDocumentListener;
+
 import org.fife.ui.hex.swing.HexEditor;
-import org.fife.ui.hex.swing.HexSearch;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
@@ -16,6 +14,7 @@ import org.jrd.backend.core.ClassInfo;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.DependenciesReader;
 import org.jrd.backend.decompiling.DecompilerWrapper;
+import org.jrd.frontend.frame.main.GlobalConsole;
 import org.jrd.frontend.frame.main.popup.ClassListPopupMenu;
 import org.jrd.frontend.frame.main.renderer.ClassListRenderer;
 import org.jrd.frontend.utility.ImageButtonFactory;
@@ -36,19 +35,16 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
-import javax.swing.Timer;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.undo.UndoManager;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -573,163 +569,6 @@ public class BytecodeDecompilerView {
         this.dependenciesReader = depsReader;
     }
 
-    private static class UndoRedoKeyAdapter extends KeyAdapter {
-        private UndoManager undoManager = new UndoManager();
-
-        @Override
-        public void keyReleased(KeyEvent e) {
-            if (e.getModifiersEx() == KeyEvent.CTRL_DOWN_MASK) {
-                if (e.getKeyCode() == KeyEvent.VK_Z && undoManager.canUndo()) {
-                    undoManager.undo();
-                } else if (e.getKeyCode() == KeyEvent.VK_Y && undoManager.canRedo()) {
-                    undoManager.redo();
-                }
-            }
-        }
-
-        public UndoManager getUndoManager() {
-            return undoManager;
-        }
-    }
-
-    private static final class SearchControlsPanel extends JPanel {
-        private final JTextField searchField = new JTextField("");
-        private final JButton previousButton = new JButton("Previous");
-        private final JButton nextButton = new JButton("Next");
-        private final Color originalSearchFieldColor = searchField.getForeground();
-
-        private final ActionListener wasNotFoundActionListener;
-
-        private SearchControlsPanel(Component optionsComponent, Component forFocus) {
-            super(new GridBagLayout());
-
-            searchField.addKeyListener(new KeyAdapter() {
-                @Override
-                public void keyPressed(KeyEvent e) {
-                    if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                        forFocus.requestFocus();
-                    }
-                }
-            });
-            Timer wasNotFoundTimer = new Timer(250, (ActionEvent e) -> searchField.setForeground(originalSearchFieldColor));
-            wasNotFoundTimer.setRepeats(false);
-            wasNotFoundActionListener = e -> {
-                searchField.setForeground(Color.RED);
-                wasNotFoundTimer.start();
-            };
-
-            UndoRedoKeyAdapter keyAdapter = new UndoRedoKeyAdapter();
-            searchField.getDocument().addUndoableEditListener(keyAdapter.getUndoManager());
-            searchField.addKeyListener(keyAdapter);
-
-            GridBagConstraints gbc = new GridBagConstraints();
-            gbc.fill = GridBagConstraints.BOTH;
-            gbc.anchor = GridBagConstraints.WEST;
-            gbc.insets = new Insets(3, 3, 3, 3);
-
-            gbc.gridx = 0;
-            gbc.weightx = 1;
-            this.add(searchField, gbc);
-
-            gbc.gridwidth = 1;
-            gbc.gridx = 1;
-            gbc.weightx = 0;
-            this.add(optionsComponent, gbc);
-
-            Dimension fixedButtonSize = buttonSizeBasedOnTextField(previousButton, searchField);
-            previousButton.setPreferredSize(fixedButtonSize);
-            nextButton.setPreferredSize(fixedButtonSize);
-
-            gbc.gridx = 2;
-            gbc.weightx = 0;
-            this.add(previousButton, gbc);
-
-            gbc.gridx = 3;
-            this.add(nextButton, gbc);
-        }
-
-        public static SearchControlsPanel createHexControls(HexEditor hex) {
-            HexSearch hexSearchEngine = new HexSearch(hex);
-            JComboBox<HexSearch.HexSearchOptions> hexSearchType = new JComboBox<>(HexSearch.HexSearchOptions.values());
-            hexSearchType.setToolTipText(
-                    styleTooltip() + "Set search type:<br/>" + " - " + HexSearch.HexSearchOptions.HEX +
-                            ": Space-delimited hexadecimal bytes, e.g. '6A 72 64'.<br/>" + " - " + HexSearch.HexSearchOptions.INT +
-                            ": Space-delimited integers, e.g. '106 114 100'.<br/>" + " - " + HexSearch.HexSearchOptions.TEXT +
-                            ": Strings, e.g. 'jrd'.</div><html>"
-            );
-            hexSearchType.setPrototypeDisplayValue(HexSearch.HexSearchOptions.TEXT);
-
-            SearchControlsPanel controls = new SearchControlsPanel(hexSearchType, hex.getTableFocus());
-
-            DocumentListener hexSearchDocumentListener =
-                    new HexSearchDocumentListener(hexSearchEngine, controls.searchField, hexSearchType, controls.wasNotFoundActionListener);
-            controls.searchField.getDocument().addDocumentListener(hexSearchDocumentListener);
-            controls.previousButton.addActionListener(
-                    new HexSearchActionListener(hexSearchEngine, controls.searchField, hexSearchType, HexSearchActionListener.Method.PREV)
-            );
-            controls.nextButton.addActionListener(
-                    new HexSearchActionListener(hexSearchEngine, controls.searchField, hexSearchType, HexSearchActionListener.Method.NEXT)
-            );
-            hexSearchType.addActionListener(event -> hexSearchDocumentListener.changedUpdate(null));
-
-            return controls;
-        }
-
-        public static SearchControlsPanel createBytecodeControls(BytecodeDecompilerView parent) {
-            final JCheckBox regexCheckBox = new JCheckBox("Regex");
-            regexCheckBox.setIconTextGap(3);
-            final JCheckBox caseCheckBox = new JCheckBox("Match case");
-            caseCheckBox.setIconTextGap(3);
-
-            JPanel checkboxes = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-            checkboxes.add(regexCheckBox);
-            checkboxes.add(caseCheckBox);
-
-            SearchControlsPanel controls = new SearchControlsPanel(checkboxes, parent.bytecodeSyntaxTextArea);
-
-            DocumentListener listener = new DocumentListener() {
-                @Override
-                public void insertUpdate(DocumentEvent documentEvent) {
-                    invokeSearch();
-                }
-
-                @Override
-                public void removeUpdate(DocumentEvent documentEvent) {
-                    invokeSearch();
-                }
-
-                @Override
-                public void changedUpdate(DocumentEvent documentEvent) {
-                    invokeSearch();
-                }
-
-                private void invokeSearch() {
-                    SwingUtilities.invokeLater(
-                            () -> parent.initialSearchBytecode(
-                                    controls.searchField.getText(), regexCheckBox.isSelected(), caseCheckBox.isSelected()
-                            )
-                    );
-                }
-            };
-            regexCheckBox.addActionListener(actionEvent -> listener.changedUpdate(null));
-            caseCheckBox.addActionListener(actionEvent -> listener.changedUpdate(null));
-
-            controls.searchField.getDocument().addDocumentListener(listener);
-            controls.previousButton.addActionListener(e -> parent.searchBytecode(false));
-            controls.nextButton.addActionListener(e -> parent.searchBytecode(true));
-
-            return controls;
-        }
-
-        public void fireWasNotFoundAction() {
-            wasNotFoundActionListener.actionPerformed(null);
-        }
-
-        public void focus() {
-            searchField.requestFocus();
-        }
-    }
-
     private boolean isSourceBufferVisible() {
         return buffers.getSelectedComponent().equals(sourceBuffer);
     }
@@ -853,7 +692,8 @@ public class BytecodeDecompilerView {
         bytecodeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                StringSelection selection = new StringSelection(" -source " + buildJavaPerVersion + " -target " + buildJavaPerVersion + " ");
+                StringSelection selection =
+                        new StringSelection(" -source " + buildJavaPerVersion + " -target " + buildJavaPerVersion + " ");
                 Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
             }
         });
@@ -877,11 +717,9 @@ public class BytecodeDecompilerView {
         if (source == null || source.length < 8) {
             return 0;
         }
-        /*
-        u4             magic;
-        u2             minor_version;
-        u2             major_version;
-         */
+        //u4             magic;
+        //u2             minor_version;
+        //u2             major_version;
         int b1 = source[4]; //minor
         int b2 = source[5]; //minor
         int b3 = source[6]; //major
@@ -907,6 +745,14 @@ public class BytecodeDecompilerView {
 
     public void setPopup(DecompilationController.AgentApiGenerator ap) {
         popup = ap;
+    }
+
+    SearchControlsPanel getBytecodeSearchControls() {
+        return bytecodeSearchControls;
+    }
+
+    RSyntaxTextArea getBytecodeSyntaxTextArea() {
+        return bytecodeSyntaxTextArea;
     }
 
     private class OverwriteActionListener implements ActionListener {
@@ -944,7 +790,7 @@ public class BytecodeDecompilerView {
         return (DecompilerWrapper) pluginComboBox.getSelectedItem();
     }
 
-    private void initialSearchBytecode(String query, boolean isRegex, boolean matchesCase) {
+    void initialSearchBytecode(String query, boolean isRegex, boolean matchesCase) {
         searchContext = new SearchContext();
 
         searchContext.setSearchFor(query);
@@ -957,7 +803,7 @@ public class BytecodeDecompilerView {
         searchBytecode(true);
     }
 
-    private void searchBytecode(boolean forward) {
+    void searchBytecode(boolean forward) {
         searchContext.setSearchForward(forward);
         SearchResult result = SearchEngine.find(bytecodeSyntaxTextArea, searchContext);
 

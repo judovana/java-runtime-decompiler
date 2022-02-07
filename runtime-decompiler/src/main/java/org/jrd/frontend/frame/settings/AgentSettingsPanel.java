@@ -11,7 +11,7 @@ import java.awt.Insets;
 import java.awt.event.ActionListener;
 import java.io.File;
 import org.jrd.backend.data.Directories;
-import org.jrd.frontend.frame.main.BytecodeDecompilerView;
+import org.jrd.frontend.frame.main.decompilerview.BytecodeDecompilerView;
 import org.jrd.frontend.frame.plugins.FileSelectorArrayRow;
 
 public class AgentSettingsPanel extends JPanel implements ChangeReporter {

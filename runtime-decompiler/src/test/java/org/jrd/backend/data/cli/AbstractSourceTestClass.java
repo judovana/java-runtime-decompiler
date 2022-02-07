@@ -139,6 +139,7 @@ abstract class AbstractSourceTestClass {
     String executeJavaP(String... options) throws SourceTestClassWrapperException, InterruptedException, IOException {
         List<String> commands = new ArrayList<>();
         commands.add("javap");
+        //--add-exports jdk.jdeps/com.sun.tools.javap=ALL-UNNAMED
         commands.addAll(Arrays.asList(options));
         commands.add(getFqn());
 
