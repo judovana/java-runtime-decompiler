@@ -18,6 +18,7 @@ import java.io.PrintStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -230,8 +231,8 @@ public class PluginConfigurationEditorController {
         }
         if (result != null) {
             result += "\n";
-            result += " - sout:\n" + new String(tees.getByteArray());
-            result += " - serr:\n" + new String(teer.getByteArray());
+            result += " - sout:\n" + new String(tees.getByteArray(), Charset.defaultCharset());
+            result += " - serr:\n" + new String(teer.getByteArray(), Charset.defaultCharset());
             if (mainEx != null) {
                 result += " - Exception:\n" + Logger.exToString(mainEx);
             }

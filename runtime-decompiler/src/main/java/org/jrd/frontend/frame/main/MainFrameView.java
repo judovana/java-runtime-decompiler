@@ -52,6 +52,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 @SuppressWarnings("Indentation") // indented Swing components greatly help with orientation
 public class MainFrameView {
 
@@ -136,6 +138,7 @@ public class MainFrameView {
         return mainFrame;
     }
 
+    @SuppressFBWarnings(value = {"EI_EXPOSE_REP"}, justification = "I miss package and subpackage visibility. Highly connected classes")
     public BytecodeDecompilerView getBytecodeDecompilerView() {
         return bytecodeDecompilerView;
     }

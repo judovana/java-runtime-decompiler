@@ -44,7 +44,10 @@ public final class Config {
     public enum DepndenceNumbers {
         ENFORCE_ONE("This will pass only selected class to decompiler. Fastest, worst results, may have its weird usecase"),
         ALL_INNERS("Together with selected class, also all its inner classes are send to decompiler. Fast. Good enough results"),
-        ALL("Together with selected class, also all classes it depends on  are send to decompiler. Slow, best results. Also it forces java.* internal classes from host, not local");
+        ALL(
+                "Together with selected class, also all classes it depends on  are send to decompiler." +
+                        " Slow, best results. Also it forces java.* internal classes from host, not local"
+        );
 
         private final String description;
 
