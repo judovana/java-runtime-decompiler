@@ -17,6 +17,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * Singleton class for storing and retrieving configuration strings.
@@ -37,6 +40,33 @@ public final class Config {
     private static final String NESTED_JAR_EXTENSIONS = "NESTED_JAR_EXTENSIONS";
     private static final String COMPILER_ARGS = "COMPILER_ARGS";
     private static final String USE_JAVAP_SIGNATURES = "USE_JAVAP_SIGNATURES";
+
+    public enum DepndenceNumbers {
+        ENFORCE_ONE("This will pass only selected class to decompiler. Fastest, worst results, may have its weird usecase"),
+        ALL_INNERS("Together with selected class, also all its inner classes are send to decompiler. Fast. Good enough results"),
+        ALL("Together with selected class, also all classes it depends on  are send to decompiler. Slow, best results. Also it forces java.* internal classes from host, not local");
+
+        private final String description;
+
+        DepndenceNumbers(String s) {
+            description = s;
+        }
+    }
+
+    @SuppressFBWarnings(value = {"DMI_RANDOM_USED_ONLY_ONCE"}, justification = "will be gone when properly implemented")
+    public DepndenceNumbers getDepndenciesNumber() {
+        int it = new Random().nextInt(3);
+        if (it == 0) {
+            System.err.println("ALL");
+            return DepndenceNumbers.ALL;
+        } else if (it == 1) {
+            System.err.println("ALL_INNERS");
+            return DepndenceNumbers.ALL_INNERS;
+        } else {
+            System.err.println("ENFORCE_ONE");
+            return DepndenceNumbers.ENFORCE_ONE;
+        }
+    }
 
     private static class ConfigHolder {
         private static final Config INSTANCE = new Config();

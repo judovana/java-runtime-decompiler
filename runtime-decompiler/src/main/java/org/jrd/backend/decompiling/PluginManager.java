@@ -2,9 +2,11 @@ package org.jrd.backend.decompiling;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
+import org.jrd.backend.data.Config;
 import org.jrd.backend.data.DependenciesReader;
 import org.jrd.backend.data.Directories;
 import org.jrd.backend.data.VmInfo;
@@ -138,11 +140,6 @@ public class PluginManager {
         }
     }
 
-    private boolean isDecompilableInnerClass(String baseClass, String currentClass) {
-        return !currentClass.contains(UNDECOMPILABLE_LAMBDA) &&
-                (currentClass.startsWith(baseClass + "$") || currentClass.startsWith(baseClass.replaceAll("__init$", "") + "$"));
-    }
-
     /**
      * @param wrapper   decompiler used for decompiling
      * @param name      optional name for decompilers supporting inner classes
@@ -171,18 +168,8 @@ public class PluginManager {
             }
 
             if (wrapper.getDecompileMethodWithInners() != null && name != null && vmInfo != null && vmManager != null) {
-                //we have to crawl through all inner classes to be available before final listing,
-                // otherwise decompiler may skip the inner class
-                Set<String> inners = io.github.mkoncek.classpathless.util.BytecodeExtractor
-                        .extractNestedClasses(bytecode, new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager));
-                //this loop may be redundant, as JrdClassesProvider init all what fails to load (and try to laod again), but...
-                for (String inner : inners) {
-                    Cli.initClass(vmInfo, vmManager, inner, System.err);
-                }
-                String[] allClasses = Cli.obtainClasses(vmInfo, vmManager);
-                Map<String, byte[]> innerClasses = new HashMap<>();
-
-                if (true) {
+                Map<String, byte[]> otherClasses = new HashMap<>();
+                if (Config.getConfig().getDepndenciesNumber() == Config.DepndenceNumbers.ALL) {
                     DependenciesReader dr = new DependenciesReader(new ModelProvider() {
                         @Override
                         public VmInfo getVmInfo() {
@@ -202,23 +189,22 @@ public class PluginManager {
                     VmDecompilerStatus result = Cli.obtainClass(dr.getVmInfo(), name, dr.getVmManager());
                     Collection<String> deps1 = dr.resolve(name, result.getLoadedClassBytes());
                     for (String clazz : deps1) {
-                        if (!(isLambdaForm(clazz) || isArrayForm(clazz) || isUndecompilableLambda(clazz))) {
-                            //init it?
-                            innerClasses.put(
-                                    clazz, Base64.getDecoder().decode(Cli.obtainClass(vmInfo, clazz, vmManager).getLoadedClassBytes())
-                            );
-                        }
-                    }
-                } else {
-                    for (String clazz : allClasses) {
-                        if (isDecompilableInnerClass(name, clazz)) {
-                            innerClasses.put(
-                                    clazz, Base64.getDecoder().decode(Cli.obtainClass(vmInfo, clazz, vmManager).getLoadedClassBytes())
-                            );
-                        }
+                        addAndInitDepndenceClass(vmInfo, vmManager, otherClasses, clazz);
                     }
                 }
-                return (String) wrapper.getDecompileMethodWithInners().invoke(wrapper.getInstance(), name, bytecode, innerClasses, options);
+                if (Config.getConfig().getDepndenciesNumber() == Config.DepndenceNumbers.ALL_INNERS) {
+                    Set<String> inners = io.github.mkoncek.classpathless.util.BytecodeExtractor
+                            .extractNestedClasses(bytecode, new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager));
+                    for (String clazz : inners) {
+                        otherClasses
+                                .put(clazz, Base64.getDecoder().decode(Cli.obtainClass(vmInfo, clazz, vmManager).getLoadedClassBytes()));
+                    }
+                } else {
+                    //just the one class, no additon to inners
+                    //maybe the getDecompileMethodNoInners to be called, or to get rid of it?
+                    otherClasses.clear(); //to make checkstyle happy
+                }
+                return (String) wrapper.getDecompileMethodWithInners().invoke(wrapper.getInstance(), name, bytecode, otherClasses, options);
             } else if (wrapper.getDecompileMethodNoInners() != null) {
                 return (String) wrapper.getDecompileMethodNoInners().invoke(wrapper.getInstance(), bytecode, options);
             } else {
@@ -228,6 +214,17 @@ public class PluginManager {
             System.setErr(origSerr);
             //get output of decompiler for research can log only to stderr
             GlobalConsole.getConsole().addMessage(Level.INFO, new String(tee.getByteArray(), StandardCharsets.UTF_8));
+        }
+    }
+
+    private void addAndInitDepndenceClass(VmInfo vmInfo, VmManager vmManager, Map<String, byte[]> otherClasses, String clazz) {
+        if (!(isLambdaForm(clazz) || isArrayForm(clazz) || isUndecompilableLambda(clazz))) {
+            try {
+                Cli.initClass(vmInfo, vmManager, clazz, System.err);
+                otherClasses.put(clazz, Base64.getDecoder().decode(Cli.obtainClass(vmInfo, clazz, vmManager).getLoadedClassBytes()));
+            } catch (Exception ex) {
+                Logger.getLogger().log(ex);
+            }
         }
     }
 
