@@ -410,7 +410,7 @@ public class PluginManager {
         int errLevel = compileWrapper(plugin, errStream);
         //cleaning after compilation
         String fileName = plugin.getWrapperUrl().getFile().getName();
-        Directories.deleteWithException(System.getProperty("java.io.tmpdir") + fileName.substring(0, fileName.length() - 4) + "class");
+        Directories.deleteWithException(System.getProperty("java.io.tmpdir") + "/" + fileName.substring(0, fileName.length() - 4) + "class");
 
         return errLevel != 0 ? errStream.toString(StandardCharsets.UTF_8) : null;
     }
