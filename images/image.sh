@@ -21,7 +21,7 @@ if [ "x$PLUGINS" = "x" ] ; then
 fi
 
 if  [ "x$VERIFY_CP" = "xTRUE"  -a "x$PLUGINS" = "xTRUE" ] ;  then
-  find "$HOME/.m2/repository" -type d | grep -e bitbucket/mstrobel/procyon -e org/jboss/windup/decompiler/fernflower -e  openjdk/asmtools -e benf/cfr
+  find "$HOME/.m2/repository" -type d | grep -e com/github/mstrobel/ -e org/jboss/windup/decompiler/fernflower -e  openjdk/asmtools -e benf/cfr
   if [ $? -eq 0 ] ; then
     echo "decompilers found in maven repo"
   else
