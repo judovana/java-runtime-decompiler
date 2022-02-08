@@ -169,7 +169,8 @@ public class PluginManager {
 
             if (wrapper.getDecompileMethodWithInners() != null && name != null && vmInfo != null && vmManager != null) {
                 Map<String, byte[]> otherClasses = new HashMap<>();
-                if (Config.getConfig().getDepndenciesNumber() == Config.DepndenceNumbers.ALL) {
+                Config.DepndenceNumbers dd = Config.getConfig().getDepndenciesNumber();
+                if (dd == Config.DepndenceNumbers.ALL) {
                     DependenciesReader dr = new DependenciesReader(new ModelProvider() {
                         @Override
                         public VmInfo getVmInfo() {
@@ -192,7 +193,7 @@ public class PluginManager {
                         addAndInitDepndenceClass(vmInfo, vmManager, otherClasses, clazz);
                     }
                 }
-                if (Config.getConfig().getDepndenciesNumber() == Config.DepndenceNumbers.ALL_INNERS) {
+                if (dd == Config.DepndenceNumbers.ALL_INNERS) {
                     Set<String> inners = io.github.mkoncek.classpathless.util.BytecodeExtractor
                             .extractNestedClasses(bytecode, new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager));
                     for (String clazz : inners) {
@@ -410,7 +411,8 @@ public class PluginManager {
         int errLevel = compileWrapper(plugin, errStream);
         //cleaning after compilation
         String fileName = plugin.getWrapperUrl().getFile().getName();
-        Directories.deleteWithException(System.getProperty("java.io.tmpdir") + "/" + fileName.substring(0, fileName.length() - 4) + "class");
+        Directories
+                .deleteWithException(System.getProperty("java.io.tmpdir") + "/" + fileName.substring(0, fileName.length() - 4) + "class");
 
         return errLevel != 0 ? errStream.toString(StandardCharsets.UTF_8) : null;
     }
