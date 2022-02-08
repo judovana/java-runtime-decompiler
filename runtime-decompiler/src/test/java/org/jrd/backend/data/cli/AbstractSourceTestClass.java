@@ -123,7 +123,9 @@ abstract class AbstractSourceTestClass {
     }
 
     AbstractSourceTestClass execute() throws SourceTestClassWrapperException {
-        ProcessBuilder pb = new ProcessBuilder("java", "-Djdk.attach.allowAttachSelf=true", getFqn());
+        ProcessHandle processHandle = ProcessHandle.current();
+        String java = processHandle.info().command().get();
+        ProcessBuilder pb = new ProcessBuilder(java, "-Djdk.attach.allowAttachSelf=true", getFqn());
         pb.directory(new File(getTargetDir()));
         try {
             process = pb.start();
