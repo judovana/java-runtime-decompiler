@@ -1,5 +1,7 @@
 package org.jrd.backend.data.cli;
 
+import org.jrd.backend.decompiling.DecompilerWrapper;
+
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 
@@ -138,7 +140,7 @@ abstract class AbstractSourceTestClass {
 
     String executeJavaP(String... options) throws SourceTestClassWrapperException, InterruptedException, IOException {
         List<String> commands = new ArrayList<>();
-        commands.add("javap");
+        commands.add(DecompilerWrapper.JAVAP_NAME);
         //--add-exports jdk.jdeps/com.sun.tools.javap=ALL-UNNAMED
         commands.addAll(Arrays.asList(options));
         commands.add(getFqn());

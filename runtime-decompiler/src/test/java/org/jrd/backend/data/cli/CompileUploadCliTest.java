@@ -2,6 +2,7 @@ package org.jrd.backend.data.cli;
 
 import org.jrd.backend.core.agentstore.AgentLiveliness;
 import org.jrd.backend.data.Model;
+import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
@@ -90,7 +91,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
     }
 
     void testDecompileJavap(String pucComponent, String option) throws Exception {
-        String[] args = new String[]{Cli.DECOMPILE, pucComponent, "javap" + option, dummy.getClassRegex()};
+        String[] args = new String[]{Cli.DECOMPILE, pucComponent, DecompilerWrapper.JAVAP_NAME + option, dummy.getClassRegex()};
         Cli cli = new Cli(args, model);
 
         cli.consumeCli();
@@ -185,7 +186,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
     }
 
     private void bytecodeContainsNewString(String pucComponent, String newString) throws Exception {
-        String[] args = new String[]{Cli.DECOMPILE, pucComponent, "javap-v", dummy.getClassRegex()};
+        String[] args = new String[]{Cli.DECOMPILE, pucComponent, DecompilerWrapper.JAVAP_VERBOSE_NAME, dummy.getClassRegex()};
         Cli cli = new Cli(args, model);
 
         cli.consumeCli();

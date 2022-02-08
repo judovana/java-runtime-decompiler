@@ -2,6 +2,7 @@ package org.jrd.backend.data.cli;
 
 import org.jrd.backend.core.agentstore.AgentLiveliness;
 import org.jrd.backend.data.MetadataProperties;
+import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.frontend.frame.main.decompilerview.DecompilationController;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -403,7 +404,7 @@ public class CliTest extends AbstractAgentNeedingTest {
                 new String[]{LIST_CLASSES}, new String[]{BYTES}, new String[]{BYTES, unimportantPid}, new String[]{BASE64},
                 new String[]{BASE64, unimportantPid}, new String[]{INIT}, new String[]{INIT, unimportantPid}, new String[]{OVERWRITE},
                 new String[]{OVERWRITE, unimportantPid}, new String[]{DECOMPILE}, new String[]{DECOMPILE, unimportantPid},
-                new String[]{DECOMPILE, unimportantPid, "javap"}, new String[]{COMPILE}, new String[]{COMPILE, R},
+                new String[]{DECOMPILE, unimportantPid, DecompilerWrapper.JAVAP_NAME}, new String[]{COMPILE}, new String[]{COMPILE, R},
                 new String[]{COMPILE, R, CP, unimportantPid}, new String[]{COMPILE, R, CP, unimportantPid, Cli.P, "unimportantPluginName"}
         ).map(a -> (Object) a).map(Arguments::of); // cast needed because of varargs factory method .of()
     }
@@ -417,7 +418,7 @@ public class CliTest extends AbstractAgentNeedingTest {
     }
 
     void testDecompileJavap(String pucComponent, String option) throws Exception {
-        args = new String[]{DECOMPILE, pucComponent, "javap" + option, dummy.getClassRegex()};
+        args = new String[]{DECOMPILE, pucComponent, DecompilerWrapper.JAVAP_NAME + option, dummy.getClassRegex()};
         cli = new Cli(args, model);
 
         cli.consumeCli();
@@ -571,7 +572,7 @@ public class CliTest extends AbstractAgentNeedingTest {
     }
 
     private void bytecodeContainsNewString(String pucComponent, String newString) throws Exception {
-        args = new String[]{DECOMPILE, pucComponent, "javap-v", dummy.getClassRegex()};
+        args = new String[]{DECOMPILE, pucComponent, DecompilerWrapper.JAVAP_VERBOSE_NAME, dummy.getClassRegex()};
         cli = new Cli(args, model);
 
         cli.consumeCli();
