@@ -1,5 +1,13 @@
-# Java Runtime Decompiler
+# Java Runtime (De)compiler
 *Java Runtime Decompiler*, or *JRD* for short, allows you to extract bytecode from the running JVM and decompile it with an external decompiler.
+* talk from devconf 2022: https://www.youtube.com/watch?v=mXcLkaAxNvM&list=PLU1vS0speL2bf9Zfa0pHQLPBhEKbbbsua&index=55
+  * quite a good overview 
+* Main usecases
+  * inspect and modify incompelte proprietary blobs
+  * watch how instrumetnation affets your code
+  * runtime hotpatching
+  * verifying what is actually running in your vm
+  * for testig, submit missbehaving or reach unreachable code
 ## Relase
 * Should be done in -Plegacy to enable injecting to jdk8 vms.
 ## Installation
