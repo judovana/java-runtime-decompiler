@@ -43,6 +43,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -417,7 +418,7 @@ public class OverwriteClassDialog extends JDialog {
             IdentifiedSource... sources
     ) {
         ClassesProvider cp = new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager);
-        ClasspathlessCompiler rc = getClasspathlessCompiler(wrapper, hasCompiler, isVerbose);
+        ClasspathlessCompiler rc = getClasspathlessCompiler(wrapper, hasCompiler, isVerbose, Optional.empty());
         JDialog compilationRunningDialog = new JDialog((JFrame) null, "Compiling", true);
         final JTextArea compilationLog = new JTextArea();
         compilationRunningDialog.setSize(300, 400);
@@ -442,14 +443,34 @@ public class OverwriteClassDialog extends JDialog {
         return compiler;
     }
 
-    public static ClasspathlessCompiler getClasspathlessCompiler(DecompilerWrapper wrapper, boolean hasCompiler, boolean isVerbose) {
+    public static ClasspathlessCompiler getClasspathlessCompiler(
+            DecompilerWrapper wrapper, boolean hasCompiler, boolean isVerbose, Optional<Integer> bestSourceTarget
+    ) {
         ClasspathlessCompiler rc;
         if (hasCompiler) {
             rc = new RuntimeCompilerConnector.ForeignCompilerWrapper(wrapper);
         } else {
             boolean useHostClasses = Config.getConfig().doUseHostSystemClasses();
             boolean useHostObject = Config.getConfig().doUseHostJavaLangObject();
-            List<String> compilerArgs = Config.getConfig().getCompilerArgs();
+            List<String> compilerArgs = new ArrayList<>(Config.getConfig().getCompilerArgs());
+            if (Config.getConfig().doOverwriteST() && bestSourceTarget.isPresent()) {
+                for (int i = 0; i < compilerArgs.size(); i++) {
+                    //todo, pass propagate decompiled class bytecode
+                    //how to from cli?
+                    //optional?
+                    //requires major rework
+                    if (compilerArgs.get(i).trim().equals("-source")) {
+                        System.err.println("would remove " + compilerArgs.get(i) + " and " + compilerArgs.get(i + 1));
+                    }
+                    if (compilerArgs.get(i).trim().equals("-target")) {
+                        System.err.println("would remove " + compilerArgs.get(i) + " and " + compilerArgs.get(i + 1));
+                    }
+                }
+                compilerArgs.add("-source");
+                compilerArgs.add("" + bestSourceTarget.get());
+                compilerArgs.add("-target");
+                compilerArgs.add("" + bestSourceTarget.get());
+            }
 
             if (isVerbose) {
                 compilerArgs.add("-verbose");
