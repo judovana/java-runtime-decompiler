@@ -100,6 +100,7 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
                 });
                 JPanel p = new JPanel(new BorderLayout());
                 JCheckBox verbose = new JCheckBox("Verbose mode", Logger.getLogger().isVerbose());
+                verbose.setSelected(Logger.getLogger().isVerbose());
                 verbose.addActionListener(actionEvent -> Logger.getLogger().setVerbose(verbose.isSelected()));
                 JComboBox<String> hgltr = new JComboBox<String>(getAllLexers());
                 hgltr.setSelectedItem(SyntaxConstants.SYNTAX_STYLE_SAS);

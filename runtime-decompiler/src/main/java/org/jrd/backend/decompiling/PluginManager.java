@@ -36,6 +36,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -192,7 +193,7 @@ public class PluginManager {
                     Set<String> inners = io.github.mkoncek.classpathless.util.BytecodeExtractor
                             .extractNestedClasses(bytecode, new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager));
                     Set<String> setdeps = new HashSet<>(deps1.size()+inners.size());
-                    //setdeps.addAll(inners);
+                    //setdeps.addAll(inners); //should be in all deps
                     setdeps.addAll(deps1);
                     for (String clazz : setdeps) {
                         addAndInitDepndenceClass(vmInfo, vmManager, otherClasses, clazz);

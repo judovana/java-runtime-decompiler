@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Singleton class for storing and retrieving configuration strings.
@@ -39,6 +40,8 @@ public final class Config {
     private static final String USE_JAVAP_SIGNATURES = "USE_JAVAP_SIGNATURES";
     private static final String ENFORCE_SOURCE_TARGET = "ENFORCE_SOURCE_TARGET";
     private static final String DEPNDENCE_NUMBERS = "DEPNDENCE_NUMBERS";
+    //this is not persistent, is used for transfering detected value to compiler with other settings
+    private Optional<Integer> sourceTargetValue;
 
     public enum DepndenceNumbers {
         ENFORCE_ONE("This will pass only selected class to decompiler. Fastest, worst results, may have its weird usecase"),
@@ -48,7 +51,7 @@ public final class Config {
                         " Slow, best results. Also it forces java.* internal classes from host, not local"
         );
 
-        private final String description;
+        public final String description;
 
         DepndenceNumbers(String s) {
             description = s;
@@ -296,4 +299,13 @@ public final class Config {
         Files.write(Paths.get(CONFIG_PATH), Collections.singleton(gson.toJson(configMap)), StandardCharsets.UTF_8);
     }
 
+    public Optional<Integer> getBestSourceTarget() {
+        return sourceTargetValue;
+    }
+    public void setBestSourceTarget(Optional<Integer> st) {
+        //how to fill it from cli?
+        //cli api to print bytecode levels?
+        //yes, not much more
+        this.sourceTargetValue=st;
+    }
 }

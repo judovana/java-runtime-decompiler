@@ -1,6 +1,7 @@
 package org.jrd.frontend.frame.settings;
 
 import org.jrd.backend.data.Config;
+import org.jrd.frontend.frame.main.decompilerview.BytecodeDecompilerView;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -36,6 +37,9 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
         dependenceNumbers = new JComboBox(Config.DepndenceNumbers.values());
         gbc.gridy = 2;
         this.add(dependenceNumbers, gbc);
+        dependenceNumbers.addActionListener(a -> {
+            dependenceNumbers.setToolTipText(BytecodeDecompilerView.styleTooltip() + ((Config.DepndenceNumbers) (dependenceNumbers.getSelectedItem())).description);
+        });
         dependenceNumbers.setSelectedItem(initialConfigNumbers);
     }
 

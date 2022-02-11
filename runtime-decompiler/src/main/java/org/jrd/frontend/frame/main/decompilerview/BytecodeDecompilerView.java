@@ -13,6 +13,7 @@ import org.fife.ui.rtextarea.SearchEngine;
 import org.fife.ui.rtextarea.SearchResult;
 import org.jrd.backend.core.ClassInfo;
 import org.jrd.backend.core.Logger;
+import org.jrd.backend.data.Config;
 import org.jrd.backend.data.DependenciesReader;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.frontend.frame.main.GlobalConsole;
@@ -69,6 +70,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -684,8 +686,11 @@ public class BytecodeDecompilerView {
         bytecodeSyntaxTextArea.setCaretPosition(0);
         int bytecodeVersion = getByteCodeVersion(source);
         int buildJavaPerVersion = getJavaFromBytelevel(bytecodeVersion);
+        Config.getConfig().setBestSourceTarget(Optional.of(buildJavaPerVersion));
         bytecodeButton.setText(buildJavaPerVersion + "");
-        bytecodeButton.setToolTipText("bytecode java version:" + buildJavaPerVersion + ". Click here to  copy it as source/target");
+        bytecodeButton.setToolTipText(styleTooltip() +
+                "bytecode java version:" + buildJavaPerVersion + ". Click here to  copy it as source/target<br>" +
+                "force it is: " + Config.getConfig().doOverwriteST());
         ActionListener[] ls = bytecodeButton.getActionListeners();
         for (ActionListener l : ls) {
             bytecodeButton.removeActionListener(l);

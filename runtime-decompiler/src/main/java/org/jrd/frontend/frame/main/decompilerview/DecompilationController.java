@@ -448,7 +448,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
             PluginManager.BundledCompilerStatus internalCompiler = pluginManager.getBundledCompilerStatus(wrapper);
             GlobalConsole.getConsole().addMessage(Level.ALL, internalCompiler.getStatus());
             OverwriteClassDialog.CompilationWithResult compiler = new OverwriteClassDialog.CompilationWithResult(
-                    OverwriteClassDialog.getClasspathlessCompiler(wrapper, internalCompiler.isEmbedded(), isVerbose, Optional.empty()),
+                    OverwriteClassDialog.getClasspathlessCompiler(wrapper, internalCompiler.isEmbedded(), isVerbose),
                     getClassesProvider(), GlobalConsole.getConsole(), srcs
             ) {
 

@@ -73,6 +73,6 @@ final class CompileArguments {
             }
         }
         Logger.getLogger().log(compilerLogMessage);
-        return OverwriteClassDialog.getClasspathlessCompiler(decompiler, hasCompiler, isVerbose, Optional.empty());
+        return OverwriteClassDialog.getClasspathlessCompiler(decompiler, hasCompiler, isVerbose);
     }
 }

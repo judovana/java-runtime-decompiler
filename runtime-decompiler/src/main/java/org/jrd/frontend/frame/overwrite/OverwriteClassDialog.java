@@ -50,6 +50,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 public class OverwriteClassDialog extends JDialog {
 
@@ -418,7 +419,7 @@ public class OverwriteClassDialog extends JDialog {
             IdentifiedSource... sources
     ) {
         ClassesProvider cp = new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager);
-        ClasspathlessCompiler rc = getClasspathlessCompiler(wrapper, hasCompiler, isVerbose, Optional.empty());
+        ClasspathlessCompiler rc = getClasspathlessCompiler(wrapper, hasCompiler, isVerbose);
         JDialog compilationRunningDialog = new JDialog((JFrame) null, "Compiling", true);
         final JTextArea compilationLog = new JTextArea();
         compilationRunningDialog.setSize(300, 400);
@@ -443,9 +444,7 @@ public class OverwriteClassDialog extends JDialog {
         return compiler;
     }
 
-    public static ClasspathlessCompiler getClasspathlessCompiler(
-            DecompilerWrapper wrapper, boolean hasCompiler, boolean isVerbose, Optional<Integer> bestSourceTarget
-    ) {
+    public static ClasspathlessCompiler getClasspathlessCompiler(DecompilerWrapper wrapper, boolean hasCompiler, boolean isVerbose) {
         ClasspathlessCompiler rc;
         if (hasCompiler) {
             rc = new RuntimeCompilerConnector.ForeignCompilerWrapper(wrapper);
@@ -453,29 +452,26 @@ public class OverwriteClassDialog extends JDialog {
             boolean useHostClasses = Config.getConfig().doUseHostSystemClasses();
             boolean useHostObject = Config.getConfig().doUseHostJavaLangObject();
             List<String> compilerArgs = new ArrayList<>(Config.getConfig().getCompilerArgs());
-            if (Config.getConfig().doOverwriteST() && bestSourceTarget.isPresent()) {
+            if (Config.getConfig().doOverwriteST() && Config.getConfig().getBestSourceTarget().isPresent()) {
                 for (int i = 0; i < compilerArgs.size(); i++) {
-                    //todo, pass propagate decompiled class bytecode
-                    //how to from cli?
-                    //optional?
-                    //requires major rework
-                    if (compilerArgs.get(i).trim().equals("-source")) {
-                        System.err.println("would remove " + compilerArgs.get(i) + " and " + compilerArgs.get(i + 1));
-                    }
-                    if (compilerArgs.get(i).trim().equals("-target")) {
-                        System.err.println("would remove " + compilerArgs.get(i) + " and " + compilerArgs.get(i + 1));
+                    if (compilerArgs.get(i).trim().equals("-source") || compilerArgs.get(i).trim().equals("-target")) {
+                        Logger.getLogger().log(Logger.Level.DEBUG, "removing " + compilerArgs.get(i) + " and " + compilerArgs.get(i + 1));
+                        compilerArgs.remove(i); //source/target
+                        compilerArgs.remove(i); //the number itself
+                        i--;
+
                     }
                 }
-                compilerArgs.add("-source");
-                compilerArgs.add("" + bestSourceTarget.get());
-                compilerArgs.add("-target");
-                compilerArgs.add("" + bestSourceTarget.get());
+                compilerArgs.add(0,"-source");
+                compilerArgs.add(1,"" + Config.getConfig().getBestSourceTarget().get());
+                compilerArgs.add(2,"-target");
+                compilerArgs.add(3,"" + Config.getConfig().getBestSourceTarget().get());
             }
 
             if (isVerbose) {
                 compilerArgs.add("-verbose");
             }
-
+            Logger.getLogger().log(Logger.Level.DEBUG, "compiler args: " + compilerArgs.stream().collect(Collectors.joining(" ")));
             ClasspathlessCompiler.Arguments arguments = new ClasspathlessCompiler.Arguments().useHostSystemClasses(useHostClasses)
                     .compilerOptions(compilerArgs).useHostJavaLangObject(useHostObject);
 
