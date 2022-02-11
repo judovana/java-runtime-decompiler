@@ -221,7 +221,12 @@ public class PluginManager {
     private void addAndInitDepndenceClass(VmInfo vmInfo, VmManager vmManager, Map<String, byte[]> otherClasses, String clazz) {
         if (!(isLambdaForm(clazz) || isArrayForm(clazz) || isUndecompilableLambda(clazz))) {
             try {
-                Cli.initClass(vmInfo, vmManager, clazz, System.err);
+                try {
+                    //some clqsses can not be init, but stil lmay be loaded if already init...
+                    Cli.initClass(vmInfo, vmManager, clazz, System.err);
+                } catch (Exception eex) {
+                    Logger.getLogger().log(eex);
+                }
                 otherClasses.put(clazz, Base64.getDecoder().decode(Cli.obtainClass(vmInfo, clazz, vmManager).getLoadedClassBytes()));
             } catch (Exception ex) {
                 Logger.getLogger().log(ex);
