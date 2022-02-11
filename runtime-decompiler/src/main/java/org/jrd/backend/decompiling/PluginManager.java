@@ -189,11 +189,15 @@ public class PluginManager {
                     }, null);
                     VmDecompilerStatus result = Cli.obtainClass(dr.getVmInfo(), name, dr.getVmManager());
                     Collection<String> deps1 = dr.resolve(name, result.getLoadedClassBytes());
-                    for (String clazz : deps1) {
+                    Set<String> inners = io.github.mkoncek.classpathless.util.BytecodeExtractor
+                            .extractNestedClasses(bytecode, new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager));
+                    Set<String> setdeps = new HashSet<>(deps1.size()+inners.size());
+                    //setdeps.addAll(inners);
+                    setdeps.addAll(deps1);
+                    for (String clazz : setdeps) {
                         addAndInitDepndenceClass(vmInfo, vmManager, otherClasses, clazz);
                     }
-                }
-                if (dd == Config.DepndenceNumbers.ALL_INNERS) {
+                } else  if (dd == Config.DepndenceNumbers.ALL_INNERS) {
                     Set<String> inners = io.github.mkoncek.classpathless.util.BytecodeExtractor
                             .extractNestedClasses(bytecode, new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager));
                     for (String clazz : inners) {
