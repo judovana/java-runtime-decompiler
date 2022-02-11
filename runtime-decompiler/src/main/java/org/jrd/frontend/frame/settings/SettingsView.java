@@ -85,10 +85,10 @@ public class SettingsView extends JDialog {
 
         agentSettingsPanel = new AgentSettingsPanel(config.getAgentRawPath());
         compilationSettingsPanel = new CompilationSettingsPanel(
-                config.doUseHostSystemClasses(), config.getCompilerArgsString(), config.doUseHostJavaLangObject()
+                config.doUseHostSystemClasses(), config.getCompilerArgsString(), config.doUseHostJavaLangObject(), config.doOverwriteST()
         );
         nestedJarsSettingsPanel = new NestedJarsSettingsPanel();
-        miscSettingsPanel = new MiscellaneousSettingsPanel(config.doUseJavapSignatures());
+        miscSettingsPanel = new MiscellaneousSettingsPanel(config.doUseJavapSignatures(), config.doDepndenceNumbers());
 
         for (
             ChangeReporter panel : new ChangeReporter[]{agentSettingsPanel, compilationSettingsPanel, nestedJarsSettingsPanel,
@@ -125,12 +125,13 @@ public class SettingsView extends JDialog {
         mainPanel.add(okCancelPanel, gbc);
 
         this.setTitle("Settings");
-        this.setSize(new Dimension(800, 600));
+        this.setSize(new Dimension(800, 800));
         this.setMinimumSize(new Dimension(250, 600));
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setLocationRelativeTo(mainFrameView.getMainFrame());
         this.setModalityType(ModalityType.APPLICATION_MODAL);
         this.add(mainPanel);
+        //this.pack(); this would kill the layout due to nested jars suffxes big box
         this.setVisible(true);
     }
 
@@ -146,8 +147,10 @@ public class SettingsView extends JDialog {
         config.setAgentPath(agentSettingsPanel.getAgentPath());
         config.setUseHostSystemClasses(compilationSettingsPanel.shouldUseHostSystemClassesCheckBox());
         config.setUseHostJavaLangObject(compilationSettingsPanel.shouldUseHostJavaLangObjectCheckBox());
+        config.setOverwriteST(compilationSettingsPanel.shouldOverwriteStCheckBox());
         config.setCompilerArguments(compilationSettingsPanel.getCompilerArgs());
         config.setUseJavapSignatures(miscSettingsPanel.shouldUseJavapSignatures());
+        config.setDepndenceNumbers(miscSettingsPanel.futurreDependenciesNumbers());
         config.setNestedJarExtensions(extensions);
 
         try {

@@ -19,8 +19,12 @@ public class CompilationSettingsPanel extends JPanel implements ChangeReporter {
     private JCheckBox useHostJavaLangObjectCheckBox;
     private JLabel compilerArgsLabel;
     private JTextField compilerArgsTextField;
+    private JCheckBox overwriteSourceTargetOnRuntime;
 
-    public CompilationSettingsPanel(boolean initialUseHostSystemClasses, String initialCompilerArgs, boolean initialUseHostJavaObject) {
+    public CompilationSettingsPanel(
+            boolean initialUseHostSystemClasses, String initialCompilerArgs, boolean initialUseHostJavaObject,
+            boolean initialOverwriteStValue
+    ) {
         compilationSettingsLabel = new JLabel("Compilation settings");
         useHostSystemClassesCheckBox =
                 new JCheckBox("Use host system classes during compilation phase of class overwrite", initialUseHostSystemClasses);
@@ -65,8 +69,18 @@ public class CompilationSettingsPanel extends JPanel implements ChangeReporter {
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.weightx = 1;
         gbc.weighty = 1;
-        gbc.gridx = 1;
+        gbc.gridx = 0;
+        gbc.gridy = 4;
         this.add(compilerArgsTextField, gbc);
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        overwriteSourceTargetOnRuntime = new JCheckBox("Overwrite source/target per class");
+        overwriteSourceTargetOnRuntime.setToolTipText(
+                BytecodeDecompilerView.styleTooltip() + "If selected, source target will be always set<br>" +
+                        "even if you set it manually, it will be overwritten<br>" + "to the value obtained from original bytecode"
+        );
+        overwriteSourceTargetOnRuntime.setSelected(initialOverwriteStValue);
+        this.add(overwriteSourceTargetOnRuntime, gbc);
     }
 
     public boolean shouldUseHostSystemClassesCheckBox() {
@@ -75,6 +89,10 @@ public class CompilationSettingsPanel extends JPanel implements ChangeReporter {
 
     public boolean shouldUseHostJavaLangObjectCheckBox() {
         return useHostJavaLangObjectCheckBox.isSelected();
+    }
+
+    public boolean shouldOverwriteStCheckBox() {
+        return overwriteSourceTargetOnRuntime.isSelected();
     }
 
     public String getCompilerArgs() {

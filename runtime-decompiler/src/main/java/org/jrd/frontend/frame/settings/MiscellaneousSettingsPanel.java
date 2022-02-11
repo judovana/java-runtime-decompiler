@@ -1,6 +1,9 @@
 package org.jrd.frontend.frame.settings;
 
+import org.jrd.backend.data.Config;
+
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import java.awt.GridBagConstraints;
@@ -12,8 +15,9 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
 
     private JLabel miscSettingsLabel;
     private JCheckBox useJavapSignaturesCheckBox;
+    private JComboBox<Config.DepndenceNumbers> dependenceNumbers;
 
-    public MiscellaneousSettingsPanel(boolean initialUseJavapSignatures) {
+    public MiscellaneousSettingsPanel(boolean initialUseJavapSignatures, Config.DepndenceNumbers initialConfigNumbers) {
         miscSettingsLabel = new JLabel("Miscellaneous settings");
         useJavapSignaturesCheckBox = new JCheckBox("Use Javap signatures in Agent API insertion menu", initialUseJavapSignatures);
 
@@ -29,10 +33,18 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
 
         gbc.gridy = 1;
         this.add(useJavapSignaturesCheckBox, gbc);
+        dependenceNumbers = new JComboBox(Config.DepndenceNumbers.values());
+        gbc.gridy = 2;
+        this.add(dependenceNumbers, gbc);
+        dependenceNumbers.setSelectedItem(initialConfigNumbers);
     }
 
     public boolean shouldUseJavapSignatures() {
         return useJavapSignaturesCheckBox.isSelected();
+    }
+
+    public Config.DepndenceNumbers futurreDependenciesNumbers() {
+        return (Config.DepndenceNumbers) dependenceNumbers.getSelectedItem();
     }
 
     @Override

@@ -17,9 +17,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
-
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * Singleton class for storing and retrieving configuration strings.
@@ -40,6 +37,8 @@ public final class Config {
     private static final String NESTED_JAR_EXTENSIONS = "NESTED_JAR_EXTENSIONS";
     private static final String COMPILER_ARGS = "COMPILER_ARGS";
     private static final String USE_JAVAP_SIGNATURES = "USE_JAVAP_SIGNATURES";
+    private static final String ENFORCE_SOURCE_TARGET = "ENFORCE_SOURCE_TARGET";
+    private static final String DEPNDENCE_NUMBERS = "DEPNDENCE_NUMBERS";
 
     public enum DepndenceNumbers {
         ENFORCE_ONE("This will pass only selected class to decompiler. Fastest, worst results, may have its weird usecase"),
@@ -54,21 +53,15 @@ public final class Config {
         DepndenceNumbers(String s) {
             description = s;
         }
+
+        public static DepndenceNumbers fromString(String s) throws IllegalArgumentException {
+            return Arrays.stream(DepndenceNumbers.values()).filter(v -> v.toString().equals(s)).findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("unknown value: " + s));
+        }
     }
 
-    @SuppressFBWarnings(value = {"DMI_RANDOM_USED_ONLY_ONCE"}, justification = "will be gone when properly implemented")
     public DepndenceNumbers getDepndenciesNumber() {
-        int it = new Random().nextInt(3);
-        if (it == 0) {
-            System.err.println("ALL");
-            return DepndenceNumbers.ALL;
-        } else if (it == 1) {
-            System.err.println("ALL_INNERS");
-            return DepndenceNumbers.ALL_INNERS;
-        } else {
-            System.err.println("ENFORCE_ONE");
-            return DepndenceNumbers.ENFORCE_ONE;
-        }
+        return getConfig().doDepndenceNumbers();
     }
 
     private static class ConfigHolder {
@@ -171,12 +164,28 @@ public final class Config {
         configMap.put(USE_HOST_JAVA_LANG_OBJECT, useHostJavaLangObject);
     }
 
+    public void setOverwriteST(boolean overwriteST) {
+        configMap.put(ENFORCE_SOURCE_TARGET, overwriteST);
+    }
+
+    public void setDepndenceNumbers(DepndenceNumbers dn) {
+        configMap.put(DEPNDENCE_NUMBERS, dn);
+    }
+
     public boolean doUseHostSystemClasses() {
         return (boolean) configMap.getOrDefault(USE_HOST_SYSTEM_CLASSES_KEY, true);
     }
 
     public boolean doUseHostJavaLangObject() {
         return (boolean) configMap.getOrDefault(USE_HOST_JAVA_LANG_OBJECT, true);
+    }
+
+    public boolean doOverwriteST() {
+        return (boolean) configMap.getOrDefault(ENFORCE_SOURCE_TARGET, true);
+    }
+
+    public DepndenceNumbers doDepndenceNumbers() {
+        return DepndenceNumbers.fromString((configMap.getOrDefault(DEPNDENCE_NUMBERS, DepndenceNumbers.ALL_INNERS.toString())).toString());
     }
 
     public void setNestedJarExtensions(List<String> extensions) {
