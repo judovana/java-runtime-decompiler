@@ -1,6 +1,5 @@
 package org.jrd.frontend.frame.settings;
 
-import org.jrd.backend.data.Config;
 import org.jrd.frontend.frame.main.decompilerview.BytecodeDecompilerView;
 
 import javax.swing.JCheckBox;

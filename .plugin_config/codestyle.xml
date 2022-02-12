@@ -156,7 +156,8 @@
         </module>
         <module name="InnerAssignment" />
         <module name="MissingSwitchDefault" />
-        <module name="ModifiedControlVariable" />
+        <module name="ModifiedControlVariable">
+        </module>
         <module name="MultipleVariableDeclarations" />
         <module name="NestedForDepth" />
         <module name="NestedIfDepth">

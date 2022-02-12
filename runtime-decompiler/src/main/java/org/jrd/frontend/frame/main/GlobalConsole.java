@@ -98,7 +98,6 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
                         }
                     }
                 });
-                JPanel p = new JPanel(new BorderLayout());
                 JCheckBox verbose = new JCheckBox("Verbose mode", Logger.getLogger().isVerbose());
                 verbose.setSelected(Logger.getLogger().isVerbose());
                 verbose.addActionListener(actionEvent -> Logger.getLogger().setVerbose(verbose.isSelected()));
@@ -112,6 +111,7 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
                         }
                     }
                 });
+                JPanel p = new JPanel(new BorderLayout());
                 p.add(tmpClean, BorderLayout.CENTER);
                 JPanel verbosity = new JPanel(new BorderLayout());
                 verbosity.add(verbose, BorderLayout.NORTH);
