@@ -453,21 +453,8 @@ public class OverwriteClassDialog extends JDialog {
             boolean useHostObject = Config.getConfig().doUseHostJavaLangObject();
             List<String> compilerArgs = new ArrayList<>(Config.getConfig().getCompilerArgs());
             if (Config.getConfig().doOverwriteST() && Config.getConfig().getBestSourceTarget().isPresent()) {
-                for (int i = 0; i < compilerArgs.size(); i++) {
-                    if (compilerArgs.get(i).trim().equals("-source") || compilerArgs.get(i).trim().equals("-target")) {
-                        Logger.getLogger().log(Logger.Level.DEBUG, "removing " + compilerArgs.get(i) + " and " + compilerArgs.get(i + 1));
-                        compilerArgs.remove(i); //source/target
-                        compilerArgs.remove(i); //the number itself
-                        i--;
-
-                    }
-                }
-                compilerArgs.add(0, "-source");
-                compilerArgs.add(1, "" + Config.getConfig().getBestSourceTarget().get());
-                compilerArgs.add(2, "-target");
-                compilerArgs.add(3, "" + Config.getConfig().getBestSourceTarget().get());
+                purgeSourceTarget(compilerArgs);
             }
-
             if (isVerbose) {
                 compilerArgs.add("-verbose");
             }
@@ -478,6 +465,20 @@ public class OverwriteClassDialog extends JDialog {
             rc = new io.github.mkoncek.classpathless.impl.CompilerJavac(arguments);
         }
         return rc;
+    }
+
+    static void purgeSourceTarget(List<String> compilerArgs) {
+        for (int i = compilerArgs.size() - 1; i >= 0; i--) {
+            if (compilerArgs.get(i).trim().equals("-source") || compilerArgs.get(i).trim().equals("-target")) {
+                Logger.getLogger().log(Logger.Level.DEBUG, "removing " + compilerArgs.get(i) + " and " + compilerArgs.get(i + 1));
+                compilerArgs.remove(i); //source/target
+                compilerArgs.remove(i); //the number itself
+            }
+        }
+        compilerArgs.add(0, "-source");
+        compilerArgs.add(1, "" + Config.getConfig().getBestSourceTarget().get());
+        compilerArgs.add(2, "-target");
+        compilerArgs.add(3, "" + Config.getConfig().getBestSourceTarget().get());
     }
 
     private void addComponentsToPanels() {

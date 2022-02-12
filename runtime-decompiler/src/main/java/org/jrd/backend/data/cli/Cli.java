@@ -122,14 +122,16 @@ public class Cli {
             }
         }
         this.saving = new Saving(saveAs, saveLike);
-        AgentLoader.setDefaultConfig(
-                AgentConfig.create(
-                        agentArgs,
-                        args.stream().map(a -> CliUtils.cleanParameter(a)).anyMatch(a -> a.equals(OVERWRITE)) ||
-                                args.stream().map(a -> CliUtils.cleanParameter(a)).anyMatch(a -> a.equals(ATTACH)) ||
-                                (args.stream().map(a -> CliUtils.cleanParameter(a)).anyMatch(a -> a.equals(COMPILE) && shouldUpload()))
-                )
-        );
+        AgentLoader
+                .setDefaultConfig(
+                        AgentConfig.create(
+                                agentArgs,
+                                args.stream().map(a -> CliUtils.cleanParameter(a)).anyMatch(a -> a.equals(OVERWRITE)) ||
+                                        args.stream().map(a -> CliUtils.cleanParameter(a)).anyMatch(a -> a.equals(ATTACH)) ||
+                                        (args.stream().map(a -> CliUtils.cleanParameter(a))
+                                                .anyMatch(a -> a.equals(COMPILE) && shouldUpload()))
+                        )
+                );
         if (!agentArgs.isEmpty() && args.isEmpty()) {
             throw new RuntimeException("It is not allowed to set " + AGENT + " in gui mode");
         }
@@ -387,7 +389,6 @@ public class Cli {
         return vmInfo;
     }
 
-
     private VmInfo attach() throws Exception {
         final int mandatoryParam = 2;
         if (filteredArgs.size() < mandatoryParam) {
@@ -576,7 +577,6 @@ public class Cli {
         return Lib.findDecompiler(decompilerName, pluginManager);
     }
 
-
     private VmInfo printBytes(String operation) throws Exception {
         if (filteredArgs.size() < 3) {
             throw new IllegalArgumentException("Incorrect argument count! Please use '" + (Help.BASE_SHARED_FORMAT) + "'.");
@@ -656,7 +656,6 @@ public class Cli {
         return vmInfo;
     }
 
-
     private void listClassesFromVmInfo(VmInfo vmInfo, List<Pattern> filter, boolean details, boolean bytecodeVersion) throws IOException {
         List<ClassInfo> classes = Lib.obtainFilteredClasses(vmInfo, vmManager, filter, details);
         if (saving.shouldSave()) {
@@ -698,7 +697,6 @@ public class Cli {
         return bytecodes;
     }
 
-
     @SuppressFBWarnings(value = "OS_OPEN_STREAM", justification = "The stream is clsoed as conditionally as is created")
     private void listPlugins() throws IOException {
         if (filteredArgs.size() != 1) {
@@ -712,10 +710,10 @@ public class Cli {
             }
 
             for (DecompilerWrapper dw : pluginManager.getWrappers()) {
-                out.printf("%s %s/%s - %s%n",
-                        dw.getName(),
-                        dw.getScope(),
-                        CliUtils.invalidityToString(dw.isInvalidWrapper()), dw.getFileLocation());
+                out.printf(
+                        "%s %s/%s - %s%n", dw.getName(), dw.getScope(), CliUtils.invalidityToString(dw.isInvalidWrapper()),
+                        dw.getFileLocation()
+                );
             }
 
             out.flush();
@@ -783,7 +781,6 @@ public class Cli {
         System.out.println("Total: " + overrides.length);
         return vmInfo;
     }
-
 
     VmInfo getVmInfo(String param) {
         return CliUtils.getVmInfo(param, vmManager);
