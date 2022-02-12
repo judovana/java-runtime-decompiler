@@ -13,6 +13,8 @@ import org.jrd.backend.core.DecompilerRequestReceiver;
 import org.jrd.backend.core.agentstore.AgentLiveliness;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
+import org.jrd.backend.core.agentstore.KnownAgent;
+import org.jrd.backend.core.agentstore.KnownAgents;
 import org.jrd.backend.data.DependenciesReader;
 import org.jrd.backend.data.MetadataProperties;
 import org.jrd.backend.data.Model;
@@ -52,6 +54,7 @@ public class Cli {
     protected static final String LIST_OVERRIDES = "-listoverrides";
     protected static final String REMOVE_OVERRIDES = "-removeoverrides";
     protected static final String LIST_PLUGINS = "-listplugins";
+    protected static final String LIST_AGENTS = "-listagents";
     protected static final String LIST_CLASSES = "-listclasses";
     protected static final String LIST_CLASSESDETAILS = "-listdetails";
     protected static final String LIST_CLASSESBYTECODEVERSIONS = "-listbytecodeversions";
@@ -189,6 +192,9 @@ public class Cli {
                 case LIST_PLUGINS:
                     listPlugins();
                     break;
+                case LIST_AGENTS:
+                    listAgents();
+                    break;
                 case LIST_OVERRIDES:
                     VmInfo vmInfo0 = listOverrides();
                     operatedOn.add(vmInfo0);
@@ -314,6 +320,12 @@ public class Cli {
                     System.err.println("exiting");
                 }
             }
+        }
+    }
+
+    private void listAgents() {
+        for (KnownAgent agent : KnownAgents.getInstance().getAgents()) {
+            System.out.println(agent.toPrint());
         }
     }
 

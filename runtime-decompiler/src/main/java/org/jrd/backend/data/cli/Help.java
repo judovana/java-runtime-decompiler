@@ -28,6 +28,7 @@ import static org.jrd.backend.data.cli.Cli.DETACH;
 import static org.jrd.backend.data.cli.Cli.H;
 import static org.jrd.backend.data.cli.Cli.HELP;
 import static org.jrd.backend.data.cli.Cli.INIT;
+import static org.jrd.backend.data.cli.Cli.LIST_AGENTS;
 import static org.jrd.backend.data.cli.Cli.LIST_CLASSES;
 import static org.jrd.backend.data.cli.Cli.LIST_CLASSESBYTECODEVERSIONS;
 import static org.jrd.backend.data.cli.Cli.LIST_CLASSESDETAILS;
@@ -59,6 +60,7 @@ public final class Help {
     static final String BYTES_FORMAT = BYTES + BASE_SHARED_FORMAT;
     static final String DEPS_FORMAT = DEPS + BASE_SHARED_FORMAT;
     static final String LIST_JVMS_FORMAT = LIST_JVMS;
+    static final String LIST_AGENTS_FORMAT = LIST_AGENTS;
     static final String LIST_OVERRIDES_FORMAT = LIST_OVERRIDES + " <PUC>";
     static final String REMOVE_OVERRIDES_FORMAT = REMOVE_OVERRIDES + " <PUC> removalRegex";
     static final String LIST_PLUGINS_FORMAT = LIST_PLUGINS;
@@ -85,6 +87,7 @@ public final class Help {
     private static final String BYTES_TEXT = "Print binary form of requested classes of a process";
     private static final String DEPS_TEXT = "Print all deps of the selected class(es).";
     private static final String LIST_JVMS_TEXT = "List all local Java processes and their PIDs.";
+    private static final String LIST_AGENTS_TEXT = "JRD keeps record off all local agents, dropping them once inaccessible.";
     private static final String LIST_PLUGINS_TEXT = "List all currently configured decompiler plugins and their statuses.";
     private static final String LIST_OVERRIDES_TEXT = "List all currently overwritten classes";
     private static final String REMOVE_OVERRIDES_TEXT = "remove all matching overwrittes of classes";
@@ -155,6 +158,7 @@ public final class Help {
         ALL_OPTIONS.put(VERSION_FORMAT, VERSION_TEXT);
         ALL_OPTIONS.put(LIST_JVMS_FORMAT, LIST_JVMS_TEXT);
         ALL_OPTIONS.put(LIST_PLUGINS_FORMAT, LIST_PLUGINS_TEXT);
+        ALL_OPTIONS.put(LIST_AGENTS_FORMAT, LIST_AGENTS_TEXT);
         ALL_OPTIONS.put(LIST_OVERRIDES_FORMAT, LIST_OVERRIDES_TEXT);
         ALL_OPTIONS.put(REMOVE_OVERRIDES_FORMAT, REMOVE_OVERRIDES_TEXT);
         ALL_OPTIONS.put(LIST_CLASSES_FORMAT, LIST_CLASSES_TEXT);

@@ -69,6 +69,11 @@ public class KnownAgent {
         return json;
     }
 
+    public String toPrint() {
+        return "" + "local pid " + pid + " = " + host + ':' + port + " (owner pid=" + owner + ", ttl=" + ttl + ", deadSince=" + deadSince +
+                ')';
+    }
+
     public boolean verify() {
         Socket socket = null;
         try {
