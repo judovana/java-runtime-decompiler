@@ -122,6 +122,15 @@ public class Cli {
             }
         }
         this.saving = new Saving(saveAs, saveLike);
+        setDefaultAgentConfig(args, agentArgs);
+        if (!agentArgs.isEmpty() && args.isEmpty()) {
+            throw new RuntimeException("It is not allowed to set " + AGENT + " in gui mode");
+        }
+        return args;
+    }
+
+    @SuppressWarnings("indentation") //conflict of checkstyle and formatter plugins
+    private void setDefaultAgentConfig(List<String> args, List<String> agentArgs) {
         AgentLoader
                 .setDefaultConfig(
                         AgentConfig.create(
@@ -132,10 +141,6 @@ public class Cli {
                                                 .anyMatch(a -> a.equals(COMPILE) && shouldUpload()))
                         )
                 );
-        if (!agentArgs.isEmpty() && args.isEmpty()) {
-            throw new RuntimeException("It is not allowed to set " + AGENT + " in gui mode");
-        }
-        return args;
     }
 
     private int readAgentParams(String[] originalArgs, List<String> agentArgs, int i) {
