@@ -11,7 +11,7 @@ import org.jrd.backend.data.DependenciesReader;
 import org.jrd.backend.data.Directories;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
-import org.jrd.backend.data.cli.Cli;
+import org.jrd.backend.data.cli.Lib;
 import org.jrd.frontend.frame.main.GlobalConsole;
 import org.jrd.frontend.frame.main.ModelProvider;
 import org.jrd.frontend.utility.TeeOutputStream;
@@ -188,7 +188,7 @@ public class PluginManager {
                             return new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager);
                         }
                     }, null);
-                    VmDecompilerStatus result = Cli.obtainClass(dr.getVmInfo(), name, dr.getVmManager());
+                    VmDecompilerStatus result = Lib.obtainClass(dr.getVmInfo(), name, dr.getVmManager());
                     Collection<String> deps1 = dr.resolve(name, result.getLoadedClassBytes());
                     Set<String> inners = io.github.mkoncek.classpathless.util.BytecodeExtractor
                             .extractNestedClasses(bytecode, new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager));
@@ -203,7 +203,7 @@ public class PluginManager {
                             .extractNestedClasses(bytecode, new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager));
                     for (String clazz : inners) {
                         otherClasses
-                                .put(clazz, Base64.getDecoder().decode(Cli.obtainClass(vmInfo, clazz, vmManager).getLoadedClassBytes()));
+                                .put(clazz, Base64.getDecoder().decode(Lib.obtainClass(vmInfo, clazz, vmManager).getLoadedClassBytes()));
                     }
                 } else {
                     //just the one class, no additon to inners
@@ -228,11 +228,11 @@ public class PluginManager {
             try {
                 try {
                     //some clqsses can not be init, but stil lmay be loaded if already init...
-                    Cli.initClass(vmInfo, vmManager, clazz, System.err);
+                    Lib.initClass(vmInfo, vmManager, clazz, System.err);
                 } catch (Exception eex) {
                     Logger.getLogger().log(eex);
                 }
-                otherClasses.put(clazz, Base64.getDecoder().decode(Cli.obtainClass(vmInfo, clazz, vmManager).getLoadedClassBytes()));
+                otherClasses.put(clazz, Base64.getDecoder().decode(Lib.obtainClass(vmInfo, clazz, vmManager).getLoadedClassBytes()));
             } catch (Exception ex) {
                 Logger.getLogger().log(ex);
             }

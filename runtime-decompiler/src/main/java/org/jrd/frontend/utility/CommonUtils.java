@@ -5,9 +5,9 @@ import io.github.mkoncek.classpathless.api.IdentifiedSource;
 import org.jrd.backend.communication.TopLevelErrorCandidate;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.Logger;
-import org.jrd.backend.data.cli.Cli;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
+import org.jrd.backend.data.cli.Lib;
 import org.jrd.frontend.frame.main.decompilerview.DecompilationController;
 
 import java.io.File;
@@ -98,7 +98,7 @@ public final class CommonUtils {
     }
 
     public static String guessClass(String src) throws IOException {
-        return Cli.guessName(Files.readAllBytes(new File(src).toPath()));
+        return Lib.guessName(Files.readAllBytes(new File(src).toPath()));
     }
 
     public static IdentifiedSource[] toIdentifiedSources(boolean recursive, List<File> sources) throws IOException {

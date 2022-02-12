@@ -55,7 +55,7 @@ final class CompileArguments {
     }
 
     public RuntimeCompilerConnector.JrdClassesProvider getClassesProvider() {
-        return new RuntimeCompilerConnector.JrdClassesProvider(Cli.getVmInfo(puc, vmManager), vmManager);
+        return new RuntimeCompilerConnector.JrdClassesProvider(CliUtils.getVmInfo(puc, vmManager), vmManager);
     }
 
     public ClasspathlessCompiler getCompiler(boolean isVerbose) {
@@ -64,7 +64,7 @@ final class CompileArguments {
         String compilerLogMessage = "Default runtime compiler will be used for overwrite.";
 
         if (wantedCustomCompiler != null) {
-            decompiler = Cli.findDecompiler(wantedCustomCompiler, pluginManager);
+            decompiler = Lib.findDecompiler(wantedCustomCompiler, pluginManager);
 
             if (pluginManager.hasBundledCompiler(decompiler)) {
                 compilerLogMessage = wantedCustomCompiler + "'s bundled compiler will be used for overwrite.";

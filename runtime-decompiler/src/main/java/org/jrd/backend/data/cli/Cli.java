@@ -20,8 +20,6 @@ import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
-import org.jrd.frontend.frame.filesystem.NewFsVmController;
-import org.jrd.frontend.frame.main.decompilerview.BytecodeDecompilerView;
 import org.jrd.frontend.frame.main.decompilerview.DecompilationController;
 import org.jrd.frontend.frame.main.LoadingDialogProvider;
 import org.jrd.frontend.frame.main.ModelProvider;
@@ -29,12 +27,9 @@ import org.jrd.frontend.frame.overwrite.FileToClassValidator;
 import org.jrd.frontend.utility.AgentApiGenerator;
 import org.jrd.frontend.utility.CommonUtils;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -92,14 +87,6 @@ public class Cli {
         this.pluginManager = model.getPluginManager();
     }
 
-    private static String cleanParameter(String param) {
-        if (param.startsWith("-")) {
-            return param.replaceAll("^--*", "-").toLowerCase();
-        }
-
-        return param; // do not make regexes and filenames lowercase
-    }
-
     public boolean shouldBeVerbose() {
         return isVerbose;
     }
@@ -117,7 +104,7 @@ public class Cli {
 
         for (int i = 0; i < originalArgs.length; i++) {
             String arg = originalArgs[i];
-            String cleanedArg = cleanParameter(arg);
+            String cleanedArg = CliUtils.cleanParameter(arg);
 
             if (cleanedArg.equals(VERBOSE)) {
                 isVerbose = true;
@@ -138,9 +125,9 @@ public class Cli {
         AgentLoader.setDefaultConfig(
                 AgentConfig.create(
                         agentArgs,
-                        args.stream().map(a -> cleanParameter(a)).anyMatch(a -> a.equals(OVERWRITE)) ||
-                                args.stream().map(a -> cleanParameter(a)).anyMatch(a -> a.equals(ATTACH)) ||
-                                (args.stream().map(a -> cleanParameter(a)).anyMatch(a -> a.equals(COMPILE) && shouldUpload()))
+                        args.stream().map(a -> CliUtils.cleanParameter(a)).anyMatch(a -> a.equals(OVERWRITE)) ||
+                                args.stream().map(a -> CliUtils.cleanParameter(a)).anyMatch(a -> a.equals(ATTACH)) ||
+                                (args.stream().map(a -> CliUtils.cleanParameter(a)).anyMatch(a -> a.equals(COMPILE) && shouldUpload()))
                 )
         );
         if (!agentArgs.isEmpty() && args.isEmpty()) {
@@ -185,7 +172,7 @@ public class Cli {
         if (filteredArgs.isEmpty()) { // impossible in org.jrd.backend.Main#Main() control flow, but possible in tests
             return;
         }
-        final String operation = cleanParameter(filteredArgs.get(0));
+        final String operation = CliUtils.cleanParameter(filteredArgs.get(0));
         final List<VmInfo> operatedOn = new ArrayList<>(2);
         try {
             switch (operation) {
@@ -396,27 +383,17 @@ public class Cli {
         }
         String fqn = filteredArgs.get(2);
         VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
-        initClass(vmInfo, vmManager, fqn, System.out);
+        Lib.initClass(vmInfo, vmManager, fqn, System.out);
         return vmInfo;
     }
 
-    public static void initClass(VmInfo vmInfo, VmManager vmManager, String fqn, PrintStream outputMessageStream) {
-        AgentRequestAction request = DecompilationController.createRequest(vmInfo, AgentRequestAction.RequestAction.INIT_CLASS, fqn);
-        String response = DecompilationController.submitRequest(vmManager, request);
-
-        if ("ok".equals(response)) {
-            outputMessageStream.println("Initialization of class '" + fqn + "' successful.");
-        } else {
-            throw new RuntimeException(DecompilationController.CLASSES_NOPE);
-        }
-    }
 
     private VmInfo attach() throws Exception {
         final int mandatoryParam = 2;
         if (filteredArgs.size() < mandatoryParam) {
             throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.ATTACH_FORMAT + "'.");
         }
-        if (guessType(filteredArgs.get(1)) != VmInfo.Type.LOCAL) {
+        if (CliUtils.guessType(filteredArgs.get(1)) != VmInfo.Type.LOCAL) {
             throw new IllegalArgumentException("Sorry, first argument must be running jvm PID, nothing else.");
         }
         VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
@@ -509,7 +486,7 @@ public class Cli {
     private boolean shouldUpload() {
         if (saving.shouldSave()) {
             try {
-                VmInfo.Type t = guessType(saving.as);
+                VmInfo.Type t = CliUtils.guessType(saving.as);
                 if (t == VmInfo.Type.LOCAL || t == VmInfo.Type.REMOTE) {
                     return true;
                 }
@@ -518,59 +495,6 @@ public class Cli {
             }
         }
         return false;
-    }
-
-    @SuppressWarnings("CyclomaticComplexity") // un-refactorable
-    public static String guessName(byte[] fileContents) throws IOException {
-        String pkg = null;
-        String clazz = null;
-
-        try (
-                BufferedReader br =
-                        new BufferedReader(new InputStreamReader(new ByteArrayInputStream(fileContents), StandardCharsets.UTF_8))
-        ) {
-            while (true) {
-                if (clazz != null && pkg != null) {
-                    return pkg + "." + clazz; // this return should be most likely everywhere inline
-                }
-
-                String line = br.readLine();
-                if (line == null) { // reached end of reader
-                    if (pkg == null && clazz == null) {
-                        throw new RuntimeException("Neither package nor class was found.");
-                    }
-                    if (pkg == null) {
-                        throw new RuntimeException("Package not found for class '" + clazz + "'.");
-                    }
-                    if (clazz == null) {
-                        throw new RuntimeException("Class not found for package '" + pkg + "'.");
-                    }
-
-                    return pkg + "." + clazz;
-                }
-
-                line = line.trim();
-                String[] commands = line.split(";");
-
-                for (String command : commands) {
-                    String[] words = command.split("\\s+");
-
-                    for (int i = 0; i < words.length; i++) {
-                        String keyWord = words[i];
-
-                        if ("0xCAFEBABE".equals(keyWord)) { // jcoder uses / and fully qualified class name
-                            return clazz.replace("/", ".");
-                        }
-                        if ("package".equals(keyWord)) {
-                            pkg = words[i + 1].replace("/", "."); // jasm uses / instead of .
-                        }
-                        if ("class".equals(keyWord) || "interface".equals(keyWord) || "enum".equals(keyWord)) {
-                            clazz = words[i + 1];
-                        }
-                    }
-                }
-            }
-        }
     }
 
     private VmInfo decompile() throws Exception {
@@ -585,12 +509,12 @@ public class Cli {
 
         for (int i = 3; i < filteredArgs.size(); i++) {
             String clazzRegex = filteredArgs.get(i);
-            List<String> classes = obtainFilteredClasses(vmInfo, vmManager, Arrays.asList(Pattern.compile(clazzRegex)), false).stream()
+            List<String> classes = Lib.obtainFilteredClasses(vmInfo, vmManager, Arrays.asList(Pattern.compile(clazzRegex)), false).stream()
                     .map(a -> a.getName()).collect(Collectors.toList());
 
             for (String clazz : classes) {
                 classCount++;
-                VmDecompilerStatus result = obtainClass(vmInfo, clazz, vmManager);
+                VmDecompilerStatus result = Lib.obtainClass(vmInfo, clazz, vmManager);
                 byte[] bytes = Base64.getDecoder().decode(result.getLoadedClassBytes());
 
                 if (new File(plugin).exists() && plugin.toLowerCase().endsWith(".json")) {
@@ -649,27 +573,9 @@ public class Cli {
     }
 
     private DecompilerWrapper findDecompiler(String decompilerName) {
-        return findDecompiler(decompilerName, pluginManager);
+        return Lib.findDecompiler(decompilerName, pluginManager);
     }
 
-    public static DecompilerWrapper findDecompiler(String decompilerName, PluginManager pluginManager) {
-        List<DecompilerWrapper> wrappers = pluginManager.getWrappers();
-        DecompilerWrapper decompiler = null;
-
-        for (DecompilerWrapper wrapper : wrappers) {
-            if (!wrapper.isLocal() && wrapper.getName().equals(decompilerName)) {
-                decompiler = wrapper;
-            }
-        }
-        // LOCAL is preferred one
-        for (DecompilerWrapper wrapper : wrappers) {
-            if (wrapper.isLocal() && wrapper.getName().equals(decompilerName)) {
-                decompiler = wrapper;
-            }
-        }
-
-        return decompiler;
-    }
 
     private VmInfo printBytes(String operation) throws Exception {
         if (filteredArgs.size() < 3) {
@@ -690,12 +596,12 @@ public class Cli {
 
         for (int i = 2; i < filteredArgs.size(); i++) {
             String clazzRegex = filteredArgs.get(i);
-            List<String> classes = obtainFilteredClasses(vmInfo, vmManager, Arrays.asList(Pattern.compile(clazzRegex)), false).stream()
+            List<String> classes = Lib.obtainFilteredClasses(vmInfo, vmManager, Arrays.asList(Pattern.compile(clazzRegex)), false).stream()
                     .map(a -> a.getName()).collect(Collectors.toList());
 
             for (String clazz : classes) {
                 classCount++;
-                VmDecompilerStatus result = obtainClass(vmInfo, clazz, vmManager);
+                VmDecompilerStatus result = Lib.obtainClass(vmInfo, clazz, vmManager);
                 byte[] bytes;
                 if (operation.equals(BYTES)) {
                     bytes = Base64.getDecoder().decode(result.getLoadedClassBytes());
@@ -750,28 +656,9 @@ public class Cli {
         return vmInfo;
     }
 
-    private static List<ClassInfo> obtainFilteredClasses(VmInfo vmInfo, VmManager vmManager, List<Pattern> filter, boolean details)
-            throws IOException {
-        List<ClassInfo> allClasses;
-        if (details) {
-            allClasses = Arrays.stream(obtainClassesDetails(vmInfo, vmManager)).collect(Collectors.toList());
-        } else {
-            allClasses =
-                    Arrays.stream(obtainClasses(vmInfo, vmManager)).map(a -> new ClassInfo(a, null, null)).collect(Collectors.toList());
-        }
-        List<ClassInfo> filteredClasses = new ArrayList<>(allClasses.size());
-
-        for (ClassInfo clazz : allClasses) {
-            if (matchesAtLeastOne(clazz, filter)) {
-                filteredClasses.add(clazz);
-            }
-        }
-
-        return filteredClasses;
-    }
 
     private void listClassesFromVmInfo(VmInfo vmInfo, List<Pattern> filter, boolean details, boolean bytecodeVersion) throws IOException {
-        List<ClassInfo> classes = obtainFilteredClasses(vmInfo, vmManager, filter, details);
+        List<ClassInfo> classes = Lib.obtainFilteredClasses(vmInfo, vmManager, filter, details);
         if (saving.shouldSave()) {
             if (saving.like.equals(Saving.DEFAULT) || saving.like.equals(Saving.EXACT)) {
                 try (PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(saving.as), StandardCharsets.UTF_8))) {
@@ -797,7 +684,7 @@ public class Cli {
         String bytecodes = "";
         if (bytecodeVersion) {
             try {
-                int[] versions = getByteCodeVersions(clazz, vmInfo, vmManager);
+                int[] versions = Lib.getByteCodeVersions(clazz, vmInfo, vmManager);
                 //double space metters
                 bytecodes = "  JDK " + versions[1] + " (bytecode: " + versions[0] + ")";
             } catch (Exception ex) {
@@ -811,23 +698,6 @@ public class Cli {
         return bytecodes;
     }
 
-    private static int[] getByteCodeVersions(ClassInfo clazz, VmInfo vmInfo, VmManager vmManager) {
-        VmDecompilerStatus result = obtainClass(vmInfo, clazz.getName(), vmManager);
-        byte[] source = Base64.getDecoder().decode(result.getLoadedClassBytes());
-        int bytecodeVersion = BytecodeDecompilerView.getByteCodeVersion(source);
-        int buildJavaPerVersion = BytecodeDecompilerView.getJavaFromBytelevel(bytecodeVersion);
-        return new int[]{bytecodeVersion, buildJavaPerVersion};
-    }
-
-    private static boolean matchesAtLeastOne(ClassInfo clazz, List<Pattern> filter) {
-        for (Pattern p : filter) {
-            if (p.matcher(clazz.getName()).matches()) {
-                return true;
-            }
-        }
-
-        return false;
-    }
 
     @SuppressFBWarnings(value = "OS_OPEN_STREAM", justification = "The stream is clsoed as conditionally as is created")
     private void listPlugins() throws IOException {
@@ -842,7 +712,10 @@ public class Cli {
             }
 
             for (DecompilerWrapper dw : pluginManager.getWrappers()) {
-                out.printf("%s %s/%s - %s%n", dw.getName(), dw.getScope(), invalidityToString(dw.isInvalidWrapper()), dw.getFileLocation());
+                out.printf("%s %s/%s - %s%n",
+                        dw.getName(),
+                        dw.getScope(),
+                        CliUtils.invalidityToString(dw.isInvalidWrapper()), dw.getFileLocation());
             }
 
             out.flush();
@@ -885,34 +758,15 @@ public class Cli {
         Help.printHelpText();
     }
 
-    private static String invalidityToString(boolean invalidWrapper) {
-        if (invalidWrapper) {
-            return "invalid";
-        } else {
-            return "valid";
-        }
-    }
-
-    public static String[] obtainClasses(VmInfo vmInfo, VmManager manager) {
-        AgentRequestAction.RequestAction requestType = AgentRequestAction.RequestAction.CLASSES;
-        AgentRequestAction request = DecompilationController.createRequest(vmInfo, requestType, null);
-        String response = DecompilationController.submitRequest(manager, request);
-        if ("ok".equals(response)) {
-            return vmInfo.getVmDecompilerStatus().getLoadedClassNames();
-        } else {
-            throw new RuntimeException(DecompilationController.CLASSES_NOPE);
-        }
-    }
-
     public VmInfo removeOverrides() {
         if (filteredArgs.size() != 3) {
             throw new RuntimeException("expected two params: " + Help.REMOVE_OVERRIDES_FORMAT);
         }
         VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
         String regex = filteredArgs.get(2);
-        String[] was = obtainOverrides(vmInfo, vmManager);
-        removeOverrides(vmInfo, vmManager, regex);
-        String[] is = obtainOverrides(vmInfo, vmManager);
+        String[] was = Lib.obtainOverrides(vmInfo, vmManager);
+        Lib.removeOverrides(vmInfo, vmManager, regex);
+        String[] is = Lib.obtainOverrides(vmInfo, vmManager);
         System.out.println("Removed: " + (was.length - is.length) + " (was: " + was.length + ", is: " + is.length + ")");
         return vmInfo;
     }
@@ -922,7 +776,7 @@ public class Cli {
             throw new RuntimeException("expected two params: " + Help.LIST_OVERRIDES_FORMAT);
         }
         VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
-        String[] overrides = obtainOverrides(vmInfo, vmManager);
+        String[] overrides = Lib.obtainOverrides(vmInfo, vmManager);
         for (String override : overrides) {
             System.out.println(override);
         }
@@ -930,103 +784,9 @@ public class Cli {
         return vmInfo;
     }
 
-    public static String[] obtainOverrides(VmInfo vmInfo, VmManager manager) {
-        AgentRequestAction.RequestAction requestType = AgentRequestAction.RequestAction.OVERRIDES;
-        AgentRequestAction request = DecompilationController.createRequest(vmInfo, requestType, null);
-        String response = DecompilationController.submitRequest(manager, request);
-        if ("ok".equals(response)) {
-            return vmInfo.getVmDecompilerStatus().getLoadedClassNames();
-        } else {
-            throw new RuntimeException(DecompilationController.CLASSES_NOPE);
-        }
-    }
-
-    public static void removeOverrides(VmInfo vmInfo, VmManager manager, String regex) {
-        AgentRequestAction.RequestAction requestType = AgentRequestAction.RequestAction.REMOVE_OVERRIDES;
-        AgentRequestAction request = DecompilationController.createRequest(vmInfo, requestType, regex);
-        String response = DecompilationController.submitRequest(manager, request);
-        if ("ok".equals(response)) {
-            return;
-        } else {
-            throw new RuntimeException(DecompilationController.CLASSES_NOPE);
-        }
-    }
-
-    public static ClassInfo[] obtainClassesDetails(VmInfo vmInfo, VmManager manager) {
-        AgentRequestAction.RequestAction requestType = AgentRequestAction.RequestAction.CLASSES_WITH_INFO;
-        AgentRequestAction request = DecompilationController.createRequest(vmInfo, requestType, null);
-        String response = DecompilationController.submitRequest(manager, request);
-        if ("ok".equals(response)) {
-            return vmInfo.getVmDecompilerStatus().getLoadedClasses();
-        } else {
-            throw new RuntimeException(DecompilationController.CLASSES_NOPE);
-        }
-    }
-
-    public static VmDecompilerStatus obtainClass(VmInfo vmInfo, String clazz, VmManager manager) {
-        AgentRequestAction request = DecompilationController.createRequest(vmInfo, AgentRequestAction.RequestAction.BYTES, clazz);
-        String response = DecompilationController.submitRequest(manager, request);
-
-        if ("ok".equals(response)) {
-            return vmInfo.getVmDecompilerStatus();
-        } else {
-            throw new RuntimeException(DecompilationController.CLASSES_NOPE);
-        }
-    }
-
-    private static VmInfo.Type guessType(String input) {
-        if (input == null || input.trim().isEmpty()) {
-            throw new RuntimeException("Unable to interpret PUC because it is empty.");
-        }
-
-        try {
-            Integer.valueOf(input);
-            Logger.getLogger().log("Interpreting '" + input + "' as PID. To use numbers as filenames, try './" + input + "'.");
-            return VmInfo.Type.LOCAL;
-        } catch (NumberFormatException e) {
-            Logger.getLogger().log("Interpretation of '" + input + "' as PID failed because it is not a number.");
-        }
-
-        try {
-            if (input.split(":").length == 2) {
-                Integer.valueOf(input.split(":")[1]);
-                Logger.getLogger().log("Interpreting '" + input + "' as hostname:port. To use colons as filenames, try './" + input + "'.");
-                return VmInfo.Type.REMOTE;
-            } else {
-                Logger.getLogger()
-                        .log("Interpretation of '" + input + "' as hostname:port failed because it cannot be correctly split on ':'.");
-            }
-        } catch (NumberFormatException e) {
-            Logger.getLogger().log("Interpretation of '" + input + "' as hostname:port failed because port is not a number.");
-        }
-
-        try {
-            NewFsVmController.cpToFiles(input);
-            Logger.getLogger().log("Interpreting " + input + " as FS VM classpath.");
-            return VmInfo.Type.FS;
-        } catch (NewFsVmController.InvalidClasspathException e) {
-            Logger.getLogger().log("Interpretation of '" + input + "' as FS VM classpath. failed. Cause: " + e.getMessage());
-        }
-
-        throw new RuntimeException("Unable to interpret '" + input + "' as any component of PUC.");
-    }
 
     VmInfo getVmInfo(String param) {
-        return getVmInfo(param, vmManager);
+        return CliUtils.getVmInfo(param, vmManager);
     }
 
-    static VmInfo getVmInfo(String param, VmManager vmManager) {
-        VmInfo.Type puc = guessType(param);
-        switch (puc) {
-            case LOCAL:
-                return vmManager.findVmFromPid(param);
-            case FS:
-                return vmManager.createFsVM(NewFsVmController.cpToFilesCaught(param), null, false);
-            case REMOTE:
-                String[] hostnamePort = param.split(":");
-                return vmManager.createRemoteVM(hostnamePort[0], Integer.parseInt(hostnamePort[1]));
-            default:
-                throw new RuntimeException("Unknown VmInfo.Type.");
-        }
-    }
 }

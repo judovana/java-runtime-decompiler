@@ -642,19 +642,19 @@ public class CliTest extends AbstractAgentNeedingTest {
     @Test
     public void testGuessNameIncorrectNoPkg() {
         byte[] contents = dummy.getDefaultContentWithoutPackage().getBytes(StandardCharsets.UTF_8);
-        assertThrows(RuntimeException.class, () -> Cli.guessName(contents));
+        assertThrows(RuntimeException.class, () -> Lib.guessName(contents));
     }
 
     @Test
     public void testGuessNameIncorrectNoClass() {
         byte[] contents = ("package " + dummy.getPackageName() + ";").getBytes(StandardCharsets.UTF_8);
-        assertThrows(RuntimeException.class, () -> Cli.guessName(contents));
+        assertThrows(RuntimeException.class, () -> Lib.guessName(contents));
     }
 
     @Test
     public void testGuessNameIncorrectNoCompile() {
         byte[] contents = "uncompilable text?".getBytes(StandardCharsets.UTF_8);
-        assertThrows(RuntimeException.class, () -> Cli.guessName(contents));
+        assertThrows(RuntimeException.class, () -> Lib.guessName(contents));
     }
 
     private Stream<byte[]> correctClassContents() {
@@ -666,7 +666,7 @@ public class CliTest extends AbstractAgentNeedingTest {
     @MethodSource("correctClassContents")
     void testGuessNameCorrect(byte[] contents) {
         try {
-            assertEquals(dummy.getPackageName() + "." + dummy.getClassName(), Cli.guessName(contents));
+            assertEquals(dummy.getPackageName() + "." + dummy.getClassName(), Lib.guessName(contents));
         } catch (IOException e) {
             fail(e);
         }

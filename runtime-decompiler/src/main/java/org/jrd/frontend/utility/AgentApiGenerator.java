@@ -7,7 +7,7 @@ import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.data.Config;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
-import org.jrd.backend.data.cli.Cli;
+import org.jrd.backend.data.cli.Lib;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
 
@@ -124,7 +124,7 @@ public final class AgentApiGenerator {
             try {
                 agentApi = new ArrayList<>();
                 for (String clazz : new String[]{"org.jrd.agent.api.Variables", "org.jrd.agent.api.UnsafeVariables"}) {
-                    String mainClazz = Cli.obtainClass(vmInfo, clazz, vmManager).getLoadedClassBytes();
+                    String mainClazz = Lib.obtainClass(vmInfo, clazz, vmManager).getLoadedClassBytes();
                     if (withSignatures) {
                         Collection<ClazzMethod> mainMethods = getClazzMethods(vmInfo, vmManager, pluginManager, clazz, mainClazz);
                         agentApi.add(new ClazzWithMethods(clazz, mainMethods));
@@ -141,7 +141,7 @@ public final class AgentApiGenerator {
                         if (innerClazzName.matches(".*\\$[0-9]+$")) {
                             continue;
                         }
-                        String innerClazz = Cli.obtainClass(vmInfo, innerClazzName, vmManager).getLoadedClassBytes();
+                        String innerClazz = Lib.obtainClass(vmInfo, innerClazzName, vmManager).getLoadedClassBytes();
                         if (withSignatures) {
                             Collection<ClazzMethod> methods = getClazzMethods(vmInfo, vmManager, pluginManager, innerClazzName, innerClazz);
                             agentApi.add(new ClazzWithMethods(innerClazzName, methods));
@@ -171,7 +171,7 @@ public final class AgentApiGenerator {
     private static Collection<ClazzMethod> getClazzMethods(
             VmInfo vmInfo, VmManager vmManager, PluginManager pluginManager, String innerClazzName, String innerClazz
     ) throws Exception {
-        DecompilerWrapper decompiler = Cli.findDecompiler(DecompilerWrapper.JAVAP_NAME, pluginManager);
+        DecompilerWrapper decompiler = Lib.findDecompiler(DecompilerWrapper.JAVAP_NAME, pluginManager);
         String decompilationResult = pluginManager
                 .decompile(decompiler, innerClazzName, Base64.getDecoder().decode(innerClazz), new String[0], vmInfo, vmManager);
         Collection<ClazzMethod> methods = extractMethods(decompilationResult);

@@ -10,10 +10,10 @@ import io.github.mkoncek.classpathless.api.MessagesListener;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
-import org.jrd.backend.data.cli.Cli;
 import org.jrd.backend.data.Config;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
+import org.jrd.backend.data.cli.Lib;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.frontend.frame.main.decompilerview.DecompilationController;
 
@@ -52,12 +52,12 @@ public class RuntimeCompilerConnector {
             for (ClassIdentifier clazz : classIdentifiers) {
                 VmDecompilerStatus result;
                 try {
-                    result = Cli.obtainClass(vmInfo, clazz.getFullName(), vmManager);
+                    result = Lib.obtainClass(vmInfo, clazz.getFullName(), vmManager);
                 } catch (Exception ex) {
                     Logger.getLogger().log(Logger.Level.DEBUG, ex);
                     Logger.getLogger().log(Logger.Level.DEBUG, "Attempting to init the class and load again");
                     try {
-                        Cli.initClass(vmInfo, vmManager, clazz.getFullName(), System.err);
+                        Lib.initClass(vmInfo, vmManager, clazz.getFullName(), System.err);
                     } catch (RuntimeException e) {
                         Logger.getLogger().log(Logger.Level.DEBUG, "Init of class '" + clazz.getFullName() + "' failed, not obtaining.");
                         continue;
@@ -65,13 +65,13 @@ public class RuntimeCompilerConnector {
                     //if we are using host classes, the class may still by on host
                     if (Config.getConfig().doUseHostSystemClasses()) {
                         try {
-                            result = Cli.obtainClass(vmInfo, clazz.getFullName(), vmManager);
+                            result = Lib.obtainClass(vmInfo, clazz.getFullName(), vmManager);
                         } catch (Exception consumedExceptionOnUseHostClasses) {
                             Logger.getLogger().log(consumedExceptionOnUseHostClasses);
                             continue;
                         }
                     } else {
-                        result = Cli.obtainClass(vmInfo, clazz.getFullName(), vmManager);
+                        result = Lib.obtainClass(vmInfo, clazz.getFullName(), vmManager);
                     }
                 }
                 byte[] ba = Base64.getDecoder().decode(result.getLoadedClassBytes());

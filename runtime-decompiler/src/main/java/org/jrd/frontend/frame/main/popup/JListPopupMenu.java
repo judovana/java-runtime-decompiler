@@ -2,7 +2,7 @@ package org.jrd.frontend.frame.main.popup;
 
 import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.data.DependenciesReader;
-import org.jrd.backend.data.cli.Cli;
+import org.jrd.backend.data.cli.Lib;
 import org.jrd.frontend.utility.ScreenFinder;
 
 import javax.swing.JButton;
@@ -146,7 +146,7 @@ public class JListPopupMenu<T> extends JPopupMenu {
                     classes.addAll(mParentJList.stream().map(JListPopupMenu.this::stringsFromValue).collect(Collectors.toList()));
                     for (String clazz : classes) {
                         VmDecompilerStatus result =
-                                Cli.obtainClass(mDependenciesReader.getVmInfo(), clazz, mDependenciesReader.getVmManager());
+                                Lib.obtainClass(mDependenciesReader.getVmInfo(), clazz, mDependenciesReader.getVmManager());
                         Collection<String> deps1 = mDependenciesReader.resolve(clazz, result.getLoadedClassBytes());
                         allDeps.addAll(deps1);
                     }
