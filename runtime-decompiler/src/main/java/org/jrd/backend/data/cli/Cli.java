@@ -21,6 +21,7 @@ import org.jrd.backend.data.VmManager;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.filesystem.NewFsVmController;
+import org.jrd.frontend.frame.main.decompilerview.BytecodeDecompilerView;
 import org.jrd.frontend.frame.main.decompilerview.DecompilationController;
 import org.jrd.frontend.frame.main.LoadingDialogProvider;
 import org.jrd.frontend.frame.main.ModelProvider;
@@ -53,9 +54,13 @@ public class Cli {
     protected static final String SAVE_AS = "-saveas";
     protected static final String SAVE_LIKE = "-savelike";
     protected static final String LIST_JVMS = "-listjvms";
+    protected static final String LIST_OVERRIDES = "-listoverrides";
+    protected static final String REMOVE_OVERRIDES = "-removeoverrides";
     protected static final String LIST_PLUGINS = "-listplugins";
     protected static final String LIST_CLASSES = "-listclasses";
     protected static final String LIST_CLASSESDETAILS = "-listdetails";
+    protected static final String LIST_CLASSESBYTECODEVERSIONS = "-listbytecodeversions";
+    protected static final String LIST_CLASSESDETAILSBYTECODEVERSIONS = "-listdetailsversions";
     protected static final String BASE64 = "-base64bytes";
     protected static final String BYTES = "-bytes";
     protected static final String DEPS = "-deps";
@@ -190,13 +195,29 @@ public class Cli {
                 case LIST_PLUGINS:
                     listPlugins();
                     break;
+                case LIST_OVERRIDES:
+                    VmInfo vmInfo0 = listOverrides();
+                    operatedOn.add(vmInfo0);
+                    break;
+                case REMOVE_OVERRIDES:
+                    VmInfo vmInfo00 = removeOverrides();
+                    operatedOn.add(vmInfo00);
+                    break;
                 case LIST_CLASSES:
-                    VmInfo vmInfo1 = listClasses(false);
+                    VmInfo vmInfo1 = listClasses(false, false);
                     operatedOn.add(vmInfo1);
                     break;
                 case LIST_CLASSESDETAILS:
-                    VmInfo vmInfo2 = listClasses(true);
+                    VmInfo vmInfo2 = listClasses(true, false);
                     operatedOn.add(vmInfo2);
+                    break;
+                case LIST_CLASSESBYTECODEVERSIONS:
+                    VmInfo vmInfo11 = listClasses(false, true);
+                    operatedOn.add(vmInfo11);
+                    break;
+                case LIST_CLASSESDETAILSBYTECODEVERSIONS:
+                    VmInfo vmInfo21 = listClasses(true, true);
+                    operatedOn.add(vmInfo21);
                     break;
                 case BYTES:
                 case BASE64:
@@ -710,7 +731,7 @@ public class Cli {
         return vmInfo;
     }
 
-    private VmInfo listClasses(boolean details) throws IOException {
+    private VmInfo listClasses(boolean details, boolean bytecodeVersion) throws IOException {
         if (filteredArgs.size() < 2) {
             throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.LIST_CLASSES_FORMAT + "'.");
         }
@@ -725,8 +746,7 @@ public class Cli {
                 classRegexes.add(Pattern.compile(filteredArgs.get(i)));
             }
         }
-
-        listClassesFromVmInfo(vmInfo, classRegexes, details);
+        listClassesFromVmInfo(vmInfo, classRegexes, details, bytecodeVersion);
         return vmInfo;
     }
 
@@ -750,13 +770,14 @@ public class Cli {
         return filteredClasses;
     }
 
-    private void listClassesFromVmInfo(VmInfo vmInfo, List<Pattern> filter, boolean details) throws IOException {
+    private void listClassesFromVmInfo(VmInfo vmInfo, List<Pattern> filter, boolean details, boolean bytecodeVersion) throws IOException {
         List<ClassInfo> classes = obtainFilteredClasses(vmInfo, vmManager, filter, details);
         if (saving.shouldSave()) {
             if (saving.like.equals(Saving.DEFAULT) || saving.like.equals(Saving.EXACT)) {
                 try (PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(saving.as), StandardCharsets.UTF_8))) {
                     for (ClassInfo clazz : classes) {
-                        pw.println(clazz.toPrint(details));
+                        String bytecodes = getBytecodesString(vmInfo, details, bytecodeVersion, clazz);
+                        pw.println(clazz.toPrint(details) + bytecodes);
                     }
                 }
             } else {
@@ -766,9 +787,36 @@ public class Cli {
             }
         } else {
             for (ClassInfo clazz : classes) {
-                System.out.println(clazz.toPrint(details));
+                String bytecodes = getBytecodesString(vmInfo, details, bytecodeVersion, clazz);
+                System.out.println(clazz.toPrint(details) + bytecodes);
             }
         }
+    }
+
+    private String getBytecodesString(VmInfo vmInfo, boolean details, boolean bytecodeVersion, ClassInfo clazz) {
+        String bytecodes = "";
+        if (bytecodeVersion) {
+            try {
+                int[] versions = getByteCodeVersions(clazz, vmInfo, vmManager);
+                //double space metters
+                bytecodes = "  JDK " + versions[1] + " (bytecode: " + versions[0] + ")";
+            } catch (Exception ex) {
+                bytecodes = "  bytecode level unknown";
+                //no need to reprint, wa sprinted already
+            }
+            if (details) {
+                bytecodes = "\n" + bytecodes;
+            }
+        }
+        return bytecodes;
+    }
+
+    private static int[] getByteCodeVersions(ClassInfo clazz, VmInfo vmInfo, VmManager vmManager) {
+        VmDecompilerStatus result = obtainClass(vmInfo, clazz.getName(), vmManager);
+        byte[] source = Base64.getDecoder().decode(result.getLoadedClassBytes());
+        int bytecodeVersion = BytecodeDecompilerView.getByteCodeVersion(source);
+        int buildJavaPerVersion = BytecodeDecompilerView.getJavaFromBytelevel(bytecodeVersion);
+        return new int[]{bytecodeVersion, buildJavaPerVersion};
     }
 
     private static boolean matchesAtLeastOne(ClassInfo clazz, List<Pattern> filter) {
@@ -851,6 +899,54 @@ public class Cli {
         String response = DecompilationController.submitRequest(manager, request);
         if ("ok".equals(response)) {
             return vmInfo.getVmDecompilerStatus().getLoadedClassNames();
+        } else {
+            throw new RuntimeException(DecompilationController.CLASSES_NOPE);
+        }
+    }
+
+    public VmInfo removeOverrides() {
+        if (filteredArgs.size() != 3) {
+            throw new RuntimeException("expected two params: " + Help.REMOVE_OVERRIDES_FORMAT);
+        }
+        VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
+        String regex = filteredArgs.get(2);
+        String[] was = obtainOverrides(vmInfo, vmManager);
+        removeOverrides(vmInfo, vmManager, regex);
+        String[] is = obtainOverrides(vmInfo, vmManager);
+        System.out.println("Removed: " + (was.length - is.length) + " (was: " + was.length + ", is: " + is.length + ")");
+        return vmInfo;
+    }
+
+    public VmInfo listOverrides() {
+        if (filteredArgs.size() != 2) {
+            throw new RuntimeException("expected two params: " + Help.LIST_OVERRIDES_FORMAT);
+        }
+        VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
+        String[] overrides = obtainOverrides(vmInfo, vmManager);
+        for (String override : overrides) {
+            System.out.println(override);
+        }
+        System.out.println("Total: " + overrides.length);
+        return vmInfo;
+    }
+
+    public static String[] obtainOverrides(VmInfo vmInfo, VmManager manager) {
+        AgentRequestAction.RequestAction requestType = AgentRequestAction.RequestAction.OVERRIDES;
+        AgentRequestAction request = DecompilationController.createRequest(vmInfo, requestType, null);
+        String response = DecompilationController.submitRequest(manager, request);
+        if ("ok".equals(response)) {
+            return vmInfo.getVmDecompilerStatus().getLoadedClassNames();
+        } else {
+            throw new RuntimeException(DecompilationController.CLASSES_NOPE);
+        }
+    }
+
+    public static void removeOverrides(VmInfo vmInfo, VmManager manager, String regex) {
+        AgentRequestAction.RequestAction requestType = AgentRequestAction.RequestAction.REMOVE_OVERRIDES;
+        AgentRequestAction request = DecompilationController.createRequest(vmInfo, requestType, regex);
+        String response = DecompilationController.submitRequest(manager, request);
+        if ("ok".equals(response)) {
+            return;
         } else {
             throw new RuntimeException(DecompilationController.CLASSES_NOPE);
         }

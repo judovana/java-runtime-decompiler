@@ -38,7 +38,9 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
         gbc.gridy = 2;
         this.add(dependenceNumbers, gbc);
         dependenceNumbers.addActionListener(a -> {
-            dependenceNumbers.setToolTipText(BytecodeDecompilerView.styleTooltip() + ((Config.DepndenceNumbers) (dependenceNumbers.getSelectedItem())).description);
+            dependenceNumbers.setToolTipText(
+                    BytecodeDecompilerView.styleTooltip() + ((Config.DepndenceNumbers) (dependenceNumbers.getSelectedItem())).description
+            );
         });
         dependenceNumbers.setSelectedItem(initialConfigNumbers);
     }

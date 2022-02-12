@@ -302,10 +302,11 @@ public final class Config {
     public Optional<Integer> getBestSourceTarget() {
         return sourceTargetValue;
     }
+
     public void setBestSourceTarget(Optional<Integer> st) {
         //how to fill it from cli?
         //cli api to print bytecode levels?
         //yes, not much more
-        this.sourceTargetValue=st;
+        this.sourceTargetValue = st;
     }
 }

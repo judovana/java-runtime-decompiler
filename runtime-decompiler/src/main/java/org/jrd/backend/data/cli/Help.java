@@ -29,12 +29,16 @@ import static org.jrd.backend.data.cli.Cli.H;
 import static org.jrd.backend.data.cli.Cli.HELP;
 import static org.jrd.backend.data.cli.Cli.INIT;
 import static org.jrd.backend.data.cli.Cli.LIST_CLASSES;
+import static org.jrd.backend.data.cli.Cli.LIST_CLASSESBYTECODEVERSIONS;
 import static org.jrd.backend.data.cli.Cli.LIST_CLASSESDETAILS;
+import static org.jrd.backend.data.cli.Cli.LIST_CLASSESDETAILSBYTECODEVERSIONS;
 import static org.jrd.backend.data.cli.Cli.LIST_JVMS;
+import static org.jrd.backend.data.cli.Cli.LIST_OVERRIDES;
 import static org.jrd.backend.data.cli.Cli.LIST_PLUGINS;
 import static org.jrd.backend.data.cli.Cli.OVERWRITE;
 import static org.jrd.backend.data.cli.Cli.P;
 import static org.jrd.backend.data.cli.Cli.R;
+import static org.jrd.backend.data.cli.Cli.REMOVE_OVERRIDES;
 import static org.jrd.backend.data.cli.Cli.SAVE_AS;
 import static org.jrd.backend.data.cli.Cli.SAVE_LIKE;
 
@@ -50,13 +54,18 @@ public final class Help {
     static final String VERBOSE_FORMAT = VERBOSE;
     static final String VERSION_FORMAT = VERSION;
     static final String BASE_SHARED_FORMAT = " <PUC> <CLASS REGEX>...";
+    static final String BASE_SHARED_OPTIONAL_FORMAT = " <PUC> [<CLASS REGEX>...]";
     static final String BASE64_FORMAT = BASE64 + BASE_SHARED_FORMAT;
     static final String BYTES_FORMAT = BYTES + BASE_SHARED_FORMAT;
     static final String DEPS_FORMAT = DEPS + BASE_SHARED_FORMAT;
     static final String LIST_JVMS_FORMAT = LIST_JVMS;
+    static final String LIST_OVERRIDES_FORMAT = LIST_OVERRIDES + " <PUC>";
+    static final String REMOVE_OVERRIDES_FORMAT = REMOVE_OVERRIDES + " <PUC> removalRegex";
     static final String LIST_PLUGINS_FORMAT = LIST_PLUGINS;
-    static final String LIST_CLASSES_FORMAT = LIST_CLASSES + " <PUC> [<CLASS REGEX>...]";
-    static final String LIST_CLASSESDETAILS_FORMAT = LIST_CLASSESDETAILS + " <PUC> [<CLASS REGEX>...]";
+    static final String LIST_CLASSES_FORMAT = LIST_CLASSES + BASE_SHARED_OPTIONAL_FORMAT;
+    static final String LIST_CLASSESDETAILS_FORMAT = LIST_CLASSESDETAILS + BASE_SHARED_OPTIONAL_FORMAT;
+    static final String LIST_CLASSESBYTECODEVERSIONS_FORMAT = LIST_CLASSESBYTECODEVERSIONS + BASE_SHARED_OPTIONAL_FORMAT;
+    static final String LIST_CLASSESDETAILSVERSIONS_FORMAT = LIST_CLASSESDETAILSBYTECODEVERSIONS + BASE_SHARED_OPTIONAL_FORMAT;
     static final String COMPILE_FORMAT = COMPILE + " [" + P + " <PLUGIN>] [" + CP + " <PUC>] [" + R + "] <PATH>...";
     static final String DECOMPILE_FORMAT = DECOMPILE + " <PUC> <PLUGIN> <CLASS REGEX>...";
     static final String OVERWRITE_FORMAT = OVERWRITE + " <PUC> <FQN> [<CLASS FILE>]";
@@ -77,6 +86,10 @@ public final class Help {
     private static final String DEPS_TEXT = "Print all deps of the selected class(es).";
     private static final String LIST_JVMS_TEXT = "List all local Java processes and their PIDs.";
     private static final String LIST_PLUGINS_TEXT = "List all currently configured decompiler plugins and their statuses.";
+    private static final String LIST_OVERRIDES_TEXT = "List all currently overwritten classes";
+    private static final String REMOVE_OVERRIDES_TEXT = "remove all matching overwrittes of classes";
+    private static final String LIST_CLASSESBYTECODEVERSIONS_TEXT = "list all classes with bytecode version (slow!)";
+    private static final String LIST_CLASSESDETAILSVERSIONS_TEXT = "list all classes with details and bytecode version (slow!)";
     private static final String LIST_CLASSES_TEXT = "List all loaded classes of a process, optionally filtering them.\n" + "Only '" +
             SAVE_LIKE + " " + Saving.EXACT + "' or '" + SAVE_LIKE + " " + Saving.DEFAULT + "' are allowed as saving modifiers.";
     private static final String LIST_CLASSESDETAILS_TEXT = "Similar to " + LIST_CLASSES + ", only more details are printed about classes.";
@@ -142,8 +155,12 @@ public final class Help {
         ALL_OPTIONS.put(VERSION_FORMAT, VERSION_TEXT);
         ALL_OPTIONS.put(LIST_JVMS_FORMAT, LIST_JVMS_TEXT);
         ALL_OPTIONS.put(LIST_PLUGINS_FORMAT, LIST_PLUGINS_TEXT);
+        ALL_OPTIONS.put(LIST_OVERRIDES_FORMAT, LIST_OVERRIDES_TEXT);
+        ALL_OPTIONS.put(REMOVE_OVERRIDES_FORMAT, REMOVE_OVERRIDES_TEXT);
         ALL_OPTIONS.put(LIST_CLASSES_FORMAT, LIST_CLASSES_TEXT);
         ALL_OPTIONS.put(LIST_CLASSESDETAILS_FORMAT, LIST_CLASSESDETAILS_TEXT);
+        ALL_OPTIONS.put(LIST_CLASSESBYTECODEVERSIONS_FORMAT, LIST_CLASSESBYTECODEVERSIONS_TEXT);
+        ALL_OPTIONS.put(LIST_CLASSESDETAILSVERSIONS_FORMAT, LIST_CLASSESDETAILSVERSIONS_TEXT);
         ALL_OPTIONS.put(BASE64_FORMAT, BASE64_TEXT);
         ALL_OPTIONS.put(BYTES_FORMAT, BYTES_TEXT);
         ALL_OPTIONS.put(DEPS_FORMAT, DEPS_TEXT);
@@ -168,9 +185,10 @@ public final class Help {
         NOTES.put(NOTES_SAVE, NOTES_SAVE_ITEMS);
     }
 
-    private static final String[] UNSAVABLE_OPTIONS = new String[]{HELP, H, OVERWRITE, INIT};
-    private static final String[] SAVABLE_OPTIONS =
-            new String[]{LIST_CLASSES, LIST_CLASSESDETAILS, BYTES, BASE64, DEPS, COMPILE, DECOMPILE, API, LIST_JVMS, LIST_PLUGINS};
+    private static final String[] UNSAVABLE_OPTIONS =
+            new String[]{HELP, H, OVERWRITE, INIT, LIST_OVERRIDES_FORMAT, REMOVE_OVERRIDES_FORMAT};
+    private static final String[] SAVABLE_OPTIONS = new String[]{LIST_CLASSES, LIST_CLASSESDETAILS, BYTES, BASE64, DEPS, COMPILE, DECOMPILE,
+            API, LIST_JVMS, LIST_PLUGINS, LIST_CLASSESBYTECODEVERSIONS, LIST_CLASSESDETAILSBYTECODEVERSIONS};
 
     private static final int LONGEST_FORMAT_LENGTH = Stream.of(ALL_OPTIONS.keySet(), SAVING_OPTIONS.keySet()).flatMap(Collection::stream)
             .map(String::length).max(Integer::compare).orElse(30) + 1; // at least one space between format and text

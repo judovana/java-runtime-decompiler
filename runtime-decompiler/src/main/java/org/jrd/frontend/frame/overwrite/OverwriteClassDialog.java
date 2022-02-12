@@ -462,10 +462,10 @@ public class OverwriteClassDialog extends JDialog {
 
                     }
                 }
-                compilerArgs.add(0,"-source");
-                compilerArgs.add(1,"" + Config.getConfig().getBestSourceTarget().get());
-                compilerArgs.add(2,"-target");
-                compilerArgs.add(3,"" + Config.getConfig().getBestSourceTarget().get());
+                compilerArgs.add(0, "-source");
+                compilerArgs.add(1, "" + Config.getConfig().getBestSourceTarget().get());
+                compilerArgs.add(2, "-target");
+                compilerArgs.add(3, "" + Config.getConfig().getBestSourceTarget().get());
             }
 
             if (isVerbose) {

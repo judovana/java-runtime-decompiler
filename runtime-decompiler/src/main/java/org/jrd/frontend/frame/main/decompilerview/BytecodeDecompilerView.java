@@ -688,9 +688,10 @@ public class BytecodeDecompilerView {
         int buildJavaPerVersion = getJavaFromBytelevel(bytecodeVersion);
         Config.getConfig().setBestSourceTarget(Optional.of(buildJavaPerVersion));
         bytecodeButton.setText(buildJavaPerVersion + "");
-        bytecodeButton.setToolTipText(styleTooltip() +
-                "bytecode java version:" + buildJavaPerVersion + ". Click here to  copy it as source/target<br>" +
-                "force it is: " + Config.getConfig().doOverwriteST());
+        bytecodeButton.setToolTipText(
+                styleTooltip() + "bytecode java version:" + buildJavaPerVersion + ". Click here to  copy it as source/target<br>" +
+                        "force it is: " + Config.getConfig().doOverwriteST()
+        );
         ActionListener[] ls = bytecodeButton.getActionListeners();
         for (ActionListener l : ls) {
             bytecodeButton.removeActionListener(l);
@@ -711,7 +712,7 @@ public class BytecodeDecompilerView {
         this.lastDecompiledClass = name;
     }
 
-    private static int getJavaFromBytelevel(int bytecodeVersion) {
+    public static int getJavaFromBytelevel(int bytecodeVersion) {
         // https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.1
         // Oracle's Java Virtual Machine implementation in JDK release 1.0.2 supports class file format
         // versions 45.0 through 45.3 inclusive.
@@ -726,7 +727,7 @@ public class BytecodeDecompilerView {
     }
 
     @SuppressFBWarnings(value = {"DLS_DEAD_LOCAL_STORE"}, justification = "the dead stores are here for clarity and possible future usage")
-    private static int getByteCodeVersion(byte[] source) {
+    public static int getByteCodeVersion(byte[] source) {
         if (source == null || source.length < 8) {
             return 0;
         }
