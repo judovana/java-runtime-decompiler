@@ -1,0 +1,10 @@
+{
+  "Name": "Procyon-Assembler",
+  "WrapperURL": "file://${XDG_CONFIG_HOME}/plugins/ProcyonAssemblerDecompilerWrapper.java",
+  "DependencyURL": [
+    "file://${HOME}/.m2/repository/com/github/mstrobel/procyon-core/1.0-SNAPSHOT/procyon-core-1.0-SNAPSHOT.jar",
+    "file://${HOME}/.m2/repository/com/github/mstrobel/procyon-compilertools/1.0-SNAPSHOT/procyon-compilertools-1.0-SNAPSHOT.jar",
+    "file://${HOME}/.m2/repository/com/github/mstrobel/procyon-decompiler/1.0-SNAPSHOT/procyon-decompiler-1.0-SNAPSHOT.jar"
+  ],
+  "DecompilerDownloadURL": "https://github.com/mstrobel/procyon/git "
+}
