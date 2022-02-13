@@ -133,7 +133,7 @@ set "PROPERTY_PURPOSE=-Djrd.purpose=%PURPOSE%"
 
 rem Concatenate classpath and launch the app
 set CLASSPATH=%TOOLS%;%RSYNTAXTEXTAREA%;%GSON%;%BYTEMAN%;%JRD%;%CPLC%;%CPLC_API%;%CPLC_UTIL%;%ASM_TREE%;%ASM_JAR%
-"%JDK_LOCATION%\bin\java.exe" --add-exports jdk.jdeps/com.sun.tools.javap=ALL-UNNAMED -Djdk.attach.allowAttachSelf=true %PROPERTY_LOCATION% %PROPERTY_PURPOSE% -cp %CLASSPATH% org.jrd.backend.data.Main %*
+"%JDK_LOCATION%\bin\java.exe" --add-exports jdk.jdeps/com.sun.tools.javap=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED -Djdk.attach.allowAttachSelf=true %PROPERTY_LOCATION% %PROPERTY_PURPOSE% -cp %CLASSPATH% org.jrd.backend.data.Main %*
 
 rem popd from network drive related pushd
 if "%PORTABLE_JRD_HOME:~0,2%"=="//" (
