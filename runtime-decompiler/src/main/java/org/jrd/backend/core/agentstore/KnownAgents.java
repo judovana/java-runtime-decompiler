@@ -177,6 +177,7 @@ public final class KnownAgents {
     }
 
     public List<KnownAgent> getAgents() {
+        //TODO load, merge..lock.. save?
         verifyAgents();
         return Collections.unmodifiableList(agents);
     }
