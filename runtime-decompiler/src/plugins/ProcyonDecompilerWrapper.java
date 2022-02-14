@@ -42,7 +42,7 @@ public class ProcyonDecompilerWrapper {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         PrintStream so = System.out;
         System.setOut(System.err);
-        File f = File.createTempFile("procyon","jrd.out");
+        File f = File.createTempFile("procyon", "jrd.out");
         f.delete();
         f.mkdir();
         try {
@@ -56,7 +56,7 @@ public class ProcyonDecompilerWrapper {
                 i++;
             }
             DecompilerDriver.main(files);
-            return readStringFromFile(getFileFrom(f,name));
+            return readStringFromFile(getFileFrom(f, name));
         } catch (IOException e) {
             e.printStackTrace();
             return e.toString();
@@ -66,7 +66,7 @@ public class ProcyonDecompilerWrapper {
     }
 
     private File getFileFrom(File dir, String fqn) {
-        return new File(dir.getAbsolutePath() + File.separator + fqn.replace('.', File.separatorChar)+".java");
+        return new File(dir.getAbsolutePath() + File.separator + fqn.replace('.', File.separatorChar) + ".java");
     }
 
     private String readStringFromFile(File filePath) throws IOException {

@@ -42,7 +42,7 @@ public class ProcyonAssemblerDecompilerWrapper {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         PrintStream so = System.out;
         System.setOut(System.err);
-        File f = File.createTempFile("procyon","jrd.out");
+        File f = File.createTempFile("procyon", "jrd.out");
         f.delete();
         f.mkdir();
         try {
@@ -57,7 +57,7 @@ public class ProcyonAssemblerDecompilerWrapper {
                 i++;
             }
             DecompilerDriver.main(files);
-            return readStringFromFile(getFileFrom(f,name));
+            return readStringFromFile(getFileFrom(f, name));
         } catch (IOException e) {
             e.printStackTrace();
             return e.toString();
@@ -67,7 +67,7 @@ public class ProcyonAssemblerDecompilerWrapper {
     }
 
     private File getFileFrom(File dir, String fqn) {
-        return new File(dir.getAbsolutePath() + File.separator + fqn.replace('.', File.separatorChar)+".jvm");
+        return new File(dir.getAbsolutePath() + File.separator + fqn.replace('.', File.separatorChar) + ".jvm");
     }
 
     private String readStringFromFile(File filePath) throws IOException {
@@ -118,5 +118,9 @@ public class ProcyonAssemblerDecompilerWrapper {
                 consoleWriter.set(System.console(), consoleWriterBackup);
             }
         }
+    }
+
+    public Map<String, byte[]> compile(Map<String, String> src, String[] options, Object maybeLogger) throws Exception {
+        throw new RuntimeException("Procyon assembler can not be assembled back");
     }
 }
