@@ -31,6 +31,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
@@ -255,7 +256,9 @@ public class MainFrameView {
                 t.setSelected(true);
             }
         }
-        newAgentPanel.add(new JPanel()); //there are just three livelines;
+        JTextField portField = new JTextField();
+        portField.setToolTipText(BytecodeDecompilerView.styleTooltip()+"Type number to enforce agent port<br>leave empty for default guessing");
+        newAgentPanel.add(portField);
         ButtonGroup loneliness = new ButtonGroup();
         for (AgentLoneliness al : AgentLoneliness.values()) {
             JToggleButton t = new JToggleButton(al.toButton());
