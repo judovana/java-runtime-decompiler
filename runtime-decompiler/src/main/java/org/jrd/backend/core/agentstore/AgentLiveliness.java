@@ -25,6 +25,19 @@ public enum AgentLiveliness {
         }
     }
 
+    public String toButton() {
+        switch (this) {
+            case ONE_SHOT:
+                return "1";
+            case SESSION:
+                return "S";
+            case PERMANENT:
+                return "P";
+            default:
+                throw new RuntimeException("Unknown " + AgentLiveliness.class.getSimpleName() + " value " + this);
+        }
+    }
+
     public static AgentLiveliness fromString(String s) throws IllegalArgumentException {
         return Arrays.stream(AgentLiveliness.values()).filter(v -> v.toString().equals(s)).findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("unknown value: " + s));

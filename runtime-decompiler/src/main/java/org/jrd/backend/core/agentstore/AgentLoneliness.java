@@ -29,6 +29,21 @@ public enum AgentLoneliness {
         }
     }
 
+    public String toButton() {
+        switch (this) {
+            case SINGLE_INSTANCE:
+                return "SI";
+            case ANONYMOUS:
+                return "A";
+            case FORCING:
+                return "F";
+            case AF:
+                return "AF";
+            default:
+                throw new RuntimeException("Unknown " + AgentLoneliness.class.getSimpleName() + " value " + this);
+        }
+    }
+
     public static AgentLoneliness fromString(String s) throws IllegalArgumentException {
         return Arrays.stream(AgentLoneliness.values()).filter(v -> v.toString().equals(s)).findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("unknown value: " + s));
