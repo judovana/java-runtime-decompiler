@@ -63,6 +63,15 @@ public class VmInfo implements Serializable {
     }
 
     public VmDecompilerStatus getVmDecompilerStatus() {
+        if (vmDecompilerStatus != null) {
+            KnownAgents.getInstance().verifyAgents();
+            List<KnownAgent> found = KnownAgents.getInstance().findAgents(
+                    vmDecompilerStatus.getHostname(), vmDecompilerStatus.getListenPort(), Integer.parseInt(vmDecompilerStatus.getVmId())
+            );
+            if (found.isEmpty()) {
+                vmDecompilerStatus = null;
+            }
+        }
         return vmDecompilerStatus;
     }
 
