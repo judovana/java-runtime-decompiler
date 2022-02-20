@@ -24,6 +24,7 @@ import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.filesystem.NewFsVmController;
 import org.jrd.frontend.frame.filesystem.NewFsVmView;
+import org.jrd.frontend.frame.main.AgentsManager;
 import org.jrd.frontend.frame.main.GlobalConsole;
 import org.jrd.frontend.frame.main.LoadingDialog;
 import org.jrd.frontend.frame.main.LoadingDialogProvider;
@@ -111,6 +112,12 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
             @Override
             public void run() {
                 OverridesManager.showFor(mainFrameView.getMainFrame(), DecompilationController.this);
+            }
+        });
+        mainFrameView.setManageAgents(new Runnable() {
+            @Override
+            public void run() {
+                AgentsManager.showFor(mainFrameView.getMainFrame(), vmManager);
             }
         });
         bytecodeDecompilerView.refreshComboBox(pluginManager.getWrappers());

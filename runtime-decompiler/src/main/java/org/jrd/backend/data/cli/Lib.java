@@ -1,7 +1,10 @@
 package org.jrd.backend.data.cli;
 
+import org.jrd.backend.core.AgentAttachManager;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.ClassInfo;
+import org.jrd.backend.core.DecompilerRequestReceiver;
+import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
@@ -201,4 +204,10 @@ public final class Lib {
             throw new RuntimeException(DecompilationController.CLASSES_NOPE);
         }
     }
+
+    public static void detach(String host, int port, VmManager vmManager) {
+        DecompilerRequestReceiver.getHaltAction(host, port, "none", 0, new AgentAttachManager(vmManager), vmManager, false);
+        Logger.getLogger().log(host + ":" + port + " should be detached successfully");
+    }
+
 }

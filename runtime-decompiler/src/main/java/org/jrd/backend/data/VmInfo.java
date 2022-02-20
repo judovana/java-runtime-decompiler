@@ -3,6 +3,8 @@ package org.jrd.backend.data;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
+import org.jrd.backend.core.agentstore.KnownAgent;
+import org.jrd.backend.core.agentstore.KnownAgents;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

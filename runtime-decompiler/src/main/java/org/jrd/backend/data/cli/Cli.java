@@ -9,7 +9,6 @@ import org.jrd.backend.core.AgentAttachManager;
 import org.jrd.backend.core.AgentLoader;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.ClassInfo;
-import org.jrd.backend.core.DecompilerRequestReceiver;
 import org.jrd.backend.core.agentstore.AgentLiveliness;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
@@ -426,20 +425,15 @@ public class Cli {
         }
         if (filteredArgs.get(1).contains(":")) {
             String[] hostPort = filteredArgs.get(1).split(":");
-            detach(hostPort[0], Integer.parseInt(hostPort[1]));
+            Lib.detach(hostPort[0], Integer.parseInt(hostPort[1]), vmManager);
         } else {
-            //is pid?
+            //TODO is pid? If so, detach its port, else localhost
             detach(Integer.parseInt(filteredArgs.get(1)));
         }
     }
 
     private void detach(int port) {
-        detach("localhost", port);
-    }
-
-    private void detach(String host, int port) {
-        DecompilerRequestReceiver.getHaltAction(host, port, "none", 0, new AgentAttachManager(vmManager), vmManager, false);
-        Logger.getLogger().log(host + ":" + port + " should be detached successfully");
+        Lib.detach("localhost", port, vmManager);
     }
 
     private VmInfo[] compile(CompileArguments args) throws Exception {

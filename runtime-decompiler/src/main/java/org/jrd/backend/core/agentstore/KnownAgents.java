@@ -163,7 +163,7 @@ public final class KnownAgents {
     }
 
     @SuppressWarnings("ModifiedControlVariable")
-    private void verifyAgents() {
+    public void verifyAgents() {
         for (int i = 0; i < agents.size(); i++) {
             KnownAgent agent = agents.get(i);
             boolean isVerified = agent.verify();
