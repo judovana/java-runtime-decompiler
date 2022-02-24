@@ -1,8 +1,6 @@
 package org.jrd.frontend.frame.main;
 
 import org.jrd.backend.core.Logger;
-import org.jrd.backend.core.agentstore.AgentLiveliness;
-import org.jrd.backend.core.agentstore.AgentLoneliness;
 import org.jrd.backend.data.Directories;
 import org.jrd.backend.data.MetadataProperties;
 import org.jrd.backend.data.VmInfo;
@@ -17,7 +15,6 @@ import org.jrd.frontend.utility.ImageButtonFactory;
 import org.jrd.frontend.utility.ScreenFinder;
 
 import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -31,8 +28,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.JToggleButton;
 import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
@@ -45,7 +40,6 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -70,7 +64,7 @@ public class MainFrameView {
     private JTabbedPane tabbedPane;
     private JPanel localVmPanel;
     private JPanel localVmLabelPanel;
-    private JPanel newAgentPanel;
+    private JButton forceNewAttach;
     private JPanel localVmButtonPanel;
     private JButton localVmRefreshButton;
     private JScrollPane localVmScrollPane;
@@ -245,38 +239,21 @@ public class MainFrameView {
         localVmLabelPanel.add(new JLabel("Local Processes", SwingConstants.CENTER), BorderLayout.CENTER);
         localVmLabelPanel.add(localVmButtonPanel, BorderLayout.EAST);
         // localVmLabelPanel End
-        newAgentPanel = new JPanel(new GridLayout(2, 4));
-        ButtonGroup liveliness = new ButtonGroup();
-        for (AgentLiveliness al : AgentLiveliness.values()) {
-            JToggleButton t = new JToggleButton(al.toButton());
-            liveliness.add(t);
-            newAgentPanel.add(t);
-            t.setToolTipText(BytecodeDecompilerView.styleTooltip() + al.toHelp());
-            if (al.equals(AgentLiveliness.PERMANENT)) {
-                t.setSelected(true);
-            }
-        }
-        JTextField portField = new JTextField();
-        portField.setToolTipText(BytecodeDecompilerView.styleTooltip()+"Type number to enforce agent port<br>leave empty for default guessing");
-        newAgentPanel.add(portField);
-        ButtonGroup loneliness = new ButtonGroup();
-        for (AgentLoneliness al : AgentLoneliness.values()) {
-            JToggleButton t = new JToggleButton(al.toButton());
-            loneliness.add(t);
-            newAgentPanel.add(t);
-            t.setToolTipText(BytecodeDecompilerView.styleTooltip() + al.toHelp());
-            if (al.equals(AgentLoneliness.SINGLE_INSTANCE)) {
-                t.setSelected(true);
-            }
-        }
-        //todo heavy warn about change here. Unlock in config?
 
+        forceNewAttach = new JButton("Force new manual attach");
+        forceNewAttach.setToolTipText(
+                BytecodeDecompilerView.styleTooltip() + "By default, each agent is attached as" +
+                        " permanent, single instance for safety and performance reasons.<br>" +
+                        "If you need different PID connection you are on yor own." +
+                        " You can later connect to such agent through remote vm, by its port"
+        );
+        forceNewAttach.addActionListener(a -> NewAgentDialog.show());
         // newAgentPanel End
         localVmPanel = new JPanel(new BorderLayout());
         localVmPanel.setName("Local VMs");
         localVmPanel.add(localVmLabelPanel, BorderLayout.NORTH);
         localVmPanel.add(localVmScrollPane, BorderLayout.CENTER);
-        localVmPanel.add(newAgentPanel, BorderLayout.SOUTH);
+        localVmPanel.add(forceNewAttach, BorderLayout.SOUTH);
         // localVmPanel End
 
         // remoteVmPanel, remoteVmScrollPane, remoteVmLabelPanel, remoteConnectionButton
