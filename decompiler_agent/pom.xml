@@ -20,6 +20,8 @@
         <jrd.jdk.arg2>jdk.jdeps,jdk.attach,jdk.hotspot.agent</jrd.jdk.arg2>
         <jrd.jdk.arg3>--add-exports</jrd.jdk.arg3>
         <jrd.jdk.arg4>jdk.jdeps/com.sun.tools.javap=ALL-UNNAMED</jrd.jdk.arg4>
+        <timestamp>${maven.build.timestamp}</timestamp>
+        <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
     </properties>
 
     <build>
@@ -56,12 +58,26 @@
             </plugin>
         </plugins>
         <resources>
-        <resource>
-            <directory>${jrd.root.directory}</directory>
-            <includes>
-                <include>LICENSE</include>
-            </includes>
-        </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>**/*.prop</exclude>
+                </excludes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.prop</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${jrd.root.directory}</directory>
+                <includes>
+                    <include>LICENSE</include>
+                </includes>
+            </resource>
         </resources>
     </build>
     <dependencies>
