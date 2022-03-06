@@ -343,7 +343,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         AgentRequestAction request = createRequest(RequestAction.INIT_CLASS, fqn);
         String response = submitRequest(request);
         hideLoadingDialog();
-        if ("ok".equals(response)) {
+        if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
             loadClassNames();
         }
         if (new TopLevelErrorCandidate(response).isError()) {
@@ -360,7 +360,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         AgentRequestAction request =
                 createRequest(bytecodeDecompilerView.doShowClassInfo() ? RequestAction.CLASSES_WITH_INFO : RequestAction.CLASSES, "");
         String response = submitRequest(request);
-        if ("ok".equals(response)) {
+        if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
             bytecodeDecompilerView.reloadClassList(vmInfo.getVmDecompilerStatus().getLoadedClasses());
         }
         hideLoadingDialog();
@@ -400,7 +400,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
     public String[] getOverrides() {
         AgentRequestAction request = createRequest(AgentRequestAction.RequestAction.OVERRIDES);
         String response = submitRequest(request);
-        if ("ok".equals(response)) {
+        if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
             VmDecompilerStatus vmStatus = vmInfo.getVmDecompilerStatus();
             String[] classes = vmStatus.getLoadedClassNames();
             return classes;
@@ -412,7 +412,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
     public void removeOverrides(String pattern) {
         AgentRequestAction request = createRequest(vmInfo, RequestAction.REMOVE_OVERRIDES, pattern);
         String response = submitRequest(request);
-        if (!"ok".equals(response)) {
+        if (!DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
             throw new RuntimeException(response);
         }
     }
@@ -544,7 +544,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         try {
             AgentRequestAction request = createRequest(RequestAction.HALT, "");
             String response = submitRequest(request);
-            if ("ok".equals(response)) {
+            if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
                 Logger.getLogger().log(Logger.Level.DEBUG, "Agent closing socket and exiting");
             }
         } catch (Exception e) {

@@ -100,7 +100,7 @@ public final class FsAgent implements JrdAgent {
                     if (removed == 0) {
                         throw new RuntimeException("Nothing removed by " + q[1] + " in " + originals.size() + " items");
                     }
-                    return "DONE";
+                    return Communicate.NO_VALLUE_DONE_RESULT;
                 case CLASSES:
                     return readClasses(false);
                 case CLASSES_WITH_INFO:
@@ -116,12 +116,12 @@ public final class FsAgent implements JrdAgent {
                     }
                     String futureBody = q[2];
                     uploadByteCode(classNameForOverwrite, futureBody);
-                    return "OK";
+                    return Communicate.NO_VALUE_OK_RESULT;
                 case INIT_CLASS:
                     Logger.getLogger().log(Logger.Level.DEBUG, "Init class have no meaning in FS 'vm'");
-                    return "DONE";
+                    return Communicate.NO_VALLUE_DONE_RESULT;
                 case HALT:
-                    return "OK";
+                    return Communicate.NO_VALUE_OK_RESULT;
                 default:
                     throw new RuntimeException("Unknown command: " + q[0]);
             }

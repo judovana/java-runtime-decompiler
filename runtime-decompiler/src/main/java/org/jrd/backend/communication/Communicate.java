@@ -19,6 +19,9 @@ import java.nio.charset.StandardCharsets;
  */
 public class Communicate {
 
+    public static final String NO_VALUE_OK_RESULT = "OK";
+    public static final String NO_VALLUE_DONE_RESULT = "DONE";
+
     private Socket commSocket;
     private BufferedReader commInput;
     private BufferedWriter commOutput;
@@ -122,10 +125,10 @@ public class Communicate {
         switch (initLine) {
             case "GOODBYE":
                 Logger.getLogger().log(Logger.Level.DEBUG, "Agent closed socket when halting.");
-                return "OK";
-            case "DONE":
+                return NO_VALUE_OK_RESULT;
+            case NO_VALLUE_DONE_RESULT:
                 Logger.getLogger().log(Logger.Level.DEBUG, "Agent successfully overwrote class.");
-                return "OK";
+                return NO_VALUE_OK_RESULT;
             default: //this is ok, it jsut feeding of idiotic codestyle
         }
         switch (AgentRequestAction.RequestAction.fromString(initLine)) {

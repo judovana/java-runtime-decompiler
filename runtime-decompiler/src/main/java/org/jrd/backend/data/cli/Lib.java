@@ -35,7 +35,7 @@ public final class Lib {
         AgentRequestAction request = DecompilationController.createRequest(vmInfo, AgentRequestAction.RequestAction.INIT_CLASS, fqn);
         String response = DecompilationController.submitRequest(vmManager, request);
 
-        if ("ok".equals(response)) {
+        if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
             outputMessageStream.println("Initialization of class '" + fqn + "' successful.");
         } else {
             throw new RuntimeException(DecompilationController.CLASSES_NOPE);
@@ -154,7 +154,7 @@ public final class Lib {
         AgentRequestAction.RequestAction requestType = AgentRequestAction.RequestAction.CLASSES;
         AgentRequestAction request = DecompilationController.createRequest(vmInfo, requestType, (String) null);
         String response = DecompilationController.submitRequest(manager, request);
-        if ("ok".equals(response)) {
+        if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
             return vmInfo.getVmDecompilerStatus().getLoadedClassNames();
         } else {
             throw new RuntimeException(DecompilationController.CLASSES_NOPE);
@@ -165,7 +165,7 @@ public final class Lib {
         AgentRequestAction.RequestAction requestType = AgentRequestAction.RequestAction.OVERRIDES;
         AgentRequestAction request = DecompilationController.createRequest(vmInfo, requestType, (String) null);
         String response = DecompilationController.submitRequest(manager, request);
-        if ("ok".equals(response)) {
+        if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
             return vmInfo.getVmDecompilerStatus().getLoadedClassNames();
         } else {
             throw new RuntimeException(DecompilationController.CLASSES_NOPE);
@@ -176,7 +176,7 @@ public final class Lib {
         AgentRequestAction.RequestAction requestType = AgentRequestAction.RequestAction.REMOVE_OVERRIDES;
         AgentRequestAction request = DecompilationController.createRequest(vmInfo, requestType, regex);
         String response = DecompilationController.submitRequest(manager, request);
-        if ("ok".equals(response)) {
+        if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
             return;
         } else {
             throw new RuntimeException(DecompilationController.CLASSES_NOPE);
@@ -187,7 +187,7 @@ public final class Lib {
         AgentRequestAction.RequestAction requestType = AgentRequestAction.RequestAction.CLASSES_WITH_INFO;
         AgentRequestAction request = DecompilationController.createRequest(vmInfo, requestType, (String) null);
         String response = DecompilationController.submitRequest(manager, request);
-        if ("ok".equals(response)) {
+        if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
             return vmInfo.getVmDecompilerStatus().getLoadedClasses();
         } else {
             throw new RuntimeException(DecompilationController.CLASSES_NOPE);
@@ -198,7 +198,7 @@ public final class Lib {
         AgentRequestAction request = DecompilationController.createRequest(vmInfo, AgentRequestAction.RequestAction.BYTES, clazz);
         String response = DecompilationController.submitRequest(manager, request);
 
-        if ("ok".equals(response)) {
+        if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
             return vmInfo.getVmDecompilerStatus();
         } else {
             throw new RuntimeException(DecompilationController.CLASSES_NOPE);

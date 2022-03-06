@@ -8,6 +8,7 @@ import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
 import io.github.mkoncek.classpathless.api.MessagesListener;
 import org.jrd.backend.core.AgentRequestAction;
+import org.jrd.backend.core.DecompilerRequestReceiver;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.data.Config;
@@ -84,7 +85,7 @@ public class RuntimeCompilerConnector {
         public List<String> getClassPathListing() {
             AgentRequestAction request = DecompilationController.createRequest(vmInfo, AgentRequestAction.RequestAction.CLASSES);
             String response = DecompilationController.submitRequest(vmManager, request);
-            if ("ok".equals(response)) {
+            if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
                 String[] classes = vmInfo.getVmDecompilerStatus().getLoadedClassNames();
                 return Arrays.asList(classes);
             } else {

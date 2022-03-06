@@ -24,7 +24,7 @@ public class DecompilerRequestReceiver {
     private final AgentAttachManager attachManager;
     private VmManager vmManager;
 
-    private static final String OK_RESPONSE = "ok";
+    public static final String OK_RESPONSE = "ok";
 
     public DecompilerRequestReceiver(VmManager vmManager) {
         this.attachManager = new AgentAttachManager(vmManager);
