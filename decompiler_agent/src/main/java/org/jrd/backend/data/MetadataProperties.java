@@ -1,12 +1,22 @@
-package org.jrd.backend.data;
+/**
+ * THIS IS COPYPASTED FROM runtime-decompiler
+ * There have to never be any differences!!
+ * Thisfiel msut be identical as the one from  runtime-decompiler except:
+ *  - this headr
+ *  - logger replaced by printStackTrace
+ *
+ *  Any development shoudl happen in runtime-decompiler and then copy here.
+ *  This serves ony one purpose - this returns toString to runtime-decompiler, and is comapred with its toString. They should match
+ */
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.jrd.backend.core.Logger;
+package org.jrd.backend.data;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.regex.Pattern;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 public final class MetadataProperties {
     private final Properties properties;
@@ -28,7 +38,7 @@ public final class MetadataProperties {
         try (InputStream stream = getClass().getResourceAsStream(PROPERTY_FILE_RESOURCE)) {
             properties.load(stream);
         } catch (IOException e) {
-            Logger.getLogger().log(Logger.Level.ALL, "Unable to read property file '" + PROPERTY_FILE_RESOURCE + "'.");
+            e.printStackTrace();
         }
     }
 
