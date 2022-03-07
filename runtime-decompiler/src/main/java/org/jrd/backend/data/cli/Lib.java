@@ -197,7 +197,16 @@ public final class Lib {
     public static VmDecompilerStatus obtainClass(VmInfo vmInfo, String clazz, VmManager manager) {
         AgentRequestAction request = DecompilationController.createRequest(vmInfo, AgentRequestAction.RequestAction.BYTES, clazz);
         String response = DecompilationController.submitRequest(manager, request);
+        if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
+            return vmInfo.getVmDecompilerStatus();
+        } else {
+            throw new RuntimeException(DecompilationController.CLASSES_NOPE);
+        }
+    }
 
+    public static VmDecompilerStatus obtainVersion(VmInfo vmInfo, VmManager manager) {
+        AgentRequestAction request = DecompilationController.createRequest(vmInfo, AgentRequestAction.RequestAction.VERSION);
+        String response = DecompilationController.submitRequest(manager, request);
         if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
             return vmInfo.getVmDecompilerStatus();
         } else {

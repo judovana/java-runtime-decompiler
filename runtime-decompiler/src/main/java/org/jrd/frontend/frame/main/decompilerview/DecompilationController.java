@@ -575,6 +575,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         }
 
         switch (action) {
+            case VERSION:
             case CLASSES:
             case OVERRIDES:
             case CLASSES_WITH_INFO:

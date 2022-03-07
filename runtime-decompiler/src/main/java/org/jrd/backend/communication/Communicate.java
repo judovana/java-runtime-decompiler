@@ -132,6 +132,7 @@ public class Communicate {
             default: //this is ok, it jsut feeding of idiotic codestyle
         }
         switch (AgentRequestAction.RequestAction.fromString(initLine)) {
+            case VERSION:
             case BYTES:
                 try {
                     String bytes = trimReadLine();

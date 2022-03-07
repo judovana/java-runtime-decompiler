@@ -51,6 +51,7 @@ public class AgentRequestAction {
     private final Map<String, String> parameters;
 
     public enum RequestAction {
+        VERSION,
         CLASSES,
         BYTES,
         HALT,

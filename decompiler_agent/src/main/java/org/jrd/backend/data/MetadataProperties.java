@@ -11,17 +11,18 @@
 
 package org.jrd.backend.data;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 public final class MetadataProperties {
     private final Properties properties;
 
     private static final Pattern UNPROPAGATED_VALUE = Pattern.compile("\\$\\{.*}");
+    private static final String DELIMITER = " - ";
     private static final String PROPERTY_FILE_RESOURCE = "/org/jrd/backend/data/metadata.prop";
     private static final String GROUP_ID_KEY = "groupId";
     private static final String VERSION_KEY = "version";
@@ -64,7 +65,36 @@ public final class MetadataProperties {
 
     @Override
     public String toString() {
-        return String.join(" - ", getGroup(), "JRD", getVersion(), getTimestamp());
+        return String.join(DELIMITER, getGroup(), "JRD", getVersion(), getTimestamp());
+    }
+
+    public static String[] unsplit(String s) {
+        return s.split(DELIMITER);
+    }
+
+    public String compare(String agaisnt) {
+        return compare(agaisnt, toString());
+    }
+
+    public static String compare(String is, String shouldBe) {
+        String[] ss1 = unsplit(is);
+        String[] ss2 = unsplit(shouldBe);
+        if (ss1.length != ss2.length) {
+            return "Invalid agent? different size of record. Expected " + ss2.length + ". Got " + ss1.length;
+        }
+        if (!ss2[0].equals(ss1[0])) {
+            return "Invalid agent? Different header. Expected: " + ss2[0] + ". Got " + ss1[0];
+        }
+        if (!ss2[1].equals(ss1[1])) {
+            return "Invalid agent? Different header. Expected: " + ss2[1] + ". Got " + ss1[1];
+        }
+        if (!ss2[2].equals(ss1[2])) {
+            return "Agent of different version. Should be usually ok. Expected: " + ss2[2] + ". Got " + ss1[2];
+        }
+        if (!ss2[3].equals(ss1[3])) {
+            return "Agent of expected version. Different build time. That is ok. Best would be: " + ss2[3] + ". Got " + ss1[3];
+        }
+        return "Agent of expected version and same build time";
     }
 
     /**

@@ -4,6 +4,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.github.mkoncek.classpathless.api.ClasspathlessCompiler;
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
+
 import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.core.AgentAttachManager;
 import org.jrd.backend.core.AgentLoader;
@@ -71,6 +72,7 @@ public class Cli {
     protected static final String DETACH = "-detach";
     protected static final String API = "-api";
     protected static final String VERSION = "-version";
+    protected static final String VERSIONS = "-versions";
     protected static final String HELP = "-help";
     protected static final String H = "-h";
 
@@ -193,7 +195,8 @@ public class Cli {
                     listPlugins();
                     break;
                 case LIST_AGENTS:
-                    listAgents();
+                    List<VmInfo> vmInfos = listAgents(filteredArgs);
+                    operatedOn.addAll(vmInfos);
                     break;
                 case LIST_OVERRIDES:
                     VmInfo vmInfo0 = listOverrides();
@@ -323,10 +326,35 @@ public class Cli {
         }
     }
 
-    private void listAgents() {
+    private List<VmInfo> listAgents(List<String> params) {
+        boolean versions = false;
+        if (params.size() > 1) {
+            String filteredSecondParam = CliUtils.cleanParameter(params.get(1));
+            versions = filteredSecondParam.equals(VERSIONS);
+        }
+        return listAgents(versions);
+    }
+
+    private List<VmInfo> listAgents(boolean versions) {
+        List<VmInfo> connections = new ArrayList<>();
         for (KnownAgent agent : KnownAgents.getInstance().getAgents()) {
             System.out.println(agent.toPrint());
+            if (versions) {
+                try {
+                    VmInfo vmInfo = vmManager.createRemoteVM(agent.getHost(), agent.getPort(), "" + agent.getPid());
+                    VmDecompilerStatus vs = Lib.obtainVersion(vmInfo, vmManager);
+                    System.out.println("  - " + vs.getLoadedClassBytes());
+                    System.out.println("  - " + MetadataProperties.getInstance().compare(vs.getLoadedClassBytes()));
+                    connections.add(vmInfo);
+                } catch (Exception ex) {
+                    if (isVerbose) {
+                        ex.printStackTrace();
+                    }
+                    System.out.println("  - unknown version. Most likely old agent. Should work for most cases though.");
+                }
+            }
         }
+        return connections;
     }
 
     private VmInfo overwrite() throws Exception {

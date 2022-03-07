@@ -73,6 +73,9 @@ public class DecompilerRequestReceiver {
                 String fqn = request.getParameter(AgentRequestAction.CLASS_NAME_PARAM);
                 response = getInitAction(hostname, port, vmId, vmPid, fqn);
                 break;
+            case VERSION:
+                response = getVersionAction(hostname, port, vmId, vmPid);
+                break;
             case BYTES:
                 String className = request.getParameter(AgentRequestAction.CLASS_NAME_PARAM);
                 response = getByteCodeAction(hostname, port, vmId, vmPid, className);
@@ -165,7 +168,8 @@ public class DecompilerRequestReceiver {
 
     private String getOverwriteAction(String hostname, int listenPort, String vmId, int vmPid, String className, String newBody) {
         try {
-            ResponseWithPort reply = getResponse(hostname, listenPort, vmId, vmPid, "OVERWRITE\n" + className + "\n" + newBody);
+            ResponseWithPort reply =
+                    getResponse(hostname, listenPort, vmId, vmPid, RequestAction.OVERWRITE + "\n" + className + "\n" + newBody);
             VmDecompilerStatus status = vmManager.getVmInfoByID(vmId).getVmDecompilerStatus();
             status.setHostname(hostname);
             status.setListenPort(reply.port);
@@ -174,6 +178,22 @@ public class DecompilerRequestReceiver {
             vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
         } catch (Exception ex) {
             Logger.getLogger().log(Logger.Level.ALL, ex);
+            return TopLevelErrorCandidate.toError(ex);
+        }
+        return OK_RESPONSE;
+    }
+
+    private String getVersionAction(String hostname, int listenPort, String vmId, int vmPid) {
+        try {
+            ResponseWithPort reply = getResponse(hostname, listenPort, vmId, vmPid, RequestAction.VERSION + "\n");
+            VmDecompilerStatus status = vmManager.getVmInfoByID(vmId).getVmDecompilerStatus();
+            status.setHostname(hostname);
+            status.setListenPort(reply.port);
+            status.setVmId(vmId);
+            status.setLoadedClassBytes(reply.response);
+            vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
+        } catch (Exception ex) {
+            Logger.getLogger().log(Logger.Level.DEBUG, ex);
             return TopLevelErrorCandidate.toError(ex);
         }
         return OK_RESPONSE;

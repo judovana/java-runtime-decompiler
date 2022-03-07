@@ -1,5 +1,7 @@
 package org.jrd.agent;
 
+import org.jrd.backend.data.MetadataProperties;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -89,39 +91,7 @@ public class AgentActionWorker extends Thread {
                 outputStream.write(toError("Agent received no command.") + "\n");
                 outputStream.flush();
             } else {
-                switch (line) {
-                    case "HALT":
-                        AgentLogger.getLogger().log("Agent received HALT command, closing socket.");
-                        closeSocket(outputStream, socket);
-                        AgentLogger.getLogger().log("Agent received HALT command, removing instrumentation");
-                        localProvider.detach();
-                        break;
-                    case "CLASSES":
-                        getAllLoadedClasses(outputStream, false);
-                        break;
-                    case "CLASSES_WITH_INFO":
-                        getAllLoadedClasses(outputStream, true);
-                        break;
-                    case "OVERRIDES":
-                        getAllOverridesClasses(outputStream);
-                        break;
-                    case "BYTES":
-                        sendByteCode(inputStream, outputStream);
-                        break;
-                    case "OVERWRITE":
-                        receiveByteCode(inputStream, outputStream);
-                        break;
-                    case "INIT_CLASS":
-                        initClass(inputStream, outputStream);
-                        break;
-                    case "REMOVE_OVERRIDES":
-                        removeOverrides(inputStream, outputStream);
-                        break;
-                    default:
-                        outputStream.write(toError("Agent received unknown command: '" + line + "'.") + "\n");
-                        outputStream.flush();
-                        break;
-                }
+                writeToStreamBasedOnLine(socket, localProvider, inputStream, outputStream, line);
             }
         } catch (IOException e) {
             AgentLogger.getLogger().log(new RuntimeException("Error when trying to process the request:", e));
@@ -131,6 +101,47 @@ public class AgentActionWorker extends Thread {
             } catch (IOException e) {
                 AgentLogger.getLogger().log(new RuntimeException("Error when trying to close the socket:", e));
             }
+        }
+    }
+
+    private void writeToStreamBasedOnLine(
+            Socket socket, InstrumentationProvider localProvider, BufferedReader inputStream, BufferedWriter outputStream, String line
+    ) throws IOException {
+        switch (line) {
+            case "HALT":
+                AgentLogger.getLogger().log("Agent received HALT command, closing socket.");
+                closeSocket(outputStream, socket);
+                AgentLogger.getLogger().log("Agent received HALT command, removing instrumentation");
+                localProvider.detach();
+                break;
+            case "CLASSES":
+                getAllLoadedClasses(outputStream, false);
+                break;
+            case "CLASSES_WITH_INFO":
+                getAllLoadedClasses(outputStream, true);
+                break;
+            case "OVERRIDES":
+                getAllOverridesClasses(outputStream);
+                break;
+            case "BYTES":
+                sendByteCode(inputStream, outputStream);
+                break;
+            case "VERSION":
+                getVersion(outputStream);
+                break;
+            case "OVERWRITE":
+                receiveByteCode(inputStream, outputStream);
+                break;
+            case "INIT_CLASS":
+                initClass(inputStream, outputStream);
+                break;
+            case "REMOVE_OVERRIDES":
+                removeOverrides(inputStream, outputStream);
+                break;
+            default:
+                outputStream.write(toError("Agent received unknown command: '" + line + "'.") + "\n");
+                outputStream.flush();
+                break;
         }
     }
 
@@ -195,6 +206,19 @@ public class AgentActionWorker extends Thread {
             out.write("BYTES");
             out.newLine();
             out.write(encoded);
+            out.newLine();
+        } catch (Throwable ex) {
+            AgentLogger.getLogger().log(ex);
+            out.write(toError(ex) + "\n");
+        }
+        out.flush();
+    }
+
+    private void getVersion(BufferedWriter out) throws IOException {
+        try {
+            out.write("VERSION");
+            out.newLine();
+            out.write(MetadataProperties.getInstance().toString());
             out.newLine();
         } catch (Throwable ex) {
             AgentLogger.getLogger().log(ex);

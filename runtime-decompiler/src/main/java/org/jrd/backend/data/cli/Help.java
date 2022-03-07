@@ -45,6 +45,7 @@ import static org.jrd.backend.data.cli.Cli.SAVE_LIKE;
 
 import static org.jrd.backend.data.cli.Cli.VERBOSE;
 import static org.jrd.backend.data.cli.Cli.VERSION;
+import static org.jrd.backend.data.cli.Cli.VERSIONS;
 
 /**
  * Class for relaying help texts to the user.
@@ -87,7 +88,9 @@ public final class Help {
     private static final String BYTES_TEXT = "Print binary form of requested classes of a process";
     private static final String DEPS_TEXT = "Print all deps of the selected class(es).";
     private static final String LIST_JVMS_TEXT = "List all local Java processes and their PIDs.";
-    private static final String LIST_AGENTS_TEXT = "JRD keeps record off all local agents, dropping them once inaccessible.";
+    private static final String LIST_AGENTS_TEXT =
+            "JRD keeps record off all local agents, dropping them once inaccessible." + "Use this to list known agents.\nYou can append " +
+                    VERSIONS + " to get also version of agent" + " (may be incompatible or not ours at all)";
     private static final String LIST_PLUGINS_TEXT = "List all currently configured decompiler plugins and their statuses.";
     private static final String LIST_OVERRIDES_TEXT = "List all currently overwritten classes";
     private static final String REMOVE_OVERRIDES_TEXT = "remove all matching overwrittes of classes";

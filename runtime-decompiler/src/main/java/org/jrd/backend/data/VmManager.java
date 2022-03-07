@@ -113,7 +113,16 @@ public class VmManager {
     }
 
     public VmInfo createRemoteVM(String hostname, int port) {
-        String id = UUID.randomUUID().toString();
+        return createRemoteVM(hostname, port, null);
+    }
+
+    public VmInfo createRemoteVM(String hostname, int port, String idOverride) {
+        String id;
+        if (idOverride == null) {
+            id = UUID.randomUUID().toString();
+        } else {
+            id = idOverride;
+        }
         VmInfo vmInfo = new VmInfo(id, 0, hostname, VmInfo.Type.REMOTE, null);
         VmDecompilerStatus status = new VmDecompilerStatus();
         status.setVmId(id);
