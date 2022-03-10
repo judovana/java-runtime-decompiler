@@ -6,6 +6,8 @@ import org.jrd.backend.core.ClassInfo;
 import org.jrd.backend.core.DecompilerRequestReceiver;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
+import org.jrd.backend.core.agentstore.KnownAgent;
+import org.jrd.backend.data.MetadataProperties;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
 import org.jrd.backend.decompiling.DecompilerWrapper;
@@ -25,6 +27,8 @@ import java.util.Base64;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 public final class Lib {
 
@@ -219,4 +223,43 @@ public final class Lib {
         Logger.getLogger().log(host + ":" + port + " should be detached successfully");
     }
 
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "VmInfo is public class.. not sure..")
+    public static class HandhshakeResult {
+        private final VmInfo vmInfo;
+        private final String agentVersion;
+        private final String diff;
+
+        public HandhshakeResult(VmInfo vmInfo, String loadedClassBytes, String compare) {
+            this.vmInfo = vmInfo;
+            this.agentVersion = loadedClassBytes;
+            this.diff = compare;
+        }
+
+        public VmInfo getVmInfo() {
+            return vmInfo;
+        }
+
+        public String getAgentVersion() {
+            return agentVersion;
+        }
+
+        public String getDiff() {
+            return diff;
+        }
+    }
+
+    public static HandhshakeResult handshakeAgent(KnownAgent agent, VmManager vmManager) {
+        VmInfo vmInfo = vmManager.createRemoteVM(agent.getHost(), agent.getPort(), "" + agent.getPid());
+        return handshakeAgent(agent, vmInfo, vmManager);
+    }
+
+    public static HandhshakeResult handshakeAgent(KnownAgent agent, VmInfo vmInfo, VmManager vmManager) {
+        VmDecompilerStatus vs = Lib.obtainVersion(vmInfo, vmManager);
+        String version = vs.getLoadedClassBytes();
+        String ortel = MetadataProperties.getInstance().compare(vs.getLoadedClassBytes());
+        if (version == null || version.trim().isEmpty()) {
+            version = "unknown version";
+        }
+        return new HandhshakeResult(vmInfo, version, ortel);
+    }
 }

@@ -341,11 +341,10 @@ public class Cli {
             System.out.println(agent.toPrint());
             if (versions) {
                 try {
-                    VmInfo vmInfo = vmManager.createRemoteVM(agent.getHost(), agent.getPort(), "" + agent.getPid());
-                    VmDecompilerStatus vs = Lib.obtainVersion(vmInfo, vmManager);
-                    System.out.println("  - " + vs.getLoadedClassBytes());
-                    System.out.println("  - " + MetadataProperties.getInstance().compare(vs.getLoadedClassBytes()));
-                    connections.add(vmInfo);
+                    Lib.HandhshakeResult vmInfo = Lib.handshakeAgent(agent, vmManager);
+                    System.out.println("  - " + vmInfo.getAgentVersion());
+                    System.out.println("  - " + vmInfo.getDiff());
+                    connections.add(vmInfo.getVmInfo());
                 } catch (Exception ex) {
                     if (isVerbose) {
                         ex.printStackTrace();
