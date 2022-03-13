@@ -247,7 +247,7 @@ public class MainFrameView {
                         "If you need different PID connection you are on yor own." +
                         " You can later connect to such agent through remote vm, by its port"
         );
-        forceNewAttach.addActionListener(a -> NewAgentDialog.show());
+        forceNewAttach.addActionListener(a -> NewAgentDialog.show(localVmList));
         // newAgentPanel End
         localVmPanel = new JPanel(new BorderLayout());
         localVmPanel.setName("Local VMs");
