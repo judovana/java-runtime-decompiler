@@ -300,6 +300,9 @@ public final class Config {
     }
 
     public Optional<Integer> getBestSourceTarget() {
+        if (sourceTargetValue == null) {
+            return Optional.empty();
+        }
         return sourceTargetValue;
     }
 
