@@ -9,21 +9,23 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.io.PrintWriter;
 
 public class JcoderDecompilerWrapper {
 
     public String decompile(byte[] bytecode, String[] options) {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        final String utf8 = StandardCharsets.UTF_8.name();
         try {
             File file = File.createTempFile("jrd-jcoder", "tmp.java");
             file.deleteOnExit();
             Files.write(file.toPath(), bytecode);
-            try (PrintStream ps = new PrintStream(baos, true, utf8)) {
-                org.openjdk.asmtools.jdec.Main jdec = new org.openjdk.asmtools.jdec.Main(ps, "jdec");
-                jdec.decode(new String[]{"-g", file.getAbsolutePath()});
+            try (PrintWriter ps = new PrintWriter(baos, true, StandardCharsets.UTF_8)) {
+                //this is broken, in asmtools, streams are mismahed somewhere
+                //org.openjdk.asmtools.jdec.Main jdec = new org.openjdk.asmtools.jdec.Main(ps, new PrintWriter(System.err, true), new PrintWriter(System.err, true), new String[]{"-g",file.getAbsolutePath()});
+org.openjdk.asmtools.jdec.Main jdec = new org.openjdk.asmtools.jdec.Main(ps, ps, ps, new String[]{"-g",file.getAbsolutePath()});
+                jdec.decode();
             }
-            String data = baos.toString(utf8);
+            String data = baos.toString(StandardCharsets.UTF_8.name());
             if (data.isEmpty()) {
                 return "No output, unpatched asmtools? See " +
                         "https://github.com/openjdk/asmtools/pull/13/commits/6f8e5b532aa0cdb032ede0854de30da16cf2bb5c";
@@ -62,8 +64,8 @@ public class JcoderDecompilerWrapper {
         String[] opts = tmpSources.toArray(new String[0]);
         log(maybeLogger, "jcoder " + Arrays.toString(opts));
 
-        org.openjdk.asmtools.jcoder.Main jcoder = new org.openjdk.asmtools.jcoder.Main(System.err, "jcoder");
-        jcoder.compile(opts);
+        org.openjdk.asmtools.jcoder.Main jcoder = new org.openjdk.asmtools.jcoder.Main(new PrintWriter(System.err, true), new PrintWriter(System.out, true), opts);
+        jcoder.compile();
         Map<String, byte[]> r = new HashMap();
         Files.walk(target.toPath()).filter(Files::isRegularFile).forEach(k -> {
             try {

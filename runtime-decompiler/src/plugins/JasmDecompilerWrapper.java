@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.io.PrintWriter;
 
 public class JasmDecompilerWrapper {
 
@@ -20,8 +21,10 @@ public class JasmDecompilerWrapper {
             file.deleteOnExit();
             Files.write(file.toPath(), bytecode);
             try (PrintStream ps = new PrintStream(baos, true, utf8)) {
-                org.openjdk.asmtools.jdis.Main jdis = new org.openjdk.asmtools.jdis.Main(ps, "jdis");
-                jdis.disasm(new String[]{file.getAbsolutePath()});
+                //-g is disputable. Second wrapper?
+                //org.openjdk.asmtools.jdis.Main jdis = new org.openjdk.asmtools.jdis.Main(ps, new String[]{"-g",file.getAbsolutePath()});
+org.openjdk.asmtools.jdis.Main jdis = new org.openjdk.asmtools.jdis.Main(ps, new String[]{file.getAbsolutePath()});
+                jdis.disasm();
             }
             String data = baos.toString(utf8);
             if (data.isEmpty()) {
@@ -59,12 +62,12 @@ public class JasmDecompilerWrapper {
         }
         tmpSources.add(0, target.getAbsolutePath());
         tmpSources.add(0, "-d");
-        tmpSources.add(0, "-g"); //shoud add debug info
+        //tmpSources.add(0, "-g"); //shoud add debug info
         String[] opts = tmpSources.toArray(new String[0]);
         log(maybeLogger, "jasm " + Arrays.toString(opts));
 
-        org.openjdk.asmtools.jasm.Main jasm = new org.openjdk.asmtools.jasm.Main(System.err, "jdis");
-        jasm.compile(opts);
+        org.openjdk.asmtools.jasm.Main jasm = new org.openjdk.asmtools.jasm.Main(new PrintWriter(System.err, true), new PrintWriter(System.out, true), opts);
+        jasm.compile();
         Map<String, byte[]> r = new HashMap();
         Files.walk(target.toPath()).filter(Files::isRegularFile).forEach(k -> {
             try {
