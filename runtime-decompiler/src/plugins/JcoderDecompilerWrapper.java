@@ -20,9 +20,9 @@ public class JcoderDecompilerWrapper {
             file.deleteOnExit();
             Files.write(file.toPath(), bytecode);
             try (PrintWriter ps = new PrintWriter(baos, true, StandardCharsets.UTF_8)) {
-                //this is broken, in asmtools, streams are mismahed somewhere
-                //org.openjdk.asmtools.jdec.Main jdec = new org.openjdk.asmtools.jdec.Main(ps, new PrintWriter(System.err, true), new PrintWriter(System.err, true), new String[]{"-g",file.getAbsolutePath()});
-org.openjdk.asmtools.jdec.Main jdec = new org.openjdk.asmtools.jdec.Main(ps, ps, ps, new String[]{"-g",file.getAbsolutePath()});
+                //-g is disputable, second wraper?
+                //fixed in https://github.com/openjdk/asmtools/pull/24
+org.openjdk.asmtools.jdec.Main jdec = new org.openjdk.asmtools.jdec.Main(ps, new PrintWriter(System.err, true), new PrintWriter(System.err, true), new String[]{"-g",file.getAbsolutePath()});
                 jdec.decode();
             }
             String data = baos.toString(StandardCharsets.UTF_8.name());
