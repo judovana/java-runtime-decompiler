@@ -21,7 +21,7 @@ public class Jcoder7DecompilerWrapper {
             Files.write(file.toPath(), bytecode);
             try (PrintStream ps = new PrintStream(baos, true, utf8)) {
                 org.openjdk.asmtools.jdec.Main jdec = new org.openjdk.asmtools.jdec.Main(ps, "jdec");
-                jdec.decode(new String[]{"-g", file.getAbsolutePath()});
+                jdec.decode(new String[]{file.getAbsolutePath()});
             }
             String data = baos.toString(utf8);
             if (data.isEmpty()) {

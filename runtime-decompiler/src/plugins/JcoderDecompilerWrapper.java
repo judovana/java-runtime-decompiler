@@ -20,14 +20,14 @@ public class JcoderDecompilerWrapper {
             file.deleteOnExit();
             Files.write(file.toPath(), bytecode);
             try (PrintWriter ps = new PrintWriter(baos, true, StandardCharsets.UTF_8)) {
-                //-g is disputable, second wraper?
                 //fixed in https://github.com/openjdk/asmtools/pull/24
-org.openjdk.asmtools.jdec.Main jdec = new org.openjdk.asmtools.jdec.Main(ps, new PrintWriter(System.err, true), new PrintWriter(System.err, true), new String[]{"-g",file.getAbsolutePath()});
+org.openjdk.asmtools.jdec.Main jdec = new org.openjdk.asmtools.jdec.Main(ps, new PrintWriter(System.err, true), new PrintWriter(System.err, true), new String[]{file.getAbsolutePath()});
                 jdec.decode();
             }
             String data = baos.toString(StandardCharsets.UTF_8.name());
             if (data.isEmpty()) {
                 return "No output, unpatched asmtools? See " +
+                        "https://github.com/openjdk/asmtools/pull/24 " +
                         "https://github.com/openjdk/asmtools/pull/13/commits/6f8e5b532aa0cdb032ede0854de30da16cf2bb5c";
             }
             return data;

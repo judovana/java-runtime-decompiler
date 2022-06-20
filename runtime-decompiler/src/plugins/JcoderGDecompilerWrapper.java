@@ -11,23 +11,25 @@ import java.util.List;
 import java.util.Map;
 import java.io.PrintWriter;
 
-public class JasmDecompilerWrapper {
+public class JcoderGDecompilerWrapper {
 
     public String decompile(byte[] bytecode, String[] options) {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        final String utf8 = StandardCharsets.UTF_8.name();
         try {
-            File file = File.createTempFile("jrd-jasm", "tmp.java");
+            File file = File.createTempFile("jrd-jcoder", "tmp.java");
             file.deleteOnExit();
             Files.write(file.toPath(), bytecode);
-            try (PrintStream ps = new PrintStream(baos, true, utf8)) {
-                org.openjdk.asmtools.jdis.Main jdis = new org.openjdk.asmtools.jdis.Main(ps, new String[]{file.getAbsolutePath()});
-                jdis.disasm();
+            try (PrintWriter ps = new PrintWriter(baos, true, StandardCharsets.UTF_8)) {
+                //-g is disputable, second wraper?
+                //fixed in https://github.com/openjdk/asmtools/pull/24
+org.openjdk.asmtools.jdec.Main jdec = new org.openjdk.asmtools.jdec.Main(ps, new PrintWriter(System.err, true), new PrintWriter(System.err, true), new String[]{"-g",file.getAbsolutePath()});
+                jdec.decode();
             }
-            String data = baos.toString(utf8);
+            String data = baos.toString(StandardCharsets.UTF_8.name());
             if (data.isEmpty()) {
                 return "No output, unpatched asmtools? See " +
-                        "https://github.com/openjdk/asmtools/pull/13/commits/9104af81fef8c220be919a3e34912386a7b99a60";
+                        "https://github.com/openjdk/asmtools/pull/24 " +
+                        "https://github.com/openjdk/asmtools/pull/13/commits/6f8e5b532aa0cdb032ede0854de30da16cf2bb5c";
             }
             return data;
         } catch (Exception e) {
@@ -41,8 +43,8 @@ public class JasmDecompilerWrapper {
     }
 
     public Map<String, byte[]> compile(Map<String, String> src, String[] options, Object maybeLogger) throws Exception {
-        log(maybeLogger, "jasm compiler caled with input of: " + src.size());
-        File parentDir = File.createTempFile("jrd-jasm", "tmp.dir");
+        log(maybeLogger, "jcoder compiler caled with input of: " + src.size());
+        File parentDir = File.createTempFile("jrd-jcoder", "tmp.dir");
         parentDir.delete();
         parentDir.mkdir();
         parentDir.deleteOnExit();
@@ -60,19 +62,19 @@ public class JasmDecompilerWrapper {
         }
         tmpSources.add(0, target.getAbsolutePath());
         tmpSources.add(0, "-d");
-        //tmpSources.add(0, "-g"); //shoud add debug info
         String[] opts = tmpSources.toArray(new String[0]);
-        log(maybeLogger, "jasm " + Arrays.toString(opts));
+        log(maybeLogger, "jcoder " + Arrays.toString(opts));
 
-        org.openjdk.asmtools.jasm.Main jasm = new org.openjdk.asmtools.jasm.Main(new PrintWriter(System.err, true), new PrintWriter(System.out, true), opts);
-        jasm.compile();
+        org.openjdk.asmtools.jcoder.Main jcoder = new org.openjdk.asmtools.jcoder.Main(new PrintWriter(System.err, true), new PrintWriter(System.out, true), opts);
+        jcoder.compile();
         Map<String, byte[]> r = new HashMap();
         Files.walk(target.toPath()).filter(Files::isRegularFile).forEach(k -> {
             try {
-                String futureFullyQualifiedNiceName = k.toString();
-                futureFullyQualifiedNiceName = futureFullyQualifiedNiceName.replace(target + File.separator, "");
-                futureFullyQualifiedNiceName = futureFullyQualifiedNiceName.replace(File.separator, ".");
-                futureFullyQualifiedNiceName = futureFullyQualifiedNiceName.replaceAll("\\.class$", "");
+                String futureFullyQualifiedNiceName = k
+                        .toString()
+                        .replace(target + File.separator, "")
+                        .replace(File.separator, ".")
+                        .replaceAll("\\.class$", "");
                 r.put(futureFullyQualifiedNiceName, Files.readAllBytes(k));
             } catch (IOException ex) {
                 ex.printStackTrace();

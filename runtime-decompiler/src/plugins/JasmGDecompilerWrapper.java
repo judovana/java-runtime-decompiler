@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.io.PrintWriter;
 
-public class JasmDecompilerWrapper {
+public class JasmGDecompilerWrapper {
 
     public String decompile(byte[] bytecode, String[] options) {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -21,7 +21,8 @@ public class JasmDecompilerWrapper {
             file.deleteOnExit();
             Files.write(file.toPath(), bytecode);
             try (PrintStream ps = new PrintStream(baos, true, utf8)) {
-                org.openjdk.asmtools.jdis.Main jdis = new org.openjdk.asmtools.jdis.Main(ps, new String[]{file.getAbsolutePath()});
+                //org.openjdk.asmtools.jdis.Main jdis = new org.openjdk.asmtools.jdis.Main(ps, new String[]{"-g",file.getAbsolutePath()});
+org.openjdk.asmtools.jdis.Main jdis = new org.openjdk.asmtools.jdis.Main(ps, new String[]{"-g", file.getAbsolutePath()});
                 jdis.disasm();
             }
             String data = baos.toString(utf8);
@@ -60,7 +61,7 @@ public class JasmDecompilerWrapper {
         }
         tmpSources.add(0, target.getAbsolutePath());
         tmpSources.add(0, "-d");
-        //tmpSources.add(0, "-g"); //shoud add debug info
+        //tmpSources.add(0, "-g"); //shoud add debug info; no longer available in asmtools8
         String[] opts = tmpSources.toArray(new String[0]);
         log(maybeLogger, "jasm " + Arrays.toString(opts));
 
