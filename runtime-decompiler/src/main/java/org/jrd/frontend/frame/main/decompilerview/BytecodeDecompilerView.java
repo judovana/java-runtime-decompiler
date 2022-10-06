@@ -115,6 +115,18 @@ public class BytecodeDecompilerView {
     private HexEditor hex;
     private SearchControlsPanel hexSearchControls;
 
+    private JPanel additionalSrcBuffer;
+    private RTextScrollPane additionalSrcScrollPane;
+    private RSyntaxTextArea additionalSrcSyntaxTextArea;
+    private SearchControlsPanel additionalSrcSearchControls;
+    private JPanel additionalBytecodeBuffer;
+    private RTextScrollPane additionalBytecodeScrollPane;
+    private RSyntaxTextArea additionalBytecodeSyntaxTextArea;
+    private SearchControlsPanel additionalBytecodeSearchControls;
+    private JPanel additionalBinaryBuffer;
+    private HexEditor additionalHex;
+    private SearchControlsPanel additionalHexSearchControls;
+
     private ActionListener bytesActionListener;
     private ActionListener classesActionListener;
     private ActionListener initActionListener;
@@ -377,7 +389,7 @@ public class BytecodeDecompilerView {
         insertButton = ImageButtonFactory.createEditButton("Insert agent API to current position");
         insertButton.addActionListener(actionEvent -> {
             if (isDecompiledBytecodeBufferVisible()) {
-                showApiMenu(new Point(0, 0));
+                showApiMenu(new Point(0, 0), bytecodeSyntaxTextArea);
             } else if (isBinaryBufferVisible()) {
                 Logger.getLogger().log(Logger.Level.ALL, "Unable to insert agent API into binary buffer.");
             }
@@ -421,52 +433,31 @@ public class BytecodeDecompilerView {
             }
         });
 
-        bytecodeSyntaxTextArea = new RSyntaxTextArea();
-        bytecodeSyntaxTextArea.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if ((e.getModifiersEx() & KeyEvent.ALT_DOWN_MASK) != 0) {
-                    if (e.getKeyCode() == KeyEvent.VK_INSERT) {
-                        showApiMenu(null);
-                    }
-                }
-                if ((e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) != 0) {
-                    if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-                        showApiMenu(null);
-                    }
-                    if (e.getKeyCode() == KeyEvent.VK_F) {
-                        bytecodeSearchControls.focus();
-                    }
-                }
-            }
-        });
-        bytecodeSyntaxTextArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
-        bytecodeSyntaxTextArea.setCodeFoldingEnabled(true);
-        bytecodeScrollPane = new RTextScrollPane(bytecodeSyntaxTextArea);
         bytecodeSearchControls = SearchControlsPanel.createBytecodeControls(this);
+        bytecodeSyntaxTextArea = createSrcTextArea(true, bytecodeSearchControls); //FIXME verify hardcoded, encapsualte elsewhere
+        bytecodeScrollPane = new RTextScrollPane(bytecodeSyntaxTextArea);
+        hex = createHexArea(hexSearchControls); // FIXME will now cause npe, as local varibale will be forever null
+        hexSearchControls = SearchControlsPanel.createHexControls(hex);
 
-        hex = new HexEditor();
-        hex.addKeyListenerToTable(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if ((e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) != 0) {
-                    if (e.getKeyCode() == KeyEvent.VK_F) {
-                        hexSearchControls.focus();
-                    }
-                }
-            }
-        });
+        //additionalBytecodeSearchControls = SearchControlsPanel.createBytecodeControls(this);
+        additionalBytecodeSyntaxTextArea = createSrcTextArea(false, additionalBytecodeSearchControls); //FIXME, nto working, to much hardcoded stuff
+        additionalBytecodeScrollPane = new RTextScrollPane(additionalBytecodeSyntaxTextArea);
+        additionalHex = createHexArea(additionalHexSearchControls); // FIXME will now cause npe, as local varibale will be forever null
+        additionalHexSearchControls = SearchControlsPanel.createHexControls(additionalHex);
+
+        //additionalSrcSearchControls = SearchControlsPanel.createBytecodeControls(this);
+        additionalSrcSyntaxTextArea = createSrcTextArea(false, additionalSrcSearchControls); //FIXME, nto working, to much hardcoded stuff
+        additionalSrcScrollPane = new RTextScrollPane(additionalSrcSyntaxTextArea);
+
         classes = new JPanel();
         classes.setLayout(new BorderLayout());
         classes.setBorder(new EtchedBorder());
 
-        bytecodeBuffer = new JPanel();
-        bytecodeBuffer.setLayout(new BorderLayout());
-        bytecodeBuffer.setBorder(new EtchedBorder());
-
-        binaryBuffer = new JPanel();
-        binaryBuffer.setLayout(new BorderLayout());
-        binaryBuffer.setBorder(new EtchedBorder());
+        bytecodeBuffer = initTabLayers("Source buffer");
+        binaryBuffer = initTabLayers("Binary buffer");
+        additionalBytecodeBuffer = initTabLayers("Additional source buffer");
+        additionalBinaryBuffer = initTabLayers("Additional binary buffer");
+        additionalSrcBuffer = initTabLayers("Additional source");
 
         buffersToolBar = new JPanel(new GridBagLayout());
         buffersToolBar.setBorder(new EtchedBorder());
@@ -512,18 +503,21 @@ public class BytecodeDecompilerView {
         classesPanel.add(classesScrollPane, BorderLayout.CENTER);
         classes.add(classesPanel);
 
-        bytecodeBuffer.setName("Source buffer");
         bytecodeBuffer.add(bytecodeScrollPane);
         bytecodeBuffer.add(bytecodeSearchControls, BorderLayout.SOUTH);
-        binaryBuffer.setName("Binary buffer");
         binaryBuffer.add(hex);
-
-        hexSearchControls = SearchControlsPanel.createHexControls(hex);
-
         binaryBuffer.add(hexSearchControls, BorderLayout.SOUTH);
+
+        additionalBytecodeBuffer.add(additionalBytecodeScrollPane);
+        additionalBinaryBuffer.add(additionalHex);
+
+        additionalSrcBuffer.add(additionalSrcScrollPane);
 
         buffers.add(bytecodeBuffer);
         buffers.add(binaryBuffer);
+        buffers.add(additionalBytecodeBuffer);
+        buffers.add(additionalBinaryBuffer);
+        buffers.add(additionalSrcBuffer);
 
         buffersPanel = new JPanel(new BorderLayout());
         buffersPanel.setBorder(new EtchedBorder());
@@ -546,6 +540,54 @@ public class BytecodeDecompilerView {
 
         bytecodeDecompilerPanel.setVisible(true);
 
+    }
+
+    private HexEditor createHexArea(SearchControlsPanel hexSearch) {
+        HexEditor lhex = new HexEditor();
+        lhex.addKeyListenerToTable(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if ((e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) != 0) {
+                    if (e.getKeyCode() == KeyEvent.VK_F) {
+                        hexSearch.focus();
+                    }
+                }
+            }
+        });
+        return lhex;
+    }
+
+    private RSyntaxTextArea createSrcTextArea(boolean api, SearchControlsPanel controls) {
+        RSyntaxTextArea rst = new RSyntaxTextArea();
+        rst.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if ((e.getModifiersEx() & KeyEvent.ALT_DOWN_MASK) != 0) {
+                    if (e.getKeyCode() == KeyEvent.VK_INSERT) {
+                        showApiMenu(null, rst);
+                    }
+                }
+                if ((e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) != 0) {
+                    if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+                        showApiMenu(null, rst);
+                    }
+                    if (e.getKeyCode() == KeyEvent.VK_F) {
+                        controls.focus();
+                    }
+                }
+            }
+        });
+        rst.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
+        rst.setCodeFoldingEnabled(true);
+        return rst;
+    }
+
+    private JPanel initTabLayers(String title) {
+        JPanel p = new JPanel();
+        p.setName(title);
+        p.setLayout(new BorderLayout());
+        p.setBorder(new EtchedBorder());
+        return p;
     }
 
     private void handleClassInfoSwitching() {
@@ -676,19 +718,25 @@ public class BytecodeDecompilerView {
      *
      * @param decompiledClass String of source code of decompiler class
      */
-    public void reloadTextField(String name, String decompiledClass, byte[] source) {
+    public void reloadTextField(
+            String name, String decompiledClass, byte[] source, String additionalDecompiledClass, byte[] additionalSource,
+            String additionalSrcClass
+    ) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                BytecodeDecompilerView.this.setDecompiledClass(name, decompiledClass, source);
+                BytecodeDecompilerView.this
+                        .setDecompiledClass(name, decompiledClass, source, additionalDecompiledClass, additionalSource, additionalSrcClass);
             }
         });
     }
 
-    private void setDecompiledClass(String name, String data, byte[] source) {
-        bytecodeSyntaxTextArea.setText(data);
-        bytecodeSyntaxTextArea.discardAllEdits(); // makes the bytecode upload not undoable
-        bytecodeSyntaxTextArea.setCaretPosition(0);
+    private void setDecompiledClass(
+            String name, String data, byte[] source, String additionalData, byte[] additionalSource, String additionalSrcData
+    ) {
+        resetSrcArea(additionalSrcSyntaxTextArea, additionalSrcData);
+        resetSrcArea(additionalBytecodeSyntaxTextArea, additionalData);
+        resetSrcArea(bytecodeSyntaxTextArea, data);
         int bytecodeVersion = getByteCodeVersion(source);
         int buildJavaPerVersion = getJavaFromBytelevel(bytecodeVersion);
         Config.getConfig().setBestSourceTarget(Optional.of(buildJavaPerVersion));
@@ -714,7 +762,18 @@ public class BytecodeDecompilerView {
         } catch (IOException ex) {
             Logger.getLogger().log(ex);
         }
+        try {
+            additionalHex.open(new ByteArrayInputStream(additionalSource));
+        } catch (IOException ex) {
+            Logger.getLogger().log(ex);
+        }
         this.lastDecompiledClass = name;
+    }
+
+    private void resetSrcArea(RSyntaxTextArea rsta, String data) {
+        rsta.setText(data);
+        rsta.discardAllEdits(); // makes the bytecode upload not undoable
+        rsta.setCaretPosition(0);
     }
 
     public static int getJavaFromBytelevel(int bytecodeVersion) {
@@ -837,8 +896,8 @@ public class BytecodeDecompilerView {
         bytecodeSyntaxTextArea.select(newDot, newDot);
     }
 
-    private void showApiMenu(Point forcedLocation) {
-        Point caretPosition = bytecodeSyntaxTextArea.getCaret().getMagicCaretPosition();
+    private void showApiMenu(Point forcedLocation, RSyntaxTextArea origin) {
+        Point caretPosition = origin.getCaret().getMagicCaretPosition();
         if (caretPosition == null || forcedLocation != null) {
             caretPosition = forcedLocation;
         }

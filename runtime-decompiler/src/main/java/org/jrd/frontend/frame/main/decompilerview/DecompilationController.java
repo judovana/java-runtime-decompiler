@@ -320,7 +320,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
     private void cleanup(boolean halt) {
         mainFrameView.switchPanel(false);
         mainFrameView.getBytecodeDecompilerView().reloadClassList(new ClassInfo[0]);
-        mainFrameView.getBytecodeDecompilerView().reloadTextField("", "", new byte[16]);
+        mainFrameView.getBytecodeDecompilerView().reloadTextField("", "", new byte[16], "", new byte[16], "");
         if (halt) {
             haltAgent();
         }
@@ -387,11 +387,20 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         } catch (Exception e) {
             Logger.getLogger().log(Logger.Level.ALL, e);
         }
-        bytecodeDecompilerView.reloadTextField(name, decompiledClass, bytes);
-        byte[] b = Config.getConfig().getAdditionalClassPathBytes(name);
-        String s = Config.getConfig().getAdditionalSourcePathString(name);
-        System.out.println(b.length + ""); //TODO, show in hex, decomple and show!!
-        System.out.println(s.length() + ""); //TODO, show!
+        byte[] additionalBytes = Config.getConfig().getAdditionalClassPathBytes(name);
+        String additionalDecompiled = "";
+        if (additionalBytes != null && additionalBytes.length > 0) {
+            try {
+                //FIXME this have to fake vminfo and vmmanager to rovide origin form local cp only
+                //FIXME this actually discovered a bug in some wrappers, which have wrong fallback method (eg cfr, but fernflower is ok)
+                additionalDecompiled =
+                        pluginManager.decompile(bytecodeDecompilerView.getSelectedDecompiler(), name, additionalBytes, null, null, null);
+            } catch (Exception e) {
+                Logger.getLogger().log(Logger.Level.ALL, e);
+            }
+        }
+        String additionalSrcClass = Config.getConfig().getAdditionalSourcePathString(name);
+        bytecodeDecompilerView.reloadTextField(name, decompiledClass, bytes, additionalDecompiled, additionalBytes, additionalSrcClass);
     }
 
     public String getVm() {
