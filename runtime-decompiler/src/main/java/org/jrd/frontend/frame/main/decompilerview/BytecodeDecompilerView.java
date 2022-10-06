@@ -350,7 +350,7 @@ public class BytecodeDecompilerView {
                 if (isDecompiledBytecodeBufferVisible()) {
                     compileButton.setEnabled(true);
                     insertButton.setEnabled(true);
-                } else {
+                } else if (isBinaryBufferVisible()) {
                     compileButton.setEnabled(false);
                     insertButton.setEnabled(false);
                 }
@@ -360,7 +360,7 @@ public class BytecodeDecompilerView {
         undoButton.addActionListener(actionEvent -> {
             if (isDecompiledBytecodeBufferVisible()) {
                 bytecodeSyntaxTextArea.undoLastAction();
-            } else {
+            } else if (isBinaryBufferVisible()) {
                 hex.undo();
             }
         });
@@ -369,7 +369,7 @@ public class BytecodeDecompilerView {
         redoButton.addActionListener(actionEvent -> {
             if (isDecompiledBytecodeBufferVisible()) {
                 bytecodeSyntaxTextArea.redoLastAction();
-            } else {
+            } else if (isBinaryBufferVisible()) {
                 hex.redo();
             }
         });
@@ -378,7 +378,7 @@ public class BytecodeDecompilerView {
         insertButton.addActionListener(actionEvent -> {
             if (isDecompiledBytecodeBufferVisible()) {
                 showApiMenu(new Point(0, 0));
-            } else {
+            } else if (isBinaryBufferVisible()) {
                 Logger.getLogger().log(Logger.Level.ALL, "Unable to insert agent API into binary buffer.");
             }
         });
