@@ -88,7 +88,9 @@ public class SettingsView extends JDialog {
                 config.doUseHostSystemClasses(), config.getCompilerArgsString(), config.doUseHostJavaLangObject(), config.doOverwriteST()
         );
         nestedJarsSettingsPanel = new NestedJarsSettingsPanel();
-        miscSettingsPanel = new MiscellaneousSettingsPanel(config.doUseJavapSignatures(), config.doDepndenceNumbers());
+        miscSettingsPanel = new MiscellaneousSettingsPanel(
+                config.doUseJavapSignatures(), config.doDepndenceNumbers(), config.getAdditionalCP(), config.getAdditionalSP()
+        );
 
         for (
             ChangeReporter panel : new ChangeReporter[]{agentSettingsPanel, compilationSettingsPanel, nestedJarsSettingsPanel,
@@ -152,6 +154,8 @@ public class SettingsView extends JDialog {
         config.setUseJavapSignatures(miscSettingsPanel.shouldUseJavapSignatures());
         config.setDepndenceNumbers(miscSettingsPanel.futurreDependenciesNumbers());
         config.setNestedJarExtensions(extensions);
+        config.setAdditionalCP(miscSettingsPanel.getAdditioalCP());
+        config.setAdditionalSP(miscSettingsPanel.getAdditionalSP());
 
         try {
             config.saveConfigFile();

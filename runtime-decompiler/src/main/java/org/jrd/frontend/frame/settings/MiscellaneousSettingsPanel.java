@@ -18,11 +18,15 @@ import java.awt.event.ActionListener;
 
 public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter {
 
-    private JLabel miscSettingsLabel;
-    private JCheckBox useJavapSignaturesCheckBox;
-    private JComboBox<Config.DepndenceNumbers> dependenceNumbers;
+    private final JLabel miscSettingsLabel;
+    private final JCheckBox useJavapSignaturesCheckBox;
+    private final JComboBox<Config.DepndenceNumbers> dependenceNumbers;
+    private final JTextField srcPath;
+    private final JTextField classPath;
 
-    public MiscellaneousSettingsPanel(boolean initialUseJavapSignatures, Config.DepndenceNumbers initialConfigNumbers) {
+    public MiscellaneousSettingsPanel(
+            boolean initialUseJavapSignatures, Config.DepndenceNumbers initialConfigNumbers, String cp, String sp
+    ) {
         miscSettingsLabel = new JLabel("Miscellaneous settings");
         useJavapSignaturesCheckBox = new JCheckBox("Use Javap signatures in Agent API insertion menu", initialUseJavapSignatures);
 
@@ -47,10 +51,13 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
             );
         });
         dependenceNumbers.setSelectedItem(initialConfigNumbers);
+
+        srcPath = new JTextField(sp);
+        classPath = new JTextField(cp);
+
         gbc.gridy = 3;
         this.add(new JLabel("Additional source-path"), gbc);
         gbc.gridy = 4;
-        JTextField srcPath = new JTextField();
         this.add(srcPath, gbc);
         gbc.weightx = 0;
         gbc.gridwidth = 1;
@@ -63,7 +70,6 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
         gbc.gridy = 5;
         this.add(new JLabel("Additional class-path"), gbc);
         gbc.gridy = 6;
-        JTextField classPath = new JTextField();
         this.add(classPath, gbc);
         gbc.weightx = 0;
         gbc.gridwidth = 1;
@@ -87,5 +93,15 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
     @Override
     public void setChangeReporter(ActionListener listener) {
         ChangeReporter.addCheckboxListener(listener, useJavapSignaturesCheckBox);
+        ChangeReporter.addTextChangeListener(listener, srcPath);
+        ChangeReporter.addTextChangeListener(listener, classPath);
+    }
+
+    public String getAdditioalCP() {
+        return classPath.getText();
+    }
+
+    public String getAdditionalSP() {
+        return srcPath.getText();
     }
 }

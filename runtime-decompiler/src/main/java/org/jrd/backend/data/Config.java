@@ -40,6 +40,8 @@ public final class Config {
     private static final String USE_JAVAP_SIGNATURES = "USE_JAVAP_SIGNATURES";
     private static final String ENFORCE_SOURCE_TARGET = "ENFORCE_SOURCE_TARGET";
     private static final String DEPNDENCE_NUMBERS = "DEPNDENCE_NUMBERS";
+    private static final String ADDITIONAL_SOURCE_PATH = "ADDITIONAL_SOURCE_PATH";
+    private static final String ADDITIONAL_CLASS_PATH = "ADDITIONAL_CLASS_PATH";
     //this is not persistent, is used for transfering detected value to compiler with other settings
     private Optional<Integer> sourceTargetValue;
 
@@ -311,5 +313,29 @@ public final class Config {
         //cli api to print bytecode levels?
         //yes, not much more
         this.sourceTargetValue = st;
+    }
+
+    public void setAdditionalCP(String paths) {
+        configMap.put(ADDITIONAL_CLASS_PATH, paths);
+    }
+
+    public void setAdditionalSP(String paths) {
+        configMap.put(ADDITIONAL_SOURCE_PATH, paths);
+    }
+
+    public String getAdditionalCP() {
+        Object s = configMap.get(ADDITIONAL_CLASS_PATH);
+        if (s == null) {
+            s = "";
+        }
+        return s.toString();
+    }
+
+    public String getAdditionalSP() {
+        Object s = configMap.get(ADDITIONAL_SOURCE_PATH);
+        if (s == null) {
+            s = "";
+        }
+        return s.toString();
     }
 }
