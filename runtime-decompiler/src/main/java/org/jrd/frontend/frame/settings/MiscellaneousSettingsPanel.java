@@ -55,8 +55,13 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
         srcPath = new JTextField(sp);
         classPath = new JTextField(cp);
 
+        String hint = BytecodeDecompilerView.styleTooltip() +
+                "Additional source-path and classpath is used to show on-fs available src/bytecode of given classes.<br>" +
+                "Class path is in addition used for runtime-compiler as helper provider.";
         gbc.gridy = 3;
-        this.add(new JLabel("Additional source-path"), gbc);
+        JLabel aspl = new JLabel("Additional source-path");
+        aspl.setToolTipText(hint);
+        this.add(aspl, gbc);
         gbc.gridy = 4;
         this.add(srcPath, gbc);
         gbc.weightx = 0;
@@ -68,7 +73,9 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
         gbc.gridwidth = 1;
         gbc.gridx = 1;
         gbc.gridy = 5;
-        this.add(new JLabel("Additional class-path"), gbc);
+        JLabel acpl = new JLabel("Additional class-path");
+        acpl.setToolTipText(hint);
+        this.add(acpl, gbc);
         gbc.gridy = 6;
         this.add(classPath, gbc);
         gbc.weightx = 0;

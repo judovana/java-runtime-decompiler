@@ -37,6 +37,7 @@ public final class FsAgent implements JrdAgent {
     private static final Map<VmInfo, FsAgent> AGENTS = new HashMap<>();
 
     private final List<File> cp;
+    private final String suffix;
     /**
      * This is exact oposite of how remote agent does this.
      * Remote agent keeps all overrides, because when new class defintion is laoded original is plled, and is modifed (overvritten) by new deffnitio.
@@ -49,17 +50,26 @@ public final class FsAgent implements JrdAgent {
      */
     private final Map<String, String> originals = new HashMap<>();
 
-    private FsAgent(List<File> cp) {
+    private FsAgent(List<File> cp, String suffix) {
         this.cp = cp;
+        this.suffix = suffix;
     }
 
     public static FsAgent get(VmInfo vmInfo) {
         FsAgent agent = AGENTS.get(vmInfo);
         if (agent == null) {
-            agent = new FsAgent(vmInfo.getCp());
+            agent = new FsAgent(vmInfo.getCp(), "class");
             AGENTS.put(vmInfo, agent);
         }
         return agent;
+    }
+
+    public static FsAgent createAdditionalClassPathFsAgent(List<File> cp) {
+        return new FsAgent(cp, "class");
+    }
+
+    public static FsAgent createAdditionalSourcePathFsAgent(List<File> cp) {
+        return new FsAgent(cp, "java");
     }
 
     public List<String> getOverrides() {
@@ -133,7 +143,7 @@ public final class FsAgent implements JrdAgent {
 
     private Void uploadByteCode(String clazz, String body) {
         try {
-            return new OperateOnCp<Void>(cp).operateOnCp(clazz, new WritingCpOperator(body));
+            return new OperateOnCp<Void>(cp, suffix).operateOnCp(clazz, new WritingCpOperator(body));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -141,7 +151,7 @@ public final class FsAgent implements JrdAgent {
 
     private String sendByteCode(String clazz) {
         try {
-            String s = new OperateOnCp<String>(cp).operateOnCp(clazz, new ReadingCpOperator());
+            String s = new OperateOnCp<String>(cp, suffix).operateOnCp(clazz, new ReadingCpOperator());
             return s;
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -150,7 +160,7 @@ public final class FsAgent implements JrdAgent {
 
     private String readClasses(final boolean details) throws IOException {
         List<String> classes = new ArrayList<>();
-        new OperateOnCp<Void>(cp).operateOnCp(null, new ListingCpOperator(classes, details));
+        new OperateOnCp<Void>(cp, suffix).operateOnCp(null, new ListingCpOperator(classes, details));
         return String.join(";", classes);
     }
 
@@ -162,9 +172,11 @@ public final class FsAgent implements JrdAgent {
 
     private static class OperateOnCp<T> {
         private final List<File> cp;
+        private final String suffix;
 
-        OperateOnCp(List<File> cp) {
+        OperateOnCp(List<File> cp, String suffix) {
             this.cp = cp;
+            this.suffix = suffix;
         }
 
         @SuppressWarnings({"NestedIfDepth", "ReturnCount"}) // no way around this
@@ -177,7 +189,7 @@ public final class FsAgent implements JrdAgent {
                         //no return, search
                         op.onDirEntry(c, null);
                     } else {
-                        String classOnFs = clazz.replace(".", File.separator) + ".class";
+                        String classOnFs = clazz.replace(".", File.separator) + "." + suffix;
                         File f = new File(root + File.separator + classOnFs);
                         if (f.exists()) {
                             return op.onDirEntry(c, f);

@@ -388,6 +388,10 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
             Logger.getLogger().log(Logger.Level.ALL, e);
         }
         bytecodeDecompilerView.reloadTextField(name, decompiledClass, bytes);
+        byte[] b = Config.getConfig().getAdditionalClassPathBytes(name);
+        String s = Config.getConfig().getAdditionalSourcePathString(name);
+        System.out.println(b.length + ""); //TODO, show in hex, decomple and show!!
+        System.out.println(s.length() + ""); //TODO, show!
     }
 
     public String getVm() {

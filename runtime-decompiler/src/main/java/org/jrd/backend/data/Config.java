@@ -1,6 +1,9 @@
 package org.jrd.backend.data;
 
 import com.google.gson.Gson;
+import org.jrd.backend.communication.ErrorCandidate;
+import org.jrd.backend.communication.FsAgent;
+import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.decompiling.ExpandableUrl;
 import org.jrd.frontend.utility.AgentApiGenerator;
@@ -8,16 +11,19 @@ import org.jrd.frontend.utility.AgentApiGenerator;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Singleton class for storing and retrieving configuration strings.
@@ -44,6 +50,8 @@ public final class Config {
     private static final String ADDITIONAL_CLASS_PATH = "ADDITIONAL_CLASS_PATH";
     //this is not persistent, is used for transfering detected value to compiler with other settings
     private Optional<Integer> sourceTargetValue;
+    private FsAgent additionalClassPathAgent;
+    private FsAgent additionalSourcePathAgent;
 
     public enum DepndenceNumbers {
         ENFORCE_ONE("This will pass only selected class to decompiler. Fastest, worst results, may have its weird usecase"),
@@ -285,8 +293,35 @@ public final class Config {
                 configMap.put(kv[0], kv[1]);
             });
             saveConfigFile();
-
             Files.delete(legacyConfFile.toPath());
+        }
+        initAdditionalAgents();
+    }
+
+    private void initAdditionalAgents() {
+        if (!getAdditionalCP().trim().isEmpty()) {
+            try {
+                this.additionalClassPathAgent = FsAgent.createAdditionalClassPathFsAgent(
+                        Arrays.stream(getAdditionalCP().split(File.pathSeparator)).map(a -> new File(a)).collect(Collectors.toList())
+                );
+            } catch (Exception ex) {
+                additionalClassPathAgent = null;
+                Logger.getLogger().log(ex);
+            }
+        } else {
+            this.additionalClassPathAgent = null;
+        }
+        if (!getAdditionalSP().trim().isEmpty()) {
+            try {
+                this.additionalSourcePathAgent = FsAgent.createAdditionalSourcePathFsAgent(
+                        Arrays.stream(getAdditionalSP().split(File.pathSeparator)).map(a -> new File(a)).collect(Collectors.toList())
+                );
+            } catch (Exception ex) {
+                additionalSourcePathAgent = null;
+                Logger.getLogger().log(ex);
+            }
+        } else {
+            this.additionalSourcePathAgent = null;
         }
     }
 
@@ -299,6 +334,7 @@ public final class Config {
 
         // creates file if it does not exist
         Files.write(Paths.get(CONFIG_PATH), Collections.singleton(gson.toJson(configMap)), StandardCharsets.UTF_8);
+        initAdditionalAgents();
     }
 
     public Optional<Integer> getBestSourceTarget() {
@@ -337,5 +373,42 @@ public final class Config {
             s = "";
         }
         return s.toString();
+    }
+
+    public byte[] getAdditionalClassPathBytes(String fqn) {
+        if (additionalClassPathAgent == null) {
+            return new byte[0];
+        } else {
+            try {
+                return getFileFromAdditionalPath(additionalClassPathAgent, fqn);
+            } catch (Exception ex) {
+                Logger.getLogger().log(ex);
+                return new byte[0];
+            }
+        }
+    }
+
+    public String getAdditionalSourcePathString(String fqn) {
+        if (additionalSourcePathAgent == null) {
+            return "";
+        } else {
+            try {
+                byte[] bytes = getFileFromAdditionalPath(additionalSourcePathAgent, fqn);
+                return new String(bytes, Charset.defaultCharset());
+            } catch (Exception ex) {
+                Logger.getLogger().log(ex);
+                return ex.getMessage();
+            }
+        }
+    }
+
+    private byte[] getFileFromAdditionalPath(FsAgent fs, String fqn) {
+        String base64 = fs.submitRequest(AgentRequestAction.RequestAction.BYTES + " " + fqn);
+        ErrorCandidate errorCandidate = new ErrorCandidate(base64);
+        if (errorCandidate.isError()) {
+            throw new RuntimeException(errorCandidate.getErrorMessage());
+        }
+        byte[] bbytes = Base64.getDecoder().decode(base64);
+        return bbytes;
     }
 }
