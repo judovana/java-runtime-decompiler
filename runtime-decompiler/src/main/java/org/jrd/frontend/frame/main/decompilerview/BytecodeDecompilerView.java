@@ -323,7 +323,7 @@ public class BytecodeDecompilerView {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 GlobalConsole.getConsole().show();
-                if (!isDecompiledBytecodeBufferVisible()) {
+                if (isBinaryBufferVisible()) {
                     compileAction.upload(lastDecompiledClass, hex.get());
                 } else {
                     compileAction.run(
@@ -577,6 +577,10 @@ public class BytecodeDecompilerView {
         return buffers.getSelectedComponent().equals(bytecodeBuffer);
     }
 
+    private boolean isBinaryBufferVisible() {
+        return buffers.getSelectedComponent().equals(binaryBuffer);
+    }
+
     private void handleBuffersDetaching() {
         if (shouldAttach) {
             shouldAttach = false;
@@ -784,7 +788,7 @@ public class BytecodeDecompilerView {
             worker.overwriteClass(
                     getSelectedDecompiler(), BytecodeDecompilerView.this.lastDecompiledClass,
                     BytecodeDecompilerView.this.bytecodeSyntaxTextArea.getText(), BytecodeDecompilerView.this.hex.get(),
-                    !isDecompiledBytecodeBufferVisible()
+                    isBinaryBufferVisible()
             );
         }
     }
