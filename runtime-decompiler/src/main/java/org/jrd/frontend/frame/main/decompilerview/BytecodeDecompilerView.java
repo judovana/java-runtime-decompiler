@@ -106,7 +106,8 @@ public class BytecodeDecompilerView {
     private JButton compileAndUploadButton;
     private JComboBox<DecompilerWrapper> pluginComboBox;
     private final JTabbedPane buffers;
-    private JPanel sourceBuffer;
+
+    private JPanel bytecodeBuffer;
     private RTextScrollPane bytecodeScrollPane;
     private RSyntaxTextArea bytecodeSyntaxTextArea;
     private SearchControlsPanel bytecodeSearchControls;
@@ -322,7 +323,7 @@ public class BytecodeDecompilerView {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 GlobalConsole.getConsole().show();
-                if (!isSourceBufferVisible()) {
+                if (!isDecompiledBytecodeBufferVisible()) {
                     compileAction.upload(lastDecompiledClass, hex.get());
                 } else {
                     compileAction.run(
@@ -346,7 +347,7 @@ public class BytecodeDecompilerView {
         buffers.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent changeEvent) {
-                if (isSourceBufferVisible()) {
+                if (isDecompiledBytecodeBufferVisible()) {
                     compileButton.setEnabled(true);
                     insertButton.setEnabled(true);
                 } else {
@@ -357,7 +358,7 @@ public class BytecodeDecompilerView {
         });
         undoButton = ImageButtonFactory.createUndoButton();
         undoButton.addActionListener(actionEvent -> {
-            if (isSourceBufferVisible()) {
+            if (isDecompiledBytecodeBufferVisible()) {
                 bytecodeSyntaxTextArea.undoLastAction();
             } else {
                 hex.undo();
@@ -366,7 +367,7 @@ public class BytecodeDecompilerView {
 
         redoButton = ImageButtonFactory.createRedoButton();
         redoButton.addActionListener(actionEvent -> {
-            if (isSourceBufferVisible()) {
+            if (isDecompiledBytecodeBufferVisible()) {
                 bytecodeSyntaxTextArea.redoLastAction();
             } else {
                 hex.redo();
@@ -375,7 +376,7 @@ public class BytecodeDecompilerView {
 
         insertButton = ImageButtonFactory.createEditButton("Insert agent API to current position");
         insertButton.addActionListener(actionEvent -> {
-            if (isSourceBufferVisible()) {
+            if (isDecompiledBytecodeBufferVisible()) {
                 showApiMenu(new Point(0, 0));
             } else {
                 Logger.getLogger().log(Logger.Level.ALL, "Unable to insert agent API into binary buffer.");
@@ -459,9 +460,9 @@ public class BytecodeDecompilerView {
         classes.setLayout(new BorderLayout());
         classes.setBorder(new EtchedBorder());
 
-        sourceBuffer = new JPanel();
-        sourceBuffer.setLayout(new BorderLayout());
-        sourceBuffer.setBorder(new EtchedBorder());
+        bytecodeBuffer = new JPanel();
+        bytecodeBuffer.setLayout(new BorderLayout());
+        bytecodeBuffer.setBorder(new EtchedBorder());
 
         binaryBuffer = new JPanel();
         binaryBuffer.setLayout(new BorderLayout());
@@ -511,9 +512,9 @@ public class BytecodeDecompilerView {
         classesPanel.add(classesScrollPane, BorderLayout.CENTER);
         classes.add(classesPanel);
 
-        sourceBuffer.setName("Source buffer");
-        sourceBuffer.add(bytecodeScrollPane);
-        sourceBuffer.add(bytecodeSearchControls, BorderLayout.SOUTH);
+        bytecodeBuffer.setName("Source buffer");
+        bytecodeBuffer.add(bytecodeScrollPane);
+        bytecodeBuffer.add(bytecodeSearchControls, BorderLayout.SOUTH);
         binaryBuffer.setName("Binary buffer");
         binaryBuffer.add(hex);
 
@@ -521,7 +522,7 @@ public class BytecodeDecompilerView {
 
         binaryBuffer.add(hexSearchControls, BorderLayout.SOUTH);
 
-        buffers.add(sourceBuffer);
+        buffers.add(bytecodeBuffer);
         buffers.add(binaryBuffer);
 
         buffersPanel = new JPanel(new BorderLayout());
@@ -572,8 +573,8 @@ public class BytecodeDecompilerView {
         this.dependenciesReader = depsReader;
     }
 
-    private boolean isSourceBufferVisible() {
-        return buffers.getSelectedComponent().equals(sourceBuffer);
+    private boolean isDecompiledBytecodeBufferVisible() {
+        return buffers.getSelectedComponent().equals(bytecodeBuffer);
     }
 
     private void handleBuffersDetaching() {
@@ -783,7 +784,7 @@ public class BytecodeDecompilerView {
             worker.overwriteClass(
                     getSelectedDecompiler(), BytecodeDecompilerView.this.lastDecompiledClass,
                     BytecodeDecompilerView.this.bytecodeSyntaxTextArea.getText(), BytecodeDecompilerView.this.hex.get(),
-                    !isSourceBufferVisible()
+                    !isDecompiledBytecodeBufferVisible()
             );
         }
     }
