@@ -1,12 +1,16 @@
 package org.jrd.frontend.frame.settings;
 
 import org.jrd.backend.data.Config;
+import org.jrd.frontend.frame.filesystem.NewFsVmView;
 import org.jrd.frontend.frame.main.decompilerview.BytecodeDecompilerView;
 
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
+
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -43,6 +47,33 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
             );
         });
         dependenceNumbers.setSelectedItem(initialConfigNumbers);
+        gbc.gridy = 3;
+        this.add(new JLabel("Additional source-path"), gbc);
+        gbc.gridy = 4;
+        JTextField srcPath = new JTextField();
+        this.add(srcPath, gbc);
+        gbc.weightx = 0;
+        gbc.gridwidth = 1;
+        gbc.gridx = 2;
+        JButton selectSrcPath = new JButton("...");
+        this.add(selectSrcPath, gbc);
+        gbc.weightx = 0;
+        gbc.gridwidth = 1;
+        gbc.gridx = 1;
+        gbc.gridy = 5;
+        this.add(new JLabel("Additional class-path"), gbc);
+        gbc.gridy = 6;
+        JTextField classPath = new JTextField();
+        this.add(classPath, gbc);
+        gbc.weightx = 0;
+        gbc.gridwidth = 1;
+        gbc.gridx = 2;
+        JButton selectClassPath = new JButton("...");
+        this.add(selectClassPath, gbc);
+
+        selectSrcPath.addActionListener(actionEvent -> NewFsVmView.CpNamePanel.selectCp(srcPath, selectSrcPath));
+        selectClassPath.addActionListener(actionEvent -> NewFsVmView.CpNamePanel.selectCp(classPath, selectClassPath));
+
     }
 
     public boolean shouldUseJavapSignatures() {

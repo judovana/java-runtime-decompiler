@@ -87,10 +87,10 @@ public class NewFsVmView extends JDialog {
 
             this.setLayout(new BorderLayout());
             this.add(textAndName, BorderLayout.CENTER);
-            selectCpButton.addActionListener(actionEvent -> selectCp());
+            selectCpButton.addActionListener(actionEvent -> selectCp(cpTextField, selectCpButton));
         }
 
-        private void selectCp() {
+        public static void selectCp(JTextField cpTextField, JButton selectCpButton) {
             JFileChooser jf = new JFileChooser(lastOpened);
             jf.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 
