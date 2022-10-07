@@ -4,7 +4,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
 
-import org.fife.ui.hex.swing.HexEditor;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
@@ -64,8 +63,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -111,9 +108,7 @@ public class BytecodeDecompilerView {
     private RTextScrollPane bytecodeScrollPane;
     private RSyntaxTextArea bytecodeSyntaxTextArea;
     private SearchControlsPanel bytecodeSearchControls;
-    private JPanel binaryBuffer;
-    private HexEditor hex;
-    private SearchControlsPanel hexSearchControls;
+    private HexWithControls binary;
 
     private JPanel additionalSrcBuffer;
     private RTextScrollPane additionalSrcScrollPane;
@@ -123,9 +118,7 @@ public class BytecodeDecompilerView {
     private RTextScrollPane additionalBytecodeScrollPane;
     private RSyntaxTextArea additionalBytecodeSyntaxTextArea;
     private SearchControlsPanel additionalBytecodeSearchControls;
-    private JPanel additionalBinaryBuffer;
-    private HexEditor additionalHex;
-    private SearchControlsPanel additionalHexSearchControls;
+    private HexWithControls additionalBinary;
 
     private ActionListener bytesActionListener;
     private ActionListener classesActionListener;
@@ -335,14 +328,33 @@ public class BytecodeDecompilerView {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 GlobalConsole.getConsole().show();
-                if (isBinaryBufferVisible()) {
-                    compileAction.upload(lastDecompiledClass, hex.get());
-                } else {
+
+                if (isAdditionalBinaryBufferVisible()) {
+                    compileAction.upload(lastDecompiledClass, additionalBinary.get());
+                } else if (isBinaryBufferVisible()) {
+                    compileAction.upload(lastDecompiledClass, binary.get());
+                } else if (isDecompiledBytecodeBufferVisible()) {
                     compileAction.run(
                             (DecompilerWrapper) pluginComboBox.getSelectedItem(), true,
                             new IdentifiedSource(
                                     new ClassIdentifier(lastDecompiledClass),
                                     bytecodeSyntaxTextArea.getText().getBytes(StandardCharsets.UTF_8)
+                            )
+                    );
+                } else if (isAdditionalDecompiledBytecodeBufferVisible()) {
+                    compileAction.run(
+                            (DecompilerWrapper) pluginComboBox.getSelectedItem(), true,
+                            new IdentifiedSource(
+                                    new ClassIdentifier(lastDecompiledClass),
+                                    additionalBytecodeSyntaxTextArea.getText().getBytes(StandardCharsets.UTF_8)
+                            )
+                    );
+                } else if (isAdditionalSrcBufferVisible()) {
+                    compileAction.run(
+                            (DecompilerWrapper) pluginComboBox.getSelectedItem(), true,
+                            new IdentifiedSource(
+                                    new ClassIdentifier(lastDecompiledClass),
+                                    additionalSrcSyntaxTextArea.getText().getBytes(StandardCharsets.UTF_8)
                             )
                     );
                 }
@@ -359,10 +371,11 @@ public class BytecodeDecompilerView {
         buffers.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent changeEvent) {
-                if (isDecompiledBytecodeBufferVisible()) {
+                if (isDecompiledBytecodeBufferVisible() || isAdditionalDecompiledBytecodeBufferVisible() ||
+                        isAdditionalSrcBufferVisible()) {
                     compileButton.setEnabled(true);
                     insertButton.setEnabled(true);
-                } else if (isBinaryBufferVisible()) {
+                } else if (isBinaryBufferVisible() || isAdditionalBinaryBufferVisible()) {
                     compileButton.setEnabled(false);
                     insertButton.setEnabled(false);
                 }
@@ -373,7 +386,9 @@ public class BytecodeDecompilerView {
             if (isDecompiledBytecodeBufferVisible()) {
                 bytecodeSyntaxTextArea.undoLastAction();
             } else if (isBinaryBufferVisible()) {
-                hex.undo();
+                binary.undo();
+            } else if (isAdditionalBinaryBufferVisible()) {
+                additionalBinary.undo();
             }
         });
 
@@ -382,7 +397,9 @@ public class BytecodeDecompilerView {
             if (isDecompiledBytecodeBufferVisible()) {
                 bytecodeSyntaxTextArea.redoLastAction();
             } else if (isBinaryBufferVisible()) {
-                hex.redo();
+                binary.redo();
+            } else if (isAdditionalBinaryBufferVisible()) {
+                additionalBinary.redo();
             }
         });
 
@@ -436,14 +453,12 @@ public class BytecodeDecompilerView {
         bytecodeSearchControls = SearchControlsPanel.createBytecodeControls(this);
         bytecodeSyntaxTextArea = createSrcTextArea(true, bytecodeSearchControls); //FIXME verify hardcoded, encapsualte elsewhere
         bytecodeScrollPane = new RTextScrollPane(bytecodeSyntaxTextArea);
-        hex = createHexArea(hexSearchControls); // FIXME will now cause npe, as local varibale will be forever null
-        hexSearchControls = SearchControlsPanel.createHexControls(hex);
+        binary = new HexWithControls("Binary buffer");
 
         //additionalBytecodeSearchControls = SearchControlsPanel.createBytecodeControls(this);
         additionalBytecodeSyntaxTextArea = createSrcTextArea(false, additionalBytecodeSearchControls); //FIXME, nto working, to much hardcoded stuff
         additionalBytecodeScrollPane = new RTextScrollPane(additionalBytecodeSyntaxTextArea);
-        additionalHex = createHexArea(additionalHexSearchControls); // FIXME will now cause npe, as local varibale will be forever null
-        additionalHexSearchControls = SearchControlsPanel.createHexControls(additionalHex);
+        additionalBinary = new HexWithControls("Additional binary buffer");
 
         //additionalSrcSearchControls = SearchControlsPanel.createBytecodeControls(this);
         additionalSrcSyntaxTextArea = createSrcTextArea(false, additionalSrcSearchControls); //FIXME, nto working, to much hardcoded stuff
@@ -453,11 +468,12 @@ public class BytecodeDecompilerView {
         classes.setLayout(new BorderLayout());
         classes.setBorder(new EtchedBorder());
 
-        bytecodeBuffer = initTabLayers("Source buffer");
-        binaryBuffer = initTabLayers("Binary buffer");
-        additionalBytecodeBuffer = initTabLayers("Additional source buffer");
-        additionalBinaryBuffer = initTabLayers("Additional binary buffer");
-        additionalSrcBuffer = initTabLayers("Additional source");
+        bytecodeBuffer = new JPanel();
+        HexWithControls.initTabLayers(bytecodeBuffer, "Source buffer");
+        additionalBytecodeBuffer = new JPanel();
+        HexWithControls.initTabLayers(additionalBytecodeBuffer, "Additional source buffer");
+        additionalSrcBuffer = new JPanel();
+        HexWithControls.initTabLayers(additionalSrcBuffer, "Additional source");
 
         buffersToolBar = new JPanel(new GridBagLayout());
         buffersToolBar.setBorder(new EtchedBorder());
@@ -505,18 +521,14 @@ public class BytecodeDecompilerView {
 
         bytecodeBuffer.add(bytecodeScrollPane);
         bytecodeBuffer.add(bytecodeSearchControls, BorderLayout.SOUTH);
-        binaryBuffer.add(hex);
-        binaryBuffer.add(hexSearchControls, BorderLayout.SOUTH);
 
         additionalBytecodeBuffer.add(additionalBytecodeScrollPane);
-        additionalBinaryBuffer.add(additionalHex);
-
         additionalSrcBuffer.add(additionalSrcScrollPane);
 
         buffers.add(bytecodeBuffer);
-        buffers.add(binaryBuffer);
+        buffers.add(binary);
         buffers.add(additionalBytecodeBuffer);
-        buffers.add(additionalBinaryBuffer);
+        buffers.add(additionalBinary);
         buffers.add(additionalSrcBuffer);
 
         buffersPanel = new JPanel(new BorderLayout());
@@ -542,21 +554,6 @@ public class BytecodeDecompilerView {
 
     }
 
-    private HexEditor createHexArea(SearchControlsPanel hexSearch) {
-        HexEditor lhex = new HexEditor();
-        lhex.addKeyListenerToTable(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if ((e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) != 0) {
-                    if (e.getKeyCode() == KeyEvent.VK_F) {
-                        hexSearch.focus();
-                    }
-                }
-            }
-        });
-        return lhex;
-    }
-
     private RSyntaxTextArea createSrcTextArea(boolean api, SearchControlsPanel controls) {
         RSyntaxTextArea rst = new RSyntaxTextArea();
         rst.addKeyListener(new KeyAdapter() {
@@ -580,14 +577,6 @@ public class BytecodeDecompilerView {
         rst.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
         rst.setCodeFoldingEnabled(true);
         return rst;
-    }
-
-    private JPanel initTabLayers(String title) {
-        JPanel p = new JPanel();
-        p.setName(title);
-        p.setLayout(new BorderLayout());
-        p.setBorder(new EtchedBorder());
-        return p;
     }
 
     private void handleClassInfoSwitching() {
@@ -620,7 +609,19 @@ public class BytecodeDecompilerView {
     }
 
     private boolean isBinaryBufferVisible() {
-        return buffers.getSelectedComponent().equals(binaryBuffer);
+        return buffers.getSelectedComponent().equals(binary);
+    }
+
+    private boolean isAdditionalBinaryBufferVisible() {
+        return buffers.getSelectedComponent().equals(additionalBinary);
+    }
+
+    private boolean isAdditionalDecompiledBytecodeBufferVisible() {
+        return buffers.getSelectedComponent().equals(additionalBytecodeBuffer);
+    }
+
+    private boolean isAdditionalSrcBufferVisible() {
+        return buffers.getSelectedComponent().equals(additionalSrcBuffer);
     }
 
     private void handleBuffersDetaching() {
@@ -757,16 +758,9 @@ public class BytecodeDecompilerView {
                 Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
             }
         });
-        try {
-            hex.open(new ByteArrayInputStream(source));
-        } catch (IOException ex) {
-            Logger.getLogger().log(ex);
-        }
-        try {
-            additionalHex.open(new ByteArrayInputStream(additionalSource));
-        } catch (IOException ex) {
-            Logger.getLogger().log(ex);
-        }
+        binary.open(source);
+        additionalBinary.open(additionalSource);
+
         this.lastDecompiledClass = name;
     }
 
@@ -826,10 +820,6 @@ public class BytecodeDecompilerView {
         popup = ap;
     }
 
-    SearchControlsPanel getBytecodeSearchControls() {
-        return bytecodeSearchControls;
-    }
-
     RSyntaxTextArea getBytecodeSyntaxTextArea() {
         return bytecodeSyntaxTextArea;
     }
@@ -844,11 +834,30 @@ public class BytecodeDecompilerView {
 
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
-            worker.overwriteClass(
-                    getSelectedDecompiler(), BytecodeDecompilerView.this.lastDecompiledClass,
-                    BytecodeDecompilerView.this.bytecodeSyntaxTextArea.getText(), BytecodeDecompilerView.this.hex.get(),
-                    isBinaryBufferVisible()
-            );
+            if (isBinaryBufferVisible() || isDecompiledBytecodeBufferVisible()) {
+                worker.overwriteClass(
+                        getSelectedDecompiler(), BytecodeDecompilerView.this.lastDecompiledClass,
+                        BytecodeDecompilerView.this.bytecodeSyntaxTextArea.getText(), BytecodeDecompilerView.this.binary.get(),
+                        isBinaryBufferVisible()
+                );
+            } else if (isAdditionalBinaryBufferVisible() || isAdditionalDecompiledBytecodeBufferVisible()) {
+                worker.overwriteClass(
+                        getSelectedDecompiler(), BytecodeDecompilerView.this.lastDecompiledClass,
+                        BytecodeDecompilerView.this.additionalBytecodeSyntaxTextArea.getText(),
+                        BytecodeDecompilerView.this.additionalBinary.get(), isAdditionalBinaryBufferVisible()
+                );
+            } else if (isAdditionalSrcBufferVisible()) {
+                worker.overwriteClass(
+                        getSelectedDecompiler(), BytecodeDecompilerView.this.lastDecompiledClass,
+                        BytecodeDecompilerView.this.additionalSrcSyntaxTextArea.getText(), new byte[0], isAdditionalBinaryBufferVisible()
+                );
+            } else {
+                JOptionPane.showMessageDialog(
+                        BytecodeDecompilerView.this.buffers,
+                        "No tab selected? \n " + BytecodeDecompilerView.this.buffers.getSelectedComponent()
+                );
+            }
+
         }
     }
 
