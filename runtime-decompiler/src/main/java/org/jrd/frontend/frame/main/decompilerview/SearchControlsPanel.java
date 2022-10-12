@@ -4,6 +4,10 @@ import org.fife.ui.hex.event.HexSearchActionListener;
 import org.fife.ui.hex.event.HexSearchDocumentListener;
 import org.fife.ui.hex.swing.HexEditor;
 import org.fife.ui.hex.swing.HexSearch;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rtextarea.SearchContext;
+import org.fife.ui.rtextarea.SearchEngine;
+import org.fife.ui.rtextarea.SearchResult;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -32,17 +36,18 @@ final class SearchControlsPanel extends JPanel {
     private final JButton previousButton = new JButton("Previous");
     private final JButton nextButton = new JButton("Next");
     private final Color originalSearchFieldColor = searchField.getForeground();
+    private SearchContext searchContext;
 
     private final ActionListener wasNotFoundActionListener;
+    private RSyntaxTextArea searchableText;
 
-    private SearchControlsPanel(Component optionsComponent, Component forFocus) {
+    private SearchControlsPanel(Component optionsComponent, Component owner) {
         super(new GridBagLayout());
-
         searchField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                    forFocus.requestFocus();
+                    owner.requestFocus(); //TODO, verify if it is correct component
                 }
             }
         });
@@ -53,7 +58,7 @@ final class SearchControlsPanel extends JPanel {
             wasNotFoundTimer.start();
         };
 
-        UndoRedoKeyAdapter keyAdapter = new UndoRedoKeyAdapter();
+        UndoRedoKeyAdapter keyAdapter = new UndoRedoKeyAdapter(this);
         searchField.getDocument().addUndoableEditListener(keyAdapter.getUndoManager());
         searchField.addKeyListener(keyAdapter);
 
@@ -110,7 +115,7 @@ final class SearchControlsPanel extends JPanel {
         return controls;
     }
 
-    public static SearchControlsPanel createBytecodeControls(BytecodeDecompilerView parent) {
+    public static SearchControlsPanel createBytecodeControls(TextWithControls owner) {
         final JCheckBox regexCheckBox = new JCheckBox("Regex");
         regexCheckBox.setIconTextGap(3);
         final JCheckBox caseCheckBox = new JCheckBox("Match case");
@@ -120,7 +125,8 @@ final class SearchControlsPanel extends JPanel {
         checkboxes.add(regexCheckBox);
         checkboxes.add(caseCheckBox);
 
-        SearchControlsPanel controls = new SearchControlsPanel(checkboxes, parent.getBytecodeSyntaxTextArea());
+        SearchControlsPanel controls = new SearchControlsPanel(checkboxes, owner);
+        controls.setUnderlyingTextView(owner);
 
         DocumentListener listener = new DocumentListener() {
             @Override
@@ -140,7 +146,7 @@ final class SearchControlsPanel extends JPanel {
 
             private void invokeSearch() {
                 SwingUtilities.invokeLater(
-                        () -> parent.initialSearchBytecode(
+                        () -> controls.initialSearchBytecode(
                                 controls.searchField.getText(), regexCheckBox.isSelected(), caseCheckBox.isSelected()
                         )
                 );
@@ -150,10 +156,15 @@ final class SearchControlsPanel extends JPanel {
         caseCheckBox.addActionListener(actionEvent -> listener.changedUpdate(null));
 
         controls.searchField.getDocument().addDocumentListener(listener);
-        controls.previousButton.addActionListener(e -> parent.searchBytecode(false));
-        controls.nextButton.addActionListener(e -> parent.searchBytecode(true));
-
+        controls.previousButton.addActionListener(e -> controls.searchBytecode(false));
+        controls.nextButton.addActionListener(e -> controls.searchBytecode(true));
+        controls.nextButton.setToolTipText(BytecodeDecompilerView.styleTooltip() + "F3");
+        controls.searchField.setToolTipText(BytecodeDecompilerView.styleTooltip() + "ctrl+f");
         return controls;
+    }
+
+    private void setUnderlyingTextView(TextWithControls owner) {
+        this.searchableText = owner.getSyntaxTextArea();
     }
 
     public void fireWasNotFoundAction() {
@@ -162,5 +173,35 @@ final class SearchControlsPanel extends JPanel {
 
     public void focus() {
         searchField.requestFocus();
+    }
+
+    void initialSearchBytecode(String query, boolean isRegex, boolean matchesCase) {
+        searchContext = new SearchContext();
+        searchContext.setSearchFor(query);
+        searchContext.setWholeWord(false);
+        searchContext.setSearchWrap(true);
+        searchContext.setRegularExpression(isRegex);
+        searchContext.setMatchCase(matchesCase);
+        deselectBytecodeSyntaxArea(); // avoid jumping to next location while typing one char at a time
+        searchBytecode(true);
+    }
+
+    void searchBytecode(boolean forward) {
+        if (searchContext != null) {
+            searchContext.setSearchForward(forward);
+            SearchResult result = SearchEngine.find(searchableText, searchContext);
+            if (!result.wasFound()) {
+                this.fireWasNotFoundAction();
+            }
+        }
+    }
+
+    private void deselectBytecodeSyntaxArea() {
+        int newDot = searchableText.getSelectionStart();
+        searchableText.select(newDot, newDot);
+    }
+
+    public void clickNextButton() {
+        nextButton.doClick();
     }
 }

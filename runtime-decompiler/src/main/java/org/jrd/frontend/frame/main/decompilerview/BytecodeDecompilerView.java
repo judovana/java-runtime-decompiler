@@ -4,12 +4,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
 
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
-import org.fife.ui.rtextarea.RTextScrollPane;
-import org.fife.ui.rtextarea.SearchContext;
-import org.fife.ui.rtextarea.SearchEngine;
-import org.fife.ui.rtextarea.SearchResult;
 import org.jrd.backend.core.ClassInfo;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.Config;
@@ -63,7 +57,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -104,20 +97,11 @@ public class BytecodeDecompilerView {
     private JComboBox<DecompilerWrapper> pluginComboBox;
     private final JTabbedPane buffers;
 
-    private JPanel bytecodeBuffer;
-    private RTextScrollPane bytecodeScrollPane;
-    private RSyntaxTextArea bytecodeSyntaxTextArea;
-    private SearchControlsPanel bytecodeSearchControls;
+    private TextWithControls bytecodeBuffer;
     private HexWithControls binary;
 
-    private JPanel additionalSrcBuffer;
-    private RTextScrollPane additionalSrcScrollPane;
-    private RSyntaxTextArea additionalSrcSyntaxTextArea;
-    private SearchControlsPanel additionalSrcSearchControls;
-    private JPanel additionalBytecodeBuffer;
-    private RTextScrollPane additionalBytecodeScrollPane;
-    private RSyntaxTextArea additionalBytecodeSyntaxTextArea;
-    private SearchControlsPanel additionalBytecodeSearchControls;
+    private TextWithControls additionalSrcBuffer;
+    private TextWithControls additionalBytecodeBuffer;
     private HexWithControls additionalBinary;
 
     private ActionListener bytesActionListener;
@@ -125,14 +109,11 @@ public class BytecodeDecompilerView {
     private ActionListener initActionListener;
     private DecompilationController.QuickCompiler compileAction;
     private OverwriteActionListener overwriteActionListener;
-    private DecompilationController.AgentApiGenerator popup;
     private DependenciesReader dependenciesReader;
 
     private ClassInfo[] loadedClasses;
     private String lastDecompiledClass = "";
     private String lastFqn = "java.lang.Override";
-
-    private SearchContext searchContext;
 
     private boolean splitPaneFirstResize = true;
     private boolean shouldAttach = false;
@@ -187,7 +168,7 @@ public class BytecodeDecompilerView {
                 updateClassList();
             }
         });
-        UndoRedoKeyAdapter classesSortFieldKeyAdapter = new UndoRedoKeyAdapter();
+        UndoRedoKeyAdapter classesSortFieldKeyAdapter = new UndoRedoKeyAdapter(null);
         classesSortField.getDocument().addUndoableEditListener(classesSortFieldKeyAdapter.getUndoManager());
         classesSortField.addKeyListener(classesSortFieldKeyAdapter);
 
@@ -316,9 +297,7 @@ public class BytecodeDecompilerView {
                 GlobalConsole.getConsole().show();
                 compileAction.run(
                         (DecompilerWrapper) pluginComboBox.getSelectedItem(), false,
-                        new IdentifiedSource(
-                                new ClassIdentifier(lastDecompiledClass), bytecodeSyntaxTextArea.getText().getBytes(StandardCharsets.UTF_8)
-                        )
+                        new IdentifiedSource(new ClassIdentifier(lastDecompiledClass), bytecodeBuffer.getTextAsBytes())
                 );
             }
         });
@@ -336,26 +315,17 @@ public class BytecodeDecompilerView {
                 } else if (isDecompiledBytecodeBufferVisible()) {
                     compileAction.run(
                             (DecompilerWrapper) pluginComboBox.getSelectedItem(), true,
-                            new IdentifiedSource(
-                                    new ClassIdentifier(lastDecompiledClass),
-                                    bytecodeSyntaxTextArea.getText().getBytes(StandardCharsets.UTF_8)
-                            )
+                            new IdentifiedSource(new ClassIdentifier(lastDecompiledClass), bytecodeBuffer.getTextAsBytes())
                     );
                 } else if (isAdditionalDecompiledBytecodeBufferVisible()) {
                     compileAction.run(
                             (DecompilerWrapper) pluginComboBox.getSelectedItem(), true,
-                            new IdentifiedSource(
-                                    new ClassIdentifier(lastDecompiledClass),
-                                    additionalBytecodeSyntaxTextArea.getText().getBytes(StandardCharsets.UTF_8)
-                            )
+                            new IdentifiedSource(new ClassIdentifier(lastDecompiledClass), additionalBytecodeBuffer.getTextAsBytes())
                     );
                 } else if (isAdditionalSrcBufferVisible()) {
                     compileAction.run(
                             (DecompilerWrapper) pluginComboBox.getSelectedItem(), true,
-                            new IdentifiedSource(
-                                    new ClassIdentifier(lastDecompiledClass),
-                                    additionalSrcSyntaxTextArea.getText().getBytes(StandardCharsets.UTF_8)
-                            )
+                            new IdentifiedSource(new ClassIdentifier(lastDecompiledClass), additionalSrcBuffer.getTextAsBytes())
                     );
                 }
             }
@@ -382,33 +352,61 @@ public class BytecodeDecompilerView {
             }
         });
         undoButton = ImageButtonFactory.createUndoButton();
-        undoButton.addActionListener(actionEvent -> {
-            if (isDecompiledBytecodeBufferVisible()) {
-                bytecodeSyntaxTextArea.undoLastAction();
-            } else if (isBinaryBufferVisible()) {
-                binary.undo();
-            } else if (isAdditionalBinaryBufferVisible()) {
-                additionalBinary.undo();
+        undoButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                if (BytecodeDecompilerView.this.isDecompiledBytecodeBufferVisible()) {
+                    bytecodeBuffer.undoLastAction();
+                }
+                if (BytecodeDecompilerView.this.isAdditionalDecompiledBytecodeBufferVisible()) {
+                    additionalBytecodeBuffer.undoLastAction();
+                }
+                if (BytecodeDecompilerView.this.isAdditionalSrcBufferVisible()) {
+                    additionalSrcBuffer.undoLastAction();
+                } else if (BytecodeDecompilerView.this.isBinaryBufferVisible()) {
+                    binary.undo();
+                } else if (BytecodeDecompilerView.this.isAdditionalBinaryBufferVisible()) {
+                    additionalBinary.undo();
+                }
             }
         });
 
         redoButton = ImageButtonFactory.createRedoButton();
-        redoButton.addActionListener(actionEvent -> {
-            if (isDecompiledBytecodeBufferVisible()) {
-                bytecodeSyntaxTextArea.redoLastAction();
-            } else if (isBinaryBufferVisible()) {
-                binary.redo();
-            } else if (isAdditionalBinaryBufferVisible()) {
-                additionalBinary.redo();
+        redoButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                if (BytecodeDecompilerView.this.isDecompiledBytecodeBufferVisible()) {
+                    bytecodeBuffer.redoLastAction();
+                }
+                if (BytecodeDecompilerView.this.isAdditionalDecompiledBytecodeBufferVisible()) {
+                    additionalBytecodeBuffer.redoLastAction();
+                }
+                if (BytecodeDecompilerView.this.isAdditionalSrcBufferVisible()) {
+                    additionalSrcBuffer.redoLastAction();
+                } else if (BytecodeDecompilerView.this.isBinaryBufferVisible()) {
+                    binary.redo();
+                } else if (BytecodeDecompilerView.this.isAdditionalBinaryBufferVisible()) {
+                    additionalBinary.redo();
+                }
             }
         });
 
         insertButton = ImageButtonFactory.createEditButton("Insert agent API to current position");
-        insertButton.addActionListener(actionEvent -> {
-            if (isDecompiledBytecodeBufferVisible()) {
-                showApiMenu(new Point(0, 0), bytecodeSyntaxTextArea);
-            } else if (isBinaryBufferVisible()) {
-                Logger.getLogger().log(Logger.Level.ALL, "Unable to insert agent API into binary buffer.");
+        insertButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                if (BytecodeDecompilerView.this.isDecompiledBytecodeBufferVisible()) {
+                    bytecodeBuffer.showApiMenu(new Point(0, 0));
+                } else if (BytecodeDecompilerView.this.isAdditionalDecompiledBytecodeBufferVisible()) {
+                    additionalBytecodeBuffer.showApiMenu(new Point(0, 0));
+                } else if (BytecodeDecompilerView.this.isAdditionalSrcBufferVisible()) {
+                    additionalSrcBuffer.showApiMenu(new Point(0, 0));
+                } else if (BytecodeDecompilerView.this.isBinaryBufferVisible() ||
+                        BytecodeDecompilerView.this.isAdditionalBinaryBufferVisible()) {
+                    Logger.getLogger().log(Logger.Level.ALL, "Unable to insert agent API into binary buffer.");
+                } else {
+                    JOptionPane.showMessageDialog(null, "weird selected component: " + buffers.getSelectedComponent());
+                }
             }
         });
 
@@ -450,30 +448,15 @@ public class BytecodeDecompilerView {
             }
         });
 
-        bytecodeSearchControls = SearchControlsPanel.createBytecodeControls(this);
-        bytecodeSyntaxTextArea = createSrcTextArea(true, bytecodeSearchControls); //FIXME verify hardcoded, encapsualte elsewhere
-        bytecodeScrollPane = new RTextScrollPane(bytecodeSyntaxTextArea);
+        bytecodeBuffer = new TextWithControls("Source buffer");
         binary = new HexWithControls("Binary buffer");
-
-        //additionalBytecodeSearchControls = SearchControlsPanel.createBytecodeControls(this); //FIXME, nto working, to much hardcoded stuff
-        additionalBytecodeSyntaxTextArea = createSrcTextArea(false, additionalBytecodeSearchControls);
-        additionalBytecodeScrollPane = new RTextScrollPane(additionalBytecodeSyntaxTextArea);
+        additionalBytecodeBuffer = new TextWithControls("Additional source buffer");
         additionalBinary = new HexWithControls("Additional binary buffer");
-
-        //additionalSrcSearchControls = SearchControlsPanel.createBytecodeControls(this);
-        additionalSrcSyntaxTextArea = createSrcTextArea(false, additionalSrcSearchControls); //FIXME, nto working, to much hardcoded stuff
-        additionalSrcScrollPane = new RTextScrollPane(additionalSrcSyntaxTextArea);
+        additionalSrcBuffer = new TextWithControls("Additional source");
 
         classes = new JPanel();
         classes.setLayout(new BorderLayout());
         classes.setBorder(new EtchedBorder());
-
-        bytecodeBuffer = new JPanel();
-        HexWithControls.initTabLayers(bytecodeBuffer, "Source buffer");
-        additionalBytecodeBuffer = new JPanel();
-        HexWithControls.initTabLayers(additionalBytecodeBuffer, "Additional source buffer");
-        additionalSrcBuffer = new JPanel();
-        HexWithControls.initTabLayers(additionalSrcBuffer, "Additional source");
 
         buffersToolBar = new JPanel(new GridBagLayout());
         buffersToolBar.setBorder(new EtchedBorder());
@@ -519,12 +502,6 @@ public class BytecodeDecompilerView {
         classesPanel.add(classesScrollPane, BorderLayout.CENTER);
         classes.add(classesPanel);
 
-        bytecodeBuffer.add(bytecodeScrollPane);
-        bytecodeBuffer.add(bytecodeSearchControls, BorderLayout.SOUTH);
-
-        additionalBytecodeBuffer.add(additionalBytecodeScrollPane);
-        additionalSrcBuffer.add(additionalSrcScrollPane);
-
         buffers.add(bytecodeBuffer);
         buffers.add(binary);
         buffers.add(additionalBytecodeBuffer);
@@ -552,31 +529,6 @@ public class BytecodeDecompilerView {
 
         bytecodeDecompilerPanel.setVisible(true);
 
-    }
-
-    private RSyntaxTextArea createSrcTextArea(boolean api, SearchControlsPanel controls) {
-        RSyntaxTextArea rst = new RSyntaxTextArea();
-        rst.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if ((e.getModifiersEx() & KeyEvent.ALT_DOWN_MASK) != 0) {
-                    if (e.getKeyCode() == KeyEvent.VK_INSERT) {
-                        showApiMenu(null, rst);
-                    }
-                }
-                if ((e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) != 0) {
-                    if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-                        showApiMenu(null, rst);
-                    }
-                    if (e.getKeyCode() == KeyEvent.VK_F) {
-                        controls.focus();
-                    }
-                }
-            }
-        });
-        rst.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
-        rst.setCodeFoldingEnabled(true);
-        return rst;
     }
 
     private void handleClassInfoSwitching() {
@@ -735,9 +687,9 @@ public class BytecodeDecompilerView {
     private void setDecompiledClass(
             String name, String data, byte[] source, String additionalData, byte[] additionalSource, String additionalSrcData
     ) {
-        resetSrcArea(additionalSrcSyntaxTextArea, additionalSrcData);
-        resetSrcArea(additionalBytecodeSyntaxTextArea, additionalData);
-        resetSrcArea(bytecodeSyntaxTextArea, data);
+        additionalSrcBuffer.resetSrcArea(additionalSrcData);
+        additionalBytecodeBuffer.resetSrcArea(additionalData);
+        bytecodeBuffer.resetSrcArea(data);
         int bytecodeVersion = getByteCodeVersion(source);
         int buildJavaPerVersion = getJavaFromBytelevel(bytecodeVersion);
         Config.getConfig().setBestSourceTarget(Optional.of(buildJavaPerVersion));
@@ -762,12 +714,6 @@ public class BytecodeDecompilerView {
         additionalBinary.open(additionalSource);
 
         this.lastDecompiledClass = name;
-    }
-
-    private void resetSrcArea(RSyntaxTextArea rsta, String data) {
-        rsta.setText(data);
-        rsta.discardAllEdits(); // makes the bytecode upload not undoable
-        rsta.setCaretPosition(0);
     }
 
     public static int getJavaFromBytelevel(int bytecodeVersion) {
@@ -817,11 +763,9 @@ public class BytecodeDecompilerView {
     }
 
     public void setPopup(DecompilationController.AgentApiGenerator ap) {
-        popup = ap;
-    }
-
-    RSyntaxTextArea getBytecodeSyntaxTextArea() {
-        return bytecodeSyntaxTextArea;
+        bytecodeBuffer.setPopup(ap);
+        additionalBytecodeBuffer.setPopup(ap);
+        additionalSrcBuffer.setPopup(ap);
     }
 
     private class OverwriteActionListener implements ActionListener {
@@ -837,19 +781,19 @@ public class BytecodeDecompilerView {
             if (isBinaryBufferVisible() || isDecompiledBytecodeBufferVisible()) {
                 worker.overwriteClass(
                         getSelectedDecompiler(), BytecodeDecompilerView.this.lastDecompiledClass,
-                        BytecodeDecompilerView.this.bytecodeSyntaxTextArea.getText(), BytecodeDecompilerView.this.binary.get(),
+                        BytecodeDecompilerView.this.bytecodeBuffer.getText(), BytecodeDecompilerView.this.binary.get(),
                         isBinaryBufferVisible()
                 );
             } else if (isAdditionalBinaryBufferVisible() || isAdditionalDecompiledBytecodeBufferVisible()) {
                 worker.overwriteClass(
                         getSelectedDecompiler(), BytecodeDecompilerView.this.lastDecompiledClass,
-                        BytecodeDecompilerView.this.additionalBytecodeSyntaxTextArea.getText(),
-                        BytecodeDecompilerView.this.additionalBinary.get(), isAdditionalBinaryBufferVisible()
+                        BytecodeDecompilerView.this.additionalBytecodeBuffer.getText(), BytecodeDecompilerView.this.additionalBinary.get(),
+                        isAdditionalBinaryBufferVisible()
                 );
             } else if (isAdditionalSrcBufferVisible()) {
                 worker.overwriteClass(
                         getSelectedDecompiler(), BytecodeDecompilerView.this.lastDecompiledClass,
-                        BytecodeDecompilerView.this.additionalSrcSyntaxTextArea.getText(), new byte[0], isAdditionalBinaryBufferVisible()
+                        BytecodeDecompilerView.this.additionalSrcBuffer.getText(), new byte[0], isAdditionalBinaryBufferVisible()
                 );
             } else {
                 JOptionPane.showMessageDialog(
@@ -876,49 +820,6 @@ public class BytecodeDecompilerView {
 
     public DecompilerWrapper getSelectedDecompiler() {
         return (DecompilerWrapper) pluginComboBox.getSelectedItem();
-    }
-
-    void initialSearchBytecode(String query, boolean isRegex, boolean matchesCase) {
-        searchContext = new SearchContext();
-
-        searchContext.setSearchFor(query);
-        searchContext.setWholeWord(false);
-        searchContext.setSearchWrap(true);
-        searchContext.setRegularExpression(isRegex);
-        searchContext.setMatchCase(matchesCase);
-
-        deselectBytecodeSyntaxArea(); // avoid jumping to next location while typing one char at a time
-        searchBytecode(true);
-    }
-
-    void searchBytecode(boolean forward) {
-        searchContext.setSearchForward(forward);
-        SearchResult result = SearchEngine.find(bytecodeSyntaxTextArea, searchContext);
-
-        if (!result.wasFound()) {
-            bytecodeSearchControls.fireWasNotFoundAction();
-        }
-    }
-
-    private void deselectBytecodeSyntaxArea() {
-        int newDot = bytecodeSyntaxTextArea.getSelectionStart();
-        bytecodeSyntaxTextArea.select(newDot, newDot);
-    }
-
-    private void showApiMenu(Point forcedLocation, RSyntaxTextArea origin) {
-        Point caretPosition = origin.getCaret().getMagicCaretPosition();
-        if (caretPosition == null || forcedLocation != null) {
-            caretPosition = forcedLocation;
-        }
-        if (caretPosition == null) {
-            return;
-        }
-
-        // y is offset to the next row
-        popup.getFor(bytecodeSyntaxTextArea, forcedLocation == null).show(
-                bytecodeSyntaxTextArea, caretPosition.x,
-                caretPosition.y + bytecodeSyntaxTextArea.getFontMetrics(bytecodeSyntaxTextArea.getFont()).getHeight()
-        );
     }
 
     public static Dimension buttonSizeBasedOnTextField(JButton originalButton, JTextField referenceTextField) {

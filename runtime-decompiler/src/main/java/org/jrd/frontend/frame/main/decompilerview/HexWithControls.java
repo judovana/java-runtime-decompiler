@@ -18,7 +18,7 @@ public class HexWithControls extends JPanel {
 
     public HexWithControls(String title) {
         initTabLayers(this, title);
-        hex = createHexArea(null);
+        hex = createHexArea();
         this.add(hex);
         hexSearchControls = SearchControlsPanel.createHexControls(hex);
         this.add(hexSearchControls, BorderLayout.SOUTH);
@@ -44,14 +44,17 @@ public class HexWithControls extends JPanel {
         }
     }
 
-    private HexEditor createHexArea(SearchControlsPanel hexSearch) {
+    private HexEditor createHexArea() {
         HexEditor lhex = new HexEditor();
         lhex.addKeyListenerToTable(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_F3) {
+                    hexSearchControls.clickNextButton();
+                }
                 if ((e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) != 0) {
                     if (e.getKeyCode() == KeyEvent.VK_F) {
-                        hexSearch.focus();
+                        hexSearchControls.focus();
                     }
                 }
             }

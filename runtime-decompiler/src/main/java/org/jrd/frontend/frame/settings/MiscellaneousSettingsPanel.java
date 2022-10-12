@@ -65,6 +65,7 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
                         " and disassemblers have ist issues.<br>" + "So if you have sources, and wish to back-compile," +
                         " it is good habit to have original source available."
         );
+        srcPath.setToolTipText(aspl.getToolTipText());
         this.add(aspl, gbc);
         gbc.gridy = 4;
         this.add(srcPath, gbc);
@@ -83,6 +84,7 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
                         "it proved itself, that soem weird class may still be missing. Thus you can add those classes via cp.<br>" +
                         "Future JRD should be able to also upload any non-existing classes to running VM."
         );
+        classPath.setToolTipText(acpl.getToolTipText());
         this.add(acpl, gbc);
         gbc.gridy = 6;
         this.add(classPath, gbc);
