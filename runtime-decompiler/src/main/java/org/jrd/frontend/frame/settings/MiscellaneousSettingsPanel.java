@@ -56,11 +56,15 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
         classPath = new JTextField(cp);
 
         String hint = BytecodeDecompilerView.styleTooltip() +
-                "Additional source-path and classpath is used to show on-fs available src/bytecode of given classes.<br>" +
-                "Class path is in addition used for runtime-compiler as helper provider.";
+                "Additional source-path and classpath is used to show on-fs available src/bytecode of given classes" +
+                " and to help with possible compilation issues. <br>";
         gbc.gridy = 3;
         JLabel aspl = new JLabel("Additional source-path");
-        aspl.setToolTipText(hint);
+        aspl.setToolTipText(
+                hint + "Although JRD was usually used no FS, it happened, that <b>decompilers</b> sucks," +
+                        " and disassemblers have ist issues.<br>" + "So if you have sources, and wish to back-compile," +
+                        " it is good habit to have original source available."
+        );
         this.add(aspl, gbc);
         gbc.gridy = 4;
         this.add(srcPath, gbc);
@@ -74,7 +78,11 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
         gbc.gridx = 1;
         gbc.gridy = 5;
         JLabel acpl = new JLabel("Additional class-path");
-        acpl.setToolTipText(hint);
+        acpl.setToolTipText(
+                hint + "Although JRD was designed to <b>actually fill" + " missing classes</b> on FS from running VM,<br>" +
+                        "it proved itself, that soem weird class may still be missing. Thus you can add those classes via cp.<br>" +
+                        "Future JRD should be able to also upload any non-existing classes to running VM."
+        );
         this.add(acpl, gbc);
         gbc.gridy = 6;
         this.add(classPath, gbc);

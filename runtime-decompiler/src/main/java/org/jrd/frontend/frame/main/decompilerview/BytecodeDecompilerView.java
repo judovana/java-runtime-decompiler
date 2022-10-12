@@ -455,8 +455,8 @@ public class BytecodeDecompilerView {
         bytecodeScrollPane = new RTextScrollPane(bytecodeSyntaxTextArea);
         binary = new HexWithControls("Binary buffer");
 
-        //additionalBytecodeSearchControls = SearchControlsPanel.createBytecodeControls(this);
-        additionalBytecodeSyntaxTextArea = createSrcTextArea(false, additionalBytecodeSearchControls); //FIXME, nto working, to much hardcoded stuff
+        //additionalBytecodeSearchControls = SearchControlsPanel.createBytecodeControls(this); //FIXME, nto working, to much hardcoded stuff
+        additionalBytecodeSyntaxTextArea = createSrcTextArea(false, additionalBytecodeSearchControls);
         additionalBytecodeScrollPane = new RTextScrollPane(additionalBytecodeSyntaxTextArea);
         additionalBinary = new HexWithControls("Additional binary buffer");
 
