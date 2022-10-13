@@ -3,6 +3,7 @@ package org.jrd.frontend.frame.main.decompilerview;
 import org.fife.ui.hex.swing.HexEditor;
 import org.jrd.backend.core.Logger;
 
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.border.EtchedBorder;
 import java.awt.BorderLayout;
@@ -10,11 +11,12 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
 public class HexWithControls extends JPanel implements LinesProvider {
+
+    private static byte[] FAKE_CLIP;
 
     private final HexEditor hex;
     private SearchControlsPanel hexSearchControls;
@@ -24,7 +26,27 @@ public class HexWithControls extends JPanel implements LinesProvider {
         hex = createHexArea();
         this.add(hex);
         hexSearchControls = SearchControlsPanel.createHexControls(hex);
-        this.add(hexSearchControls, BorderLayout.SOUTH);
+        JPanel southWrapper = new JPanel(new BorderLayout());
+        southWrapper.add(hexSearchControls, BorderLayout.CENTER);
+        JPanel southeEastPanel = new JPanel(new BorderLayout());
+        JButton copy = new JButton("copy");
+        copy.addActionListener(a -> FAKE_CLIP = hex.get());
+        southeEastPanel.add(copy, BorderLayout.WEST);
+        JButton paste = new JButton("paste");
+        paste.addActionListener(a -> {
+            try {
+                hex.set(FAKE_CLIP);
+            } catch (Exception ex) {
+                Logger.getLogger().log(ex);
+            }
+        });
+        southeEastPanel.add(paste, BorderLayout.EAST);
+        southWrapper.add(southeEastPanel, BorderLayout.EAST);
+        String hint = BytecodeDecompilerView.styleTooltip() + "This is simple helper to trasnfer bytebuffers without clipboard.<br>" +
+                "Undo/redo should still work.";
+        paste.setToolTipText(hint);
+        copy.setToolTipText(hint);
+        this.add(southWrapper, BorderLayout.SOUTH);
     }
 
     public byte[] get() {

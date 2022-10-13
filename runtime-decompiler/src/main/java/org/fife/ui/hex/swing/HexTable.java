@@ -29,6 +29,7 @@ import java.awt.Rectangle;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -186,11 +187,15 @@ public class HexTable extends JTable {
     }
 
     public void open(final String fileName) throws IOException {
-        this.model.setBytes(fileName);
+        this.model.setBytes(fileName, true);
     }
 
     public void open(final InputStream in) throws IOException {
-        this.model.setBytes(in);
+        this.model.setBytes(in, true);
+    }
+
+    public void set(final byte[] in) throws IOException {
+        this.model.setBytes(new ByteArrayInputStream(in), false);
     }
 
     @Override

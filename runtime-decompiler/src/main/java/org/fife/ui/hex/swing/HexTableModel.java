@@ -130,16 +130,28 @@ public class HexTableModel extends AbstractTableModel {
         }
     }
 
-    public void setBytes(final String fileName) throws IOException {
-        this.doc = new ByteBuffer(fileName);
-        this.undoManager.discardAllEdits();
+    public void setBytes(final String fileName, boolean reset) throws IOException {
+        ByteBuffer tmpDoc = new ByteBuffer(fileName);
+        if (reset) {
+            this.doc = tmpDoc;
+            this.undoManager.discardAllEdits();
+        } else {
+            this.undoManager.addEdit(new BytesReplacedUndoableEdit(0, this.doc.getBuffer(), tmpDoc.getBuffer()));
+            this.doc = tmpDoc;
+        }
         this.fireTableDataChanged();
         this.editor.fireHexEditorEvent(0, this.doc.getSize(), 0);
     }
 
-    public void setBytes(final InputStream in) throws IOException {
-        this.doc = new ByteBuffer(in);
-        this.undoManager.discardAllEdits();
+    public void setBytes(final InputStream in, boolean reset) throws IOException {
+        ByteBuffer tmpDoc = new ByteBuffer(in);
+        if (reset) {
+            this.doc = tmpDoc;
+            this.undoManager.discardAllEdits();
+        } else {
+            this.undoManager.addEdit(new BytesReplacedUndoableEdit(0, this.doc.getBuffer(), tmpDoc.getBuffer()));
+            this.doc = tmpDoc;
+        }
         this.fireTableDataChanged();
         this.editor.fireHexEditorEvent(0, this.doc.getSize(), 0);
     }
