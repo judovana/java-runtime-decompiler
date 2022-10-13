@@ -11,6 +11,7 @@ import org.jrd.backend.data.DependenciesReader;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.frontend.frame.main.GlobalConsole;
 import org.jrd.frontend.frame.main.popup.ClassListPopupMenu;
+import org.jrd.frontend.frame.main.popup.DiffPopup;
 import org.jrd.frontend.frame.main.renderer.ClassListRenderer;
 import org.jrd.frontend.utility.ImageButtonFactory;
 import org.jrd.frontend.utility.ScreenFinder;
@@ -85,6 +86,7 @@ public class BytecodeDecompilerView {
     private ClassListRenderer filteredClassesRenderer;
     private JPanel buffersPanel;
     private JPanel buffersToolBar;
+    private JButton diffButton;
     private JButton undoButton;
     private JButton redoButton;
     private JButton insertButton;
@@ -351,6 +353,13 @@ public class BytecodeDecompilerView {
                 }
             }
         });
+        diffButton = new JButton("Df");
+        diffButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                DiffPopup.create(buffers.getComponents()).show(diffButton, 0, 0);
+            }
+        });
         undoButton = ImageButtonFactory.createUndoButton();
         undoButton.addActionListener(new ActionListener() {
             @Override
@@ -464,35 +473,38 @@ public class BytecodeDecompilerView {
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = PANEL_INSETS;
         gbc.weightx = 0;
-        buffersToolBar.add(undoButton, gbc);
+        buffersToolBar.add(diffButton, gbc);
 
         gbc.gridx = 1;
-        buffersToolBar.add(redoButton, gbc);
+        buffersToolBar.add(undoButton, gbc);
 
         gbc.gridx = 2;
-        buffersToolBar.add(insertButton, gbc);
+        buffersToolBar.add(redoButton, gbc);
 
         gbc.gridx = 3;
+        buffersToolBar.add(insertButton, gbc);
+
+        gbc.gridx = 4;
         buffersToolBar.add(bytecodeButton, gbc);
 
         gbc.weightx = 1;
         gbc.insets = new Insets(0, 0, 0, 0); // prevent double padding when no glue is utilized
-        gbc.gridx = 3;
+        gbc.gridx = 4;
         buffersToolBar.add(Box.createHorizontalGlue(), gbc);
 
         gbc.insets = PANEL_INSETS;
         gbc.weightx = 0;
-        gbc.gridx = 4;
-        buffersToolBar.add(detachButton, gbc);
         gbc.gridx = 5;
-        buffersToolBar.add(initClassButton, gbc);
+        buffersToolBar.add(detachButton, gbc);
         gbc.gridx = 6;
-        buffersToolBar.add(overwriteButton, gbc);
+        buffersToolBar.add(initClassButton, gbc);
         gbc.gridx = 7;
-        buffersToolBar.add(compileButton, gbc);
+        buffersToolBar.add(overwriteButton, gbc);
         gbc.gridx = 8;
-        buffersToolBar.add(compileAndUploadButton, gbc);
+        buffersToolBar.add(compileButton, gbc);
         gbc.gridx = 9;
+        buffersToolBar.add(compileAndUploadButton, gbc);
+        gbc.gridx = 10;
         buffersToolBar.add(pluginComboBox, gbc);
 
         classesScrollPane = new JScrollPane(filteredClassesJList);

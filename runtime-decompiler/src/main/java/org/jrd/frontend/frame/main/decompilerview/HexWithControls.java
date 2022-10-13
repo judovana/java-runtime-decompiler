@@ -10,8 +10,11 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 
-public class HexWithControls extends JPanel {
+public class HexWithControls extends JPanel implements LinesProvider {
 
     private final HexEditor hex;
     private SearchControlsPanel hexSearchControls;
@@ -68,4 +71,30 @@ public class HexWithControls extends JPanel {
         p.setBorder(new EtchedBorder());
     }
 
+    @Override
+    public List<String> getLines(int type) {
+        if (type == 0) {
+            StringBuilder sb = new StringBuilder();
+            for (byte b : hex.get()) {
+                char ch = (char) b;
+                if (ch < ' ' || ch > '~') {
+                    ch = '.';
+                }
+                sb.append(ch);
+            }
+            return split(sb.toString(), 16);
+        } else {
+            StringBuilder sb = new StringBuilder();
+            for (byte b : hex.get()) {
+                int hex = b & 0xFF;
+                sb.append(Integer.toHexString(hex).toUpperCase());
+            }
+            return split(sb.toString(), 32);
+        }
+    }
+
+    public static List<String> split(String text, int n) {
+        String[] results = text.split("(?<=\\G.{" + n + "})");
+        return Arrays.asList(results);
+    }
 }

@@ -9,12 +9,14 @@ import java.awt.Point;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.JPanel;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
-public class TextWithControls extends JPanel {
+public class TextWithControls extends JPanel implements LinesProvider {
 
     private final RSyntaxTextArea bytecodeSyntaxTextArea;
     private final SearchControlsPanel bytecodeSearchControls;
@@ -102,5 +104,10 @@ public class TextWithControls extends JPanel {
                 bytecodeSyntaxTextArea, caretPosition.x,
                 caretPosition.y + bytecodeSyntaxTextArea.getFontMetrics(bytecodeSyntaxTextArea.getFont()).getHeight()
         );
+    }
+
+    @Override
+    public List<String> getLines(int type) {
+        return Arrays.asList(bytecodeSyntaxTextArea.getText().split("\n"));
     }
 }
