@@ -107,7 +107,12 @@ public class TextWithControls extends JPanel implements LinesProvider {
     }
 
     @Override
-    public List<String> getLines(int type) {
+    public List<String> getLines(LinesFormat type) {
         return Arrays.asList(bytecodeSyntaxTextArea.getText().split("\n"));
+    }
+
+    @Override
+    public void setLines(LinesFormat type, String nwContent) {
+        throw new RuntimeException("used for patching!");
     }
 }

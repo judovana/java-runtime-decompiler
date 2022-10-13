@@ -94,8 +94,8 @@ public class HexWithControls extends JPanel implements LinesProvider {
     }
 
     @Override
-    public List<String> getLines(int type) {
-        if (type == 0) {
+    public List<String> getLines(LinesFormat type) {
+        if (type == LinesFormat.CHARS) {
             StringBuilder sb = new StringBuilder();
             for (byte b : hex.get()) {
                 char ch = (char) b;
@@ -108,6 +108,7 @@ public class HexWithControls extends JPanel implements LinesProvider {
         } else {
             StringBuilder sb = new StringBuilder();
             for (byte b : hex.get()) {
+                //TODO unittest, once also this string to byte[] is done
                 int hexval = b & 0xFF;
                 sb.append(Integer.toHexString(hexval).toUpperCase());
             }
@@ -118,5 +119,11 @@ public class HexWithControls extends JPanel implements LinesProvider {
     public static List<String> split(String text, int n) {
         String[] results = text.split("(?<=\\G.{" + n + "})");
         return Arrays.asList(results);
+    }
+
+    @Override
+    public void setLines(LinesFormat type, String nwContent) {
+        //see TODO above
+        throw new RuntimeException("used for patching!");
     }
 }
