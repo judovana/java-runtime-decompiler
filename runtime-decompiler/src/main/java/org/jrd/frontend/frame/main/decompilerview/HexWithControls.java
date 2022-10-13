@@ -16,7 +16,7 @@ import java.util.List;
 
 public class HexWithControls extends JPanel implements LinesProvider {
 
-    private static byte[] FAKE_CLIP;
+    private static byte[] fakeClip;
 
     private final HexEditor hex;
     private SearchControlsPanel hexSearchControls;
@@ -30,12 +30,12 @@ public class HexWithControls extends JPanel implements LinesProvider {
         southWrapper.add(hexSearchControls, BorderLayout.CENTER);
         JPanel southeEastPanel = new JPanel(new BorderLayout());
         JButton copy = new JButton("copy");
-        copy.addActionListener(a -> FAKE_CLIP = hex.get());
+        copy.addActionListener(a -> fakeClip = hex.get());
         southeEastPanel.add(copy, BorderLayout.WEST);
         JButton paste = new JButton("paste");
         paste.addActionListener(a -> {
             try {
-                hex.set(FAKE_CLIP);
+                hex.set(fakeClip);
             } catch (Exception ex) {
                 Logger.getLogger().log(ex);
             }
@@ -108,8 +108,8 @@ public class HexWithControls extends JPanel implements LinesProvider {
         } else {
             StringBuilder sb = new StringBuilder();
             for (byte b : hex.get()) {
-                int hex = b & 0xFF;
-                sb.append(Integer.toHexString(hex).toUpperCase());
+                int hexval = b & 0xFF;
+                sb.append(Integer.toHexString(hexval).toUpperCase());
             }
             return split(sb.toString(), 32);
         }

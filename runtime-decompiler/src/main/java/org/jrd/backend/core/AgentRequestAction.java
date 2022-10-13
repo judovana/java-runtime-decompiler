@@ -36,6 +36,7 @@
 
 package org.jrd.backend.core;
 
+import org.jrd.backend.communication.DelegatingJrdAgent;
 import org.jrd.backend.data.VmInfo;
 
 import java.util.Arrays;
@@ -51,15 +52,21 @@ public class AgentRequestAction {
     private final Map<String, String> parameters;
 
     public enum RequestAction {
-        VERSION,
-        CLASSES,
-        BYTES,
-        HALT,
-        OVERWRITE,
-        INIT_CLASS,
-        OVERRIDES,
-        REMOVE_OVERRIDES,
-        CLASSES_WITH_INFO;
+        VERSION(DelegatingJrdAgent.CommandDelegationOptions.MAIN_ONLY),
+        CLASSES(DelegatingJrdAgent.CommandDelegationOptions.ALL),
+        BYTES(DelegatingJrdAgent.CommandDelegationOptions.FIRST_OK),
+        HALT(DelegatingJrdAgent.CommandDelegationOptions.MAIN_ONLY),
+        OVERWRITE(DelegatingJrdAgent.CommandDelegationOptions.MAIN_ONLY),
+        INIT_CLASS(DelegatingJrdAgent.CommandDelegationOptions.ALL),
+        OVERRIDES(DelegatingJrdAgent.CommandDelegationOptions.MAIN_ONLY),
+        REMOVE_OVERRIDES(DelegatingJrdAgent.CommandDelegationOptions.MAIN_ONLY),
+        CLASSES_WITH_INFO(DelegatingJrdAgent.CommandDelegationOptions.MAIN_ONLY);
+
+        private final DelegatingJrdAgent.CommandDelegationOptions delegation;
+
+        RequestAction(DelegatingJrdAgent.CommandDelegationOptions delegation) {
+            this.delegation = delegation;
+        }
 
         public static RequestAction fromString(String s) throws IllegalArgumentException {
             return Arrays.stream(RequestAction.values()).filter(v -> v.toString().equals(s)).findFirst()
