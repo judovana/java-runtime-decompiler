@@ -11,6 +11,7 @@ import java.awt.event.KeyEvent;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.swing.JPanel;
 
@@ -112,7 +113,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
     }
 
     @Override
-    public void setLines(LinesFormat type, String nwContent) {
-        throw new RuntimeException("used for patching!");
+    public void setLines(LinesFormat type, List<String> lines) {
+        bytecodeSyntaxTextArea.setText(lines.stream().collect(Collectors.joining("\n")));
     }
 }

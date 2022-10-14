@@ -14,6 +14,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class HexWithControls extends JPanel implements LinesProvider {
 
@@ -103,12 +104,22 @@ public class HexWithControls extends JPanel implements LinesProvider {
             }
             return split(sb.toString(), 16);
         } else {
-            StringBuilder sb = new StringBuilder();
-            for (byte b : hex.get()) {
-                sb.append(HexTableModel.byteToHexString(b));
-            }
-            return split(sb.toString(), 32);
+            return bytesToStrings(hex.get());
         }
+    }
+
+    public static List<String> bytesToStrings(byte[] bytes) {
+        //TODO, move to utils
+        StringBuilder sb = new StringBuilder();
+        int count = 0;
+        for (byte b : bytes) {
+            if (count % 16 != 0) {
+                sb.append(" ");
+            }
+            sb.append(HexTableModel.byteToHexString(b));
+            count++;
+        }
+        return split(sb.toString(), 32 + 15);
     }
 
     public static List<String> split(String text, int n) {
@@ -117,7 +128,21 @@ public class HexWithControls extends JPanel implements LinesProvider {
     }
 
     @Override
-    public void setLines(LinesFormat type, String nwContent) {
-        throw new RuntimeException("used for patching!");
+    public void setLines(LinesFormat type, List<String> nwContent) throws Exception {
+        if (type == LinesFormat.CHARS) {
+            throw new RuntimeException("only hex can be pasted in");
+        }
+        hex.set(hexToBytes(nwContent.stream().collect(Collectors.joining(""))));
+    }
+
+    private static byte[] hexToBytes(String s) {
+        //TODO, move to utils
+        s = s.replaceAll("\\s+", "");
+        int len = s.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4) + Character.digit(s.charAt(i + 1), 16));
+        }
+        return data;
     }
 }

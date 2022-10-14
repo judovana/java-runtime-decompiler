@@ -6,8 +6,11 @@ import com.github.difflib.patch.Patch;
 import com.github.difflib.text.DiffRow;
 import com.github.difflib.text.DiffRowGenerator;
 
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.jrd.backend.core.Logger;
 import org.jrd.frontend.frame.main.decompilerview.LinesProvider;
 
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JEditorPane;
@@ -19,8 +22,13 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.WindowConstants;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Arrays;
 import java.util.List;
 
 public class DiffPopup extends JPopupMenu {
@@ -59,13 +67,48 @@ public class DiffPopup extends JPopupMenu {
         p.add(invert);
         JMenu applyPatch = new JMenu();
         applyPatch.setText("Apply patch");
-        applyPatch.add(new JMenuItem(components[0].getName()));
-        applyPatch.add(new JMenuItem(components[1].getName() + " (hex)"));
-        applyPatch.add(new JMenuItem(components[2].getName()));
-        applyPatch.add(new JMenuItem(components[3].getName() + " (hex)"));
-        applyPatch.add(new JMenuItem(components[4].getName()));
+        applyPatch.add(createPatchAction((LinesProvider) components[0], LinesProvider.LinesFormat.CHARS, invert));
+        applyPatch.add(createPatchAction((LinesProvider) components[1], LinesProvider.LinesFormat.HEX, invert));
+        applyPatch.add(createPatchAction((LinesProvider) components[2], LinesProvider.LinesFormat.CHARS, invert));
+        applyPatch.add(createPatchAction((LinesProvider) components[3], LinesProvider.LinesFormat.HEX, invert));
+        applyPatch.add(createPatchAction((LinesProvider) components[4], LinesProvider.LinesFormat.CHARS, invert));
         p.add(applyPatch);
         return p;
+    }
+
+    private static JMenuItem createPatchAction(final LinesProvider component, final LinesProvider.LinesFormat suffix, JCheckBox invert) {
+        JMenuItem item = new JMenuItem(component.getName() + " " + (suffix == LinesProvider.LinesFormat.CHARS ? "" : " " + suffix));
+        item.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                JDialog d = new JDialog((JFrame) null, "paste patch to apply to " + item.getText());
+                d.setSize(new Dimension(800, 600));
+                d.setLocationRelativeTo(null);
+                RSyntaxTextArea t = new RSyntaxTextArea("");
+                d.add(new JScrollPane(t));
+                d.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+                JButton apply = new JButton("apply");
+                apply.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent actionEvent) {
+                        List<String> orig = component.getLines(suffix);
+                        Patch<String> importedPatch = UnifiedDiffUtils.parseUnifiedDiff(Arrays.asList(t.getText().split("\n")));
+                        try {
+                            List<String> patchedText =
+                                    invert.isSelected() ? DiffUtils.unpatch(orig, importedPatch) : DiffUtils.patch(orig, importedPatch);
+                            component.setLines(suffix, patchedText);
+                        } catch (Exception e) {
+                            Logger.getLogger().log(Logger.Level.ALL, e);
+                            t.setText("press ctrl+z to return to patch\n" + Logger.exToString(e));
+                        }
+                    }
+                });
+                d.add(apply, BorderLayout.SOUTH);
+                d.setVisible(true);
+            }
+        });
+
+        return item;
     }
 
     private static
@@ -95,6 +138,7 @@ public class DiffPopup extends JPopupMenu {
             d.setSize(new Dimension(800, 600));
             d.setLocationRelativeTo(null);
             JEditorPane t = new JEditorPane("text/html", html);
+            t.setFont(new Font("Monospaced", t.getFont().getStyle(), t.getFont().getSize()));
             d.add(new JScrollPane(t));
             d.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
             d.setVisible(true);
@@ -104,6 +148,7 @@ public class DiffPopup extends JPopupMenu {
             d.setSize(new Dimension(800, 600));
             d.setLocationRelativeTo(null);
             JTextArea t = new JTextArea(patch);
+            t.setFont(new Font("Monospaced", t.getFont().getStyle(), t.getFont().getSize()));
             d.add(new JScrollPane(t));
             d.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
             d.setVisible(true);

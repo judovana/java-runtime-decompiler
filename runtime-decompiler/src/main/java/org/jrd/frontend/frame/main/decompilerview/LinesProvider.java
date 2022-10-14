@@ -13,5 +13,5 @@ public interface LinesProvider {
 
     String getName();
 
-    void setLines(LinesFormat type, String nwContent);
+    void setLines(LinesFormat type, List<String> nwContent) throws Exception;
 }
