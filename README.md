@@ -10,6 +10,7 @@
   * for testig, submit missbehaving or reach unreachable code
 ## Relase
 * Should be done in -Plegacy to enable injecting to jdk8 vms.
+  * note, that newest asmtools, are jdk16 and up
 ## Installation
 * JRD 4 and lower: Note that Git, Maven & [JDK 8](https://adoptopenjdk.net/) with its tools.jar or [JDK11 and higher](https://adoptopenjdk.net/) are required to run or help develop this app.*
 * JRD 5 and up: Note that Git, Maven & [JDK11 and higher](https://adoptopenjdk.net/) are required to run or help develop this app.*
