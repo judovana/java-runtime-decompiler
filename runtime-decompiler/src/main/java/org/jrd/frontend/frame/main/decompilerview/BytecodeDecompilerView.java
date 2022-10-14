@@ -297,10 +297,29 @@ public class BytecodeDecompilerView {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 GlobalConsole.getConsole().show();
-                compileAction.run(
-                        (DecompilerWrapper) pluginComboBox.getSelectedItem(), false,
-                        new IdentifiedSource(new ClassIdentifier(lastDecompiledClass), bytecodeBuffer.getTextAsBytes())
-                );
+                Logger.getLogger().log("Compilation started");
+                if (isAdditionalBinaryBufferVisible()) {
+                    JOptionPane.showMessageDialog(buffers, "Unlike (compile) and upload, compile is onloy for source buffers");
+                } else if (isBinaryBufferVisible()) {
+                    JOptionPane.showMessageDialog(buffers, "Unlike (compile) and upload, compile is onloy for source buffers");
+                } else if (isDecompiledBytecodeBufferVisible()) {
+                    compileAction.run(
+                            (DecompilerWrapper) pluginComboBox.getSelectedItem(), false,
+                            new IdentifiedSource(new ClassIdentifier(lastDecompiledClass), bytecodeBuffer.getTextAsBytes())
+                    );
+                } else if (isAdditionalDecompiledBytecodeBufferVisible()) {
+                    compileAction.run(
+                            (DecompilerWrapper) pluginComboBox.getSelectedItem(), false,
+                            new IdentifiedSource(new ClassIdentifier(lastDecompiledClass), additionalBytecodeBuffer.getTextAsBytes())
+                    );
+                } else if (isAdditionalSrcBufferVisible()) {
+                    compileAction.run(
+                            (DecompilerWrapper) pluginComboBox.getSelectedItem(), false,
+                            new IdentifiedSource(new ClassIdentifier(lastDecompiledClass), additionalSrcBuffer.getTextAsBytes())
+                    );
+                } else {
+                    JOptionPane.showMessageDialog(buffers, "nothing selected - " + buffers.getSelectedComponent());
+                }
             }
         });
 
@@ -309,7 +328,7 @@ public class BytecodeDecompilerView {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 GlobalConsole.getConsole().show();
-
+                Logger.getLogger().log("Compilation with upload started");
                 if (isAdditionalBinaryBufferVisible()) {
                     compileAction.upload(lastDecompiledClass, additionalBinary.get());
                 } else if (isBinaryBufferVisible()) {
@@ -329,6 +348,8 @@ public class BytecodeDecompilerView {
                             (DecompilerWrapper) pluginComboBox.getSelectedItem(), true,
                             new IdentifiedSource(new ClassIdentifier(lastDecompiledClass), additionalSrcBuffer.getTextAsBytes())
                     );
+                } else {
+                    JOptionPane.showMessageDialog(buffers, "nothing selected - " + buffers.getSelectedComponent());
                 }
             }
         });
