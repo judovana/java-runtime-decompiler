@@ -1,6 +1,7 @@
 package org.jrd.frontend.frame.main.decompilerview;
 
 import org.fife.ui.hex.swing.HexEditor;
+import org.fife.ui.hex.swing.HexTableModel;
 import org.jrd.backend.core.Logger;
 
 import javax.swing.JButton;
@@ -98,19 +99,13 @@ public class HexWithControls extends JPanel implements LinesProvider {
         if (type == LinesFormat.CHARS) {
             StringBuilder sb = new StringBuilder();
             for (byte b : hex.get()) {
-                char ch = (char) b;
-                if (ch < ' ' || ch > '~') {
-                    ch = '.';
-                }
-                sb.append(ch);
+                sb.append(HexTableModel.byteToAsci(b));
             }
             return split(sb.toString(), 16);
         } else {
             StringBuilder sb = new StringBuilder();
             for (byte b : hex.get()) {
-                //TODO unittest, once also this string to byte[] is done
-                int hexval = b & 0xFF;
-                sb.append(Integer.toHexString(hexval).toUpperCase());
+                sb.append(HexTableModel.byteToHexString(b));
             }
             return split(sb.toString(), 32);
         }
@@ -123,7 +118,6 @@ public class HexWithControls extends JPanel implements LinesProvider {
 
     @Override
     public void setLines(LinesFormat type, String nwContent) {
-        //see TODO above
         throw new RuntimeException("used for patching!");
     }
 }

@@ -3,8 +3,6 @@ package org.jrd.backend.communication;
 import org.jrd.backend.core.Logger;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class is handling opening of communication socket and request submitting.
@@ -16,7 +14,7 @@ public class CallDecompilerAgent implements DelegatingJrdAgent {
 
     private final int port;
     private final String address;
-    private final List<JrdAgent> delegationCandidates = new ArrayList<>(1);
+    private final DelegatingHelper delegationCandidates = new DelegatingHelper();
 
     /**
      * Constructor of the object
@@ -58,28 +56,16 @@ public class CallDecompilerAgent implements DelegatingJrdAgent {
 
     @Override
     public JrdAgent addDelegatingAgent(JrdAgent agent) {
-        if (!delegationCandidates.contains(agent)) {
-            delegationCandidates.add(agent);
-            return agent;
-        } else {
-            return null;
-        }
+        return delegationCandidates.addDelegatingAgent(agent);
     }
 
     @Override
     public JrdAgent removeDelegatingAgent(JrdAgent agent) {
-        if (delegationCandidates.contains(agent)) {
-            delegationCandidates.remove(agent);
-            return agent;
-        } else {
-            return null;
-        }
+        return delegationCandidates.removeDelegatingAgent(agent);
     }
 
     @Override
     public int cleanDelegatingAgents() {
-        int r = delegationCandidates.size();
-        delegationCandidates.clear();
-        return r;
+        return delegationCandidates.cleanDelegatingAgents();
     }
 }

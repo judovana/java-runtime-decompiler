@@ -38,7 +38,7 @@ public final class FsAgent implements DelegatingJrdAgent {
 
     private final List<File> cp;
     private final String suffix;
-    private final List<JrdAgent> delegationCandidates = new ArrayList<>(1);
+    private final DelegatingHelper delegationCandidates = new DelegatingHelper();
     /**
      * This is exact oposite of how remote agent does this.
      * Remote agent keeps all overrides, because when new class defintion is laoded original is plled, and is modifed (overvritten) by new deffnitio.
@@ -390,28 +390,16 @@ public final class FsAgent implements DelegatingJrdAgent {
 
     @Override
     public JrdAgent addDelegatingAgent(JrdAgent agent) {
-        if (!delegationCandidates.contains(agent)) {
-            delegationCandidates.add(agent);
-            return agent;
-        } else {
-            return null;
-        }
+        return delegationCandidates.addDelegatingAgent(agent);
     }
 
     @Override
     public JrdAgent removeDelegatingAgent(JrdAgent agent) {
-        if (delegationCandidates.contains(agent)) {
-            delegationCandidates.remove(agent);
-            return agent;
-        } else {
-            return null;
-        }
+        return delegationCandidates.removeDelegatingAgent(agent);
     }
 
     @Override
     public int cleanDelegatingAgents() {
-        int r = delegationCandidates.size();
-        delegationCandidates.clear();
-        return r;
+        return delegationCandidates.cleanDelegatingAgents();
     }
 }

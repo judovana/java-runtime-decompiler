@@ -18,6 +18,9 @@ import java.io.InputStream;
 import java.util.Arrays;
 
 public class HexTableModel extends AbstractTableModel {
+
+    private static final String[] BYTE_STRING_VALUES;
+
     private static final long serialVersionUID = 1L;
     private HexEditor editor;
     private ByteBuffer doc;
@@ -26,7 +29,13 @@ public class HexTableModel extends AbstractTableModel {
     private String[] columnNames;
     private byte[] bitBuf;
     private char[] dumpColBuf;
-    private String[] byteStringValues;
+
+    static {
+        BYTE_STRING_VALUES = new String[256];
+        for (int i = 0; i < BYTE_STRING_VALUES.length; ++i) {
+            BYTE_STRING_VALUES[i] = Integer.toHexString(i).toUpperCase();
+        }
+    }
 
     public HexTableModel(final HexEditor editor) {
         this.bitBuf = new byte[16];
@@ -44,10 +53,6 @@ public class HexTableModel extends AbstractTableModel {
         this.dumpColBuf = new char[16];
         Arrays.fill(dumpColBuf, ' ');
 
-        this.byteStringValues = new String[256];
-        for (int i = 0; i < this.byteStringValues.length; ++i) {
-            this.byteStringValues[i] = Integer.toHexString(i);
-        }
     }
 
     public byte getByte(final int offset) {
@@ -78,7 +83,7 @@ public class HexTableModel extends AbstractTableModel {
     public Object getValueAt(final int row, final int col) {
         if (col != this.bytesPerRow) {
             final int pos = this.editor.cellToOffset(row, col);
-            return (pos == -1) ? "" : this.byteStringValues[this.doc.getByte(pos) & 0xFF];
+            return (pos == -1) ? "" : byteToHexString(this.doc.getByte(pos));
         }
         final int pos = this.editor.cellToOffset(row, 0);
         if (pos == -1) {
@@ -86,13 +91,21 @@ public class HexTableModel extends AbstractTableModel {
         }
         final int count = this.doc.read(pos, this.bitBuf);
         for (int i = 0; i < count; ++i) {
-            char ch = (char) this.bitBuf[i];
-            if (ch < ' ' || ch > '~') {
-                ch = '.';
-            }
-            this.dumpColBuf[i] = ch;
+            this.dumpColBuf[i] = byteToAsci(this.bitBuf[i]);
         }
         return new String(this.dumpColBuf, 0, count);
+    }
+
+    public static String byteToHexString(byte b) {
+        return BYTE_STRING_VALUES[b & 0xFF];
+    }
+
+    public static char byteToAsci(byte b) {
+        char ch = (char) b;
+        if (ch < ' ' || ch > '~') {
+            ch = '.';
+        }
+        return ch;
     }
 
     public boolean redo() {
