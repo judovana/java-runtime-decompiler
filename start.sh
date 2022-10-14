@@ -46,6 +46,7 @@ TOOLS="$javac_home"/lib/tools.jar  #jsut jdk8 and down
 
 readonly RSYNTAXTEXTAREA=$(findLib "com/fifesoft/rsyntaxtextarea" "rsyntaxtextarea-.*\.jar" )
 readonly GSON=$(findLib "com/google/code/gson/gson" "gson-.*\.jar")
+readonly JDIFF=$(findLib "io/github/java-diff-utils/java-diff-utils" "java-diff-utils-.*\.jar")
 readonly ASM_TREE=$(findLib "org/ow2/asm/asm-tree" "asm-tree-.*\.jar")
 readonly ASM_JAR=$(findLib "org/ow2/asm/asm" "asm-[0-9].*\.jar")
 readonly BYTEMAN=$(findLib "org/jboss/byteman/byteman-install" "byteman-install-.*\.jar")
@@ -70,5 +71,5 @@ readonly PROPERTY_PURPOSE="-Djrd.purpose=$PURPOSE"
 "$javac_home"/bin/java -Djdk.attach.allowAttachSelf=true "$PROPERTY_LOCATION" "$PROPERTY_PURPOSE" \
 --add-exports jdk.jdeps/com.sun.tools.javap=ALL-UNNAMED \
 --add-opens   java.base/java.lang=ALL-UNNAMED \
--cp "$TOOLS:$JRD:$RSYNTAXTEXTAREA:$GSON:$BYTEMAN:$CPLC_API:$CPLC_UTIL:$CPLC:$ASM_TREE:$ASM_JAR" \
+-cp "$TOOLS:$JRD:$RSYNTAXTEXTAREA:$GSON:$JDIFF:$BYTEMAN:$CPLC_API:$CPLC_UTIL:$CPLC:$ASM_TREE:$ASM_JAR" \
 org.jrd.backend.data.Main "$@"
