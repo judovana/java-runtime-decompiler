@@ -34,6 +34,9 @@ public class HexTableModel extends AbstractTableModel {
         BYTE_STRING_VALUES = new String[256];
         for (int i = 0; i < BYTE_STRING_VALUES.length; ++i) {
             BYTE_STRING_VALUES[i] = Integer.toHexString(i).toUpperCase();
+            if (BYTE_STRING_VALUES[i].length() == 1) {
+                BYTE_STRING_VALUES[i] = "0" + BYTE_STRING_VALUES[i];
+            }
         }
     }
 
