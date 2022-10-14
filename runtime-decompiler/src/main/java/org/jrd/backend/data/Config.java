@@ -393,8 +393,19 @@ public final class Config {
             return "";
         } else {
             try {
-                byte[] bytes = getFileFromAdditionalPath(additionalSourcePathAgent, fqn);
-                return new String(bytes, Charset.defaultCharset());
+                if (fqn.contains("$")) {
+                    try {
+                        byte[] bytes = getFileFromAdditionalPath(additionalSourcePathAgent, fqn);
+                        return new String(bytes, Charset.defaultCharset());
+                    } catch (Exception ex) {
+                        //there are weird classes which have $ as valid character
+                        byte[] bytes = getFileFromAdditionalPath(additionalSourcePathAgent, fqn.replaceAll("\\$.*", ""));
+                        return "/*WARNING! showing wrapper class! Do not use for upload!*/\n" + new String(bytes, Charset.defaultCharset());
+                    }
+                } else {
+                    byte[] bytes = getFileFromAdditionalPath(additionalSourcePathAgent, fqn);
+                    return new String(bytes, Charset.defaultCharset());
+                }
             } catch (Exception ex) {
                 Logger.getLogger().log(ex);
                 return ex.getMessage();

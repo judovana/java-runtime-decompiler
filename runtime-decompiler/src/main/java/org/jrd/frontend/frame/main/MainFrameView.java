@@ -135,7 +135,12 @@ public class MainFrameView {
             "\n" +
             "JRD allows you to view loaded classes and their decompiled bytecode in either source code form or in a binary buffer.\n" +
             "JRD can be a dangerous program, as it allows you to overwrite classes in a running JVM, which has the potential to break the JVM.\n" +
-            "Aside from local running JVMs, JRD can also interact with remote JMX processes and with JARs or class file trees on the filesystem.\n";
+            "Aside from local running JVMs, JRD can also interact with remote JMX processes and with JARs or class file trees on the filesystem.\n" +
+            "\n" +
+            "JRD is NOT an IDE. If you need to do a bigger changes, copypaste the code to IDE, and maybe let JRD to get more classes for you.\n" +
+            "Then do your changes, and copypaste/upload  through JRD to the target VM\n" +
+            "Decompilers are not perfect, JRD offers you to set up source paths(s) so you can edit and compile original code, not decompiled one\n" +
+            "Local class path is here more over for completeness, and may be slowing down JRD. But sometimes there are interesting differences between your local build and runtime version\n";
 
     public JFrame getMainFrame() {
         return mainFrame;
@@ -374,7 +379,10 @@ public class MainFrameView {
         welcomePanel = new JPanel(new BorderLayout());
         welcomePanel.setBorder(BorderFactory.createLineBorder(welcomePanel.getBackground(), 50));
         welcomeJTextArea.setBackground(new Color(welcomePanel.getBackground().getRGB()));
-        welcomePanel.add(welcomeJTextArea);
+        JScrollPane welcomeTextScroll = new JScrollPane(welcomeJTextArea);
+        welcomeTextScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        welcomeTextScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        welcomePanel.add(welcomeTextScroll);
         // welcomePanel End
 
         mainFrame = new JFrame();
