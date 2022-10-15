@@ -8,45 +8,11 @@
   * runtime hotpatching
   * verifying what is actually running in your vm
   * for testig, submit missbehaving or reach unreachable code
-## Relase
-* Should be done in -Plegacy to enable injecting to jdk8 vms.
-  * note, that newest asmtools, are jdk16 and up
-## Installation
-* JRD 4 and lower: Note that Git, Maven & [JDK 8](https://adoptopenjdk.net/) with its tools.jar or [JDK11 and higher](https://adoptopenjdk.net/) are required to run or help develop this app.*
-* JRD 5 and up: Note that Git, Maven & [JDK11 and higher](https://adoptopenjdk.net/) are required to run or help develop this app.*
-### From GIT
-#### Initial setup
-```
-$ git clone https://github.com/pmikova/java-runtime-decompiler.git
-$ cd java-runtime-decompiler
-$ mvn clean install  # builds the runtime decpompiler and agent, downloads also plugins
-$ mvn clean install -PdownloadPlugins # builds the decompiler and downloads the decompiler plugins for future use, if not already downloaded
-$ mvn clean install -Pimages # on Linux, bundles the plugins and JRD into a standalone portable image. Make some basic verifications
-$ mvn clean install -Plegacy # take care to build agent in oldest resonable way
-
-# $PLUGINS and $VERIFY_CP variables may help to solve some weird image building issues.
-```
-usually the development command is:
-```
-$ mvn clean install -Dcheckstyle.skip -Dspotbugs.skip=true 
-```
-Which downloads also te plugins.
-usually the release command is:
-```
-$ mvn clean install -DskipTests -Pimages -Plegacy
-```
-if the development command was never run, then  plugins profile must be included
-```
-$ mvn clean install -DskipTests -Pimages -Plegacy -PdownloadPlugins
-```
-Note, that tests requires valid DISPLAY, to have some top level components (like HexEditor) pass
-
-Then, in images/target/runtime-decompiler... `./start.sh` in a *Linux terminal* or `start.bat` in a *Windows CMD* to start the application. The usage of top level start.sh/bat is only for development purposes.
-
-#### Configuring decompiler agent
+## Configuring decompiler agent
 In order to start using Java-Runtime-Decompiler, you will need to select the Decompiler Agent's path in *Configure → Agent Path*.
 The Decompiler Agent is a built-in project and can usually be found at `./decompiler_agent/target/decompiler-agent-*.jar`. The image should have agent preset.
-#### Configuring external decompilers
+
+## Configuring external decompilers
 Internal *javap* and *javap -v* decompiling tools are available by default. In image, we try to keep as many decompilers as possible bundled.
 
 Additionally, external decompilers are supported and can be configured in *Configure → Plugins*:
@@ -60,21 +26,22 @@ Currently supported decompilers are:
 * [JD](https://github.com/java-decompiler/jd-core/)
 
 Assemblers/Disassemblers
-* [jasm](https://github.com/openjdk/asmtools)
-* [jcoder](https://github.com/openjdk/asmtools)
+* [jasm](https://github.com/openjdk/asmtools) (jdk 17 and up, with lambdas fixed)
+* [jcoder](https://github.com/openjdk/asmtools) (jdk 17 and up)
+* [jasm7](https://github.com/openjdk/asmtools) (jdk 11 and down, with known, broken lambdas)
+* [jcoder7](https://github.com/openjdk/asmtools) (jdk 11 and down)
 * [javap](https://github.com/openjdk/jdk) (disassemble only)
-#### Known issues
-* `mvn clean install` results in `BUILD FAILURE` with the error
-`java.lang.RuntimeException: Unexpected error: java.security.InvalidAlgorithmParameterException: the trustAnchors parameter must be non-empty`
-(spotted on Windows)
+* [Procyon disassembler](https://bitbucket.org/mstrobel/procyon/downloads/)(disassemble only)
 
-   **Temporary solution**: Use `mvn clean install -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true`
-   to disregard SSL certificates when building.
-* `mvn clean install` results in `TEST FAILURE`
+Assemblers/Disassemblers with additional info
+* [jasmG](https://github.com/openjdk/asmtools) (jdk 17 and up, with lambdas fixed, with -g switch)
+* [jcoderG](https://github.com/openjdk/asmtools) (jdk 17 and up, with -g switch)
+* [jasmG7](https://github.com/openjdk/asmtools) (jdk 11 and down, with known, broken lambdas, with -g switch)
+* [jcoderG7](https://github.com/openjdk/asmtools) (jdk 11 and down, with -g switch)
+* [javap-v](https://github.com/openjdk/jdk) (disassemble only, javap with -v switch)
 
-   **Temporary solution**: Use `mvn clean install -DskipTests` to not run test classes when building.
 ### From Fedora repositories
-The Java-Runtime-Decompiler is packed together with Fernflower and Procyon decompilers in the main Fedora repositories and in EPEL 7 and EPEL 8.
+The Java-Runtime-Decompiler is packed together with Fernflower and Procyon decompilers in the main Fedora repositories and in EPEL 7 and EPEL 8 and EPEL 9.
 ```
 dnf install java-runtime-decompiler
 ```
@@ -151,3 +118,51 @@ Saved: /tmp/bin/io/github/mkoncek/classpathless/api/MessagesListener.class
 ```
 
 Don't forget that all operations are same over classpath, remote vm, or process of VM - *runtime* compiler/decompiler!
+
+## For developers
+
+## Relase
+* Should be done in -Plegacy to enable injecting to jdk8 vms.
+  * note, that newest asmtools, are jdk16 and up
+## Installation
+* JRD 4 and lower: Note that Git, Maven & [JDK 8](https://adoptopenjdk.net/) with its tools.jar or [JDK11 and higher](https://adoptopenjdk.net/) are required to run or help develop this app.*
+* JRD 5 and up: Note that Git, Maven & [JDK11 and higher](https://adoptopenjdk.net/) are required to run or help develop this app.*
+### From GIT
+#### Initial setup
+```
+$ git clone https://github.com/pmikova/java-runtime-decompiler.git
+$ cd java-runtime-decompiler
+$ mvn clean install  # builds the runtime decpompiler and agent, downloads also plugins
+$ mvn clean install -PdownloadPlugins # builds the decompiler and downloads the decompiler plugins for future use, if not already downloaded
+$ mvn clean install -Pimages # on Linux, bundles the plugins and JRD into a standalone portable image. Make some basic verifications
+$ mvn clean install -Plegacy # take care to build agent in oldest resonable way
+
+# $PLUGINS and $VERIFY_CP variables may help to solve some weird image building issues.
+```
+usually the development command is:
+```
+$ mvn clean install -Dcheckstyle.skip -Dspotbugs.skip=true 
+```
+Which downloads also te plugins.
+usually the release command is:
+```
+$ mvn clean install -DskipTests -Pimages -Plegacy
+```
+if the development command was never run, then  plugins profile must be included
+```
+$ mvn clean install -DskipTests -Pimages -Plegacy -PdownloadPlugins
+```
+Note, that tests requires valid DISPLAY, to have some top level components (like HexEditor) pass
+
+Then, in images/target/runtime-decompiler... `./start.sh` in a *Linux terminal* or `start.bat` in a *Windows CMD* to start the application. The usage of top level start.sh/bat is only for development purposes.
+
+#### Known issues
+* `mvn clean install` results in `BUILD FAILURE` with the error
+`java.lang.RuntimeException: Unexpected error: java.security.InvalidAlgorithmParameterException: the trustAnchors parameter must be non-empty`
+(spotted on Windows)
+
+   **Temporary solution**: Use `mvn clean install -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true`
+   to disregard SSL certificates when building.
+* `mvn clean install` results in `TEST FAILURE`
+
+   **Temporary solution**: Use `mvn clean install -DskipTests` to not run test classes when building.
