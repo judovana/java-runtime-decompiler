@@ -2,35 +2,31 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.io.PrintWriter;
+import java.util.Set;
+
+import org.openjdk.asmtools.common.ToolInput;
+import org.openjdk.asmtools.common.ToolOutput;
+import org.openjdk.asmtools.jdis.Options;
 
 public class JasmGDecompilerWrapper {
 
     public String decompile(byte[] bytecode, String[] options) {
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        final String utf8 = StandardCharsets.UTF_8.name();
         try {
-            File file = File.createTempFile("jrd-jasm", "tmp.java");
-            file.deleteOnExit();
-            Files.write(file.toPath(), bytecode);
-            try (PrintStream ps = new PrintStream(baos, true, utf8)) {
-                //org.openjdk.asmtools.jdis.Main jdis = new org.openjdk.asmtools.jdis.Main(ps, new String[]{"-g",file.getAbsolutePath()});
-org.openjdk.asmtools.jdis.Main jdis = new org.openjdk.asmtools.jdis.Main(ps, new String[]{"-g", file.getAbsolutePath()});
-                jdis.disasm();
-            }
-            String data = baos.toString(utf8);
-            if (data.isEmpty()) {
-                return "No output, unpatched asmtools? See " +
-                        "https://github.com/openjdk/asmtools/pull/13/commits/9104af81fef8c220be919a3e34912386a7b99a60";
-            }
-            return data;
+            log(null, "jasmG decompiler caled with input of bytes: " + bytecode.length);
+            ToolInput[] originalFiles = new ToolInput[]{new ToolInput.ByteInput(bytecode)};
+            ToolOutput.TextOutput decodedFiles = new ToolOutput.TextOutput();
+            ToolOutput.SingleDualOutputStreamOutput decodeLog = new ToolOutput.SingleDualOutputStreamOutput();
+            org.openjdk.asmtools.jdis.Main jdis = new org.openjdk.asmtools.jdis.Main(decodedFiles, decodeLog, originalFiles);
+            jdis.setVerboseFlag(true);
+            Options.setDetailedOutputOptions();
+            int r = jdis.disasm();
+            return decodedFiles.getOutputs().get(0).getBody();
         } catch (Exception e) {
             e.printStackTrace();
             return e.toString();
@@ -42,43 +38,21 @@ org.openjdk.asmtools.jdis.Main jdis = new org.openjdk.asmtools.jdis.Main(ps, new
     }
 
     public Map<String, byte[]> compile(Map<String, String> src, String[] options, Object maybeLogger) throws Exception {
-        log(maybeLogger, "jasm compiler caled with input of: " + src.size());
-        File parentDir = File.createTempFile("jrd-jasm", "tmp.dir");
-        parentDir.delete();
-        parentDir.mkdir();
-        parentDir.deleteOnExit();
-        File srcs = new File(parentDir, "src");
-        srcs.mkdir();
-        File target = new File(parentDir, "bin");
-        target.mkdir();
-        log(maybeLogger, "entering into " + parentDir.getAbsolutePath());
-        List<String> tmpSources = new ArrayList<>(src.size());
-        for (Map.Entry<String, String> fileToCompile : src.entrySet()) {
-            File nw = new File(srcs, fileToCompile.getKey() + ".java");
-            log(maybeLogger, "writing tmp file into " + nw.getAbsolutePath());
-            Files.write(nw.toPath(), fileToCompile.getValue().getBytes());
-            tmpSources.add(nw.getAbsolutePath());
+        log(maybeLogger, "jasmG compiler caled with input of files: " + src.size());
+        ToolInput[] originalFiles = new ToolInput[src.size()];
+        ArrayList<Map.Entry<String,String>> input = new ArrayList<>(src.entrySet());
+        for (int i = 0; i < input.size(); i++) {
+            originalFiles[i] = new ToolInput.ByteInput(input.get(i).getValue());
         }
-        tmpSources.add(0, target.getAbsolutePath());
-        tmpSources.add(0, "-d");
-        //tmpSources.add(0, "-g"); //shoud add debug info; no longer available in asmtools8
-        String[] opts = tmpSources.toArray(new String[0]);
-        log(maybeLogger, "jasm " + Arrays.toString(opts));
-
-        org.openjdk.asmtools.jasm.Main jasm = new org.openjdk.asmtools.jasm.Main(new PrintWriter(System.err, true), new PrintWriter(System.out, true), opts);
-        jasm.compile();
-        Map<String, byte[]> r = new HashMap();
-        Files.walk(target.toPath()).filter(Files::isRegularFile).forEach(k -> {
-            try {
-                String futureFullyQualifiedNiceName = k.toString();
-                futureFullyQualifiedNiceName = futureFullyQualifiedNiceName.replace(target + File.separator, "");
-                futureFullyQualifiedNiceName = futureFullyQualifiedNiceName.replace(File.separator, ".");
-                futureFullyQualifiedNiceName = futureFullyQualifiedNiceName.replaceAll("\\.class$", "");
-                r.put(futureFullyQualifiedNiceName, Files.readAllBytes(k));
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        });
-        return r;
+        ToolOutput.ByteOutput encodedFiles = new ToolOutput.ByteOutput();
+        ToolOutput.StringLog encodeLog = new ToolOutput.StringLog();
+        org.openjdk.asmtools.jasm.Main jasm = new org.openjdk.asmtools.jasm.Main(encodedFiles, encodeLog, originalFiles);
+        jasm.setVerboseFlag(true);
+        int r = jasm.compile();
+        Map<String, byte[]> results = new HashMap<>(src.size());
+        for(ToolOutput.ByteOutput.NamedBinary nb: encodedFiles.getOutputs()) {
+            results.put(nb.getFqn().replace("/", "."), nb.getBody());
+        }
+        return results;
     }
 }
