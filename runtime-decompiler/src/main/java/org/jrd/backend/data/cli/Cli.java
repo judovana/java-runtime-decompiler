@@ -26,6 +26,7 @@ import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.main.decompilerview.DecompilationController;
 import org.jrd.frontend.frame.main.LoadingDialogProvider;
 import org.jrd.frontend.frame.main.ModelProvider;
+import org.jrd.frontend.frame.main.decompilerview.HexWithControls;
 import org.jrd.frontend.frame.overwrite.FileToClassValidator;
 import org.jrd.frontend.utility.AgentApiGenerator;
 import org.jrd.frontend.utility.CommonUtils;
@@ -49,6 +50,7 @@ import java.util.stream.Collectors;
 public class Cli {
 
     protected static final String VERBOSE = "-verbose";
+    protected static final String HEX = "-hex";
     protected static final String SAVE_AS = "-saveas";
     protected static final String SAVE_LIKE = "-savelike";
     protected static final String LIST_JVMS = "-listjvms";
@@ -85,6 +87,7 @@ public class Cli {
     private final PluginManager pluginManager;
     private Saving saving;
     private boolean isVerbose;
+    private boolean isHex;
 
     public Cli(String[] orig, Model model) {
         this.filteredArgs = prefilterArgs(orig);
@@ -114,6 +117,8 @@ public class Cli {
             if (cleanedArg.equals(VERBOSE)) {
                 isVerbose = true;
                 Logger.getLogger().setVerbose(true);
+            } else if (cleanedArg.equals(HEX)) {
+                isHex = true;
             } else if (cleanedArg.equals(SAVE_AS)) {
                 saveAs = originalArgs[i + 1];
                 i++;
@@ -604,7 +609,11 @@ public class Cli {
             return CommonUtils.saveByGui(saving.as, saving.toInt(extension), extension, saving, name, body);
         } else {
             if (forceBytes) {
-                System.out.write(body);
+                if (isHex) {
+                    System.out.println(HexWithControls.bytesToStrings(body).stream().collect(Collectors.joining("\n")));
+                } else {
+                    System.out.write(body);
+                }
             } else {
                 System.out.println(new String(body, StandardCharsets.UTF_8));
             }
