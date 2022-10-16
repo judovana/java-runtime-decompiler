@@ -1,5 +1,5 @@
 # Java Runtime (De)compiler
-*Java Runtime Decompiler*, or *JRD* for short, allows you to extract bytecode from the running JVM and decompile it with an external decompiler.
+*Java Runtime (De)compiler*, or *JRD* for short, allows you to extract bytecode from the running JVM and decompile it with an external decompiler and compile back to running vm.
 * talk from devconf 2022: https://www.youtube.com/watch?v=mXcLkaAxNvM&list=PLU1vS0speL2bf9Zfa0pHQLPBhEKbbbsua&index=55
   * quite a good overview 
 * Main usecases
