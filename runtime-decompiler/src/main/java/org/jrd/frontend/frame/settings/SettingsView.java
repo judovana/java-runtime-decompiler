@@ -10,9 +10,11 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -107,27 +109,33 @@ public class SettingsView extends JDialog {
         gbc.insets = new Insets(10, 0, 10, 0);
         gbc.weightx = 1;
 
-        mainPanel.add(agentSettingsPanel, gbc);
+        JTextField thisSettings = new JTextField(Config.getConfig().getConfFile().getAbsolutePath());
+        thisSettings.setEditable(false);
+        thisSettings.setFont(new Font("Monospaced", thisSettings.getFont().getStyle(), (thisSettings.getFont().getSize() * 2) / 3));
+        mainPanel.add(thisSettings, gbc);
 
         gbc.gridy = 1;
-        mainPanel.add(compilationSettingsPanel, gbc);
+        mainPanel.add(agentSettingsPanel, gbc);
 
         gbc.gridy = 2;
+        mainPanel.add(compilationSettingsPanel, gbc);
+
+        gbc.gridy = 3;
         gbc.weighty = 1;
         mainPanel.add(nestedJarsSettingsPanel, gbc);
 
-        gbc.gridy = 3;
+        gbc.gridy = 4;
         gbc.weighty = 0;
         mainPanel.add(miscSettingsPanel, gbc);
 
-        gbc.gridy = 4;
+        gbc.gridy = 5;
         mainPanel.add(Box.createVerticalGlue(), gbc);
 
-        gbc.gridy = 5;
+        gbc.gridy = 6;
         mainPanel.add(okCancelPanel, gbc);
 
         this.setTitle("Settings");
-        this.setSize(new Dimension(800, 800));
+        this.setSize(new Dimension(800, 850));
         this.setMinimumSize(new Dimension(250, 600));
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setLocationRelativeTo(mainFrameView.getMainFrame());

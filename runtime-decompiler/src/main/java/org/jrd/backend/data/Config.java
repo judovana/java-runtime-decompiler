@@ -278,7 +278,7 @@ public final class Config {
     @SuppressWarnings("unchecked") // gson.fromJson returns a Map<String, Object> when called with configMap.getClass()
     private void loadConfigFile() throws IOException {
         configMap = new HashMap<>();
-        File confFile = new File(CONFIG_PATH);
+        File confFile = getConfFile();
         File legacyConfFile = new File(LEGACY_CONFIG_PATH);
         if (confFile.exists()) {
             try (FileReader reader = new FileReader(confFile, StandardCharsets.UTF_8)) {
@@ -326,7 +326,7 @@ public final class Config {
     }
 
     public void saveConfigFile() throws IOException {
-        File confFile = new File(CONFIG_PATH);
+        File confFile = getConfFile();
 
         if (!confFile.getParentFile().exists()) {
             Files.createDirectories(confFile.getParentFile().toPath());
@@ -335,6 +335,10 @@ public final class Config {
         // creates file if it does not exist
         Files.write(Paths.get(CONFIG_PATH), Collections.singleton(gson.toJson(configMap)), StandardCharsets.UTF_8);
         initAdditionalAgents();
+    }
+
+    public File getConfFile() {
+        return new File(CONFIG_PATH);
     }
 
     public Optional<Integer> getBestSourceTarget() {

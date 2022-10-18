@@ -16,6 +16,7 @@ import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.core.agentstore.KnownAgent;
 import org.jrd.backend.core.agentstore.KnownAgents;
+import org.jrd.backend.data.Config;
 import org.jrd.backend.data.DependenciesReader;
 import org.jrd.backend.data.MetadataProperties;
 import org.jrd.backend.data.Model;
@@ -38,6 +39,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -50,6 +52,7 @@ import java.util.stream.Collectors;
 public class Cli {
 
     protected static final String VERBOSE = "-verbose";
+    protected static final String CONFIG = "-config";
     protected static final String HEX = "-hex";
     protected static final String SAVE_AS = "-saveas";
     protected static final String SAVE_LIKE = "-savelike";
@@ -269,6 +272,9 @@ public class Cli {
                 case H:
                     printHelp();
                     break;
+                case CONFIG:
+                    printConfig();
+                    break;
                 case VERSION:
                     printVersion();
                     break;
@@ -328,6 +334,14 @@ public class Cli {
                     System.err.println("exiting");
                 }
             }
+        }
+    }
+
+    private void printConfig() throws IOException {
+        if (isVerbose) {
+            System.out.println(Files.readString(Config.getConfig().getConfFile().toPath()));
+        } else {
+            System.out.println(Config.getConfig().getConfFile().getAbsolutePath());
         }
     }
 
