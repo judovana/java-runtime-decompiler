@@ -32,56 +32,58 @@ import java.util.Arrays;
 import java.util.List;
 
 public class DiffPopup extends JPopupMenu {
+    private final String fqn;
+    private final Component[] components;
+    JCheckBox human = new JCheckBox("human readable");
+    JCheckBox invert = new JCheckBox("invert order");
 
-    public static DiffPopup create(Component[] components) {
-        JCheckBox human = new JCheckBox("human readable");
-        JCheckBox invert = new JCheckBox("invert order");
-
-        DiffPopup p = new DiffPopup();
+    public DiffPopup(Component[] components, String fqn) {
+        this.fqn = fqn;
+        this.components = components;
         JMenuItem oneThree = new JMenuItem(components[0].getName() + " - " + components[2].getName());
         oneThree.addActionListener(actionEvent -> {
-            processText(0, 2, components, human, invert);
+            processText(0, 2);
         });
-        p.add(oneThree);
+        this.add(oneThree);
         JMenuItem threeFive = new JMenuItem(components[2].getName() + " - " + components[4].getName());
         threeFive.addActionListener(actionEvent -> {
-            processText(2, 4, components, human, invert);
+            processText(2, 4);
         });
-        p.add(threeFive);
+        this.add(threeFive);
         JMenuItem oneFive = new JMenuItem(components[0].getName() + " - " + components[4].getName());
         oneFive.addActionListener(actionEvent -> {
-            processText(2, 4, components, human, invert);
+            processText(2, 4);
         });
-        p.add(oneFive);
+        this.add(oneFive);
         JMenuItem bin1 = new JMenuItem(components[1].getName() + " - " + components[3].getName() + " (ascii)");
         bin1.addActionListener(actionEvent -> {
-            processBin(LinesProvider.LinesFormat.CHARS, 1, 3, components, human, invert);
+            processBin(LinesProvider.LinesFormat.CHARS, 1, 3);
         });
-        p.add(bin1);
+        this.add(bin1);
         JMenuItem bin2 = new JMenuItem(components[1].getName() + " - " + components[3].getName() + " (hex)");
         bin2.addActionListener(actionEvent -> {
-            processBin(LinesProvider.LinesFormat.HEX, 1, 3, components, human, invert);
+            processBin(LinesProvider.LinesFormat.HEX, 1, 3);
         });
-        p.add(bin2);
-        p.add(human);
-        p.add(invert);
+        this.add(bin2);
+        this.add(human);
+        this.add(invert);
         JMenu applyPatch = new JMenu();
         applyPatch.setText("Apply patch");
-        applyPatch.add(createPatchAction((LinesProvider) components[0], LinesProvider.LinesFormat.CHARS, invert));
-        applyPatch.add(createPatchAction((LinesProvider) components[1], LinesProvider.LinesFormat.HEX, invert));
-        applyPatch.add(createPatchAction((LinesProvider) components[2], LinesProvider.LinesFormat.CHARS, invert));
-        applyPatch.add(createPatchAction((LinesProvider) components[3], LinesProvider.LinesFormat.HEX, invert));
-        applyPatch.add(createPatchAction((LinesProvider) components[4], LinesProvider.LinesFormat.CHARS, invert));
-        p.add(applyPatch);
-        return p;
+        applyPatch.add(createPatchAction(0, LinesProvider.LinesFormat.CHARS));
+        applyPatch.add(createPatchAction(1, LinesProvider.LinesFormat.HEX));
+        applyPatch.add(createPatchAction(2, LinesProvider.LinesFormat.CHARS));
+        applyPatch.add(createPatchAction(3, LinesProvider.LinesFormat.HEX));
+        applyPatch.add(createPatchAction(4, LinesProvider.LinesFormat.CHARS));
+        this.add(applyPatch);
     }
 
-    private static JMenuItem createPatchAction(final LinesProvider component, final LinesProvider.LinesFormat suffix, JCheckBox invert) {
+    private JMenuItem createPatchAction(int id, final LinesProvider.LinesFormat suffix) {
+        LinesProvider component = (LinesProvider) components[id];
         JMenuItem item = new JMenuItem(component.getName() + " " + (suffix == LinesProvider.LinesFormat.CHARS ? "" : " " + suffix));
         item.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                JDialog d = new JDialog((JFrame) null, "paste patch to apply to " + item.getText());
+                JDialog d = new JDialog((JFrame) null, "paste patch to apply to " + item.getText() + "/" + fqn);
                 d.setSize(new Dimension(800, 600));
                 d.setLocationRelativeTo(null);
                 RSyntaxTextArea t = new RSyntaxTextArea("");
@@ -111,19 +113,17 @@ public class DiffPopup extends JPopupMenu {
         return item;
     }
 
-    private static
-            void
-            processBin(LinesProvider.LinesFormat format, int x, int y, Component[] components, JCheckBox human, JCheckBox invert) {
+    private void processBin(LinesProvider.LinesFormat format, int x, int y) {
         List<String> l0 = ((LinesProvider) components[x]).getLines(format);
         List<String> l1 = ((LinesProvider) components[y]).getLines(format);
-        process(l0, l1, invert.isSelected(), human.isSelected(), components[x].getName(), components[y].getName());
+        process(l0, l1, components[x].getName(), components[y].getName(), invert.isSelected(), human.isSelected(), fqn);
     }
 
-    private static void processText(int x, int y, Component[] components, JCheckBox human, JCheckBox invert) {
-        processBin(null, x, y, components, human, invert);
+    private void processText(int x, int y) {
+        processBin(null, x, y);
     }
 
-    private static void process(List<String> l0, List<String> l1, boolean invert, boolean human, String n0, String n1) {
+    private static void process(List<String> l0, List<String> l1, String n0, String n1, boolean invert, boolean human, String fqn) {
         if (invert) {
             List<String> l = l0;
             l0 = l1;
@@ -134,7 +134,7 @@ public class DiffPopup extends JPopupMenu {
         }
         if (human) {
             String html = "<html>" + getHtml(l0, l1) + "</html>";
-            JDialog d = new JDialog((JFrame) null, "diff " + n0 + " x " + n1);
+            JDialog d = new JDialog((JFrame) null, "diff " + n0 + "/" + fqn + " x " + n1 + "/" + fqn);
             d.setSize(new Dimension(800, 600));
             d.setLocationRelativeTo(null);
             JEditorPane t = new JEditorPane("text/html", html);
@@ -143,8 +143,8 @@ public class DiffPopup extends JPopupMenu {
             d.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
             d.setVisible(true);
         } else {
-            String patch = getPatch(l0, l1, n0, n1);
-            JDialog d = new JDialog((JFrame) null, "patch " + n0 + " x " + n1);
+            String patch = getPatch(l0, l1, n0 + "/" + fqn, n1 + "/" + fqn);
+            JDialog d = new JDialog((JFrame) null, "patch " + n0 + "/" + fqn + " x " + n1 + "/" + fqn);
             d.setSize(new Dimension(800, 600));
             d.setLocationRelativeTo(null);
             JTextArea t = new JTextArea(patch);

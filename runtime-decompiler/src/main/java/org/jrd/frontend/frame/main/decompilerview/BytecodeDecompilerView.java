@@ -378,7 +378,7 @@ public class BytecodeDecompilerView {
         diffButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                DiffPopup.create(buffers.getComponents()).show(diffButton, 0, 0);
+                new DiffPopup(buffers.getComponents(), lastDecompiledClass).show(diffButton, 0, 0);
             }
         });
         undoButton = ImageButtonFactory.createUndoButton();
