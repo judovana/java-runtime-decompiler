@@ -132,11 +132,14 @@ public class HexWithControls extends JPanel implements LinesProvider {
         if (type == LinesFormat.CHARS) {
             throw new RuntimeException("only hex can be pasted in");
         }
-        hex.set(hexToBytes(nwContent.stream().collect(Collectors.joining(""))));
+        hex.set(hexToBytes(hexLinesToHexString(nwContent)));
     }
 
-    private static byte[] hexToBytes(String s) {
-        //TODO, move to utils
+    public static String hexLinesToHexString(List<String> s) {
+        return s.stream().collect(Collectors.joining(""));
+    }
+
+    public static byte[] hexToBytes(String s) {
         s = s.replaceAll("\\s+", "");
         int len = s.length();
         byte[] data = new byte[len / 2];

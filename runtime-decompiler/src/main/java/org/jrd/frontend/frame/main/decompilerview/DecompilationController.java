@@ -48,9 +48,12 @@ import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -516,17 +519,25 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         }
     }
 
-    public static String fileToBase64(String path) {
+    public static String fileToBase64(String path, boolean deHex) {
         try {
-            return bytesToBase64(fileToBytes(path));
+            if (deHex) {
+                return bytesToBase64(HexWithControls.hexToBytes(HexWithControls.hexLinesToHexString(fileToLines(path))));
+            } else {
+                return bytesToBase64(fileToBytes(path));
+            }
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
     }
 
-    public static String stdinToBase64() {
+    public static String stdinToBase64(boolean deHex) {
         try {
-            return bytesToBase64(stdinToBytes());
+            if (deHex) {
+                return bytesToBase64(HexWithControls.hexToBytes(HexWithControls.hexLinesToHexString(stdinToStrings())));
+            } else {
+                return bytesToBase64(stdinToBytes());
+            }
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
@@ -534,6 +545,10 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
 
     public static byte[] fileToBytes(String path) throws IOException {
         return Files.readAllBytes(new File(path).toPath());
+    }
+
+    public static List<String> fileToLines(String path) throws IOException {
+        return Files.readAllLines(new File(path).toPath());
     }
 
     public static byte[] stdinToBytes() throws IOException {
@@ -544,6 +559,20 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
             baos.write(buffer, 0, bytesRead);
         }
         return baos.toByteArray();
+    }
+
+    public static List<String> stdinToStrings() throws IOException {
+        List<String> r = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8))) {
+            while (true) {
+                String s = br.readLine();
+                if (s == null) {
+                    break;
+                }
+                r.add(s);
+            }
+        }
+        return r;
     }
 
     public static String bytesToBase64(byte[] bytes) {

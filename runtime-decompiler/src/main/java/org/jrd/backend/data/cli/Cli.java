@@ -392,7 +392,7 @@ public class Cli {
         String clazz;
 
         if (newBytecodeFile == null) {
-            clazz = DecompilationController.stdinToBase64();
+            clazz = DecompilationController.stdinToBase64(isHex);
         } else { // validate first
             FileToClassValidator.StringAndScore r = FileToClassValidator.validate(className, newBytecodeFile);
 
@@ -403,7 +403,7 @@ public class Cli {
                 Logger.getLogger().log(Logger.Level.ALL, "ERROR: " + r.getMessage());
             }
 
-            clazz = DecompilationController.fileToBase64(newBytecodeFile);
+            clazz = DecompilationController.fileToBase64(newBytecodeFile, isHex);
         }
 
         AgentRequestAction request =
