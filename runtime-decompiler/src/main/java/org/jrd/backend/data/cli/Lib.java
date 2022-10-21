@@ -139,8 +139,8 @@ public final class Lib {
     static int[] getByteCodeVersions(ClassInfo clazz, VmInfo vmInfo, VmManager vmManager) {
         VmDecompilerStatus result = obtainClass(vmInfo, clazz.getName(), vmManager);
         byte[] source = Base64.getDecoder().decode(result.getLoadedClassBytes());
-        int bytecodeVersion = BytecodeDecompilerView.getByteCodeVersion(source);
-        int buildJavaPerVersion = BytecodeDecompilerView.getJavaFromBytelevel(bytecodeVersion);
+        int bytecodeVersion = Lib.getByteCodeVersion(source);
+        int buildJavaPerVersion = Lib.getJavaFromBytelevel(bytecodeVersion);
         return new int[]{bytecodeVersion, buildJavaPerVersion};
     }
 
@@ -223,6 +223,48 @@ public final class Lib {
         Logger.getLogger().log(host + ":" + port + " should be detached successfully");
     }
 
+    public static PluginWithOptions getDecompilerFromString(String plugin, PluginManager pm) {
+        DecompilerWrapper decompiler;
+        String[] options = null;
+        if (plugin.startsWith(DecompilerWrapper.JAVAP_NAME)) {
+            options = Arrays.stream(plugin.split("-")).skip(1) // do not include "javap" in options
+                    .map(s -> "-" + s).toArray(String[]::new);
+            decompiler = findDecompiler(DecompilerWrapper.JAVAP_NAME, pm);
+        } else {
+            decompiler = findDecompiler(plugin, pm);
+        }
+        if (decompiler == null) {
+            throw new RuntimeException("Plugin '" + plugin + "' not found.");
+        }
+        return new PluginWithOptions(decompiler, options);
+    }
+
+    public static String decompileBytesByDecompilerName(
+            String base64Bytes, String pluginName, String className, VmInfo vmInfo, VmManager vmManager, PluginManager pluginManager
+    ) throws Exception {
+        byte[] bytes = Base64.getDecoder().decode(base64Bytes);
+        return decompileBytesByDecompilerName(bytes, pluginName, className, vmInfo, vmManager, pluginManager);
+    }
+
+    public static String decompileBytesByDecompilerName(
+            byte[] bytes, String pluginName, String className, VmInfo vmInfo, VmManager vmManager, PluginManager pluginManager
+    ) throws Exception {
+        PluginWithOptions pwo = Lib.getDecompilerFromString(pluginName, pluginManager);
+        String decompilationResult = pluginManager.decompile(pwo.getDecompiler(), className, bytes, pwo.getOptions(), vmInfo, vmManager);
+        return decompilationResult;
+    }
+
+    public static String uploadClass(VmInfo vmInfo, String className, byte[] bytes, VmManager vmManager) {
+        return uploadClass(vmInfo, className, Base64.getEncoder().encodeToString(bytes), vmManager);
+    }
+
+    public static String uploadClass(VmInfo vmInfo, String className, String clazzBytesInBase64, VmManager vmManager) {
+        AgentRequestAction request =
+                DecompilationController.createRequest(vmInfo, AgentRequestAction.RequestAction.OVERWRITE, className, clazzBytesInBase64);
+        String response = DecompilationController.submitRequest(vmManager, request);
+        return response;
+    }
+
     @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "VmInfo is public class.. not sure..")
     public static class HandhshakeResult {
         private final VmInfo vmInfo;
@@ -262,4 +304,42 @@ public final class Lib {
         }
         return new HandhshakeResult(vmInfo, version, ortel);
     }
+
+    public static int getBuildJavaPerVersion(byte[] source) {
+        int bytecodeVersion = getByteCodeVersion(source);
+        int buildJavaPerVersion = getJavaFromBytelevel(bytecodeVersion);
+        return buildJavaPerVersion;
+    }
+
+
+    public static int getJavaFromBytelevel(int bytecodeVersion) {
+        // https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.1
+        // Oracle's Java Virtual Machine implementation in JDK release 1.0.2 supports class file format
+        // versions 45.0 through 45.3 inclusive.
+        // JDK releases 1.1.* support class file format versions in the range 45.0 through 45.65535 inclusive.
+        // For k ≥ 2, JDK release 1.k supports class file format versions in the range 45.0 through 44+k.0 inclusive.
+        // https://javaalmanac.io/bytecode/versions/
+        int r = bytecodeVersion - 44;
+        if (r <= 1) {
+            r = 1;
+        }
+        return r;
+    }
+
+    @SuppressFBWarnings(value = {"DLS_DEAD_LOCAL_STORE"}, justification = "the dead stores are here for clarity and possible future usage")
+    public static int getByteCodeVersion(byte[] source) {
+        if (source == null || source.length < 8) {
+            return 0;
+        }
+        //https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html
+        //u4             magic;
+        //u2             minor_version;
+        //u2             major_version;
+        int b1 = source[4]; //minor
+        int b2 = source[5]; //minor
+        int b3 = source[6]; //major
+        int b4 = source[7]; //major
+        return b4;
+    }
+
 }

@@ -64,7 +64,12 @@ public final class CliUtils {
 
     static String cleanParameter(String param) {
         if (param.startsWith("-")) {
-            return param.replaceAll("^--*", "-").toLowerCase();
+            param = param.replaceAll("^--*", "-");
+            if ("-R".equals(param)) {
+                return param;
+            } else {
+                return param.toLowerCase();
+            }
         }
 
         return param; // do not make regexes and filenames lowercase

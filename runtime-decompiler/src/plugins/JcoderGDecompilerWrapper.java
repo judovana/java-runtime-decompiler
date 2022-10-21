@@ -45,7 +45,7 @@ public class JcoderGDecompilerWrapper {
             originalFiles[i] = new ToolInput.ByteInput(input.get(i).getValue());
         }
         ToolOutput.ByteOutput encodedFiles = new ToolOutput.ByteOutput();
-        ToolOutput.StringLog encodeLog = new ToolOutput.StringLog();
+        ToolOutput.SingleDualOutputStreamOutput encodeLog = new ToolOutput.SingleDualOutputStreamOutput();
         org.openjdk.asmtools.jcoder.Main jcoder = new org.openjdk.asmtools.jcoder.Main(encodedFiles, encodeLog, originalFiles);
         jcoder.setVerboseFlag(true);
         int r = jcoder.compile();

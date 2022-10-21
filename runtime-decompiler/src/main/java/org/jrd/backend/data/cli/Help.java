@@ -15,39 +15,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.jrd.backend.data.cli.Cli.AGENT;
-import static org.jrd.backend.data.cli.Cli.API;
-import static org.jrd.backend.data.cli.Cli.ATTACH;
-import static org.jrd.backend.data.cli.Cli.BASE64;
-import static org.jrd.backend.data.cli.Cli.BYTES;
-import static org.jrd.backend.data.cli.Cli.COMPILE;
-import static org.jrd.backend.data.cli.Cli.CONFIG;
-import static org.jrd.backend.data.cli.Cli.CP;
-import static org.jrd.backend.data.cli.Cli.DECOMPILE;
-import static org.jrd.backend.data.cli.Cli.DEPS;
-import static org.jrd.backend.data.cli.Cli.DETACH;
-import static org.jrd.backend.data.cli.Cli.H;
-import static org.jrd.backend.data.cli.Cli.HELP;
-import static org.jrd.backend.data.cli.Cli.HEX;
-import static org.jrd.backend.data.cli.Cli.INIT;
-import static org.jrd.backend.data.cli.Cli.LIST_AGENTS;
-import static org.jrd.backend.data.cli.Cli.LIST_CLASSES;
-import static org.jrd.backend.data.cli.Cli.LIST_CLASSESBYTECODEVERSIONS;
-import static org.jrd.backend.data.cli.Cli.LIST_CLASSESDETAILS;
-import static org.jrd.backend.data.cli.Cli.LIST_CLASSESDETAILSBYTECODEVERSIONS;
-import static org.jrd.backend.data.cli.Cli.LIST_JVMS;
-import static org.jrd.backend.data.cli.Cli.LIST_OVERRIDES;
-import static org.jrd.backend.data.cli.Cli.LIST_PLUGINS;
-import static org.jrd.backend.data.cli.Cli.OVERWRITE;
-import static org.jrd.backend.data.cli.Cli.P;
-import static org.jrd.backend.data.cli.Cli.R;
-import static org.jrd.backend.data.cli.Cli.REMOVE_OVERRIDES;
-import static org.jrd.backend.data.cli.Cli.SAVE_AS;
-import static org.jrd.backend.data.cli.Cli.SAVE_LIKE;
-
-import static org.jrd.backend.data.cli.Cli.VERBOSE;
-import static org.jrd.backend.data.cli.Cli.VERSION;
-import static org.jrd.backend.data.cli.Cli.VERSIONS;
+import static org.jrd.backend.data.cli.CliSwitches.*;
 
 /**
  * Class for relaying help texts to the user.
@@ -76,6 +44,7 @@ public final class Help {
     static final String COMPILE_FORMAT = COMPILE + " [" + P + " <PLUGIN>] [" + CP + " <PUC>] [" + R + "] <PATH>...";
     static final String DECOMPILE_FORMAT = DECOMPILE + " <PUC> <PLUGIN> <CLASS REGEX>...";
     static final String OVERWRITE_FORMAT = OVERWRITE + " <PUC> <FQN> [<CLASS FILE>]";
+    static final String PATCH_FORMAT = PATCH + " <PUC>  <PLUGIN>xor<ADDITIONAL-SOURCE/CLASS-PATH (" + HEX + ") (" + REVERT + ")";
     static final String INIT_FORMAT = INIT + " <PUC> <FQN>";
     static final String AGENT_FORMAT =
             AGENT + " <" + AgentLiveliness.class.getSimpleName() + "> " + "<" + AgentLoneliness.class.getSimpleName() + "> " + "<port>";
@@ -116,6 +85,16 @@ public final class Help {
             "Javap can be passed options by appending them without spaces: " + "'javap-v-public ...' executes as 'javap -v -public ...'";
     private static final String OVERWRITE_TEXT =
             "Overwrite class of a process with new bytecode. If <CLASS FILE> is not set, standard input is used.";
+    private static final String PATCH_TEXT = "You can apply patch from stdin to classes in <PUC>." +
+            " The patch can be on source, or on binary if  " + HEX + " is provided\n" +
+            "The header  (+++/---) must contain dot-delimited FQN of class. All before / (or \\) is stripped." +
+            " .class$/.java$  is omited. See gui for the examples.\n" +
+            "If plugin is specified, runtime classapth is decompiled, patched (is not decompiled with " + HEX + ")," +
+            " compiled and uploade.\n " +
+            "If plugin is not specified, then source from additional-source-path is patched, compiled and uploaded.\n" + "If " + HEX +
+            ". is set, then binary from addtional-class-path is patched and uploaded." + " In both cases, class is INIT before all.\n" +
+            "This is a bit different from gui, where patch can contain several files, and is moreover direct shortcut" +
+            " to init, bytes, (decompile,) patch, (compile,) upload. As patch tool, " + REVERT + " will invert the patch";
     private static final String INIT_TEXT = "Try to initialize a class in a running JVM (has no effect in FS VMs). " +
             "Because class loading is lazy, the class you need might be missing, eg. java.lang.Override.";
     static final String ATTACH_TEXT = "Will only attach the agent to selected pid. Prints out the port for future usage.";

@@ -3,6 +3,7 @@ package org.jrd.frontend.frame.main.popup;
 import com.github.difflib.DiffUtils;
 import com.github.difflib.UnifiedDiffUtils;
 import com.github.difflib.patch.Patch;
+import com.github.difflib.patch.PatchFailedException;
 import com.github.difflib.text.DiffRow;
 import com.github.difflib.text.DiffRowGenerator;
 
@@ -28,6 +29,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -77,6 +79,14 @@ public class DiffPopup extends JPopupMenu {
         this.add(applyPatch);
     }
 
+    public static String parseClassFromHeader(String s) {
+        String clazz = s.trim().replaceAll(".*/", "").replaceAll(".*\\\\", "");
+        clazz = clazz.replaceAll("\\.class$", "");
+        clazz = clazz.replaceAll("\\.java$", "");
+        clazz = clazz.replaceAll(".*\\s+", "");
+        return clazz;
+    }
+
     private JMenuItem createPatchAction(int id, final LinesProvider.LinesFormat suffix) {
         LinesProvider component = (LinesProvider) components[id];
         JMenuItem item = new JMenuItem(component.getName() + " " + (suffix == LinesProvider.LinesFormat.CHARS ? "" : " " + suffix));
@@ -93,11 +103,9 @@ public class DiffPopup extends JPopupMenu {
                 apply.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent actionEvent) {
-                        List<String> orig = component.getLines(suffix);
-                        Patch<String> importedPatch = UnifiedDiffUtils.parseUnifiedDiff(Arrays.asList(t.getText().split("\n")));
                         try {
                             List<String> patchedText =
-                                    invert.isSelected() ? DiffUtils.unpatch(orig, importedPatch) : DiffUtils.patch(orig, importedPatch);
+                                    patch(component.getLines(suffix), Arrays.asList(t.getText().split("\n")), invert.isSelected());
                             component.setLines(suffix, patchedText);
                         } catch (Exception e) {
                             Logger.getLogger().log(Logger.Level.ALL, e);
@@ -111,6 +119,12 @@ public class DiffPopup extends JPopupMenu {
         });
 
         return item;
+    }
+
+    public static List<String> patch(List<String> origFile, List<String> patch, boolean revert) throws PatchFailedException {
+        Patch<String> importedPatch = UnifiedDiffUtils.parseUnifiedDiff(patch);
+        List<String> patchedText = revert ? DiffUtils.unpatch(origFile, importedPatch) : DiffUtils.patch(origFile, importedPatch);
+        return patchedText;
     }
 
     private void processBin(LinesProvider.LinesFormat format, int x, int y) {
@@ -184,5 +198,41 @@ public class DiffPopup extends JPopupMenu {
             }
         }
         return sb.toString().replace(" ", "&nbsp;");
+    }
+
+    @SuppressWarnings({"ModifiedControlVariable", "CyclomaticComplexity"})
+    public static List<SingleFilePatch> getIndividualPatches(List<String> patches) {
+        List<SingleFilePatch> r = new ArrayList<>(patches.size() / 7);
+        int start = -1;
+        int end = -1;
+        for (int i = 0; i < patches.size(); i++) {
+            if ((patches.get(i).startsWith("+++") || patches.get(i).startsWith("---")) && i < patches.size() - 1 &&
+                    (patches.get(i + 1).startsWith("---") || patches.get(i + 1).startsWith("+++"))) {
+                start = i;
+                i++;
+                i++;
+                while (true) {
+                    if (i >= patches.size()) {
+                        i--;
+                        break;
+                    }
+                    if (patches.get(i).startsWith("+") || patches.get(i).startsWith("-") ||
+                            patches.get(i).startsWith(" ") ||
+                            patches.get(i).startsWith("@")) {
+                        if (patches.get(i).equals("-- ")) { //this is how diff-email ends files
+                            i--;
+                            break;
+                        }
+                        i++;
+                    } else {
+                        i--;
+                        break;
+                    }
+                }
+                end = i;
+                r.add(new SingleFilePatch(start, end));
+            }
+        }
+        return r;
     }
 }

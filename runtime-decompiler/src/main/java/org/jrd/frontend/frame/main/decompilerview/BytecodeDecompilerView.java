@@ -8,6 +8,7 @@ import org.jrd.backend.core.ClassInfo;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.Config;
 import org.jrd.backend.data.DependenciesReader;
+import org.jrd.backend.data.cli.Lib;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.frontend.frame.main.GlobalConsole;
 import org.jrd.frontend.frame.main.popup.ClassListPopupMenu;
@@ -723,8 +724,7 @@ public class BytecodeDecompilerView {
         additionalSrcBuffer.resetSrcArea(additionalSrcData);
         additionalBytecodeBuffer.resetSrcArea(additionalData);
         bytecodeBuffer.resetSrcArea(data);
-        int bytecodeVersion = getByteCodeVersion(source);
-        int buildJavaPerVersion = getJavaFromBytelevel(bytecodeVersion);
+        int buildJavaPerVersion = Lib.getBuildJavaPerVersion(source);
         Config.getConfig().setBestSourceTarget(Optional.of(buildJavaPerVersion));
         bytecodeButton.setText(buildJavaPerVersion + "");
         bytecodeButton.setToolTipText(
@@ -747,36 +747,6 @@ public class BytecodeDecompilerView {
         additionalBinary.open(additionalSource);
 
         this.lastDecompiledClass = name;
-    }
-
-    public static int getJavaFromBytelevel(int bytecodeVersion) {
-        // https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.1
-        // Oracle's Java Virtual Machine implementation in JDK release 1.0.2 supports class file format
-        // versions 45.0 through 45.3 inclusive.
-        // JDK releases 1.1.* support class file format versions in the range 45.0 through 45.65535 inclusive.
-        // For k ≥ 2, JDK release 1.k supports class file format versions in the range 45.0 through 44+k.0 inclusive.
-        // https://javaalmanac.io/bytecode/versions/
-        int r = bytecodeVersion - 44;
-        if (r <= 1) {
-            r = 1;
-        }
-        return r;
-    }
-
-    @SuppressFBWarnings(value = {"DLS_DEAD_LOCAL_STORE"}, justification = "the dead stores are here for clarity and possible future usage")
-    public static int getByteCodeVersion(byte[] source) {
-        if (source == null || source.length < 8) {
-            return 0;
-        }
-        //https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html
-        //u4             magic;
-        //u2             minor_version;
-        //u2             major_version;
-        int b1 = source[4]; //minor
-        int b2 = source[5]; //minor
-        int b3 = source[6]; //major
-        int b4 = source[7]; //major
-        return b4;
     }
 
     public void setClassesActionListener(ActionListener listener) {

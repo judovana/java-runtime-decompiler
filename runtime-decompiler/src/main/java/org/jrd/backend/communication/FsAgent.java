@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -25,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
@@ -65,8 +67,20 @@ public final class FsAgent implements DelegatingJrdAgent {
         return agent;
     }
 
+    public static FsAgent createAdditionalClassPathFsAgent(String cp) {
+        return createAdditionalClassPathFsAgent(
+                Arrays.stream(cp.split(File.pathSeparator)).map(a -> new File(a)).collect(Collectors.toList())
+        );
+    }
+
     public static FsAgent createAdditionalClassPathFsAgent(List<File> cp) {
         return new FsAgent(cp, "class");
+    }
+
+    public static FsAgent createAdditionalSourcePathFsAgent(String cp) {
+        return createAdditionalSourcePathFsAgent(
+                Arrays.stream(cp.split(File.pathSeparator)).map(a -> new File(a)).collect(Collectors.toList())
+        );
     }
 
     public static FsAgent createAdditionalSourcePathFsAgent(List<File> cp) {

@@ -1,0 +1,55 @@
+From 508a07e33c53b050cda0e3abd242f629c299ed7d Mon Sep 17 00:00:00 2001
+From: Michal Karm Babacek <karm@redhat.com>
+Date: Sun, 16 Oct 2022 10:53:11 +0200
+Subject: [PATCH] Quarkus 2.13.0.Final to Quarkus 2.13.2.Final
+
+---
+ jenkins/job_dsl/tests/Constants.groovy                      | 6 +++---
+ .../tests/mandrel_linux_amd64_perfcheck_tests.groovy        | 2 +-
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/jenkins/job_dsl/tests/Constants.groovy b/jenkins/job_dsl/tests/Constants.groovy
+index e7e1dffc..25312af8 100644
+--- a/jenkins/job_dsl/tests/Constants.groovy
++++ b/jenkins/job_dsl/tests/Constants.groovy
+@@ -2,21 +2,21 @@ class Constants {
+ 
+     static final ArrayList<String> QUARKUS_VERSION_LATEST =
+             [
+-                    '2.13.0.Final',
++                    '2.13.2.Final',
+                     'main'
+             ]
+ 
+     static final ArrayList<String> QUARKUS_VERSION_RELEASED =
+             [
+                     '2.7.6.Final',
+-                    '2.13.0.Final'
++                    '2.13.2.Final'
+             ]
+ 
+     static final ArrayList<String> QUARKUS_VERSION_ALL =
+             [
+                     '2.7.6.Final',
+                     '2.12.2.Final',
+-                    '2.13.0.Final'
++                    '2.13.2.Final'
+             ]
+ 
+     static final String QUARKUS_MODULES_AWT_TESTS = '' +
+diff --git a/jenkins/job_dsl/tests/mandrel_linux_amd64_perfcheck_tests.groovy b/jenkins/job_dsl/tests/mandrel_linux_amd64_perfcheck_tests.groovy
+index 036e583d..f7b21022 100644
+--- a/jenkins/job_dsl/tests/mandrel_linux_amd64_perfcheck_tests.groovy
++++ b/jenkins/job_dsl/tests/mandrel_linux_amd64_perfcheck_tests.groovy
+@@ -7,7 +7,7 @@ matrixJob('mandrel-linux-amd64-perfcheck-tests') {
+                 '22.0.0.2-Final'
+         )
+         text('QUARKUS_VERSION',
+-                '2.13.0.Final',
++                '2.13.2.Final',
+                 '2.8.3.Final',
+                 '2.8.2.Final',
+                 '2.7.1.Final'
+-- 
+GitLab
+

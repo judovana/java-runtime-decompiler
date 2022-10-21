@@ -1,10 +1,15 @@
 package org.jrd.backend.data.cli;
 
+import com.github.difflib.patch.PatchFailedException;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.ClasspathlessCompiler;
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
 
+import org.jrd.backend.communication.ErrorCandidate;
+import org.jrd.backend.communication.FsAgent;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.core.AgentAttachManager;
 import org.jrd.backend.core.AgentLoader;
@@ -28,7 +33,10 @@ import org.jrd.frontend.frame.main.decompilerview.DecompilationController;
 import org.jrd.frontend.frame.main.LoadingDialogProvider;
 import org.jrd.frontend.frame.main.ModelProvider;
 import org.jrd.frontend.frame.main.decompilerview.HexWithControls;
+import org.jrd.frontend.frame.main.popup.DiffPopup;
+import org.jrd.frontend.frame.main.popup.SingleFilePatch;
 import org.jrd.frontend.frame.overwrite.FileToClassValidator;
+import org.jrd.frontend.frame.overwrite.OverwriteClassDialog;
 import org.jrd.frontend.utility.AgentApiGenerator;
 import org.jrd.frontend.utility.CommonUtils;
 
@@ -44,46 +52,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static org.jrd.backend.data.cli.CliSwitches.*;
+
 public class Cli {
-
-    protected static final String VERBOSE = "-verbose";
-    protected static final String CONFIG = "-config";
-    protected static final String HEX = "-hex";
-    protected static final String SAVE_AS = "-saveas";
-    protected static final String SAVE_LIKE = "-savelike";
-    protected static final String LIST_JVMS = "-listjvms";
-    protected static final String LIST_OVERRIDES = "-listoverrides";
-    protected static final String REMOVE_OVERRIDES = "-removeoverrides";
-    protected static final String LIST_PLUGINS = "-listplugins";
-    protected static final String LIST_AGENTS = "-listagents";
-    protected static final String LIST_CLASSES = "-listclasses";
-    protected static final String LIST_CLASSESDETAILS = "-listdetails";
-    protected static final String LIST_CLASSESBYTECODEVERSIONS = "-listbytecodeversions";
-    protected static final String LIST_CLASSESDETAILSBYTECODEVERSIONS = "-listdetailsversions";
-    protected static final String BASE64 = "-base64bytes";
-    protected static final String BYTES = "-bytes";
-    protected static final String DEPS = "-deps";
-    protected static final String DECOMPILE = "-decompile";
-    protected static final String COMPILE = "-compile";
-    protected static final String OVERWRITE = "-overwrite";
-    protected static final String INIT = "-init";
-    protected static final String AGENT = "-agent";
-    protected static final String ATTACH = "-attach";
-    protected static final String DETACH = "-detach";
-    protected static final String API = "-api";
-    protected static final String VERSION = "-version";
-    protected static final String VERSIONS = "-versions";
-    protected static final String HELP = "-help";
-    protected static final String H = "-h";
-
-    protected static final String R = "-r";
-    protected static final String P = "-p";
-    protected static final String CP = "-cp";
 
     private final List<String> filteredArgs;
     private final VmManager vmManager;
@@ -91,6 +69,7 @@ public class Cli {
     private Saving saving;
     private boolean isVerbose;
     private boolean isHex;
+    private boolean isRevert;
 
     public Cli(String[] orig, Model model) {
         this.filteredArgs = prefilterArgs(orig);
@@ -122,6 +101,8 @@ public class Cli {
                 Logger.getLogger().setVerbose(true);
             } else if (cleanedArg.equals(HEX)) {
                 isHex = true;
+            } else if (cleanedArg.equals(REVERT)) {
+                isRevert = true;
             } else if (cleanedArg.equals(SAVE_AS)) {
                 saveAs = originalArgs[i + 1];
                 i++;
@@ -241,17 +222,15 @@ public class Cli {
                     operatedOn.add(vmInfo4);
                     break;
                 case COMPILE:
-                    VmInfo[] sourceTarget = compile(new CompileArguments(filteredArgs, pluginManager, vmManager, true));
-                    if (sourceTarget[0] != null) {
-                        operatedOn.add(sourceTarget[0]);
-                    }
-                    if (sourceTarget[1] != null) {
-                        operatedOn.add(sourceTarget[1]);
-                    }
+                    compileWrapper(operatedOn);
                     break;
                 case OVERWRITE:
                     VmInfo vmInfo5 = overwrite();
                     operatedOn.add(vmInfo5);
+                    break;
+                case PATCH:
+                    VmInfo patchVmInfo = patch();
+                    operatedOn.add(patchVmInfo);
                     break;
                 case INIT:
                     VmInfo vmInfo6 = init();
@@ -337,6 +316,16 @@ public class Cli {
         }
     }
 
+    private void compileWrapper(List<VmInfo> operatedOn) throws Exception {
+        VmInfo[] sourceTarget = compileAndUpload(new CompileArguments(filteredArgs, pluginManager, vmManager, true));
+        if (sourceTarget[0] != null) {
+            operatedOn.add(sourceTarget[0]);
+        }
+        if (sourceTarget[1] != null) {
+            operatedOn.add(sourceTarget[1]);
+        }
+    }
+
     private void printConfig() throws IOException {
         if (isVerbose) {
             System.out.println(Files.readString(Config.getConfig().getConfFile().toPath()));
@@ -375,6 +364,222 @@ public class Cli {
         return connections;
     }
 
+    /*FIXME refactor*/
+    @SuppressWarnings({"CyclomaticComplexity", "ExecutableStatementCount", "JavaNCSS"})
+    private VmInfo patch() throws Exception {
+        //--patch <puc>  ((plugin)xor(SP/CP)( (-hex) < patch
+        if (filteredArgs.size() != 3) {
+            throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.PATCH_FORMAT + "'.");
+        }
+        String puc = filteredArgs.get(1);
+        VmInfo vmInfo = getVmInfo(puc);
+        String pluginXorPath = filteredArgs.get(2);
+        List<String> patch = DecompilationController.stdinToStrings();
+        List<SingleFilePatch> files = DiffPopup.getIndividualPatches(patch);
+        for (SingleFilePatch startEnd : files) {
+            String className = DiffPopup.parseClassFromHeader(patch.get(startEnd.getStart()));
+            String classNameCheck = DiffPopup.parseClassFromHeader(patch.get(startEnd.getStart() + 1));
+            if (!className.equals(classNameCheck)) {
+                throw new RuntimeException("Invalid file header for:\n" + patch.get(startEnd.getStart()) + "\n" + patch.get(startEnd.getEnd() + 1));
+            }
+            Lib.initClass(vmInfo, vmManager, className, System.out);
+        }
+
+        FsAgent initialSearch;
+        if (isHex) {
+            initialSearch = FsAgent.createAdditionalClassPathFsAgent(pluginXorPath);
+        } else {
+            initialSearch = FsAgent.createAdditionalSourcePathFsAgent(pluginXorPath);
+        }
+
+        List<String> local = new ArrayList<>();
+        List<String> remote = new ArrayList<>();
+
+        List<ObtainedCodeWithNameAndBytecode> obtainedCodeWithNameAndBytecode = new ArrayList<>(files.size());
+        for (SingleFilePatch startEnd : files) {
+            String className = DiffPopup.parseClassFromHeader(patch.get(startEnd.getStart()));
+            System.out.println("Obtaining " + className);
+            Integer byteCodeLevel = null;
+            String base64Bytes = initialSearch.submitRequest(AgentRequestAction.RequestAction.BYTES + " " + className);
+            ErrorCandidate errorCandidateLocal = new ErrorCandidate(base64Bytes);
+            if (errorCandidateLocal.isError()) {
+                //not found on additional cp/sp: getting from puc
+                base64Bytes = Lib.obtainClass(vmInfo, className, vmManager).getLoadedClassBytes();
+                ErrorCandidate errorCandidateRemote = new ErrorCandidate(base64Bytes);
+                if (errorCandidateRemote.isError()) {
+                    throw new RuntimeException(className + " not found on local nor remote paths/vm"); //not probable, see the init check above
+                }
+                byteCodeLevel = Lib.getBuildJavaPerVersion(Base64.getDecoder().decode(base64Bytes));
+                remote.add(className);
+                if (isHex) {
+                    //we are done, we have just  by obtainClasses
+                    System.out.println("...remote binary");
+                } else {
+                    String decompiledSrc = decompileBytesByDecompilerName(base64Bytes, pluginXorPath, className, vmInfo);
+                    base64Bytes = Base64.getEncoder().encodeToString(decompiledSrc.getBytes(StandardCharsets.UTF_8));
+                    System.out.println("...remote decompiled src ( compiled as " + byteCodeLevel + ")");
+                }
+            } else {
+                local.add(className);
+                if (isHex) {
+                    //we are done, base64 bytes are already loaded by initialSearch
+                    System.out.println("...local binary");
+                } else {
+                    //we are done also here, it was found on SRC path (and is base64 as it is found by agent)
+                    //but wee need to find how it was compiled
+                    String remoteImpl = Lib.obtainClass(vmInfo, className, vmManager).getLoadedClassBytes();
+                    ErrorCandidate errorCandidateRemote = new ErrorCandidate(remoteImpl);
+                    if (errorCandidateRemote.isError()) {
+                        throw new RuntimeException(className + " not found on local nor remote paths/vm"); //not probable, see the init check above
+                    }
+                    byteCodeLevel = Lib.getBuildJavaPerVersion(Base64.getDecoder().decode(remoteImpl));
+                    System.out.println("...local src ( compiled as " + byteCodeLevel + ")");
+                }
+            }
+            obtainedCodeWithNameAndBytecode.add(new ObtainedCodeWithNameAndBytecode(className, base64Bytes, byteCodeLevel));
+        }
+        if (obtainedCodeWithNameAndBytecode.size() == remote.size()) {
+            System.out.println("Warning! All classes found only in remote vm!");
+        } else if (obtainedCodeWithNameAndBytecode.size() == local.size()) {
+            System.out.println("All classes found on local path");
+        } else if (obtainedCodeWithNameAndBytecode.size() == (local.size() + remote.size())) {
+            //this is theoretical, current input/output do nto allow inclusion of decompielr and src path together... maybe improvable later
+            System.out.println("WARNING! Some (" + local.size() + ") classes found in local, some (" + remote.size() + ") in remote");
+        } else {
+            throw new RuntimeException(" Only " + (local.size() + remote.size()) + " from " + files.size() + " found!");
+        }
+
+        //Dont forget, if one file is patched more times, then it is expected, that it is applied to the already patched!
+        Map<String, String> patched = new HashMap(files.size());
+        for (int i = 0; i < files.size(); i++) {
+            SingleFilePatch startEnd = files.get(i);
+            String className = DiffPopup.parseClassFromHeader(patch.get(startEnd.getStart()));
+            ObtainedCodeWithNameAndBytecode nameBody = obtainedCodeWithNameAndBytecode.get(0);
+            if (!nameBody.getName().equals(className)) {
+                throw new RuntimeException("Misaligned patching of " + nameBody.getName() + " by " + className);
+            }
+            System.out.println("Patching " + nameBody.getName());
+            String toPatch = nameBody.getBase64Body();
+            if (patched.containsKey(className)) {
+                toPatch = patched.get(className);
+            }
+            if (isHex) {
+                byte[] bytes = Base64.getDecoder().decode(toPatch);
+                List<String> hexLines = HexWithControls.bytesToStrings(bytes);
+                if (isVerbose) {
+                    System.out.println("-  " + hexLines.stream().collect(Collectors.joining("\n-  ")));
+                }
+                List<String> patchedLines = applySubPatch(patch, startEnd, hexLines);
+                if (isVerbose) {
+                    System.out.println("+  " + patchedLines.stream().collect(Collectors.joining("\n+  ")));
+                }
+                String patchedBase64 =
+                        Base64.getEncoder().encodeToString(HexWithControls.hexToBytes(HexWithControls.hexLinesToHexString(patchedLines)));
+                patched.put(className, patchedBase64);
+                System.out.println("Patched bin");
+            } else {
+                String src = new String(Base64.getDecoder().decode(toPatch), StandardCharsets.UTF_8); //change to src
+                List<String> srcLines = Arrays.asList(src.split("\n"));
+                if (isVerbose) {
+                    System.out.println("-  " + srcLines.stream().collect(Collectors.joining("\n-  ")));
+                }
+                List<String> patchedLines = applySubPatch(patch, startEnd, srcLines);
+                if (isVerbose) {
+                    System.out.println("+  " + patchedLines.stream().collect(Collectors.joining("\n+  ")));
+                }
+                String patchedBase64 = Base64.getEncoder()
+                        .encodeToString(patchedLines.stream().collect(Collectors.joining("\n")).getBytes(StandardCharsets.UTF_8));
+                patched.put(className, patchedBase64);
+                System.out.println("Patched src");
+            }
+        }
+
+        //in addition, we have to different by bytecode version (although it is src only)
+        Map<Integer, Map<String, String>> binariesToUpload = new HashMap(files.size());
+        if (isHex) {
+            Map<String, String> defaultByteCodeMap = new HashMap<>();
+            for (Map.Entry<String, String> singlePatched : patched.entrySet()) {
+                defaultByteCodeMap.put(singlePatched.getKey(), singlePatched.getValue());
+            }
+            binariesToUpload.put(null, defaultByteCodeMap);
+        } else {
+            List<Map.Entry<String, String>> patchedList = new ArrayList<>(patched.entrySet());
+            IdentifiedSource[] identifiedSources = new IdentifiedSource[patched.entrySet().size()];
+            for (int i = 0; i < patchedList.size(); i++) {
+                Map.Entry<String, String> toUpload = patchedList.get(i);
+                identifiedSources[i] = new IdentifiedSource(
+                        new ClassIdentifier(toUpload.getKey()), Base64.getDecoder().decode(patchedList.get(i).getValue()),
+                        StandardCharsets.UTF_8
+                );
+            }
+            System.out.println("Compiling.");
+            CompileArguments args = new CompileArguments(pluginManager, vmManager, vmInfo, pluginXorPath);
+            //todo, pass bytecode from version from runing vm!
+            PluginWithOptions wrapper = null;
+            boolean haveCompiler = false;
+            try {
+                wrapper = Lib.getDecompilerFromString(pluginXorPath, pluginManager);
+                if (wrapper.getDecompiler() == null) {
+                    wrapper = null;
+                    throw new RuntimeException();
+                }
+                haveCompiler = pluginManager.hasBundledCompiler(wrapper.getDecompiler());
+            } catch (Exception ex) {
+                //plugin not found
+            }
+            Integer detectedByteCode = obtainedCodeWithNameAndBytecode.get(0).getBytecodeLevel();
+            System.out.println("Compiling group of files of level : "
+                            + detectedByteCode == null ? "unknown" : detectedByteCode
+                            + " " + patched.keySet().stream().collect(Collectors.joining(", ")));
+                    // FIXME FIXME FIXME
+                    // settingbytecode  must be done per class!
+                    // FIXME FIXME FIXME
+                    Config.getConfig().setBestSourceTarget(Optional.ofNullable(detectedByteCode));
+            ClasspathlessCompiler compiler = OverwriteClassDialog.getClasspathlessCompiler(wrapper == null ? null : wrapper.getDecompiler(), haveCompiler, isVerbose);
+            Collection<IdentifiedBytecode> compiledFiles = compiler.compileClass(
+                    args.getClassesProvider(),
+                    Optional.of((level, message) -> Logger.getLogger().log(message)),
+                    identifiedSources);
+            //Collection<IdentifiedBytecode> compiledFiles = compile(args, args.getClassesProvider(), identifiedSources, true);
+            System.out.println(
+                    "Compiled " + patched.size() + " sources to " + compiledFiles.size() + " files: " +
+                            compiledFiles.stream().map(a -> a.getClassIdentifier().getFullName()).collect(Collectors.joining(", "))
+            );
+            for (IdentifiedBytecode compiled : compiledFiles) {
+                Map<String, String> compiledForSingleBytecodeLevel = new HashMap<>();
+                compiledForSingleBytecodeLevel.put(compiled.getClassIdentifier().getFullName(), Base64.getEncoder().encodeToString(compiled.getFile()));
+                binariesToUpload.put(8, compiledForSingleBytecodeLevel);
+            }
+        }
+
+        for (Map.Entry<Integer, Map<String, String>> toUploadWithBytecode : binariesToUpload.entrySet()) {
+            Integer bytecodeLevel = toUploadWithBytecode.getKey();
+            System.out.println("Upload group of bytecode level: " + (bytecodeLevel == null ? "default:" : "" + bytecodeLevel));
+            for (Map.Entry<String, String> toUpload : toUploadWithBytecode.getValue().entrySet()) {
+                System.out.println("Uploading: " + toUpload.getKey());
+                String reply = uploadClass(vmInfo, toUpload.getKey(), toUpload.getValue());
+                //FIXME do not work
+                ErrorCandidate ec = new ErrorCandidate(reply);
+                if (ec.isError()) {
+                    System.out.println("failed - " + reply.replaceAll("for request 'OVERWRITE.*", ""));
+                } else {
+                    System.out.println("Uploaded.");
+                }
+            }
+        }
+        return vmInfo;
+    }
+
+    private List<String> applySubPatch(List<String> patch, SingleFilePatch startEnd, List<String> linesToPatch) throws PatchFailedException {
+        List<String> subPatch = patch.subList(startEnd.getStart(), startEnd.getEnd() + 1);
+        List<String> patchedLines = DiffPopup.patch(linesToPatch, subPatch, isRevert);
+        return patchedLines;
+    }
+
+    private String decompileBytesByDecompilerName(String base64Bytes, String pluginName, String className, VmInfo vmInfo) throws Exception {
+        return Lib.decompileBytesByDecompilerName(base64Bytes, pluginName, className, vmInfo, vmManager, pluginManager);
+    }
+
     private VmInfo overwrite() throws Exception {
         String newBytecodeFile;
         if (filteredArgs.size() == 3) {
@@ -406,9 +611,7 @@ public class Cli {
             clazz = DecompilationController.fileToBase64(newBytecodeFile, isHex);
         }
 
-        AgentRequestAction request =
-                DecompilationController.createRequest(vmInfo, AgentRequestAction.RequestAction.OVERWRITE, className, clazz);
-        String response = DecompilationController.submitRequest(vmManager, request);
+        String response = uploadClass(vmInfo, className, clazz);
 
         if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
             System.out.println("Overwrite of class '" + className + "' successful.");
@@ -416,6 +619,10 @@ public class Cli {
             throw new RuntimeException(DecompilationController.CLASSES_NOPE);
         }
         return vmInfo;
+    }
+
+    private String uploadClass(VmInfo vmInfo, String className, String clazz) {
+        return Lib.uploadClass(vmInfo, className, clazz, vmManager);
     }
 
     @SuppressFBWarnings(value = "OS_OPEN_STREAM", justification = "The stream is clsoed as conditionally as is created")
@@ -483,16 +690,12 @@ public class Cli {
         Lib.detach("localhost", port, vmManager);
     }
 
-    private VmInfo[] compile(CompileArguments args) throws Exception {
+    private VmInfo[] compileAndUpload(CompileArguments args) throws Exception {
+
         // handle -cp
         RuntimeCompilerConnector.JrdClassesProvider provider = args.getClassesProvider();
-
-        // handle -p
-        ClasspathlessCompiler compiler = args.getCompiler(isVerbose);
-
         IdentifiedSource[] identifiedSources = CommonUtils.toIdentifiedSources(args.isRecursive, args.filesToCompile);
-        Collection<IdentifiedBytecode> allBytecode =
-                compiler.compileClass(provider, Optional.of((level, message) -> Logger.getLogger().log(message)), identifiedSources);
+        Collection<IdentifiedBytecode> allBytecode = compile(args, provider, identifiedSources, false);
 
         boolean shouldUpload = shouldUpload();
 
@@ -505,11 +708,7 @@ public class Cli {
                 String className = bytecode.getClassIdentifier().getFullName();
                 Logger.getLogger().log("Uploading class '" + className + "'.");
 
-                AgentRequestAction request = DecompilationController.createRequest(
-                        targetVm, AgentRequestAction.RequestAction.OVERWRITE, className,
-                        Base64.getEncoder().encodeToString(bytecode.getFile())
-                );
-                String response = DecompilationController.submitRequest(vmManager, request);
+                String response = uploadClass(targetVm, className, Base64.getEncoder().encodeToString(bytecode.getFile()));
 
                 if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
                     Logger.getLogger().log("Successfully uploaded class '" + className + "'.");
@@ -540,6 +739,23 @@ public class Cli {
         } else {
             return new VmInfo[]{provider.getVmInfo(), targetVm};
         }
+    }
+
+    private Collection<IdentifiedBytecode> compile(
+            CompileArguments args,
+            RuntimeCompilerConnector.JrdClassesProvider provider,
+            IdentifiedSource[] identifiedSources,
+            boolean acceptNonsenseAsDefault
+    ) throws IOException {
+        /*
+         * This ignores global settings. FIXME, replace by logic from path()?
+         * */
+        // handle -p
+        ClasspathlessCompiler compiler = args.getCompiler(isVerbose, acceptNonsenseAsDefault);
+
+        Collection<IdentifiedBytecode> allBytecode =
+                compiler.compileClass(provider, Optional.of((level, message) -> Logger.getLogger().log(message)), identifiedSources);
+        return allBytecode;
     }
 
     private boolean shouldUpload() {
@@ -580,24 +796,15 @@ public class Cli {
                     throw new RuntimeException("Plugin loading directly from file is not implemented.");
                 }
 
-                DecompilerWrapper decompiler;
-                String[] options = null;
-                if (plugin.startsWith(DecompilerWrapper.JAVAP_NAME)) {
-                    options = Arrays.stream(plugin.split("-")).skip(1) // do not include "javap" in options
-                            .map(s -> "-" + s).toArray(String[]::new);
-                    decompiler = findDecompiler(DecompilerWrapper.JAVAP_NAME);
-                } else {
-                    decompiler = findDecompiler(plugin);
-                }
+                PluginWithOptions pwo = Lib.getDecompilerFromString(plugin, pluginManager);
 
-                if (decompiler != null) {
-                    String decompilationResult = pluginManager.decompile(decompiler, clazz, bytes, options, vmInfo, vmManager);
+                if (pwo.getDecompiler() != null) {
+                    String decompilationResult =
+                            pluginManager.decompile(pwo.getDecompiler(), clazz, bytes, pwo.getOptions(), vmInfo, vmManager);
 
                     if (!outOrSave(clazz, ".java", decompilationResult)) {
                         failCount++;
                     }
-                } else {
-                    throw new RuntimeException("Plugin '" + plugin + "' not found.");
                 }
             }
         }
@@ -633,10 +840,6 @@ public class Cli {
             }
             return true;
         }
-    }
-
-    private DecompilerWrapper findDecompiler(String decompilerName) {
-        return Lib.findDecompiler(decompilerName, pluginManager);
     }
 
     private VmInfo printBytes(String operation) throws Exception {

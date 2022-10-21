@@ -29,22 +29,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static org.jrd.backend.data.cli.Cli.AGENT;
-import static org.jrd.backend.data.cli.Cli.BASE64;
-import static org.jrd.backend.data.cli.Cli.BYTES;
-import static org.jrd.backend.data.cli.Cli.COMPILE;
-import static org.jrd.backend.data.cli.Cli.CP;
-import static org.jrd.backend.data.cli.Cli.DECOMPILE;
-import static org.jrd.backend.data.cli.Cli.H;
-import static org.jrd.backend.data.cli.Cli.HELP;
-import static org.jrd.backend.data.cli.Cli.INIT;
-import static org.jrd.backend.data.cli.Cli.LIST_CLASSES;
-import static org.jrd.backend.data.cli.Cli.LIST_JVMS;
-import static org.jrd.backend.data.cli.Cli.LIST_PLUGINS;
-import static org.jrd.backend.data.cli.Cli.OVERWRITE;
-import static org.jrd.backend.data.cli.Cli.R;
-import static org.jrd.backend.data.cli.Cli.VERBOSE;
-import static org.jrd.backend.data.cli.Cli.VERSION;
+import static org.jrd.backend.data.cli.CliSwitches.*;
 import static org.jrd.backend.data.cli.Help.BASE64_FORMAT;
 import static org.jrd.backend.data.cli.Help.BYTES_FORMAT;
 import static org.jrd.backend.data.cli.Help.DECOMPILE_FORMAT;
@@ -405,7 +390,7 @@ public class CliTest extends AbstractAgentNeedingTest {
                 new String[]{BASE64, unimportantPid}, new String[]{INIT}, new String[]{INIT, unimportantPid}, new String[]{OVERWRITE},
                 new String[]{OVERWRITE, unimportantPid}, new String[]{DECOMPILE}, new String[]{DECOMPILE, unimportantPid},
                 new String[]{DECOMPILE, unimportantPid, DecompilerWrapper.JAVAP_NAME}, new String[]{COMPILE}, new String[]{COMPILE, R},
-                new String[]{COMPILE, R, CP, unimportantPid}, new String[]{COMPILE, R, CP, unimportantPid, Cli.P, "unimportantPluginName"}
+                new String[]{COMPILE, R, CP, unimportantPid}, new String[]{COMPILE, R, CP, unimportantPid, P, "unimportantPluginName"}
         ).map(a -> (Object) a).map(Arguments::of); // cast needed because of varargs factory method .of()
     }
 

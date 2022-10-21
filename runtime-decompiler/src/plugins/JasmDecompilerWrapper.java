@@ -43,7 +43,7 @@ public class JasmDecompilerWrapper {
             originalFiles[i] = new ToolInput.ByteInput(input.get(i).getValue());
         }
         ToolOutput.ByteOutput encodedFiles = new ToolOutput.ByteOutput();
-        ToolOutput.StringLog encodeLog = new ToolOutput.StringLog();
+        ToolOutput.SingleDualOutputStreamOutput encodeLog = new ToolOutput.SingleDualOutputStreamOutput();
         org.openjdk.asmtools.jasm.Main jasm = new org.openjdk.asmtools.jasm.Main(encodedFiles, encodeLog, originalFiles);
         jasm.setVerboseFlag(true);
         int r = jasm.compile();
