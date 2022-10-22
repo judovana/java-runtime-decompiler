@@ -4,6 +4,8 @@ import org.jrd.agent.api.UnsafeVariables;
 import org.jrd.agent.api.Variables;
 
 import java.lang.instrument.Instrumentation;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 /**
  * This class contains agent's premain and agentmain methods.
@@ -19,6 +21,14 @@ public final class Main {
     private static String hostname;
     private static Integer port;
     private static boolean firstTime = true;
+
+    static String getHostname() {
+        return hostname;
+    }
+
+    static Integer getPort() {
+        return port;
+    }
 
     private Main() {
     }
@@ -44,8 +54,13 @@ public final class Main {
         UnsafeVariables.init();
         Transformer transformer = new Transformer();
         inst.addTransformer(transformer, true);
-        InstrumentationProvider p = new InstrumentationProvider(inst, transformer);
-
+        InstrumentationProvider p = AccessController.doPrivileged(new PrivilegedAction<InstrumentationProvider>() {
+            @Override
+            public InstrumentationProvider run() {
+                InstrumentationProvider p = new InstrumentationProvider(inst, transformer);
+                return p;
+            }
+        });
         if (agentArgs != null) {
             String[] argsArray = agentArgs.split(",");
             for (String arg : argsArray) {
@@ -66,7 +81,6 @@ public final class Main {
                 }
             }
         }
-
         ConnectionDelegator.initialize(hostname, port, p);
     }
 

@@ -44,6 +44,7 @@ public final class Help {
     static final String COMPILE_FORMAT = COMPILE + " [" + P + " <PLUGIN>] [" + CP + " <PUC>] [" + R + "] <PATH>...";
     static final String DECOMPILE_FORMAT = DECOMPILE + " <PUC> <PLUGIN> <CLASS REGEX>...";
     static final String OVERWRITE_FORMAT = OVERWRITE + " <PUC> <FQN> [<CLASS FILE>]";
+    static final String ADD_FORMAT = ADD_CLASS + " <PUC> <FQN> [<CLASS FILE>]";
     static final String PATCH_FORMAT = PATCH + " <PUC>  <PLUGIN>xor<ADDITIONAL-SOURCE/CLASS-PATH (" + HEX + ") (" + REVERT + ")";
     static final String INIT_FORMAT = INIT + " <PUC> <FQN>";
     static final String AGENT_FORMAT =
@@ -80,11 +81,13 @@ public final class Help {
             "the compiled code will be attempted to be injected into that process.\n" + "If multiple PATHs were specified, but no '" +
             SAVE_AS + "', the process fails.\n" + "use: -D of " + GlobalConsole.CPLC_DUPLICATED_CODE_VERBOSITY_CONSTANT +
             "= any subset of " + Arrays.stream(GlobalConsole.CPLC_ITEMS).collect(Collectors.joining(",")) + "\n" +
-            "to see what is CPLC reolver doing";
+            "to see what is CPLC reolver doing. Warning, CPLC have issues with default (none).";
     private static final String DECOMPILE_TEXT = "Decompile and print classes of a process with the specified decompiler plugin.\n" +
             "Javap can be passed options by appending them without spaces: " + "'javap-v-public ...' executes as 'javap -v -public ...'";
     private static final String OVERWRITE_TEXT =
             "Overwrite class of a process with new bytecode. If <CLASS FILE> is not set, standard input is used.";
+    private static final String ADD_TEXT =
+            "Add class is currently unable to add class, unless all its dependencies are already in running vm. Stdin used if no file.";
     private static final String PATCH_TEXT = " You may ignore 3rd param in " + HEX + " mode." +
             "You can apply patch from stdin to classes in <PUC>." + " The patch can be on source, or on binary if  " + HEX +
             " is provided\n" + "The header  (+++/---) must contain dot-delimited FQN of class. All before / (or \\) is stripped." +
@@ -167,6 +170,7 @@ public final class Help {
         ALL_OPTIONS.put(COMPILE_FORMAT, COMPILE_TEXT);
         ALL_OPTIONS.put(DECOMPILE_FORMAT, DECOMPILE_TEXT);
         ALL_OPTIONS.put(OVERWRITE_FORMAT, OVERWRITE_TEXT);
+        ALL_OPTIONS.put(ADD_FORMAT, ADD_TEXT);
         ALL_OPTIONS.put(INIT_FORMAT, INIT_TEXT);
         ALL_OPTIONS.put(ATTACH_FORMAT, ATTACH_TEXT);
         ALL_OPTIONS.put(AGENT_FORMAT, AGENT_TEXT);

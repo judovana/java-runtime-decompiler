@@ -142,6 +142,8 @@ public final class FsAgent implements DelegatingJrdAgent {
                     String futureBody = q[2];
                     uploadByteCode(classNameForOverwrite, futureBody);
                     return Communicate.NO_VALUE_OK_RESULT;
+                case ADD_CLASS:
+                    throw new RuntimeException("Not sure if adding class will be ever implemented for FS");
                 case INIT_CLASS:
                     Logger.getLogger().log(Logger.Level.DEBUG, "Init class have no meaning in FS 'vm'");
                     return Communicate.NO_VALLUE_DONE_RESULT;

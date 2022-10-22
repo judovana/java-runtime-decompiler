@@ -2,6 +2,8 @@ package org.jrd.agent;
 
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.regex.Pattern;
@@ -144,5 +146,20 @@ public class InstrumentationProvider {
         int loader = Integer.parseInt(System.getProperty(Main.JRD_AGENT_LOADED, "0")) - 1;
         System.setProperty(Main.JRD_AGENT_LOADED, String.valueOf(loader));
         AgentLogger.getLogger().log("done");
+    }
+
+    /**
+     * Tis was originally solved by custom classloader which had map(string, byte[]) and map(string, clazz).
+     * However such class, although visible in class listing and by decompilers,
+     * was not usable in tunrime compilation, nor eg initialized by class.forName.
+     * The class.forName is good test or the  class being correctly loaded
+     */
+    public void addClass(String className, byte[] b)
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, ClassNotFoundException {
+        Method m = ClassLoader.class.getDeclaredMethod("defineClass", String.class, byte[].class, int.class, int.class);
+        m.setAccessible(true);
+        Object futureClazz = m.invoke(this.getClass().getClassLoader(), className, b, 0, b.length);
+        System.err.println("JRD Agent added " + futureClazz);
+        Class.forName(className);
     }
 }

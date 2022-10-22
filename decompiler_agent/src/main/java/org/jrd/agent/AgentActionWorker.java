@@ -130,7 +130,10 @@ public class AgentActionWorker extends Thread {
                 getVersion(outputStream);
                 break;
             case "OVERWRITE":
-                receiveByteCode(inputStream, outputStream);
+                receiveByteCode(inputStream, outputStream, false);
+                break;
+            case "ADD_CLASS":
+                receiveByteCode(inputStream, outputStream, true);
                 break;
             case "INIT_CLASS":
                 initClass(inputStream, outputStream);
@@ -272,7 +275,7 @@ public class AgentActionWorker extends Thread {
         });
     }
 
-    private void receiveByteCode(BufferedReader in, BufferedWriter out) throws IOException {
+    private void receiveByteCode(BufferedReader in, BufferedWriter out, boolean addNew) throws IOException {
         executeParametrisedNoReturnCommand(in, out, "No class name provided for the overwrite command.", new ParametrisedRunner() {
             @Override
             public void run(String className) throws Exception {
@@ -282,7 +285,12 @@ public class AgentActionWorker extends Thread {
                     out.flush();
                     return;
                 }
-                provider.setClassBody(className, Base64.getDecoder().decode(classBodyBase64));
+                if (addNew) {
+                    provider.addClass(className, Base64.getDecoder().decode(classBodyBase64));
+                    //initClass(in, out); returns
+                } else {
+                    provider.setClassBody(className, Base64.getDecoder().decode(classBodyBase64));
+                }
             }
         });
     }

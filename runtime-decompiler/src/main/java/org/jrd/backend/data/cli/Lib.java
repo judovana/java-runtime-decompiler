@@ -264,6 +264,13 @@ public final class Lib {
         return response;
     }
 
+    public static String addClass(VmInfo vmInfo, String className, String clazzBytesInBase64, VmManager vmManager) {
+        AgentRequestAction request =
+                DecompilationController.createRequest(vmInfo, AgentRequestAction.RequestAction.ADD_CLASS, className, clazzBytesInBase64);
+        String response = DecompilationController.submitRequest(vmManager, request);
+        return response;
+    }
+
     @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "VmInfo is public class.. not sure..")
     public static class HandhshakeResult {
         private final VmInfo vmInfo;

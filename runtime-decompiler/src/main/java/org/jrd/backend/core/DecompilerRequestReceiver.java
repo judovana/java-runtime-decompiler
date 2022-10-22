@@ -60,10 +60,11 @@ public class DecompilerRequestReceiver {
         }
         String response;
         switch (action) {
+            case ADD_CLASS:
             case OVERWRITE:
                 String classNameForOverwrite = request.getParameter(AgentRequestAction.CLASS_NAME_PARAM);
                 String classFutureBody = request.getParameter(AgentRequestAction.CLASS_TO_OVERWRITE_BODY);
-                response = getOverwriteAction(hostname, port, vmId, vmPid, classNameForOverwrite, classFutureBody);
+                response = getOverwriteAction(action, hostname, port, vmId, vmPid, classNameForOverwrite, classFutureBody);
                 break;
             case REMOVE_OVERRIDES:
                 String patern = request.getParameter(AgentRequestAction.CLASS_NAME_PARAM);
@@ -171,10 +172,11 @@ public class DecompilerRequestReceiver {
         return new ResponseWithPort(reply, actualListenPort);
     }
 
-    private String getOverwriteAction(String hostname, int listenPort, String vmId, int vmPid, String className, String newBody) {
+    private String getOverwriteAction(
+            RequestAction action, String hostname, int listenPort, String vmId, int vmPid, String className, String newBody
+    ) {
         try {
-            ResponseWithPort reply =
-                    getResponse(hostname, listenPort, vmId, vmPid, RequestAction.OVERWRITE + "\n" + className + "\n" + newBody);
+            ResponseWithPort reply = getResponse(hostname, listenPort, vmId, vmPid, action + "\n" + className + "\n" + newBody);
             VmDecompilerStatus status = vmManager.getVmInfoByID(vmId).getVmDecompilerStatus();
             status.setHostname(hostname);
             status.setListenPort(reply.port);

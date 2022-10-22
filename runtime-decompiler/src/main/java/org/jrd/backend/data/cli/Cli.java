@@ -231,12 +231,16 @@ public class Cli {
                     compileWrapper(operatedOn);
                     break;
                 case OVERWRITE:
-                    VmInfo vmInfo5 = overwrite();
+                    VmInfo vmInfo5 = overwrite(false);
                     operatedOn.add(vmInfo5);
                     break;
                 case PATCH:
                     VmInfo patchVmInfo = patch();
                     operatedOn.add(patchVmInfo);
+                    break;
+                case ADD_CLASS:
+                    VmInfo vmInfoAddClass = overwrite(true);
+                    operatedOn.add(vmInfoAddClass);
                     break;
                 case INIT:
                     VmInfo vmInfo6 = init();
@@ -622,7 +626,7 @@ public class Cli {
         return Lib.decompileBytesByDecompilerName(base64Bytes, pluginName, className, vmInfo, vmManager, pluginManager);
     }
 
-    private VmInfo overwrite() throws Exception {
+    private VmInfo overwrite(boolean add) throws Exception {
         String newBytecodeFile;
         if (filteredArgs.size() == 3) {
             Logger.getLogger().log("Reading class for overwrite from stdin.");
@@ -653,10 +657,19 @@ public class Cli {
             clazz = DecompilationController.fileToBase64(newBytecodeFile, isHex);
         }
 
-        String response = uploadClass(vmInfo, className, clazz);
+        String response;
+        if (add) {
+            response = Lib.addClass(vmInfo, className, clazz, vmManager);
+        } else {
+            response = uploadClass(vmInfo, className, clazz);
+        }
 
         if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
-            System.out.println("Overwrite of class '" + className + "' successful.");
+            if (add) {
+                System.out.println("Addition of class '" + className + "' successful.");
+            } else {
+                System.out.println("Overwrite of class '" + className + "' successful.");
+            }
         } else {
             throw new RuntimeException(DecompilationController.CLASSES_NOPE);
         }

@@ -57,6 +57,7 @@ public class AgentRequestAction {
         BYTES(DelegatingJrdAgent.CommandDelegationOptions.FIRST_OK),
         HALT(DelegatingJrdAgent.CommandDelegationOptions.MAIN_ONLY),
         OVERWRITE(DelegatingJrdAgent.CommandDelegationOptions.MAIN_ONLY),
+        ADD_CLASS(DelegatingJrdAgent.CommandDelegationOptions.MAIN_ONLY),
         INIT_CLASS(DelegatingJrdAgent.CommandDelegationOptions.ALL),
         OVERRIDES(DelegatingJrdAgent.CommandDelegationOptions.MAIN_ONLY),
         REMOVE_OVERRIDES(DelegatingJrdAgent.CommandDelegationOptions.MAIN_ONLY),

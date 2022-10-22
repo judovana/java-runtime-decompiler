@@ -629,6 +629,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
             case BYTES:
                 request = AgentRequestAction.create(vmInfo, hostname, listenPort, action, commands[0]);
                 break;
+            case ADD_CLASS:
             case OVERWRITE:
                 try {
                     request = AgentRequestAction.create(vmInfo, hostname, listenPort, action, commands[0], commands[1]);

@@ -22,6 +22,7 @@ public final class CliSwitches {
     static final String DECOMPILE = "-decompile";
     static final String COMPILE = "-compile";
     static final String OVERWRITE = "-overwrite";
+    static final String ADD_CLASS = "-addclass";
     static final String PATCH = "-patch";
     static final String INIT = "-init";
     static final String AGENT = "-agent";
