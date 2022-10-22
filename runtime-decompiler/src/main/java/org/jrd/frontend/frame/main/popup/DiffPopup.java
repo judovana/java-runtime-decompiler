@@ -54,7 +54,7 @@ public class DiffPopup extends JPopupMenu {
         this.add(threeFive);
         JMenuItem oneFive = new JMenuItem(components[0].getName() + " - " + components[4].getName());
         oneFive.addActionListener(actionEvent -> {
-            processText(2, 4);
+            processText(0, 4);
         });
         this.add(oneFive);
         JMenuItem bin1 = new JMenuItem(components[1].getName() + " - " + components[3].getName() + " (ascii)");

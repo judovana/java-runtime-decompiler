@@ -5,7 +5,6 @@ public class ObtainedCodeWithNameAndBytecode {
     private final String base64Body;
     private final Integer bytecodeLevel;
 
-
     public ObtainedCodeWithNameAndBytecode(String name, String base64Body, Integer bytecodeLevel) {
         this.name = name;
         this.base64Body = base64Body;

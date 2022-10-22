@@ -53,6 +53,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -61,6 +62,10 @@ import java.util.stream.Collectors;
 
 import static org.jrd.backend.data.cli.CliSwitches.*;
 
+/*
+FIXME, refactor - each case item must go to its own class
+Once done, reset FileLength in codestyle.xml to 1000 or less
+ */
 public class Cli {
 
     private final List<String> filteredArgs;
@@ -131,6 +136,7 @@ public class Cli {
                                 agentArgs,
                                 args.stream().map(a -> CliUtils.cleanParameter(a)).anyMatch(a -> a.equals(OVERWRITE)) ||
                                         args.stream().map(a -> CliUtils.cleanParameter(a)).anyMatch(a -> a.equals(ATTACH)) ||
+                                        args.stream().map(a -> CliUtils.cleanParameter(a)).anyMatch(a -> a.equals(PATCH)) ||
                                         (args.stream().map(a -> CliUtils.cleanParameter(a))
                                                 .anyMatch(a -> a.equals(COMPILE) && shouldUpload()))
                         )
@@ -364,23 +370,44 @@ public class Cli {
         return connections;
     }
 
-    /*FIXME refactor*/
-    @SuppressWarnings({"CyclomaticComplexity", "ExecutableStatementCount", "JavaNCSS"})
+    /* FIXME refactor
+     * The refactoring should be simple, there are obvious parts like check all , init all, gather all, compile all, upload all...
+     */
+    @SuppressWarnings({"MethodLength", "CyclomaticComplexity", "ExecutableStatementCount", "JavaNCSS"})
     private VmInfo patch() throws Exception {
-        //--patch <puc>  ((plugin)xor(SP/CP)( (-hex) < patch
-        if (filteredArgs.size() != 3) {
-            throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.PATCH_FORMAT + "'.");
+        //--patch <puc>  ((plugin)xor(SP/CP)( (-hex) (-R) < patch
+        String puc;
+        VmInfo vmInfo;
+        String pluginXorPath;
+        if (isHex) {
+            if (filteredArgs.size() == 2) {
+                puc = filteredArgs.get(1);
+                vmInfo = getVmInfo(puc);
+                pluginXorPath = "nothingNowhere";
+            } else if (filteredArgs.size() == 3) {
+                puc = filteredArgs.get(1);
+                vmInfo = getVmInfo(puc);
+                pluginXorPath = filteredArgs.get(2);
+            } else {
+                throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.PATCH_FORMAT + "'.");
+            }
+        } else {
+            if (filteredArgs.size() != 3) {
+                throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.PATCH_FORMAT + "'.");
+            }
+            puc = filteredArgs.get(1);
+            vmInfo = getVmInfo(puc);
+            pluginXorPath = filteredArgs.get(2);
         }
-        String puc = filteredArgs.get(1);
-        VmInfo vmInfo = getVmInfo(puc);
-        String pluginXorPath = filteredArgs.get(2);
         List<String> patch = DecompilationController.stdinToStrings();
         List<SingleFilePatch> files = DiffPopup.getIndividualPatches(patch);
         for (SingleFilePatch startEnd : files) {
             String className = DiffPopup.parseClassFromHeader(patch.get(startEnd.getStart()));
             String classNameCheck = DiffPopup.parseClassFromHeader(patch.get(startEnd.getStart() + 1));
             if (!className.equals(classNameCheck)) {
-                throw new RuntimeException("Invalid file header for:\n" + patch.get(startEnd.getStart()) + "\n" + patch.get(startEnd.getEnd() + 1));
+                throw new RuntimeException(
+                        "Invalid file header for:\n" + patch.get(startEnd.getStart()) + "\n" + patch.get(startEnd.getEnd() + 1)
+                );
             }
             Lib.initClass(vmInfo, vmManager, className, System.out);
         }
@@ -396,6 +423,7 @@ public class Cli {
         List<String> remote = new ArrayList<>();
 
         List<ObtainedCodeWithNameAndBytecode> obtainedCodeWithNameAndBytecode = new ArrayList<>(files.size());
+        Map<String, Integer> bytecodeLevelCache = new HashMap<>();
         for (SingleFilePatch startEnd : files) {
             String className = DiffPopup.parseClassFromHeader(patch.get(startEnd.getStart()));
             System.out.println("Obtaining " + className);
@@ -437,6 +465,7 @@ public class Cli {
                 }
             }
             obtainedCodeWithNameAndBytecode.add(new ObtainedCodeWithNameAndBytecode(className, base64Bytes, byteCodeLevel));
+            bytecodeLevelCache.put(className, byteCodeLevel);
         }
         if (obtainedCodeWithNameAndBytecode.size() == remote.size()) {
             System.out.println("Warning! All classes found only in remote vm!");
@@ -454,7 +483,7 @@ public class Cli {
         for (int i = 0; i < files.size(); i++) {
             SingleFilePatch startEnd = files.get(i);
             String className = DiffPopup.parseClassFromHeader(patch.get(startEnd.getStart()));
-            ObtainedCodeWithNameAndBytecode nameBody = obtainedCodeWithNameAndBytecode.get(0);
+            ObtainedCodeWithNameAndBytecode nameBody = obtainedCodeWithNameAndBytecode.get(i);
             if (!nameBody.getName().equals(className)) {
                 throw new RuntimeException("Misaligned patching of " + nameBody.getName() + " by " + className);
             }
@@ -503,18 +532,8 @@ public class Cli {
             }
             binariesToUpload.put(null, defaultByteCodeMap);
         } else {
-            List<Map.Entry<String, String>> patchedList = new ArrayList<>(patched.entrySet());
-            IdentifiedSource[] identifiedSources = new IdentifiedSource[patched.entrySet().size()];
-            for (int i = 0; i < patchedList.size(); i++) {
-                Map.Entry<String, String> toUpload = patchedList.get(i);
-                identifiedSources[i] = new IdentifiedSource(
-                        new ClassIdentifier(toUpload.getKey()), Base64.getDecoder().decode(patchedList.get(i).getValue()),
-                        StandardCharsets.UTF_8
-                );
-            }
-            System.out.println("Compiling.");
+            System.out.println("Compiling patched sources.");
             CompileArguments args = new CompileArguments(pluginManager, vmManager, vmInfo, pluginXorPath);
-            //todo, pass bytecode from version from runing vm!
             PluginWithOptions wrapper = null;
             boolean haveCompiler = false;
             try {
@@ -525,52 +544,75 @@ public class Cli {
                 }
                 haveCompiler = pluginManager.hasBundledCompiler(wrapper.getDecompiler());
             } catch (Exception ex) {
-                //plugin not found
+                //plugin not found == default compiler
+                System.out.print(""); //FB error
             }
-            Integer detectedByteCode = obtainedCodeWithNameAndBytecode.get(0).getBytecodeLevel();
-            System.out.println("Compiling group of files of level : "
-                            + detectedByteCode == null ? "unknown" : detectedByteCode
-                            + " " + patched.keySet().stream().collect(Collectors.joining(", ")));
-                    // FIXME FIXME FIXME
-                    // settingbytecode  must be done per class!
-                    // FIXME FIXME FIXME
-                    Config.getConfig().setBestSourceTarget(Optional.ofNullable(detectedByteCode));
-            ClasspathlessCompiler compiler = OverwriteClassDialog.getClasspathlessCompiler(wrapper == null ? null : wrapper.getDecompiler(), haveCompiler, isVerbose);
-            Collection<IdentifiedBytecode> compiledFiles = compiler.compileClass(
-                    args.getClassesProvider(),
-                    Optional.of((level, message) -> Logger.getLogger().log(message)),
-                    identifiedSources);
-            //Collection<IdentifiedBytecode> compiledFiles = compile(args, args.getClassesProvider(), identifiedSources, true);
-            System.out.println(
-                    "Compiled " + patched.size() + " sources to " + compiledFiles.size() + " files: " +
-                            compiledFiles.stream().map(a -> a.getClassIdentifier().getFullName()).collect(Collectors.joining(", "))
-            );
-            for (IdentifiedBytecode compiled : compiledFiles) {
+
+            List<Map.Entry<String, String>> patchedList = new ArrayList<>(patched.entrySet());
+            for (Integer detectedByteCode : new HashSet<>(bytecodeLevelCache.values())) {
+                List<IdentifiedSource> thisBytecodeClasses = patchedList.stream().filter(
+                        a -> null == bytecodeLevelCache.get(a.getKey()) || detectedByteCode.equals(bytecodeLevelCache.get(a.getKey()))
+                ).map(a -> new IdentifiedSource(new ClassIdentifier(a.getKey()), Base64.getDecoder().decode(a.getValue())))
+                        .collect(Collectors.toList());
+                //ternary operator is constantly killed by autoformater
+                String m = "Compiling group of files " + thisBytecodeClasses.size() + " of level : ";
+                if (detectedByteCode == null) {
+                    m = m + "unknown";
+                } else {
+                    m = m + detectedByteCode;
+                }
+                m = m + " - " +
+                        thisBytecodeClasses.stream().map(a -> a.getClassIdentifier().getFullName()).collect(Collectors.joining(", "));
+                System.out.println(m);
+                Config.getConfig().setBestSourceTarget(Optional.ofNullable(detectedByteCode));
+                ClasspathlessCompiler compiler = OverwriteClassDialog
+                        .getClasspathlessCompiler(wrapper == null ? null : wrapper.getDecompiler(), haveCompiler, isVerbose);
+                Collection<IdentifiedBytecode> compiledFiles = compiler.compileClass(
+                        args.getClassesProvider(), Optional.of((level, message) -> Logger.getLogger().log(message)),
+                        thisBytecodeClasses.toArray(IdentifiedSource[]::new)
+                );
+                //Collection<IdentifiedBytecode> compiledFiles = compile(args, args.getClassesProvider(), identifiedSources, true);
+                String mm = "Compiled " + thisBytecodeClasses.size() + " sources to " + compiledFiles.size() + " files: " +
+                        compiledFiles.stream().map(a -> a.getClassIdentifier().getFullName()).collect(Collectors.joining(", "));
+                System.out.println(mm);
                 Map<String, String> compiledForSingleBytecodeLevel = new HashMap<>();
-                compiledForSingleBytecodeLevel.put(compiled.getClassIdentifier().getFullName(), Base64.getEncoder().encodeToString(compiled.getFile()));
-                binariesToUpload.put(8, compiledForSingleBytecodeLevel);
+                for (IdentifiedBytecode compiled : compiledFiles) {
+                    compiledForSingleBytecodeLevel
+                            .put(compiled.getClassIdentifier().getFullName(), Base64.getEncoder().encodeToString(compiled.getFile()));
+                }
+                binariesToUpload.put(detectedByteCode, compiledForSingleBytecodeLevel);
             }
         }
 
+        List<String> failures = new ArrayList<>();
+        List<String> passes = new ArrayList<>();
         for (Map.Entry<Integer, Map<String, String>> toUploadWithBytecode : binariesToUpload.entrySet()) {
             Integer bytecodeLevel = toUploadWithBytecode.getKey();
             System.out.println("Upload group of bytecode level: " + (bytecodeLevel == null ? "default:" : "" + bytecodeLevel));
             for (Map.Entry<String, String> toUpload : toUploadWithBytecode.getValue().entrySet()) {
                 System.out.println("Uploading: " + toUpload.getKey());
                 String reply = uploadClass(vmInfo, toUpload.getKey(), toUpload.getValue());
-                //FIXME do not work
                 ErrorCandidate ec = new ErrorCandidate(reply);
-                if (ec.isError()) {
+                if (ec.isError() || reply.startsWith("error ")/*fix me, why the or is needed?*/) {
                     System.out.println("failed - " + reply.replaceAll("for request 'OVERWRITE.*", ""));
+                    failures.add(toUpload.getKey());
                 } else {
                     System.out.println("Uploaded.");
+                    passes.add(toUpload.getKey());
                 }
             }
+        }
+        if (failures.isEmpty()) {
+            System.out.println("All looks good");
+        } else {
+            System.out.println("Failed to upload: " + failures.stream().collect(Collectors.joining(", ")));
+            throw new RuntimeException("Failed to upload " + failures.size() + " classes from " + (passes.size() + failures.size()) + "");
         }
         return vmInfo;
     }
 
-    private List<String> applySubPatch(List<String> patch, SingleFilePatch startEnd, List<String> linesToPatch) throws PatchFailedException {
+    private List<String> applySubPatch(List<String> patch, SingleFilePatch startEnd, List<String> linesToPatch)
+            throws PatchFailedException {
         List<String> subPatch = patch.subList(startEnd.getStart(), startEnd.getEnd() + 1);
         List<String> patchedLines = DiffPopup.patch(linesToPatch, subPatch, isRevert);
         return patchedLines;
@@ -742,9 +784,7 @@ public class Cli {
     }
 
     private Collection<IdentifiedBytecode> compile(
-            CompileArguments args,
-            RuntimeCompilerConnector.JrdClassesProvider provider,
-            IdentifiedSource[] identifiedSources,
+            CompileArguments args, RuntimeCompilerConnector.JrdClassesProvider provider, IdentifiedSource[] identifiedSources,
             boolean acceptNonsenseAsDefault
     ) throws IOException {
         /*

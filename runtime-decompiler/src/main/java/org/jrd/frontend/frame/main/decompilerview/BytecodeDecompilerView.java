@@ -1,6 +1,5 @@
 package org.jrd.frontend.frame.main.decompilerview;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
 

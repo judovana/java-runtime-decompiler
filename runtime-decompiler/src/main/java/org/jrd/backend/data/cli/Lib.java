@@ -12,7 +12,6 @@ import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
-import org.jrd.frontend.frame.main.decompilerview.BytecodeDecompilerView;
 import org.jrd.frontend.frame.main.decompilerview.DecompilationController;
 
 import java.io.BufferedReader;
@@ -310,7 +309,6 @@ public final class Lib {
         int buildJavaPerVersion = getJavaFromBytelevel(bytecodeVersion);
         return buildJavaPerVersion;
     }
-
 
     public static int getJavaFromBytelevel(int bytecodeVersion) {
         // https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.1

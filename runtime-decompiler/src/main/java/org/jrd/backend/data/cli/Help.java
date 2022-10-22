@@ -79,35 +79,40 @@ public final class Help {
             " for recursive search if <PATH> is a directory.\n" + "If the argument of '" + SAVE_AS + "' is a valid PID or URL, " +
             "the compiled code will be attempted to be injected into that process.\n" + "If multiple PATHs were specified, but no '" +
             SAVE_AS + "', the process fails.\n" + "use: -D of " + GlobalConsole.CPLC_DUPLICATED_CODE_VERBOSITY_CONSTANT +
-            "= any subset of" + Arrays.stream(GlobalConsole.CPLC_ITEMS).collect(Collectors.joining(",")) + "\n" +
+            "= any subset of " + Arrays.stream(GlobalConsole.CPLC_ITEMS).collect(Collectors.joining(",")) + "\n" +
             "to see what is CPLC reolver doing";
     private static final String DECOMPILE_TEXT = "Decompile and print classes of a process with the specified decompiler plugin.\n" +
             "Javap can be passed options by appending them without spaces: " + "'javap-v-public ...' executes as 'javap -v -public ...'";
     private static final String OVERWRITE_TEXT =
             "Overwrite class of a process with new bytecode. If <CLASS FILE> is not set, standard input is used.";
-    private static final String PATCH_TEXT = "You can apply patch from stdin to classes in <PUC>." +
-            " The patch can be on source, or on binary if  " + HEX + " is provided\n" +
-            "The header  (+++/---) must contain dot-delimited FQN of class. All before / (or \\) is stripped." +
+    private static final String PATCH_TEXT = " You may ignore 3rd param in " + HEX + " mode." +
+            "You can apply patch from stdin to classes in <PUC>." + " The patch can be on source, or on binary if  " + HEX +
+            " is provided\n" + "The header  (+++/---) must contain dot-delimited FQN of class. All before / (or \\) is stripped." +
             " .class$/.java$  is omited. See gui for the examples.\n" +
             "If plugin is specified, runtime classapth is decompiled, patched (is not decompiled with " + HEX + ")," +
             " compiled and uploade.\n " +
             "If plugin is not specified, then source from additional-source-path is patched, compiled and uploaded.\n" + "If " + HEX +
             ". is set, then binary from addtional-class-path is patched and uploaded." + " In both cases, class is INIT before all.\n" +
-            "This is a bit different from gui, where patch can contain several files, and is moreover direct shortcut" +
-            " to init, bytes, (decompile,) patch, (compile,) upload. As patch tool, " + REVERT + " will invert the patch";
+            "This is a bit different from gui, where patch is aptching just one file.\n" +
+            "In cli can contain several files, and is moreover direct shortcut to init, bytes, (decompile,) patch,( detect bytecode" +
+            " level, compile,) upload.\n" + "As patch tool, " + REVERT + " will invert the patch";
     private static final String INIT_TEXT = "Try to initialize a class in a running JVM (has no effect in FS VMs). " +
             "Because class loading is lazy, the class you need might be missing, eg. java.lang.Override.";
     static final String ATTACH_TEXT = "Will only attach the agent to selected pid. Prints out the port for future usage.";
-    static final String AGENT_TEXT = "Control how agent is attached. Have sense only in operations attaching to PID. Possible values of " +
-            AgentLiveliness.class.getSimpleName() + ":\n" +
-            Arrays.stream(AgentLiveliness.values()).map(i -> "  " + i.toString() + " - " + i.toHelp()).collect(Collectors.joining("\n")) +
-            "\n" + "optional, defaults to " + AgentLiveliness.SESSION + " for override and attach," + " to " + AgentLiveliness.ONE_SHOT +
-            " for read. Followed one of " + AgentLoneliness.class.getSimpleName() + ":\n" +
-            Arrays.stream(AgentLoneliness.values()).map(i -> "  " + i.toString() + " - " + i.toHelp()).collect(Collectors.joining("\n")) +
-            "\n" + "optional, defaults to " + AgentLoneliness.SINGLE_INSTANCE + "\n" +
-            "You can also specify port where the agent will listen, otherwise default port is calculated." +
-            "JRD keep record of all permanent and session agents, so they can be listed/reused/removed." +
-            "This list is usually checked for consistency. File is " + KnownAgents.JRD_TMP_FILE.toFile().getAbsolutePath();
+    static final String AGENT_TEXT =
+            "Control how agent is attached. Have sense only in operations attaching to PID. Possible values of " +
+                    AgentLiveliness.class.getSimpleName() + ":\n" +
+                    Arrays.stream(AgentLiveliness.values()).map(i -> "  " + i.toString() + " - " + i.toHelp())
+                            .collect(Collectors.joining("\n")) +
+                    "\n" + "optional, defaults to " + AgentLiveliness.SESSION + " for " + OVERWRITE + ", " + PATCH + ", " + ATTACH + "" +
+                    " and " + COMPILE + " with upload to VM.\n" + "to " + AgentLiveliness.ONE_SHOT + " for read. Followed one of " +
+                    AgentLoneliness.class.getSimpleName() + ":\n" +
+                    Arrays.stream(AgentLoneliness.values()).map(i -> "  " + i.toString() + " - " + i.toHelp())
+                            .collect(Collectors.joining("\n")) +
+                    "\n" + "optional, defaults to " + AgentLoneliness.SINGLE_INSTANCE + "\n" +
+                    "You can also specify port where the agent will listen, otherwise default port is calculated." +
+                    "JRD keep record of all permanent and session agents, so they can be listed/reused/removed." +
+                    "This list is usually checked for consistency. File is " + KnownAgents.JRD_TMP_FILE.toFile().getAbsolutePath();
     private static final String DETACH_TEXT = "Will close and detach " + AgentLiveliness.PERMANENT +
             " agent from given localhost:port or url. To detach from PID, a valid mapping in " +
             KnownAgents.JRD_TMP_FILE.toFile().getAbsolutePath() + " file is needed";
@@ -158,6 +163,7 @@ public final class Help {
         ALL_OPTIONS.put(BASE64_FORMAT, BASE64_TEXT);
         ALL_OPTIONS.put(BYTES_FORMAT, BYTES_TEXT);
         ALL_OPTIONS.put(DEPS_FORMAT, DEPS_TEXT);
+        ALL_OPTIONS.put(PATCH_FORMAT, PATCH_TEXT);
         ALL_OPTIONS.put(COMPILE_FORMAT, COMPILE_TEXT);
         ALL_OPTIONS.put(DECOMPILE_FORMAT, DECOMPILE_TEXT);
         ALL_OPTIONS.put(OVERWRITE_FORMAT, OVERWRITE_TEXT);
