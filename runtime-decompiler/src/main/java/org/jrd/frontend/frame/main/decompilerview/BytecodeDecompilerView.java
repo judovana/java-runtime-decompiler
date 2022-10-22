@@ -251,6 +251,8 @@ public class BytecodeDecompilerView {
         initClassButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
+                //todo replace with proepr cusotm dialog, allowing to load new byte code
+                //eg tab pane new x init
                 final String fqn =
                         JOptionPane.showInputDialog(mainFrameReference, "Enter the fully qualified name of a class to initialize", lastFqn);
 
