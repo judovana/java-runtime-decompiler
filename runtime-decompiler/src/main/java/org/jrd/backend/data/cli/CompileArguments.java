@@ -77,6 +77,9 @@ final class CompileArguments {
             value = "NP_LOAD_OF_KNOWN_NULL_VALUE",
             justification = "Classpath is only used for FS VMs, in other cases getCp() does not get called"
     )
+    /**
+     * Warning, possibly unused, rotten code.
+     */
     public ClasspathlessCompiler getCompiler(boolean isVerbose, boolean acceptNonsenseAsDefault) {
         DecompilerWrapper decompiler = null;
         boolean hasCompiler = false;

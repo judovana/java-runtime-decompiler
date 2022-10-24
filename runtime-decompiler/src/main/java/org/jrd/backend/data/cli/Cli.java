@@ -538,48 +538,18 @@ public class Cli {
         } else {
             System.out.println("Compiling patched sources.");
             CompileArguments args = new CompileArguments(pluginManager, vmManager, vmInfo, pluginXorPath);
-            PluginWithOptions wrapper = null;
-            boolean haveCompiler = false;
-            try {
-                wrapper = Lib.getDecompilerFromString(pluginXorPath, pluginManager);
-                if (wrapper.getDecompiler() == null) {
-                    wrapper = null;
-                    throw new RuntimeException();
-                }
-                haveCompiler = pluginManager.hasBundledCompiler(wrapper.getDecompiler());
-            } catch (Exception ex) {
-                //plugin not found == default compiler
-                System.out.print(""); //FB error
-            }
-
+            PluginWrapperWithMetaInfo wrapper = Lib.getPluginWrapper(pluginManager, pluginXorPath, false);
             List<Map.Entry<String, String>> patchedList = new ArrayList<>(patched.entrySet());
             for (Integer detectedByteCode : new HashSet<>(bytecodeLevelCache.values())) {
-                List<IdentifiedSource> thisBytecodeClasses = patchedList.stream().filter(
-                        a -> null == bytecodeLevelCache.get(a.getKey()) || detectedByteCode.equals(bytecodeLevelCache.get(a.getKey()))
-                ).map(a -> new IdentifiedSource(new ClassIdentifier(a.getKey()), Base64.getDecoder().decode(a.getValue())))
+                List<IdentifiedSource> thisBytecodeClasses = patchedList.stream().filter(a -> {
+                    return null == bytecodeLevelCache.get(a.getKey()) || detectedByteCode.equals(bytecodeLevelCache.get(a.getKey()));
+                }).map(a -> new IdentifiedSource(new ClassIdentifier(a.getKey()), Base64.getDecoder().decode(a.getValue())))
                         .collect(Collectors.toList());
                 //ternary operator is constantly killed by autoformater
-                String m = "Compiling group of files " + thisBytecodeClasses.size() + " of level : ";
-                if (detectedByteCode == null) {
-                    m = m + "unknown";
-                } else {
-                    m = m + detectedByteCode;
-                }
-                m = m + " - " +
-                        thisBytecodeClasses.stream().map(a -> a.getClassIdentifier().getFullName()).collect(Collectors.joining(", "));
-                System.out.println(m);
-                Config.getConfig().setBestSourceTarget(Optional.ofNullable(detectedByteCode));
-                ClasspathlessCompiler compiler = OverwriteClassDialog
-                        .getClasspathlessCompiler(wrapper == null ? null : wrapper.getDecompiler(), haveCompiler, isVerbose);
-                Collection<IdentifiedBytecode> compiledFiles = compiler.compileClass(
-                        args.getClassesProvider(), Optional.of((level, message) -> Logger.getLogger().log(message)),
-                        thisBytecodeClasses.toArray(IdentifiedSource[]::new)
-                );
-                //Collection<IdentifiedBytecode> compiledFiles = compile(args, args.getClassesProvider(), identifiedSources, true);
-                String mm = "Compiled " + thisBytecodeClasses.size() + " sources to " + compiledFiles.size() + " files: " +
-                        compiledFiles.stream().map(a -> a.getClassIdentifier().getFullName()).collect(Collectors.joining(", "));
-                System.out.println(mm);
+
                 Map<String, String> compiledForSingleBytecodeLevel = new HashMap<>();
+                Collection<IdentifiedBytecode> compiledFiles =
+                        compile(args, thisBytecodeClasses.toArray(IdentifiedSource[]::new), wrapper, detectedByteCode, System.out);
                 for (IdentifiedBytecode compiled : compiledFiles) {
                     compiledForSingleBytecodeLevel
                             .put(compiled.getClassIdentifier().getFullName(), Base64.getEncoder().encodeToString(compiled.getFile()));
@@ -747,10 +717,10 @@ public class Cli {
 
     private VmInfo[] compileAndUpload(CompileArguments args) throws Exception {
 
-        // handle -cp
         RuntimeCompilerConnector.JrdClassesProvider provider = args.getClassesProvider();
         IdentifiedSource[] identifiedSources = CommonUtils.toIdentifiedSources(args.isRecursive, args.filesToCompile);
-        Collection<IdentifiedBytecode> allBytecode = compile(args, provider, identifiedSources, false);
+        PluginWrapperWithMetaInfo wrapper = Lib.getPluginWrapper(pluginManager, args.wantedCustomCompiler, true);
+        Collection<IdentifiedBytecode> allBytecode = compile(args, identifiedSources, wrapper, null, System.err);
 
         boolean shouldUpload = shouldUpload();
 
@@ -766,10 +736,10 @@ public class Cli {
                 String response = uploadClass(targetVm, className, Base64.getEncoder().encodeToString(bytecode.getFile()));
 
                 if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
-                    Logger.getLogger().log("Successfully uploaded class '" + className + "'.");
+                    Logger.getLogger().log(Logger.Level.ALL, "Successfully uploaded class '" + className + "'.");
                 } else {
                     failCount++;
-                    Logger.getLogger().log("Failed to upload class '" + className + "'.");
+                    Logger.getLogger().log(Logger.Level.ALL, "Failed to upload class '" + className + "'.");
                 }
             }
 
@@ -797,18 +767,30 @@ public class Cli {
     }
 
     private Collection<IdentifiedBytecode> compile(
-            CompileArguments args, RuntimeCompilerConnector.JrdClassesProvider provider, IdentifiedSource[] identifiedSources,
-            boolean acceptNonsenseAsDefault
-    ) throws IOException {
-        /*
-         * This ignores global settings. FIXME, replace by logic from path()?
-         * */
-        // handle -p
-        ClasspathlessCompiler compiler = args.getCompiler(isVerbose, acceptNonsenseAsDefault);
+            CompileArguments args, IdentifiedSource[] identifiedSources, PluginWrapperWithMetaInfo wrapper, Integer detectedByteCode,
+            PrintStream outerr
+    ) {
+        String m = "Compiling group of files " + identifiedSources.length + " of level : ";
+        if (detectedByteCode == null) {
+            m = m + "unknown";
+        } else {
+            m = m + detectedByteCode;
+        }
+        m = m + " - " + Arrays.stream(identifiedSources).map(a -> a.getClassIdentifier().getFullName()).collect(Collectors.joining(", "));
+        outerr.println(m);
+        Config.getConfig().setBestSourceTarget(Optional.ofNullable(detectedByteCode));
+        ClasspathlessCompiler compiler = OverwriteClassDialog.getClasspathlessCompiler(
+                wrapper.getWrapper() == null ? null : wrapper.getWrapper().getDecompiler(), wrapper.haveCompiler(), isVerbose
+        );
+        Collection<IdentifiedBytecode> compiledFiles = compiler.compileClass(
+                args.getClassesProvider(), Optional.of((level, message) -> Logger.getLogger().log(message)), identifiedSources
+        );
+        //Collection<IdentifiedBytecode> compiledFiles = compile(args, args.getClassesProvider(), identifiedSources, true);
+        String mm = "Compiled " + identifiedSources.length + " sources to " + compiledFiles.size() + " files: " +
+                compiledFiles.stream().map(a -> a.getClassIdentifier().getFullName()).collect(Collectors.joining(", "));
+        outerr.println(mm);
 
-        Collection<IdentifiedBytecode> allBytecode =
-                compiler.compileClass(provider, Optional.of((level, message) -> Logger.getLogger().log(message)), identifiedSources);
-        return allBytecode;
+        return compiledFiles;
     }
 
     private boolean shouldUpload() {

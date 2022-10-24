@@ -405,7 +405,7 @@ public final class Config {
                     } catch (Exception ex) {
                         byte[] bytes = getFileFromAdditionalPath(additionalSourcePathAgent, fqn.replaceAll("\\$.*", ""));
                         return "/*WARNING! showing wrapper class! Do not use for upload!*/\n" + "/*The class amy still be used as " + fqn +
-                                "WARNING!*/\n" + new String(bytes, Charset.defaultCharset());
+                                " WARNING!*/\n" + new String(bytes, Charset.defaultCharset());
                     }
                 } else {
                     byte[] bytes = getFileFromAdditionalPath(additionalSourcePathAgent, fqn);

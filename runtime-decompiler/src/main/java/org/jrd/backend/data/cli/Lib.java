@@ -271,6 +271,25 @@ public final class Lib {
         return response;
     }
 
+    public static PluginWrapperWithMetaInfo getPluginWrapper(PluginManager pluginManager, String pluginIdOrNonsense, boolean doThrow) {
+        PluginWithOptions wrapper = null;
+        boolean haveCompiler = false;
+        try {
+            wrapper = Lib.getDecompilerFromString(pluginIdOrNonsense, pluginManager);
+            if (wrapper.getDecompiler() == null) {
+                wrapper = null;
+                throw new RuntimeException();
+            }
+            haveCompiler = pluginManager.hasBundledCompiler(wrapper.getDecompiler());
+        } catch (Exception ex) {
+            //plugin not found == default compiler
+            if (doThrow) {
+                throw ex;
+            }
+        }
+        return new PluginWrapperWithMetaInfo(wrapper, haveCompiler);
+    }
+
     @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "VmInfo is public class.. not sure..")
     public static class HandhshakeResult {
         private final VmInfo vmInfo;
