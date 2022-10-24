@@ -88,15 +88,15 @@ public final class Help {
             "Overwrite class of a process with new bytecode. If <CLASS FILE> is not set, standard input is used.";
     private static final String ADD_TEXT =
             "Add class is currently unable to add class, unless all its dependencies are already in running vm. Stdin used if no file.";
-    private static final String PATCH_TEXT = " You may ignore 3rd param in " + HEX + " mode." +
-            "You can apply patch from stdin to classes in <PUC>." + " The patch can be on source, or on binary if  " + HEX +
-            " is provided\n" + "The header  (+++/---) must contain dot-delimited FQN of class. All before / (or \\) is stripped." +
-            " .class$/.java$  is omited. See gui for the examples.\n" +
-            "If plugin is specified, runtime classapth is decompiled, patched (is not decompiled with " + HEX + ")," +
-            " compiled and uploade.\n " +
+    private static final String PATCH_TEXT = " You may ignore plugin/path param in " + HEX + " mode." +
+            "You can apply patch from STD-IN to classes in <PUC>. The patch can be on source, or on binary if  " + HEX + " is provided\n" +
+            "The header (+++/---) must contain dot-delimited FQN of class. All before / (or \\) is stripped." +
+            " .class$/.java$  is omitted. See gui for the examples.\n" +
+            "If plugin is specified, runtime classpath is decompiled, patched," + " compiled (is not (de)compiled with " + HEX +
+            ") and uploaded.\n " +
             "If plugin is not specified, then source from additional-source-path is patched, compiled and uploaded.\n" + "If " + HEX +
-            ". is set, then binary from addtional-class-path is patched and uploaded." + " In both cases, class is INIT before all.\n" +
-            "This is a bit different from gui, where patch is aptching just one file.\n" +
+            " is set, then binary from additional-class-path is patched and uploaded. In both cases, class is INIT before all.\n" +
+            "This is a bit different from gui, where patch is patching just one file.\n" +
             "In cli can contain several files, and is moreover direct shortcut to init, bytes, (decompile,) patch,( detect bytecode" +
             " level, compile,) upload.\n" + "As patch tool, " + REVERT + " will invert the patch";
     private static final String INIT_TEXT = "Try to initialize a class in a running JVM (has no effect in FS VMs). " +
@@ -190,7 +190,7 @@ public final class Help {
     }
 
     private static final String[] UNSAVABLE_OPTIONS =
-            new String[]{HELP, H, OVERWRITE, INIT, LIST_OVERRIDES_FORMAT, REMOVE_OVERRIDES_FORMAT};
+            new String[]{HELP, H, REVERT, HEX, OVERWRITE, INIT, REMOVE_OVERRIDES, PATCH, ADD_CLASS, LIST_OVERRIDES_FORMAT};
     private static final String[] SAVABLE_OPTIONS = new String[]{LIST_CLASSES, LIST_CLASSESDETAILS, BYTES, BASE64, DEPS, COMPILE, DECOMPILE,
             API, LIST_JVMS, LIST_PLUGINS, LIST_CLASSESBYTECODEVERSIONS, LIST_CLASSESDETAILSBYTECODEVERSIONS};
 
