@@ -2,6 +2,7 @@ package org.jrd.backend.core.agentstore;
 
 import com.google.gson.Gson;
 import org.jrd.backend.communication.InstallDecompilerAgentImpl;
+import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.Logger;
 
 import javax.net.SocketFactory;
@@ -86,10 +87,10 @@ public class KnownAgent {
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8));
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
             //TODO, repalce with handshake
-            out.write("BLAH\n");
+            out.write(AgentRequestAction.RequestAction.HELLO + "\n");
             out.flush();
             String reply = in.readLine();
-            if ("ERROR Agent received unknown command: 'BLAH'.".equals(reply)) {
+            if (reply != null && reply.startsWith("Agent HELLO handshake:")) {
                 Logger.getLogger().log(" restored agent verified on : " + host + ":" + port);
                 deadSince = null;
                 return true;

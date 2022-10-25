@@ -142,6 +142,7 @@ public class Communicate {
                     Logger.getLogger().log(Logger.Level.ALL, ex);
                     return ErrorCandidate.toError(ex);
                 }
+            case SEARCH_CLASSES:
             case OVERRIDES:
             case CLASSES:
                 StringBuilder str = new StringBuilder();

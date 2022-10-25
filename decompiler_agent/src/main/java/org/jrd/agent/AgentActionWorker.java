@@ -12,6 +12,7 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -114,6 +115,9 @@ public class AgentActionWorker extends Thread {
                 AgentLogger.getLogger().log("Agent received HALT command, removing instrumentation");
                 localProvider.detach();
                 break;
+            case "SEARCH_CLASSES":
+                getAllFilteredClasses(inputStream, outputStream);
+                break;
             case "CLASSES":
                 getAllLoadedClasses(outputStream, false);
                 break;
@@ -140,6 +144,10 @@ public class AgentActionWorker extends Thread {
                 break;
             case "REMOVE_OVERRIDES":
                 removeOverrides(inputStream, outputStream);
+                break;
+            case "HELLO":
+                outputStream.write("Agent HELLO handshake: '" + line + "'." + "\n");
+                outputStream.flush();
                 break;
             default:
                 outputStream.write(toError("Agent received unknown command: '" + line + "'.") + "\n");
@@ -182,7 +190,19 @@ public class AgentActionWorker extends Thread {
         getList(out, "CLASSES", new ListInjector<String>() {
             @Override
             public void inject(BlockingQueue<String> target) throws InterruptedException {
-                provider.getClasses(target, abort, doGetInfo);
+                provider.getClasses(target, abort, doGetInfo, Optional.empty());
+            }
+        });
+    }
+
+    private void getAllFilteredClasses(BufferedReader in, BufferedWriter out) throws IOException {
+        final String substringAndRegexLineAndDetails = in.readLine();
+        boolean doGetInfo = (substringAndRegexLineAndDetails != null) ? substringAndRegexLineAndDetails.endsWith(" true") : false;
+        final Optional<ClassFilter> filter = ClassFilter.create(substringAndRegexLineAndDetails);
+        getList(out, "SEARCH_CLASSES", new ListInjector<String>() {
+            @Override
+            public void inject(BlockingQueue<String> target) throws InterruptedException {
+                provider.getClasses(target, abort, doGetInfo, filter);
             }
         });
     }

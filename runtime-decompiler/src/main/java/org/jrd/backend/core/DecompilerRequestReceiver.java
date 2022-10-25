@@ -15,6 +15,7 @@ import org.jrd.backend.decompiling.PluginManager;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.stream.Collectors;
 
 /**
  * This class manages the requests that are put in queue by the controller.
@@ -85,6 +86,10 @@ public class DecompilerRequestReceiver {
             case CLASSES:
             case CLASSES_WITH_INFO:
                 response = getListAction(hostname, port, vmId, vmPid, action);
+                break;
+            case SEARCH_CLASSES:
+                String substringAndRegex = request.getParameter(AgentRequestAction.CLASS_NAME_PARAM);
+                response = getListAction(hostname, port, vmId, vmPid, action, substringAndRegex);
                 break;
             case HALT:
                 response = getHaltAction(hostname, port, vmId, vmPid);
@@ -245,9 +250,16 @@ public class DecompilerRequestReceiver {
         return OK_RESPONSE;
     }
 
-    private String getListAction(String hostname, int listenPort, String vmId, int vmPid, RequestAction type) {
+    private String getListAction(String hostname, int listenPort, String vmId, int vmPid, RequestAction type, String... params) {
         try {
-            ResponseWithPort reply = getResponse(hostname, listenPort, vmId, vmPid, type.toString());
+            ResponseWithPort reply;
+            if (params.length == 0) {
+                reply = getResponse(hostname, listenPort, vmId, vmPid, type.toString());
+            } else {
+                reply = getResponse(
+                        hostname, listenPort, vmId, vmPid, type.toString() + "\n" + Arrays.stream(params).collect(Collectors.joining("\n"))
+                );
+            }
             ClassInfo[] arrayOfClasses = parseClasses(reply.response);
             Arrays.sort(arrayOfClasses, new ClassesComparator());
 

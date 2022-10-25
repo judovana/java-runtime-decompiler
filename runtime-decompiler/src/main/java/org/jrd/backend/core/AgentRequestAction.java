@@ -52,8 +52,10 @@ public class AgentRequestAction {
     private final Map<String, String> parameters;
 
     public enum RequestAction {
+        HELLO(DelegatingJrdAgent.CommandDelegationOptions.MAIN_ONLY),
         VERSION(DelegatingJrdAgent.CommandDelegationOptions.MAIN_ONLY),
         CLASSES(DelegatingJrdAgent.CommandDelegationOptions.ALL),
+        SEARCH_CLASSES(DelegatingJrdAgent.CommandDelegationOptions.ALL),
         BYTES(DelegatingJrdAgent.CommandDelegationOptions.FIRST_OK),
         HALT(DelegatingJrdAgent.CommandDelegationOptions.MAIN_ONLY),
         OVERWRITE(DelegatingJrdAgent.CommandDelegationOptions.MAIN_ONLY),

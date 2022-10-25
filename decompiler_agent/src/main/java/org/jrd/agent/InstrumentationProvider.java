@@ -5,6 +5,7 @@ import java.lang.instrument.UnmodifiableClassException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.regex.Pattern;
 
@@ -43,7 +44,7 @@ public class InstrumentationProvider {
         }
     }
 
-    private byte[] getClassBody(Class clazz) throws UnmodifiableClassException {
+    byte[] getClassBody(Class clazz) throws UnmodifiableClassException {
         byte[] result;
         transformer.allowToSaveBytecode();
         try {
@@ -91,28 +92,37 @@ public class InstrumentationProvider {
      * @param abort abort signal
      * @throws InterruptedException interrupted exception
      */
-    public void getClasses(BlockingQueue<String> queue, Boolean abort, boolean doGetInfo) throws InterruptedException {
+    public void getClasses(BlockingQueue<String> queue, Boolean abort, boolean doGetInfo, Optional<ClassFilter> filter)
+            throws InterruptedException {
         Class[] loadedClasses = instrumentation.getAllLoadedClasses();
         for (Class loadedClass : loadedClasses) {
             String className = loadedClass.getName();
-            if (doGetInfo) {
-                String location;
-                try {
-                    location = loadedClass.getProtectionDomain().getCodeSource().getLocation().getPath();
-                } catch (Exception ex) {
-                    location = "unknown";
-                }
-
-                String classLoader;
-                try {
-                    classLoader = loadedClass.getClassLoader().toString();
-                } catch (Exception ex) {
-                    classLoader = "unknown";
-                }
-
-                queue.put(className + INFO_DELIMITER + location + INFO_DELIMITER + classLoader);
+            boolean found = false;
+            if (filter.isPresent()) {
+                found = filter.get().match(this, loadedClass);
             } else {
-                queue.put(className);
+                found = true;
+            }
+            if (found) {
+                if (doGetInfo) {
+                    String location;
+                    try {
+                        location = loadedClass.getProtectionDomain().getCodeSource().getLocation().getPath();
+                    } catch (Exception ex) {
+                        location = "unknown";
+                    }
+
+                    String classLoader;
+                    try {
+                        classLoader = loadedClass.getClassLoader().toString();
+                    } catch (Exception ex) {
+                        classLoader = "unknown";
+                    }
+
+                    queue.put(className + INFO_DELIMITER + location + INFO_DELIMITER + classLoader);
+                } else {
+                    queue.put(className);
+                }
             }
             if (abort) {
                 break;

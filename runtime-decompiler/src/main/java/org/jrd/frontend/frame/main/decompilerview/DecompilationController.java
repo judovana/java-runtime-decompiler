@@ -95,6 +95,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         mainFrameView.setRemoveVmDialogListener(this::removeVmDialog);
         bytecodeDecompilerView.setInitActionListener(e -> initClass(e.getActionCommand()));
         bytecodeDecompilerView.setClassesActionListener(e -> loadClassNames());
+        bytecodeDecompilerView.setSearchInActionListener(e -> searchInClasses(e.getActionCommand()));
         bytecodeDecompilerView.setBytesActionListener(e -> {
             showLoadingDialog(a -> hideLoadingDialog(), "Loading bytecode");
             try {
@@ -372,6 +373,19 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         }
     }
 
+    private void searchInClasses(String substringAndRegex) {
+        showLoadingDialog("Searching classes. Do not abort.");
+        AgentRequestAction request = createRequest(RequestAction.SEARCH_CLASSES, substringAndRegex);
+        String response = submitRequest(request);
+        if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
+            bytecodeDecompilerView.reloadClassList(vmInfo.getVmDecompilerStatus().getLoadedClasses());
+        }
+        hideLoadingDialog();
+        if (new TopLevelErrorCandidate(response).isError()) {
+            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), response + "\n" + CLASSES_NOPE, "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
     private void loadClassBytecode(String name) {
         AgentRequestAction request = createRequest(RequestAction.BYTES, name);
         String response = submitRequest(request);
@@ -624,6 +638,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
             case HALT:
                 request = AgentRequestAction.create(vmInfo, hostname, listenPort, action);
                 break;
+            case SEARCH_CLASSES:
             case REMOVE_OVERRIDES:
             case INIT_CLASS:
             case BYTES:

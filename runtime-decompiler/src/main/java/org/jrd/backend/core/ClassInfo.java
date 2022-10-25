@@ -60,7 +60,7 @@ public class ClassInfo {
     }
 
     public String getSearchableString(boolean isLocationVisible) {
-        return isLocationVisible ? (name + location + classLoader) : name;
+        return isLocationVisible ? (name + " " + location + " " + classLoader) : name;
     }
 
     @Override

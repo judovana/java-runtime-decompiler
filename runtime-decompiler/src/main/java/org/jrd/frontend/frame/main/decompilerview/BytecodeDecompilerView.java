@@ -77,8 +77,11 @@ public class BytecodeDecompilerView {
     private JPanel classes;
     private JPanel classesToolBar;
     private JButton reloadClassesButton;
+    private JButton searchInClassesButton;
     private JCheckBox showInfoCheckBox;
+    private JTextField classCount;
     private JTextField classesSortField;
+    private JCheckBox metadata = new JCheckBox("metada?");
     private final Color classesSortFieldColor;
     private JPanel classesPanel;
     private JScrollPane classesScrollPane;
@@ -108,6 +111,7 @@ public class BytecodeDecompilerView {
 
     private ActionListener bytesActionListener;
     private ActionListener classesActionListener;
+    private ActionListener searchClassesActionListener;
     private ActionListener initActionListener;
     private DecompilationController.QuickCompiler compileAction;
     private OverwriteActionListener overwriteActionListener;
@@ -116,6 +120,7 @@ public class BytecodeDecompilerView {
     private ClassInfo[] loadedClasses;
     private String lastDecompiledClass = "";
     private String lastFqn = "java.lang.Override";
+    private String lastSearch = "Enum";
 
     private boolean splitPaneFirstResize = true;
     private boolean shouldAttach = false;
@@ -274,6 +279,49 @@ public class BytecodeDecompilerView {
             }
         });
 
+        searchInClassesButton = new JButton("?");
+        searchInClassesButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                String substring = JOptionPane.showInputDialog(
+                        mainFrameReference,
+                        "Search case-sensitive substring in currently displayed list of classes\n" +
+                                "This runs on ascii/utf view of binaries in VM.. Takes time!\n" +
+                                "To search in decompiled code, use CLI and grep.",
+                        lastSearch
+                );
+                if (substring == null || substring.isEmpty()) {
+                    JOptionPane.showMessageDialog(mainFrameReference, "Please enter valid substring", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                if (classesSortField.getText() == null || classesSortField.getText().trim().isEmpty()) {
+                    JOptionPane.showMessageDialog(mainFrameReference, "Please set valid class filter", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                try {
+                    Pattern.compile(classesSortField.getText());
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(mainFrameReference, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                lastSearch = substring;
+                new SwingWorker<Void, Void>() {
+                    @Override
+                    protected Void doInBackground() throws Exception {
+                        try {
+                            ActionEvent event = new ActionEvent(
+                                    this, 5, lastSearch + " " + classesSortField.getText() + " " + showInfoCheckBox.isSelected()
+                            );
+                            searchClassesActionListener.actionPerformed(event);
+                        } catch (Throwable t) {
+                            Logger.getLogger().log(Logger.Level.ALL, t);
+                        }
+                        return null;
+                    }
+                }.execute();
+            }
+        });
+
         overwriteButton = ImageButtonFactory.createOverwriteButton();
         overwriteButton.addActionListener(new ActionListener() {
             @Override
@@ -360,7 +408,8 @@ public class BytecodeDecompilerView {
         reloadClassesButton.addActionListener(e -> classWorker());
 
         showInfoCheckBox = new JCheckBox("Show detailed class info");
-        showInfoCheckBox.addActionListener(event -> handleClassInfoSwitching());
+        showInfoCheckBox.addActionListener(event -> handleClassInfoSwitching(true));
+        metadata.addActionListener(event -> handleClassInfoSwitching(false));
 
         buffers = new JTabbedPane();
         buffers.addChangeListener(new ChangeListener() {
@@ -445,29 +494,26 @@ public class BytecodeDecompilerView {
         bytecodeButton = new JButton("0");
         bytecodeButton.setBorder(new EmptyBorder(5, 5, 5, 5));
 
-        classesToolBar = new JPanel(new GridBagLayout());
+        classesToolBar = new JPanel(new BorderLayout());
         classesToolBar.setBorder(new EtchedBorder());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = PANEL_INSETS;
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.anchor = GridBagConstraints.WEST;
 
-        gbc.weightx = 0;
-        classesToolBar.add(reloadClassesButton, gbc);
+        classCount = new JTextField("0");
+        classCount.setEditable(false);
 
-        gbc.gridx = 1;
-        gbc.weightx = 1;
-        classesToolBar.add(Box.createHorizontalGlue(), gbc);
+        JPanel twoButtons = new JPanel(new BorderLayout());
+        twoButtons.add(reloadClassesButton, BorderLayout.WEST);
+        twoButtons.add(searchInClassesButton, BorderLayout.EAST);
+        JPanel topControls = new JPanel(new BorderLayout());
+        topControls.add(twoButtons, BorderLayout.WEST);
+        topControls.add(showInfoCheckBox, BorderLayout.EAST);
+        topControls.add(classCount, BorderLayout.CENTER);
 
-        gbc.gridx = 2;
-        gbc.weightx = 0;
-        classesToolBar.add(showInfoCheckBox, gbc);
+        JPanel bottomControls = new JPanel(new BorderLayout());
+        bottomControls.add(metadata, BorderLayout.WEST);
+        bottomControls.add(classesSortField, BorderLayout.CENTER);
 
-        gbc.gridy = 1;
-        gbc.gridx = 0;
-        gbc.weightx = 1;
-        gbc.gridwidth = 3;
-        classesToolBar.add(classesSortField, gbc);
+        classesToolBar.add(topControls, BorderLayout.NORTH);
+        classesToolBar.add(bottomControls, BorderLayout.SOUTH);
 
         pluginComboBox = new JComboBox<DecompilerWrapper>();
         pluginComboBox.addActionListener(new ActionListener() {
@@ -492,7 +538,7 @@ public class BytecodeDecompilerView {
 
         buffersToolBar = new JPanel(new GridBagLayout());
         buffersToolBar.setBorder(new EtchedBorder());
-        gbc = new GridBagConstraints();
+        GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = PANEL_INSETS;
         gbc.weightx = 0;
@@ -554,7 +600,7 @@ public class BytecodeDecompilerView {
             @Override
             public void componentResized(ComponentEvent e) {
                 if (splitPaneFirstResize) {
-                    splitPane.setDividerLocation(0.35);
+                    splitPane.setDividerLocation(0.40);
                     splitPaneFirstResize = false;
                 }
             }
@@ -566,8 +612,16 @@ public class BytecodeDecompilerView {
 
     }
 
-    private void handleClassInfoSwitching() {
-        classWorker();
+    private void handleClassInfoSwitching(boolean reload) {
+        if (doShowClassInfo()) {
+            metadata.setEnabled(true);
+        } else {
+            metadata.setEnabled(false);
+            metadata.setSelected(false);
+        }
+        if (reload) {
+            classWorker();
+        }
 
         filteredClassesRenderer.setDoShowInfo(doShowClassInfo());
 
@@ -637,7 +691,7 @@ public class BytecodeDecompilerView {
 
                 splitPane.setEnabled(true);
                 splitPane.add(buffersPanel);
-                splitPane.setDividerLocation(0.35);
+                splitPane.setDividerLocation(0.40);
             }
         });
 
@@ -664,9 +718,15 @@ public class BytecodeDecompilerView {
             classesSortField.repaint();
 
             for (ClassInfo clazz : loadedClasses) {
-                Matcher m = p.matcher(clazz.getSearchableString(doShowClassInfo()));
-                if (m.matches()) {
-                    filtered.add(clazz);
+                if (metadata.isSelected()) {
+                    if (matchesAny(filtered, p, clazz)) {
+                        continue;
+                    }
+                } else {
+                    Matcher m = p.matcher(clazz.getName());
+                    if (m.matches()) {
+                        filtered.add(clazz);
+                    }
                 }
             }
         } catch (Exception ex) {
@@ -689,6 +749,32 @@ public class BytecodeDecompilerView {
         if (filteredClassesJList.getSelectedIndex() == -1) {
             classesScrollPane.getVerticalScrollBar().setValue(0);
         }
+        classCount.setText("" + filteredClassesJList.getModel().getSize());
+    }
+
+    private boolean matchesAny(List<ClassInfo> filtered, Pattern p, ClassInfo clazz) {
+        if (clazz.getName() != null) {
+            Matcher m = p.matcher(clazz.getName());
+            if (m.matches()) {
+                filtered.add(clazz);
+                return true;
+            }
+        }
+        if (clazz.getClassLoader() != null) {
+            Matcher m = p.matcher(clazz.getClassLoader());
+            if (m.matches()) {
+                filtered.add(clazz);
+                return true;
+            }
+        }
+        if (clazz.getLocation() != null) {
+            Matcher m = p.matcher(clazz.getLocation());
+            if (m.matches()) {
+                filtered.add(clazz);
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -748,6 +834,10 @@ public class BytecodeDecompilerView {
         additionalBinary.open(additionalSource);
 
         this.lastDecompiledClass = name;
+    }
+
+    public void setSearchInActionListener(ActionListener o) {
+        searchClassesActionListener = o;
     }
 
     public void setClassesActionListener(ActionListener listener) {
@@ -862,5 +952,9 @@ public class BytecodeDecompilerView {
 
     public boolean doShowClassInfo() {
         return showInfoCheckBox.isSelected();
+    }
+
+    public boolean doSearchInClassInfo() {
+        return metadata.isSelected();
     }
 }
