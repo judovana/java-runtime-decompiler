@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -117,14 +118,28 @@ public final class Lib {
         return decompiler;
     }
 
-    static List<ClassInfo> obtainFilteredClasses(VmInfo vmInfo, VmManager vmManager, List<Pattern> filter, boolean details)
-            throws IOException {
+    static List<ClassInfo> obtainFilteredClasses(
+            VmInfo vmInfo, VmManager vmManager, List<Pattern> filter, boolean details, Optional<String> search
+    ) throws IOException {
         List<ClassInfo> allClasses;
-        if (details) {
-            allClasses = Arrays.stream(obtainClassesDetails(vmInfo, vmManager)).collect(Collectors.toList());
+        if (search.isPresent()) {
+            if (filter.size() != 1) {
+                throw new RuntimeException("Search allows only one regex, you have " + filter.size());
+            }
+            if (details) {
+                allClasses = Arrays.stream(searchWithClassesDetails(vmInfo, vmManager, search.get(), filter.get(0).pattern()))
+                        .collect(Collectors.toList());
+            } else {
+                allClasses = Arrays.stream(searchClasses(vmInfo, vmManager, search.get(), filter.get(0).pattern()))
+                        .map(a -> new ClassInfo(a, null, null)).collect(Collectors.toList());
+            }
         } else {
-            allClasses =
-                    Arrays.stream(obtainClasses(vmInfo, vmManager)).map(a -> new ClassInfo(a, null, null)).collect(Collectors.toList());
+            if (details) {
+                allClasses = Arrays.stream(obtainClassesDetails(vmInfo, vmManager)).collect(Collectors.toList());
+            } else {
+                allClasses =
+                        Arrays.stream(obtainClasses(vmInfo, vmManager)).map(a -> new ClassInfo(a, null, null)).collect(Collectors.toList());
+            }
         }
         List<ClassInfo> filteredClasses = new ArrayList<>(allClasses.size());
         for (ClassInfo clazz : allClasses) {
@@ -151,6 +166,23 @@ public final class Lib {
         }
 
         return false;
+    }
+
+    public static String[] searchClasses(VmInfo vmInfo, VmManager manager, String searchedSusbtring, String regex) {
+        Pattern.compile(regex);
+        if (searchedSusbtring == null || searchedSusbtring.trim().isEmpty()) {
+            throw new RuntimeException("empty substring");
+        }
+        AgentRequestAction.RequestAction requestType = AgentRequestAction.RequestAction.SEARCH_CLASSES;
+        AgentRequestAction request = DecompilationController.createRequest(
+                vmInfo, requestType, Arrays.stream(new String[]{searchedSusbtring, regex, "false"}).collect(Collectors.joining(" "))
+        );
+        String response = DecompilationController.submitRequest(manager, request);
+        if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
+            return vmInfo.getVmDecompilerStatus().getLoadedClassNames();
+        } else {
+            throw new RuntimeException(DecompilationController.CLASSES_NOPE);
+        }
     }
 
     public static String[] obtainClasses(VmInfo vmInfo, VmManager manager) {
@@ -189,6 +221,23 @@ public final class Lib {
     public static ClassInfo[] obtainClassesDetails(VmInfo vmInfo, VmManager manager) {
         AgentRequestAction.RequestAction requestType = AgentRequestAction.RequestAction.CLASSES_WITH_INFO;
         AgentRequestAction request = DecompilationController.createRequest(vmInfo, requestType, (String) null);
+        String response = DecompilationController.submitRequest(manager, request);
+        if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
+            return vmInfo.getVmDecompilerStatus().getLoadedClasses();
+        } else {
+            throw new RuntimeException(DecompilationController.CLASSES_NOPE);
+        }
+    }
+
+    public static ClassInfo[] searchWithClassesDetails(VmInfo vmInfo, VmManager manager, String searchedSusbtring, String regex) {
+        Pattern.compile(regex);
+        if (searchedSusbtring == null || searchedSusbtring.trim().isEmpty()) {
+            throw new RuntimeException("empty substring");
+        }
+        AgentRequestAction.RequestAction requestType = AgentRequestAction.RequestAction.SEARCH_CLASSES;
+        AgentRequestAction request = DecompilationController.createRequest(
+                vmInfo, requestType, Arrays.stream(new String[]{searchedSusbtring, regex, "true"}).collect(Collectors.joining(" "))
+        );
         String response = DecompilationController.submitRequest(manager, request);
         if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
             return vmInfo.getVmDecompilerStatus().getLoadedClasses();

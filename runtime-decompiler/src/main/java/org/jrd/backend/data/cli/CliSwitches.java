@@ -13,6 +13,7 @@ public final class CliSwitches {
     static final String LIST_PLUGINS = "-listplugins";
     static final String LIST_AGENTS = "-listagents";
     static final String LIST_CLASSES = "-listclasses";
+    static final String SEARCH = "-search";
     static final String LIST_CLASSESDETAILS = "-listdetails";
     static final String LIST_CLASSESBYTECODEVERSIONS = "-listbytecodeversions";
     static final String LIST_CLASSESDETAILSBYTECODEVERSIONS = "-listdetailsversions";

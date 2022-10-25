@@ -163,9 +163,13 @@ public class InstrumentationProvider {
      * However such class, although visible in class listing and by decompilers,
      * was not usable in tunrime compilation, nor eg initialized by class.forName.
      * The class.forName is good test or the  class being correctly loaded
+     *
+     * The reflection could be avoided by doing fake classlaoder which was publishing defineClass method and friends,
+     * but they are final now
      */
     public void addClass(String className, byte[] b)
             throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, ClassNotFoundException {
+
         Method m = ClassLoader.class.getDeclaredMethod("defineClass", String.class, byte[].class, int.class, int.class);
         m.setAccessible(true);
         Object futureClazz = m.invoke(this.getClass().getClassLoader(), className, b, 0, b.length);

@@ -38,6 +38,7 @@ public final class Help {
     static final String REMOVE_OVERRIDES_FORMAT = REMOVE_OVERRIDES + " <PUC> removalRegex";
     static final String LIST_PLUGINS_FORMAT = LIST_PLUGINS;
     static final String LIST_CLASSES_FORMAT = LIST_CLASSES + BASE_SHARED_OPTIONAL_FORMAT;
+    static final String SEARCH_FORMAT = SEARCH + BASE_SHARED_FORMAT + " searchedSubstring true/false (details)";
     static final String LIST_CLASSESDETAILS_FORMAT = LIST_CLASSESDETAILS + BASE_SHARED_OPTIONAL_FORMAT;
     static final String LIST_CLASSESBYTECODEVERSIONS_FORMAT = LIST_CLASSESBYTECODEVERSIONS + BASE_SHARED_OPTIONAL_FORMAT;
     static final String LIST_CLASSESDETAILSVERSIONS_FORMAT = LIST_CLASSESDETAILSBYTECODEVERSIONS + BASE_SHARED_OPTIONAL_FORMAT;
@@ -74,6 +75,8 @@ public final class Help {
     private static final String LIST_CLASSESDETAILSVERSIONS_TEXT = "list all classes with details and bytecode version (slow!)";
     private static final String LIST_CLASSES_TEXT = "List all loaded classes of a process, optionally filtering them.\n" + "Only '" +
             SAVE_LIKE + " " + Saving.EXACT + "' or '" + SAVE_LIKE + " " + Saving.DEFAULT + "' are allowed as saving modifiers.";
+    private static final String SEARCH_TEXT = "Will search ascii/utf8 substring in regex-subset binaries in remote vm.\n" +
+            "To search in decompiled classes use grep.You can misuses " + HEX + " to include bytecode level";
     private static final String LIST_CLASSESDETAILS_TEXT = "Similar to " + LIST_CLASSES + ", only more details are printed about classes.";
     private static final String COMPILE_TEXT = "Compile local files against runtime classpath, specified by " + CP + ".\n" + "Use " + P +
             " to utilize some plugins' (like jasm or jcoder) bundled compilers.\n" + "Use " + R +
@@ -163,6 +166,7 @@ public final class Help {
         ALL_OPTIONS.put(LIST_CLASSESDETAILS_FORMAT, LIST_CLASSESDETAILS_TEXT);
         ALL_OPTIONS.put(LIST_CLASSESBYTECODEVERSIONS_FORMAT, LIST_CLASSESBYTECODEVERSIONS_TEXT);
         ALL_OPTIONS.put(LIST_CLASSESDETAILSVERSIONS_FORMAT, LIST_CLASSESDETAILSVERSIONS_TEXT);
+        ALL_OPTIONS.put(SEARCH_FORMAT, SEARCH_TEXT);
         ALL_OPTIONS.put(BASE64_FORMAT, BASE64_TEXT);
         ALL_OPTIONS.put(BYTES_FORMAT, BYTES_TEXT);
         ALL_OPTIONS.put(DEPS_FORMAT, DEPS_TEXT);
@@ -192,7 +196,7 @@ public final class Help {
     private static final String[] UNSAVABLE_OPTIONS =
             new String[]{HELP, H, REVERT, HEX, OVERWRITE, INIT, REMOVE_OVERRIDES, PATCH, ADD_CLASS, LIST_OVERRIDES_FORMAT};
     private static final String[] SAVABLE_OPTIONS = new String[]{LIST_CLASSES, LIST_CLASSESDETAILS, BYTES, BASE64, DEPS, COMPILE, DECOMPILE,
-            API, LIST_JVMS, LIST_PLUGINS, LIST_CLASSESBYTECODEVERSIONS, LIST_CLASSESDETAILSBYTECODEVERSIONS};
+            API, LIST_JVMS, LIST_PLUGINS, LIST_CLASSESBYTECODEVERSIONS, LIST_CLASSESDETAILSBYTECODEVERSIONS, SEARCH};
 
     private static final int LONGEST_FORMAT_LENGTH = Stream.of(ALL_OPTIONS.keySet(), SAVING_OPTIONS.keySet()).flatMap(Collection::stream)
             .map(String::length).max(Integer::compare).orElse(30) + 1; // at least one space between format and text

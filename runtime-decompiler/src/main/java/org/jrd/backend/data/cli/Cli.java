@@ -174,7 +174,8 @@ public class Cli {
         return i;
     }
 
-    @SuppressWarnings({"CyclomaticComplexity", "JavaNCSS", "ExecutableStatementCount"}) // un-refactorable
+    @SuppressWarnings({"CyclomaticComplexity", "JavaNCSS", "ExecutableStatementCount", "MethodLength"})
+    // un-refactorable
     public void consumeCli() throws Exception {
         if (filteredArgs.isEmpty()) { // impossible in org.jrd.backend.Main#Main() control flow, but possible in tests
             return;
@@ -201,20 +202,24 @@ public class Cli {
                     VmInfo vmInfo00 = removeOverrides();
                     operatedOn.add(vmInfo00);
                     break;
+                case SEARCH:
+                    VmInfo vmInfoSearch = searchClasses();
+                    operatedOn.add(vmInfoSearch);
+                    break;
                 case LIST_CLASSES:
-                    VmInfo vmInfo1 = listClasses(false, false);
+                    VmInfo vmInfo1 = listClasses(false, false, Optional.empty());
                     operatedOn.add(vmInfo1);
                     break;
                 case LIST_CLASSESDETAILS:
-                    VmInfo vmInfo2 = listClasses(true, false);
+                    VmInfo vmInfo2 = listClasses(true, false, Optional.empty());
                     operatedOn.add(vmInfo2);
                     break;
                 case LIST_CLASSESBYTECODEVERSIONS:
-                    VmInfo vmInfo11 = listClasses(false, true);
+                    VmInfo vmInfo11 = listClasses(false, true, Optional.empty());
                     operatedOn.add(vmInfo11);
                     break;
                 case LIST_CLASSESDETAILSBYTECODEVERSIONS:
-                    VmInfo vmInfo21 = listClasses(true, true);
+                    VmInfo vmInfo21 = listClasses(true, true, Optional.empty());
                     operatedOn.add(vmInfo21);
                     break;
                 case BYTES:
@@ -528,13 +533,10 @@ public class Cli {
         }
 
         //in addition, we have to different by bytecode version (although it is src only)
-        Map<Integer, Map<String, String>> binariesToUpload = new HashMap(files.size());
+        Map<Integer, Map<String, String>> binariesToUpload = new HashMap<>(files.size());
         if (isHex) {
-            Map<String, String> defaultByteCodeMap = new HashMap<>();
-            for (Map.Entry<String, String> singlePatched : patched.entrySet()) {
-                defaultByteCodeMap.put(singlePatched.getKey(), singlePatched.getValue());
-            }
-            binariesToUpload.put(null, defaultByteCodeMap);
+            BytecodeSorter bt = new BytecodeSorter.HexDummySorter(patched.entrySet());
+            binariesToUpload = bt.sort();
         } else {
             System.out.println("Compiling patched sources.");
             CompileArguments args = new CompileArguments(pluginManager, vmManager, vmInfo, pluginXorPath);
@@ -715,20 +717,64 @@ public class Cli {
         Lib.detach("localhost", port, vmManager);
     }
 
+    @SuppressWarnings(
+        {"CyclomaticComplexity", "JavaNCSS", "ExecutableStatementCount", "VariableDeclarationUsageDistance", "AvoidNestedBlocks"}
+    ) // todo refactor
     private VmInfo[] compileAndUpload(CompileArguments args) throws Exception {
 
         RuntimeCompilerConnector.JrdClassesProvider provider = args.getClassesProvider();
-        IdentifiedSource[] identifiedSources = CommonUtils.toIdentifiedSources(args.isRecursive, args.filesToCompile);
-        PluginWrapperWithMetaInfo wrapper = Lib.getPluginWrapper(pluginManager, args.wantedCustomCompiler, true);
-        Collection<IdentifiedBytecode> allBytecode = compile(args, identifiedSources, wrapper, null, System.err);
-
         boolean shouldUpload = shouldUpload();
-
         VmInfo targetVm = null;
         if (shouldUpload) {
             targetVm = getVmInfo(saving.as);
-            int failCount = 0;
+        }
+        Map<Integer, List<IdentifiedSource>> sortedSources = new HashMap<>();
+        {
+            IdentifiedSource[] identifiedSources = CommonUtils.toIdentifiedSources(args.isRecursive, args.filesToCompile);
+            for (IdentifiedSource is : identifiedSources) {
+                String fqn = is.getClassIdentifier().getFullName();
+                Integer detectedByteCode = null;
+                //FIRST try to find the class in target vm if enabled
+                if (shouldUpload) {
+                    try {
+                        int[] versions = Lib.getByteCodeVersions(new ClassInfo(fqn), targetVm, vmManager);
+                        detectedByteCode = versions[1];
+                        Logger.getLogger().log(Logger.Level.ALL, fqn + " - detected bytecode in target VM: " + detectedByteCode);
+                    } catch (Exception ex) {
+                        System.out.println(""); //findbugs issue
+                    }
+                }
+                if (detectedByteCode == null) {
+                    //FALLBACK try to find the class in target vm in source
+                    try {
+                        int[] versions = Lib.getByteCodeVersions(new ClassInfo(fqn), args.getClassesProvider().getVmInfo(), vmManager);
+                        detectedByteCode = versions[1]; /**/
+                        Logger.getLogger().log(Logger.Level.ALL, fqn + " - detected bytecode in source VM: " + detectedByteCode);
+                    } catch (Exception ex) {
+                        System.out.println(""); //findbugs issue
+                    }
+                }
+                if (detectedByteCode == null) {
+                    Logger.getLogger().log(Logger.Level.ALL, fqn + " - failed to detect bytecode level");
+                }
+                List<IdentifiedSource> sources = sortedSources.get(detectedByteCode);
+                if (sources == null) {
+                    sources = new ArrayList<>();
+                    sortedSources.put(detectedByteCode, sources);
+                }
+                sources.add(is);
+            }
+        }
+        PluginWrapperWithMetaInfo wrapper = Lib.getPluginWrapper(pluginManager, args.wantedCustomCompiler, true);
+        List<IdentifiedBytecode> allBytecode = new ArrayList<>();
+        for (Map.Entry<Integer, List<IdentifiedSource>> entry : sortedSources.entrySet()) {
+            Integer detectedByteCode = entry.getKey();
+            IdentifiedSource[] identifiedSources = entry.getValue().toArray(new IdentifiedSource[0]);
+            allBytecode.addAll(compile(args, identifiedSources, wrapper, detectedByteCode, System.err));
+        }
 
+        if (shouldUpload) {
+            int failCount = 0;
             for (IdentifiedBytecode bytecode : allBytecode) {
                 String className = bytecode.getClassIdentifier().getFullName();
                 Logger.getLogger().log("Uploading class '" + className + "'.");
@@ -785,7 +831,6 @@ public class Cli {
         Collection<IdentifiedBytecode> compiledFiles = compiler.compileClass(
                 args.getClassesProvider(), Optional.of((level, message) -> Logger.getLogger().log(message)), identifiedSources
         );
-        //Collection<IdentifiedBytecode> compiledFiles = compile(args, args.getClassesProvider(), identifiedSources, true);
         String mm = "Compiled " + identifiedSources.length + " sources to " + compiledFiles.size() + " files: " +
                 compiledFiles.stream().map(a -> a.getClassIdentifier().getFullName()).collect(Collectors.joining(", "));
         outerr.println(mm);
@@ -819,8 +864,9 @@ public class Cli {
 
         for (int i = 3; i < filteredArgs.size(); i++) {
             String clazzRegex = filteredArgs.get(i);
-            List<String> classes = Lib.obtainFilteredClasses(vmInfo, vmManager, Arrays.asList(Pattern.compile(clazzRegex)), false).stream()
-                    .map(a -> a.getName()).collect(Collectors.toList());
+            List<String> classes =
+                    Lib.obtainFilteredClasses(vmInfo, vmManager, Arrays.asList(Pattern.compile(clazzRegex)), false, Optional.empty())
+                            .stream().map(a -> a.getName()).collect(Collectors.toList());
 
             for (String clazz : classes) {
                 classCount++;
@@ -896,8 +942,9 @@ public class Cli {
 
         for (int i = 2; i < filteredArgs.size(); i++) {
             String clazzRegex = filteredArgs.get(i);
-            List<String> classes = Lib.obtainFilteredClasses(vmInfo, vmManager, Arrays.asList(Pattern.compile(clazzRegex)), false).stream()
-                    .map(a -> a.getName()).collect(Collectors.toList());
+            List<String> classes =
+                    Lib.obtainFilteredClasses(vmInfo, vmManager, Arrays.asList(Pattern.compile(clazzRegex)), false, Optional.empty())
+                            .stream().map(a -> a.getName()).collect(Collectors.toList());
 
             for (String clazz : classes) {
                 classCount++;
@@ -937,7 +984,18 @@ public class Cli {
         return vmInfo;
     }
 
-    private VmInfo listClasses(boolean details, boolean bytecodeVersion) throws IOException {
+    private VmInfo searchClasses() throws IOException {
+        if (filteredArgs.size() != 5) {
+            throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.SEARCH_FORMAT + "'.");
+        }
+        boolean details = Boolean.parseBoolean(filteredArgs.get(4));
+        String substring = filteredArgs.get(3);
+        filteredArgs.remove(4);
+        filteredArgs.remove(3);
+        return listClasses(details, isHex, Optional.of(substring));
+    }
+
+    private VmInfo listClasses(boolean details, boolean bytecodeVersion, Optional<String> search) throws IOException {
         if (filteredArgs.size() < 2) {
             throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.LIST_CLASSES_FORMAT + "'.");
         }
@@ -952,17 +1010,19 @@ public class Cli {
                 classRegexes.add(Pattern.compile(filteredArgs.get(i)));
             }
         }
-        listClassesFromVmInfo(vmInfo, classRegexes, details, bytecodeVersion);
+        listClassesFromVmInfo(vmInfo, classRegexes, details, bytecodeVersion, search);
         return vmInfo;
     }
 
-    private void listClassesFromVmInfo(VmInfo vmInfo, List<Pattern> filter, boolean details, boolean bytecodeVersion) throws IOException {
-        List<ClassInfo> classes = Lib.obtainFilteredClasses(vmInfo, vmManager, filter, details);
+    private void listClassesFromVmInfo(
+            VmInfo vmInfo, List<Pattern> filter, boolean details, boolean bytecodeVersion, Optional<String> search
+    ) throws IOException {
+        List<ClassInfo> classes = Lib.obtainFilteredClasses(vmInfo, vmManager, filter, details, search);
         if (saving.shouldSave()) {
             if (saving.like.equals(Saving.DEFAULT) || saving.like.equals(Saving.EXACT)) {
                 try (PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(saving.as), StandardCharsets.UTF_8))) {
                     for (ClassInfo clazz : classes) {
-                        String bytecodes = getBytecodesString(vmInfo, details, bytecodeVersion, clazz);
+                        String bytecodes = getBytecodesString(vmInfo, details, bytecodeVersion, clazz, false);
                         pw.println(clazz.toPrint(details) + bytecodes);
                     }
                 }
@@ -973,13 +1033,13 @@ public class Cli {
             }
         } else {
             for (ClassInfo clazz : classes) {
-                String bytecodes = getBytecodesString(vmInfo, details, bytecodeVersion, clazz);
+                String bytecodes = getBytecodesString(vmInfo, details, bytecodeVersion, clazz, false);
                 System.out.println(clazz.toPrint(details) + bytecodes);
             }
         }
     }
 
-    private String getBytecodesString(VmInfo vmInfo, boolean details, boolean bytecodeVersion, ClassInfo clazz) {
+    private String getBytecodesString(VmInfo vmInfo, boolean details, boolean bytecodeVersion, ClassInfo clazz, boolean doThrow) {
         String bytecodes = "";
         if (bytecodeVersion) {
             try {
@@ -988,7 +1048,9 @@ public class Cli {
                 bytecodes = "  JDK " + versions[1] + " (bytecode: " + versions[0] + ")";
             } catch (Exception ex) {
                 bytecodes = "  bytecode level unknown";
-                //no need to reprint, wa sprinted already
+                if (doThrow) {
+                    throw new RuntimeException(bytecodes, ex);
+                }
             }
             if (details) {
                 bytecodes = "\n" + bytecodes;
