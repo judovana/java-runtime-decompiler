@@ -94,6 +94,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         mainFrameView.setNewFsVmDialogListener(e -> createNewFsVMDialog());
         mainFrameView.setRemoveVmDialogListener(this::removeVmDialog);
         bytecodeDecompilerView.setInitActionListener(e -> initClass(e.getActionCommand()));
+        bytecodeDecompilerView.setAddActionListener(e -> addClass(e.getActionCommand()));
         bytecodeDecompilerView.setClassesActionListener(e -> loadClassNames());
         bytecodeDecompilerView.setSearchInActionListener(e -> searchInClasses(e.getActionCommand()));
         bytecodeDecompilerView.setBytesActionListener(e -> {
@@ -345,6 +346,20 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
     private void initClass(String fqn) {
         showLoadingDialog("Initializing class");
         AgentRequestAction request = createRequest(RequestAction.INIT_CLASS, fqn);
+        String response = submitRequest(request);
+        hideLoadingDialog();
+        if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
+            loadClassNames();
+        }
+        if (new TopLevelErrorCandidate(response).isError()) {
+            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), response + "\n" + CLASSES_NOPE, "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void addClass(String fqnSpaceBody) {
+        showLoadingDialog("Adding class");
+        String[] fqnBody = fqnSpaceBody.split("\\s+");
+        AgentRequestAction request = createRequest(RequestAction.ADD_CLASS, fqnBody[0], fqnBody[1]);
         String response = submitRequest(request);
         hideLoadingDialog();
         if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {

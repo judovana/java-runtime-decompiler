@@ -59,8 +59,10 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -114,6 +116,7 @@ public class BytecodeDecompilerView {
     private ActionListener classesActionListener;
     private ActionListener searchClassesActionListener;
     private ActionListener initActionListener;
+    private ActionListener addActionListener;
     private DecompilationController.QuickCompiler compileAction;
     private OverwriteActionListener overwriteActionListener;
     private DependenciesReader dependenciesReader;
@@ -278,8 +281,22 @@ public class BytecodeDecompilerView {
                             }
                         }.execute();
                     } else {
-                        //FIXME!
-                        System.out.println("todo, ad from gui");
+                        lastAddedFqn = fqn[0];
+                        lastAddedFile = new File(fqn[1]);
+                        new SwingWorker<Void, Void>() {
+                            @Override
+                            protected Void doInBackground() throws Exception {
+                                try {
+                                    String body = Base64.getEncoder().encodeToString(Files.readAllBytes(lastAddedFile.toPath()));
+                                    ActionEvent event = new ActionEvent(this, 6, lastAddedFqn + " " + body);
+                                    addActionListener.actionPerformed(event);
+                                } catch (Throwable t) {
+                                    Logger.getLogger().log(Logger.Level.ALL, t);
+                                }
+                                return null;
+                            }
+                        }.execute();
+
                     }
                 }
             }
@@ -852,6 +869,10 @@ public class BytecodeDecompilerView {
 
     public void setInitActionListener(ActionListener listener) {
         initActionListener = listener;
+    }
+
+    public void setAddActionListener(ActionListener listener) {
+        addActionListener = listener;
     }
 
     public void setCompileListener(DecompilationController.QuickCompiler listener) {

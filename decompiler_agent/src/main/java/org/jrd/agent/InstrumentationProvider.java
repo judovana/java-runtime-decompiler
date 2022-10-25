@@ -166,6 +166,8 @@ public class InstrumentationProvider {
      *
      * The reflection could be avoided by doing fake classlaoder which was publishing defineClass method and friends,
      * but they are final now
+     *
+     * Waring! Do not work with target process JDK17, that would eed --add-opens java.base or similar:(
      */
     public void addClass(String className, byte[] b)
             throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, ClassNotFoundException {
