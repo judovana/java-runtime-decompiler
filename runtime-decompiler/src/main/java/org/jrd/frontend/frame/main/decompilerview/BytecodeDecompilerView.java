@@ -58,6 +58,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -120,6 +121,8 @@ public class BytecodeDecompilerView {
     private ClassInfo[] loadedClasses;
     private String lastDecompiledClass = "";
     private String lastFqn = "java.lang.Override";
+    private String lastAddedFqn = "fully.qualified.name";
+    private File lastAddedFile = new File(".");
     private String lastSearch = "Enum";
 
     private boolean splitPaneFirstResize = true;
@@ -256,25 +259,28 @@ public class BytecodeDecompilerView {
         initClassButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                //todo replace with proepr cusotm dialog, allowing to load new byte code
-                //eg tab pane new x init
-                final String fqn =
-                        JOptionPane.showInputDialog(mainFrameReference, "Enter the fully qualified name of a class to initialize", lastFqn);
 
-                if (fqn != null) {
-                    lastFqn = fqn;
-                    new SwingWorker<Void, Void>() {
-                        @Override
-                        protected Void doInBackground() throws Exception {
-                            try {
-                                ActionEvent event = new ActionEvent(this, 4, fqn);
-                                initActionListener.actionPerformed(event);
-                            } catch (Throwable t) {
-                                Logger.getLogger().log(Logger.Level.ALL, t);
+                String[] fqn = new InitAddClassDialog(lastFqn, lastAddedFqn, lastAddedFile).showAndGet();
+
+                if (fqn != null && fqn.length > 0) {
+                    if (fqn.length == 1) {
+                        lastFqn = fqn[0];
+                        new SwingWorker<Void, Void>() {
+                            @Override
+                            protected Void doInBackground() throws Exception {
+                                try {
+                                    ActionEvent event = new ActionEvent(this, 4, lastFqn);
+                                    initActionListener.actionPerformed(event);
+                                } catch (Throwable t) {
+                                    Logger.getLogger().log(Logger.Level.ALL, t);
+                                }
+                                return null;
                             }
-                            return null;
-                        }
-                    }.execute();
+                        }.execute();
+                    } else {
+                        //FIXME!
+                        System.out.println("todo, ad from gui");
+                    }
                 }
             }
         });
