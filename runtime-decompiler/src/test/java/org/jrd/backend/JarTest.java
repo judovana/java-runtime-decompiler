@@ -1,6 +1,5 @@
 package org.jrd.backend;
 
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -28,16 +27,15 @@ public class JarTest {
             addToManifest("Can-Redefine-Classes", "true");
         }
 
-        public void setMainClass(String mainFQCN) {
-            if (mainFQCN != null && !mainFQCN.equals("")) {
-                addToManifest(Attributes.Name.MAIN_CLASS.toString(), mainFQCN);
+        public void setMainClass(String mainFqn) {
+            if (mainFqn != null && !"".equals(mainFqn)) {
+                addToManifest(Attributes.Name.MAIN_CLASS.toString(), mainFqn);
             }
         }
 
         public void addToManifest(String key, String value) {
             manifest.getMainAttributes().put(new Attributes.Name(key), value);
         }
-
 
         public JarOutputStream openJar(OutputStream os) throws IOException {
             return new JarOutputStream(os, manifest);
@@ -71,7 +69,7 @@ public class JarTest {
             boolean one = false;
             boolean second = false;
             int c = 0;
-            for (Enumeration list = jf.entries(); list.hasMoreElements(); ) {
+            for (Enumeration list = jf.entries(); list.hasMoreElements();) {
                 c++;
                 ZipEntry entry = (ZipEntry) list.nextElement();
                 if (entry.getName().equals("my/clazz.class")) {

@@ -2,22 +2,26 @@ package org.jrd.frontend.frame.main.decompilerview;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 
 public class InitAddClassDialog extends JDialog {
 
-    JTextField addText;
-    JTextField addFile;
+    JTextField addSingleClassFqn;
+    JTextField addSingleClassFile;
     JTextField initFqn;
     JTabbedPane tp = new JTabbedPane();
     JPanel init = new JPanel();
     JPanel addJar = new JPanel();
     JPanel addClasses = new JPanel();
+    JPanel addClass = new JPanel();
     int r = 0;
 
     public InitAddClassDialog(String lastFqn, String lastAdd, File lastAddFile) {
@@ -25,9 +29,11 @@ public class InitAddClassDialog extends JDialog {
         init.setName("Init");
         addJar.setName("Add Jar");
         addClasses.setName("Add classes");
+        addClass.setName("Add single class");
         tp.add(init);
         tp.add(addJar);
         tp.add(addClasses);
+        tp.add(addClass);
 
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setModal(true);
@@ -56,15 +62,51 @@ public class InitAddClassDialog extends JDialog {
         addJar.add(
                 new JLabel(
                         "<html>This allows you to select JAR from HDD, and inject it to the running vm<br/>" +
-                                "You can then use the classes in it in overwritten classes"
+                                "You can then use the classes in it in overwritten classes<br/>" +
+                                "Note, that jar is stored on remote system, if remote system can not store, you must use<br/>" +
+                                "legacy add single class "
                 )
         );
-        addText = new JTextField(lastAdd);
-        addJar.add(addText);
-        addJar.add(new JButton("Select"));
-        addFile = new JTextField(lastAddFile.getAbsolutePath());
-        addJar.add(addFile);
-        addJar.add(new JLabel("..verification.."));
+
+        addClasses.setLayout(new GridLayout(2, 1));
+        addClasses.add(
+                new JLabel(
+                        "<html>This allows you to select CLASSES from HDD, and inject it to the running vm<br/>" +
+                                "Those classes will be packed to jar and sent." +
+                                " You can then use the classes in it in overwritten classes<br/>" +
+                                "Note, that jar is stored on remote system," +
+                                " if remote system can not store, you must use legacy add single class "
+                )
+        );
+
+        addClass.setLayout(new GridLayout(6, 1));
+        addClass.add(
+                new JLabel(
+                        "<html>This allows you to select single CLASS from HDD, and inject it to the running vm<br/>" +
+                                "The classes must have all dependecnies in running vm already," +
+                                " and are initiated by very fragile method<br/>" +
+                                "In addition, this method works only for jdk11 and older."
+                )
+        );
+        addSingleClassFqn = new JTextField(lastAdd);
+        addClass.add(addSingleClassFqn);
+        JButton selectSingleClass = new JButton("Select");
+        selectSingleClass.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                JFileChooser jf = new JFileChooser(addSingleClassFile.getText());
+                int rr = jf.showOpenDialog(selectSingleClass);
+                jf.setMultiSelectionEnabled(false);
+                if (rr == JFileChooser.APPROVE_OPTION && jf.getSelectedFile() != null) {
+                    String q = jf.getSelectedFile().getAbsolutePath();
+                    addSingleClassFile.setText(q);
+                }
+            }
+        });
+        addClass.add(selectSingleClass);
+        addSingleClassFile = new JTextField(lastAddFile.getAbsolutePath());
+        addClass.add(addSingleClassFile);
+        addClass.add(new JLabel("..verification.."));
         JButton addB = new JButton("Add");
         addB.addActionListener(a -> {
             r = 1;
@@ -79,7 +121,7 @@ public class InitAddClassDialog extends JDialog {
         nice2.setLayout(new GridLayout(1, 2));
         nice2.add(addB);
         nice2.add(cancel2);
-        addJar.add(nice2);
+        addClass.add(nice2);
 
         this.pack();
         this.setLocationRelativeTo(null);
@@ -92,8 +134,8 @@ public class InitAddClassDialog extends JDialog {
         }
         if (tp.getSelectedComponent() == init) {
             return new String[]{initFqn.getText()};
-        } else if (tp.getSelectedComponent() == addJar) {
-            return new String[]{addText.getText(), addFile.getText()};
+        } else if (tp.getSelectedComponent() == addClass) {
+            return new String[]{addSingleClassFqn.getText(), addSingleClassFile.getText()};
         } else {
             throw new RuntimeException();
         }
