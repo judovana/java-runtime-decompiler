@@ -16,15 +16,18 @@ public class InitAddClassDialog extends JDialog {
     JTextField initFqn;
     JTabbedPane tp = new JTabbedPane();
     JPanel init = new JPanel();
-    JPanel add = new JPanel();
+    JPanel addJar = new JPanel();
+    JPanel addClasses = new JPanel();
     int r = 0;
 
     public InitAddClassDialog(String lastFqn, String lastAdd, File lastAddFile) {
         this.add(tp);
         init.setName("Init");
-        add.setName("Add");
+        addJar.setName("Add Jar");
+        addClasses.setName("Add classes");
         tp.add(init);
-        tp.add(add);
+        tp.add(addJar);
+        tp.add(addClasses);
 
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setModal(true);
@@ -49,20 +52,19 @@ public class InitAddClassDialog extends JDialog {
         nice1.add(cancel1);
         init.add(nice1);
 
-        add.setLayout(new GridLayout(6, 1));
-        add.add(
+        addJar.setLayout(new GridLayout(6, 1));
+        addJar.add(
                 new JLabel(
-                        "<html>This allows you to seelct class from HDD, and inject it to the running vm<br/>" +
-                                "The class should be dependent only on already existing classes.<br/>" +
-                                "You can then use the class in overwritten classes"
+                        "<html>This allows you to select JAR from HDD, and inject it to the running vm<br/>" +
+                                "You can then use the classes in it in overwritten classes"
                 )
         );
         addText = new JTextField(lastAdd);
-        add.add(addText);
-        add.add(new JButton("Select"));
+        addJar.add(addText);
+        addJar.add(new JButton("Select"));
         addFile = new JTextField(lastAddFile.getAbsolutePath());
-        add.add(addFile);
-        add.add(new JLabel("..verification.."));
+        addJar.add(addFile);
+        addJar.add(new JLabel("..verification.."));
         JButton addB = new JButton("Add");
         addB.addActionListener(a -> {
             r = 1;
@@ -77,7 +79,7 @@ public class InitAddClassDialog extends JDialog {
         nice2.setLayout(new GridLayout(1, 2));
         nice2.add(addB);
         nice2.add(cancel2);
-        add.add(nice2);
+        addJar.add(nice2);
 
         this.pack();
         this.setLocationRelativeTo(null);
@@ -90,7 +92,7 @@ public class InitAddClassDialog extends JDialog {
         }
         if (tp.getSelectedComponent() == init) {
             return new String[]{initFqn.getText()};
-        } else if (tp.getSelectedComponent() == add) {
+        } else if (tp.getSelectedComponent() == addJar) {
             return new String[]{addText.getText(), addFile.getText()};
         } else {
             throw new RuntimeException();
