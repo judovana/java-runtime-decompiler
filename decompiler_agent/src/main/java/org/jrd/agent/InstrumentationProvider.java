@@ -21,15 +21,11 @@ public class InstrumentationProvider {
 
     private final Transformer transformer;
     private final Instrumentation instrumentation;
-    private final AddClassFakeClassLoader addClassFakeClassLoader;
     private static final String INFO_DELIMITER = "|";
 
     InstrumentationProvider(Instrumentation inst, Transformer transformer) {
         this.transformer = transformer;
         this.instrumentation = inst;
-        this.addClassFakeClassLoader = AccessController.doPrivileged((PrivilegedAction<AddClassFakeClassLoader>) () -> {
-            return new AddClassFakeClassLoader();
-        });
 
     }
 
@@ -176,16 +172,12 @@ public class InstrumentationProvider {
      * <p>
      * Waring! Do not work with target process JDK17, that would eed --add-opens java.base or similar:(
      */
-    public void addClass2(String className, byte[] b)
+    public void addClass(String className, byte[] b)
             throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, ClassNotFoundException {
         Method m = ClassLoader.class.getDeclaredMethod("defineClass", String.class, byte[].class, int.class, int.class);
         m.setAccessible(true);
         Object futureClazz = m.invoke(this.getClass().getClassLoader(), className, b, 0, b.length);
         System.err.println("JRD Agent added " + futureClazz);
         Class.forName(className);
-    }
-
-    public void addClass1(String className, byte[] b) throws ClassNotFoundException {
-        addClassFakeClassLoader.defineCLassIn(this.getClass().getClassLoader(), className, b);
     }
 }

@@ -306,7 +306,7 @@ public class AgentActionWorker extends Thread {
                     return;
                 }
                 if (addNew) {
-                    provider.addClass2(className, Base64.getDecoder().decode(classBodyBase64));
+                    provider.addClass(className, Base64.getDecoder().decode(classBodyBase64));
                     //initClass(in, out); returns
                 } else {
                     provider.setClassBody(className, Base64.getDecoder().decode(classBodyBase64));
