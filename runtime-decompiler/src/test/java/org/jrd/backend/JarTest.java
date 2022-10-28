@@ -74,9 +74,11 @@ public class JarTest {
                 ZipEntry entry = (ZipEntry) list.nextElement();
                 if (entry.getName().equals("my/clazz.class")) {
                     one = true;
+                    Assertions.assertEquals(3, entry.getSize());
                 }
                 if (entry.getName().equals("META-INF/MANIFEST.MF")) {
                     second = true;
+                    Assertions.assertTrue(entry.getSize() > 10);
                 }
             }
             Assertions.assertTrue(one);
