@@ -134,10 +134,13 @@ public class AgentActionWorker extends Thread {
                 getVersion(outputStream);
                 break;
             case "OVERWRITE":
-                receiveByteCode(inputStream, outputStream, false);
+                receiveByteCode(inputStream, outputStream, ReceivedType.OVERWRITE_CLASS);
                 break;
             case "ADD_CLASS":
-                receiveByteCode(inputStream, outputStream, true);
+                receiveByteCode(inputStream, outputStream, ReceivedType.ADD_CLASS);
+                break;
+            case "ADD_JAR":
+                receiveByteCode(inputStream, outputStream, ReceivedType.ADD_JAR);
                 break;
             case "INIT_CLASS":
                 initClass(inputStream, outputStream);
@@ -295,7 +298,7 @@ public class AgentActionWorker extends Thread {
         });
     }
 
-    private void receiveByteCode(BufferedReader in, BufferedWriter out, boolean addNew) throws IOException {
+    private void receiveByteCode(BufferedReader in, BufferedWriter out, ReceivedType rewroteAddJar) throws IOException {
         executeParametrisedNoReturnCommand(in, out, "No class name provided for the overwrite command.", new ParametrisedRunner() {
             @Override
             public void run(String className) throws Exception {
@@ -305,11 +308,19 @@ public class AgentActionWorker extends Thread {
                     out.flush();
                     return;
                 }
-                if (addNew) {
-                    provider.addClass(className, Base64.getDecoder().decode(classBodyBase64));
-                    //initClass(in, out); returns
-                } else {
-                    provider.setClassBody(className, Base64.getDecoder().decode(classBodyBase64));
+                switch (rewroteAddJar) {
+                    case OVERWRITE_CLASS:
+                        provider.setClassBody(className, Base64.getDecoder().decode(classBodyBase64));
+                        break;
+                    case ADD_CLASS:
+                        provider.addClass(className, Base64.getDecoder().decode(classBodyBase64));
+                        //initClass(in, out); returns
+                        break;
+                    case ADD_JAR:
+                        provider.addJar(className, Base64.getDecoder().decode(classBodyBase64));
+                        break;
+                    default:
+                        throw new RuntimeException("Unknown action to receiveByteCode: " + rewroteAddJar);
                 }
             }
         });

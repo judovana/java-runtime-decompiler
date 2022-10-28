@@ -117,6 +117,7 @@ public class BytecodeDecompilerView {
     private ActionListener searchClassesActionListener;
     private ActionListener initActionListener;
     private ActionListener addActionListener;
+    private ActionListener addJar;
     private DecompilationController.QuickCompiler compileAction;
     private OverwriteActionListener overwriteActionListener;
     private DependenciesReader dependenciesReader;
@@ -259,48 +260,7 @@ public class BytecodeDecompilerView {
         detachButton.addActionListener(e -> handleBuffersDetaching());
 
         initClassButton = ImageButtonFactory.createInitButton();
-        initClassButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-
-                String[] fqn = new InitAddClassDialog(lastFqn, lastAddedFqn, lastAddedFile).showAndGet();
-
-                if (fqn != null && fqn.length > 0) {
-                    if (fqn.length == 1) {
-                        lastFqn = fqn[0];
-                        new SwingWorker<Void, Void>() {
-                            @Override
-                            protected Void doInBackground() throws Exception {
-                                try {
-                                    ActionEvent event = new ActionEvent(this, 4, lastFqn);
-                                    initActionListener.actionPerformed(event);
-                                } catch (Throwable t) {
-                                    Logger.getLogger().log(Logger.Level.ALL, t);
-                                }
-                                return null;
-                            }
-                        }.execute();
-                    } else {
-                        lastAddedFqn = fqn[0];
-                        lastAddedFile = new File(fqn[1]);
-                        new SwingWorker<Void, Void>() {
-                            @Override
-                            protected Void doInBackground() throws Exception {
-                                try {
-                                    String body = Base64.getEncoder().encodeToString(Files.readAllBytes(lastAddedFile.toPath()));
-                                    ActionEvent event = new ActionEvent(this, 6, lastAddedFqn + " " + body);
-                                    addActionListener.actionPerformed(event);
-                                } catch (Throwable t) {
-                                    Logger.getLogger().log(Logger.Level.ALL, t);
-                                }
-                                return null;
-                            }
-                        }.execute();
-
-                    }
-                }
-            }
-        });
+        initClassButton.addActionListener(new InitAddClassJar());
 
         searchInClassesButton = new JButton("?");
         searchInClassesButton.addActionListener(new ActionListener() {
@@ -875,6 +835,10 @@ public class BytecodeDecompilerView {
         addActionListener = listener;
     }
 
+    public void setJarActionListener(ActionListener listener) {
+        addJar = listener;
+    }
+
     public void setCompileListener(DecompilationController.QuickCompiler listener) {
         compileAction = listener;
     }
@@ -983,5 +947,84 @@ public class BytecodeDecompilerView {
 
     public boolean doSearchInClassInfo() {
         return metadata.isSelected();
+    }
+
+    private class InitAddClassJar implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            try {
+                String[] fqn = new InitAddClassDialog(lastFqn, lastAddedFqn, lastAddedFile).showAndGet();
+
+                if (fqn != null && fqn.length > 0) {
+                    if (fqn.length == 1) {
+                        initGui(fqn[0]);
+                    } else if (fqn.length == 2) {
+                        addClassGui(fqn[0], fqn[1]);
+                    } else if (fqn.length == 3) {
+                        addJar(Boolean.parseBoolean(fqn[0]), fqn[2], fqn[1]);
+                    } else {
+                        throw new RuntimeException("Unknown output from dialog");
+                    }
+                }
+            } catch (Exception ex) {
+                Logger.getLogger().log(ex);
+                JOptionPane.showMessageDialog(BytecodeDecompilerView.this.buffers, ex.getMessage());
+            }
+        }
+
+        private void addJar(boolean boot, String file, String name) {
+            lastAddedFile = new File(file);
+            new SwingWorker<Void, Void>() {
+                @Override
+                protected Void doInBackground() throws Exception {
+                    try {
+                        String prefix = "SYSTEM";
+                        if (boot) {
+                            prefix = "BOOT";
+                        }
+                        String body = Base64.getEncoder().encodeToString(Files.readAllBytes(lastAddedFile.toPath()));
+                        ActionEvent event = new ActionEvent(this, 7, prefix + "/" + name + " " + body);
+                        addJar.actionPerformed(event);
+                    } catch (Throwable t) {
+                        Logger.getLogger().log(Logger.Level.ALL, t);
+                    }
+                    return null;
+                }
+            }.execute();
+        }
+
+        private void addClassGui(String fqn, String file) {
+            lastAddedFqn = fqn;
+            lastAddedFile = new File(file);
+            new SwingWorker<Void, Void>() {
+                @Override
+                protected Void doInBackground() throws Exception {
+                    try {
+                        String body = Base64.getEncoder().encodeToString(Files.readAllBytes(lastAddedFile.toPath()));
+                        ActionEvent event = new ActionEvent(this, 6, lastAddedFqn + " " + body);
+                        addActionListener.actionPerformed(event);
+                    } catch (Throwable t) {
+                        Logger.getLogger().log(Logger.Level.ALL, t);
+                    }
+                    return null;
+                }
+            }.execute();
+        }
+
+        private void initGui(String fqn) {
+            lastFqn = fqn;
+            new SwingWorker<Void, Void>() {
+                @Override
+                protected Void doInBackground() throws Exception {
+                    try {
+                        ActionEvent event = new ActionEvent(this, 4, lastFqn);
+                        initActionListener.actionPerformed(event);
+                    } catch (Throwable t) {
+                        Logger.getLogger().log(Logger.Level.ALL, t);
+                    }
+                    return null;
+                }
+            }.execute();
+        }
     }
 }

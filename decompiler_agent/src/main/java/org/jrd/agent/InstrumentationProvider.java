@@ -1,15 +1,19 @@
 package org.jrd.agent;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
+import java.nio.file.Files;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
+import java.util.jar.JarFile;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
 
 /**
  * This class stores instrumentation and transformer objects and handles the
@@ -177,7 +181,44 @@ public class InstrumentationProvider {
         Method m = ClassLoader.class.getDeclaredMethod("defineClass", String.class, byte[].class, int.class, int.class);
         m.setAccessible(true);
         Object futureClazz = m.invoke(this.getClass().getClassLoader(), className, b, 0, b.length);
-        System.err.println("JRD Agent added " + futureClazz);
+        AgentLogger.getLogger().log("JRD Agent added " + futureClazz);
         Class.forName(className);
+    }
+
+    public void addJar(String jarOrigName, byte[] decoded) throws IOException {
+        File tmp = File.createTempFile("jrdagent", ".jar");
+        Files.write(tmp.toPath(), decoded);
+        tmp.deleteOnExit();
+        AgentLogger.getLogger().log("Jrd agent added client's " + jarOrigName + " as " + tmp.getAbsolutePath());
+        if (jarOrigName.startsWith("BOOT/")) {
+            instrumentation.appendToBootstrapClassLoaderSearch(new JarFile(tmp));
+        } else {
+            instrumentation.appendToSystemClassLoaderSearch(new JarFile(tmp));
+        }
+        JarFile jf = new JarFile(tmp);
+        int loaded = 0;
+        int skipped = 0;
+        int failed = 0;
+        try {
+            for (Enumeration list = jf.entries(); list.hasMoreElements();) {
+                ZipEntry entry = (ZipEntry) list.nextElement();
+                if (entry.getName().endsWith(".class") && !entry.getName().endsWith("/module-info.class") &&
+                        !"module-info.class".equals(entry.getName())) {
+                    String clazz = entry.getName().replace('/', '.').replaceAll("\\.class$", "");
+                    try {
+                        Class.forName(clazz); //throws error
+                        loaded++;
+                    } catch (Throwable ex) {
+                        AgentLogger.getLogger().log("Failed to load: " + clazz + " - " + ex.getMessage());
+                        failed++;
+                    }
+                } else {
+                    skipped++;
+                }
+            }
+        } finally {
+            jf.close();
+        }
+        AgentLogger.getLogger().log("total classes loaded: " + loaded + "; skipped: " + skipped + "; failed to load:" + failed);
     }
 }

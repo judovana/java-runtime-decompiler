@@ -81,6 +81,7 @@ public class JarTest {
                     Assertions.assertTrue(entry.getSize() > 10);
                 }
             }
+            jf.close();
             Assertions.assertTrue(one);
             Assertions.assertTrue(second);
             Assertions.assertEquals(2, c);

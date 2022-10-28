@@ -62,6 +62,7 @@ public class DecompilerRequestReceiver {
         String response;
         switch (action) {
             case ADD_CLASS:
+            case ADD_JAR:
             case OVERWRITE:
                 String classNameForOverwrite = request.getParameter(AgentRequestAction.CLASS_NAME_PARAM);
                 String classFutureBody = request.getParameter(AgentRequestAction.CLASS_TO_OVERWRITE_BODY);

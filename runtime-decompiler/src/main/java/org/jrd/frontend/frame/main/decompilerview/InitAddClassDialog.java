@@ -4,6 +4,7 @@ import org.jrd.backend.core.Logger;
 import org.objectweb.asm.ClassReader;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -28,6 +29,7 @@ public class InitAddClassDialog extends JDialog {
     AddSingleFile addSingleJar;
 
     JTextField initFqn;
+    JCheckBox jarBoot = new JCheckBox("Force to boot loader instead of application one (eg java.lang...)");
     JTabbedPane tp = new JTabbedPane();
     JPanel init = new JPanel();
     JPanel addJar = new JPanel();
@@ -54,7 +56,7 @@ public class InitAddClassDialog extends JDialog {
         initFqn = new JTextField(lastFqn);
         init.add(initFqn);
 
-        addJar.setLayout(new GridLayout(2, 1));
+        addJar.setLayout(new GridLayout(3, 1));
         addJar.add(
                 new JLabel(
                         "<html>This allows you to select JAR from HDD, and inject it to the running vm<br/>" +
@@ -63,7 +65,7 @@ public class InitAddClassDialog extends JDialog {
                                 "legacy add single class "
                 )
         );
-
+        addJar.add(jarBoot);
         addClasses.setLayout(new GridLayout(1, 1));
         addClasses.add(
                 new JLabel(
@@ -117,16 +119,28 @@ public class InitAddClassDialog extends JDialog {
         if (tp.getSelectedComponent() == init) {
             return new String[]{initFqn.getText()};
         } else if (tp.getSelectedComponent() == addClass) {
+            JTextField fakeReply = new JTextField();
+            boolean verified = new ClassVerifier(addSingleClassPanel.addSingleClassFile, fakeReply).verifySource(null);
+            if (!verified) {
+                throw new RuntimeException(fakeReply.getText());
+            }
             return new String[]{addSingleClassPanel.addSingleClassFqn.getText(), addSingleClassPanel.addSingleClassFile.getText()};
+        } else if (tp.getSelectedComponent() == addJar) {
+            boolean verified = addSingleJar.verifier.verifySource(null);
+            if (!verified) {
+                throw new RuntimeException(addSingleJar.addSingleClassFqn.getText());
+            }
+            return new String[]{jarBoot.isSelected() + "", new File(addSingleJar.addSingleClassFile.getText()).getName(),
+                    new File(addSingleJar.addSingleClassFile.getText()).getAbsolutePath()};
         } else {
-            throw new RuntimeException();
+            throw new RuntimeException("unsupported tab");
         }
     }
 
     private static class AddSingleFile extends JPanel {
         protected final JTextField addSingleClassFqn;
         protected final JTextField addSingleClassFile;
-        private final DocumentListener verifier;
+        private final FileVerifier verifier;
 
         AddSingleFile(String lastFqn, String lastFile) {
             this.setLayout(new GridLayout(3, 1));
@@ -153,7 +167,7 @@ public class InitAddClassDialog extends JDialog {
             this.add(addSingleClassFqn);
         }
 
-        protected DocumentListener createListener() {
+        protected FileVerifier createListener() {
             return new ClassVerifier(addSingleClassFile, addSingleClassFqn);
         }
     }
@@ -276,7 +290,7 @@ public class InitAddClassDialog extends JDialog {
         }
 
         @Override
-        protected DocumentListener createListener() {
+        protected FileVerifier createListener() {
             return new JarVerifier(addSingleClassFile, addSingleClassFqn);
         }
     }

@@ -95,6 +95,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         mainFrameView.setRemoveVmDialogListener(this::removeVmDialog);
         bytecodeDecompilerView.setInitActionListener(e -> initClass(e.getActionCommand()));
         bytecodeDecompilerView.setAddActionListener(e -> addClass(e.getActionCommand()));
+        bytecodeDecompilerView.setJarActionListener(e -> addJar(e.getActionCommand()));
         bytecodeDecompilerView.setClassesActionListener(e -> loadClassNames());
         bytecodeDecompilerView.setSearchInActionListener(e -> searchInClasses(e.getActionCommand()));
         bytecodeDecompilerView.setBytesActionListener(e -> {
@@ -360,6 +361,20 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         showLoadingDialog("Adding class");
         String[] fqnBody = fqnSpaceBody.split("\\s+");
         AgentRequestAction request = createRequest(RequestAction.ADD_CLASS, fqnBody[0], fqnBody[1]);
+        String response = submitRequest(request);
+        hideLoadingDialog();
+        if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
+            loadClassNames();
+        }
+        if (new TopLevelErrorCandidate(response).isError()) {
+            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), response + "\n" + CLASSES_NOPE, "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void addJar(String fqnSpaceBody) {
+        showLoadingDialog("Adding jar");
+        String[] fqnBody = fqnSpaceBody.split("\\s+");
+        AgentRequestAction request = createRequest(RequestAction.ADD_JAR, fqnBody[0], fqnBody[1]);
         String response = submitRequest(request);
         hideLoadingDialog();
         if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
@@ -660,6 +675,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
                 request = AgentRequestAction.create(vmInfo, hostname, listenPort, action, commands[0]);
                 break;
             case ADD_CLASS:
+            case ADD_JAR:
             case OVERWRITE:
                 try {
                     request = AgentRequestAction.create(vmInfo, hostname, listenPort, action, commands[0], commands[1]);
