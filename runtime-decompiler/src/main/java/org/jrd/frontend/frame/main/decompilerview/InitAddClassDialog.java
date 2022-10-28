@@ -12,15 +12,20 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.nio.file.Files;
+import java.util.Enumeration;
+import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
 
 public class InitAddClassDialog extends JDialog {
 
-    AddSingleClass addSingleClassPanel;
+    AddSingleFile addSingleClassPanel;
+    AddSingleFile addSingleJar;
 
     JTextField initFqn;
     JTabbedPane tp = new JTabbedPane();
@@ -44,27 +49,12 @@ public class InitAddClassDialog extends JDialog {
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setModal(true);
 
-        init.setLayout(new GridLayout(3, 1));
+        init.setLayout(new GridLayout(2, 1));
         init.add(new JLabel("This will send command to VM, to init existing, but not yet used class"));
         initFqn = new JTextField(lastFqn);
         init.add(initFqn);
-        JPanel nice1 = new JPanel();
-        JButton initB = new JButton("Init");
-        initB.addActionListener(a -> {
-            r = 1;
-            InitAddClassDialog.this.setVisible(false);
-        });
-        JButton cancel1 = new JButton("Cancel");
-        cancel1.addActionListener(a -> {
-            r = 0;
-            InitAddClassDialog.this.setVisible(false);
-        });
-        nice1.setLayout(new GridLayout(1, 2));
-        nice1.add(initB);
-        nice1.add(cancel1);
-        init.add(nice1);
 
-        addJar.setLayout(new GridLayout(6, 1));
+        addJar.setLayout(new GridLayout(2, 1));
         addJar.add(
                 new JLabel(
                         "<html>This allows you to select JAR from HDD, and inject it to the running vm<br/>" +
@@ -74,7 +64,7 @@ public class InitAddClassDialog extends JDialog {
                 )
         );
 
-        addClasses.setLayout(new GridLayout(2, 1));
+        addClasses.setLayout(new GridLayout(1, 1));
         addClasses.add(
                 new JLabel(
                         "<html>This allows you to select CLASSES from HDD, and inject it to the running vm<br/>" +
@@ -85,7 +75,7 @@ public class InitAddClassDialog extends JDialog {
                 )
         );
 
-        addClass.setLayout(new GridLayout(3, 1));
+        addClass.setLayout(new GridLayout(2, 1));
         addClass.add(
                 new JLabel(
                         "<html>This allows you to select single CLASS from HDD, and inject it to the running vm<br/>" +
@@ -94,10 +84,12 @@ public class InitAddClassDialog extends JDialog {
                                 "In addition, this method works only for jdk11 and older."
                 )
         );
-        addSingleClassPanel = new AddSingleClass(lastFqn, lastAddFile.getAbsolutePath());
+        addSingleClassPanel = new AddSingleFile(lastFqn, lastAddFile.getAbsolutePath());
         addClass.add(addSingleClassPanel);
+        addSingleJar = new AddSingleJar(lastFqn, lastAddFile);
+        addJar.add(addSingleJar);
 
-        JButton addB = new JButton("Add");
+        JButton addB = new JButton("Add/Init");
         addB.addActionListener(a -> {
             r = 1;
             InitAddClassDialog.this.setVisible(false);
@@ -107,11 +99,11 @@ public class InitAddClassDialog extends JDialog {
             r = 0;
             InitAddClassDialog.this.setVisible(false);
         });
-        JPanel nice2 = new JPanel();
-        nice2.setLayout(new GridLayout(1, 2));
-        nice2.add(addB);
-        nice2.add(cancel2);
-        addClass.add(nice2);
+        JPanel okCancelButtonsPane = new JPanel();
+        okCancelButtonsPane.setLayout(new GridLayout(1, 2));
+        okCancelButtonsPane.add(addB);
+        okCancelButtonsPane.add(cancel2);
+        this.add(okCancelButtonsPane, BorderLayout.SOUTH);
 
         this.pack();
         this.setLocationRelativeTo(null);
@@ -131,11 +123,12 @@ public class InitAddClassDialog extends JDialog {
         }
     }
 
-    private static class AddSingleClass extends JPanel {
-        private final JTextField addSingleClassFqn;
-        private final JTextField addSingleClassFile;
+    private static class AddSingleFile extends JPanel {
+        protected final JTextField addSingleClassFqn;
+        protected final JTextField addSingleClassFile;
+        private final DocumentListener verifier;
 
-        AddSingleClass(String lastFqn, String lastFile) {
+        AddSingleFile(String lastFqn, String lastFile) {
             this.setLayout(new GridLayout(3, 1));
             addSingleClassFqn = new JTextField(lastFqn);
             JButton selectSingleClass = new JButton("Select");
@@ -151,11 +144,17 @@ public class InitAddClassDialog extends JDialog {
                     }
                 }
             });
-            addSingleClassFile = new JTextField(lastFile);
-            addSingleClassFile.getDocument().addDocumentListener(new ClassVerifier(addSingleClassFile, addSingleClassFqn));
+            addSingleClassFile = new JTextField("");
+            this.verifier = createListener();
+            addSingleClassFile.getDocument().addDocumentListener(verifier);
+            addSingleClassFile.setText(lastFile);
             this.add(selectSingleClass);
             this.add(addSingleClassFile);
             this.add(addSingleClassFqn);
+        }
+
+        protected DocumentListener createListener() {
+            return new ClassVerifier(addSingleClassFile, addSingleClassFqn);
         }
     }
 
@@ -199,6 +198,42 @@ public class InitAddClassDialog extends JDialog {
         }
     }
 
+    private static class JarVerifier extends FileVerifier {
+
+        JarVerifier(JTextField source, JTextField target) {
+            super(source, target);
+        }
+
+        public boolean verifySource(DocumentEvent documentEvent) {
+            boolean intermezo = super.verifySource(documentEvent);
+            if (intermezo) {
+                File f = new File(source.getText());
+                try {
+                    JarFile jf = new JarFile(f);
+                    int manfest = 0;
+                    int others = 0;
+                    for (Enumeration list = jf.entries(); list.hasMoreElements();) {
+                        ZipEntry entry = (ZipEntry) list.nextElement();
+                        if (entry.getName().contains("META-INF")) {
+                            manfest++;
+                        } else {
+                            others++;
+                        }
+                    }
+                    target.setText("contains " + others + " classes and " + manfest + " manifest items");
+                    jf.close();
+                    return true;
+                } catch (Exception ex) {
+                    target.setText(ex.getMessage());
+                    Logger.getLogger().log(ex);
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+    }
+
     private static class ClassVerifier extends FileVerifier {
 
         ClassVerifier(JTextField source, JTextField target) {
@@ -230,6 +265,19 @@ public class InitAddClassDialog extends JDialog {
                 }
             }
             return false;
+        }
+    }
+
+    private static class AddSingleJar extends AddSingleFile {
+
+        AddSingleJar(String lastFqn, File lastAddFile) {
+            super(lastFqn, lastAddFile.getAbsolutePath());
+
+        }
+
+        @Override
+        protected DocumentListener createListener() {
+            return new JarVerifier(addSingleClassFile, addSingleClassFqn);
         }
     }
 }
