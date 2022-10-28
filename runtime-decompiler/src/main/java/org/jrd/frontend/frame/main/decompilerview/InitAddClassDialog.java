@@ -152,42 +152,63 @@ public class InitAddClassDialog extends JDialog {
                 }
             });
             addSingleClassFile = new JTextField(lastFile);
-            addSingleClassFile.getDocument().addDocumentListener(new InitAddClassVerifyListener(addSingleClassFile, addSingleClassFqn));
+            addSingleClassFile.getDocument().addDocumentListener(new ClassVerifier(addSingleClassFile, addSingleClassFqn));
             this.add(selectSingleClass);
             this.add(addSingleClassFile);
             this.add(addSingleClassFqn);
         }
     }
 
-    private static class InitAddClassVerifyListener implements DocumentListener {
-        private final JTextField source;
-        private final JTextField target;
+    private static class FileVerifier implements DocumentListener {
+        protected final JTextField source;
+        protected final JTextField target;
 
-        InitAddClassVerifyListener(JTextField source, JTextField target) {
+        FileVerifier(JTextField source, JTextField target) {
             this.source = source;
             this.target = target;
         }
 
         @Override
         public void insertUpdate(DocumentEvent documentEvent) {
-            dome(documentEvent);
+            verifySource(documentEvent);
         }
 
         @Override
         public void removeUpdate(DocumentEvent documentEvent) {
-            dome(documentEvent);
+            verifySource(documentEvent);
         }
 
         @Override
         public void changedUpdate(DocumentEvent documentEvent) {
-            dome(documentEvent);
+            verifySource(documentEvent);
         }
 
-        public void dome(DocumentEvent documentEvent) {
+        public boolean verifySource(DocumentEvent documentEvent) {
             File f = new File(source.getText());
             if (!f.exists()) {
                 target.setText("file do not exists");
+                return false;
             } else {
+                if (f.isDirectory()) {
+                    target.setText("is directory");
+                    return false;
+                }
+                target.setText("ok");
+                return true;
+            }
+        }
+    }
+
+    private static class ClassVerifier extends FileVerifier {
+
+        ClassVerifier(JTextField source, JTextField target) {
+            super(source, target);
+        }
+
+        public boolean verifySource(DocumentEvent documentEvent) {
+            boolean intermezo = super.verifySource(documentEvent);
+            if (intermezo) {
+                File f = new File(source.getText());
                 byte[] b = null;
                 try {
                     b = Files.readAllBytes(f.toPath());
@@ -201,12 +222,14 @@ public class InitAddClassDialog extends JDialog {
                     try {
                         ClassReader cr = new ClassReader(b);
                         target.setText(cr.getClassName().replace('/', '.'));
+                        return true;
                     } catch (Exception ex) {
                         target.setText(ex.getMessage());
                         Logger.getLogger().log(ex);
                     }
                 }
             }
+            return false;
         }
     }
 }
