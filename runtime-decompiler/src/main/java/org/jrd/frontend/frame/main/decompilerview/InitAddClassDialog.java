@@ -9,17 +9,22 @@ import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
@@ -30,6 +35,11 @@ public class InitAddClassDialog extends JDialog {
 
     JTextField initFqn;
     JCheckBox jarBoot = new JCheckBox("Force to boot loader instead of application one (eg java.lang...)");
+
+    JCheckBox classesBoot = new JCheckBox("Force to boot loader instead of application one (eg java.lang...)");
+    String lastClassesSelection;
+    JPanel addClassesGuis = new JPanel(new GridLayout(0, 1));
+
     JTabbedPane tp = new JTabbedPane();
     JPanel init = new JPanel();
     JPanel addJar = new JPanel();
@@ -39,6 +49,7 @@ public class InitAddClassDialog extends JDialog {
 
     public InitAddClassDialog(String lastFqn, String lastAdd, File lastAddFile) {
         this.add(tp);
+        lastClassesSelection = lastAddFile.getAbsolutePath();
         init.setName("Init");
         addJar.setName("Add Jar");
         addClasses.setName("Add classes");
@@ -66,8 +77,9 @@ public class InitAddClassDialog extends JDialog {
                 )
         );
         addJar.add(jarBoot);
-        addClasses.setLayout(new GridLayout(1, 1));
-        addClasses.add(
+        addClasses.setLayout(new BorderLayout());
+        JPanel addClassesTopPanel = new JPanel(new GridLayout(3, 1));
+        addClassesTopPanel.add(
                 new JLabel(
                         "<html>This allows you to select CLASSES from HDD, and inject it to the running vm<br/>" +
                                 "Those classes will be packed to jar and sent." +
@@ -76,7 +88,28 @@ public class InitAddClassDialog extends JDialog {
                                 " if remote system can not store, you must use legacy add single class "
                 )
         );
-
+        addClassesTopPanel.add(classesBoot);
+        JButton addClassButton = new JButton("+");
+        addClassButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                JFileChooser jf = new JFileChooser(lastClassesSelection);
+                jf.setMultiSelectionEnabled(true);
+                int rr = jf.showOpenDialog(addClassButton);
+                if (rr == JFileChooser.APPROVE_OPTION && jf.getSelectedFile() != null) {
+                    addClassesGuis.setLayout(new GridLayout(addSingleClassPanel.getComponentCount() + jf.getSelectedFiles().length, 1));
+                    for (File f : jf.getSelectedFiles()) {
+                        lastClassesSelection = f.getParent();
+                        String q = f.getAbsolutePath();
+                        addClassesGuis.add(new AddMultiFilePart("", q));
+                    }
+                    InitAddClassDialog.this.pack();
+                }
+            }
+        });
+        addClassesTopPanel.add(addClassButton);
+        addClasses.add(addClassesTopPanel, BorderLayout.NORTH);
+        addClasses.add(new JScrollPane(addClassesGuis));
         addClass.setLayout(new GridLayout(2, 1));
         addClass.add(
                 new JLabel(
@@ -132,8 +165,43 @@ public class InitAddClassDialog extends JDialog {
             }
             return new String[]{jarBoot.isSelected() + "", new File(addSingleJar.addSingleClassFile.getText()).getName(),
                     new File(addSingleJar.addSingleClassFile.getText()).getAbsolutePath()};
+        } else if (tp.getSelectedComponent() == addClasses) {
+            List<String> futureArray = new ArrayList<>();
+            futureArray.add("header");
+            futureArray.add("header");
+            futureArray.add("header");
+            futureArray.add("header");
+            Component[] fqnAndFile = addClassesGuis.getComponents();
+            if (fqnAndFile.length == 0) {
+                throw new RuntimeException("No classes to add");
+            }
+            for (Component c : fqnAndFile) {
+                AddSingleFile addSingleFile = (AddSingleFile) c;
+                boolean verified = addSingleFile.verifier.verifySource(null);
+                if (!verified) {
+                    throw new RuntimeException(addSingleFile.addSingleClassFqn.getText());
+                }
+                futureArray.add(addSingleFile.addSingleClassFqn.getText());
+                futureArray.add(addSingleFile.addSingleClassFile.getText());
+            }
+            return futureArray.toArray(String[]::new);
         } else {
             throw new RuntimeException("unsupported tab");
+        }
+    }
+
+    private static class AddMultiFilePart extends AddSingleFile {
+
+        AddMultiFilePart(String lastFqn, String lastFile) {
+            super(lastFqn, lastFile);
+            this.setLayout(new GridLayout(4, 1));
+            JButton removeB = new JButton("-^-Remove-^-");
+            removeB.addActionListener(a -> {
+                Container p = AddMultiFilePart.this.getParent();
+                AddMultiFilePart.this.getParent().remove(AddMultiFilePart.this);
+                p.repaint();
+            });
+            this.add(removeB);
         }
     }
 
@@ -145,13 +213,13 @@ public class InitAddClassDialog extends JDialog {
         AddSingleFile(String lastFqn, String lastFile) {
             this.setLayout(new GridLayout(3, 1));
             addSingleClassFqn = new JTextField(lastFqn);
-            JButton selectSingleClass = new JButton("Select");
+            JButton selectSingleClass = new JButton("-ˇ-Select-ˇ-");
             selectSingleClass.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent actionEvent) {
                     JFileChooser jf = new JFileChooser(addSingleClassFile.getText());
-                    int rr = jf.showOpenDialog(selectSingleClass);
                     jf.setMultiSelectionEnabled(false);
+                    int rr = jf.showOpenDialog(selectSingleClass);
                     if (rr == JFileChooser.APPROVE_OPTION && jf.getSelectedFile() != null) {
                         String q = jf.getSelectedFile().getAbsolutePath();
                         addSingleClassFile.setText(q);

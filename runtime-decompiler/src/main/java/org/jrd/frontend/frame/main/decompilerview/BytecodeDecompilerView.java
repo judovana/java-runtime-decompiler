@@ -963,7 +963,7 @@ public class BytecodeDecompilerView {
                     } else if (fqn.length == 3) {
                         addJar(Boolean.parseBoolean(fqn[0]), fqn[2], fqn[1]);
                     } else {
-                        throw new RuntimeException("Unknown output from dialog");
+                        addClassesGui(Arrays.copyOfRange(fqn, 4, fqn.length));
                     }
                 }
             } catch (Exception ex) {
@@ -1026,5 +1026,9 @@ public class BytecodeDecompilerView {
                 }
             }.execute();
         }
+    }
+
+    private void addClassesGui(String[] fqnFilePairs) {
+        System.out.println(fqnFilePairs.length + "");
     }
 }
