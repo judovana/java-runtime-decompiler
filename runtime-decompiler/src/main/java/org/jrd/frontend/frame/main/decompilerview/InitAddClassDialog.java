@@ -241,6 +241,7 @@ public class InitAddClassDialog extends JDialog {
     }
 
     private static class FileVerifier implements DocumentListener {
+        //FIXME replace by interface set/get text only
         protected final JTextField source;
         protected final JTextField target;
 
@@ -280,9 +281,9 @@ public class InitAddClassDialog extends JDialog {
         }
     }
 
-    private static class JarVerifier extends FileVerifier {
+    public static class JarVerifier extends FileVerifier {
 
-        JarVerifier(JTextField source, JTextField target) {
+        public JarVerifier(JTextField source, JTextField target) {
             super(source, target);
         }
 

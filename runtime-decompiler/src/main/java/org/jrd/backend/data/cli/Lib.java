@@ -322,6 +322,13 @@ public final class Lib {
         return response;
     }
 
+    public static String addJar(VmInfo vmInfo, boolean isBoot, String jarName, String jarBytesInBase64, VmManager vmManager) {
+        AgentRequestAction request = DecompilationController
+                .createRequest(vmInfo, AgentRequestAction.RequestAction.ADD_JAR, getPrefixByBoot(isBoot) + "/" + jarName, jarBytesInBase64);
+        String response = DecompilationController.submitRequest(vmManager, request);
+        return response;
+    }
+
     public static PluginWrapperWithMetaInfo getPluginWrapper(PluginManager pluginManager, String pluginIdOrNonsense, boolean doThrow) {
         PluginWithOptions wrapper = null;
         boolean haveCompiler = false;

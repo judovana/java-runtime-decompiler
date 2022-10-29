@@ -33,6 +33,7 @@ import org.jrd.frontend.frame.main.decompilerview.DecompilationController;
 import org.jrd.frontend.frame.main.LoadingDialogProvider;
 import org.jrd.frontend.frame.main.ModelProvider;
 import org.jrd.frontend.frame.main.decompilerview.HexWithControls;
+import org.jrd.frontend.frame.main.decompilerview.InitAddClassDialog;
 import org.jrd.frontend.frame.main.popup.DiffPopup;
 import org.jrd.frontend.frame.main.popup.SingleFilePatch;
 import org.jrd.frontend.frame.overwrite.FileToClassValidator;
@@ -40,6 +41,7 @@ import org.jrd.frontend.frame.overwrite.OverwriteClassDialog;
 import org.jrd.frontend.utility.AgentApiGenerator;
 import org.jrd.frontend.utility.CommonUtils;
 
+import javax.swing.JTextField;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -75,6 +77,7 @@ public class Cli {
     private boolean isVerbose;
     private boolean isHex;
     private boolean isRevert;
+    private boolean isBoot;
 
     public Cli(String[] orig, Model model) {
         this.filteredArgs = prefilterArgs(orig);
@@ -104,6 +107,8 @@ public class Cli {
             if (cleanedArg.equals(VERBOSE)) {
                 isVerbose = true;
                 Logger.getLogger().setVerbose(true);
+            } else if (cleanedArg.equals(BOOT_CLASS_LOADER)) {
+                isBoot = true;
             } else if (cleanedArg.equals(HEX)) {
                 isHex = true;
             } else if (cleanedArg.equals(REVERT)) {
@@ -236,7 +241,7 @@ public class Cli {
                     compileWrapper(operatedOn);
                     break;
                 case OVERWRITE:
-                    VmInfo vmInfo5 = overwrite(false);
+                    VmInfo vmInfo5 = overwrite(ReceivedType.OVERWRITE_CLASS);
                     operatedOn.add(vmInfo5);
                     break;
                 case PATCH:
@@ -244,8 +249,12 @@ public class Cli {
                     operatedOn.add(patchVmInfo);
                     break;
                 case ADD_CLASS:
-                    VmInfo vmInfoAddClass = overwrite(true);
+                    VmInfo vmInfoAddClass = overwrite(ReceivedType.ADD_CLASS);
                     operatedOn.add(vmInfoAddClass);
+                    break;
+                case ADD_JAR:
+                    VmInfo vmInfoAddJar = overwrite(ReceivedType.ADD_JAR);
+                    operatedOn.add(vmInfoAddJar);
                     break;
                 case INIT:
                     VmInfo vmInfo6 = init();
@@ -598,49 +607,98 @@ public class Cli {
         return Lib.decompileBytesByDecompilerName(base64Bytes, pluginName, className, vmInfo, vmManager, pluginManager);
     }
 
-    private VmInfo overwrite(boolean add) throws Exception {
+    //fixme, refactor, jar do not belongs here
+    @SuppressWarnings({"CyclomaticComplexity"})
+    private VmInfo overwrite(ReceivedType add) throws Exception {
+        int maxargs = 4;
+        if (add.equals(ReceivedType.ADD_JAR)) {
+            Logger.getLogger().log(Logger.Level.ALL, "adding jar to " + Lib.getPrefixByBoot(isBoot));
+            maxargs = 3;
+        }
         String newBytecodeFile;
-        if (filteredArgs.size() == 3) {
-            Logger.getLogger().log("Reading class for overwrite from stdin.");
+        if (filteredArgs.size() == (maxargs - 1)) {
+            Logger.getLogger().log("Reading  from stdin.");
             newBytecodeFile = null;
         } else {
-            if (filteredArgs.size() != 4) {
-                throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.OVERWRITE_FORMAT + "'.");
+            if (filteredArgs.size() != maxargs) {
+                switch (add) {
+                    case OVERWRITE_CLASS:
+                        throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.OVERWRITE_FORMAT + "'.");
+                    case ADD_CLASS:
+                        throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.ADD_CLASS_FORMAT + "'.");
+                    case ADD_JAR:
+                        throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.ADD_JAR_FORMAT + "'.");
+                    default:
+                        throw new RuntimeException("Unknown action " + add);
+                }
             }
-            newBytecodeFile = filteredArgs.get(3);
+            if (add.equals(ReceivedType.ADD_JAR)) {
+                newBytecodeFile = filteredArgs.get(2);
+            } else {
+                newBytecodeFile = filteredArgs.get(3);
+            }
         }
 
-        String className = filteredArgs.get(2);
+        String className;
+        if (add.equals(ReceivedType.ADD_JAR)) {
+            className = newBytecodeFile == null ? "stdin.jar" : new File(newBytecodeFile).getName();
+        } else {
+            className = filteredArgs.get(2);
+        }
         VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
         String clazz;
 
         if (newBytecodeFile == null) {
             clazz = DecompilationController.stdinToBase64(isHex);
         } else { // validate first
-            FileToClassValidator.StringAndScore r = FileToClassValidator.validate(className, newBytecodeFile);
+            if (!add.equals(ReceivedType.ADD_JAR)) {
+                FileToClassValidator.StringAndScore r = FileToClassValidator.validate(className, newBytecodeFile);
 
-            if (r.getScore() > 0 && r.getScore() < 10) {
-                Logger.getLogger().log(Logger.Level.ALL, "WARNING: " + r.getMessage());
+                if (r.getScore() > 0 && r.getScore() < 10) {
+                    Logger.getLogger().log(Logger.Level.ALL, "WARNING: " + r.getMessage());
+                }
+                if (r.getScore() >= 10) {
+                    Logger.getLogger().log(Logger.Level.ALL, "ERROR: " + r.getMessage());
+                }
+            } else {
+                JTextField fakeInput = new JTextField(newBytecodeFile);
+                JTextField fakeOutput = new JTextField();
+                boolean passed = new InitAddClassDialog.JarVerifier(fakeInput, fakeOutput).verifySource(null);
+                if (!passed) {
+                    throw new RuntimeException(fakeOutput.getText());
+                }
             }
-            if (r.getScore() >= 10) {
-                Logger.getLogger().log(Logger.Level.ALL, "ERROR: " + r.getMessage());
-            }
-
             clazz = DecompilationController.fileToBase64(newBytecodeFile, isHex);
         }
 
         String response;
-        if (add) {
-            response = Lib.addClass(vmInfo, className, clazz, vmManager);
-        } else {
-            response = uploadClass(vmInfo, className, clazz);
+        switch (add) {
+            case OVERWRITE_CLASS:
+                response = uploadClass(vmInfo, className, clazz);
+                break;
+            case ADD_CLASS:
+                response = Lib.addClass(vmInfo, className, clazz, vmManager);
+                break;
+            case ADD_JAR:
+                response = Lib.addJar(vmInfo, isBoot, className, clazz, vmManager);
+                break;
+            default:
+                throw new RuntimeException("Unknown action " + add);
         }
 
         if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
-            if (add) {
-                System.out.println("Addition of class '" + className + "' successful.");
-            } else {
-                System.out.println("Overwrite of class '" + className + "' successful.");
+            switch (add) {
+                case OVERWRITE_CLASS:
+                    System.out.println("Overwrite of class '" + className + "' successful.");
+                    break;
+                case ADD_CLASS:
+                    System.out.println("Addition of class '" + className + "' successful.");
+                    break;
+                case ADD_JAR:
+                    System.out.println("Addition of jar '" + className + "' successful.");
+                    break;
+                default:
+                    throw new RuntimeException("Unknown action " + add);
             }
         } else {
             throw new RuntimeException(DecompilationController.CLASSES_NOPE);
