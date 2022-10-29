@@ -431,9 +431,9 @@ public final class Lib {
     }
 
     public static String getPrefixByBoot(boolean boot) {
-        String prefix = "SYSTEM";
+        String prefix = CliSwitches.SYSTEM_CLASS_LOADER;
         if (boot) {
-            prefix = "BOOT";
+            prefix = CliSwitches.BOOT_CLASS_LOADER;
         }
         return prefix;
     }

@@ -5,6 +5,8 @@ public final class CliSwitches {
     static final String VERBOSE = "-verbose";
     static final String CONFIG = "-config";
     static final String HEX = "-hex";
+    static final String SYSTEM_CLASS_LOADER = "SYSTEM";
+    static final String BOOT_CLASS_LOADER = "BOOT";
     static final String SAVE_AS = "-saveas";
     static final String SAVE_LIKE = "-savelike";
     static final String LIST_JVMS = "-listjvms";
@@ -24,6 +26,8 @@ public final class CliSwitches {
     static final String COMPILE = "-compile";
     static final String OVERWRITE = "-overwrite";
     static final String ADD_CLASS = "-addclass";
+    static final String ADD_JAR = "-addjar";
+    static final String ADD_CLASSES = "-addclasses";
     static final String PATCH = "-patch";
     static final String INIT = "-init";
     static final String AGENT = "-agent";

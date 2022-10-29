@@ -45,7 +45,10 @@ public final class Help {
     static final String COMPILE_FORMAT = COMPILE + " [" + P + " <PLUGIN>] [" + CP + " <PUC>] [" + R + "] <PATH>...";
     static final String DECOMPILE_FORMAT = DECOMPILE + " <PUC> <PLUGIN> <CLASS REGEX>...";
     static final String OVERWRITE_FORMAT = OVERWRITE + " <PUC> <FQN> [<CLASS FILE>]";
-    static final String ADD_FORMAT = ADD_CLASS + " <PUC> <FQN> [<CLASS FILE>]";
+    static final String ADD_CLASS_FORMAT = ADD_CLASS + " <PUC> <FQN> <CLASS FILE>";
+    static final String ADD_CLASSES_FORMAT1 = ADD_CLASSES + " <PUC> (<CLASS FILE1>)^n [" + BOOT_CLASS_LOADER + "]";
+    static final String ADD_CLASSES_FORMAT2 = ADD_CLASSES + " <PUC> (<FQN1> <CLASS FILE1>)^n [" + BOOT_CLASS_LOADER + "]";
+    static final String ADD_JAR_FORMAT = ADD_JAR + " <PUC> <JAR FILE> [" + BOOT_CLASS_LOADER + "]";
     static final String PATCH_FORMAT = PATCH + " <PUC>  <PLUGIN>xor<ADDITIONAL-SOURCE/CLASS-PATH (" + HEX + ") (" + REVERT + ")";
     static final String INIT_FORMAT = INIT + " <PUC> <FQN>";
     static final String AGENT_FORMAT =
@@ -89,12 +92,18 @@ public final class Help {
             "Javap can be passed options by appending them without spaces: " + "'javap-v-public ...' executes as 'javap -v -public ...'";
     private static final String OVERWRITE_TEXT =
             "Overwrite class of a process with new bytecode. If <CLASS FILE> is not set, standard input is used.";
-    private static final String ADD_TEXT =
+    private static final String ADD_CLASS_TEXT =
             "Add class is currently unable to add class, unless all its dependencies are already in running vm. Stdin used if no file.";
-    private static final String PATCH_TEXT = " You may ignore plugin/path param in " + HEX + " mode." +
+    private static final String ADD_JAR_TEXT = "Will add all classes from jar into selected VM." +
+            " If you are adding system classes, yo have to specify " + BOOT_CLASS_LOADER;
+    private static final String ADD_CLASSES_TEXT1 = "Will add all classes into jar, guess theirs FQN, and sent them into selected VM." +
+            " If you are adding system classes, yo have to specify " + BOOT_CLASS_LOADER;
+    private static final String ADD_CLASSES_TEXT2 = "Will add all classes into jar, set theirs FQN, and sent them into selected VM." +
+            " If you are adding system classes, yo have to specify " + BOOT_CLASS_LOADER;
+    private static final String PATCH_TEXT = "You may ignore plugin/path param in " + HEX + " mode." +
             "You can apply patch from STD-IN to classes in <PUC>. The patch can be on source, or on binary if  " + HEX + " is provided\n" +
             "The header (+++/---) must contain dot-delimited FQN of class. All before / (or \\) is stripped." +
-            " .class$/.java$  is omitted. See gui for the examples.\n" +
+            " .class$/.java$  is omitted.\n" + "See gui for the examples.\n" +
             "If plugin is specified, runtime classpath is decompiled, patched," + " compiled (is not (de)compiled with " + HEX +
             ") and uploaded.\n " +
             "If plugin is not specified, then source from additional-source-path is patched, compiled and uploaded.\n" + "If " + HEX +
@@ -116,9 +125,9 @@ public final class Help {
                     Arrays.stream(AgentLoneliness.values()).map(i -> "  " + i.toString() + " - " + i.toHelp())
                             .collect(Collectors.joining("\n")) +
                     "\n" + "optional, defaults to " + AgentLoneliness.SINGLE_INSTANCE + "\n" +
-                    "You can also specify port where the agent will listen, otherwise default port is calculated." +
-                    "JRD keep record of all permanent and session agents, so they can be listed/reused/removed." +
-                    "This list is usually checked for consistency. File is " + KnownAgents.JRD_TMP_FILE.toFile().getAbsolutePath();
+                    "You can also specify port where the agent will listen, otherwise default port is calculated.\n" +
+                    "JRD keep record of all permanent and session agents, so they can be listed/reused/removed.\n" +
+                    "This list is usually checked for consistency.\n" + "File is " + KnownAgents.JRD_TMP_FILE.toFile().getAbsolutePath();
     private static final String DETACH_TEXT = "Will close and detach " + AgentLiveliness.PERMANENT +
             " agent from given localhost:port or url. To detach from PID, a valid mapping in " +
             KnownAgents.JRD_TMP_FILE.toFile().getAbsolutePath() + " file is needed";
@@ -146,12 +155,11 @@ public final class Help {
     private static final String LAUNCHER_LINUX = "./start.sh";
     private static final String LAUNCHER_WINDOWS = "start.bat";
 
-    static final Map<String, String> ALL_OPTIONS;
-    static final Map<String, String> SAVING_OPTIONS;
-    private static final Map<String, String[]> NOTES;
+    static final Map<String, String> ALL_OPTIONS = new LinkedHashMap<>();
+    static final Map<String, String> SAVING_OPTIONS = new LinkedHashMap<>();
+    private static final Map<String, String[]> NOTES = new LinkedHashMap<>();
 
     static {
-        ALL_OPTIONS = new LinkedHashMap<>();
         ALL_OPTIONS.put(HELP_FORMAT, HELP_TEXT);
         ALL_OPTIONS.put(VERBOSE_FORMAT, VERBOSE_TEXT);
         ALL_OPTIONS.put(VERSION_FORMAT, VERSION_TEXT);
@@ -174,18 +182,19 @@ public final class Help {
         ALL_OPTIONS.put(COMPILE_FORMAT, COMPILE_TEXT);
         ALL_OPTIONS.put(DECOMPILE_FORMAT, DECOMPILE_TEXT);
         ALL_OPTIONS.put(OVERWRITE_FORMAT, OVERWRITE_TEXT);
-        ALL_OPTIONS.put(ADD_FORMAT, ADD_TEXT);
+        ALL_OPTIONS.put(ADD_CLASS_FORMAT, ADD_CLASS_TEXT);
+        ALL_OPTIONS.put(ADD_JAR_FORMAT, ADD_JAR_TEXT);
+        ALL_OPTIONS.put(ADD_CLASSES_FORMAT1, ADD_CLASSES_TEXT1);
+        ALL_OPTIONS.put(ADD_CLASSES_FORMAT2, ADD_CLASSES_TEXT2);
         ALL_OPTIONS.put(INIT_FORMAT, INIT_TEXT);
         ALL_OPTIONS.put(ATTACH_FORMAT, ATTACH_TEXT);
         ALL_OPTIONS.put(AGENT_FORMAT, AGENT_TEXT);
         ALL_OPTIONS.put(DETACH_FORMAT, DETACH_TEXT);
         ALL_OPTIONS.put(API_FORMAT, API_TEXT);
 
-        SAVING_OPTIONS = new LinkedHashMap<>();
         SAVING_OPTIONS.put(SAVE_AS_FORMAT, SAVE_AS_TEXT);
         SAVING_OPTIONS.put(SAVE_LIKE_FORMAT, SAVE_LIKE_TEXT);
 
-        NOTES = new LinkedHashMap<>();
         NOTES.put(NOTES_SLASH, new String[0]);
         NOTES.put(NOTES_REGEX, new String[0]);
         NOTES.put(NOTES_FQN, new String[0]);
@@ -193,8 +202,8 @@ public final class Help {
         NOTES.put(NOTES_SAVE, NOTES_SAVE_ITEMS);
     }
 
-    private static final String[] UNSAVABLE_OPTIONS =
-            new String[]{HELP, H, REVERT, HEX, OVERWRITE, INIT, REMOVE_OVERRIDES, PATCH, ADD_CLASS, LIST_OVERRIDES_FORMAT};
+    private static final String[] UNSAVABLE_OPTIONS = new String[]{HELP, H, REVERT, HEX, BOOT_CLASS_LOADER, SYSTEM_CLASS_LOADER, OVERWRITE,
+            INIT, REMOVE_OVERRIDES, PATCH, ADD_CLASS, ADD_CLASSES, ADD_JAR, LIST_OVERRIDES_FORMAT};
     private static final String[] SAVABLE_OPTIONS = new String[]{LIST_CLASSES, LIST_CLASSESDETAILS, BYTES, BASE64, DEPS, COMPILE, DECOMPILE,
             API, LIST_JVMS, LIST_PLUGINS, LIST_CLASSESBYTECODEVERSIONS, LIST_CLASSESDETAILSBYTECODEVERSIONS, SEARCH};
 
