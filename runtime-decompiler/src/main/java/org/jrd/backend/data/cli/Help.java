@@ -127,7 +127,9 @@ public final class Help {
                     "\n" + "optional, defaults to " + AgentLoneliness.SINGLE_INSTANCE + "\n" +
                     "You can also specify port where the agent will listen, otherwise default port is calculated.\n" +
                     "JRD keep record of all permanent and session agents, so they can be listed/reused/removed.\n" +
-                    "This list is usually checked for consistency.\n" + "File is " + KnownAgents.JRD_TMP_FILE.toFile().getAbsolutePath();
+                    "This list is still checked for consistency.\n" + "File is " + KnownAgents.JRD_TMP_FILE.toFile().getAbsolutePath() +
+                    "\nThe " + ADD_CLASS + ", " + ADD_CLASSES + ", " + ADD_JAR + " is not " + AgentLiveliness.SESSION + " or " +
+                    AgentLiveliness.PERMANENT + " because there is no way to unload them";
     private static final String DETACH_TEXT = "Will close and detach " + AgentLiveliness.PERMANENT +
             " agent from given localhost:port or url. To detach from PID, a valid mapping in " +
             KnownAgents.JRD_TMP_FILE.toFile().getAbsolutePath() + " file is needed";
