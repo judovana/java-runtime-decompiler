@@ -7,6 +7,7 @@ import org.jrd.backend.core.ClassInfo;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.Config;
 import org.jrd.backend.data.DependenciesReader;
+import org.jrd.backend.data.cli.InMemoryJar;
 import org.jrd.backend.data.cli.Lib;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.frontend.frame.main.GlobalConsole;
@@ -59,6 +60,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -963,72 +965,80 @@ public class BytecodeDecompilerView {
                     } else if (fqn.length == 3) {
                         addJar(Boolean.parseBoolean(fqn[0]), fqn[2], fqn[1]);
                     } else {
-                        addClassesGui(Arrays.copyOfRange(fqn, 4, fqn.length));
+                        addClassesGui(Boolean.parseBoolean(fqn[0]), Arrays.copyOfRange(fqn, 4, fqn.length));
                     }
                 }
             } catch (Exception ex) {
-                Logger.getLogger().log(ex);
+                Logger.getLogger().log(Logger.Level.ALL, ex);
                 JOptionPane.showMessageDialog(BytecodeDecompilerView.this.buffers, ex.getMessage());
             }
         }
-
-        private void addJar(boolean boot, String file, String name) {
-            lastAddedFile = new File(file);
-            new SwingWorker<Void, Void>() {
-                @Override
-                protected Void doInBackground() throws Exception {
-                    try {
-                        String prefix = "SYSTEM";
-                        if (boot) {
-                            prefix = "BOOT";
-                        }
-                        String body = Base64.getEncoder().encodeToString(Files.readAllBytes(lastAddedFile.toPath()));
-                        ActionEvent event = new ActionEvent(this, 7, prefix + "/" + name + " " + body);
-                        addJar.actionPerformed(event);
-                    } catch (Throwable t) {
-                        Logger.getLogger().log(Logger.Level.ALL, t);
-                    }
-                    return null;
-                }
-            }.execute();
-        }
-
-        private void addClassGui(String fqn, String file) {
-            lastAddedFqn = fqn;
-            lastAddedFile = new File(file);
-            new SwingWorker<Void, Void>() {
-                @Override
-                protected Void doInBackground() throws Exception {
-                    try {
-                        String body = Base64.getEncoder().encodeToString(Files.readAllBytes(lastAddedFile.toPath()));
-                        ActionEvent event = new ActionEvent(this, 6, lastAddedFqn + " " + body);
-                        addActionListener.actionPerformed(event);
-                    } catch (Throwable t) {
-                        Logger.getLogger().log(Logger.Level.ALL, t);
-                    }
-                    return null;
-                }
-            }.execute();
-        }
-
-        private void initGui(String fqn) {
-            lastFqn = fqn;
-            new SwingWorker<Void, Void>() {
-                @Override
-                protected Void doInBackground() throws Exception {
-                    try {
-                        ActionEvent event = new ActionEvent(this, 4, lastFqn);
-                        initActionListener.actionPerformed(event);
-                    } catch (Throwable t) {
-                        Logger.getLogger().log(Logger.Level.ALL, t);
-                    }
-                    return null;
-                }
-            }.execute();
-        }
     }
 
-    private void addClassesGui(String[] fqnFilePairs) {
-        System.out.println(fqnFilePairs.length + "");
+    private void addJar(boolean boot, String file, String name) {
+        lastAddedFile = new File(file);
+        new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                try {
+                    String prefix = Lib.getPrefixByBoot(boot);
+                    String body = Base64.getEncoder().encodeToString(Files.readAllBytes(lastAddedFile.toPath()));
+                    ActionEvent event = new ActionEvent(this, 7, prefix + "/" + name + " " + body);
+                    addJar.actionPerformed(event);
+                } catch (Throwable t) {
+                    Logger.getLogger().log(Logger.Level.ALL, t);
+                }
+                return null;
+            }
+        }.execute();
+    }
+
+    private void addClassGui(String fqn, String file) {
+        lastAddedFqn = fqn;
+        lastAddedFile = new File(file);
+        new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                try {
+                    String body = Base64.getEncoder().encodeToString(Files.readAllBytes(lastAddedFile.toPath()));
+                    ActionEvent event = new ActionEvent(this, 6, lastAddedFqn + " " + body);
+                    addActionListener.actionPerformed(event);
+                } catch (Throwable t) {
+                    Logger.getLogger().log(Logger.Level.ALL, t);
+                }
+                return null;
+            }
+        }.execute();
+    }
+
+    private void initGui(String fqn) {
+        lastFqn = fqn;
+        new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                try {
+                    ActionEvent event = new ActionEvent(this, 4, lastFqn);
+                    initActionListener.actionPerformed(event);
+                } catch (Throwable t) {
+                    Logger.getLogger().log(Logger.Level.ALL, t);
+                }
+                return null;
+            }
+        }.execute();
+    }
+
+    private void addClassesGui(boolean boot, String[] fqnFilePairs) throws IOException {
+        Object[] carier = new Object[]{lastAddedFqn, lastAddedFile};
+        try {
+            InMemoryJar imjar = Lib.jarFromClasses(fqnFilePairs, carier);
+            String prefix = Lib.getPrefixByBoot(boot);
+            byte[] jar = imjar.toBytes();
+            String body = Base64.getEncoder().encodeToString(jar);
+            ActionEvent event = new ActionEvent(this, 8, prefix + "/jrd" + (fqnFilePairs.length / 2) + "customClasses.jar" + " " + body);
+            addJar.actionPerformed(event);
+        } finally {
+            lastAddedFqn = (String) carier[0];
+            lastAddedFile = (File) carier[1];
+        }
     }
 }

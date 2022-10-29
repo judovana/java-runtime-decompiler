@@ -167,7 +167,7 @@ public class InitAddClassDialog extends JDialog {
                     new File(addSingleJar.addSingleClassFile.getText()).getAbsolutePath()};
         } else if (tp.getSelectedComponent() == addClasses) {
             List<String> futureArray = new ArrayList<>();
-            futureArray.add("header");
+            futureArray.add(classesBoot.isSelected() + "");
             futureArray.add("header");
             futureArray.add("header");
             futureArray.add("header");

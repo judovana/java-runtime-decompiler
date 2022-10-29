@@ -16,10 +16,12 @@ import org.jrd.frontend.frame.main.decompilerview.DecompilationController;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -413,6 +415,27 @@ public final class Lib {
         int b3 = source[6]; //major
         int b4 = source[7]; //major
         return b4;
+    }
+
+    public static InMemoryJar jarFromClasses(String[] fqnFilePairs, Object[] lastCarier) throws IOException {
+        InMemoryJar imjar = new InMemoryJar();
+        for (int x = 0; x < fqnFilePairs.length; x = x + 2) {
+            String lastAddedFqn = fqnFilePairs[x];
+            File lastAddedFile = new File(fqnFilePairs[x + 1]);
+            lastCarier[0] = lastAddedFqn;
+            lastCarier[1] = lastAddedFile;
+            imjar.addFile(Files.readAllBytes(lastAddedFile.toPath()), lastAddedFqn);
+        }
+        imjar.close();
+        return imjar;
+    }
+
+    public static String getPrefixByBoot(boolean boot) {
+        String prefix = "SYSTEM";
+        if (boot) {
+            prefix = "BOOT";
+        }
+        return prefix;
     }
 
 }
