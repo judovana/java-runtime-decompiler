@@ -12,8 +12,14 @@ public class Main {
         Cli cli = new Cli(allArgs, model);
         if (cli.isGui()) {
             setLookAndFeel();
-            MainFrameView mainView = new MainFrameView();
-            new DecompilationController(mainView, model, cli.shouldBeVerbose());
+            if (cli.isHex()) {
+                //FIXME open jsut hex window(s) in tab pane (copy should work)
+                //undo will need reimplement
+                System.err.println("standalon hex editor nto yet fully enaabled");
+            } else {
+                MainFrameView mainView = new MainFrameView();
+                new DecompilationController(mainView, model, cli.shouldBeVerbose());
+            }
         } else {
             cli.consumeCli();
         }

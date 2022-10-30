@@ -202,6 +202,13 @@ public final class Help {
         NOTES.put(NOTES_FQN, new String[0]);
         NOTES.put(NOTES_PUC, NOTES_PUC_ITEMS);
         NOTES.put(NOTES_SAVE, NOTES_SAVE_ITEMS);
+        NOTES.put(
+                "WARNING: ",
+                new String[]{"JRD wa designed to overwrite existing classed, with all limits hot swap have.",
+                        "And to add new, not yet present, classes.",
+                        "You can try to add add already existing class," +
+                                " to workaround hotswap limitations, but there is no guarantee, such class will be ever picked up."}
+        );
     }
 
     private static final String[] UNSAVABLE_OPTIONS = new String[]{HELP, H, REVERT, HEX, BOOT_CLASS_LOADER, SYSTEM_CLASS_LOADER, OVERWRITE,

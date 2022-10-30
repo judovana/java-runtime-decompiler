@@ -1,7 +1,9 @@
 package org.jrd.frontend.frame.main.decompilerview;
 
-import org.jrd.backend.core.Logger;
-import org.objectweb.asm.ClassReader;
+import org.jrd.frontend.frame.main.decompilerview.verifiers.ClassVerifier;
+import org.jrd.frontend.frame.main.decompilerview.verifiers.FileVerifier;
+import org.jrd.frontend.frame.main.decompilerview.verifiers.GetSetText;
+import org.jrd.frontend.frame.main.decompilerview.verifiers.JarVerifier;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -12,8 +14,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
@@ -21,19 +21,15 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
-import java.util.jar.JarFile;
-import java.util.zip.ZipEntry;
 
 public class InitAddClassDialog extends JDialog {
 
     AddSingleFile addSingleClassPanel;
     AddSingleFile addSingleJar;
 
-    JTextField initFqn;
+    MyJTextField initFqn;
     JCheckBox jarBoot = new JCheckBox("Force to boot loader instead of application one (eg java.lang...)");
 
     JCheckBox classesBoot = new JCheckBox("Force to boot loader instead of application one (eg java.lang...)");
@@ -64,7 +60,7 @@ public class InitAddClassDialog extends JDialog {
 
         init.setLayout(new GridLayout(2, 1));
         init.add(new JLabel("This will send command to VM, to init existing, but not yet used class"));
-        initFqn = new JTextField(lastFqn);
+        initFqn = new MyJTextField(lastFqn);
         init.add(initFqn);
 
         addJar.setLayout(new GridLayout(3, 1));
@@ -152,7 +148,7 @@ public class InitAddClassDialog extends JDialog {
         if (tp.getSelectedComponent() == init) {
             return new String[]{initFqn.getText()};
         } else if (tp.getSelectedComponent() == addClass) {
-            JTextField fakeReply = new JTextField();
+            MyJTextField fakeReply = new MyJTextField();
             boolean verified = new ClassVerifier(addSingleClassPanel.addSingleClassFile, fakeReply).verifySource(null);
             if (!verified) {
                 throw new RuntimeException(fakeReply.getText());
@@ -206,13 +202,13 @@ public class InitAddClassDialog extends JDialog {
     }
 
     private static class AddSingleFile extends JPanel {
-        protected final JTextField addSingleClassFqn;
-        protected final JTextField addSingleClassFile;
+        protected final MyJTextField addSingleClassFqn;
+        protected final MyJTextField addSingleClassFile;
         private final FileVerifier verifier;
 
         AddSingleFile(String lastFqn, String lastFile) {
             this.setLayout(new GridLayout(3, 1));
-            addSingleClassFqn = new JTextField(lastFqn);
+            addSingleClassFqn = new MyJTextField(lastFqn);
             JButton selectSingleClass = new JButton("-ˇ-Select-ˇ-");
             selectSingleClass.addActionListener(new ActionListener() {
                 @Override
@@ -226,7 +222,7 @@ public class InitAddClassDialog extends JDialog {
                     }
                 }
             });
-            addSingleClassFile = new JTextField("");
+            addSingleClassFile = new MyJTextField("");
             this.verifier = createListener();
             addSingleClassFile.getDocument().addDocumentListener(verifier);
             addSingleClassFile.setText(lastFile);
@@ -240,114 +236,13 @@ public class InitAddClassDialog extends JDialog {
         }
     }
 
-    private static class FileVerifier implements DocumentListener {
-        //FIXME replace by interface set/get text only
-        protected final JTextField source;
-        protected final JTextField target;
+    private static class MyJTextField extends JTextField implements GetSetText {
 
-        FileVerifier(JTextField source, JTextField target) {
-            this.source = source;
-            this.target = target;
+        MyJTextField() {
         }
 
-        @Override
-        public void insertUpdate(DocumentEvent documentEvent) {
-            verifySource(documentEvent);
-        }
-
-        @Override
-        public void removeUpdate(DocumentEvent documentEvent) {
-            verifySource(documentEvent);
-        }
-
-        @Override
-        public void changedUpdate(DocumentEvent documentEvent) {
-            verifySource(documentEvent);
-        }
-
-        public boolean verifySource(DocumentEvent documentEvent) {
-            File f = new File(source.getText());
-            if (!f.exists()) {
-                target.setText("file do not exists");
-                return false;
-            } else {
-                if (f.isDirectory()) {
-                    target.setText("is directory");
-                    return false;
-                }
-                target.setText("ok");
-                return true;
-            }
-        }
-    }
-
-    public static class JarVerifier extends FileVerifier {
-
-        public JarVerifier(JTextField source, JTextField target) {
-            super(source, target);
-        }
-
-        public boolean verifySource(DocumentEvent documentEvent) {
-            boolean intermezo = super.verifySource(documentEvent);
-            if (intermezo) {
-                File f = new File(source.getText());
-                try {
-                    JarFile jf = new JarFile(f);
-                    int manfest = 0;
-                    int others = 0;
-                    for (Enumeration list = jf.entries(); list.hasMoreElements();) {
-                        ZipEntry entry = (ZipEntry) list.nextElement();
-                        if (entry.getName().contains("META-INF")) {
-                            manfest++;
-                        } else {
-                            others++;
-                        }
-                    }
-                    target.setText("contains " + others + " classes and " + manfest + " manifest items");
-                    jf.close();
-                    return true;
-                } catch (Exception ex) {
-                    target.setText(ex.getMessage());
-                    Logger.getLogger().log(ex);
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        }
-    }
-
-    private static class ClassVerifier extends FileVerifier {
-
-        ClassVerifier(JTextField source, JTextField target) {
-            super(source, target);
-        }
-
-        public boolean verifySource(DocumentEvent documentEvent) {
-            boolean intermezo = super.verifySource(documentEvent);
-            if (intermezo) {
-                File f = new File(source.getText());
-                byte[] b = null;
-                try {
-                    b = Files.readAllBytes(f.toPath());
-                } catch (Exception ex) {
-                    target.setText(ex.getMessage());
-                    Logger.getLogger().log(ex);
-                }
-                if (b == null || b.length == 0) {
-                    target.setText("is empty");
-                } else {
-                    try {
-                        ClassReader cr = new ClassReader(b);
-                        target.setText(cr.getClassName().replace('/', '.'));
-                        return true;
-                    } catch (Exception ex) {
-                        target.setText(ex.getMessage());
-                        Logger.getLogger().log(ex);
-                    }
-                }
-            }
-            return false;
+        MyJTextField(String s) {
+            super(s);
         }
     }
 

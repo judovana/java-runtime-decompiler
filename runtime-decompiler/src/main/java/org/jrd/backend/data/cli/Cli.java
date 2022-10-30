@@ -33,7 +33,10 @@ import org.jrd.frontend.frame.main.decompilerview.DecompilationController;
 import org.jrd.frontend.frame.main.LoadingDialogProvider;
 import org.jrd.frontend.frame.main.ModelProvider;
 import org.jrd.frontend.frame.main.decompilerview.HexWithControls;
-import org.jrd.frontend.frame.main.decompilerview.InitAddClassDialog;
+import org.jrd.frontend.frame.main.decompilerview.verifiers.ClassVerifier;
+import org.jrd.frontend.frame.main.decompilerview.verifiers.FileVerifier;
+import org.jrd.frontend.frame.main.decompilerview.verifiers.GetSetText;
+import org.jrd.frontend.frame.main.decompilerview.verifiers.JarVerifier;
 import org.jrd.frontend.frame.main.popup.DiffPopup;
 import org.jrd.frontend.frame.main.popup.SingleFilePatch;
 import org.jrd.frontend.frame.overwrite.FileToClassValidator;
@@ -41,7 +44,6 @@ import org.jrd.frontend.frame.overwrite.OverwriteClassDialog;
 import org.jrd.frontend.utility.AgentApiGenerator;
 import org.jrd.frontend.utility.CommonUtils;
 
-import javax.swing.JTextField;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -91,6 +93,10 @@ public class Cli {
 
     public boolean isGui() {
         return filteredArgs.isEmpty();
+    }
+
+    public boolean isHex() {
+        return isHex;
     }
 
     @SuppressWarnings("ModifiedControlVariable") // shifting arguments when parsing
@@ -256,6 +262,10 @@ public class Cli {
                     VmInfo vmInfoAddJar = overwrite(ReceivedType.ADD_JAR);
                     operatedOn.add(vmInfoAddJar);
                     break;
+                case ADD_CLASSES:
+                    VmInfo vmInfoAddClasses = addClasses();
+                    operatedOn.add(vmInfoAddClasses);
+                    break;
                 case INIT:
                     VmInfo vmInfo6 = init();
                     operatedOn.add(vmInfo6);
@@ -340,6 +350,76 @@ public class Cli {
         }
     }
 
+    private VmInfo addClasses() throws IOException {
+        if (filteredArgs.size() < 2) {
+            throw new RuntimeException("Expected two and more arguments - " + Help.ADD_CLASSES_FORMAT1 + " or " + Help.ADD_CLASSES_FORMAT2);
+        }
+        VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
+        boolean allExists = true;
+        for (int x = 2; x < filteredArgs.size(); x++) {
+            if (!new File(filteredArgs.get(x)).exists()) {
+                allExists = false;
+                break;
+            }
+        }
+        if (allExists) {
+            addClassesGuessFqn(vmInfo, filteredArgs.subList(2, filteredArgs.size()));
+        } else {
+            if (Math.abs(filteredArgs.size() - 2/*--addclasses and puc*/) % 2 == 1) {
+                throw new RuntimeException("Expected list of pairs (fqn file)^n - you have odd count");
+            }
+            addClassesEvenWithFqns(vmInfo, filteredArgs.subList(2, filteredArgs.size()));
+        }
+        return vmInfo;
+    }
+
+    private void addClassesGuessFqn(VmInfo vmInfo, List<String> files) throws IOException {
+        List<FqnAndClassToJar> toJar = new ArrayList<>(files.size());
+        for (int x = 0; x < files.size(); x++) {
+            File f = new File(files.get(x));
+            GetSetText r = new GetSetText.DummyGetSet("ok?");
+            boolean b = new FileVerifier(new GetSetText.DummyGetSet(f.getAbsolutePath()), r).verifySource(null);
+            if (!b) {
+                throw new RuntimeException(f.getAbsolutePath() + " " + r.getText());
+            }
+            String fqn = Lib.readClassNameFromClass(Files.readAllBytes(f.toPath()));
+            toJar.add(new FqnAndClassToJar(fqn, f));
+        }
+        addJar(vmInfo, toJar);
+    }
+
+    private void addClassesEvenWithFqns(VmInfo vmInfo, List<String> fqnAndFile) throws IOException {
+        List<FqnAndClassToJar> toJar = new ArrayList<>(fqnAndFile.size() / 2);
+        for (int x = 0; x < fqnAndFile.size(); x = x + 2) {
+            String fqn = fqnAndFile.get(x);
+            File f = new File(fqnAndFile.get(x + 1));
+            GetSetText r = new GetSetText.DummyGetSet("ok?");
+            boolean b = new FileVerifier(new GetSetText.DummyGetSet(f.getAbsolutePath()), r).verifySource(null);
+            if (!b) {
+                throw new RuntimeException(f.getAbsolutePath() + " " + r.getText());
+            }
+            toJar.add(new FqnAndClassToJar(fqn, f));
+        }
+        addJar(vmInfo, toJar);
+    }
+
+    private void addJar(VmInfo vmInfo, List<FqnAndClassToJar> toJar) throws IOException {
+        System.out.println("Adding " + toJar.size() + " classes via jar to remote vm (" + Lib.getPrefixByBoot(isBoot) + ")");
+        InMemoryJar jar = new InMemoryJar();
+        jar.open();
+        for (FqnAndClassToJar item : toJar) {
+            GetSetText fakeInput = new GetSetText.DummyGetSet(item.getFile().getAbsolutePath());
+            GetSetText fakeOutput = new GetSetText.DummyGetSet("ok?");
+            boolean passed = new ClassVerifier(fakeInput, fakeOutput).verifySource(null);
+            if (!passed) {
+                throw new RuntimeException(item.getFile().getAbsolutePath() + " " + fakeOutput.getText());
+            }
+            jar.addFile(Files.readAllBytes(item.getFile().toPath()), item.getFqn());
+        }
+        jar.close();
+        Lib.addJar(vmInfo, isBoot, "custom" + toJar.size() + "classes.jar", Base64.getEncoder().encodeToString(jar.toBytes()), vmManager);
+    }
+
     private void compileWrapper(List<VmInfo> operatedOn) throws Exception {
         VmInfo[] sourceTarget = compileAndUpload(new CompileArguments(filteredArgs, pluginManager, vmManager, true));
         if (sourceTarget[0] != null) {
@@ -391,7 +471,7 @@ public class Cli {
     /* FIXME refactor
      * The refactoring should be simple, there are obvious parts like check all , init all, gather all, compile all, upload all...
      */
-    @SuppressWarnings({"MethodLength", "CyclomaticComplexity", "ExecutableStatementCount", "JavaNCSS"})
+    @SuppressWarnings({"MethodLength", "CyclomaticComplexity", "ExecutableStatementCount", "JavaNCSS", "UnnecessaryParentheses"})
     private VmInfo patch() throws Exception {
         //--patch <puc>  ((plugin)xor(SP/CP)( (-hex) (-R) < patch
         String puc;
@@ -420,11 +500,42 @@ public class Cli {
         List<String> patch = DecompilationController.stdinToStrings();
         List<SingleFilePatch> files = DiffPopup.getIndividualPatches(patch);
         for (SingleFilePatch startEnd : files) {
-            String className = DiffPopup.parseClassFromHeader(patch.get(startEnd.getStart()));
-            String classNameCheck = DiffPopup.parseClassFromHeader(patch.get(startEnd.getStart() + 1));
+            /**
+             * FIXME, add support for:
+             * --- /dev/null
+             * +++ b/runtime-deco
+             * (or in revert:
+             * --- a/runtime-deco
+             * +++ /dev/null
+             * )
+             * via addClasses
+             * FIXME, State clearly that
+             * --- a/runtime-deco
+             * +++ /dev/null
+             * (or in revert
+             * --- /dev/null
+             * +++ b/runtime-deco
+             * )
+             * can not be supported
+             *
+             * todo, compile the +++ b/runtime-deco
+             * with biggest group?
+             * new agent api to get more info from runniong vm?
+             */
+            String header1 = patch.get(startEnd.getStart());
+            String header2 = patch.get(startEnd.getStart() + 1);
+            String className = DiffPopup.parseClassFromHeader(header1);
+            String classNameCheck = DiffPopup.parseClassFromHeader(header2);
             if (!className.equals(classNameCheck)) {
+                if ((!isRevert && DiffPopup.isRemoveFile(header1) && DiffPopup.isAddDevNull(header2)) ||
+                        (isRevert && DiffPopup.isAddFile(header2) && DiffPopup.isRemoveDevNull(header1))) {
+                    throw new RuntimeException(
+                            "Removal of files can not be supported. Jvm can not unload: :\n" + patch.get(startEnd.getStart()) + "\n" +
+                                    patch.get(startEnd.getStart() + 1) + (isRevert ? "\nrevert on" : "")
+                    );
+                }
                 throw new RuntimeException(
-                        "Invalid file header for:\n" + patch.get(startEnd.getStart()) + "\n" + patch.get(startEnd.getEnd() + 1)
+                        "Invalid file header for:\n" + patch.get(startEnd.getStart()) + "\n" + patch.get(startEnd.getStart() + 1)
                 );
             }
             Lib.initClass(vmInfo, vmManager, className, System.out);
@@ -661,9 +772,9 @@ public class Cli {
                     Logger.getLogger().log(Logger.Level.ALL, "ERROR: " + r.getMessage());
                 }
             } else {
-                JTextField fakeInput = new JTextField(newBytecodeFile);
-                JTextField fakeOutput = new JTextField();
-                boolean passed = new InitAddClassDialog.JarVerifier(fakeInput, fakeOutput).verifySource(null);
+                GetSetText fakeInput = new GetSetText.DummyGetSet(newBytecodeFile);
+                GetSetText fakeOutput = new GetSetText.DummyGetSet("ok?");
+                boolean passed = new JarVerifier(fakeInput, fakeOutput).verifySource(null);
                 if (!passed) {
                     throw new RuntimeException(fakeOutput.getText());
                 }

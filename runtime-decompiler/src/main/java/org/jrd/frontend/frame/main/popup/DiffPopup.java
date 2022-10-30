@@ -87,6 +87,22 @@ public class DiffPopup extends JPopupMenu {
         return clazz;
     }
 
+    public static boolean isAddDevNull(String line) {
+        return line.startsWith("+++ ") && line.endsWith("/dev/null");
+    }
+
+    public static boolean isRemoveDevNull(String line) {
+        return line.startsWith("--- ") && line.endsWith("/dev/null");
+    }
+
+    public static boolean isAddFile(String line) {
+        return line.startsWith("+++ ") && !line.endsWith("/dev/null");
+    }
+
+    public static boolean isRemoveFile(String line) {
+        return line.startsWith("--- ") && !line.endsWith("/dev/null");
+    }
+
     private JMenuItem createPatchAction(int id, final LinesProvider.LinesFormat suffix) {
         LinesProvider component = (LinesProvider) components[id];
         JMenuItem item = new JMenuItem(component.getName() + " " + (suffix == LinesProvider.LinesFormat.CHARS ? "" : " " + suffix));

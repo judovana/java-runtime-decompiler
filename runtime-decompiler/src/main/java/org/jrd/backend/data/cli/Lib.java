@@ -31,6 +31,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.objectweb.asm.ClassReader;
 
 public final class Lib {
 
@@ -443,6 +444,11 @@ public final class Lib {
             prefix = CliSwitches.BOOT_CLASS_LOADER;
         }
         return prefix;
+    }
+
+    public static String readClassNameFromClass(byte[] b) {
+        ClassReader cr = new ClassReader(b);
+        return cr.getClassName().replace('/', '.');
     }
 
 }

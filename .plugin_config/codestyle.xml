@@ -43,7 +43,7 @@
 
     <!-- Size violation checks, see https://checkstyle.org/config_sizes.html -->
     <module name="FileLength">
-        <property name="max" value="1210"/>
+        <property name="max" value="1400"/>
     </module>
     <module name="LineLength">
         <property name="max" value="140"/> <!-- Seriously, 21st century, all monitors are somewhere around 2000px of width... -->
