@@ -1,4 +1,4 @@
-package org.jrd.backend.data.cli;
+package org.jrd.backend.data.cli.utils;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jrd.backend.decompiling.DecompilerWrapper;
@@ -8,7 +8,7 @@ public class PluginWithOptions {
     private final DecompilerWrapper decompiler;
     private final String[] options;
 
-    PluginWithOptions(DecompilerWrapper decompiler, String[] options) {
+    public PluginWithOptions(DecompilerWrapper decompiler, String[] options) {
         this.decompiler = decompiler;
         this.options = options;
     }

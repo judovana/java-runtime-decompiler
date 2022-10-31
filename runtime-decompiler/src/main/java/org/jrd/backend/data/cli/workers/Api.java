@@ -4,7 +4,7 @@ import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
 import org.jrd.backend.data.cli.CliUtils;
 import org.jrd.backend.data.cli.Help;
-import org.jrd.backend.data.cli.Saving;
+import org.jrd.backend.data.cli.utils.Saving;
 import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.utility.AgentApiGenerator;
 

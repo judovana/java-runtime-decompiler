@@ -6,8 +6,8 @@ import org.jrd.backend.data.VmManager;
 import org.jrd.backend.data.cli.CliUtils;
 import org.jrd.backend.data.cli.Help;
 import org.jrd.backend.data.cli.Lib;
-import org.jrd.backend.data.cli.PluginWithOptions;
-import org.jrd.backend.data.cli.Saving;
+import org.jrd.backend.data.cli.utils.PluginWithOptions;
+import org.jrd.backend.data.cli.utils.Saving;
 import org.jrd.backend.decompiling.PluginManager;
 
 import java.io.File;

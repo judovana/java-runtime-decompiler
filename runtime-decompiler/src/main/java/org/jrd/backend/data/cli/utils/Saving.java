@@ -1,4 +1,4 @@
-package org.jrd.backend.data.cli;
+package org.jrd.backend.data.cli.utils;
 
 import org.jrd.backend.core.Logger;
 import org.jrd.frontend.utility.CommonUtils;
@@ -15,7 +15,7 @@ public class Saving implements CommonUtils.StatusKeeper {
     private final String as;
     private final String like;
 
-    Saving(String as, String like) {
+    public Saving(String as, String like) {
         this.as = as;
         if (like == null) {
             this.like = DEFAULT;

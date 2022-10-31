@@ -1,17 +1,18 @@
-package org.jrd.backend.data.cli;
+package org.jrd.backend.data.cli.utils;
 
 import org.jrd.backend.core.agentstore.AgentLiveliness;
 import org.jrd.backend.core.agentstore.AgentLoneliness;
 import org.jrd.backend.core.Logger;
+import org.jrd.backend.data.cli.Help;
 
 import java.util.List;
 import java.util.Optional;
 
 public final class AgentConfig {
 
-    final AgentLoneliness loneliness;
-    final Optional<Integer> port;
-    final AgentLiveliness liveliness;
+    private final AgentLoneliness loneliness;
+    private final Optional<Integer> port;
+    private final AgentLiveliness liveliness;
 
     public AgentConfig() {
         this(AgentLoneliness.SINGLE_INSTANCE, AgentLiveliness.SESSION, Optional.empty());
@@ -104,4 +105,5 @@ public final class AgentConfig {
     public Optional<Integer> getPort() {
         return port;
     }
+
 }

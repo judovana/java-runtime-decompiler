@@ -7,7 +7,7 @@ import org.jrd.backend.data.VmManager;
 import org.jrd.backend.data.cli.CliUtils;
 import org.jrd.backend.data.cli.Help;
 import org.jrd.backend.data.cli.Lib;
-import org.jrd.backend.data.cli.ReceivedType;
+import org.jrd.backend.data.cli.utils.ReceivedType;
 import org.jrd.frontend.frame.main.decompilerview.DecompilationController;
 import org.jrd.frontend.frame.main.decompilerview.verifiers.GetSetText;
 import org.jrd.frontend.frame.main.decompilerview.verifiers.JarVerifier;

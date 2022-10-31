@@ -1,6 +1,6 @@
 package org.jrd.backend.data.cli.workers;
 
-import org.jrd.backend.data.cli.Saving;
+import org.jrd.backend.data.cli.utils.Saving;
 import org.jrd.frontend.frame.main.decompilerview.HexWithControls;
 import org.jrd.frontend.utility.CommonUtils;
 

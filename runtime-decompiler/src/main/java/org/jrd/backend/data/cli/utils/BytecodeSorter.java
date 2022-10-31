@@ -1,4 +1,4 @@
-package org.jrd.backend.data.cli;
+package org.jrd.backend.data.cli.utils;
 
 import java.util.HashMap;
 import java.util.Map;

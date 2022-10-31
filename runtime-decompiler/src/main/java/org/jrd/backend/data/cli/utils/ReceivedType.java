@@ -1,4 +1,4 @@
-package org.jrd.backend.data.cli;
+package org.jrd.backend.data.cli.utils;
 
 public enum ReceivedType {
     OVERWRITE_CLASS,

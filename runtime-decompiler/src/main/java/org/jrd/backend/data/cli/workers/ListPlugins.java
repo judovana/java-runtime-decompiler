@@ -2,7 +2,7 @@ package org.jrd.backend.data.cli.workers;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jrd.backend.data.cli.CliUtils;
-import org.jrd.backend.data.cli.Saving;
+import org.jrd.backend.data.cli.utils.Saving;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
 

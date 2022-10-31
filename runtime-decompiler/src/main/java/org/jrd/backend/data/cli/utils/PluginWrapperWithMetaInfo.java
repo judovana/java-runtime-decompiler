@@ -1,4 +1,4 @@
-package org.jrd.backend.data.cli;
+package org.jrd.backend.data.cli.utils;
 
 public class PluginWrapperWithMetaInfo {
     private final PluginWithOptions wrapper;

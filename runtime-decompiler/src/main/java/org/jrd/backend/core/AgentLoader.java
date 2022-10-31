@@ -5,7 +5,7 @@ import com.sun.tools.attach.AgentLoadException;
 import com.sun.tools.attach.AttachNotSupportedException;
 
 import org.jrd.backend.communication.InstallDecompilerAgentImpl;
-import org.jrd.backend.data.cli.AgentConfig;
+import org.jrd.backend.data.cli.utils.AgentConfig;
 
 import java.io.IOException;
 import java.net.ServerSocket;

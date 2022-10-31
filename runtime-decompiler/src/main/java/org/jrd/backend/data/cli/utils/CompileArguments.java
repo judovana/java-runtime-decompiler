@@ -1,4 +1,4 @@
-package org.jrd.backend.data.cli;
+package org.jrd.backend.data.cli.utils;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.github.mkoncek.classpathless.api.ClasspathlessCompiler;
@@ -6,6 +6,9 @@ import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
+import org.jrd.backend.data.cli.CliSwitches;
+import org.jrd.backend.data.cli.CliUtils;
+import org.jrd.backend.data.cli.Lib;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.overwrite.OverwriteClassDialog;

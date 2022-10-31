@@ -3,7 +3,7 @@ package org.jrd.backend.data.cli.workers;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
-import org.jrd.backend.data.cli.Saving;
+import org.jrd.backend.data.cli.utils.Saving;
 
 import java.io.IOException;
 import java.io.PrintStream;

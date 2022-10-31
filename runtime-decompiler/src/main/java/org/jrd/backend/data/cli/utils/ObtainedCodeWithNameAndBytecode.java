@@ -1,4 +1,4 @@
-package org.jrd.backend.data.cli;
+package org.jrd.backend.data.cli.utils;
 
 public class ObtainedCodeWithNameAndBytecode {
     private final String name;

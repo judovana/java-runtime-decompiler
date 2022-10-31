@@ -5,6 +5,7 @@ import org.jrd.backend.core.agentstore.AgentLoneliness;
 import org.jrd.backend.core.agentstore.KnownAgents;
 import org.jrd.backend.data.Directories;
 import org.jrd.backend.data.MetadataProperties;
+import org.jrd.backend.data.cli.utils.Saving;
 import org.jrd.frontend.frame.main.GlobalConsole;
 
 import java.io.File;
@@ -114,7 +115,7 @@ public final class Help {
     private static final String INIT_TEXT = "Try to initialize a class in a running JVM (has no effect in FS VMs). " +
             "Because class loading is lazy, the class you need might be missing, eg. java.lang.Override.";
     static final String ATTACH_TEXT = "Will only attach the agent to selected pid. Prints out the port for future usage.";
-    static final String AGENT_TEXT =
+    public static final String AGENT_TEXT =
             "Control how agent is attached. Have sense only in operations attaching to PID. Possible values of " +
                     AgentLiveliness.class.getSimpleName() + ":\n" +
                     Arrays.stream(AgentLiveliness.values()).map(i -> "  " + i.toString() + " - " + i.toHelp())

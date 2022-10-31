@@ -3,7 +3,7 @@ package org.jrd.backend.data.cli.workers;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
 import org.jrd.backend.data.cli.CliUtils;
-import org.jrd.backend.data.cli.FqnAndClassToJar;
+import org.jrd.backend.data.cli.utils.FqnAndClassToJar;
 import org.jrd.backend.data.cli.Help;
 import org.jrd.backend.data.cli.InMemoryJar;
 import org.jrd.backend.data.cli.Lib;
