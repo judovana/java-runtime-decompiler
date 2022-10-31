@@ -7,13 +7,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 
-class Saving implements CommonUtils.StatusKeeper {
-    static final String DEFAULT = "default";
-    static final String EXACT = "exact";
-    static final String FQN = "fqn";
-    static final String DIR = "dir";
-    final String as;
-    final String like;
+public class Saving implements CommonUtils.StatusKeeper {
+    public static final String DEFAULT = "default";
+    public static final String EXACT = "exact";
+    public static final String FQN = "fqn";
+    public static final String DIR = "dir";
+    private final String as;
+    private final String like;
 
     Saving(String as, String like) {
         this.as = as;
@@ -25,7 +25,7 @@ class Saving implements CommonUtils.StatusKeeper {
     }
 
     public boolean shouldSave() {
-        return as != null;
+        return getAs() != null;
     }
 
     @Override
@@ -44,7 +44,7 @@ class Saving implements CommonUtils.StatusKeeper {
 
     @SuppressWarnings("ReturnCount") // returns in switch cases
     public int toInt(String suffix) {
-        switch (like) {
+        switch (getLike()) {
             case FQN:
                 return CommonUtils.FULLY_QUALIFIED_NAME;
             case EXACT:
@@ -60,11 +60,19 @@ class Saving implements CommonUtils.StatusKeeper {
                 }
                 return CommonUtils.CUSTOM_NAME;
             default:
-                throw new RuntimeException("Unknown saving type: " + like + ". Allowed are: " + FQN + "," + DIR + "," + EXACT);
+                throw new RuntimeException("Unknown saving type: " + getLike() + ". Allowed are: " + FQN + "," + DIR + "," + EXACT);
         }
     }
 
     public PrintStream openPrintStream() throws IOException {
-        return new PrintStream(new FileOutputStream(this.as), true, "UTF-8");
+        return new PrintStream(new FileOutputStream(this.getAs()), true, "UTF-8");
+    }
+
+    public String getAs() {
+        return as;
+    }
+
+    public String getLike() {
+        return like;
     }
 }

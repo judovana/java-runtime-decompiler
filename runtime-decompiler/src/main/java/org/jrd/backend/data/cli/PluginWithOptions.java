@@ -1,8 +1,9 @@
 package org.jrd.backend.data.cli;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 
-class PluginWithOptions {
+public class PluginWithOptions {
 
     private final DecompilerWrapper decompiler;
     private final String[] options;
@@ -12,11 +13,13 @@ class PluginWithOptions {
         this.options = options;
     }
 
-    DecompilerWrapper getDecompiler() {
+    @SuppressFBWarnings("EI_EXPOSE_REP")
+    public DecompilerWrapper getDecompiler() {
         return decompiler;
     }
 
-    String[] getOptions() {
+    @SuppressFBWarnings("EI_EXPOSE_REP")
+    public String[] getOptions() {
         return options;
     }
 }

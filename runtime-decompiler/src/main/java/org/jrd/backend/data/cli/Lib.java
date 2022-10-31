@@ -121,7 +121,7 @@ public final class Lib {
         return decompiler;
     }
 
-    static List<ClassInfo> obtainFilteredClasses(
+    public static List<ClassInfo> obtainFilteredClasses(
             VmInfo vmInfo, VmManager vmManager, List<Pattern> filter, boolean details, Optional<String> search
     ) throws IOException {
         List<ClassInfo> allClasses;
@@ -153,7 +153,7 @@ public final class Lib {
         return filteredClasses;
     }
 
-    static int[] getByteCodeVersions(ClassInfo clazz, VmInfo vmInfo, VmManager vmManager) {
+    public static int[] getByteCodeVersions(ClassInfo clazz, VmInfo vmInfo, VmManager vmManager) {
         VmDecompilerStatus result = obtainClass(vmInfo, clazz.getName(), vmManager);
         byte[] source = Base64.getDecoder().decode(result.getLoadedClassBytes());
         int bytecodeVersion = Lib.getByteCodeVersion(source);

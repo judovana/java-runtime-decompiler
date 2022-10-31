@@ -19,19 +19,22 @@ import org.jrd.backend.core.DecompilerRequestReceiver;
 import org.jrd.backend.core.agentstore.AgentLiveliness;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
-import org.jrd.backend.core.agentstore.KnownAgent;
-import org.jrd.backend.core.agentstore.KnownAgents;
 import org.jrd.backend.data.Config;
-import org.jrd.backend.data.DependenciesReader;
 import org.jrd.backend.data.MetadataProperties;
 import org.jrd.backend.data.Model;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
-import org.jrd.backend.decompiling.DecompilerWrapper;
+import org.jrd.backend.data.cli.workers.Classes;
+import org.jrd.backend.data.cli.workers.Decompile;
+import org.jrd.backend.data.cli.workers.InitClass;
+import org.jrd.backend.data.cli.workers.ListAgents;
+import org.jrd.backend.data.cli.workers.ListJvms;
+import org.jrd.backend.data.cli.workers.ListPlugins;
+import org.jrd.backend.data.cli.workers.Overrides;
+import org.jrd.backend.data.cli.workers.PrintBytes;
+import org.jrd.backend.data.cli.workers.Shared;
 import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.main.decompilerview.DecompilationController;
-import org.jrd.frontend.frame.main.LoadingDialogProvider;
-import org.jrd.frontend.frame.main.ModelProvider;
 import org.jrd.frontend.frame.main.decompilerview.HexWithControls;
 import org.jrd.frontend.frame.main.decompilerview.verifiers.ClassVerifier;
 import org.jrd.frontend.frame.main.decompilerview.verifiers.FileVerifier;
@@ -45,11 +48,8 @@ import org.jrd.frontend.utility.AgentApiGenerator;
 import org.jrd.frontend.utility.CommonUtils;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -61,15 +61,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.jrd.backend.data.cli.CliSwitches.*;
 
-/*
-FIXME, refactor - each case item must go to its own class
-Once done, reset FileLength in codestyle.xml to 1000 or less
- */
 public class Cli {
 
     private final List<String> filteredArgs;
@@ -196,51 +191,51 @@ public class Cli {
         try {
             switch (operation) {
                 case LIST_JVMS:
-                    listJvms();
+                    new ListJvms(filteredArgs, saving, vmManager).listJvms();
                     break;
                 case LIST_PLUGINS:
-                    listPlugins();
+                    new ListPlugins(filteredArgs, saving, pluginManager).listPlugins();
                     break;
                 case LIST_AGENTS:
-                    List<VmInfo> vmInfos = listAgents(filteredArgs);
+                    List<VmInfo> vmInfos = new ListAgents(isVerbose, vmManager).listAgents(filteredArgs);
                     operatedOn.addAll(vmInfos);
                     break;
                 case LIST_OVERRIDES:
-                    VmInfo vmInfo0 = listOverrides();
+                    VmInfo vmInfo0 = new Overrides(filteredArgs, vmManager).listOverrides();
                     operatedOn.add(vmInfo0);
                     break;
                 case REMOVE_OVERRIDES:
-                    VmInfo vmInfo00 = removeOverrides();
+                    VmInfo vmInfo00 = new Overrides(filteredArgs, vmManager).removeOverrides();
                     operatedOn.add(vmInfo00);
                     break;
                 case SEARCH:
-                    VmInfo vmInfoSearch = searchClasses();
+                    VmInfo vmInfoSearch = new Classes(filteredArgs, vmManager, isHex, saving).searchClasses();
                     operatedOn.add(vmInfoSearch);
                     break;
                 case LIST_CLASSES:
-                    VmInfo vmInfo1 = listClasses(false, false, Optional.empty());
+                    VmInfo vmInfo1 = new Classes(filteredArgs, vmManager, isHex, saving).listClasses(false, false, Optional.empty());
                     operatedOn.add(vmInfo1);
                     break;
                 case LIST_CLASSESDETAILS:
-                    VmInfo vmInfo2 = listClasses(true, false, Optional.empty());
+                    VmInfo vmInfo2 = new Classes(filteredArgs, vmManager, isHex, saving).listClasses(true, false, Optional.empty());
                     operatedOn.add(vmInfo2);
                     break;
                 case LIST_CLASSESBYTECODEVERSIONS:
-                    VmInfo vmInfo11 = listClasses(false, true, Optional.empty());
+                    VmInfo vmInfo11 = new Classes(filteredArgs, vmManager, isHex, saving).listClasses(false, true, Optional.empty());
                     operatedOn.add(vmInfo11);
                     break;
                 case LIST_CLASSESDETAILSBYTECODEVERSIONS:
-                    VmInfo vmInfo21 = listClasses(true, true, Optional.empty());
+                    VmInfo vmInfo21 = new Classes(filteredArgs, vmManager, isHex, saving).listClasses(true, true, Optional.empty());
                     operatedOn.add(vmInfo21);
                     break;
                 case BYTES:
                 case BASE64:
                 case DEPS:
-                    VmInfo vmInfo3 = printBytes(operation);
+                    VmInfo vmInfo3 = new PrintBytes(isHex, filteredArgs, saving, vmManager, pluginManager).printBytes(operation);
                     operatedOn.add(vmInfo3);
                     break;
                 case DECOMPILE:
-                    VmInfo vmInfo4 = decompile();
+                    VmInfo vmInfo4 = new Decompile(isHex, filteredArgs, saving, vmManager, pluginManager).decompile();
                     operatedOn.add(vmInfo4);
                     break;
                 case COMPILE:
@@ -267,7 +262,7 @@ public class Cli {
                     operatedOn.add(vmInfoAddClasses);
                     break;
                 case INIT:
-                    VmInfo vmInfo6 = init();
+                    VmInfo vmInfo6 = new InitClass(filteredArgs, vmManager).init();
                     operatedOn.add(vmInfo6);
                     break;
                 case ATTACH:
@@ -438,36 +433,6 @@ public class Cli {
         }
     }
 
-    private List<VmInfo> listAgents(List<String> params) {
-        boolean versions = false;
-        if (params.size() > 1) {
-            String filteredSecondParam = CliUtils.cleanParameter(params.get(1));
-            versions = filteredSecondParam.equals(VERSIONS);
-        }
-        return listAgents(versions);
-    }
-
-    private List<VmInfo> listAgents(boolean versions) {
-        List<VmInfo> connections = new ArrayList<>();
-        for (KnownAgent agent : KnownAgents.getInstance().getAgents()) {
-            System.out.println(agent.toPrint());
-            if (versions) {
-                try {
-                    Lib.HandhshakeResult vmInfo = Lib.handshakeAgent(agent, vmManager);
-                    System.out.println("  - " + vmInfo.getAgentVersion());
-                    System.out.println("  - " + vmInfo.getDiff());
-                    connections.add(vmInfo.getVmInfo());
-                } catch (Exception ex) {
-                    if (isVerbose) {
-                        ex.printStackTrace();
-                    }
-                    System.out.println("  - unknown version. Most likely old agent. Should work for most cases though.");
-                }
-            }
-        }
-        return connections;
-    }
-
     /* FIXME refactor
      * The refactoring should be simple, there are obvious parts like check all , init all, gather all, compile all, upload all...
      */
@@ -519,7 +484,7 @@ public class Cli {
              * can not be supported
              *
              * todo, compile the +++ b/runtime-deco
-             * with biggest group?
+             * with biggest group? By default?
              * new agent api to get more info from runniong vm?
              */
             String header1 = patch.get(startEnd.getStart());
@@ -825,7 +790,7 @@ public class Cli {
     private VmInfo api() throws Exception {
         PrintStream out = System.out;
         try {
-            if (saving != null && saving.as != null) {
+            if (saving != null && saving.getAs() != null) {
                 out = saving.openPrintStream();
             }
 
@@ -839,20 +804,10 @@ public class Cli {
             out.flush();
             return vmInfo;
         } finally {
-            if (saving != null && saving.as != null) {
+            if (saving != null && saving.getAs() != null) {
                 out.close();
             }
         }
-    }
-
-    private VmInfo init() throws Exception {
-        if (filteredArgs.size() != 3) {
-            throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.INIT_FORMAT + "'.");
-        }
-        String fqn = filteredArgs.get(2);
-        VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
-        Lib.initClass(vmInfo, vmManager, fqn, System.out);
-        return vmInfo;
     }
 
     private VmInfo attach() throws Exception {
@@ -895,7 +850,7 @@ public class Cli {
         boolean shouldUpload = shouldUpload();
         VmInfo targetVm = null;
         if (shouldUpload) {
-            targetVm = getVmInfo(saving.as);
+            targetVm = getVmInfo(saving.getAs());
         }
         Map<Integer, List<IdentifiedSource>> sortedSources = new HashMap<>();
         {
@@ -971,7 +926,7 @@ public class Cli {
             }
 
             for (IdentifiedBytecode bytecode : allBytecode) {
-                outOrSave(bytecode.getClassIdentifier().getFullName(), ".class", bytecode.getFile(), true);
+                new Shared(isHex, saving).outOrSave(bytecode.getClassIdentifier().getFullName(), ".class", bytecode.getFile(), true);
             }
         }
         if (provider.getVmInfo().equals(targetVm)) {
@@ -1010,7 +965,7 @@ public class Cli {
     private boolean shouldUpload() {
         if (saving.shouldSave()) {
             try {
-                VmInfo.Type t = CliUtils.guessType(saving.as);
+                VmInfo.Type t = CliUtils.guessType(saving.getAs());
                 if (t == VmInfo.Type.LOCAL || t == VmInfo.Type.REMOTE) {
                     return true;
                 }
@@ -1021,264 +976,6 @@ public class Cli {
         return false;
     }
 
-    private VmInfo decompile() throws Exception {
-        if (filteredArgs.size() < 4) {
-            throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.DECOMPILE_FORMAT + "'.");
-        }
-
-        VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
-        String plugin = filteredArgs.get(2);
-        int failCount = 0;
-        int classCount = 0;
-
-        for (int i = 3; i < filteredArgs.size(); i++) {
-            String clazzRegex = filteredArgs.get(i);
-            List<String> classes =
-                    Lib.obtainFilteredClasses(vmInfo, vmManager, Arrays.asList(Pattern.compile(clazzRegex)), false, Optional.empty())
-                            .stream().map(a -> a.getName()).collect(Collectors.toList());
-
-            for (String clazz : classes) {
-                classCount++;
-                VmDecompilerStatus result = Lib.obtainClass(vmInfo, clazz, vmManager);
-                byte[] bytes = Base64.getDecoder().decode(result.getLoadedClassBytes());
-
-                if (new File(plugin).exists() && plugin.toLowerCase().endsWith(".json")) {
-                    throw new RuntimeException("Plugin loading directly from file is not implemented.");
-                }
-
-                PluginWithOptions pwo = Lib.getDecompilerFromString(plugin, pluginManager);
-
-                if (pwo.getDecompiler() != null) {
-                    String decompilationResult =
-                            pluginManager.decompile(pwo.getDecompiler(), clazz, bytes, pwo.getOptions(), vmInfo, vmManager);
-
-                    if (!outOrSave(clazz, ".java", decompilationResult)) {
-                        failCount++;
-                    }
-                }
-            }
-        }
-        returnNonzero(failCount, classCount);
-        return vmInfo;
-    }
-
-    private void returnNonzero(int failures, int total) {
-        if (total == 0) {
-            throw new RuntimeException("No class found to save.");
-        }
-        if (failures > 0) {
-            throw new RuntimeException("Failed to save " + failures + "classes.");
-        }
-    }
-
-    private boolean outOrSave(String name, String extension, String s) throws IOException {
-        return outOrSave(name, extension, s.getBytes(StandardCharsets.UTF_8), false);
-    }
-
-    private boolean outOrSave(String name, String extension, byte[] body, boolean forceBytes) throws IOException {
-        if (saving.shouldSave()) {
-            return CommonUtils.saveByGui(saving.as, saving.toInt(extension), extension, saving, name, body);
-        } else {
-            if (forceBytes) {
-                if (isHex) {
-                    System.out.println(HexWithControls.bytesToStrings(body).stream().collect(Collectors.joining("\n")));
-                } else {
-                    System.out.write(body);
-                }
-            } else {
-                System.out.println(new String(body, StandardCharsets.UTF_8));
-            }
-            return true;
-        }
-    }
-
-    private VmInfo printBytes(String operation) throws Exception {
-        if (filteredArgs.size() < 3) {
-            throw new IllegalArgumentException("Incorrect argument count! Please use '" + (Help.BASE_SHARED_FORMAT) + "'.");
-        }
-        final CompileArguments args;
-        if (operation.equals(DEPS)) {
-            List nwArgs = new ArrayList<>(filteredArgs);
-            nwArgs.set(0, CP); //faking a bit
-            nwArgs.add(0, "dummy"); //faking a bit more
-            args = new CompileArguments(nwArgs, pluginManager, vmManager, false);
-        } else {
-            args = null;
-        }
-        VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
-        int failCount = 0;
-        int classCount = 0;
-
-        for (int i = 2; i < filteredArgs.size(); i++) {
-            String clazzRegex = filteredArgs.get(i);
-            List<String> classes =
-                    Lib.obtainFilteredClasses(vmInfo, vmManager, Arrays.asList(Pattern.compile(clazzRegex)), false, Optional.empty())
-                            .stream().map(a -> a.getName()).collect(Collectors.toList());
-
-            for (String clazz : classes) {
-                classCount++;
-                VmDecompilerStatus result = Lib.obtainClass(vmInfo, clazz, vmManager);
-                byte[] bytes;
-                if (operation.equals(BYTES)) {
-                    bytes = Base64.getDecoder().decode(result.getLoadedClassBytes());
-                } else if (operation.equals(DEPS)) {
-                    Collection<String> deps = new DependenciesReader(new ModelProvider() {
-                        @Override
-                        public VmInfo getVmInfo() {
-                            return vmInfo;
-                        }
-
-                        @Override
-                        public VmManager getVmManager() {
-                            return vmManager;
-                        }
-
-                        @Override
-                        public RuntimeCompilerConnector.JrdClassesProvider getClassesProvider() {
-                            return args.getClassesProvider();
-                        }
-                    }, new LoadingDialogProvider() {
-                    }).resolve(clazz, result.getLoadedClassBytes());
-                    bytes = deps.stream().collect(Collectors.joining("\n")).getBytes(StandardCharsets.UTF_8);
-                } else {
-                    bytes = result.getLoadedClassBytes().getBytes(StandardCharsets.UTF_8);
-                }
-
-                if (!outOrSave(clazz, ".class", bytes, operation.equals(BYTES))) {
-                    failCount++;
-                }
-            }
-        }
-        returnNonzero(failCount, classCount);
-        return vmInfo;
-    }
-
-    private VmInfo searchClasses() throws IOException {
-        if (filteredArgs.size() != 5) {
-            throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.SEARCH_FORMAT + "'.");
-        }
-        boolean details = Boolean.parseBoolean(filteredArgs.get(4));
-        String substring = filteredArgs.get(3);
-        filteredArgs.remove(4);
-        filteredArgs.remove(3);
-        return listClasses(details, isHex, Optional.of(substring));
-    }
-
-    private VmInfo listClasses(boolean details, boolean bytecodeVersion, Optional<String> search) throws IOException {
-        if (filteredArgs.size() < 2) {
-            throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.LIST_CLASSES_FORMAT + "'.");
-        }
-
-        VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
-        List<Pattern> classRegexes = new ArrayList<>(filteredArgs.size() - 1);
-
-        if (filteredArgs.size() == 2) {
-            classRegexes.add(Pattern.compile(".*"));
-        } else {
-            for (int i = 2; i < filteredArgs.size(); i++) {
-                classRegexes.add(Pattern.compile(filteredArgs.get(i)));
-            }
-        }
-        listClassesFromVmInfo(vmInfo, classRegexes, details, bytecodeVersion, search);
-        return vmInfo;
-    }
-
-    private void listClassesFromVmInfo(
-            VmInfo vmInfo, List<Pattern> filter, boolean details, boolean bytecodeVersion, Optional<String> search
-    ) throws IOException {
-        List<ClassInfo> classes = Lib.obtainFilteredClasses(vmInfo, vmManager, filter, details, search);
-        if (saving.shouldSave()) {
-            if (saving.like.equals(Saving.DEFAULT) || saving.like.equals(Saving.EXACT)) {
-                try (PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(saving.as), StandardCharsets.UTF_8))) {
-                    for (ClassInfo clazz : classes) {
-                        String bytecodes = getBytecodesString(vmInfo, details, bytecodeVersion, clazz, false);
-                        pw.println(clazz.toPrint(details) + bytecodes);
-                    }
-                }
-            } else {
-                throw new RuntimeException(
-                        "Only '" + Saving.DEFAULT + "' and '" + Saving.EXACT + "' are allowed for class listing saving."
-                );
-            }
-        } else {
-            for (ClassInfo clazz : classes) {
-                String bytecodes = getBytecodesString(vmInfo, details, bytecodeVersion, clazz, false);
-                System.out.println(clazz.toPrint(details) + bytecodes);
-            }
-        }
-    }
-
-    private String getBytecodesString(VmInfo vmInfo, boolean details, boolean bytecodeVersion, ClassInfo clazz, boolean doThrow) {
-        String bytecodes = "";
-        if (bytecodeVersion) {
-            try {
-                int[] versions = Lib.getByteCodeVersions(clazz, vmInfo, vmManager);
-                //double space metters
-                bytecodes = "  JDK " + versions[1] + " (bytecode: " + versions[0] + ")";
-            } catch (Exception ex) {
-                bytecodes = "  bytecode level unknown";
-                if (doThrow) {
-                    throw new RuntimeException(bytecodes, ex);
-                }
-            }
-            if (details) {
-                bytecodes = "\n" + bytecodes;
-            }
-        }
-        return bytecodes;
-    }
-
-    @SuppressFBWarnings(value = "OS_OPEN_STREAM", justification = "The stream is clsoed as conditionally as is created")
-    private void listPlugins() throws IOException {
-        if (filteredArgs.size() != 1) {
-            throw new RuntimeException(LIST_PLUGINS + " does not expect arguments.");
-        }
-
-        PrintStream out = System.out;
-        try {
-            if (saving != null && saving.as != null) {
-                out = saving.openPrintStream();
-            }
-
-            for (DecompilerWrapper dw : pluginManager.getWrappers()) {
-                out.printf(
-                        "%s %s/%s - %s%n", dw.getName(), dw.getScope(), CliUtils.invalidityToString(dw.isInvalidWrapper()),
-                        dw.getFileLocation()
-                );
-            }
-
-            out.flush();
-        } finally {
-            if (saving != null && saving.as != null) {
-                out.close();
-            }
-        }
-    }
-
-    @SuppressFBWarnings(value = "OS_OPEN_STREAM", justification = "The stream is clsoed as conditionally as is created")
-    private void listJvms() throws IOException {
-        if (filteredArgs.size() != 1) {
-            throw new RuntimeException(LIST_JVMS + " does not expect arguments.");
-        }
-
-        PrintStream out = System.out;
-        try {
-            if (saving != null && saving.as != null) {
-                out = saving.openPrintStream();
-            }
-
-            for (VmInfo vmInfo : vmManager.getVmInfoSet()) {
-                out.println(vmInfo.getVmPid() + " " + vmInfo.getVmName());
-            }
-
-            out.flush();
-        } finally {
-            if (saving != null && saving.as != null) {
-                out.close();
-            }
-        }
-    }
-
     private void printVersion() {
         System.out.println(MetadataProperties.getInstance());
     }
@@ -1287,33 +984,7 @@ public class Cli {
         Help.printHelpText();
     }
 
-    public VmInfo removeOverrides() {
-        if (filteredArgs.size() != 3) {
-            throw new RuntimeException("expected two params: " + Help.REMOVE_OVERRIDES_FORMAT);
-        }
-        VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
-        String regex = filteredArgs.get(2);
-        String[] was = Lib.obtainOverrides(vmInfo, vmManager);
-        Lib.removeOverrides(vmInfo, vmManager, regex);
-        String[] is = Lib.obtainOverrides(vmInfo, vmManager);
-        System.out.println("Removed: " + (was.length - is.length) + " (was: " + was.length + ", is: " + is.length + ")");
-        return vmInfo;
-    }
-
-    public VmInfo listOverrides() {
-        if (filteredArgs.size() != 2) {
-            throw new RuntimeException("expected two params: " + Help.LIST_OVERRIDES_FORMAT);
-        }
-        VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
-        String[] overrides = Lib.obtainOverrides(vmInfo, vmManager);
-        for (String override : overrides) {
-            System.out.println(override);
-        }
-        System.out.println("Total: " + overrides.length);
-        return vmInfo;
-    }
-
-    VmInfo getVmInfo(String param) {
+    private VmInfo getVmInfo(String param) {
         return CliUtils.getVmInfo(param, vmManager);
     }
 

@@ -47,7 +47,7 @@ public final class CliUtils {
         throw new RuntimeException("Unable to interpret '" + input + "' as any component of PUC.");
     }
 
-    static VmInfo getVmInfo(String param, VmManager vmManager) {
+    public static VmInfo getVmInfo(String param, VmManager vmManager) {
         VmInfo.Type puc = guessType(param);
         switch (puc) {
             case LOCAL:
@@ -62,7 +62,7 @@ public final class CliUtils {
         }
     }
 
-    static String cleanParameter(String param) {
+    public static String cleanParameter(String param) {
         if (param.startsWith("-")) {
             param = param.replaceAll("^--*", "-");
             if ("-R".equals(param)) {
@@ -75,11 +75,20 @@ public final class CliUtils {
         return param; // do not make regexes and filenames lowercase
     }
 
-    static String invalidityToString(boolean invalidWrapper) {
+    public static String invalidityToString(boolean invalidWrapper) {
         if (invalidWrapper) {
             return "invalid";
         } else {
             return "valid";
+        }
+    }
+
+    public static void returnNonzero(int failures, int total) {
+        if (total == 0) {
+            throw new RuntimeException("No class found to save.");
+        }
+        if (failures > 0) {
+            throw new RuntimeException("Failed to save " + failures + "classes.");
         }
     }
 

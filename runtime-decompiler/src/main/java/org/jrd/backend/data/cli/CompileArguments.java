@@ -15,7 +15,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
-final class CompileArguments {
+public final class CompileArguments {
     String wantedCustomCompiler;
     String puc;
     boolean isRecursive = false;
@@ -34,7 +34,7 @@ final class CompileArguments {
 
     @SuppressWarnings("ModifiedControlVariable")
     // shifting arguments when parsing
-    CompileArguments(List<String> filteredArgs, PluginManager pluginManager, VmManager vmManager, boolean checkFile)
+    public CompileArguments(List<String> filteredArgs, PluginManager pluginManager, VmManager vmManager, boolean checkFile)
             throws FileNotFoundException {
         this.pluginManager = pluginManager;
         this.vmManager = vmManager;
