@@ -83,4 +83,44 @@ class DiffPopupTest {
         s = DiffPopup.parseClassFromHeader("+++ Additional source buffer/org.jrd.backend.data.Config");
         Assertions.assertEquals("org.jrd.backend.data.Config", s);
     }
+
+    @Test
+    void parseDevNull() {
+        boolean b;
+        b = DiffPopup.isAddDevNull("+++ file1");
+        Assertions.assertFalse(b);
+        b = DiffPopup.isAddDevNull("--- file1");
+        Assertions.assertFalse(b);
+        b = DiffPopup.isAddDevNull("+++ /dev/null");
+        Assertions.assertTrue(b);
+        b = DiffPopup.isAddDevNull("--- /dev/null");
+        Assertions.assertFalse(b);
+
+        b = DiffPopup.isRemoveDevNull("+++ file1");
+        Assertions.assertFalse(b);
+        b = DiffPopup.isRemoveDevNull("--- file1");
+        Assertions.assertFalse(b);
+        b = DiffPopup.isRemoveDevNull("+++ /dev/null");
+        Assertions.assertFalse(b);
+        b = DiffPopup.isRemoveDevNull("--- /dev/null");
+        Assertions.assertTrue(b);
+
+        b = DiffPopup.isAddFile("+++ file1");
+        Assertions.assertTrue(b);
+        b = DiffPopup.isAddFile("--- file1");
+        Assertions.assertFalse(b);
+        b = DiffPopup.isAddFile("+++ /dev/null");
+        Assertions.assertFalse(b);
+        b = DiffPopup.isAddFile("--- /dev/null");
+        Assertions.assertFalse(b);
+
+        b = DiffPopup.isRemoveFile("+++ file1");
+        Assertions.assertFalse(b);
+        b = DiffPopup.isRemoveFile("--- file1");
+        Assertions.assertTrue(b);
+        b = DiffPopup.isRemoveFile("+++ /dev/null");
+        Assertions.assertFalse(b);
+        b = DiffPopup.isRemoveFile("--- /dev/null");
+        Assertions.assertFalse(b);
+    }
 }
