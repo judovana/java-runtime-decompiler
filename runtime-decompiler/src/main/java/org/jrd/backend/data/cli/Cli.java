@@ -2,7 +2,6 @@ package org.jrd.backend.data.cli;
 
 import com.github.difflib.patch.PatchFailedException;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.ClasspathlessCompiler;
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
@@ -11,19 +10,20 @@ import io.github.mkoncek.classpathless.api.IdentifiedSource;
 import org.jrd.backend.communication.ErrorCandidate;
 import org.jrd.backend.communication.FsAgent;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
-import org.jrd.backend.core.AgentAttachManager;
 import org.jrd.backend.core.AgentLoader;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.ClassInfo;
 import org.jrd.backend.core.DecompilerRequestReceiver;
 import org.jrd.backend.core.agentstore.AgentLiveliness;
 import org.jrd.backend.core.Logger;
-import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.data.Config;
 import org.jrd.backend.data.MetadataProperties;
 import org.jrd.backend.data.Model;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
+import org.jrd.backend.data.cli.workers.AddClasses;
+import org.jrd.backend.data.cli.workers.Api;
+import org.jrd.backend.data.cli.workers.AttachDetach;
 import org.jrd.backend.data.cli.workers.Classes;
 import org.jrd.backend.data.cli.workers.Decompile;
 import org.jrd.backend.data.cli.workers.InitClass;
@@ -31,23 +31,17 @@ import org.jrd.backend.data.cli.workers.ListAgents;
 import org.jrd.backend.data.cli.workers.ListJvms;
 import org.jrd.backend.data.cli.workers.ListPlugins;
 import org.jrd.backend.data.cli.workers.Overrides;
+import org.jrd.backend.data.cli.workers.OverwriteAndUpload;
 import org.jrd.backend.data.cli.workers.PrintBytes;
 import org.jrd.backend.data.cli.workers.Shared;
 import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.main.decompilerview.DecompilationController;
 import org.jrd.frontend.frame.main.decompilerview.HexWithControls;
-import org.jrd.frontend.frame.main.decompilerview.verifiers.ClassVerifier;
-import org.jrd.frontend.frame.main.decompilerview.verifiers.FileVerifier;
-import org.jrd.frontend.frame.main.decompilerview.verifiers.GetSetText;
-import org.jrd.frontend.frame.main.decompilerview.verifiers.JarVerifier;
 import org.jrd.frontend.frame.main.popup.DiffPopup;
 import org.jrd.frontend.frame.main.popup.SingleFilePatch;
-import org.jrd.frontend.frame.overwrite.FileToClassValidator;
 import org.jrd.frontend.frame.overwrite.OverwriteClassDialog;
-import org.jrd.frontend.utility.AgentApiGenerator;
 import org.jrd.frontend.utility.CommonUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
@@ -244,7 +238,7 @@ public class Cli {
                     compileWrapper(operatedOn);
                     break;
                 case OVERWRITE:
-                    VmInfo vmInfo5 = overwrite(ReceivedType.OVERWRITE_CLASS);
+                    VmInfo vmInfo5 = new OverwriteAndUpload(filteredArgs, vmManager, isBoot, isHex).overwrite(ReceivedType.OVERWRITE_CLASS);
                     operatedOn.add(vmInfo5);
                     break;
                 case PATCH:
@@ -252,15 +246,16 @@ public class Cli {
                     operatedOn.add(patchVmInfo);
                     break;
                 case ADD_CLASS:
-                    VmInfo vmInfoAddClass = overwrite(ReceivedType.ADD_CLASS);
+                    VmInfo vmInfoAddClass =
+                            new OverwriteAndUpload(filteredArgs, vmManager, isBoot, isHex).overwrite(ReceivedType.ADD_CLASS);
                     operatedOn.add(vmInfoAddClass);
                     break;
                 case ADD_JAR:
-                    VmInfo vmInfoAddJar = overwrite(ReceivedType.ADD_JAR);
+                    VmInfo vmInfoAddJar = new OverwriteAndUpload(filteredArgs, vmManager, isBoot, isHex).overwrite(ReceivedType.ADD_JAR);
                     operatedOn.add(vmInfoAddJar);
                     break;
                 case ADD_CLASSES:
-                    VmInfo vmInfoAddClasses = addClasses();
+                    VmInfo vmInfoAddClasses = new AddClasses(filteredArgs, vmManager, isBoot).addClasses();
                     operatedOn.add(vmInfoAddClasses);
                     break;
                 case INIT:
@@ -268,14 +263,14 @@ public class Cli {
                     operatedOn.add(vmInfo6);
                     break;
                 case ATTACH:
-                    VmInfo vmInfo7 = attach();
+                    VmInfo vmInfo7 = new AttachDetach(filteredArgs, vmManager).attach();
                     operatedOn.add(vmInfo7);
                     break;
                 case DETACH:
-                    detach();
+                    new AttachDetach(filteredArgs, vmManager).detach();
                     break;
                 case API:
-                    VmInfo vmInfo8 = api();
+                    VmInfo vmInfo8 = new Api(filteredArgs, saving, vmManager, pluginManager).api();
                     operatedOn.add(vmInfo8);
                     break;
                 case HELP:
@@ -305,7 +300,7 @@ public class Cli {
                     public void run() {
                         for (VmInfo status : operatedOn) {
                             if (status.getType() == VmInfo.Type.LOCAL && !status.getVmDecompilerStatus().isReused()) {
-                                detach(status.getVmDecompilerStatus().getListenPort());
+                                AttachDetach.detachLocalhost(status.getVmDecompilerStatus().getListenPort(), vmManager);
                             }
                         }
                     }
@@ -328,7 +323,7 @@ public class Cli {
                         Logger.getLogger().log("Detaching single attach agent(s), if any");
                     }
                     if (status.getType() == VmInfo.Type.LOCAL) {
-                        detach(status.getVmDecompilerStatus().getListenPort());
+                        AttachDetach.detachLocalhost(status.getVmDecompilerStatus().getListenPort(), vmManager);
                     }
                 }
             } else {
@@ -345,76 +340,6 @@ public class Cli {
                 }
             }
         }
-    }
-
-    private VmInfo addClasses() throws IOException {
-        if (filteredArgs.size() < 2) {
-            throw new RuntimeException("Expected two and more arguments - " + Help.ADD_CLASSES_FORMAT1 + " or " + Help.ADD_CLASSES_FORMAT2);
-        }
-        VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
-        boolean allExists = true;
-        for (int x = 2; x < filteredArgs.size(); x++) {
-            if (!new File(filteredArgs.get(x)).exists()) {
-                allExists = false;
-                break;
-            }
-        }
-        if (allExists) {
-            addClassesGuessFqn(vmInfo, filteredArgs.subList(2, filteredArgs.size()));
-        } else {
-            if (Math.abs(filteredArgs.size() - 2/*--addclasses and puc*/) % 2 == 1) {
-                throw new RuntimeException("Expected list of pairs (fqn file)^n - you have odd count");
-            }
-            addClassesEvenWithFqns(vmInfo, filteredArgs.subList(2, filteredArgs.size()));
-        }
-        return vmInfo;
-    }
-
-    private void addClassesGuessFqn(VmInfo vmInfo, List<String> files) throws IOException {
-        List<FqnAndClassToJar> toJar = new ArrayList<>(files.size());
-        for (int x = 0; x < files.size(); x++) {
-            File f = new File(files.get(x));
-            GetSetText r = new GetSetText.DummyGetSet("ok?");
-            boolean b = new FileVerifier(new GetSetText.DummyGetSet(f.getAbsolutePath()), r).verifySource(null);
-            if (!b) {
-                throw new RuntimeException(f.getAbsolutePath() + " " + r.getText());
-            }
-            String fqn = Lib.readClassNameFromClass(Files.readAllBytes(f.toPath()));
-            toJar.add(new FqnAndClassToJar(fqn, f));
-        }
-        addJar(vmInfo, toJar);
-    }
-
-    private void addClassesEvenWithFqns(VmInfo vmInfo, List<String> fqnAndFile) throws IOException {
-        List<FqnAndClassToJar> toJar = new ArrayList<>(fqnAndFile.size() / 2);
-        for (int x = 0; x < fqnAndFile.size(); x = x + 2) {
-            String fqn = fqnAndFile.get(x);
-            File f = new File(fqnAndFile.get(x + 1));
-            GetSetText r = new GetSetText.DummyGetSet("ok?");
-            boolean b = new FileVerifier(new GetSetText.DummyGetSet(f.getAbsolutePath()), r).verifySource(null);
-            if (!b) {
-                throw new RuntimeException(f.getAbsolutePath() + " " + r.getText());
-            }
-            toJar.add(new FqnAndClassToJar(fqn, f));
-        }
-        addJar(vmInfo, toJar);
-    }
-
-    private void addJar(VmInfo vmInfo, List<FqnAndClassToJar> toJar) throws IOException {
-        System.out.println("Adding " + toJar.size() + " classes via jar to remote vm (" + Lib.getPrefixByBoot(isBoot) + ")");
-        InMemoryJar jar = new InMemoryJar();
-        jar.open();
-        for (FqnAndClassToJar item : toJar) {
-            GetSetText fakeInput = new GetSetText.DummyGetSet(item.getFile().getAbsolutePath());
-            GetSetText fakeOutput = new GetSetText.DummyGetSet("ok?");
-            boolean passed = new ClassVerifier(fakeInput, fakeOutput).verifySource(null);
-            if (!passed) {
-                throw new RuntimeException(item.getFile().getAbsolutePath() + " " + fakeOutput.getText());
-            }
-            jar.addFile(Files.readAllBytes(item.getFile().toPath()), item.getFqn());
-        }
-        jar.close();
-        Lib.addJar(vmInfo, isBoot, "custom" + toJar.size() + "classes.jar", Base64.getEncoder().encodeToString(jar.toBytes()), vmManager);
     }
 
     private void compileWrapper(List<VmInfo> operatedOn) throws Exception {
@@ -654,7 +579,7 @@ public class Cli {
             System.out.println("Upload group of bytecode level: " + (bytecodeLevel == null ? "default:" : "" + bytecodeLevel));
             for (Map.Entry<String, String> toUpload : toUploadWithBytecode.getValue().entrySet()) {
                 System.out.println("Uploading: " + toUpload.getKey());
-                String reply = uploadClass(vmInfo, toUpload.getKey(), toUpload.getValue());
+                String reply = Lib.uploadClass(vmInfo, toUpload.getKey(), toUpload.getValue(), vmManager);
                 ErrorCandidate ec = new ErrorCandidate(reply);
                 if (ec.isError() || reply.startsWith("error ")/*fix me, why the or is needed?*/) {
                     System.out.println("failed - " + reply.replaceAll("for request 'OVERWRITE.*", ""));
@@ -683,164 +608,6 @@ public class Cli {
 
     private String decompileBytesByDecompilerName(String base64Bytes, String pluginName, String className, VmInfo vmInfo) throws Exception {
         return Lib.decompileBytesByDecompilerName(base64Bytes, pluginName, className, vmInfo, vmManager, pluginManager);
-    }
-
-    //fixme, refactor, jar do not belongs here
-    @SuppressWarnings({"CyclomaticComplexity"})
-    private VmInfo overwrite(ReceivedType add) throws Exception {
-        int maxargs = 4;
-        if (add.equals(ReceivedType.ADD_JAR)) {
-            Logger.getLogger().log(Logger.Level.ALL, "adding jar to " + Lib.getPrefixByBoot(isBoot));
-            maxargs = 3;
-        }
-        String newBytecodeFile;
-        if (filteredArgs.size() == (maxargs - 1)) {
-            Logger.getLogger().log("Reading  from stdin.");
-            newBytecodeFile = null;
-        } else {
-            if (filteredArgs.size() != maxargs) {
-                switch (add) {
-                    case OVERWRITE_CLASS:
-                        throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.OVERWRITE_FORMAT + "'.");
-                    case ADD_CLASS:
-                        throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.ADD_CLASS_FORMAT + "'.");
-                    case ADD_JAR:
-                        throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.ADD_JAR_FORMAT + "'.");
-                    default:
-                        throw new RuntimeException("Unknown action " + add);
-                }
-            }
-            if (add.equals(ReceivedType.ADD_JAR)) {
-                newBytecodeFile = filteredArgs.get(2);
-            } else {
-                newBytecodeFile = filteredArgs.get(3);
-            }
-        }
-
-        String className;
-        if (add.equals(ReceivedType.ADD_JAR)) {
-            className = newBytecodeFile == null ? "stdin.jar" : new File(newBytecodeFile).getName();
-        } else {
-            className = filteredArgs.get(2);
-        }
-        VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
-        String clazz;
-
-        if (newBytecodeFile == null) {
-            clazz = DecompilationController.stdinToBase64(isHex);
-        } else { // validate first
-            if (!add.equals(ReceivedType.ADD_JAR)) {
-                FileToClassValidator.StringAndScore r = FileToClassValidator.validate(className, newBytecodeFile);
-
-                if (r.getScore() > 0 && r.getScore() < 10) {
-                    Logger.getLogger().log(Logger.Level.ALL, "WARNING: " + r.getMessage());
-                }
-                if (r.getScore() >= 10) {
-                    Logger.getLogger().log(Logger.Level.ALL, "ERROR: " + r.getMessage());
-                }
-            } else {
-                GetSetText fakeInput = new GetSetText.DummyGetSet(newBytecodeFile);
-                GetSetText fakeOutput = new GetSetText.DummyGetSet("ok?");
-                boolean passed = new JarVerifier(fakeInput, fakeOutput).verifySource(null);
-                if (!passed) {
-                    throw new RuntimeException(fakeOutput.getText());
-                }
-            }
-            clazz = DecompilationController.fileToBase64(newBytecodeFile, isHex);
-        }
-
-        String response;
-        switch (add) {
-            case OVERWRITE_CLASS:
-                response = uploadClass(vmInfo, className, clazz);
-                break;
-            case ADD_CLASS:
-                response = Lib.addClass(vmInfo, className, clazz, vmManager);
-                break;
-            case ADD_JAR:
-                response = Lib.addJar(vmInfo, isBoot, className, clazz, vmManager);
-                break;
-            default:
-                throw new RuntimeException("Unknown action " + add);
-        }
-
-        if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
-            switch (add) {
-                case OVERWRITE_CLASS:
-                    System.out.println("Overwrite of class '" + className + "' successful.");
-                    break;
-                case ADD_CLASS:
-                    System.out.println("Addition of class '" + className + "' successful.");
-                    break;
-                case ADD_JAR:
-                    System.out.println("Addition of jar '" + className + "' successful.");
-                    break;
-                default:
-                    throw new RuntimeException("Unknown action " + add);
-            }
-        } else {
-            throw new RuntimeException(DecompilationController.CLASSES_NOPE);
-        }
-        return vmInfo;
-    }
-
-    private String uploadClass(VmInfo vmInfo, String className, String clazz) {
-        return Lib.uploadClass(vmInfo, className, clazz, vmManager);
-    }
-
-    @SuppressFBWarnings(value = "OS_OPEN_STREAM", justification = "The stream is clsoed as conditionally as is created")
-    private VmInfo api() throws Exception {
-        PrintStream out = System.out;
-        try {
-            if (saving != null && saving.getAs() != null) {
-                out = saving.openPrintStream();
-            }
-
-            if (filteredArgs.size() != 2) {
-                throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.API_FORMAT + "'.");
-            }
-
-            VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
-            AgentApiGenerator.initItems(vmInfo, vmManager, pluginManager);
-            out.println(AgentApiGenerator.getInterestingHelp());
-            out.flush();
-            return vmInfo;
-        } finally {
-            if (saving != null && saving.getAs() != null) {
-                out.close();
-            }
-        }
-    }
-
-    private VmInfo attach() throws Exception {
-        final int mandatoryParam = 2;
-        if (filteredArgs.size() < mandatoryParam) {
-            throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.ATTACH_FORMAT + "'.");
-        }
-        if (CliUtils.guessType(filteredArgs.get(1)) != VmInfo.Type.LOCAL) {
-            throw new IllegalArgumentException("Sorry, first argument must be running jvm PID, nothing else.");
-        }
-        VmInfo vmInfo = getVmInfo(filteredArgs.get(1));
-        VmDecompilerStatus status = new AgentAttachManager(vmManager).attachAgentToVm(vmInfo.getVmId(), vmInfo.getVmPid());
-        System.out.println("Attached. Listening on: " + status.getListenPort());
-        return vmInfo;
-    }
-
-    private void detach() {
-        if (filteredArgs.size() < 2) {
-            throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.DETACH_FORMAT + "'.");
-        }
-        if (filteredArgs.get(1).contains(":")) {
-            String[] hostPort = filteredArgs.get(1).split(":");
-            Lib.detach(hostPort[0], Integer.parseInt(hostPort[1]), vmManager);
-        } else {
-            //TODO is pid? If so, detach its port, else localhost
-            detach(Integer.parseInt(filteredArgs.get(1)));
-        }
-    }
-
-    private void detach(int port) {
-        Lib.detach("localhost", port, vmManager);
     }
 
     @SuppressWarnings(
@@ -905,7 +672,7 @@ public class Cli {
                 String className = bytecode.getClassIdentifier().getFullName();
                 Logger.getLogger().log("Uploading class '" + className + "'.");
 
-                String response = uploadClass(targetVm, className, Base64.getEncoder().encodeToString(bytecode.getFile()));
+                String response = Lib.uploadClass(targetVm, className, Base64.getEncoder().encodeToString(bytecode.getFile()), vmManager);
 
                 if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
                     Logger.getLogger().log(Logger.Level.ALL, "Successfully uploaded class '" + className + "'.");

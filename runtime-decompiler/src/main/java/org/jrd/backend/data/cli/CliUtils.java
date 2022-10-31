@@ -10,7 +10,7 @@ public final class CliUtils {
     private CliUtils() {
     }
 
-    static VmInfo.Type guessType(String input) {
+    public static VmInfo.Type guessType(String input) {
         if (input == null || input.trim().isEmpty()) {
             throw new RuntimeException("Unable to interpret PUC because it is empty.");
         }
