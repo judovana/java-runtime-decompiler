@@ -13,18 +13,19 @@ import org.jrd.frontend.frame.overwrite.OverwriteClassDialog;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public final class CompileArguments {
-    String wantedCustomCompiler;
-    String puc;
-    boolean isRecursive = false;
-    List<File> filesToCompile = new ArrayList<>(1);
+    private String wantedCustomCompiler;
+    private String puc;
+    private boolean isRecursive = false;
+    private List<File> filesToCompile = new ArrayList<>(1);
     private final PluginManager pluginManager;
     private final VmManager vmManager;
     private VmInfo vmInfo;
 
-    CompileArguments(PluginManager pluginManager, VmManager vmManager, VmInfo vmInfo, String pluginCompiler) {
+    public CompileArguments(PluginManager pluginManager, VmManager vmManager, VmInfo vmInfo, String pluginCompiler) {
         this.pluginManager = pluginManager;
         this.vmManager = vmManager;
         this.wantedCustomCompiler = pluginCompiler;
@@ -100,4 +101,17 @@ public final class CompileArguments {
         Logger.getLogger().log(compilerLogMessage);
         return OverwriteClassDialog.getClasspathlessCompiler(decompiler, hasCompiler, isVerbose);
     }
+
+    public String getWantedCustomCompiler() {
+        return wantedCustomCompiler;
+    }
+
+    public boolean isRecursive() {
+        return isRecursive;
+    }
+
+    public List<File> getFilesToCompile() {
+        return Collections.unmodifiableList(filesToCompile);
+    }
+
 }
