@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -86,8 +87,9 @@ public class Cli {
         return isVerbose;
     }
 
+    @SuppressWarnings({"UnnecessaryParentheses"})
     public boolean isGui() {
-        return filteredArgs.isEmpty();
+        return filteredArgs.isEmpty() || (isHex && (CliSwitches.noMatch(filteredArgs)));
     }
 
     public boolean isHex() {
@@ -628,9 +630,9 @@ public class Cli {
             PluginWrapperWithMetaInfo wrapper = Lib.getPluginWrapper(pluginManager, pluginXorPath, false);
             List<Map.Entry<String, String>> patchedList = new ArrayList<>(patched.entrySet());
             for (Integer detectedByteCode : new HashSet<>(bytecodeLevelCache.values())) {
-                List<IdentifiedSource> thisBytecodeClasses = patchedList.stream().filter(a -> {
-                    return null == bytecodeLevelCache.get(a.getKey()) || detectedByteCode.equals(bytecodeLevelCache.get(a.getKey()));
-                }).map(a -> new IdentifiedSource(new ClassIdentifier(a.getKey()), Base64.getDecoder().decode(a.getValue())))
+                List<IdentifiedSource> thisBytecodeClasses = patchedList.stream().filter(
+                        a -> null == bytecodeLevelCache.get(a.getKey()) || detectedByteCode.equals(bytecodeLevelCache.get(a.getKey()))
+                ).map(a -> new IdentifiedSource(new ClassIdentifier(a.getKey()), Base64.getDecoder().decode(a.getValue())))
                         .collect(Collectors.toList());
                 //ternary operator is constantly killed by autoformater
 
@@ -988,4 +990,7 @@ public class Cli {
         return CliUtils.getVmInfo(param, vmManager);
     }
 
+    public List<String> getFilteredArgs() {
+        return Collections.unmodifiableList(filteredArgs);
+    }
 }

@@ -1,5 +1,9 @@
 package org.jrd.backend.data.cli;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+
 public final class CliSwitches {
 
     public static final String VERBOSE = "-verbose";
@@ -45,5 +49,32 @@ public final class CliSwitches {
     public static final String CP = "-cp";
 
     private CliSwitches() {
+    }
+
+    public static List<String> getSwitches() throws IllegalAccessException {
+        Field[] fields = CliSwitches.class.getDeclaredFields();
+        List<String> all = new ArrayList<>(fields.length);
+        for (Field f : fields) {
+            all.add(f.get(null).toString());
+        }
+        return all;
+    }
+
+    public static boolean isSwitch(String s) throws IllegalAccessException {
+        String ss = CliUtils.cleanParameter(s);
+        return getSwitches().contains(ss);
+    }
+
+    public static boolean noMatch(List<String> filteredArgs) {
+        try {
+            for (String arg : filteredArgs) {
+                if (isSwitch(arg)) {
+                    return false;
+                }
+            }
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
     }
 }

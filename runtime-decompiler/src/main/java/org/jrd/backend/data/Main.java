@@ -12,8 +12,12 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.WindowConstants;
+
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 
 public class Main {
 
@@ -23,35 +27,26 @@ public class Main {
         if (cli.isGui()) {
             setLookAndFeel();
             if (cli.isHex()) {
-                //FIXME open jsut hex window(s) in tab pane (copy should work)
-                //undo will need reimplement
-                //todo, handle input files :D with them, isGui do not work :D
-                if (true) {
-                    System.err.println("standalon hex editor nto yet fully enaabled");
-                } else {
-                    //todo move wrapper to class
-                    JFrame hexview = new JFrame("JRD's hex diff and editor");
-                    hexview.setSize(800, 600);
-                    hexview.setLocationRelativeTo(null);
-                    hexview.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-                    JPanel wrapper = new JPanel();
-                    wrapper.setName("some.file");
-                    wrapper.setLayout(new BorderLayout());
-                    JPanel tool = new JPanel();
-                    tool.setLayout(new GridLayout(1, 5));
-                    tool.add(ImageButtonFactory.createUndoButton());
-                    tool.add(ImageButtonFactory.createRedoButton());
-                    tool.add(new JButton("Diff"));
-                    tool.add(new JButton("Save"));
-                    tool.add(new JButton("Open"));
-                    wrapper.add(tool, BorderLayout.NORTH);
-                    HexWithControls hex = new HexWithControls("some.class");
-                    wrapper.add(hex, BorderLayout.CENTER);
-                    JTabbedPane tp = new JTabbedPane();
+                System.err.println("standalon hex editor nto yet fully enaabled");
+                //todo move wrapper to class
+                JFrame hexview = new JFrame("JRD's hex diff and editor");
+                hexview.setSize(800, 600);
+                hexview.setLocationRelativeTo(null);
+                hexview.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+                JTabbedPane tp = new JTabbedPane();
+                for (String s : cli.getFilteredArgs()) {
+                    JPanel wrapper = getFeatureFullTab(new File(s));
                     tp.add(wrapper);
-                    hexview.add(tp);
-                    hexview.setVisible(true);
                 }
+                JButton open = new JButton("Open file");
+                JButton exit = new JButton("exit");
+                JPanel plus = new JPanel(new BorderLayout());
+                plus.add(open, BorderLayout.NORTH);
+                plus.add(exit, BorderLayout.SOUTH);
+                plus.setName("+");
+                tp.add(plus);
+                hexview.add(tp);
+                hexview.setVisible(true);
             } else {
                 MainFrameView mainView = new MainFrameView();
                 new DecompilationController(mainView, model, cli.shouldBeVerbose());
@@ -60,6 +55,25 @@ public class Main {
             cli.consumeCli();
         }
 
+    }
+
+    private static JPanel getFeatureFullTab(File f) throws IOException {
+        JPanel wrapper = new JPanel();
+        wrapper.setName(f.getName());
+        wrapper.setLayout(new BorderLayout());
+        JPanel tool = new JPanel();
+        tool.setLayout(new GridLayout(1, 6));
+        tool.add(ImageButtonFactory.createUndoButton());
+        tool.add(ImageButtonFactory.createRedoButton());
+        tool.add(new JButton("Diff"));
+        tool.add(new JButton("Save"));
+        tool.add(new JButton("Open"));
+        tool.add(new JButton("Close"));
+        wrapper.add(tool, BorderLayout.NORTH);
+        HexWithControls hex = new HexWithControls("some.class");
+        hex.open(Files.readAllBytes(f.toPath()));
+        wrapper.add(hex, BorderLayout.CENTER);
+        return wrapper;
     }
 
     public static void setLookAndFeel() {
