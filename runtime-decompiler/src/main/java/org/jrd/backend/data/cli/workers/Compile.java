@@ -111,6 +111,8 @@ public class Compile {
         }
         PluginWrapperWithMetaInfo wrapper = Lib.getPluginWrapper(pluginManager, args.getWantedCustomCompiler(), true);
         List<IdentifiedBytecode> allBytecode = new ArrayList<>();
+        //Do not use default grup, unless it is alone.
+        //Always merge default group to the biggest other group
         for (Map.Entry<Integer, List<IdentifiedSource>> entry : sortedSources.entrySet()) {
             Integer detectedByteCode = entry.getKey();
             IdentifiedSource[] identifiedSources = entry.getValue().toArray(new IdentifiedSource[0]);

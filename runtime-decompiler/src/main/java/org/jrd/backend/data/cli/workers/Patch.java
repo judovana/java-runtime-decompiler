@@ -108,6 +108,9 @@ public class Patch {
              * todo, compile the +++ b/runtime-deco
              * with biggest group? By default?
              * new agent api to get more info from runniong vm?
+             *
+             * never to defaul, default is just wrong.
+             * add new files to the default group, and MERGE whole default group to the BIGEST other group
              */
             String header1 = patch.get(startEnd.getStart());
             String header2 = patch.get(startEnd.getStart() + 1);
