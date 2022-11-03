@@ -35,48 +35,62 @@ import java.util.List;
 
 public class DiffPopup extends JPopupMenu {
     private final String fqn;
-    private final Component[] components;
+    private final LinesProvider[] linesProviders;
     JCheckBox human = new JCheckBox("human readable");
     JCheckBox invert = new JCheckBox("invert order");
 
-    public DiffPopup(Component[] components, String fqn) {
+    public DiffPopup(LinesProvider[] linesProviders, String fqn) {
         this.fqn = fqn;
-        this.components = components;
-        JMenuItem oneThree = new JMenuItem(components[0].getName() + " - " + components[2].getName());
-        oneThree.addActionListener(actionEvent -> {
-            processText(0, 2);
-        });
-        this.add(oneThree);
-        JMenuItem threeFive = new JMenuItem(components[2].getName() + " - " + components[4].getName());
-        threeFive.addActionListener(actionEvent -> {
-            processText(2, 4);
-        });
-        this.add(threeFive);
-        JMenuItem oneFive = new JMenuItem(components[0].getName() + " - " + components[4].getName());
-        oneFive.addActionListener(actionEvent -> {
-            processText(0, 4);
-        });
-        this.add(oneFive);
-        JMenuItem bin1 = new JMenuItem(components[1].getName() + " - " + components[3].getName() + " (ascii)");
-        bin1.addActionListener(actionEvent -> {
-            processBin(LinesProvider.LinesFormat.CHARS, 1, 3);
-        });
-        this.add(bin1);
-        JMenuItem bin2 = new JMenuItem(components[1].getName() + " - " + components[3].getName() + " (hex)");
-        bin2.addActionListener(actionEvent -> {
-            processBin(LinesProvider.LinesFormat.HEX, 1, 3);
-        });
-        this.add(bin2);
+        this.linesProviders = linesProviders;
+        for (int x = 0; x < linesProviders.length; x++) {
+            if (linesProviders[x].isText()) {
+                for (int y = x + 1; y < linesProviders.length; y++) {
+                    if (linesProviders[y].isText()) {
+                        int finalX = x;
+                        int finalY = y;
+                        JMenuItem oneThree = new JMenuItem(linesProviders[x].getName() + " - " + linesProviders[y].getName());
+                        oneThree.addActionListener(actionEvent -> {
+                            processText(finalX, finalY);
+                        });
+                        this.add(oneThree);
+                    }
+                }
+            } else if (linesProviders[x].isBin()) {
+                for (int y = x + 1; y < linesProviders.length; y++) {
+                    if (linesProviders[y].isBin()) {
+                        int finalX = x;
+                        int finalY = y;
+                        JMenuItem bin1 = new JMenuItem(linesProviders[x].getName() + " - " + linesProviders[y].getName() + " (ascii)");
+                        bin1.addActionListener(actionEvent -> {
+                            processBin(LinesProvider.LinesFormat.CHARS, finalX, finalY);
+                        });
+                        this.add(bin1);
+                        JMenuItem bin2 = new JMenuItem(linesProviders[x].getName() + " - " + linesProviders[y].getName() + " (hex)");
+                        bin2.addActionListener(actionEvent -> {
+                            processBin(LinesProvider.LinesFormat.HEX, finalX, finalY);
+                        });
+                        this.add(bin2);
+                    }
+                }
+            } else {
+                throw new RuntimeException("unknown text/bin");
+            }
+        }
         this.add(human);
         this.add(invert);
+
         JMenu applyPatch = new JMenu();
         applyPatch.setText("Apply patch");
-        applyPatch.add(createPatchAction(0, LinesProvider.LinesFormat.CHARS));
-        applyPatch.add(createPatchAction(1, LinesProvider.LinesFormat.HEX));
-        applyPatch.add(createPatchAction(2, LinesProvider.LinesFormat.CHARS));
-        applyPatch.add(createPatchAction(3, LinesProvider.LinesFormat.HEX));
-        applyPatch.add(createPatchAction(4, LinesProvider.LinesFormat.CHARS));
-        this.add(applyPatch);
+        for (int x = 0; x < linesProviders.length; x++) {
+            if ((linesProviders[x].isText())) {
+                applyPatch.add(createPatchAction(x, LinesProvider.LinesFormat.CHARS));
+            } else if ((linesProviders[x].isBin())) {
+                applyPatch.add(createPatchAction(x, LinesProvider.LinesFormat.HEX));
+            } else {
+                throw new RuntimeException("unknown text/bin");
+            }
+            this.add(applyPatch);
+        }
     }
 
     public static String parseClassFromHeader(String s) {
@@ -104,7 +118,7 @@ public class DiffPopup extends JPopupMenu {
     }
 
     private JMenuItem createPatchAction(int id, final LinesProvider.LinesFormat suffix) {
-        LinesProvider component = (LinesProvider) components[id];
+        LinesProvider component = (LinesProvider) linesProviders[id];
         JMenuItem item = new JMenuItem(component.getName() + " " + (suffix == LinesProvider.LinesFormat.CHARS ? "" : " " + suffix));
         item.addActionListener(new ActionListener() {
             @Override
@@ -137,23 +151,25 @@ public class DiffPopup extends JPopupMenu {
         return item;
     }
 
-    public static List<String> patch(List<String> origFile, List<String> patch, boolean revert) throws PatchFailedException {
+    public static List<String> patch(List<String> origFile, List<String> patch, boolean revert) throws
+            PatchFailedException {
         Patch<String> importedPatch = UnifiedDiffUtils.parseUnifiedDiff(patch);
         List<String> patchedText = revert ? DiffUtils.unpatch(origFile, importedPatch) : DiffUtils.patch(origFile, importedPatch);
         return patchedText;
     }
 
     private void processBin(LinesProvider.LinesFormat format, int x, int y) {
-        List<String> l0 = ((LinesProvider) components[x]).getLines(format);
-        List<String> l1 = ((LinesProvider) components[y]).getLines(format);
-        process(l0, l1, components[x].getName(), components[y].getName(), invert.isSelected(), human.isSelected(), fqn);
+        List<String> l0 = linesProviders[x].getLines(format);
+        List<String> l1 = linesProviders[y].getLines(format);
+        process(l0, l1, linesProviders[x].getName(), linesProviders[y].getName(), invert.isSelected(), human.isSelected(), fqn);
     }
 
     private void processText(int x, int y) {
         processBin(null, x, y);
     }
 
-    private static void process(List<String> l0, List<String> l1, String n0, String n1, boolean invert, boolean human, String fqn) {
+    private static void process(List<String> l0, List<String> l1, String n0, String n1, boolean invert,
+                                boolean human, String fqn) {
         if (invert) {
             List<String> l = l0;
             l0 = l1;

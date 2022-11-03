@@ -148,4 +148,9 @@ public class HexWithControls extends JPanel implements LinesProvider {
         }
         return data;
     }
+
+    @Override
+    public boolean isBin() {
+        return true;
+    }
 }

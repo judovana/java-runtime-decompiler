@@ -41,6 +41,7 @@ import javax.swing.event.DocumentListener;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -414,7 +415,17 @@ public class BytecodeDecompilerView {
         diffButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                new DiffPopup(buffers.getComponents(), lastDecompiledClass).show(diffButton, 0, 0);
+                new DiffPopup(toLines(buffers.getComponents()), lastDecompiledClass).show(diffButton, 0, 0);
+            }
+
+            private LinesProvider[] toLines(Component[] knownLinesProvidingComponents) {
+                return new LinesProvider[]{
+                        (LinesProvider)knownLinesProvidingComponents[0],
+                        (LinesProvider)knownLinesProvidingComponents[1],
+                        (LinesProvider)knownLinesProvidingComponents[2],
+                        (LinesProvider)knownLinesProvidingComponents[3],
+                        (LinesProvider)knownLinesProvidingComponents[4]
+                };
             }
         });
         undoButton = ImageButtonFactory.createUndoButton();

@@ -116,4 +116,9 @@ public class TextWithControls extends JPanel implements LinesProvider {
     public void setLines(LinesFormat type, List<String> lines) {
         bytecodeSyntaxTextArea.setText(lines.stream().collect(Collectors.joining("\n")));
     }
+
+    @Override
+    public boolean isBin() {
+        return false;
+    }
 }

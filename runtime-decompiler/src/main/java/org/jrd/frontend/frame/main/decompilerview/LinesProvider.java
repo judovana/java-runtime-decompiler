@@ -14,4 +14,10 @@ public interface LinesProvider {
     String getName();
 
     void setLines(LinesFormat type, List<String> nwContent) throws Exception;
+
+    boolean isBin();
+
+    default boolean isText() {
+        return ! isBin();
+    }
 }
