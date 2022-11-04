@@ -32,17 +32,26 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public class DiffPopup extends JPopupMenu {
-    private final String fqn;
+    private final Optional<String> fqn;
     private final LinesProvider[] linesProviders;
     JCheckBox human = new JCheckBox("human readable");
     JCheckBox invert = new JCheckBox("invert order");
 
-    public DiffPopup(LinesProvider[] linesProviders, String fqn) {
+    public DiffPopup(List<LinesProvider> linesProviders, Optional<String> fqn, boolean onlyOne) {
+        this(linesProviders.toArray(new LinesProvider[0]), fqn, onlyOne);
+    }
+
+    public DiffPopup(LinesProvider[] linesProviders, Optional<String> fqn, boolean onlyOne) {
         this.fqn = fqn;
         this.linesProviders = linesProviders;
-        for (int x = 0; x < linesProviders.length; x++) {
+        int iterateTo = linesProviders.length;
+        if (onlyOne) {
+            iterateTo = 1;
+        }
+        for (int x = 0; x < iterateTo; x++) {
             if (linesProviders[x].isText()) {
                 for (int y = x + 1; y < linesProviders.length; y++) {
                     if (linesProviders[y].isText()) {
@@ -81,7 +90,7 @@ public class DiffPopup extends JPopupMenu {
 
         JMenu applyPatch = new JMenu();
         applyPatch.setText("Apply patch");
-        for (int x = 0; x < linesProviders.length; x++) {
+        for (int x = 0; x < iterateTo; x++) {
             if ((linesProviders[x].isText())) {
                 applyPatch.add(createPatchAction(x, LinesProvider.LinesFormat.CHARS));
             } else if ((linesProviders[x].isBin())) {
@@ -118,12 +127,12 @@ public class DiffPopup extends JPopupMenu {
     }
 
     private JMenuItem createPatchAction(int id, final LinesProvider.LinesFormat suffix) {
-        LinesProvider component = (LinesProvider) linesProviders[id];
+        LinesProvider component = linesProviders[id];
         JMenuItem item = new JMenuItem(component.getName() + " " + (suffix == LinesProvider.LinesFormat.CHARS ? "" : " " + suffix));
         item.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                JDialog d = new JDialog((JFrame) null, "paste patch to apply to " + item.getText() + "/" + fqn);
+                JDialog d = new JDialog((JFrame) null, "paste patch to apply to " + patchTitle(component,fqn));
                 d.setSize(new Dimension(800, 600));
                 d.setLocationRelativeTo(null);
                 RSyntaxTextArea t = new RSyntaxTextArea("");
@@ -161,7 +170,13 @@ public class DiffPopup extends JPopupMenu {
     private void processBin(LinesProvider.LinesFormat format, int x, int y) {
         List<String> l0 = linesProviders[x].getLines(format);
         List<String> l1 = linesProviders[y].getLines(format);
-        process(l0, l1, linesProviders[x].getName(), linesProviders[y].getName(), invert.isSelected(), human.isSelected(), fqn);
+        if (linesProviders[x].getFile() != null) {
+            //we assume both are files then
+            //todo, make relative?
+            process(l0, l1, linesProviders[x].getFile().getAbsolutePath(), linesProviders[y].getFile().getAbsolutePath(), invert.isSelected(), human.isSelected(), fqn);
+        } else {
+            process(l0, l1, linesProviders[x].getName(), linesProviders[y].getName(), invert.isSelected(), human.isSelected(), fqn);
+        }
     }
 
     private void processText(int x, int y) {
@@ -169,7 +184,7 @@ public class DiffPopup extends JPopupMenu {
     }
 
     private static void process(List<String> l0, List<String> l1, String n0, String n1, boolean invert,
-                                boolean human, String fqn) {
+                                boolean human, Optional<String> fqn) {
         if (invert) {
             List<String> l = l0;
             l0 = l1;
@@ -180,7 +195,7 @@ public class DiffPopup extends JPopupMenu {
         }
         if (human) {
             String html = "<html>" + getHtml(l0, l1) + "</html>";
-            JDialog d = new JDialog((JFrame) null, "diff " + n0 + "/" + fqn + " x " + n1 + "/" + fqn);
+            JDialog d = new JDialog((JFrame) null, "diff " + toTitle(n0, n1, fqn));
             d.setSize(new Dimension(800, 600));
             d.setLocationRelativeTo(null);
             JEditorPane t = new JEditorPane("text/html", html);
@@ -189,8 +204,8 @@ public class DiffPopup extends JPopupMenu {
             d.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
             d.setVisible(true);
         } else {
-            String patch = getPatch(l0, l1, n0 + "/" + fqn, n1 + "/" + fqn);
-            JDialog d = new JDialog((JFrame) null, "patch " + n0 + "/" + fqn + " x " + n1 + "/" + fqn);
+            String patch = getPatch(l0, l1, toPatchName(n0, fqn), toPatchName(n1, fqn));
+            JDialog d = new JDialog((JFrame) null, "patch " + toTitle(n0, n1, fqn));
             d.setSize(new Dimension(800, 600));
             d.setLocationRelativeTo(null);
             JTextArea t = new JTextArea(patch);
@@ -198,6 +213,30 @@ public class DiffPopup extends JPopupMenu {
             d.add(new JScrollPane(t));
             d.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
             d.setVisible(true);
+        }
+    }
+
+    private static String toPatchName(String n, Optional<String> fqn) {
+        if (fqn.isPresent()) {
+            return n + "/" + fqn.get();
+        } else {
+            return n;
+        }
+    }
+
+    private static String toTitle(String n0, String n1, Optional<String> fqn) {
+        if (fqn.isPresent()) {
+            return n0 + "/" + fqn.get() + " x " + n1 + "/" + fqn.get();
+        } else {
+            return n0 + " x " + n1;
+        }
+    }
+
+    private static String patchTitle(LinesProvider component, Optional<String> fqn) {
+        if (fqn.isPresent()) {
+            return component.getName() + "/" + fqn.get();
+        } else {
+            return component.getName();
         }
     }
 

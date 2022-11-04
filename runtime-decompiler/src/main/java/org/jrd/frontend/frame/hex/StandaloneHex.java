@@ -21,7 +21,7 @@ public class StandaloneHex extends JFrame {
         this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         JTabbedPane tp = new JTabbedPane();
         for (String s : files) {
-            JPanel wrapper = new FeatureFullHex(new File(s));
+            JPanel wrapper = new FeatureFullHex(new File(s), tp);
             tp.add(wrapper);
         }
         JButton open = new JButton("Open file");
@@ -33,5 +33,7 @@ public class StandaloneHex extends JFrame {
         tp.add(plus);
         this.add(tp);
     }
+
+
 
 }

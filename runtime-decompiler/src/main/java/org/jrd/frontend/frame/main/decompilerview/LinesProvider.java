@@ -1,5 +1,6 @@
 package org.jrd.frontend.frame.main.decompilerview;
 
+import java.io.File;
 import java.util.List;
 
 public interface LinesProvider {
@@ -20,4 +21,8 @@ public interface LinesProvider {
     default boolean isText() {
         return ! isBin();
     }
+
+    File getFile();
+    void setFile(File f);
+
 }

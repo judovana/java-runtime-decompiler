@@ -415,7 +415,7 @@ public class BytecodeDecompilerView {
         diffButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                new DiffPopup(toLines(buffers.getComponents()), lastDecompiledClass).show(diffButton, 0, 0);
+                new DiffPopup(toLines(buffers.getComponents()), Optional.of(lastDecompiledClass), false).show(diffButton, 0, 0);
             }
 
             private LinesProvider[] toLines(Component[] knownLinesProvidingComponents) {

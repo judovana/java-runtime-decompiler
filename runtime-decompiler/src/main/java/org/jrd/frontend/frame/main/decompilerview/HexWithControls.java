@@ -11,6 +11,7 @@ import java.awt.BorderLayout;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 public class HexWithControls extends JPanel implements LinesProvider {
 
     private static byte[] fakeClip;
+    private File f;
 
     private final HexEditor hex;
     private SearchControlsPanel hexSearchControls;
@@ -152,5 +154,24 @@ public class HexWithControls extends JPanel implements LinesProvider {
     @Override
     public boolean isBin() {
         return true;
+    }
+
+    @Override
+    public File getFile() {
+        return f;
+    }
+
+    @Override
+    public void setFile(File f) {
+        this.f = f;
+    }
+
+    @Override
+    public String getName() {
+        if (getFile() != null) {
+            return getFile().getName();
+        } else {
+            return super.getName();
+        }
     }
 }

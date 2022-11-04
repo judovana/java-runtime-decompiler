@@ -8,6 +8,7 @@ import java.awt.BorderLayout;
 import java.awt.Point;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
@@ -22,6 +23,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
     private final RSyntaxTextArea bytecodeSyntaxTextArea;
     private final SearchControlsPanel bytecodeSearchControls;
     private DecompilationController.AgentApiGenerator popup;
+    private File f;
 
     public TextWithControls(String title) {
         HexWithControls.initTabLayers(this, title);
@@ -120,5 +122,15 @@ public class TextWithControls extends JPanel implements LinesProvider {
     @Override
     public boolean isBin() {
         return false;
+    }
+
+    @Override
+    public File getFile() {
+        return f;
+    }
+
+    @Override
+    public void setFile(File f) {
+        this.f = f;
     }
 }
