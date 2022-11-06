@@ -8,6 +8,9 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.border.EtchedBorder;
 import java.awt.BorderLayout;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.ByteArrayInputStream;
@@ -50,6 +53,15 @@ public class HexWithControls extends JPanel implements LinesProvider {
                 "Undo/redo should still work.";
         paste.setToolTipText(hint);
         copy.setToolTipText(hint);
+        JButton copyText = new JButton("Text");
+        copyText.setToolTipText(BytecodeDecompilerView.styleTooltip() + "Copy HEX buffer as string to clipboard");
+        copyText.addActionListener(a -> {
+            String toCopy = getLines(LinesFormat.HEX).stream().collect(Collectors.joining("\n"));
+            StringSelection stringSelection = new StringSelection(toCopy);
+            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            clipboard.setContents(stringSelection, null);
+        });
+        southeEastPanel.add(copyText, BorderLayout.CENTER);
         this.add(southWrapper, BorderLayout.SOUTH);
     }
 
