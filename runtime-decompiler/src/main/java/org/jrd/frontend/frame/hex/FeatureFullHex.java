@@ -32,8 +32,10 @@ public class FeatureFullHex extends JPanel {
         this.setLayout(new BorderLayout());
         JPanel tool = new JPanel();
         tool.setLayout(new GridLayout(1, 6));
-        tool.add(ImageButtonFactory.createUndoButton());
-        tool.add(ImageButtonFactory.createRedoButton());
+        JButton undo = ImageButtonFactory.createUndoButton();
+        tool.add(undo);
+        JButton redo = ImageButtonFactory.createRedoButton();
+        tool.add(redo);
         JButton diff = new JButton("Diff");
         diff.addActionListener(new ActionListener() {
             @Override
@@ -104,6 +106,12 @@ public class FeatureFullHex extends JPanel {
         });
         close.addActionListener(a -> {
             parent.remove(FeatureFullHex.this);
+        });
+        undo.addActionListener(a->{
+            hex.undo();
+        });
+        redo.addActionListener(a->{
+            hex.redo();
         });
     }
 
