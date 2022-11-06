@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
@@ -44,25 +46,70 @@ public class FeatureFullHex extends JPanel {
                 int selected = parent.getSelectedIndex();
                 Component[] comps = parent.getComponents();
                 List<LinesProvider> r = new ArrayList<>();
-                for (int i = selected; i< comps.length-1/*the plus button*/ ; i++ ) {
-                    HexWithControls featureFullHex = (HexWithControls)(((JPanel)comps[i]).getComponents()[1]);
+                for (int i = selected; i < comps.length - 1/*the plus button*/ ; i++) {
+                    HexWithControls featureFullHex = (HexWithControls) (((JPanel) comps[i]).getComponents()[1]);
                     r.add(featureFullHex);
                 }
-                for (int i = 0; i < selected ; i++ ) {
-                    HexWithControls featureFullHex = (HexWithControls)(((JPanel)comps[i]).getComponents()[1]);
+                for (int i = 0; i < selected; i++) {
+                    HexWithControls featureFullHex = (HexWithControls) (((JPanel) comps[i]).getComponents()[1]);
                     r.add(featureFullHex);
                 }
                 return r;
             }
         });
         tool.add(diff);
-        tool.add(new JButton("Save"));
-        tool.add(new JButton("Open"));
-        tool.add(new JButton("Close"));
+        JButton save = (new JButton("Save"));
+        JButton open = (new JButton("Open"));
+        JButton close = (new JButton("Close"));
+        tool.add(save);
+        tool.add(open);
+        tool.add(close);
         this.add(tool, BorderLayout.NORTH);
         hex = new HexWithControls(null);
         hex.setFile(f);
         hex.open(Files.readAllBytes(f.toPath()));
         this.add(hex, BorderLayout.CENTER);
+        save.addActionListener(a -> {
+            JFileChooser jFileChooser = new JFileChooser(hex.getFile());
+            int fo = jFileChooser.showSaveDialog(hex);
+            File nwf = jFileChooser.getSelectedFile();
+            if (fo == JFileChooser.APPROVE_OPTION && nwf != null) {
+                try {
+                    Files.write(nwf.toPath(), hex.get());
+                    hex.setFile(nwf);
+                    FeatureFullHex.this.setName(nwf.getName());
+                    updateTitles(parent);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(hex, ex.getMessage());
+                }
+            }
+        });
+        open.addActionListener(a -> {
+            JFileChooser jFileChooser = new JFileChooser(hex.getFile());
+            int fo = jFileChooser.showOpenDialog(hex);
+            File nwf = jFileChooser.getSelectedFile();
+            if (fo == JFileChooser.APPROVE_OPTION && nwf != null) {
+                try {
+                    byte[] nwBytes = Files.readAllBytes(nwf.toPath());
+                    hex.setFile(nwf);
+                    hex.open(nwBytes);
+                    FeatureFullHex.this.setName(nwf.getName());
+                    updateTitles(parent);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(hex, ex.getMessage());
+                }
+            }
+        });
+        close.addActionListener(a -> {
+            parent.remove(FeatureFullHex.this);
+        });
+    }
+
+    private static void updateTitles(JTabbedPane parent) {
+        for (int x = 0; x < parent.getComponentCount(); x++) {
+            parent.setTitleAt(x, parent.getComponent(x).getName());
+        }
     }
 }
