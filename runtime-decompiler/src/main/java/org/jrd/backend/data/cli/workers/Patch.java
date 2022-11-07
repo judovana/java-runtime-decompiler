@@ -158,6 +158,7 @@ public class Patch {
             boolean isNew = DiffPopup.isDevNull(patch.get(startEnd.getStart() + 1));
             //todo, maybe repalce default group by scan from vm, eg for java.lang.Integer?
             //and thus have sane default?
+            //fixme, can  be misleading, if we upload to NEWER jvm...
             Integer byteCodeLevel = null;
             if (isNew) {
                 System.out.println("Creating " + className);
