@@ -164,7 +164,7 @@ public class Compile {
     ) {
         String m = "Compiling group of files " + identifiedSources.length + " of level : ";
         if (detectedByteCode == null) {
-            m = m + "unknown";
+            m = m + "default (" + Config.getConfig().getCompilerArgsString() + ")";
         } else {
             m = m + detectedByteCode;
         }

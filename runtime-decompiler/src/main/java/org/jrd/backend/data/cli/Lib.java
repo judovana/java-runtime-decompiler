@@ -1,5 +1,6 @@
 package org.jrd.backend.data.cli;
 
+import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import org.jrd.backend.core.AgentAttachManager;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.ClassInfo;
@@ -10,6 +11,7 @@ import org.jrd.backend.core.agentstore.KnownAgent;
 import org.jrd.backend.data.MetadataProperties;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
+import org.jrd.backend.data.cli.utils.FqnAndClassToJar;
 import org.jrd.backend.data.cli.utils.PluginWithOptions;
 import org.jrd.backend.data.cli.utils.PluginWrapperWithMetaInfo;
 import org.jrd.backend.decompiling.DecompilerWrapper;
@@ -33,6 +35,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.jrd.frontend.frame.main.decompilerview.verifiers.ClassVerifier;
+import org.jrd.frontend.frame.main.decompilerview.verifiers.GetSetText;
 import org.objectweb.asm.ClassReader;
 
 public final class Lib {
@@ -41,14 +45,18 @@ public final class Lib {
     }
 
     public static void initClass(VmInfo vmInfo, VmManager vmManager, String fqn, PrintStream outputMessageStream) {
-        AgentRequestAction request = DecompilationController.createRequest(vmInfo, AgentRequestAction.RequestAction.INIT_CLASS, fqn);
-        String response = DecompilationController.submitRequest(vmManager, request);
+        String response = initClassNoThrow(vmInfo, vmManager, fqn);
 
         if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
             outputMessageStream.println("Initialization of class '" + fqn + "' successful.");
         } else {
             throw new RuntimeException(DecompilationController.CLASSES_NOPE);
         }
+    }
+
+    public static String initClassNoThrow(VmInfo vmInfo, VmManager vmManager, String fqn) {
+        AgentRequestAction request = DecompilationController.createRequest(vmInfo, AgentRequestAction.RequestAction.INIT_CLASS, fqn);
+        return DecompilationController.submitRequest(vmManager, request);
     }
 
     @SuppressWarnings("CyclomaticComplexity") // un-refactorable
@@ -451,6 +459,34 @@ public final class Lib {
     public static String readClassNameFromClass(byte[] b) {
         ClassReader cr = new ClassReader(b);
         return cr.getClassName().replace('/', '.');
+    }
+
+    public static String addFileClassesViaJar(VmInfo vmInfo, List<FqnAndClassToJar> toJar, boolean isBoot, VmManager vmManager) throws IOException {
+        InMemoryJar jar = new InMemoryJar();
+        jar.open();
+        for (FqnAndClassToJar item : toJar) {
+            GetSetText fakeInput = new GetSetText.DummyGetSet(item.getFile().getAbsolutePath());
+            GetSetText fakeOutput = new GetSetText.DummyGetSet("ok?");
+            boolean passed = new ClassVerifier(fakeInput, fakeOutput).verifySource(null);
+            if (!passed) {
+                throw new RuntimeException(item.getFile().getAbsolutePath() + " " + fakeOutput.getText());
+            }
+            jar.addFile(Files.readAllBytes(item.getFile().toPath()), item.getFqn());
+        }
+        jar.close();
+        //the jar is saved to tmp with random name via agent alter
+        return Lib.addJar(vmInfo, isBoot, "custom" + toJar.size() + "classes.jar", Base64.getEncoder().encodeToString(jar.toBytes()), vmManager);
+    }
+
+    public static String addByteClassesViaJar(VmInfo vmInfo, List<IdentifiedBytecode> toJar, boolean isBoot, VmManager vmManager) throws IOException {
+        InMemoryJar jar = new InMemoryJar();
+        jar.open();
+        for (IdentifiedBytecode item : toJar) {
+            jar.addFile(item.getFile(), item.getClassIdentifier().getFullName());
+        }
+        jar.close();
+        //the jar is saved to tmp with random name via agent alter
+        return Lib.addJar(vmInfo, isBoot, "custom" + toJar.size() + "classes.jar", Base64.getEncoder().encodeToString(jar.toBytes()), vmManager);
     }
 
 }

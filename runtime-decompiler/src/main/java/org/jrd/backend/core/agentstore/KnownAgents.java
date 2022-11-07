@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -153,6 +154,8 @@ public final class KnownAgents {
                     }.getType()));
 
                 }
+                //to be garbage collected a bit later
+                JRD_TMP_FILE.toFile().setLastModified(new Date().getTime());
             } catch (Exception ex) {
                 Logger.getLogger().log(Logger.Level.ALL, ex);
             }

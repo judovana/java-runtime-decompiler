@@ -114,6 +114,10 @@ public class DiffPopup extends JPopupMenu {
         return line.startsWith("+++ ") && line.endsWith("/dev/null");
     }
 
+    public static boolean isDevNull(String line) {
+        return (line.startsWith("+++ ") || line.startsWith("--- ")) && line.endsWith("/dev/null");
+    }
+
     public static boolean isRemoveDevNull(String line) {
         return line.startsWith("--- ") && line.endsWith("/dev/null");
     }
@@ -158,6 +162,30 @@ public class DiffPopup extends JPopupMenu {
         });
 
         return item;
+    }
+
+    public static List<String> dummyCreate(List<String> buffer, List<String> patch, boolean revert) throws
+            PatchFailedException {
+        //pathc was preprepared by getIndividualPatches
+        //lets expect it did its j ob, and do not recreate the terirbel logic here
+        if (!buffer.isEmpty()) {
+            throw new PatchFailedException("trying to create new file in non empty original");
+        }
+        if (!patch.get(2).startsWith("@@")) {
+            throw new PatchFailedException("missing @@ header, although it is not yet checked for corrrectness");
+        }
+        String start = "+";
+        if (revert) {
+            start = "-";
+        }
+
+        for (int x = 3; x < patch.size(); x++) {
+            if (!patch.get(x).startsWith(start)) {
+                throw new PatchFailedException("Invalid line, all should star with " + start + " was: " + patch.get(x));
+            }
+            buffer.add(patch.get(x).substring(1));
+        }
+        return buffer;
     }
 
     public static List<String> patch(List<String> origFile, List<String> patch, boolean revert) throws

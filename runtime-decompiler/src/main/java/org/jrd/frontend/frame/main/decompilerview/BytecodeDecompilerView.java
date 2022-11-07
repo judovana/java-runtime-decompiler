@@ -822,7 +822,7 @@ public class BytecodeDecompilerView {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 StringSelection selection =
-                        new StringSelection(" -source " + buildJavaPerVersion + " -target " + buildJavaPerVersion + " ");
+                        new StringSelection("-source " + buildJavaPerVersion + " -target " + buildJavaPerVersion + " ");
                 Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
             }
         });

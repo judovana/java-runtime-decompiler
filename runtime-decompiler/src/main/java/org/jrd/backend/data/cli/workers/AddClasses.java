@@ -53,7 +53,7 @@ public class AddClasses {
         return vmInfo;
     }
 
-    private void addClassesGuessFqn(VmInfo vmInfo, List<String> files) throws IOException {
+    private String addClassesGuessFqn(VmInfo vmInfo, List<String> files) throws IOException {
         List<FqnAndClassToJar> toJar = new ArrayList<>(files.size());
         for (int x = 0; x < files.size(); x++) {
             File f = new File(files.get(x));
@@ -65,10 +65,15 @@ public class AddClasses {
             String fqn = Lib.readClassNameFromClass(Files.readAllBytes(f.toPath()));
             toJar.add(new FqnAndClassToJar(fqn, f));
         }
-        addJar(vmInfo, toJar);
+        return addClassesViaJarWraper(vmInfo, toJar);
     }
 
-    private void addClassesEvenWithFqns(VmInfo vmInfo, List<String> fqnAndFile) throws IOException {
+    private String  addClassesViaJarWraper(VmInfo vmInfo, List<FqnAndClassToJar> toJar) throws IOException {
+        System.out.println("Adding " + toJar.size() + " classes via jar to remote vm (" + Lib.getPrefixByBoot(isBoot) + ")");
+        return Lib.addFileClassesViaJar(vmInfo, toJar, isBoot, vmManager);
+    }
+
+    private String addClassesEvenWithFqns(VmInfo vmInfo, List<String> fqnAndFile) throws IOException {
         List<FqnAndClassToJar> toJar = new ArrayList<>(fqnAndFile.size() / 2);
         for (int x = 0; x < fqnAndFile.size(); x = x + 2) {
             String fqn = fqnAndFile.get(x);
@@ -80,23 +85,8 @@ public class AddClasses {
             }
             toJar.add(new FqnAndClassToJar(fqn, f));
         }
-        addJar(vmInfo, toJar);
+        return addClassesViaJarWraper(vmInfo, toJar);
     }
 
-    private void addJar(VmInfo vmInfo, List<FqnAndClassToJar> toJar) throws IOException {
-        System.out.println("Adding " + toJar.size() + " classes via jar to remote vm (" + Lib.getPrefixByBoot(isBoot) + ")");
-        InMemoryJar jar = new InMemoryJar();
-        jar.open();
-        for (FqnAndClassToJar item : toJar) {
-            GetSetText fakeInput = new GetSetText.DummyGetSet(item.getFile().getAbsolutePath());
-            GetSetText fakeOutput = new GetSetText.DummyGetSet("ok?");
-            boolean passed = new ClassVerifier(fakeInput, fakeOutput).verifySource(null);
-            if (!passed) {
-                throw new RuntimeException(item.getFile().getAbsolutePath() + " " + fakeOutput.getText());
-            }
-            jar.addFile(Files.readAllBytes(item.getFile().toPath()), item.getFqn());
-        }
-        jar.close();
-        Lib.addJar(vmInfo, isBoot, "custom" + toJar.size() + "classes.jar", Base64.getEncoder().encodeToString(jar.toBytes()), vmManager);
-    }
+
 }

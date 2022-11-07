@@ -123,4 +123,18 @@ class DiffPopupTest {
         b = DiffPopup.isRemoveFile("--- /dev/null");
         Assertions.assertFalse(b);
     }
+
+    @Test
+    void isDevNull() {
+        boolean b;
+        b = DiffPopup.isDevNull("+++ file1");
+        Assertions.assertFalse(b);
+        b = DiffPopup.isDevNull("--- file1");
+        Assertions.assertFalse(b);
+        b = DiffPopup.isDevNull("+++ /dev/null");
+        Assertions.assertTrue(b);
+        b = DiffPopup.isDevNull("--- /dev/null");
+        Assertions.assertTrue(b);
+
+    }
 }
