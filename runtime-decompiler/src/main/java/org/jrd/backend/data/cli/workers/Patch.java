@@ -156,6 +156,8 @@ public class Patch {
         for (SingleFilePatch startEnd : files) {
             String className = DiffPopup.parseClassFromHeader(patch.get(startEnd.getStart()));
             boolean isNew = DiffPopup.isDevNull(patch.get(startEnd.getStart() + 1));
+            //todo, maybe repalce default group by scan from vm, eg for java.lang.Integer?
+            //and thus have sane default?
             Integer byteCodeLevel = null;
             if (isNew) {
                 System.out.println("Creating " + className);
