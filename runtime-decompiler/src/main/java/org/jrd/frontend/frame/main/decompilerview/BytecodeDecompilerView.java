@@ -43,6 +43,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -809,6 +810,11 @@ public class BytecodeDecompilerView {
         bytecodeBuffer.resetSrcArea(data);
         int buildJavaPerVersion = Lib.getBuildJavaPerVersion(source);
         Config.getConfig().setBestSourceTarget(Optional.of(buildJavaPerVersion));
+        if (Config.getConfig().doOverwriteST()){
+            bytecodeButton.setFont(bytecodeBuffer.getFont().deriveFont(Font.BOLD));
+        } else {
+            bytecodeButton.setFont(bytecodeBuffer.getFont().deriveFont(Font.ITALIC));
+        }
         bytecodeButton.setText(buildJavaPerVersion + "");
         bytecodeButton.setToolTipText(
                 styleTooltip() + "bytecode java version:" + buildJavaPerVersion + ". Click here to  copy it as source/target<br>" +

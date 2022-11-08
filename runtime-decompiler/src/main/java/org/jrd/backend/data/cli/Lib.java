@@ -1,6 +1,7 @@
 package org.jrd.backend.data.cli;
 
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
+import org.jrd.backend.communication.ErrorCandidate;
 import org.jrd.backend.core.AgentAttachManager;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.ClassInfo;
@@ -8,6 +9,7 @@ import org.jrd.backend.core.DecompilerRequestReceiver;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.core.agentstore.KnownAgent;
+import org.jrd.backend.data.Config;
 import org.jrd.backend.data.MetadataProperties;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
@@ -487,6 +489,28 @@ public final class Lib {
         jar.close();
         //the jar is saved to tmp with random name via agent alter
         return Lib.addJar(vmInfo, isBoot, "custom" + toJar.size() + "classes.jar", Base64.getEncoder().encodeToString(jar.toBytes()), vmManager);
+    }
+
+    public static Integer getDefaultRemoteBytecodelevelCatched(VmInfo vmInfo, VmManager vmManager) {
+        try {
+            return getDefaultRemoteBytecodelevel(vmInfo, vmManager);
+        } catch (Exception ex) {
+            Logger.getLogger().log(ex);
+            return null;
+        }
+    }
+    public static Integer getDefaultRemoteBytecodelevel(VmInfo vmInfo, VmManager vmManager) {
+        String className = java.lang.Object.class.getName();
+        return getDefaultRemoteBytecodelevel(vmInfo, vmManager, className);
+    }
+
+    public static Integer getDefaultRemoteBytecodelevel(VmInfo vmInfo, VmManager vmManager, String className) {
+        String base64Bytes = Lib.obtainClass(vmInfo, className, vmManager).getLoadedClassBytes();
+        ErrorCandidate errorCandidateRemote = new ErrorCandidate(base64Bytes);
+        if (errorCandidateRemote.isError()) {
+            throw new RuntimeException(className + " not found on local nor remote paths/vm"); //not probable, see the init check above
+        }
+        return Lib.getBuildJavaPerVersion(Base64.getDecoder().decode(base64Bytes));
     }
 
 }

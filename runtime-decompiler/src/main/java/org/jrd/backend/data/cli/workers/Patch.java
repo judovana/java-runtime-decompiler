@@ -5,6 +5,8 @@ import com.github.difflib.patch.PatchFailedException;
 import org.jrd.backend.communication.ErrorCandidate;
 import org.jrd.backend.communication.FsAgent;
 import org.jrd.backend.core.AgentRequestAction;
+import org.jrd.backend.core.Logger;
+import org.jrd.backend.data.Config;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
 import org.jrd.backend.data.cli.utils.BytecodeSorter;
@@ -94,14 +96,6 @@ public class Patch {
         List<SingleFilePatch> files = DiffPopup.getIndividualPatches(patch);
         for (int i = 0; i < files.size(); i++) {
             SingleFilePatch startEnd = files.get(i);
-            /**
-             * todo, compile the +++ b/runtime-deco
-             * with biggest group? By default?
-             * new agent api to get more info from runniong vm?
-             *
-             * never to defaul, default is just wrong.
-             * add new files to the default group, and MERGE whole default group to the BIGEST other group
-             */
             String header1 = patch.get(startEnd.getStart());
             String header2 = patch.get(startEnd.getStart() + 1);
             String className = DiffPopup.parseClassFromHeader(header1);
@@ -155,19 +149,17 @@ public class Patch {
         Map<String, Integer> bytecodeLevelCache = new HashMap<>();
         for (SingleFilePatch startEnd : files) {
             String className = DiffPopup.parseClassFromHeader(patch.get(startEnd.getStart()));
+            String base64Bytes;
             boolean isNew = DiffPopup.isDevNull(patch.get(startEnd.getStart() + 1));
-            //todo, maybe repalce default group by scan from vm, eg for java.lang.Integer?
-            //and thus have sane default?
-            //fixme, can  be misleading, if we upload to NEWER jvm...
-            Integer byteCodeLevel = null;
+            Integer byteCodeLevel = Lib.getDefaultRemoteBytecodelevelCatched(vmInfo, vmManager);
             if (isNew) {
                 System.out.println("Creating " + className);
                 added.add(className);
-                obtainedCodeWithNameAndBytecode.add(new ObtainedCodeWithNameAndBytecode(className, Base64.getEncoder().encodeToString(new byte[0]), null));
-                bytecodeLevelCache.put(className, byteCodeLevel);
+                base64Bytes = Base64.getEncoder().encodeToString(new byte[0]);
+                System.out.println("setting up default group level " + byteCodeLevel + "");
             } else {
                 System.out.println("Obtaining " + className);
-                String base64Bytes = initialSearch.submitRequest(AgentRequestAction.RequestAction.BYTES + " " + className);
+                base64Bytes = initialSearch.submitRequest(AgentRequestAction.RequestAction.BYTES + " " + className);
                 ErrorCandidate errorCandidateLocal = new ErrorCandidate(base64Bytes);
                 if (errorCandidateLocal.isError()) {
                     //not found on additional cp/sp: getting from puc
@@ -203,9 +195,13 @@ public class Patch {
                         System.out.println("...local src ( compiled as " + byteCodeLevel + ")");
                     }
                 }
-                obtainedCodeWithNameAndBytecode.add(new ObtainedCodeWithNameAndBytecode(className, base64Bytes, byteCodeLevel));
-                bytecodeLevelCache.put(className, byteCodeLevel);
             }
+            if (!Config.getConfig().doOverwriteST()) {
+                System.out.println(" * Overwrite of source/target turned off! Resetting to defaults *");
+                byteCodeLevel = null;
+            }
+            obtainedCodeWithNameAndBytecode.add(new ObtainedCodeWithNameAndBytecode(className, base64Bytes, byteCodeLevel));
+            bytecodeLevelCache.put(className, byteCodeLevel);
         }
         if (obtainedCodeWithNameAndBytecode.size() == remote.size()) {
             System.out.println("Warning! All classes found only in remote vm!");

@@ -95,11 +95,26 @@ public class Compile {
                         detectedByteCode = versions[1]; /**/
                         Logger.getLogger().log(Logger.Level.ALL, fqn + " - detected bytecode in source VM: " + detectedByteCode);
                     } catch (Exception ex) {
-                        System.out.println(""); //findbugs issue
+                        Logger.getLogger().log(ex);
                     }
                 }
                 if (detectedByteCode == null) {
-                    Logger.getLogger().log(Logger.Level.ALL, fqn + " - failed to detect bytecode level");
+                    if (targetVm != null) {
+                        detectedByteCode = Lib.getDefaultRemoteBytecodelevelCatched(targetVm, vmManager);
+                    }
+                    if (detectedByteCode == null) {
+                        try {
+                            String randomClass = Lib.obtainClasses(args.getClassesProvider().getVmInfo(), vmManager)[0];
+                            detectedByteCode = Lib.getDefaultRemoteBytecodelevel(args.getClassesProvider().getVmInfo(), vmManager, randomClass);
+                        } catch (Exception ex) {
+                            Logger.getLogger().log(ex);
+                        }
+                    }
+                    Logger.getLogger().log(Logger.Level.ALL, fqn + " - failed to detect bytecode level. Fallback to " + (detectedByteCode == null ? "nothing" : detectedByteCode.intValue()));
+                }
+                if (!Config.getConfig().doOverwriteST()) {
+                    Logger.getLogger().log(Logger.Level.ALL, " * Overwrite of source/target turned off! Resetting to defaults *");
+                    detectedByteCode = null;
                 }
                 List<IdentifiedSource> sources = sortedSources.get(detectedByteCode);
                 if (sources == null) {
@@ -111,8 +126,6 @@ public class Compile {
         }
         PluginWrapperWithMetaInfo wrapper = Lib.getPluginWrapper(pluginManager, args.getWantedCustomCompiler(), true);
         List<IdentifiedBytecode> allBytecode = new ArrayList<>();
-        //Do not use default grup, unless it is alone.
-        //Always merge default group to the biggest other group
         for (Map.Entry<Integer, List<IdentifiedSource>> entry : sortedSources.entrySet()) {
             Integer detectedByteCode = entry.getKey();
             IdentifiedSource[] identifiedSources = entry.getValue().toArray(new IdentifiedSource[0]);
