@@ -49,10 +49,11 @@ public class VmInfo implements Serializable {
 
     /**
      * Stores information about Available Virtual Machine.
-     * @param vmId Unique ID for this VmInfo
-     * @param vmPid Virtual Machine process ID
+     *
+     * @param vmId   Unique ID for this VmInfo
+     * @param vmPid  Virtual Machine process ID
      * @param vmName Name for the Virtual Machine. Hostname for remote VMs
-     * @param type local, remote, type
+     * @param type   local, remote, type
      */
     public VmInfo(String vmId, int vmPid, String vmName, Type type, List<File> cp) {
         setVmId(vmId);
@@ -68,9 +69,14 @@ public class VmInfo implements Serializable {
         }
         if (vmDecompilerStatus != null) {
             KnownAgents.getInstance().verifyAgents();
-            List<KnownAgent> found = KnownAgents.getInstance().findAgents(
-                    vmDecompilerStatus.getHostname(), vmDecompilerStatus.getListenPort(), Integer.parseInt(vmDecompilerStatus.getVmId())
-            );
+            List<KnownAgent> found;
+            try {
+                found = KnownAgents.getInstance().findAgents(
+                        vmDecompilerStatus.getHostname(), vmDecompilerStatus.getListenPort(), Integer.parseInt(vmDecompilerStatus.getVmId())
+                );
+            } catch (NumberFormatException ex) {
+                found = KnownAgents.getInstance().findAgents(vmDecompilerStatus.getHostname(), vmDecompilerStatus.getListenPort());
+            }
             if (found.isEmpty()) {
                 vmDecompilerStatus = null;
             }
