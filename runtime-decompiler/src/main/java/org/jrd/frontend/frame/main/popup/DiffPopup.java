@@ -15,25 +15,33 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JEditorPane;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.WindowConstants;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 public class DiffPopup extends JPopupMenu {
+
+    private static File lastOpened = new File(System.getProperty("user.dir"));
+
     private final Optional<String> fqn;
     private final LinesProvider[] linesProviders;
     JCheckBox human = new JCheckBox("human readable");
@@ -156,11 +164,33 @@ public class DiffPopup extends JPopupMenu {
                     }
                 });
                 d.add(apply, BorderLayout.SOUTH);
+                JButton open = new JButton("Load patch file");
+                open.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent actionEvent) {
+                        loadPatch(t, open);
+                    }
+                });
+                d.add(open, BorderLayout.NORTH);
                 d.setVisible(true);
             }
         });
-
         return item;
+    }
+
+    private void loadPatch(RSyntaxTextArea t, Component open) {
+        JFileChooser jFileChooser = new JFileChooser(lastOpened);
+        int fo = jFileChooser.showOpenDialog(open);
+        File nwf = jFileChooser.getSelectedFile();
+        if (fo == JFileChooser.APPROVE_OPTION && nwf != null) {
+            try {
+                t.setText(Files.readString(nwf.toPath()));
+                lastOpened = nwf;
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(open, ex.getMessage());
+            }
+        }
     }
 
     public static List<String> dummyCreate(List<String> buffer, List<String> patch, boolean revert) throws PatchFailedException {
