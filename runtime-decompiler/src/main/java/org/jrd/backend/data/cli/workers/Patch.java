@@ -73,8 +73,8 @@ public class Patch {
      */
     @SuppressWarnings(
         {"MethodLength", "CyclomaticComplexity", "ExecutableStatementCount", "JavaNCSS", "UnnecessaryParentheses",
-                "ModifiedControlVariable", "NestedIfDepth"}
-    )
+                "ModifiedControlVariable", "NestedIfDepth", "LineLength", "Indentation"}
+    ) // Indentation and LineLength are because of this line itself :-/ Remove them once refactored!
     public VmInfo patch() throws Exception {
         //--patch <puc>  ((plugin)xor(SP/CP)( (-hex) (-R) < patch
         String puc;

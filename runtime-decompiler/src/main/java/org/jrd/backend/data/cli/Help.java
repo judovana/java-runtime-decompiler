@@ -262,7 +262,9 @@ public final class Help {
             for (String launchOption : launchOptions()) {
                 System.out.println(indent(1) + launcher(true) + launchOption);
             }
-            System.out.println(indent(1) + launcher(false) + HEX + " launches standalone hex (and text) editor/diff. Mighty diff.");
+            System.out.println(
+                    indent(1) + launcher(false) + HEX + " [file, file...]" + " launches standalone hex (and text) editor/diff. Mighty diff."
+            );
         }
 
         void printOptionsHeading();
