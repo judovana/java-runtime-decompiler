@@ -5,6 +5,7 @@ import org.fife.ui.hex.swing.HexTableModel;
 import org.jrd.backend.core.Logger;
 
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.border.EtchedBorder;
 import java.awt.BorderLayout;
@@ -16,6 +17,7 @@ import java.awt.event.KeyEvent;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -69,10 +71,12 @@ public class HexWithControls extends JPanel implements LinesProvider {
         return hex.get();
     }
 
+    @Override
     public void undo() {
         hex.undo();
     }
 
+    @Override
     public void redo() {
         hex.redo();
     }
@@ -185,5 +189,26 @@ public class HexWithControls extends JPanel implements LinesProvider {
         } else {
             return super.getName();
         }
+    }
+
+    @Override
+    public JComponent asComponent() {
+        return this;
+    }
+
+    @Override
+    public void save(File f) throws IOException {
+        Files.write(f.toPath(), hex.get());
+    }
+
+    @Override
+    public void open(File f) throws IOException {
+        this.open(Files.readAllBytes(f.toPath()));
+    }
+
+
+    @Override
+    public void resetUndoRedo() {
+        //nothig to do in hex
     }
 }

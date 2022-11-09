@@ -1,6 +1,8 @@
 package org.jrd.frontend.frame.main.decompilerview;
 
+import javax.swing.JComponent;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 public interface LinesProvider {
@@ -24,5 +26,14 @@ public interface LinesProvider {
 
     File getFile();
     void setFile(File f);
+
+    void open(File f) throws IOException;
+    void save(File f) throws IOException;
+
+    JComponent asComponent();
+
+    void undo();
+    void redo();
+    void resetUndoRedo();
 
 }

@@ -1,6 +1,5 @@
 package org.jrd.frontend.frame.hex;
 
-import org.jrd.frontend.frame.main.decompilerview.HexWithControls;
 import org.jrd.frontend.frame.main.decompilerview.LinesProvider;
 import org.jrd.frontend.frame.main.popup.DiffPopup;
 import org.jrd.frontend.utility.ImageButtonFactory;
@@ -12,7 +11,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -25,9 +23,9 @@ import javax.swing.JTabbedPane;
 
 public class FeatureFullHex extends JPanel {
 
-    private final HexWithControls hex;
+    private final LinesProvider hex;
 
-    public FeatureFullHex(final File f, final JTabbedPane parent) throws IOException {
+    public FeatureFullHex(final File f, final JTabbedPane parent, LinesProvider impl) throws IOException {
         this.setName(f.getName());
         this.setLayout(new BorderLayout());
         JPanel tool = new JPanel();
@@ -49,11 +47,11 @@ public class FeatureFullHex extends JPanel {
                 Component[] comps = parent.getComponents();
                 List<LinesProvider> r = new ArrayList<>();
                 for (int i = selected; i < comps.length - 1/*the plus button*/ ; i++) {
-                    HexWithControls featureFullHex = (HexWithControls) (((JPanel) comps[i]).getComponents()[1]);
+                    LinesProvider featureFullHex = (LinesProvider) (((JPanel) comps[i]).getComponents()[1]);
                     r.add(featureFullHex);
                 }
                 for (int i = 0; i < selected; i++) {
-                    HexWithControls featureFullHex = (HexWithControls) (((JPanel) comps[i]).getComponents()[1]);
+                    LinesProvider featureFullHex = (LinesProvider) (((JPanel) comps[i]).getComponents()[1]);
                     r.add(featureFullHex);
                 }
                 return r;
@@ -67,40 +65,39 @@ public class FeatureFullHex extends JPanel {
         tool.add(open);
         tool.add(close);
         this.add(tool, BorderLayout.NORTH);
-        hex = new HexWithControls(null);
+        hex = impl;
         hex.setFile(f);
-        hex.open(Files.readAllBytes(f.toPath()));
-        this.add(hex, BorderLayout.CENTER);
+        hex.open(f);
+        this.add(hex.asComponent(), BorderLayout.CENTER);
         save.addActionListener(a -> {
             JFileChooser jFileChooser = new JFileChooser(hex.getFile());
-            int fo = jFileChooser.showSaveDialog(hex);
+            int fo = jFileChooser.showSaveDialog(hex.asComponent());
             File nwf = jFileChooser.getSelectedFile();
             if (fo == JFileChooser.APPROVE_OPTION && nwf != null) {
                 try {
-                    Files.write(nwf.toPath(), hex.get());
+                    hex.save(nwf);
                     hex.setFile(nwf);
                     FeatureFullHex.this.setName(nwf.getName());
                     updateTitles(parent);
                 } catch (Exception ex) {
                     ex.printStackTrace();
-                    JOptionPane.showMessageDialog(hex, ex.getMessage());
+                    JOptionPane.showMessageDialog(hex.asComponent(), ex.getMessage());
                 }
             }
         });
         open.addActionListener(a -> {
             JFileChooser jFileChooser = new JFileChooser(hex.getFile());
-            int fo = jFileChooser.showOpenDialog(hex);
+            int fo = jFileChooser.showOpenDialog(hex.asComponent());
             File nwf = jFileChooser.getSelectedFile();
             if (fo == JFileChooser.APPROVE_OPTION && nwf != null) {
                 try {
-                    byte[] nwBytes = Files.readAllBytes(nwf.toPath());
                     hex.setFile(nwf);
-                    hex.open(nwBytes);
+                    hex.open(nwf);
                     FeatureFullHex.this.setName(nwf.getName());
                     updateTitles(parent);
                 } catch (Exception ex) {
                     ex.printStackTrace();
-                    JOptionPane.showMessageDialog(hex, ex.getMessage());
+                    JOptionPane.showMessageDialog(hex.asComponent(), ex.getMessage());
                 }
             }
         });

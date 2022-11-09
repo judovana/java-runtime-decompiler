@@ -9,11 +9,14 @@ import java.awt.Point;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -42,11 +45,14 @@ public class TextWithControls extends JPanel implements LinesProvider {
         return bytecodeSyntaxTextArea.getText().getBytes(StandardCharsets.UTF_8);
     }
 
-    public void undoLastAction() {
+    @Override
+    public void undo() {
         bytecodeSyntaxTextArea.undoLastAction();
     }
 
-    public void redoLastAction() {
+
+    @Override
+    public void redo() {
         bytecodeSyntaxTextArea.redoLastAction();
     }
 
@@ -57,8 +63,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
 
     void resetSrcArea(String data) {
         bytecodeSyntaxTextArea.setText(data);
-        bytecodeSyntaxTextArea.discardAllEdits(); // makes the bytecode upload not undoable
-        bytecodeSyntaxTextArea.setCaretPosition(0);
+        resetUndoRedo();
     }
 
     private RSyntaxTextArea createSrcTextArea(boolean api) {
@@ -132,5 +137,37 @@ public class TextWithControls extends JPanel implements LinesProvider {
     @Override
     public void setFile(File f) {
         this.f = f;
+    }
+
+    @Override
+    public void open(File f) throws IOException {
+        String s = Files.readString(f.toPath());
+        resetSrcArea(s);
+    }
+
+    @Override
+    public void save(File f) throws IOException {
+        Files.writeString(f.toPath(), bytecodeSyntaxTextArea.getText());
+    }
+
+    @Override
+    public JComponent asComponent() {
+        return this;
+    }
+
+
+    @Override
+    public void resetUndoRedo() {
+        bytecodeSyntaxTextArea.discardAllEdits(); // makes the bytecode upload not undoable
+        bytecodeSyntaxTextArea.setCaretPosition(0);
+    }
+
+    @Override
+    public String getName() {
+        if (getFile() != null) {
+            return getFile().getName();
+        } else {
+            return super.getName();
+        }
     }
 }

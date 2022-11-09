@@ -434,13 +434,13 @@ public class BytecodeDecompilerView {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 if (BytecodeDecompilerView.this.isDecompiledBytecodeBufferVisible()) {
-                    bytecodeBuffer.undoLastAction();
+                    bytecodeBuffer.undo();
                 }
                 if (BytecodeDecompilerView.this.isAdditionalDecompiledBytecodeBufferVisible()) {
-                    additionalBytecodeBuffer.undoLastAction();
+                    additionalBytecodeBuffer.undo();
                 }
                 if (BytecodeDecompilerView.this.isAdditionalSrcBufferVisible()) {
-                    additionalSrcBuffer.undoLastAction();
+                    additionalSrcBuffer.undo();
                 } else if (BytecodeDecompilerView.this.isBinaryBufferVisible()) {
                     binary.undo();
                 } else if (BytecodeDecompilerView.this.isAdditionalBinaryBufferVisible()) {
@@ -454,13 +454,13 @@ public class BytecodeDecompilerView {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 if (BytecodeDecompilerView.this.isDecompiledBytecodeBufferVisible()) {
-                    bytecodeBuffer.redoLastAction();
+                    bytecodeBuffer.redo();
                 }
                 if (BytecodeDecompilerView.this.isAdditionalDecompiledBytecodeBufferVisible()) {
-                    additionalBytecodeBuffer.redoLastAction();
+                    additionalBytecodeBuffer.redo();
                 }
                 if (BytecodeDecompilerView.this.isAdditionalSrcBufferVisible()) {
-                    additionalSrcBuffer.redoLastAction();
+                    additionalSrcBuffer.redo();
                 } else if (BytecodeDecompilerView.this.isBinaryBufferVisible()) {
                     binary.redo();
                 } else if (BytecodeDecompilerView.this.isAdditionalBinaryBufferVisible()) {
