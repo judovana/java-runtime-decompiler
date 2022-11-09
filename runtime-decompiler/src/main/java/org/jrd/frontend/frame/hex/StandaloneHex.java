@@ -6,6 +6,7 @@ import org.jrd.frontend.frame.main.decompilerview.TextWithControls;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.HeadlessException;
 import java.io.File;
 import java.io.IOException;
@@ -22,6 +23,7 @@ import javax.swing.WindowConstants;
 
 public class StandaloneHex extends JFrame {
 
+    private static int counter = 0;
     File lastOpened = new File(System.getProperty("user.dir"));
 
     public StandaloneHex(List<String> files) throws HeadlessException, IOException {
@@ -34,14 +36,23 @@ public class StandaloneHex extends JFrame {
             JPanel wrapper = new FeatureFullHex(new File(s), tp, new HexWithControls(null));
             tp.add(wrapper);
         }
+        JPanel topButtons = new JPanel(new GridLayout(1, 2));
         JButton openHex = new JButton("Open file (hex)");
         openHex.setFont(openHex.getFont().deriveFont(Font.BOLD));
-        JButton exit = new JButton("exit");
+        JButton openEmptyHex = new JButton("Open empty hex");
+        topButtons.add(openEmptyHex, BorderLayout.WEST);
+        topButtons.add(openHex, BorderLayout.EAST);
+        JPanel lowButtons = new JPanel(new GridLayout(1, 2));
         JButton openText = new JButton("Open file (text)... just because we can, it do not mean it is good idea");
+        JButton openEmptyText = new JButton("Open empty text");
+        openEmptyText.setFont(openEmptyText.getFont().deriveFont(Font.BOLD));
+        lowButtons.add(openEmptyText, BorderLayout.WEST);
+        lowButtons.add(openText, BorderLayout.EAST);
+        final JButton exit = new JButton("exit");
         final JPanel plus = new JPanel(new BorderLayout());
-        plus.add(openHex, BorderLayout.NORTH);
+        plus.add(topButtons, BorderLayout.NORTH);
         plus.add(exit, BorderLayout.CENTER);
-        plus.add(openText, BorderLayout.SOUTH);
+        plus.add(lowButtons, BorderLayout.SOUTH);
         plus.setName("+");
         tp.add(plus);
         this.add(tp);
@@ -53,6 +64,19 @@ public class StandaloneHex extends JFrame {
         openText.addActionListener(a -> {
             addMainPanel(tp, openHex, plus, new TextWithControls(null));
         });
+
+        openEmptyHex.addActionListener(a -> {
+            addEmptyMainPanel(tp, openHex, plus, new HexWithControls(null));
+        });
+
+        openEmptyText.addActionListener(a -> {
+            addEmptyMainPanel(tp, openHex, plus, new TextWithControls(null));
+        });
+    }
+
+    public static File getNext() {
+        counter++;
+        return new File(System.getProperty("user.home") + File.separator + "file" + counter);
     }
 
     private void addMainPanel(JTabbedPane tp, JButton openHex, JPanel plus, final LinesProvider lp) {
@@ -71,10 +95,24 @@ public class StandaloneHex extends JFrame {
     }
 
     private void movePlus(JTabbedPane tp, JPanel plus, File nwf, JComponent ffh) {
+        final int i = tp.getSelectedIndex();
         tp.remove(plus);
         tp.add(ffh);
         tp.add(plus);
-        lastOpened = nwf;
+        if (nwf != null) {
+            lastOpened = nwf;
+        }
+        tp.setSelectedIndex(i);
+    }
+
+    private void addEmptyMainPanel(JTabbedPane tp, JButton openHex, JPanel plus, final LinesProvider lp) {
+        try {
+            FeatureFullHex ffh = new FeatureFullHex(null, tp, lp);
+            movePlus(tp, plus, null, ffh);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(openHex, ex.getMessage());
+        }
     }
 
 }

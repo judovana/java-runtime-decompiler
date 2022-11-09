@@ -26,7 +26,6 @@ public class FeatureFullHex extends JPanel {
     private final LinesProvider hex;
 
     public FeatureFullHex(final File f, final JTabbedPane parent, LinesProvider impl) throws IOException {
-        this.setName(f.getName());
         this.setLayout(new BorderLayout());
         JPanel tool = new JPanel();
         tool.setLayout(new GridLayout(1, 6));
@@ -66,8 +65,15 @@ public class FeatureFullHex extends JPanel {
         tool.add(close);
         this.add(tool, BorderLayout.NORTH);
         hex = impl;
-        hex.setFile(f);
-        hex.open(f);
+        if (f != null) {
+            this.setName(f.getName());
+            hex.setFile(f);
+            hex.open(f);
+        } else {
+            File ff = StandaloneHex.getNext();
+            this.setName(ff.getName());
+            hex.setFile(ff);
+        }
         this.add(hex.asComponent(), BorderLayout.CENTER);
         save.addActionListener(new ActionListener() {
             @Override

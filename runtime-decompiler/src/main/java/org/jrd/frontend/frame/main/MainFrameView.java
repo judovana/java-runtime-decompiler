@@ -5,6 +5,7 @@ import org.jrd.backend.data.Directories;
 import org.jrd.backend.data.MetadataProperties;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.frontend.frame.about.AboutView;
+import org.jrd.frontend.frame.hex.StandaloneHex;
 import org.jrd.frontend.frame.license.LicenseView;
 import org.jrd.frontend.frame.main.decompilerview.BytecodeDecompilerView;
 import org.jrd.frontend.frame.main.decompilerview.DecompilationController;
@@ -48,6 +49,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -97,6 +99,7 @@ public class MainFrameView {
     private JMenuBar menuBar;
     private JMenu jMenuConnect;
     private JMenuItem jMenuItemNewConnection;
+    private JMenuItem openEditor;
     private JMenu jMenuConfig;
     private JMenuItem jMenuSettings;
     private JMenuItem jMenuPluginEditor;
@@ -422,6 +425,17 @@ public class MainFrameView {
             newConnectionDialogListener.actionPerformed(actionEvent);
         });
         jMenuConnect.add(jMenuItemNewConnection);
+        openEditor = new JMenuItem("Open Hex/Text notes");
+        openEditor.addActionListener(a -> {
+            StandaloneHex hexview = null;
+            try {
+                hexview = new StandaloneHex(new ArrayList<>());
+                hexview.setVisible(true);
+            } catch (IOException ex) {
+                Logger.getLogger().log(ex);
+            }
+        });
+        jMenuConnect.add(openEditor);
         // jMenuConnect end
 
         jMenuConfig = new JMenu("Configure");
