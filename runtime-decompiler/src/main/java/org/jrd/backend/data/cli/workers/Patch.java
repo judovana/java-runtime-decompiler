@@ -5,7 +5,6 @@ import com.github.difflib.patch.PatchFailedException;
 import org.jrd.backend.communication.ErrorCandidate;
 import org.jrd.backend.communication.FsAgent;
 import org.jrd.backend.core.AgentRequestAction;
-import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.Config;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
@@ -14,9 +13,9 @@ import org.jrd.backend.data.cli.CliUtils;
 import org.jrd.backend.data.cli.utils.CompileArguments;
 import org.jrd.backend.data.cli.Help;
 import org.jrd.backend.data.cli.Lib;
-import org.jrd.backend.data.cli.utils.FqnAndClassToJar;
 import org.jrd.backend.data.cli.utils.ObtainedCodeWithNameAndBytecode;
 import org.jrd.backend.data.cli.utils.PluginWrapperWithMetaInfo;
+import org.jrd.backend.data.cli.utils.Saving;
 import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.main.decompilerview.DecompilationController;
 import org.jrd.frontend.frame.main.decompilerview.HexWithControls;
@@ -24,6 +23,8 @@ import org.jrd.frontend.frame.main.popup.DiffPopup;
 import org.jrd.frontend.frame.main.popup.SingleFilePatch;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -39,6 +40,7 @@ import java.util.stream.Collectors;
 import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
+import org.jrd.frontend.utility.CommonUtils;
 
 public class Patch {
 
@@ -49,10 +51,11 @@ public class Patch {
     private final boolean isVerbose;
     private final boolean isRevert;
     private final boolean isBoot;
+    private final Saving saving;
 
     public Patch(
             boolean isHex, boolean isVerbose, List<String> filteredArgs, boolean isRevert, VmManager vmManager,
-            PluginManager pluginManager, boolean isBoot
+            PluginManager pluginManager, boolean isBoot, Saving saving
     ) {
         this.filteredArgs = filteredArgs;
         this.isRevert = isRevert;
@@ -61,6 +64,7 @@ public class Patch {
         this.isHex = isHex;
         this.isVerbose = isVerbose;
         this.isBoot = isBoot;
+        this.saving = saving;
     }
 
     /* FIXME refactor
@@ -261,6 +265,19 @@ public class Patch {
             }
         }
 
+        if (saving != null && saving.shouldSave() && saving.getLike().equals(Saving.FQN)) {
+            File f = new File(saving.getAs());
+            if (!f.exists()) {
+                throw new FileNotFoundException(f.getAbsolutePath() + " do not exists");
+            }
+            System.out.println("Saving set as " + saving.getLike() + " saving patched sources to " + f.getAbsolutePath());
+            for (Map.Entry<String, String> singlePatched : patched.entrySet()) {
+                String fqn = singlePatched.getKey();
+                byte[] body = Base64.getDecoder().decode(singlePatched.getValue());
+                CommonUtils.saveByGui(saving.getAs(), saving.toInt(null), ".java", saving, fqn, body);
+            }
+            return vmInfo;
+        }
         //in addition, we have to different by bytecode version (although it is src only)
         Map<Integer, Map<String, String>> binariesToUpload = new HashMap<>(files.size());
         if (isHex) {
@@ -290,6 +307,21 @@ public class Patch {
             }
         }
 
+        if (saving != null && saving.shouldSave() && saving.getLike().equals(Saving.DIR)) {
+            File f = new File(saving.getAs());
+            if (!f.exists()) {
+                throw new FileNotFoundException(f.getAbsolutePath() + " do not exists");
+            }
+            System.out.println("Saving set as " + saving.getLike() + " saving pathced compiled classes to " + f.getAbsolutePath());
+            for (Map.Entry<Integer, Map<String, String>> toUploadWithBytecode : binariesToUpload.entrySet()) {
+                for (Map.Entry<String, String> toUpload : toUploadWithBytecode.getValue().entrySet()) {
+                    String fqn = toUpload.getKey();
+                    byte[] body = Base64.getDecoder().decode(toUpload.getValue());
+                    CommonUtils.saveByGui(saving.getAs(), saving.toInt(null), ".class", saving, fqn, body);
+                }
+            }
+            return vmInfo;
+        }
         List<String> failures = new ArrayList<>();
         List<String> passes = new ArrayList<>();
         for (Map.Entry<Integer, Map<String, String>> toUploadWithBytecode : binariesToUpload.entrySet()) {

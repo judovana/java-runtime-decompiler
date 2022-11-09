@@ -111,7 +111,8 @@ public final class Help {
             " is set, then binary from additional-class-path is patched and uploaded. In both cases, class is INIT before all.\n" +
             "This is a bit different from gui, where patch is patching just one file.\n" +
             "In cli can contain several files, and is moreover direct shortcut to init, bytes, (decompile,) patch,( detect bytecode" +
-            " level, compile,) upload.\n" + "As patch tool, " + REVERT + " will invert the patch";
+            " level, compile,) upload.\n" + "As patch tool, " + REVERT + " will invert the patch\n" +
+            "For debugging -savelike dir can be used to save patched and compiled output. -savelike fqn can be used to save patched sources";
     private static final String INIT_TEXT = "Try to initialize a class in a running JVM (has no effect in FS VMs). " +
             "Because class loading is lazy, the class you need might be missing, eg. java.lang.Override.";
     static final String ATTACH_TEXT = "Will only attach the agent to selected pid. Prints out the port for future usage.";
