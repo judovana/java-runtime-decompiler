@@ -155,7 +155,10 @@ public final class KnownAgents {
 
                 }
                 //to be garbage collected a bit later
-                JRD_TMP_FILE.toFile().setLastModified(new Date().getTime());
+                boolean touch = JRD_TMP_FILE.toFile().setLastModified(new Date().getTime());
+                if (!touch) {
+                    Logger.getLogger().log("failed to touch " + JRD_TMP_FILE.toFile().getAbsolutePath());
+                }
             } catch (Exception ex) {
                 Logger.getLogger().log(Logger.Level.ALL, ex);
             }

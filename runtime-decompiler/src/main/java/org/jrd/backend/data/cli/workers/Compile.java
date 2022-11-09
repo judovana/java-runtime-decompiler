@@ -105,12 +105,17 @@ public class Compile {
                     if (detectedByteCode == null) {
                         try {
                             String randomClass = Lib.obtainClasses(args.getClassesProvider().getVmInfo(), vmManager)[0];
-                            detectedByteCode = Lib.getDefaultRemoteBytecodelevel(args.getClassesProvider().getVmInfo(), vmManager, randomClass);
+                            detectedByteCode =
+                                    Lib.getDefaultRemoteBytecodelevel(args.getClassesProvider().getVmInfo(), vmManager, randomClass);
                         } catch (Exception ex) {
                             Logger.getLogger().log(ex);
                         }
                     }
-                    Logger.getLogger().log(Logger.Level.ALL, fqn + " - failed to detect bytecode level. Fallback to " + (detectedByteCode == null ? "nothing" : detectedByteCode.intValue()));
+                    Logger.getLogger().log(
+                            Logger.Level.ALL,
+                            fqn + " - failed to detect bytecode level. Fallback to " +
+                                    (detectedByteCode == null ? "nothing" : detectedByteCode)
+                    );
                 }
                 if (!Config.getConfig().doOverwriteST()) {
                     Logger.getLogger().log(Logger.Level.ALL, " * Overwrite of source/target turned off! Resetting to defaults *");

@@ -1,6 +1,7 @@
 package org.jrd.frontend.frame.hex;
 
 import org.jrd.frontend.frame.main.decompilerview.HexWithControls;
+import org.jrd.frontend.frame.main.decompilerview.LinesProvider;
 import org.jrd.frontend.frame.main.decompilerview.TextWithControls;
 
 import java.awt.BorderLayout;
@@ -46,42 +47,34 @@ public class StandaloneHex extends JFrame {
         this.add(tp);
         exit.addActionListener(a -> StandaloneHex.this.dispose());
         openHex.addActionListener(a -> {
-            JFileChooser jFileChooser = new JFileChooser(lastOpened);
-            int fo = jFileChooser.showOpenDialog(openHex);
-            File nwf = jFileChooser.getSelectedFile();
-            if (fo == JFileChooser.APPROVE_OPTION && nwf != null) {
-                try {
-                    FeatureFullHex ffh = new FeatureFullHex(nwf, tp, new HexWithControls(null));
-                    extracted(tp, plus, nwf, ffh);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    JOptionPane.showMessageDialog(openHex, ex.getMessage());
-                }
-            }
+            addMainPanel(tp, openHex, plus, new HexWithControls(null));
         });
 
         openText.addActionListener(a -> {
-            JFileChooser jFileChooser = new JFileChooser(lastOpened);
-            int fo = jFileChooser.showOpenDialog(openHex);
-            File nwf = jFileChooser.getSelectedFile();
-            if (fo == JFileChooser.APPROVE_OPTION && nwf != null) {
-                try {
-                    FeatureFullHex ffh = new FeatureFullHex(nwf, tp, new TextWithControls(null));
-                    extracted(tp, plus, nwf, ffh);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    JOptionPane.showMessageDialog(openHex, ex.getMessage());
-                }
-            }
+            addMainPanel(tp, openHex, plus, new TextWithControls(null));
         });
     }
 
-    private void extracted(JTabbedPane tp, JPanel plus, File nwf, JComponent ffh) {
+    private void addMainPanel(JTabbedPane tp, JButton openHex, JPanel plus, final LinesProvider lp) {
+        JFileChooser jFileChooser = new JFileChooser(lastOpened);
+        int fo = jFileChooser.showOpenDialog(openHex);
+        File nwf = jFileChooser.getSelectedFile();
+        if (fo == JFileChooser.APPROVE_OPTION && nwf != null) {
+            try {
+                FeatureFullHex ffh = new FeatureFullHex(nwf, tp, lp);
+                movePlus(tp, plus, nwf, ffh);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(openHex, ex.getMessage());
+            }
+        }
+    }
+
+    private void movePlus(JTabbedPane tp, JPanel plus, File nwf, JComponent ffh) {
         tp.remove(plus);
         tp.add(ffh);
         tp.add(plus);
         lastOpened = nwf;
     }
-
 
 }

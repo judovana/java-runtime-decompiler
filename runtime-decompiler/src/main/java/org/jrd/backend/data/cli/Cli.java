@@ -214,7 +214,8 @@ public class Cli {
                     new Compile(isHex, isVerbose, filteredArgs, saving, vmManager, pluginManager).compileWrapper(operatedOn);
                     break;
                 case PATCH:
-                    VmInfo patchVmInfo = new Patch(isHex, isVerbose, filteredArgs, isRevert, vmManager, pluginManager, isBoot, saving).patch();
+                    VmInfo patchVmInfo =
+                            new Patch(isHex, isVerbose, filteredArgs, isRevert, vmManager, pluginManager, isBoot, saving).patch();
                     operatedOn.add(patchVmInfo);
                     break;
                 case OVERWRITE:

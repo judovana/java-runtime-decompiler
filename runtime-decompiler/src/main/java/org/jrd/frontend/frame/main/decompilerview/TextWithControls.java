@@ -26,7 +26,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
     private final RSyntaxTextArea bytecodeSyntaxTextArea;
     private final SearchControlsPanel bytecodeSearchControls;
     private DecompilationController.AgentApiGenerator popup;
-    private File f;
+    private File decorativeFilePlaceholder;
 
     public TextWithControls(String title) {
         HexWithControls.initTabLayers(this, title);
@@ -49,7 +49,6 @@ public class TextWithControls extends JPanel implements LinesProvider {
     public void undo() {
         bytecodeSyntaxTextArea.undoLastAction();
     }
-
 
     @Override
     public void redo() {
@@ -131,12 +130,12 @@ public class TextWithControls extends JPanel implements LinesProvider {
 
     @Override
     public File getFile() {
-        return f;
+        return decorativeFilePlaceholder;
     }
 
     @Override
     public void setFile(File f) {
-        this.f = f;
+        this.decorativeFilePlaceholder = f;
     }
 
     @Override
@@ -154,7 +153,6 @@ public class TextWithControls extends JPanel implements LinesProvider {
     public JComponent asComponent() {
         return this;
     }
-
 
     @Override
     public void resetUndoRedo() {

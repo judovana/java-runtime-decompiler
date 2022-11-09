@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 public class HexWithControls extends JPanel implements LinesProvider {
 
     private static byte[] fakeClip;
-    private File f;
+    private File decorativeFilePlaceholder;
 
     private final HexEditor hex;
     private SearchControlsPanel hexSearchControls;
@@ -71,24 +71,6 @@ public class HexWithControls extends JPanel implements LinesProvider {
         return hex.get();
     }
 
-    @Override
-    public void undo() {
-        hex.undo();
-    }
-
-    @Override
-    public void redo() {
-        hex.redo();
-    }
-
-    public void open(byte[] source) {
-        try {
-            hex.open(new ByteArrayInputStream(source));
-        } catch (IOException ex) {
-            Logger.getLogger().log(ex);
-        }
-    }
-
     private HexEditor createHexArea() {
         HexEditor lhex = new HexEditor();
         lhex.addKeyListenerToTable(new KeyAdapter() {
@@ -111,6 +93,16 @@ public class HexWithControls extends JPanel implements LinesProvider {
         p.setName(title);
         p.setLayout(new BorderLayout());
         p.setBorder(new EtchedBorder());
+    }
+
+    @Override
+    public void undo() {
+        hex.undo();
+    }
+
+    @Override
+    public void redo() {
+        hex.redo();
     }
 
     @Override
@@ -145,14 +137,6 @@ public class HexWithControls extends JPanel implements LinesProvider {
         return Arrays.asList(results);
     }
 
-    @Override
-    public void setLines(LinesFormat type, List<String> nwContent) throws Exception {
-        if (type == LinesFormat.CHARS) {
-            throw new RuntimeException("only hex can be pasted in");
-        }
-        hex.set(hexToBytes(hexLinesToHexString(nwContent)));
-    }
-
     public static String hexLinesToHexString(List<String> s) {
         return s.stream().collect(Collectors.joining(""));
     }
@@ -168,18 +152,26 @@ public class HexWithControls extends JPanel implements LinesProvider {
     }
 
     @Override
+    public void setLines(LinesFormat type, List<String> nwContent) throws Exception {
+        if (type == LinesFormat.CHARS) {
+            throw new RuntimeException("only hex can be pasted in");
+        }
+        hex.set(hexToBytes(hexLinesToHexString(nwContent)));
+    }
+
+    @Override
     public boolean isBin() {
         return true;
     }
 
     @Override
     public File getFile() {
-        return f;
+        return decorativeFilePlaceholder;
     }
 
     @Override
     public void setFile(File f) {
-        this.f = f;
+        this.decorativeFilePlaceholder = f;
     }
 
     @Override
@@ -201,11 +193,18 @@ public class HexWithControls extends JPanel implements LinesProvider {
         Files.write(f.toPath(), hex.get());
     }
 
+    public void open(byte[] source) {
+        try {
+            hex.open(new ByteArrayInputStream(source));
+        } catch (IOException ex) {
+            Logger.getLogger().log(ex);
+        }
+    }
+
     @Override
     public void open(File f) throws IOException {
         this.open(Files.readAllBytes(f.toPath()));
     }
-
 
     @Override
     public void resetUndoRedo() {

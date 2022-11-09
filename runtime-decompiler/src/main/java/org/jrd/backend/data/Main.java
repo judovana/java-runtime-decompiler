@@ -14,7 +14,6 @@ public class Main {
         if (cli.isGui()) {
             setLookAndFeel();
             if (cli.isHex()) {
-                System.err.println("standalon hex editor nto yet fully enaabled");
                 StandaloneHex hexview = new StandaloneHex(cli.getFilteredArgs());
                 hexview.setVisible(true);
             } else {

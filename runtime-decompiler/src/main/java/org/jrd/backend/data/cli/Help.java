@@ -112,7 +112,8 @@ public final class Help {
             "This is a bit different from gui, where patch is patching just one file.\n" +
             "In cli can contain several files, and is moreover direct shortcut to init, bytes, (decompile,) patch,( detect bytecode" +
             " level, compile,) upload.\n" + "As patch tool, " + REVERT + " will invert the patch\n" +
-            "For debugging -savelike dir can be used to save patched and compiled output. -savelike fqn can be used to save patched sources";
+            "For debugging -savelike dir can be used to save patched and compiled output." +
+            " -savelike fqn can be used to save patched sources";
     private static final String INIT_TEXT = "Try to initialize a class in a running JVM (has no effect in FS VMs). " +
             "Because class loading is lazy, the class you need might be missing, eg. java.lang.Override.";
     static final String ATTACH_TEXT = "Will only attach the agent to selected pid. Prints out the port for future usage.";
@@ -214,9 +215,9 @@ public final class Help {
     }
 
     private static final String[] UNSAVABLE_OPTIONS = new String[]{HELP, H, REVERT, HEX, BOOT_CLASS_LOADER, SYSTEM_CLASS_LOADER, OVERWRITE,
-            INIT, REMOVE_OVERRIDES, PATCH, ADD_CLASS, ADD_CLASSES, ADD_JAR, LIST_OVERRIDES_FORMAT};
+            INIT, REMOVE_OVERRIDES, ADD_CLASS, ADD_CLASSES, ADD_JAR, LIST_OVERRIDES_FORMAT};
     private static final String[] SAVABLE_OPTIONS = new String[]{LIST_CLASSES, LIST_CLASSESDETAILS, BYTES, BASE64, DEPS, COMPILE, DECOMPILE,
-            API, LIST_JVMS, LIST_PLUGINS, LIST_CLASSESBYTECODEVERSIONS, LIST_CLASSESDETAILSBYTECODEVERSIONS, SEARCH};
+            PATCH, API, LIST_JVMS, LIST_PLUGINS, LIST_CLASSESBYTECODEVERSIONS, LIST_CLASSESDETAILSBYTECODEVERSIONS, SEARCH};
 
     private static final int LONGEST_FORMAT_LENGTH = Stream.of(ALL_OPTIONS.keySet(), SAVING_OPTIONS.keySet()).flatMap(Collection::stream)
             .map(String::length).max(Integer::compare).orElse(30) + 1; // at least one space between format and text
@@ -259,8 +260,9 @@ public final class Help {
          */
         default void printUsage() {
             for (String launchOption : launchOptions()) {
-                System.out.println(indent(1) + launcher() + launchOption);
+                System.out.println(indent(1) + launcher(true) + launchOption);
             }
+            System.out.println(indent(1) + launcher(false) + HEX + " launches standalone hex (and text) editor/diff. Mighty diff.");
         }
 
         void printOptionsHeading();
@@ -295,7 +297,7 @@ public final class Help {
             return new String[]{"# launches GUI", optionize(UNSAVABLE_OPTIONS), optionize(SAVABLE_OPTIONS) + savingModifiers()};
         }
 
-        String launcher();
+        String launcher(boolean verbose);
 
         String savingModifiers();
 
@@ -355,8 +357,12 @@ public final class Help {
         }
 
         @Override
-        public String launcher() {
-            return (Directories.isOsWindows() ? LAUNCHER_WINDOWS : LAUNCHER_LINUX) + " [" + VERBOSE + "] ";
+        public String launcher(boolean verbose) {
+            String tail = " ";
+            if (verbose) {
+                tail = " [" + VERBOSE + "] ";
+            }
+            return (Directories.isOsWindows() ? LAUNCHER_WINDOWS : LAUNCHER_LINUX) + tail;
         }
 
         @Override
@@ -444,10 +450,14 @@ public final class Help {
         }
 
         @Override
-        public String launcher() {
+        public String launcher(boolean verbose) {
             // initial \n is for paragraph separation
             // the trailing space separates from rest of line
-            return "\n" + optionize(new String[]{LAUNCHER_LINUX, LAUNCHER_WINDOWS}) + " [" + formatWrap('I', VERBOSE) + "] ";
+            String tail = " ";
+            if (verbose) {
+                tail = " [" + formatWrap('I', VERBOSE) + "] ";
+            }
+            return "\n" + optionize(new String[]{LAUNCHER_LINUX, LAUNCHER_WINDOWS}) + tail;
         }
 
         @Override

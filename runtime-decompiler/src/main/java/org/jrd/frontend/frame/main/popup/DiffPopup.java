@@ -24,7 +24,6 @@ import javax.swing.JTextArea;
 import javax.swing.WindowConstants;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -91,9 +90,9 @@ public class DiffPopup extends JPopupMenu {
         JMenu applyPatch = new JMenu();
         applyPatch.setText("Apply patch");
         for (int x = 0; x < iterateTo; x++) {
-            if ((linesProviders[x].isText())) {
+            if (linesProviders[x].isText()) {
                 applyPatch.add(createPatchAction(x, LinesProvider.LinesFormat.CHARS));
-            } else if ((linesProviders[x].isBin())) {
+            } else if (linesProviders[x].isBin()) {
                 applyPatch.add(createPatchAction(x, LinesProvider.LinesFormat.HEX));
             } else {
                 throw new RuntimeException("unknown text/bin");
@@ -136,7 +135,7 @@ public class DiffPopup extends JPopupMenu {
         item.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                JDialog d = new JDialog((JFrame) null, "paste patch to apply to " + patchTitle(component,fqn));
+                JDialog d = new JDialog((JFrame) null, "paste patch to apply to " + patchTitle(component, fqn));
                 d.setSize(new Dimension(800, 600));
                 d.setLocationRelativeTo(null);
                 RSyntaxTextArea t = new RSyntaxTextArea("");
@@ -164,8 +163,7 @@ public class DiffPopup extends JPopupMenu {
         return item;
     }
 
-    public static List<String> dummyCreate(List<String> buffer, List<String> patch, boolean revert) throws
-            PatchFailedException {
+    public static List<String> dummyCreate(List<String> buffer, List<String> patch, boolean revert) throws PatchFailedException {
         //pathc was preprepared by getIndividualPatches
         //lets expect it did its j ob, and do not recreate the terirbel logic here
         if (!buffer.isEmpty()) {
@@ -188,8 +186,7 @@ public class DiffPopup extends JPopupMenu {
         return buffer;
     }
 
-    public static List<String> patch(List<String> origFile, List<String> patch, boolean revert) throws
-            PatchFailedException {
+    public static List<String> patch(List<String> origFile, List<String> patch, boolean revert) throws PatchFailedException {
         Patch<String> importedPatch = UnifiedDiffUtils.parseUnifiedDiff(patch);
         List<String> patchedText = revert ? DiffUtils.unpatch(origFile, importedPatch) : DiffUtils.patch(origFile, importedPatch);
         return patchedText;
@@ -201,7 +198,10 @@ public class DiffPopup extends JPopupMenu {
         if (linesProviders[x].getFile() != null) {
             //we assume both are files then
             //todo, make relative?
-            process(l0, l1, linesProviders[x].getFile().getAbsolutePath(), linesProviders[y].getFile().getAbsolutePath(), invert.isSelected(), human.isSelected(), fqn);
+            process(
+                    l0, l1, linesProviders[x].getFile().getAbsolutePath(), linesProviders[y].getFile().getAbsolutePath(),
+                    invert.isSelected(), human.isSelected(), fqn
+            );
         } else {
             process(l0, l1, linesProviders[x].getName(), linesProviders[y].getName(), invert.isSelected(), human.isSelected(), fqn);
         }
@@ -211,8 +211,9 @@ public class DiffPopup extends JPopupMenu {
         processBin(null, x, y);
     }
 
-    private static void process(List<String> l0, List<String> l1, String n0, String n1, boolean invert,
-                                boolean human, Optional<String> fqn) {
+    private static
+            void
+            process(List<String> l0, List<String> l1, String n0, String n1, boolean invert, boolean human, Optional<String> fqn) {
         if (invert) {
             List<String> l = l0;
             l0 = l1;

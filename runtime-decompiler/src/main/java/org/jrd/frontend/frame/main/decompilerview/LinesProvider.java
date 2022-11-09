@@ -21,19 +21,23 @@ public interface LinesProvider {
     boolean isBin();
 
     default boolean isText() {
-        return ! isBin();
+        return !isBin();
     }
 
     File getFile();
+
     void setFile(File f);
 
     void open(File f) throws IOException;
+
     void save(File f) throws IOException;
 
     JComponent asComponent();
 
     void undo();
+
     void redo();
+
     void resetUndoRedo();
 
 }

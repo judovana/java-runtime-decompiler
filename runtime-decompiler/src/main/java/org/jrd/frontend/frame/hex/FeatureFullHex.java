@@ -46,7 +46,7 @@ public class FeatureFullHex extends JPanel {
                 int selected = parent.getSelectedIndex();
                 Component[] comps = parent.getComponents();
                 List<LinesProvider> r = new ArrayList<>();
-                for (int i = selected; i < comps.length - 1/*the plus button*/ ; i++) {
+                for (int i = selected; i < comps.length - 1/*the plus button*/; i++) {
                     LinesProvider featureFullHex = (LinesProvider) (((JPanel) comps[i]).getComponents()[1]);
                     r.add(featureFullHex);
                 }
@@ -58,9 +58,9 @@ public class FeatureFullHex extends JPanel {
             }
         });
         tool.add(diff);
-        JButton save = (new JButton("Save"));
-        JButton open = (new JButton("Open"));
-        JButton close = (new JButton("Close"));
+        JButton save = new JButton("Save");
+        JButton open = new JButton("Open");
+        JButton close = new JButton("Close");
         tool.add(save);
         tool.add(open);
         tool.add(close);
@@ -69,45 +69,51 @@ public class FeatureFullHex extends JPanel {
         hex.setFile(f);
         hex.open(f);
         this.add(hex.asComponent(), BorderLayout.CENTER);
-        save.addActionListener(a -> {
-            JFileChooser jFileChooser = new JFileChooser(hex.getFile());
-            int fo = jFileChooser.showSaveDialog(hex.asComponent());
-            File nwf = jFileChooser.getSelectedFile();
-            if (fo == JFileChooser.APPROVE_OPTION && nwf != null) {
-                try {
-                    hex.save(nwf);
-                    hex.setFile(nwf);
-                    FeatureFullHex.this.setName(nwf.getName());
-                    updateTitles(parent);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    JOptionPane.showMessageDialog(hex.asComponent(), ex.getMessage());
+        save.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent a) {
+                JFileChooser jFileChooser = new JFileChooser(hex.getFile());
+                int fo = jFileChooser.showSaveDialog(hex.asComponent());
+                File nwf = jFileChooser.getSelectedFile();
+                if (fo == JFileChooser.APPROVE_OPTION && nwf != null) {
+                    try {
+                        hex.save(nwf);
+                        hex.setFile(nwf);
+                        FeatureFullHex.this.setName(nwf.getName());
+                        updateTitles(parent);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(hex.asComponent(), ex.getMessage());
+                    }
                 }
             }
         });
-        open.addActionListener(a -> {
-            JFileChooser jFileChooser = new JFileChooser(hex.getFile());
-            int fo = jFileChooser.showOpenDialog(hex.asComponent());
-            File nwf = jFileChooser.getSelectedFile();
-            if (fo == JFileChooser.APPROVE_OPTION && nwf != null) {
-                try {
-                    hex.setFile(nwf);
-                    hex.open(nwf);
-                    FeatureFullHex.this.setName(nwf.getName());
-                    updateTitles(parent);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    JOptionPane.showMessageDialog(hex.asComponent(), ex.getMessage());
+        open.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent a) {
+                JFileChooser jFileChooser = new JFileChooser(hex.getFile());
+                int fo = jFileChooser.showOpenDialog(hex.asComponent());
+                File nwf = jFileChooser.getSelectedFile();
+                if (fo == JFileChooser.APPROVE_OPTION && nwf != null) {
+                    try {
+                        hex.setFile(nwf);
+                        hex.open(nwf);
+                        FeatureFullHex.this.setName(nwf.getName());
+                        updateTitles(parent);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(hex.asComponent(), ex.getMessage());
+                    }
                 }
             }
         });
         close.addActionListener(a -> {
             parent.remove(FeatureFullHex.this);
         });
-        undo.addActionListener(a->{
+        undo.addActionListener(a -> {
             hex.undo();
         });
-        redo.addActionListener(a->{
+        redo.addActionListener(a -> {
             hex.redo();
         });
     }

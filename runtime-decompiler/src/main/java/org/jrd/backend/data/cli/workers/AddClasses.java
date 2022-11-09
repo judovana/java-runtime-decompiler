@@ -5,9 +5,7 @@ import org.jrd.backend.data.VmManager;
 import org.jrd.backend.data.cli.CliUtils;
 import org.jrd.backend.data.cli.utils.FqnAndClassToJar;
 import org.jrd.backend.data.cli.Help;
-import org.jrd.backend.data.cli.InMemoryJar;
 import org.jrd.backend.data.cli.Lib;
-import org.jrd.frontend.frame.main.decompilerview.verifiers.ClassVerifier;
 import org.jrd.frontend.frame.main.decompilerview.verifiers.FileVerifier;
 import org.jrd.frontend.frame.main.decompilerview.verifiers.GetSetText;
 
@@ -15,7 +13,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 
 public class AddClasses {
@@ -68,7 +65,7 @@ public class AddClasses {
         return addClassesViaJarWraper(vmInfo, toJar);
     }
 
-    private String  addClassesViaJarWraper(VmInfo vmInfo, List<FqnAndClassToJar> toJar) throws IOException {
+    private String addClassesViaJarWraper(VmInfo vmInfo, List<FqnAndClassToJar> toJar) throws IOException {
         System.out.println("Adding " + toJar.size() + " classes via jar to remote vm (" + Lib.getPrefixByBoot(isBoot) + ")");
         return Lib.addFileClassesViaJar(vmInfo, toJar, isBoot, vmManager);
     }
@@ -87,6 +84,5 @@ public class AddClasses {
         }
         return addClassesViaJarWraper(vmInfo, toJar);
     }
-
 
 }

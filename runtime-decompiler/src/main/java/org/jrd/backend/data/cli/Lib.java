@@ -9,7 +9,6 @@ import org.jrd.backend.core.DecompilerRequestReceiver;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.core.agentstore.KnownAgent;
-import org.jrd.backend.data.Config;
 import org.jrd.backend.data.MetadataProperties;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
@@ -463,7 +462,8 @@ public final class Lib {
         return cr.getClassName().replace('/', '.');
     }
 
-    public static String addFileClassesViaJar(VmInfo vmInfo, List<FqnAndClassToJar> toJar, boolean isBoot, VmManager vmManager) throws IOException {
+    public static String addFileClassesViaJar(VmInfo vmInfo, List<FqnAndClassToJar> toJar, boolean isBoot, VmManager vmManager)
+            throws IOException {
         InMemoryJar jar = new InMemoryJar();
         jar.open();
         for (FqnAndClassToJar item : toJar) {
@@ -477,10 +477,13 @@ public final class Lib {
         }
         jar.close();
         //the jar is saved to tmp with random name via agent alter
-        return Lib.addJar(vmInfo, isBoot, "custom" + toJar.size() + "classes.jar", Base64.getEncoder().encodeToString(jar.toBytes()), vmManager);
+        return Lib.addJar(
+                vmInfo, isBoot, "custom" + toJar.size() + "classes.jar", Base64.getEncoder().encodeToString(jar.toBytes()), vmManager
+        );
     }
 
-    public static String addByteClassesViaJar(VmInfo vmInfo, List<IdentifiedBytecode> toJar, boolean isBoot, VmManager vmManager) throws IOException {
+    public static String addByteClassesViaJar(VmInfo vmInfo, List<IdentifiedBytecode> toJar, boolean isBoot, VmManager vmManager)
+            throws IOException {
         InMemoryJar jar = new InMemoryJar();
         jar.open();
         for (IdentifiedBytecode item : toJar) {
@@ -488,7 +491,9 @@ public final class Lib {
         }
         jar.close();
         //the jar is saved to tmp with random name via agent alter
-        return Lib.addJar(vmInfo, isBoot, "custom" + toJar.size() + "classes.jar", Base64.getEncoder().encodeToString(jar.toBytes()), vmManager);
+        return Lib.addJar(
+                vmInfo, isBoot, "custom" + toJar.size() + "classes.jar", Base64.getEncoder().encodeToString(jar.toBytes()), vmManager
+        );
     }
 
     public static Integer getDefaultRemoteBytecodelevelCatched(VmInfo vmInfo, VmManager vmManager) {
@@ -499,6 +504,7 @@ public final class Lib {
             return null;
         }
     }
+
     public static Integer getDefaultRemoteBytecodelevel(VmInfo vmInfo, VmManager vmManager) {
         String className = java.lang.Object.class.getName();
         return getDefaultRemoteBytecodelevel(vmInfo, vmManager, className);

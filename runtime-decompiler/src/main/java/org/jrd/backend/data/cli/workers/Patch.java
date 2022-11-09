@@ -5,6 +5,7 @@ import com.github.difflib.patch.PatchFailedException;
 import org.jrd.backend.communication.ErrorCandidate;
 import org.jrd.backend.communication.FsAgent;
 import org.jrd.backend.core.AgentRequestAction;
+import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.Config;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
@@ -54,8 +55,8 @@ public class Patch {
     private final Saving saving;
 
     public Patch(
-            boolean isHex, boolean isVerbose, List<String> filteredArgs, boolean isRevert, VmManager vmManager,
-            PluginManager pluginManager, boolean isBoot, Saving saving
+            boolean isHex, boolean isVerbose, List<String> filteredArgs, boolean isRevert, VmManager vmManager, PluginManager pluginManager,
+            boolean isBoot, Saving saving
     ) {
         this.filteredArgs = filteredArgs;
         this.isRevert = isRevert;
@@ -70,7 +71,10 @@ public class Patch {
     /* FIXME refactor
      * The refactoring should be simple, there are obvious parts like check all , init all, gather all, compile all, upload all...
      */
-    @SuppressWarnings({"MethodLength", "CyclomaticComplexity", "ExecutableStatementCount", "JavaNCSS", "UnnecessaryParentheses"})
+    @SuppressWarnings(
+        {"MethodLength", "CyclomaticComplexity", "ExecutableStatementCount", "JavaNCSS", "UnnecessaryParentheses",
+                "ModifiedControlVariable", "NestedIfDepth"}
+    )
     public VmInfo patch() throws Exception {
         //--patch <puc>  ((plugin)xor(SP/CP)( (-hex) (-R) < patch
         String puc;
@@ -98,6 +102,7 @@ public class Patch {
         }
         List<String> patch = DecompilationController.stdinToStrings();
         List<SingleFilePatch> files = DiffPopup.getIndividualPatches(patch);
+        /*ModifiedControlVariable intnetional, removal*/
         for (int i = 0; i < files.size(); i++) {
             SingleFilePatch startEnd = files.get(i);
             String header1 = patch.get(startEnd.getStart());
@@ -156,6 +161,7 @@ public class Patch {
             String base64Bytes;
             boolean isNew = DiffPopup.isDevNull(patch.get(startEnd.getStart() + 1));
             Integer byteCodeLevel = Lib.getDefaultRemoteBytecodelevelCatched(vmInfo, vmManager);
+            /*NestedIfDepth:*/
             if (isNew) {
                 System.out.println("Creating " + className);
                 added.add(className);
@@ -333,8 +339,8 @@ public class Patch {
                 boolean maybeNew = false;
                 PrintStream defaultErr = System.err;
                 try {
-                    System.setErr(new PrintStream(new ByteArrayOutputStream())); //the init is to verbose in bellow
-                    Lib.initClass(vmInfo, vmManager, className, new PrintStream(new ByteArrayOutputStream()));
+                    System.setErr(new PrintStream(new ByteArrayOutputStream(), true, StandardCharsets.UTF_8)); //the init is to verbose in bellow
+                    Lib.initClass(vmInfo, vmManager, className, new PrintStream(new ByteArrayOutputStream(), true, StandardCharsets.UTF_8));
                 } catch (RuntimeException ex) {
                     //even if we would be counting new files during patching,
                     //there can be much more of them after compilation
@@ -346,14 +352,18 @@ public class Patch {
                     System.out.println("Uploading new class: " + className);
                     String reply1 = Lib.addByteClassesViaJar(
                             vmInfo,
-                            Arrays.asList(new IdentifiedBytecode[]{
-                                    new IdentifiedBytecode(
-                                            new ClassIdentifier(className),
-                                            Base64.getDecoder().decode(toUpload.getValue()))}),
-                            isBoot, vmManager);
+                            Arrays.asList(
+                                    new IdentifiedBytecode[]{new IdentifiedBytecode(
+                                            new ClassIdentifier(className), Base64.getDecoder().decode(toUpload.getValue())
+                                    )}
+                            ), isBoot, vmManager
+                    );
                     ErrorCandidate ec1 = new ErrorCandidate(reply1); //unluckily always ok
+                    if (ec1.isError()) {
+                        Logger.getLogger().log(Logger.Level.ALL, "Miracle, add bytes returned non ok: " + ec1.getErrorMessage());
+                    }
                     try {
-                        System.setErr(new PrintStream(new ByteArrayOutputStream()));
+                        System.setErr(new PrintStream(new ByteArrayOutputStream(), true, StandardCharsets.UTF_8));
                         reply = Lib.initClassNoThrow(vmInfo, vmManager, className);
                     } finally {
                         System.setErr(defaultErr);

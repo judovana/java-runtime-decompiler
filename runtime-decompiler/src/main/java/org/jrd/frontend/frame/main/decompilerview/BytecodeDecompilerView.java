@@ -420,13 +420,9 @@ public class BytecodeDecompilerView {
             }
 
             private LinesProvider[] toLines(Component[] knownLinesProvidingComponents) {
-                return new LinesProvider[]{
-                        (LinesProvider)knownLinesProvidingComponents[0],
-                        (LinesProvider)knownLinesProvidingComponents[1],
-                        (LinesProvider)knownLinesProvidingComponents[2],
-                        (LinesProvider)knownLinesProvidingComponents[3],
-                        (LinesProvider)knownLinesProvidingComponents[4]
-                };
+                return new LinesProvider[]{(LinesProvider) knownLinesProvidingComponents[0],
+                        (LinesProvider) knownLinesProvidingComponents[1], (LinesProvider) knownLinesProvidingComponents[2],
+                        (LinesProvider) knownLinesProvidingComponents[3], (LinesProvider) knownLinesProvidingComponents[4]};
             }
         });
         undoButton = ImageButtonFactory.createUndoButton();
@@ -810,7 +806,7 @@ public class BytecodeDecompilerView {
         bytecodeBuffer.resetSrcArea(data);
         int buildJavaPerVersion = Lib.getBuildJavaPerVersion(source);
         Config.getConfig().setBestSourceTarget(Optional.of(buildJavaPerVersion));
-        if (Config.getConfig().doOverwriteST()){
+        if (Config.getConfig().doOverwriteST()) {
             bytecodeButton.setFont(bytecodeBuffer.getFont().deriveFont(Font.BOLD));
         } else {
             bytecodeButton.setFont(bytecodeBuffer.getFont().deriveFont(Font.ITALIC));
@@ -827,8 +823,7 @@ public class BytecodeDecompilerView {
         bytecodeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                StringSelection selection =
-                        new StringSelection("-source " + buildJavaPerVersion + " -target " + buildJavaPerVersion + " ");
+                StringSelection selection = new StringSelection("-source " + buildJavaPerVersion + " -target " + buildJavaPerVersion + " ");
                 Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
             }
         });
