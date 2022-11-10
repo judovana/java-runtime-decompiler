@@ -2,6 +2,7 @@ package org.jrd.backend.data;
 
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.cli.Cli;
+import org.jrd.backend.data.cli.Help;
 import org.jrd.frontend.frame.hex.StandaloneHex;
 import org.jrd.frontend.frame.main.decompilerview.DecompilationController;
 import org.jrd.frontend.frame.main.MainFrameView;
@@ -13,12 +14,19 @@ public class Main {
         Cli cli = new Cli(allArgs, model);
         if (cli.isGui()) {
             setLookAndFeel();
-            if (cli.isHex()) {
-                StandaloneHex hexview = new StandaloneHex(cli.getFilteredArgs());
+            if (!cli.getFilteredArgs().isEmpty()) {
+                Help.printHelpText();
+                StandaloneHex hexview = new StandaloneHex(cli.getFilteredArgs(), cli.isHex());
                 hexview.setVisible(true);
             } else {
-                MainFrameView mainView = new MainFrameView();
-                new DecompilationController(mainView, model, cli.shouldBeVerbose());
+                if (cli.isHex() && cli.getFilteredArgs().isEmpty()) {
+                    Help.printHelpText();
+                    StandaloneHex hexview = new StandaloneHex(cli.getFilteredArgs(), cli.isHex());
+                    hexview.setVisible(true);
+                } else {
+                    MainFrameView mainView = new MainFrameView();
+                    new DecompilationController(mainView, model, cli.shouldBeVerbose());
+                }
             }
         } else {
             cli.consumeCli();

@@ -26,14 +26,19 @@ public class StandaloneHex extends JFrame {
     private static int counter = 0;
     File lastOpened = new File(System.getProperty("user.dir"));
 
-    public StandaloneHex(List<String> files) throws HeadlessException, IOException {
+    public StandaloneHex(List<String> files, boolean hex) throws HeadlessException, IOException {
         super("JRD's hex diff and editor");
         this.setSize(900, 800);
         this.setLocationRelativeTo(null);
         this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         final JTabbedPane tp = new JTabbedPane();
         for (String s : files) {
-            JPanel wrapper = new FeatureFullHex(new File(s), tp, new HexWithControls(null));
+            JPanel wrapper;
+            if (hex) {
+                wrapper = new FeatureFullHex(new File(s), tp, new HexWithControls(null));
+            } else {
+                wrapper = new FeatureFullHex(new File(s), tp, new TextWithControls(null));
+            }
             tp.add(wrapper);
         }
         JPanel topButtons = new JPanel(new GridLayout(1, 2));

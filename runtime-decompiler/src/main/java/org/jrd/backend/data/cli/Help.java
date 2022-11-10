@@ -39,7 +39,7 @@ public final class Help {
     public static final String REMOVE_OVERRIDES_FORMAT = REMOVE_OVERRIDES + " <PUC> removalRegex";
     public static final String LIST_PLUGINS_FORMAT = LIST_PLUGINS;
     public static final String LIST_CLASSES_FORMAT = LIST_CLASSES + BASE_SHARED_OPTIONAL_FORMAT;
-    public static final String SEARCH_FORMAT = SEARCH + BASE_SHARED_FORMAT + " searchedSubstring true/false (details)";
+    public static final String SEARCH_FORMAT = SEARCH + BASE_SHARED_FORMAT + " searchedSubstring true/false (with/without details)";
     public static final String LIST_CLASSESDETAILS_FORMAT = LIST_CLASSESDETAILS + BASE_SHARED_OPTIONAL_FORMAT;
     public static final String LIST_CLASSESBYTECODEVERSIONS_FORMAT = LIST_CLASSESBYTECODEVERSIONS + BASE_SHARED_OPTIONAL_FORMAT;
     public static final String LIST_CLASSESDETAILSVERSIONS_FORMAT = LIST_CLASSESDETAILSBYTECODEVERSIONS + BASE_SHARED_OPTIONAL_FORMAT;
@@ -225,7 +225,7 @@ public final class Help {
     private Help() {
     }
 
-    protected static void printHelpText() {
+    public static void printHelpText() {
         printHelpText(new CliHelpFormatter());
     }
 
@@ -263,7 +263,8 @@ public final class Help {
                 System.out.println(indent(1) + launcher(true) + launchOption);
             }
             System.out.println(
-                    indent(1) + launcher(false) + HEX + " [file, file...]" + " launches standalone hex (and text) editor/diff. Mighty diff."
+                    indent(1) + launcher(false) + "[" + HEX + "]" + " [file, file...]" +
+                            " launches standalone hex (or text) editor/diff. Mighty diff. " + HEX + " suggests, how to open `file, file...`"
             );
         }
 

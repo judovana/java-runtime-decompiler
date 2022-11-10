@@ -58,9 +58,8 @@ public class Cli {
         return isVerbose;
     }
 
-    @SuppressWarnings({"UnnecessaryParentheses"})
     public boolean isGui() {
-        return filteredArgs.isEmpty() || (isHex && (CliSwitches.noMatch(filteredArgs)));
+        return filteredArgs.isEmpty() || CliSwitches.noMatch(filteredArgs);
     }
 
     public boolean isHex() {

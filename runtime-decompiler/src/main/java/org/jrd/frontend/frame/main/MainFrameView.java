@@ -429,7 +429,7 @@ public class MainFrameView {
         openEditor.addActionListener(a -> {
             StandaloneHex hexview = null;
             try {
-                hexview = new StandaloneHex(new ArrayList<>());
+                hexview = new StandaloneHex(new ArrayList<>(), true);
                 hexview.setVisible(true);
             } catch (IOException ex) {
                 Logger.getLogger().log(ex);
