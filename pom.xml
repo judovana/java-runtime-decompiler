@@ -13,7 +13,7 @@
     </modules>
     <groupId>java-runtime-decompiler</groupId>
     <artifactId>java-runtime-decompiler</artifactId>
-    <version>7.0-SNAPSHOT.8</version>
+    <version>7.0-SNAPSHOT.9</version>
 
     <properties>
         <jrd.root.directory>${project.basedir}</jrd.root.directory>
