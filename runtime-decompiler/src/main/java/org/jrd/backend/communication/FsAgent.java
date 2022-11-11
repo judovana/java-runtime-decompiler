@@ -143,9 +143,9 @@ public final class FsAgent implements DelegatingJrdAgent {
                     uploadByteCode(classNameForOverwrite, futureBody);
                     return Communicate.NO_VALUE_OK_RESULT;
                 case ADD_CLASS:
-                    throw new RuntimeException("Not sure if adding class will be ever implemented for FS, but should be");
+                    throw new RuntimeException("add class is not implemented in FS vm, and never will - where to add it?");
                 case ADD_JAR:
-                    throw new RuntimeException("Add jar is not implemented in FS vm, and never will");
+                    throw new RuntimeException("Add jar is not implemented in FS vm, and never will - where to add it?");
                 case INIT_CLASS:
                     Logger.getLogger().log(Logger.Level.DEBUG, "Init class have no meaning in FS 'vm'");
                     return Communicate.NO_VALLUE_DONE_RESULT;
