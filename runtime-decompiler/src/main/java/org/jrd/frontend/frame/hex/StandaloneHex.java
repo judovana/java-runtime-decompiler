@@ -1,5 +1,6 @@
 package org.jrd.frontend.frame.hex;
 
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.jrd.frontend.frame.main.decompilerview.HexWithControls;
 import org.jrd.frontend.frame.main.decompilerview.LinesProvider;
 import org.jrd.frontend.frame.main.decompilerview.TextWithControls;
@@ -37,7 +38,7 @@ public class StandaloneHex extends JFrame {
             if (hex) {
                 wrapper = new FeatureFullHex(new File(s), tp, new HexWithControls(null));
             } else {
-                wrapper = new FeatureFullHex(new File(s), tp, new TextWithControls(null));
+                wrapper = new FeatureFullHex(new File(s), tp, new TextWithControls(null, SyntaxConstants.SYNTAX_STYLE_JAVA));
             }
             tp.add(wrapper);
         }
@@ -67,7 +68,7 @@ public class StandaloneHex extends JFrame {
         });
 
         openText.addActionListener(a -> {
-            addMainPanel(tp, openHex, plus, new TextWithControls(null));
+            addMainPanel(tp, openHex, plus, new TextWithControls(null, SyntaxConstants.SYNTAX_STYLE_JAVA));
         });
 
         openEmptyHex.addActionListener(a -> {
@@ -75,7 +76,7 @@ public class StandaloneHex extends JFrame {
         });
 
         openEmptyText.addActionListener(a -> {
-            addEmptyMainPanel(tp, openHex, plus, new TextWithControls(null));
+            addEmptyMainPanel(tp, openHex, plus, new TextWithControls(null, SyntaxConstants.SYNTAX_STYLE_JAVA));
         });
     }
 

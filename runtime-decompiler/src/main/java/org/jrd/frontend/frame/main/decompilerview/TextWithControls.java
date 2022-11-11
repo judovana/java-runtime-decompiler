@@ -6,20 +6,26 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 
 import java.awt.BorderLayout;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.jrd.backend.core.Logger;
 
 public class TextWithControls extends JPanel implements LinesProvider {
 
@@ -29,12 +35,30 @@ public class TextWithControls extends JPanel implements LinesProvider {
     private File decorativeFilePlaceholder;
 
     public TextWithControls(String title) {
+        this(title, null);
+    }
+
+    public TextWithControls(String title, String codeSelect) {
         HexWithControls.initTabLayers(this, title);
         bytecodeSyntaxTextArea = createSrcTextArea(true);
         bytecodeSearchControls = SearchControlsPanel.createBytecodeControls(this);
         RTextScrollPane bytecodeScrollPane = new RTextScrollPane(bytecodeSyntaxTextArea);
         this.add(bytecodeScrollPane);
         this.add(bytecodeSearchControls, BorderLayout.SOUTH);
+
+        if (codeSelect != null) {
+            JComboBox<String> hgltr = new JComboBox<String>(getAllLexers());
+            hgltr.setSelectedItem(codeSelect);
+            hgltr.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent actionEvent) {
+                    if (bytecodeSyntaxTextArea != null) {
+                        bytecodeSyntaxTextArea.setSyntaxEditingStyle(hgltr.getSelectedItem().toString());
+                    }
+                }
+            });
+            this.add(hgltr, BorderLayout.NORTH);
+        }
     }
 
     public String getText() {
@@ -167,5 +191,29 @@ public class TextWithControls extends JPanel implements LinesProvider {
         } else {
             return super.getName();
         }
+    }
+
+    private static String[] getAllLexers() {
+        try {
+            List<String> r = new ArrayList<>();
+            Field[] fields = SyntaxConstants.class.getDeclaredFields();
+            for (Field field : fields) {
+                if (field.getType().equals(String.class)) {
+                    r.add(field.get(null).toString());
+                }
+            }
+            return r.toArray(new String[0]);
+        } catch (Exception ex) {
+            Logger.getLogger().log(ex);
+            return new String[]{ex.getMessage()};
+        }
+    }
+
+    public void setText(String s) {
+        bytecodeSyntaxTextArea.setText(s);
+    }
+
+    public void scrollDown() {
+        bytecodeSyntaxTextArea.setCaretPosition(bytecodeSyntaxTextArea.getDocument().getLength());
     }
 }

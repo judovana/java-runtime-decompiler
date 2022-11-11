@@ -2,8 +2,8 @@ package org.jrd.frontend.frame.main;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -16,7 +16,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -26,9 +25,9 @@ import java.util.stream.Collectors;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.github.mkoncek.classpathless.api.MessagesListener;
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.jrd.backend.core.Logger;
+import org.jrd.frontend.frame.main.decompilerview.TextWithControls;
 import org.jrd.frontend.frame.overwrite.OverwriteClassDialog;
 import org.jrd.frontend.utility.ScreenFinder;
 
@@ -44,7 +43,7 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
     public static final String[] CPLC_ITEMS =
             Arrays.stream(new String[]{CPLC_IL, CPLC_IA, CPLC_SO, CPLC_AC, CPLC_R}).sorted().toArray(String[]::new);
     private static GlobalConsole console = new GlobalConsole();
-    private final RSyntaxTextArea log;
+    private final TextWithControls log;
     private final JButton clean; //assigned by inherited listner
     private JList<String> verboseCplc;
     private final JFrame frame;
@@ -52,18 +51,17 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
 
     public GlobalConsole() {
         JButton tmpClean;
-        RSyntaxTextArea tmpLog;
+        TextWithControls tmpLog;
         JFrame tmpFrame;
         Logger.getLogger().disableGuiLogging();
         if (!GraphicsEnvironment.isHeadless()) {
             try {
                 verboseCplc = new JList(CPLC_ITEMS);
-                tmpLog = new RSyntaxTextArea();
-                tmpLog.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_SAS);
+                tmpLog = new TextWithControls("console", SyntaxConstants.SYNTAX_STYLE_SAS);
                 tmpClean = new JButton("Clean log");
                 tmpFrame = new JFrame("Log console");
                 tmpFrame.setLayout(new BorderLayout());
-                tmpFrame.add(new JScrollPane(tmpLog));
+                tmpFrame.add(tmpLog);
                 verboseCplc.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
                 verboseCplc.addListSelectionListener(actionEvent -> {
                     if (!actionEvent.getValueIsAdjusting()) {
@@ -101,16 +99,6 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
                 JCheckBox verbose = new JCheckBox("Verbose mode", Logger.getLogger().isVerbose());
                 verbose.setSelected(Logger.getLogger().isVerbose());
                 verbose.addActionListener(actionEvent -> Logger.getLogger().setVerbose(verbose.isSelected()));
-                JComboBox<String> hgltr = new JComboBox<String>(getAllLexers());
-                hgltr.setSelectedItem(SyntaxConstants.SYNTAX_STYLE_SAS);
-                hgltr.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent actionEvent) {
-                        if (log != null) {
-                            log.setSyntaxEditingStyle(hgltr.getSelectedItem().toString());
-                        }
-                    }
-                });
                 JPanel p = new JPanel(new BorderLayout());
                 p.add(tmpClean, BorderLayout.CENTER);
                 JPanel verbosity = new JPanel(new BorderLayout());
@@ -121,9 +109,9 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
                 verbosityScroller.setMaximumSize(new Dimension(verbosityScroller.getMaximumSize().width, 20));
                 verbosityScroller.setPreferredSize(new Dimension(verbosityScroller.getPreferredSize().width, 20));
                 verbosityScroller.setMinimumSize(new Dimension(verbosityScroller.getMaximumSize().width, 20));
-                verbosity.add(verbosityScroller, BorderLayout.SOUTH);
+                verbosity.add(new JLabel("<- compiler events to show"), BorderLayout.SOUTH);
+                p.add(verbosityScroller, BorderLayout.WEST);
                 p.add(verbosity, BorderLayout.EAST);
-                p.add(hgltr, BorderLayout.WEST);
                 tmpFrame.add(p, BorderLayout.SOUTH);
                 tmpFrame.setSize(800, 600);
                 tmpClean.addActionListener(new ActionListener() {
@@ -167,17 +155,6 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
         verboseCplc.setToolTipText("CPLC verbosity: " + System.getProperty(CPLC_DUPLICATED_CODE_VERBOSITY_CONSTANT, "none"));
     }
 
-    private String[] getAllLexers() throws IllegalAccessException {
-        List<String> r = new ArrayList<>();
-        Field[] fields = SyntaxConstants.class.getDeclaredFields();
-        for (Field field : fields) {
-            if (field.getType().equals(String.class)) {
-                r.add(field.get(null).toString());
-            }
-        }
-        return r.toArray(new String[0]);
-    }
-
     @SuppressFBWarnings(value = "MS_EXPOSE_REP", justification = "Public encapsulated singleton.")
     public static GlobalConsole getConsole() {
         return console;
@@ -218,7 +195,7 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
             if (ourLevel == Logger.Level.ALL || Logger.getLogger().isVerbose()) {
                 try {
                     log.setText(log.getText() + stamp() + tail(s));
-                    log.setCaretPosition(log.getDocument().getLength());
+                    log.scrollDown();
                 } catch (Exception ex) {
                     //belive or not, rsyntax are can throw exception form here, and asnothing expects that, it may be fatal
                     ex.printStackTrace();
@@ -241,7 +218,7 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
     public void setText(String s) {
         try {
             log.setText(s);
-            log.setCaretPosition(log.getDocument().getLength());
+            log.scrollDown();
         } catch (Exception ex) {
             //belive or not, rsyntax are can throw exception form here, and asnothing expects that, it may be fatal
             ex.printStackTrace();
