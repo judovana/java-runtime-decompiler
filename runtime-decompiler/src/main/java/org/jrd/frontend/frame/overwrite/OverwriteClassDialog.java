@@ -28,9 +28,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentListener;
 
@@ -420,26 +418,21 @@ public class OverwriteClassDialog extends JDialog {
     ) {
         ClassesProvider cp = new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager);
         ClasspathlessCompiler rc = getClasspathlessCompiler(wrapper, hasCompiler, isVerbose);
-        JDialog compilationRunningDialog = new JDialog((JFrame) null, "Compiling", true);
-        final JTextArea compilationLog = new JTextArea();
-        compilationRunningDialog.setSize(300, 400);
-        compilationRunningDialog.add(new JScrollPane(compilationLog));
-
+        GlobalConsole.getConsole().hide();
         OverwriteClassDialog.CompilationWithResult compiler = new OverwriteClassDialog.CompilationWithResult(rc, cp, new TextLog() {
             @Override
             public void setText(String s) {
-                compilationLog.setText(s);
+                GlobalConsole.getConsole().setText(s);
             }
 
             @Override
             public String getText() {
-                return compilationLog.getText();
+                return GlobalConsole.getConsole().getText();
             }
         }, sources);
         Thread t = new Thread(compiler);
         t.start();
-        compilationRunningDialog.setLocationRelativeTo(null);
-        compilationRunningDialog.setVisible(true);
+        GlobalConsole.getConsole().show(true);
 
         return compiler;
     }
@@ -609,7 +602,10 @@ public class OverwriteClassDialog extends JDialog {
                 Logger.getLogger().log(e);
                 compilationLog.setText(compilationLog.getText() + e.getMessage() + "\n");
             } finally {
-                String s = "Attempt to compile finished";
+                String s = "Attempt to compile finished successfully";
+                if (ex != null) {
+                    s = "Attempt to compile failed with - " + ex.getMessage();
+                }
                 Logger.getLogger().log(Logger.Level.DEBUG, s + ".");
                 compilationLog.setText(compilationLog.getText() + s + ", you may close dialog\n");
             }

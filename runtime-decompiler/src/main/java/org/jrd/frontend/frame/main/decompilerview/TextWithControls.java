@@ -214,6 +214,11 @@ public class TextWithControls extends JPanel implements LinesProvider {
     }
 
     public void scrollDown() {
-        bytecodeSyntaxTextArea.setCaretPosition(bytecodeSyntaxTextArea.getDocument().getLength());
+        try {
+            bytecodeSyntaxTextArea.setCaretPosition(bytecodeSyntaxTextArea.getDocument().getLength());
+        } catch (Exception ex) {
+            //belive or not, rsyntax are can throw exception form here, and asnothing expects that, it may be fatal
+            ex.printStackTrace();
+        }
     }
 }

@@ -2,6 +2,7 @@ package org.jrd.frontend.frame.main;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -46,20 +47,20 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
     private final TextWithControls log;
     private final JButton clean; //assigned by inherited listner
     private JList<String> verboseCplc;
-    private final JFrame frame;
+    private final JDialog frame;
     private boolean first = true;
 
     public GlobalConsole() {
         JButton tmpClean;
         TextWithControls tmpLog;
-        JFrame tmpFrame;
+        JDialog tmpFrame;
         Logger.getLogger().disableGuiLogging();
         if (!GraphicsEnvironment.isHeadless()) {
             try {
                 verboseCplc = new JList(CPLC_ITEMS);
                 tmpLog = new TextWithControls("console", SyntaxConstants.SYNTAX_STYLE_SAS);
                 tmpClean = new JButton("Clean log");
-                tmpFrame = new JFrame("Log console");
+                tmpFrame = new JDialog((JFrame) null, "Log console");
                 tmpFrame.setLayout(new BorderLayout());
                 tmpFrame.add(tmpLog);
                 verboseCplc.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -160,11 +161,20 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
         return console;
     }
 
+    public void hide() {
+        frame.setVisible(false);
+    }
+
     public void show() {
+        show(false);
+    }
+
+    public void show(boolean modal) {
         if (first) {
             ScreenFinder.centerWindowToCurrentScreen(frame);
             first = false;
         }
+        frame.setModal(modal);
         frame.setVisible(true);
     }
 
