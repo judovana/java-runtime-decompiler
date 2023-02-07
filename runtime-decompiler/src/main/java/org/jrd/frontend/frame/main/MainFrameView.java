@@ -495,8 +495,9 @@ public class MainFrameView {
 
         mainFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         mainFrame.setTitle(MetadataProperties.getInstance().getName());
-        mainFrame.setSize(1366, 768);
-        mainFrame.setMinimumSize(new Dimension(700, 340));
+        mainFrame.setMinimumSize(new Dimension(500, 340));
+        mainFrame.setPreferredSize(new Dimension(900, 600));
+        mainFrame.setSize(1400, 768);
         mainFrame.setLayout(new BorderLayout());
         ScreenFinder.centerWindowToCurrentScreen(mainFrame);
         mainFrame.setJMenuBar(menuBar);

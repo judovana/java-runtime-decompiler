@@ -593,7 +593,7 @@ public class BytecodeDecompilerView {
             @Override
             public void componentResized(ComponentEvent e) {
                 if (splitPaneFirstResize) {
-                    splitPane.setDividerLocation(0.40);
+                    splitPane.setDividerLocation(0.35);
                     splitPaneFirstResize = false;
                 }
             }
