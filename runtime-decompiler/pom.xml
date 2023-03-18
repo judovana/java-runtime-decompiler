@@ -208,7 +208,8 @@
                 <!-- procyon 0.6 was not yet released
                 use git clone  git@github.com:mstrobel/procyon.git
                 JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk ./gradlew  install
-                to push it to local repos
+                to push it to local repos.
+                Procyon needs besut.jcommander. For built image, it workws without, but otherwise may be missing
                 -->
                 <dependency>
                     <groupId>com.github.mstrobel</groupId>
@@ -227,6 +228,11 @@
                     <artifactId>procyon-compilertools</artifactId>
                     <version>1.0-SNAPSHOT</version>
                     <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>com.beust</groupId>
+                    <artifactId>jcommander</artifactId>
+                    <version>1.78</version>
                 </dependency>
 
                 <dependency>

@@ -141,6 +141,7 @@ function modifyAndCopyWrappers() {
 if [ "x$PLUGINS" == "xTRUE" ] ; then
   for dec in procyonAssembler procyon fernflower jasm jcoder cfr jd jasm7 jcoder7 jasmG jcoderG jasmG7 jcoderG7 ; do
     mkdir "$DECOMPILERS/$dec"
+    additionalDeps=""
     if [ "x$dec" == "xjasm" -o "x$dec" == "xjcoder" ] ; then
       lname=asmtools
     elif [ "x$dec" == "xjasm7" -o "x$dec" == "xjcoder7" ] ; then
@@ -151,14 +152,15 @@ if [ "x$PLUGINS" == "xTRUE" ] ; then
       lname=asmtools
     elif [ "x$dec" == "xjd" ] ; then
       lname=jd-core
-    elif [ "x$dec" == "xprocyonAssembler" ] ; then
+    elif [ "x$dec" == "xprocyonAssembler" -o "x$dec" == "xprocyon" ] ; then
       lname=procyon
+      additionalDeps="-e jcommander"
     else
       lname=$dec
     fi
     # this is very naive, and may cause multiple versions in images
     # TODO, read dependencies from pom even with versions, and maybe check them against the jsons
-    jars=`find $MVN_SOURCE | grep -e $lname | grep \.jar$`
+    jars=`find $MVN_SOURCE | grep -e $lname $additionalDeps | grep \.jar$`
     for jar in $jars ; do
       cp "$jar" "$DECOMPILERS/$dec"
     done
