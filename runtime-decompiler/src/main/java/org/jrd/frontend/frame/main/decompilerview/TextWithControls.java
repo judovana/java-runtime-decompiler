@@ -40,6 +40,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
     private final SearchControlsPanel bytecodeSearchControls;
     private DecompilationController.AgentApiGenerator popup;
     private File decorativeFilePlaceholder;
+    private KeywordBasedCodeCompletion codeCompletion;
 
     public TextWithControls(String title) {
         this(title, null);
@@ -64,11 +65,18 @@ public class TextWithControls extends JPanel implements LinesProvider {
                     @Override
                     public void actionPerformed(ActionEvent actionEvent) {
                         CompletionSettings newSettings = new CompletionSettingsDialogue().showForResults();
+                        //null was cancel
+                        if (newSettings != null) {
+                            if (codeCompletion!=null){
+                                codeCompletion.dispose();
+                            }
+                            codeCompletion = new KeywordBasedCodeCompletion(bytecodeSyntaxTextArea, newSettings.getSet());
+                        }
                     }
                 });
                 menu.add(completionMenu);
                 menu.add(new JMenuItem("Dummy compilation"));
-                menu.show(completion, completion.getWidth()/2, completion.getHeight()/2);
+                menu.show(completion, completion.getWidth() / 2, completion.getHeight() / 2);
             }
         });
         searchAndCode.add(completion, BorderLayout.WEST);
@@ -118,7 +126,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
 
     private RSyntaxTextArea createSrcTextArea(boolean api) {
         RSyntaxTextArea rst = new RSyntaxTextArea();
-        new KeywordBasedCodeCompletion(rst, new JrdApiKeywords());
+        codeCompletion =  new KeywordBasedCodeCompletion(rst, new JrdApiKeywords());
         rst.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {

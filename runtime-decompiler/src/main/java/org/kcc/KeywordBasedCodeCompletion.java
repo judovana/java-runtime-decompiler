@@ -38,6 +38,7 @@ public class KeywordBasedCodeCompletion {
     private final JFrame popup;
     private JFrame help;
     private final JList<CompletionItem> suggested;
+    private final JScrollPane scroll;
     private final CaretListener caretListenerToRemove;
     private final KeyListener keyListenerToRemove;
     private final FocusListener focusListenerToRemove;
@@ -48,10 +49,11 @@ public class KeywordBasedCodeCompletion {
     public KeywordBasedCodeCompletion(JTextArea source, CompletionItem.CompletionItemSet set) {
         this.source = source;
         suggested = new JList<>(set.getItemsArray());
+        scroll = new JScrollPane(suggested);
         suggested.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if  (e.getClickCount()>1){
+                if (e.getClickCount() > 1) {
                     apply();
                 }
             }
@@ -65,24 +67,9 @@ public class KeywordBasedCodeCompletion {
             public void valueChanged(ListSelectionEvent listSelectionEvent) {
                 if (popup.isVisible() && suggested.getSelectedValue() != null && !suggested.getSelectedValue().getDescription().isEmpty()) {
                     //fixme made disable-able
-                    if (help != null) {
-                        help.dispose();
-                    }
-                    help = new JFrame();
-                    help.setFocusableWindowState(false);
-                    help.setUndecorated(true);
-                    help.setSize(400, 200);
-                    help.setAlwaysOnTop(true);
-                    JTextArea tt = new JTextArea(suggested.getSelectedValue().getDescription());
-                    tt.setLineWrap(true);
-                    help.add(new JScrollPane(tt));
-                    help.setLocation(popup.getLocationOnScreen().x, popup.getLocationOnScreen().y + popup.getHeight());
-                    help.setVisible(true);
+                    showHelp();
                 } else {
-                    if (help != null) {
-                        help.dispose();
-                        help = null;
-                    }
+                    deHelp();
                 }
             }
         });
@@ -94,13 +81,11 @@ public class KeywordBasedCodeCompletion {
 
                 }
                 if (keyEvent.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                    popup.setFocusableWindowState(false);
-                    popup.setVisible(false);
+                    ende();
                 }
             }
         });
-
-        popup.add(new JScrollPane(suggested));
+        popup.add(scroll);
 
         caretListenerToRemove = new CaretListener() {
             @Override
@@ -125,6 +110,9 @@ public class KeywordBasedCodeCompletion {
                         calcCompletionPosition();
                     }
                     popup.setVisible(true);
+                    if (suggested.isShowing() && suggested.getSelectedValue() != null && !suggested.getSelectedValue().getDescription().isEmpty()) {
+                        showHelp();
+                    }
                 }
                 proceedArrow(keyEvent);
             }
@@ -149,6 +137,20 @@ public class KeywordBasedCodeCompletion {
         source.addFocusListener(focusListenerToRemove);
     }
 
+    private void showHelp() {
+        deHelp();
+        help = new JFrame();
+        help.setFocusableWindowState(false);
+        help.setUndecorated(true);
+        help.setSize(400, 200);
+        help.setAlwaysOnTop(true);
+        JTextArea tt = new JTextArea(suggested.getSelectedValue().getKey() + "\n" + suggested.getSelectedValue().getDescription());
+        tt.setLineWrap(true);
+        help.add(new JScrollPane(tt));
+        help.setLocation(popup.getLocationOnScreen().x, popup.getLocationOnScreen().y + popup.getHeight());
+        help.setVisible(true);
+    }
+
     private JFrame createFrame() {
         JFrame f = new JFrame() {
             @Override
@@ -161,10 +163,7 @@ public class KeywordBasedCodeCompletion {
                     }
                 } else {
                     debugln("hidden");
-                    if (help != null) {
-                        help.dispose();
-                        help = null;
-                    }
+                    deHelp();
                 }
             }
         };
@@ -187,7 +186,7 @@ public class KeywordBasedCodeCompletion {
             keyEvent.consume();
         }
         if (keyEvent.getKeyCode() == KeyEvent.VK_ESCAPE) {
-            popup.setVisible(false);
+            ende();
         }
         if (keyEvent.getKeyCode() == KeyEvent.VK_DOWN || keyEvent.getKeyCode() == KeyEvent.VK_UP) {
             if (popup.isVisible()) {
@@ -211,6 +210,11 @@ public class KeywordBasedCodeCompletion {
         }
     }
 
+    private void ende() {
+        popup.setFocusableWindowState(false);
+        popup.setVisible(false);
+    }
+
     private void proceed(CaretEvent caretEvent) {
         proceed(caretEvent, null);
     }
@@ -232,11 +236,11 @@ public class KeywordBasedCodeCompletion {
                     popup.setLocation(futureLocation);
                 }
             } else {
-                popup.setVisible(false);
+                ende();
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            popup.setVisible(false);
+            ende();
         }
     }
 
@@ -268,7 +272,7 @@ public class KeywordBasedCodeCompletion {
     }
 
     private int calcCompletionPosition() {
-        if (!popup.isVisible()){
+        if (!source.isShowing()) {
             return 0;
         }
         int caretpos = source.getCaretPosition();
@@ -339,6 +343,7 @@ public class KeywordBasedCodeCompletion {
         for (int i = 0; i < suggested.getModel().getSize(); i++) {
             String s = suggested.getModel().getElementAt(i).getKey();
             int w = (int) (suggested.getFontMetrics(suggested.getFont()).getStringBounds(s, suggested.getGraphics()).getWidth());
+            w = w + (scroll.getVerticalScrollBar().getWidth() * 2/*it counts as it is not here*/);
             if (w > width) {
                 width = w;
             }
@@ -347,8 +352,7 @@ public class KeywordBasedCodeCompletion {
     }
 
     private void apply() {
-        popup.setFocusableWindowState(false);
-        popup.setVisible(false);
+        ende();
         int pos = source.getCaretPosition();
         String lastWord = getLastWord(pos);
         source.replaceRange(suggested.getSelectedValue().toString(), pos - lastWord.length(), pos);
@@ -356,13 +360,19 @@ public class KeywordBasedCodeCompletion {
     }
 
     public void dispose() {
+        popup.setVisible(false);
         popup.dispose();
-        if (help != null) {
-            help.dispose();
-            help = null;
-        }
+        deHelp();
         source.removeFocusListener(focusListenerToRemove);
         source.removeKeyListener(keyListenerToRemove);
         source.removeCaretListener(caretListenerToRemove);
+    }
+
+    private void deHelp() {
+        if (help != null) {
+            help.setVisible(false);
+            help.dispose();
+            help = null;
+        }
     }
 }

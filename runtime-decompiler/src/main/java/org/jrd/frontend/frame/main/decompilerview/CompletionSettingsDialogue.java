@@ -88,7 +88,7 @@ public class CompletionSettingsDialogue extends JDialog {
 
     public CompletionSettings showForResults() {
         this.setVisible(true);
-        return null;
+        return new CompletionSettings(result);
     }
 
 
