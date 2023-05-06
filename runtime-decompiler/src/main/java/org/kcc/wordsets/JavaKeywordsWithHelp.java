@@ -2,8 +2,13 @@ package org.kcc.wordsets;
 
 import org.kcc.CompletionItem;
 
-public class JavaKeywordsWithHelp {
-    public static final CompletionItem[] JAVA_KEYWORDS = {
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.regex.Pattern;
+
+public class JavaKeywordsWithHelp  implements  CompletionItem.CompletionItemSet{
+    private static final CompletionItem[] JAVA_KEYWORDS = {
             new CompletionItem("_", "Added in Java 9, the underscore has become a keyword and cannot be used as a variable name anymore.[3]"),
             new CompletionItem("abstract", "A method with no definition must be declared as abstract and the class containing it must be declared as abstract. Abstract classes cannot be instantiated. Abstract methods must be implemented in the sub classes. The abstract keyword cannot be used with variables or constructors. Note that an abstract class isn't required to have an abstract method at all."),
             new CompletionItem("assert", "Assert describes a predicate (a true–false statement) placed in a Java program to indicate that the developer thinks that the predicate is always true at that place. If an assertion evaluates to false at run-time, an assertion failure results, which typically causes execution to abort. Assertions are disabled at runtime by default, but can be enabled through a command-line option or programmatically through a method on the class loader."),
@@ -79,4 +84,22 @@ public class JavaKeywordsWithHelp {
     };
 
 
+    @Override
+    public CompletionItem[] getItemsArray() {
+        CompletionItem[] r = Arrays.copyOf(JAVA_KEYWORDS, JAVA_KEYWORDS.length);
+        Arrays.sort(r);
+        return r;
+    }
+
+    @Override
+    public List<CompletionItem> getItemsList() {
+        List<CompletionItem> l = Arrays.asList(JAVA_KEYWORDS);
+        Collections.sort(l);
+        return l;
+    }
+
+    @Override
+    public Pattern getRecommendedDelimiterSet() {
+        return Pattern.compile("[a-zA-Z_\\-]");
+    }
 }

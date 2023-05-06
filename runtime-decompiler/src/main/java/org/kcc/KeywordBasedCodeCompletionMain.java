@@ -1,10 +1,10 @@
 package org.kcc;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-import org.kcc.wordsets.BytecodeKeywords;
 import org.kcc.wordsets.BytecodeKeywordsWithHelp;
-import org.kcc.wordsets.JavaKeywords;
+import org.kcc.wordsets.ConnectedKeywords;
 import org.kcc.wordsets.JavaKeywordsWithHelp;
+import org.kcc.wordsets.JrdApiKeywords;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -41,14 +41,11 @@ public class KeywordBasedCodeCompletionMain {
                 frame.add(b1, BorderLayout.SOUTH);
                 frame.add(t1);
 
-                final KeywordBasedCodeCompletion comp = new KeywordBasedCodeCompletion(t1, BytecodeKeywordsWithHelp.BYTECODE_KEYWORDS);
+                final KeywordBasedCodeCompletion comp = new KeywordBasedCodeCompletion(t1, new BytecodeKeywordsWithHelp());
                 b1.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent actionEvent) {
-                        List<CompletionItem> r = new ArrayList<>();
-                        r.addAll(Arrays.asList(BytecodeKeywordsWithHelp.BYTECODE_KEYWORDS));
-                        r.addAll(Arrays.asList(JavaKeywordsWithHelp.JAVA_KEYWORDS));
-                        comp.setKeywords(r.toArray(new CompletionItem[0]));
+                        comp.setCompletionsSet(new ConnectedKeywords(new BytecodeKeywordsWithHelp(), new JavaKeywordsWithHelp(), new JrdApiKeywords()));
                     }
                 });
                 frame.addWindowListener(new WindowAdapter() {

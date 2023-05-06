@@ -2,11 +2,14 @@ package org.kcc.wordsets;
 
 import org.kcc.CompletionItem;
 
-public class BytecodeKeywordsWithHelp {
-    //fixme
-    //https://en.wikipedia.org/wiki/List_of_Java_bytecode_instructions
-    //have help
-    public static final CompletionItem[] BYTECODE_KEYWORDS = {
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.regex.Pattern;
+
+public class BytecodeKeywordsWithHelp implements  CompletionItem.CompletionItemSet{
+
+    private static final CompletionItem[] BYTECODE_KEYWORDS = {
             new CompletionItem("aaload", "32\n0011 0010\n arrayref, index → value\nload onto the stack a reference from an array"),
             new CompletionItem("aastore", "53\n0101 0011\n arrayref, index, value →\nstore a reference in an array"),
             new CompletionItem("aconst_null", "01\n0000 0001\n → null\npush a null reference onto the stack"),
@@ -213,4 +216,23 @@ public class BytecodeKeywordsWithHelp {
             new CompletionItem("tableswitch", "aa\n1010 1010\n16+: [0–3 bytes padding], defaultbyte1, defaultbyte2, defaultbyte3, defaultbyte4, lowbyte1, lowbyte2, lowbyte3, lowbyte4, highbyte1, highbyte2, highbyte3, highbyte4, jump offsets...\nindex →\ncontinue execution from an address in the table at offset index"),
             new CompletionItem("wide", "c4\n1100 0100\n3/5: opcode, indexbyte1, indexbyte2 or iinc, indexbyte1, indexbyte2, countbyte1, countbyte2\n[same as for corresponding instructions]\nexecute opcode, where opcode is either iload, fload, aload, lload, dload, istore, fstore, astore, lstore, dstore, or ret, but assume the index is 16 bit; or execute iinc, where the index is 16 bits and the constant to increment by is a signed 16 bit short")
     };
+
+    @Override
+    public CompletionItem[] getItemsArray() {
+        CompletionItem[] r = Arrays.copyOf(BYTECODE_KEYWORDS, BYTECODE_KEYWORDS.length);
+        Arrays.sort(r);
+        return r;
+    }
+
+    @Override
+    public List<CompletionItem> getItemsList() {
+        List<CompletionItem> l = Arrays.asList(BYTECODE_KEYWORDS);
+        Collections.sort(l);
+        return l;
+    }
+
+    @Override
+    public Pattern getRecommendedDelimiterSet() {
+        return CompletionItem.CompletionItemSet.delimiterStrictSet();
+    }
 }

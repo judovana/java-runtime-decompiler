@@ -22,10 +22,13 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class KeywordBasedCodeCompletion {
 
     private final JTextArea source;
+
+    private Pattern nondelimiter;
     private CompletionItem[] keywords;
     //private final List<JComponent> functional; //buttons/check/radio boxes below completion - ex settings
 
@@ -39,10 +42,12 @@ public class KeywordBasedCodeCompletion {
     private Point futureLocation;
 
 
-    public KeywordBasedCodeCompletion(JTextArea source, CompletionItem[] keywords) {
+    public KeywordBasedCodeCompletion(JTextArea source, CompletionItem.CompletionItemSet set) {
         this.source = source;
-        this.keywords = keywords;
-        suggested = new JList<>(keywords);
+        suggested = new JList<>(set.getItemsArray());
+        popup = createFrame();
+        setCompletionsSet(set);
+        this.nondelimiter = set.getRecommendedDelimiterSet();
         suggested.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent listSelectionEvent) {
@@ -83,29 +88,7 @@ public class KeywordBasedCodeCompletion {
             }
         });
 
-        popup = new JFrame() {
-            @Override
-            public void setVisible(boolean b) {
-                super.setVisible(b);
-                if (b) {
-                    debugln("shown");
-                    if (futureLocation != null) {
-                        popup.setLocation(futureLocation);
-                    }
-                } else {
-                    debugln("hidden");
-                    if (help != null) {
-                        help.dispose();
-                        help = null;
-                    }
-                }
-            }
-        };
         popup.add(new JScrollPane(suggested));
-        popup.setFocusableWindowState(false);
-        popup.setUndecorated(true);
-        popup.setSize(100, 100);
-        popup.setAlwaysOnTop(true);
 
         caretListenerToRemove = new CaretListener() {
             @Override
@@ -149,6 +132,37 @@ public class KeywordBasedCodeCompletion {
             }
         });
         source.addFocusListener(focusListenerToRemove);
+    }
+
+    private JFrame createFrame() {
+        JFrame f = new JFrame() {
+            @Override
+            public void setVisible(boolean b) {
+                super.setVisible(b);
+                if (b) {
+                    debugln("shown");
+                    if (futureLocation != null) {
+                        popup.setLocation(futureLocation);
+                    }
+                } else {
+                    debugln("hidden");
+                    if (help != null) {
+                        help.dispose();
+                        help = null;
+                    }
+                }
+            }
+        };
+        f.setFocusableWindowState(false);
+        f.setUndecorated(true);
+        deductSize(f);
+        f.setAlwaysOnTop(true);
+       return f;
+    }
+
+    public void setCompletionsSet(CompletionItem.CompletionItemSet set) {
+        setKeywords(set.getItemsArray());
+        this.nondelimiter = set.getRecommendedDelimiterSet();
     }
 
 
@@ -215,7 +229,7 @@ public class KeywordBasedCodeCompletion {
         StringBuilder lastWord = new StringBuilder();
         for (int x = caretpos; x > 0; x--) {
             String letter = source.getText().substring(x - 1, x);
-            if (!letter.matches("[a-zA-Z0-9]")) { //fixme, deduct from keywords and make setup-able
+            if (!nondelimiter.matcher(letter).matches()) {
                 break;
             }
             lastWord.append(letter);
@@ -287,18 +301,31 @@ public class KeywordBasedCodeCompletion {
         }));
     }
 
-    public void setKeywords(CompletionItem[] keywords) {
+    private void setKeywords(CompletionItem[] keywords) {
         this.keywords = keywords;
         setKeywordsImpl(keywords);
     }
 
-    public void setKeywordsImpl(CompletionItem[] keywords) {
+    private void setKeywordsImpl(CompletionItem[] keywords) {
         CompletionItem wasSelected = suggested.getSelectedValue();
         suggested.setModel(createModel(keywords));
         suggested.setSelectedValue(wasSelected, true);
         if (suggested.getSelectedValue() == null && suggested.getModel().getSize() > 0) {
             suggested.setSelectedIndex(0);
         }
+        deductSize(popup);
+    }
+
+    private void deductSize(JFrame ff) {
+        int width = 100;
+        for (int i = 0; i < suggested.getModel().getSize(); i++) {
+            String s = suggested.getModel().getElementAt(i).getKey();
+            int w = (int) (suggested.getFontMetrics(suggested.getFont()).getStringBounds(s, suggested.getGraphics()).getWidth());
+            if (w > width) {
+                width = w;
+            }
+        }
+        ff.setSize(width, 100);
     }
 
     private void apply() {
@@ -316,5 +343,8 @@ public class KeywordBasedCodeCompletion {
             help.dispose();
             help = null;
         }
+        source.removeFocusListener(focusListenerToRemove);
+        source.removeKeyListener(keyListenerToRemove);
+        source.removeCaretListener(caretListenerToRemove);
     }
 }
