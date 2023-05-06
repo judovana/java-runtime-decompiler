@@ -105,7 +105,10 @@ public class KeywordBasedCodeCompletion {
 
             @Override
             public void keyPressed(KeyEvent keyEvent) {
-                if (keyEvent.getKeyCode() == KeyEvent.VK_SPACE && keyEvent.getModifiersEx() == InputEvent.CTRL_DOWN_MASK) {
+                if ((keyEvent.getKeyCode() == KeyEvent.VK_SPACE && keyEvent.getModifiersEx() == InputEvent.CTRL_DOWN_MASK)
+                        ||
+                        (keyEvent.getKeyCode() == KeyEvent.VK_INSERT && keyEvent.getModifiersEx() == InputEvent.ALT_DOWN_MASK)
+                ) {
                     if (futureLocation == null) {
                         calcCompletionPosition();
                     }
@@ -157,7 +160,7 @@ public class KeywordBasedCodeCompletion {
         f.setUndecorated(true);
         deductSize(f);
         f.setAlwaysOnTop(true);
-       return f;
+        return f;
     }
 
     public void setCompletionsSet(CompletionItem.CompletionItemSet set) {

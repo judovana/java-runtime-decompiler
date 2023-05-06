@@ -26,6 +26,9 @@ import javax.swing.JPanel;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jrd.backend.core.Logger;
+import org.jrd.frontend.utility.ImageButtonFactory;
+import org.kcc.KeywordBasedCodeCompletion;
+import org.kcc.wordsets.JrdApiKeywords;
 
 public class TextWithControls extends JPanel implements LinesProvider {
 
@@ -44,7 +47,10 @@ public class TextWithControls extends JPanel implements LinesProvider {
         bytecodeSearchControls = SearchControlsPanel.createBytecodeControls(this);
         RTextScrollPane bytecodeScrollPane = new RTextScrollPane(bytecodeSyntaxTextArea);
         this.add(bytecodeScrollPane);
-        this.add(bytecodeSearchControls, BorderLayout.SOUTH);
+        JPanel searchAndCode = new JPanel(new BorderLayout());
+        this.add(searchAndCode, BorderLayout.SOUTH);
+        searchAndCode.add(bytecodeSearchControls, BorderLayout.CENTER);
+        searchAndCode.add(ImageButtonFactory.createEditButton("Code completion and compilation"), BorderLayout.WEST);
 
         if (codeSelect != null) {
             JComboBox<String> hgltr = new JComboBox<String>(getAllLexers());
@@ -91,21 +97,14 @@ public class TextWithControls extends JPanel implements LinesProvider {
 
     private RSyntaxTextArea createSrcTextArea(boolean api) {
         RSyntaxTextArea rst = new RSyntaxTextArea();
+        new KeywordBasedCodeCompletion(rst, new JrdApiKeywords());
         rst.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_F3) {
                     bytecodeSearchControls.clickNextButton();
                 }
-                if ((e.getModifiersEx() & KeyEvent.ALT_DOWN_MASK) != 0) {
-                    if (e.getKeyCode() == KeyEvent.VK_INSERT) {
-                        showApiMenu(null);
-                    }
-                }
                 if ((e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) != 0) {
-                    if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-                        showApiMenu(null);
-                    }
                     if (e.getKeyCode() == KeyEvent.VK_F) {
                         bytecodeSearchControls.focus(); //!!global :(
                     }
