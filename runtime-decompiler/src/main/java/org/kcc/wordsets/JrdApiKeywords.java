@@ -117,4 +117,9 @@ public class JrdApiKeywords  implements  CompletionItem.CompletionItemSet{
     public Pattern getRecommendedDelimiterSet() {
         return CompletionItem.CompletionItemSet.delimiterSet();
     }
+
+    @Override
+    public String toString() {
+        return "JRD runtime modification api. Good to connect wit java.";
+    }
 }

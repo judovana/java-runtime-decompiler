@@ -51,4 +51,9 @@ public class BytemanKeywords  implements  CompletionItem.CompletionItemSet{
     public Pattern getRecommendedDelimiterSet() {
         return CompletionItem.CompletionItemSet.delimiterWordSet();
     }
+
+    @Override
+    public String toString() {
+        return "Byteman keywords - good to concat with java";
+    }
 }

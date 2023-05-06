@@ -102,4 +102,9 @@ public class JavaKeywordsWithHelp  implements  CompletionItem.CompletionItemSet{
     public Pattern getRecommendedDelimiterSet() {
         return Pattern.compile("[a-zA-Z_\\-]");
     }
+
+    @Override
+    public String toString() {
+        return "java keywords";
+    }
 }

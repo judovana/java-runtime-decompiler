@@ -6,6 +6,7 @@ import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.ListModel;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
@@ -20,6 +21,8 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -45,6 +48,15 @@ public class KeywordBasedCodeCompletion {
     public KeywordBasedCodeCompletion(JTextArea source, CompletionItem.CompletionItemSet set) {
         this.source = source;
         suggested = new JList<>(set.getItemsArray());
+        suggested.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if  (e.getClickCount()>1){
+                    apply();
+                }
+            }
+        });
+        suggested.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         popup = createFrame();
         setCompletionsSet(set);
         this.nondelimiter = set.getRecommendedDelimiterSet();
@@ -256,6 +268,9 @@ public class KeywordBasedCodeCompletion {
     }
 
     private int calcCompletionPosition() {
+        if (!popup.isVisible()){
+            return 0;
+        }
         int caretpos = source.getCaretPosition();
         Point coord = source.getLocationOnScreen();
         futureLocation = coord;

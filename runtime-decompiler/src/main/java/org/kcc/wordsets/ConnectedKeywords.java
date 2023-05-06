@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class ConnectedKeywords implements CompletionItem.CompletionItemSet {
     private final CompletionItem.CompletionItemSet[] originalSets;
@@ -41,5 +42,10 @@ public class ConnectedKeywords implements CompletionItem.CompletionItemSet {
             }
         }
         return Pattern.compile(sb.toString());
+    }
+
+    @Override
+    public String toString() {
+        return Arrays.stream(originalSets).map(a -> a.toString()).collect(Collectors.joining("; "));
     }
 }

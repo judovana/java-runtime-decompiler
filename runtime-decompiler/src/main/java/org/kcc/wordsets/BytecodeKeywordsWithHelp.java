@@ -235,4 +235,9 @@ public class BytecodeKeywordsWithHelp implements  CompletionItem.CompletionItemS
     public Pattern getRecommendedDelimiterSet() {
         return CompletionItem.CompletionItemSet.delimiterStrictSet();
     }
+
+    @Override
+    public String toString() {
+        return "Bytecode assembler - good to concate with java";
+    }
 }

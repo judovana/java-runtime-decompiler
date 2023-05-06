@@ -20,13 +20,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jrd.backend.core.Logger;
 import org.jrd.frontend.utility.ImageButtonFactory;
+import org.kcc.CompletionSettings;
 import org.kcc.KeywordBasedCodeCompletion;
 import org.kcc.wordsets.JrdApiKeywords;
 
@@ -50,7 +54,24 @@ public class TextWithControls extends JPanel implements LinesProvider {
         JPanel searchAndCode = new JPanel(new BorderLayout());
         this.add(searchAndCode, BorderLayout.SOUTH);
         searchAndCode.add(bytecodeSearchControls, BorderLayout.CENTER);
-        searchAndCode.add(ImageButtonFactory.createEditButton("Code completion and compilation"), BorderLayout.WEST);
+        final JButton completion = ImageButtonFactory.createEditButton("Code completion and compilation");
+        completion.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                final JPopupMenu menu = new JPopupMenu("Settings");
+                JMenuItem completionMenu = new JMenuItem("Code completion");
+                completionMenu.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent actionEvent) {
+                        CompletionSettings newSettings = new CompletionSettingsDialogue().showForResults();
+                    }
+                });
+                menu.add(completionMenu);
+                menu.add(new JMenuItem("Dummy compilation"));
+                menu.show(completion, completion.getWidth()/2, completion.getHeight()/2);
+            }
+        });
+        searchAndCode.add(completion, BorderLayout.WEST);
 
         if (codeSelect != null) {
             JComboBox<String> hgltr = new JComboBox<String>(getAllLexers());
