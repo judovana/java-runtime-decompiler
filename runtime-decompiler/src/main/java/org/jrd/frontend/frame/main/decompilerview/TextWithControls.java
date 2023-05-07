@@ -64,13 +64,21 @@ public class TextWithControls extends JPanel implements LinesProvider {
                 completionMenu.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent actionEvent) {
-                        CompletionSettings newSettings = new CompletionSettingsDialogue().showForResults();
-                        //null was cancel
+                        CompletionSettings oldSettings;
+                        if (codeCompletion == null) {
+                            oldSettings = SupportedKeySets.JrdDefault;
+                        } else {
+                            oldSettings = codeCompletion.getSettings();
+                        }
+                        CompletionSettings newSettings = new CompletionSettingsDialogue().showForResults(oldSettings);
                         if (newSettings != null) {
-                            if (codeCompletion!=null){
+                            if (codeCompletion != null) {
                                 codeCompletion.dispose();
+                                codeCompletion = null;
                             }
-                            codeCompletion = new KeywordBasedCodeCompletion(bytecodeSyntaxTextArea, newSettings.getSet());
+                            if (newSettings.getSet()!=null) {
+                                codeCompletion = new KeywordBasedCodeCompletion(bytecodeSyntaxTextArea, newSettings);
+                            }
                         }
                     }
                 });
@@ -126,7 +134,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
 
     private RSyntaxTextArea createSrcTextArea(boolean api) {
         RSyntaxTextArea rst = new RSyntaxTextArea();
-        codeCompletion =  new KeywordBasedCodeCompletion(rst, new JrdApiKeywords());
+        codeCompletion = new KeywordBasedCodeCompletion(rst, SupportedKeySets.JrdDefault);
         rst.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {

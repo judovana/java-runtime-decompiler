@@ -48,4 +48,8 @@ public class ConnectedKeywords implements CompletionItem.CompletionItemSet {
     public String toString() {
         return Arrays.stream(originalSets).map(a -> a.toString()).collect(Collectors.joining("; "));
     }
+
+    public CompletionItem.CompletionItemSet[] getOriginalSets() {
+        return originalSets;
+    }
 }

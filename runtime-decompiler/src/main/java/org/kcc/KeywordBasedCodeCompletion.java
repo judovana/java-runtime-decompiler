@@ -24,12 +24,16 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class KeywordBasedCodeCompletion {
 
     private final JTextArea source;
+    private final CompletionSettings settings;
 
     private Pattern nondelimiter;
     private CompletionItem[] keywords;
@@ -46,9 +50,10 @@ public class KeywordBasedCodeCompletion {
     private Point futureLocation;
 
 
-    public KeywordBasedCodeCompletion(JTextArea source, CompletionItem.CompletionItemSet set) {
+    public KeywordBasedCodeCompletion(JTextArea source, CompletionSettings settings) {
         this.source = source;
-        suggested = new JList<>(set.getItemsArray());
+        this.settings = settings;
+        suggested = new JList<>(settings.getSet().getItemsArray());
         scroll = new JScrollPane(suggested);
         suggested.addMouseListener(new MouseAdapter() {
             @Override
@@ -60,8 +65,8 @@ public class KeywordBasedCodeCompletion {
         });
         suggested.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         popup = createFrame();
-        setCompletionsSet(set);
-        this.nondelimiter = set.getRecommendedDelimiterSet();
+        setCompletionsSet(settings.getSet());
+        this.nondelimiter = settings.getSet().getRecommendedDelimiterSet();
         suggested.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent listSelectionEvent) {
@@ -260,12 +265,45 @@ public class KeywordBasedCodeCompletion {
 
     private void filter(String word) {
         List<CompletionItem> filtered = new ArrayList<>(keywords.length);
+        if (!settings.isCaseSensitive()) {
+            word = word.toLowerCase();
+        }
+        final String finalword = word;
+        String[] letters = finalword.split("");
+        Pattern vagueMatch = null;
+        switch (settings.getOp()) {
+            case SPARSE:
+                vagueMatch = Pattern.compile(".*" + Arrays.stream(letters).map(a -> Pattern.quote(a)).collect(Collectors.joining("+.*")) + ".*");
+                break;
+            case MAYHEM:
+                vagueMatch = Pattern.compile(".*" + Arrays.stream(letters).map(a -> "[" + Pattern.quote(finalword) + "]").collect(Collectors.joining("+.*")) + ".*");
+                break;
+        }
         for (CompletionItem item : keywords) {
             //fixme
             //starts, contains, c o n t a i, c o n .. without order
             //case sensitive/not sensitive
-            if (item.getKey().startsWith(word)) {
-                filtered.add(item);
+            String itemKey = item.getKey();
+            if (!settings.isCaseSensitive()) {
+                itemKey = itemKey.toLowerCase();
+            }
+            switch (settings.getOp()) {
+                case STARTS:
+                    if (itemKey.startsWith(finalword)) {
+                        filtered.add(item);
+                    }
+                    break;
+                case CONTAINS:
+                    if (itemKey.contains(finalword)) {
+                        filtered.add(item);
+                    }
+                    break;
+                case SPARSE:
+                case MAYHEM:
+                    if (vagueMatch.matcher(itemKey).matches()) {
+                        filtered.add(item);
+                    }
+                    break;
             }
         }
         setKeywordsImpl(filtered.toArray(new CompletionItem[0]));
@@ -374,5 +412,9 @@ public class KeywordBasedCodeCompletion {
             help.dispose();
             help = null;
         }
+    }
+
+    public CompletionSettings getSettings() {
+        return settings;
     }
 }
