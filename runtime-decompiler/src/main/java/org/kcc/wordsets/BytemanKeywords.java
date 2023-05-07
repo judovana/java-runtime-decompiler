@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class BytemanKeywords  implements  CompletionItem.CompletionItemSet{
+    //FIXME! write help!
     private static final CompletionItem[] BYTEMAN_KEYWORDS = {
             new CompletionItem("RULE"),
             new CompletionItem("CLASS"),
@@ -26,7 +27,6 @@ public class BytemanKeywords  implements  CompletionItem.CompletionItemSet{
             new CompletionItem("WRITE"),
             new CompletionItem("READ"),
             new CompletionItem("ALL"),
-            new CompletionItem("SYNCHRONIZE"),
             new CompletionItem("SYNCHRONIZE"),
             new CompletionItem("traceln"),
             new CompletionItem("traceStack"),
