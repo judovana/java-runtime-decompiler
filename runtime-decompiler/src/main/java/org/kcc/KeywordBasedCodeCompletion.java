@@ -26,7 +26,6 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -74,7 +73,7 @@ public class KeywordBasedCodeCompletion {
                     //fixme made disable-able
                     showHelp();
                 } else {
-                    deHelp();
+                    removeHelp();
                 }
             }
         });
@@ -143,17 +142,19 @@ public class KeywordBasedCodeCompletion {
     }
 
     private void showHelp() {
-        deHelp();
-        help = new JFrame();
-        help.setFocusableWindowState(false);
-        help.setUndecorated(true);
-        help.setSize(400, 200);
-        help.setAlwaysOnTop(true);
-        JTextArea tt = new JTextArea(suggested.getSelectedValue().getKey() + "\n" + suggested.getSelectedValue().getDescription());
-        tt.setLineWrap(true);
-        help.add(new JScrollPane(tt));
-        help.setLocation(popup.getLocationOnScreen().x, popup.getLocationOnScreen().y + popup.getHeight());
-        help.setVisible(true);
+        removeHelp();
+        if(settings.isShowHelp()) {
+            help = new JFrame();
+            help.setFocusableWindowState(false);
+            help.setUndecorated(true);
+            help.setSize(400, 200);
+            help.setAlwaysOnTop(true);
+            JTextArea tt = new JTextArea(suggested.getSelectedValue().getKey() + "\n" + suggested.getSelectedValue().getDescription());
+            tt.setLineWrap(true);
+            help.add(new JScrollPane(tt));
+            help.setLocation(popup.getLocationOnScreen().x, popup.getLocationOnScreen().y + popup.getHeight());
+            help.setVisible(true);
+        }
     }
 
     private JFrame createFrame() {
@@ -168,7 +169,7 @@ public class KeywordBasedCodeCompletion {
                     }
                 } else {
                     debugln("hidden");
-                    deHelp();
+                    removeHelp();
                 }
             }
         };
@@ -400,13 +401,13 @@ public class KeywordBasedCodeCompletion {
     public void dispose() {
         popup.setVisible(false);
         popup.dispose();
-        deHelp();
+        removeHelp();
         source.removeFocusListener(focusListenerToRemove);
         source.removeKeyListener(keyListenerToRemove);
         source.removeCaretListener(caretListenerToRemove);
     }
 
-    private void deHelp() {
+    private void removeHelp() {
         if (help != null) {
             help.setVisible(false);
             help.dispose();

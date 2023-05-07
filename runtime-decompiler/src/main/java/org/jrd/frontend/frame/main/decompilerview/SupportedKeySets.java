@@ -17,7 +17,7 @@ public class SupportedKeySets {
             new BytecodeKeywordsWithHelp(),
             new JavaKeywordsWithHelp());
 
-    public static final CompletionSettings JrdDefault = new CompletionSettings(JrdKeySets.sets[0], CompletionSettings.OP.SPARSE, false);
+    public static final CompletionSettings JrdDefault = new CompletionSettings(JrdKeySets.sets[0], CompletionSettings.OP.SPARSE, false, true);
 
 
     private final CompletionItem.CompletionItemSet[] sets;

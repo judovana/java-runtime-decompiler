@@ -6,6 +6,7 @@ import org.kcc.wordsets.ConnectedKeywords;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -32,6 +33,7 @@ public class CompletionSettingsDialogue extends JDialog {
     JRadioButton rb22 = new JRadioButton("case non sensitive");
     JButton ok = new JButton("ok");
     JButton cancel = new JButton("cancel");
+    JCheckBox showHelp = new JCheckBox("Show help if available");
 
     public CompletionSettingsDialogue() {
         this.setLayout(new GridLayout(1, 2));
@@ -52,7 +54,7 @@ public class CompletionSettingsDialogue extends JDialog {
         });
         p1.add(completions);
         p1.add(status, BorderLayout.SOUTH);
-        JPanel p2 = new JPanel(new GridLayout(9, 1));
+        JPanel p2 = new JPanel(new GridLayout(10, 1));
         p2.add(new JLabel("Select sensitivity"));
         ButtonGroup b1 = new ButtonGroup();
         b1.add(rb11);
@@ -71,6 +73,7 @@ public class CompletionSettingsDialogue extends JDialog {
         b2.add(rb22);
         p2.add(rb21);
         p2.add(rb22);
+        p2.add(showHelp);
         JPanel buttons = new JPanel(new GridLayout(1, 2));
         buttons.add(ok);
         buttons.add(cancel);
@@ -123,10 +126,11 @@ public class CompletionSettingsDialogue extends JDialog {
         if (rb14.isSelected()) {
             op = CompletionSettings.OP.MAYHEM;
         }
-        return new CompletionSettings(result, op, caseSensitive);
+        return new CompletionSettings(result, op, caseSensitive, showHelp.isSelected());
     }
 
     private void pre(CompletionSettings settings) {
+        showHelp.setSelected(settings.isShowHelp());
         if (!settings.isCaseSensitive()) {
             rb22.setSelected(true);
         }

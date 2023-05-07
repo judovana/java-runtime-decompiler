@@ -40,7 +40,7 @@ public class KeywordBasedCodeCompletionMain {
                 frame.add(l1, BorderLayout.NORTH);
                 frame.add(b1, BorderLayout.SOUTH);
                 frame.add(t1);
-                final KeywordBasedCodeCompletion comp = new KeywordBasedCodeCompletion(t1, new CompletionSettings(new BytecodeKeywordsWithHelp(), CompletionSettings.OP.STARTS, true));
+                final KeywordBasedCodeCompletion comp = new KeywordBasedCodeCompletion(t1, new CompletionSettings(new BytecodeKeywordsWithHelp(), CompletionSettings.OP.STARTS, true, true));
                 b1.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent actionEvent) {
