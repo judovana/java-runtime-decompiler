@@ -70,7 +70,6 @@ public class KeywordBasedCodeCompletion {
             @Override
             public void valueChanged(ListSelectionEvent listSelectionEvent) {
                 if (popup.isVisible() && suggested.getSelectedValue() != null && !suggested.getSelectedValue().getDescription().isEmpty()) {
-                    //fixme made disable-able
                     showHelp();
                 } else {
                     removeHelp();
