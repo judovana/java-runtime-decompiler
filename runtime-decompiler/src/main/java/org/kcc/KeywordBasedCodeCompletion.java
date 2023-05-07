@@ -280,9 +280,6 @@ public class KeywordBasedCodeCompletion {
                 break;
         }
         for (CompletionItem item : keywords) {
-            //fixme
-            //starts, contains, c o n t a i, c o n .. without order
-            //case sensitive/not sensitive
             String itemKey = item.getKey();
             if (!settings.isCaseSensitive()) {
                 itemKey = itemKey.toLowerCase();
