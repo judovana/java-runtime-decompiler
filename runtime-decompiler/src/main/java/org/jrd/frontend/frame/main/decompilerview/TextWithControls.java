@@ -30,8 +30,10 @@ import javax.swing.JPopupMenu;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jrd.backend.core.Logger;
 import org.jrd.frontend.utility.ImageButtonFactory;
+import org.kcc.CompletionItem;
 import org.kcc.CompletionSettings;
 import org.kcc.KeywordBasedCodeCompletion;
+import org.kcc.wordsets.ConnectedKeywords;
 import org.kcc.wordsets.JrdApiKeywords;
 
 public class TextWithControls extends JPanel implements LinesProvider {
@@ -70,19 +72,56 @@ public class TextWithControls extends JPanel implements LinesProvider {
                         } else {
                             oldSettings = codeCompletion.getSettings();
                         }
-                        CompletionSettings newSettings = new CompletionSettingsDialogue().showForResults(oldSettings);
+                        CompletionSettings newSettings = new CompletionSettingsDialogue().showForResults(TextWithControls.this, oldSettings);
                         if (newSettings != null) {
                             if (codeCompletion != null) {
                                 codeCompletion.dispose();
                                 codeCompletion = null;
                             }
-                            if (newSettings.getSet()!=null) {
+                            if (newSettings.getSet() != null) {
                                 codeCompletion = new KeywordBasedCodeCompletion(bytecodeSyntaxTextArea, newSettings);
                             }
                         }
                     }
                 });
                 menu.add(completionMenu);
+                JMenuItem guess = new JMenuItem("guess completion (see verbose console for analyse)");
+                guess.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent actionEvent) {
+                        List<CompletionItem.CompletionItemSet> guessed = SupportedKeySets.JrdKeySets.recognize(bytecodeSyntaxTextArea.getText());
+                        {
+                            CompletionSettings oldSettings;
+                            if (codeCompletion == null) {
+                                oldSettings = SupportedKeySets.JrdDefault;
+                            } else {
+                                oldSettings = codeCompletion.getSettings();
+                            }
+                            if (codeCompletion != null) {
+                                codeCompletion.dispose();
+                                codeCompletion = null;
+                            }
+                            if (guessed.isEmpty()) {
+                                //nothing, removed
+                            } else if (guessed.size() == 1) {
+                                codeCompletion = new KeywordBasedCodeCompletion(bytecodeSyntaxTextArea, new CompletionSettings(
+                                        guessed.get(0),
+                                        oldSettings.getOp(),
+                                        oldSettings.isCaseSensitive(),
+                                        oldSettings.isShowHelp()
+                                ));
+                            } else {
+                                codeCompletion = new KeywordBasedCodeCompletion(bytecodeSyntaxTextArea, new CompletionSettings(
+                                        new ConnectedKeywords(guessed.toArray(new CompletionItem.CompletionItemSet[0])),
+                                        oldSettings.getOp(),
+                                        oldSettings.isCaseSensitive(),
+                                        oldSettings.isShowHelp()
+                                ));
+                            }
+                        }
+                    }
+                });
+                menu.add(guess);
                 menu.add(new JMenuItem("Dummy compilation"));
                 menu.show(completion, completion.getWidth() / 2, completion.getHeight() / 2);
             }

@@ -1,5 +1,6 @@
 package org.jrd.frontend.frame.main.decompilerview;
 
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.kcc.CompletionItem;
 import org.kcc.CompletionSettings;
 import org.kcc.wordsets.ConnectedKeywords;
@@ -15,6 +16,7 @@ import javax.swing.JRadioButton;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.List;
@@ -101,8 +103,9 @@ public class CompletionSettingsDialogue extends JDialog {
         }
     }
 
-    public CompletionSettings showForResults(CompletionSettings settings) {
+    public CompletionSettings showForResults(Component parent, CompletionSettings settings) {
         pre(settings);
+        this.setLocationRelativeTo(parent);
         this.setVisible(true);
         if (okState) {
             return post();

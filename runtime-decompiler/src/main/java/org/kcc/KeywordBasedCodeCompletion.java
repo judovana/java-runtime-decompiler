@@ -45,7 +45,7 @@ public class KeywordBasedCodeCompletion {
     private final CaretListener caretListenerToRemove;
     private final KeyListener keyListenerToRemove;
     private final FocusListener focusListenerToRemove;
-    private boolean debug = true;
+    private boolean debug = false;
     private Point futureLocation;
 
 
