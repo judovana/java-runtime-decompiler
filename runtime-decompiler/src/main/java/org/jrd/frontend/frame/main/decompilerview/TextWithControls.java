@@ -74,7 +74,8 @@ public class TextWithControls extends JPanel implements LinesProvider {
                         @Override
                         public void actionPerformed(ActionEvent actionEvent) {
                             saveOldSettings();
-                            CompletionSettings newSettings = new CompletionSettingsDialogue().showForResults(TextWithControls.this, oldSettings);
+                            CompletionSettings newSettings =
+                                    new CompletionSettingsDialogue().showForResults(TextWithControls.this, oldSettings);
                             if (newSettings != null) {
                                 removeCodecompletion();
                                 if (newSettings.getSet() != null) {
@@ -88,7 +89,8 @@ public class TextWithControls extends JPanel implements LinesProvider {
                     guess.addActionListener(new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent actionEvent) {
-                            List<CompletionItem.CompletionItemSet> guessed = SupportedKeySets.JrdKeySets.recognize(bytecodeSyntaxTextArea.getText());
+                            List<CompletionItem.CompletionItemSet> guessed =
+                                    SupportedKeySets.JrdKeySets.recognize(bytecodeSyntaxTextArea.getText());
                             normalCodeCompletionGuess(guessed);
                         }
                     });
@@ -127,19 +129,18 @@ public class TextWithControls extends JPanel implements LinesProvider {
         if (guessed.isEmpty()) {
             //nothing, removed
         } else if (guessed.size() == 1) {
-            codeCompletion = new KeywordBasedCodeCompletion(bytecodeSyntaxTextArea, new CompletionSettings(
-                    guessed.get(0),
-                    oldSettings.getOp(),
-                    oldSettings.isCaseSensitive(),
-                    oldSettings.isShowHelp()
-            ));
+            codeCompletion = new KeywordBasedCodeCompletion(
+                    bytecodeSyntaxTextArea,
+                    new CompletionSettings(guessed.get(0), oldSettings.getOp(), oldSettings.isCaseSensitive(), oldSettings.isShowHelp())
+            );
         } else {
-            codeCompletion = new KeywordBasedCodeCompletion(bytecodeSyntaxTextArea, new CompletionSettings(
-                    new ConnectedKeywords(guessed.toArray(new CompletionItem.CompletionItemSet[0])),
-                    oldSettings.getOp(),
-                    oldSettings.isCaseSensitive(),
-                    oldSettings.isShowHelp()
-            ));
+            codeCompletion = new KeywordBasedCodeCompletion(
+                    bytecodeSyntaxTextArea,
+                    new CompletionSettings(
+                            new ConnectedKeywords(guessed.toArray(new CompletionItem.CompletionItemSet[0])), oldSettings.getOp(),
+                            oldSettings.isCaseSensitive(), oldSettings.isShowHelp()
+                    )
+            );
         }
     }
 
@@ -208,34 +209,37 @@ public class TextWithControls extends JPanel implements LinesProvider {
                     } else if (cct == CodeCompletionType.JRD) {
                         for (CompletionItem.CompletionItemSet set : r) {
                             if (SupportedKeySets.JrdKeySets.isByteman(set)) {
-                                codeCompletion = new KeywordBasedCodeCompletion(bytecodeSyntaxTextArea, new CompletionSettings(
-                                        new BytemanKeywords(),
-                                        oldSettings.getOp(),
-                                        oldSettings.isCaseSensitive(),
-                                        oldSettings.isShowHelp()
-                                ));
+                                codeCompletion = new KeywordBasedCodeCompletion(
+                                        bytecodeSyntaxTextArea,
+                                        new CompletionSettings(
+                                                new BytemanKeywords(), oldSettings.getOp(), oldSettings.isCaseSensitive(),
+                                                oldSettings.isShowHelp()
+                                        )
+                                );
                                 return;
                             }
                         }
                         for (CompletionItem.CompletionItemSet set : r) {
                             if (SupportedKeySets.JrdKeySets.isJasm(set)) {
-                                codeCompletion = new KeywordBasedCodeCompletion(bytecodeSyntaxTextArea, new CompletionSettings(
-                                        new BytecodeKeywordsWithHelp(),
-                                        oldSettings.getOp(),
-                                        oldSettings.isCaseSensitive(),
-                                        oldSettings.isShowHelp()
-                                ));
+                                codeCompletion = new KeywordBasedCodeCompletion(
+                                        bytecodeSyntaxTextArea,
+                                        new CompletionSettings(
+                                                new BytecodeKeywordsWithHelp(), oldSettings.getOp(), oldSettings.isCaseSensitive(),
+                                                oldSettings.isShowHelp()
+                                        )
+                                );
                                 return;
                             }
                         }
                         for (CompletionItem.CompletionItemSet set : r) {
                             if (SupportedKeySets.JrdKeySets.isJava(set)) {
-                                codeCompletion = new KeywordBasedCodeCompletion(bytecodeSyntaxTextArea, new CompletionSettings(
-                                        new JrdApiKeywords(),
-                                        oldSettings.getOp(),
-                                        oldSettings.isCaseSensitive(),
-                                        oldSettings.isShowHelp()
-                                ));
+                                codeCompletion = new KeywordBasedCodeCompletion(
+                                        bytecodeSyntaxTextArea,
+                                        new CompletionSettings(
+                                                new JrdApiKeywords(), oldSettings.getOp(), oldSettings.isCaseSensitive(),
+                                                oldSettings.isShowHelp()
+                                        )
+                                );
                                 return;
                             }
                         }
@@ -374,6 +378,8 @@ public class TextWithControls extends JPanel implements LinesProvider {
     }
 
     public enum CodeCompletionType {
-        FORBIDDEN, JRD, STANDALONE;
+        FORBIDDEN,
+        JRD,
+        STANDALONE;
     }
 }

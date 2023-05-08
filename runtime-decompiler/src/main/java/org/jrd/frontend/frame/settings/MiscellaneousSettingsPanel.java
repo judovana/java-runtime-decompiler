@@ -26,14 +26,16 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
     private final JTextField classPath;
 
     public MiscellaneousSettingsPanel(
-            boolean initialUseJavapSignatures, Config.DepndenceNumbers initialConfigNumbers, String cp, String sp, boolean detectAutocompletion
+            boolean initialUseJavapSignatures, Config.DepndenceNumbers initialConfigNumbers, String cp, String sp,
+            boolean detectAutocompletion
     ) {
         miscSettingsLabel = new JLabel("Miscellaneous settings");
         useJavapSignaturesCheckBox = new JCheckBox("Use Javap signatures in Agent API insertion menu", initialUseJavapSignatures);
         detectAutocompletionCheckBox = new JCheckBox("Detect and enable autocompletion in text editor", detectAutocompletion);
         detectAutocompletionCheckBox.setToolTipText(
                 BytecodeDecompilerView.styleTooltip() +
-                        "for assemblers, the bytecode will be loaded.<br/> For byteman, byteman.<br/> But for java, it depends on editor - in JRD it will runtime modification api");
+                        "for assemblers, the bytecode will be loaded.<br/> For byteman, byteman.<br/> But for java, it depends on editor - in JRD it will runtime modification api"
+        );
         this.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.NORTHWEST;

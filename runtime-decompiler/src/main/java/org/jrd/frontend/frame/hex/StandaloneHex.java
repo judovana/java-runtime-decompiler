@@ -46,7 +46,10 @@ public class StandaloneHex extends JFrame {
             if (hex) {
                 wrapper = new FeatureFullHex(new File(s), tp, new HexWithControls(null));
             } else {
-                wrapper = new FeatureFullHex(new File(s), tp, new TextWithControls(null, SyntaxConstants.SYNTAX_STYLE_JAVA, TextWithControls.CodeCompletionType.STANDALONE));
+                wrapper = new FeatureFullHex(
+                        new File(s), tp,
+                        new TextWithControls(null, SyntaxConstants.SYNTAX_STYLE_JAVA, TextWithControls.CodeCompletionType.STANDALONE)
+                );
             }
             tp.add(wrapper);
         }
@@ -63,7 +66,9 @@ public class StandaloneHex extends JFrame {
         lowButtons.add(openEmptyText, BorderLayout.WEST);
         lowButtons.add(openText, BorderLayout.EAST);
         final JButton exit = new JButton("exit");
-        JLabel hint = new JLabel("<html><div style='text-align: center;'>welcome to Jrd's standalone hex and texts</div></html>", SwingConstants.CENTER);
+        JLabel hint = new JLabel(
+                "<html><div style='text-align: center;'>welcome to Jrd's standalone hex and texts</div></html>", SwingConstants.CENTER
+        );
         final JButton settings = new JButton("jrd's settings");
         final JPanel plus = new JPanel(new BorderLayout());
         plus.add(topButtons, BorderLayout.NORTH);
@@ -88,7 +93,10 @@ public class StandaloneHex extends JFrame {
         });
 
         openText.addActionListener(a -> {
-            addMainPanel(tp, openHex, plus, new TextWithControls(null, SyntaxConstants.SYNTAX_STYLE_JAVA, TextWithControls.CodeCompletionType.STANDALONE));
+            addMainPanel(
+                    tp, openHex, plus,
+                    new TextWithControls(null, SyntaxConstants.SYNTAX_STYLE_JAVA, TextWithControls.CodeCompletionType.STANDALONE)
+            );
         });
 
         openEmptyHex.addActionListener(a -> {
@@ -96,14 +104,17 @@ public class StandaloneHex extends JFrame {
         });
 
         openEmptyText.addActionListener(a -> {
-            addEmptyMainPanel(tp, openHex, plus, new TextWithControls(null, SyntaxConstants.SYNTAX_STYLE_JAVA, TextWithControls.CodeCompletionType.STANDALONE));
+            addEmptyMainPanel(
+                    tp, openHex, plus,
+                    new TextWithControls(null, SyntaxConstants.SYNTAX_STYLE_JAVA, TextWithControls.CodeCompletionType.STANDALONE)
+            );
         });
 
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosed(WindowEvent e) {
-                for(Component c: tp.getComponents()){
-                   //fixme, dispose all completions in all windows
+                for (Component c : tp.getComponents()) {
+                    //fixme, dispose all completions in all windows
                 }
             }
         });

@@ -47,7 +47,6 @@ public class KeywordBasedCodeCompletion {
     private boolean debug = false;
     private Point futureLocation;
 
-
     public KeywordBasedCodeCompletion(JTextArea source, CompletionSettings settings) {
         this.source = source;
         this.settings = settings;
@@ -104,15 +103,15 @@ public class KeywordBasedCodeCompletion {
 
             @Override
             public void keyPressed(KeyEvent keyEvent) {
-                if ((keyEvent.getKeyCode() == KeyEvent.VK_SPACE && keyEvent.getModifiersEx() == InputEvent.CTRL_DOWN_MASK)
-                        ||
+                if ((keyEvent.getKeyCode() == KeyEvent.VK_SPACE && keyEvent.getModifiersEx() == InputEvent.CTRL_DOWN_MASK) ||
                         (keyEvent.getKeyCode() == KeyEvent.VK_INSERT && keyEvent.getModifiersEx() == InputEvent.ALT_DOWN_MASK)
                 ) {
                     if (futureLocation == null) {
                         calcCompletionPosition();
                     }
                     popup.setVisible(true);
-                    if (suggested.isShowing() && suggested.getSelectedValue() != null && !suggested.getSelectedValue().getDescription().isEmpty()) {
+                    if (suggested.isShowing() && suggested.getSelectedValue() != null &&
+                            !suggested.getSelectedValue().getDescription().isEmpty()) {
                         showHelp();
                     }
                 }
@@ -141,7 +140,7 @@ public class KeywordBasedCodeCompletion {
 
     private void showHelp() {
         removeHelp();
-        if(settings.isShowHelp()) {
+        if (settings.isShowHelp()) {
             help = new JFrame();
             help.setFocusableWindowState(false);
             help.setUndecorated(true);
@@ -182,7 +181,6 @@ public class KeywordBasedCodeCompletion {
         setKeywords(set.getItemsArray());
         this.nondelimiter = set.getRecommendedDelimiterSet();
     }
-
 
     private void proceedArrow(final KeyEvent keyEvent) {
         if (keyEvent.getKeyCode() == KeyEvent.VK_ENTER && popup.isVisible()) {
@@ -272,10 +270,14 @@ public class KeywordBasedCodeCompletion {
         Pattern vagueMatch = null;
         switch (settings.getOp()) {
             case SPARSE:
-                vagueMatch = Pattern.compile(".*" + Arrays.stream(letters).map(a -> Pattern.quote(a)).collect(Collectors.joining("+.*")) + ".*");
+                vagueMatch =
+                        Pattern.compile(".*" + Arrays.stream(letters).map(a -> Pattern.quote(a)).collect(Collectors.joining("+.*")) + ".*");
                 break;
             case MAYHEM:
-                vagueMatch = Pattern.compile(".*" + Arrays.stream(letters).map(a -> "[" + Pattern.quote(finalword) + "]").collect(Collectors.joining("+.*")) + ".*");
+                vagueMatch = Pattern.compile(
+                        ".*" + Arrays.stream(letters).map(a -> "[" + Pattern.quote(finalword) + "]").collect(Collectors.joining("+.*")) +
+                                ".*"
+                );
                 break;
         }
         for (CompletionItem item : keywords) {

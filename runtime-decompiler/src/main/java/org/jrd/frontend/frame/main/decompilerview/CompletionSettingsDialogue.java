@@ -25,7 +25,7 @@ public class CompletionSettingsDialogue extends JDialog {
     private final JLabel status = new JLabel("...");;
     private final JList<CompletionItem.CompletionItemSet> completions;
     private ConnectedKeywords result;
-    private  boolean okState = false;
+    private boolean okState = false;
 
     JRadioButton rb11 = new JRadioButton("starts with");
     JRadioButton rb12 = new JRadioButton("contains");
@@ -153,19 +153,18 @@ public class CompletionSettingsDialogue extends JDialog {
             sets = new CompletionItem.CompletionItemSet[]{settings.getSet()};
         }
         List<Integer> selected = new ArrayList<>();
-        for(CompletionItem.CompletionItemSet set: sets){
-            for(int i = 0; i< completions.getModel().getSize(); i++){
-                if (completions.getModel().getElementAt(i).toString().equals(set.toString())){
+        for (CompletionItem.CompletionItemSet set : sets) {
+            for (int i = 0; i < completions.getModel().getSize(); i++) {
+                if (completions.getModel().getElementAt(i).toString().equals(set.toString())) {
                     selected.add(i);
                 }
             }
         }
         int[] indices = new int[selected.size()];
-        for(int i = 0; i < indices.length; i++){
+        for (int i = 0; i < indices.length; i++) {
             indices[i] = selected.get(i);
         }
         completions.setSelectedIndices(indices);
     }
-
 
 }

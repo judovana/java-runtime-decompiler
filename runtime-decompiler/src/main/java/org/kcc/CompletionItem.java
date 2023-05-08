@@ -24,6 +24,7 @@ public class CompletionItem implements Comparable<CompletionItem> {
         static Pattern delimiterWordSet() {
             return Pattern.compile("[a-zA-Z]");
         }
+
         static Pattern delimiterWordAndNumberSet() {
             return Pattern.compile("[a-zA-Z0-9]");
         }

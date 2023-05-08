@@ -7,7 +7,10 @@ import java.util.regex.Pattern;
 
 public class CompletionSettings {
     public enum OP {
-        STARTS, CONTAINS, SPARSE, MAYHEM
+        STARTS,
+        CONTAINS,
+        SPARSE,
+        MAYHEM
     }
 
     private final boolean caseSensitive;
@@ -39,14 +42,14 @@ public class CompletionSettings {
         return showHelp;
     }
 
-    public static class RecognitionResult implements  Comparable<RecognitionResult>{
+    public static class RecognitionResult implements Comparable<RecognitionResult> {
         private final int words;
         private final int hits;
         private final int percent;
         private final int index;
         private final CompletionItem.CompletionItemSet set;
 
-        public RecognitionResult(int words, int hits, int percent, int index, CompletionItem.CompletionItemSet set)  {
+        public RecognitionResult(int words, int hits, int percent, int index, CompletionItem.CompletionItemSet set) {
             this.words = words;
             this.hits = hits;
             this.percent = percent;
@@ -76,20 +79,14 @@ public class CompletionSettings {
 
         @Override
         public String toString() {
-            return "RecognitionResult{" +
-                    "words=" + words +
-                    ", hits=" + hits +
-                    ", percent=" + percent +
-                    ", set index=" + index +
-                    '}';
+            return "RecognitionResult{" + "words=" + words + ", hits=" + hits + ", percent=" + percent + ", set index=" + index + '}';
         }
 
         @Override
         public int compareTo(RecognitionResult recognitionResult) {
-            return recognitionResult.percent-percent;
+            return recognitionResult.percent - percent;
         }
     }
-
 
     public static RecognitionResult[] recognize(String stext, CompletionItem.CompletionItemSet... sets) {
         char[] text = stext.toCharArray();
@@ -118,19 +115,18 @@ public class CompletionSettings {
                 }
             }
             long percent = 0;
-            if (w[i]>0) {
+            if (w[i] > 0) {
                 percent = (int) (((long) h[i] * 100l) / w[i]);
             }
-            p[i] = (int)percent;
+            p[i] = (int) percent;
         }
-        RecognitionResult[] r= new RecognitionResult[sets.length];
+        RecognitionResult[] r = new RecognitionResult[sets.length];
         for (int i = 0; i < r.length; i++) {
             r[i] = new RecognitionResult(w[i], h[i], p[i], i, sets[i]);
         }
         Arrays.sort(r);
         return r;
     }
-
 
     private static boolean isInSet(String word, CompletionItem.CompletionItemSet set) {
         for (CompletionItem item : set.getItemsArray()) {
@@ -140,6 +136,5 @@ public class CompletionSettings {
         }
         return false;
     }
-
 
 }

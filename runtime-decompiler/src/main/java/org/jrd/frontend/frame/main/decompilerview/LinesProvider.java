@@ -7,7 +7,6 @@ import java.util.List;
 
 public interface LinesProvider {
 
-
     enum LinesFormat {
         CHARS,
         HEX

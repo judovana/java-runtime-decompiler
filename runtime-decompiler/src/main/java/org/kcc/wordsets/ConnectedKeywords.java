@@ -25,7 +25,11 @@ public class ConnectedKeywords implements CompletionItem.CompletionItemSet {
     public List<CompletionItem> getItemsList() {
         List<CompletionItem> l = new ArrayList<>();
         for (CompletionItem.CompletionItemSet item : originalSets) {
-            l.addAll(item.getItemsList().stream().map(a-> new CompletionItem(a.getKey(), a.getDescription()+"\n from: " + item.toString())).collect(Collectors.toList()));
+            l.addAll(
+                    item.getItemsList().stream()
+                            .map(a -> new CompletionItem(a.getKey(), a.getDescription() + "\n from: " + item.toString()))
+                            .collect(Collectors.toList())
+            );
         }
         Collections.sort(l);
         return l;

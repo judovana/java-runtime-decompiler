@@ -92,7 +92,8 @@ public class SettingsView extends JDialog {
         );
         nestedJarsSettingsPanel = new NestedJarsSettingsPanel();
         miscSettingsPanel = new MiscellaneousSettingsPanel(
-                config.doUseJavapSignatures(), config.doDepndenceNumbers(), config.getAdditionalCP(), config.getAdditionalSP(), config.doAutocompletion()
+                config.doUseJavapSignatures(), config.doDepndenceNumbers(), config.getAdditionalCP(), config.getAdditionalSP(),
+                config.doAutocompletion()
         );
 
         for (
