@@ -1,7 +1,5 @@
 package org.kcc;
 
-import org.kcc.wordsets.ConnectedKeywords;
-
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
@@ -116,7 +114,7 @@ public class CompletionSettings {
             }
             long percent = 0;
             if (w[i] > 0) {
-                percent = (int) (((long) h[i] * 100l) / w[i]);
+                percent = (int) (((long) h[i] * 100L) / w[i]);
             }
             p[i] = (int) percent;
         }

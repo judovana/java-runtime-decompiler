@@ -12,11 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SupportedKeySets {
-    public static final SupportedKeySets JrdKeySets =
+    public static final SupportedKeySets JRD_KEY_SETS =
             new SupportedKeySets(new JrdApiKeywords(), new BytemanKeywords(), new BytecodeKeywordsWithHelp(), new JavaKeywordsWithHelp());
 
-    public static final CompletionSettings JrdDefault =
-            new CompletionSettings(JrdKeySets.sets[0], CompletionSettings.OP.SPARSE, false, true);
+    public static final CompletionSettings JRD_DEFAULT =
+            new CompletionSettings(JRD_KEY_SETS.sets[0], CompletionSettings.OP.SPARSE, false, true);
 
     private final CompletionItem.CompletionItemSet[] sets;
 

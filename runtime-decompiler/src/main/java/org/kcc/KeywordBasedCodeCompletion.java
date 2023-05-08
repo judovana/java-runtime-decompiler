@@ -37,7 +37,7 @@ public class KeywordBasedCodeCompletion {
     private Pattern nondelimiter;
     private CompletionItem[] keywords;
 
-    private final JFrame popup;//FIXME, rework to always dispose after hide, otherwise it is impossible to close application to often...
+    private final JFrame popup; //FIXME, rework to always dispose after hide, otherwise it is impossible to close application to often...
     private JFrame help;
     private final JList<CompletionItem> suggested;
     private final JScrollPane scroll;
@@ -103,8 +103,8 @@ public class KeywordBasedCodeCompletion {
 
             @Override
             public void keyPressed(KeyEvent keyEvent) {
-                if ((keyEvent.getKeyCode() == KeyEvent.VK_SPACE && keyEvent.getModifiersEx() == InputEvent.CTRL_DOWN_MASK) ||
-                        (keyEvent.getKeyCode() == KeyEvent.VK_INSERT && keyEvent.getModifiersEx() == InputEvent.ALT_DOWN_MASK)
+                if (keyEvent.getKeyCode() == KeyEvent.VK_SPACE && keyEvent.getModifiersEx() == InputEvent.CTRL_DOWN_MASK ||
+                        keyEvent.getKeyCode() == KeyEvent.VK_INSERT && keyEvent.getModifiersEx() == InputEvent.ALT_DOWN_MASK
                 ) {
                     if (futureLocation == null) {
                         calcCompletionPosition();
@@ -124,7 +124,7 @@ public class KeywordBasedCodeCompletion {
             }
         };
         source.addKeyListener(keyListenerToRemove);
-        focusListenerToRemove = (new FocusListener() {
+        focusListenerToRemove = new FocusListener() {
             @Override
             public void focusGained(FocusEvent focusEvent) {
                 popup.setFocusableWindowState(false);
@@ -134,23 +134,30 @@ public class KeywordBasedCodeCompletion {
             public void focusLost(FocusEvent focusEvent) {
 
             }
-        });
+        };
         source.addFocusListener(focusListenerToRemove);
     }
 
     private void showHelp() {
         removeHelp();
         if (settings.isShowHelp()) {
-            help = new JFrame();
-            help.setFocusableWindowState(false);
-            help.setUndecorated(true);
-            help.setSize(400, 200);
-            help.setAlwaysOnTop(true);
-            JTextArea tt = new JTextArea(suggested.getSelectedValue().getKey() + "\n" + suggested.getSelectedValue().getDescription());
-            tt.setLineWrap(true);
-            help.add(new JScrollPane(tt));
-            help.setLocation(popup.getLocationOnScreen().x, popup.getLocationOnScreen().y + popup.getHeight());
-            help.setVisible(true);
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    help = new JFrame();
+                    help.setFocusableWindowState(false);
+                    help.setUndecorated(true);
+                    help.setSize(400, 200);
+                    help.setAlwaysOnTop(true);
+                    JTextArea tt = new JTextArea(
+                            suggested.getSelectedValue().getKey() + "\n" +
+                                    suggested.getSelectedValue().getDescription());
+                    tt.setLineWrap(true);
+                    help.add(new JScrollPane(tt));
+                    help.setLocation(popup.getLocationOnScreen().x, popup.getLocationOnScreen().y + popup.getHeight());
+                    help.setVisible(true);
+                }
+            });
         }
     }
 
@@ -199,12 +206,16 @@ public class KeywordBasedCodeCompletion {
                         popup.setFocusableWindowState(true);
                         suggested.requestFocus();
                         if (suggested.getSelectedValue() == null && suggested.getModel().getSize() > 0) {
-                            if (keyEvent.getKeyCode() == KeyEvent.VK_DOWN) {
-                                suggested.setSelectedIndex(0);
-                            }
-                            if (keyEvent.getKeyCode() == KeyEvent.VK_UP) {
-                                suggested.setSelectedIndex(suggested.getModel().getSize() - 1);
-                            }
+                            consumeKeyUpAndDown();
+                        }
+                    }
+
+                    private void consumeKeyUpAndDown() {
+                        if (keyEvent.getKeyCode() == KeyEvent.VK_DOWN) {
+                            suggested.setSelectedIndex(0);
+                        }
+                        if (keyEvent.getKeyCode() == KeyEvent.VK_UP) {
+                            suggested.setSelectedIndex(suggested.getModel().getSize() - 1);
                         }
                     }
                 });
@@ -279,6 +290,9 @@ public class KeywordBasedCodeCompletion {
                                 ".*"
                 );
                 break;
+            default:
+                break;
+
         }
         for (CompletionItem item : keywords) {
             String itemKey = item.getKey();
@@ -302,6 +316,7 @@ public class KeywordBasedCodeCompletion {
                         filtered.add(item);
                     }
                     break;
+                default: throw new RuntimeException("Unknown switch: " + settings.getOp());
             }
         }
         setKeywordsImpl(filtered.toArray(new CompletionItem[0]));
@@ -336,7 +351,7 @@ public class KeywordBasedCodeCompletion {
     }
 
     private static ListModel createModel(final CompletionItem[] listData) {
-        return ((ListModel) (new AbstractListModel<CompletionItem>() {
+        return (ListModel) new AbstractListModel<CompletionItem>() {
             public int getSize() {
                 return listData.length;
             }
@@ -344,11 +359,11 @@ public class KeywordBasedCodeCompletion {
             public CompletionItem getElementAt(int i) {
                 return listData[i];
             }
-        }));
+        };
     }
 
     private static ListModel createModel(final List<CompletionItem> listData) {
-        return ((ListModel) (new AbstractListModel<CompletionItem>() {
+        return (ListModel) new AbstractListModel<CompletionItem>() {
             public int getSize() {
                 return listData.size();
             }
@@ -356,7 +371,7 @@ public class KeywordBasedCodeCompletion {
             public CompletionItem getElementAt(int i) {
                 return listData.get(i);
             }
-        }));
+        };
     }
 
     private void setKeywords(CompletionItem[] keywords) {
@@ -364,9 +379,9 @@ public class KeywordBasedCodeCompletion {
         setKeywordsImpl(keywords);
     }
 
-    private void setKeywordsImpl(CompletionItem[] keywords) {
+    private void setKeywordsImpl(CompletionItem[] lkeywords) {
         CompletionItem wasSelected = suggested.getSelectedValue();
-        suggested.setModel(createModel(keywords));
+        suggested.setModel(createModel(lkeywords));
         suggested.setSelectedValue(wasSelected, true);
         if (suggested.getSelectedValue() == null && suggested.getModel().getSize() > 0) {
             suggested.setSelectedIndex(0);

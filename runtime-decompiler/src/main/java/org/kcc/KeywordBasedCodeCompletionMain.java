@@ -16,13 +16,19 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
-public class KeywordBasedCodeCompletionMain {
+public final class KeywordBasedCodeCompletionMain {
 
-    public static void main(String[] args) throws Exception {
+    private KeywordBasedCodeCompletionMain() {
+    }
+
+    /**
+     * Experiemntal main method showing as demo for KeywordBasedCodeCompletion;
+     * move from mainX to main once moved to separeate project
+     * @param args
+     * @throws Exception
+     */
+    public static void mainX(String[] args) throws Exception {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {

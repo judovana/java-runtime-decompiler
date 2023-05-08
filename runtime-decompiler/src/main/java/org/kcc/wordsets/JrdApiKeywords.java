@@ -95,7 +95,7 @@ public class JrdApiKeywords implements CompletionItem.CompletionItemSet {
                     new CompletionItem("org.jrd.agent.api.UnsafeVariables.Clazzs.removeAll();", ""),
                     new CompletionItem("org.jrd.agent.api.UnsafeVariables.Clazzs.removeAll(Class);", ""),
                     new CompletionItem("org.jrd.agent.api.UnsafeVariables.Clazzs.removeAll(String);", ""),
-                    new CompletionItem("(String)(org.jrd.agent.api.UnsafeVariables.dumpAll());", ""),};
+                    new CompletionItem("(String)(org.jrd.agent.api.UnsafeVariables.dumpAll());", "")};
 
     @Override
     public CompletionItem[] getItemsArray() {

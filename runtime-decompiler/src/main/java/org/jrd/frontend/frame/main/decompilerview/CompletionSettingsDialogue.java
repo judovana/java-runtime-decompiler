@@ -1,6 +1,5 @@
 package org.jrd.frontend.frame.main.decompilerview;
 
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.kcc.CompletionItem;
 import org.kcc.CompletionSettings;
 import org.kcc.wordsets.ConnectedKeywords;
@@ -22,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CompletionSettingsDialogue extends JDialog {
-    private final JLabel status = new JLabel("...");;
+    private final JLabel status = new JLabel("...");
     private final JList<CompletionItem.CompletionItemSet> completions;
     private ConnectedKeywords result;
     private boolean okState = false;
@@ -42,7 +41,7 @@ public class CompletionSettingsDialogue extends JDialog {
         this.setModal(true);
         JPanel p1 = new JPanel(new BorderLayout());
         p1.add(new JLabel("Select completion(s) - multiselect supported"), BorderLayout.NORTH);
-        completions = new JList(SupportedKeySets.JrdKeySets.getSets());
+        completions = new JList(SupportedKeySets.JRD_KEY_SETS.getSets());
         completions.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent listSelectionEvent) {

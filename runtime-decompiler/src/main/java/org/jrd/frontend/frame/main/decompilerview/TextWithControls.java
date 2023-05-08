@@ -90,7 +90,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
                         @Override
                         public void actionPerformed(ActionEvent actionEvent) {
                             List<CompletionItem.CompletionItemSet> guessed =
-                                    SupportedKeySets.JrdKeySets.recognize(bytecodeSyntaxTextArea.getText());
+                                    SupportedKeySets.JRD_KEY_SETS.recognize(bytecodeSyntaxTextArea.getText());
                             normalCodeCompletionGuess(guessed);
                         }
                     });
@@ -127,7 +127,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
     private void normalCodeCompletionGuess(List<CompletionItem.CompletionItemSet> guessed) {
         removeCodecompletion();
         if (guessed.isEmpty()) {
-            //nothing, removed
+            Logger.getLogger().log(Logger.Level.DEBUG, "Completion discarded");
         } else if (guessed.size() == 1) {
             codeCompletion = new KeywordBasedCodeCompletion(
                     bytecodeSyntaxTextArea,
@@ -148,7 +148,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
         if (codeCompletion == null) {
             if (oldSettings == null) {
                 if (oldSettings == null) {
-                    oldSettings = SupportedKeySets.JrdDefault;
+                    oldSettings = SupportedKeySets.JRD_DEFAULT;
                 }
             }
         } else {
@@ -194,61 +194,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
     }
 
     private RSyntaxTextArea createSrcTextArea() {
-        final RSyntaxTextArea rst = new RSyntaxTextArea() {
-            @Override
-            public void setText(String t) {
-                super.setText(t);
-                if (cct != CodeCompletionType.FORBIDDEN) {
-                    removeCodecompletion();
-                    List<CompletionItem.CompletionItemSet> r = SupportedKeySets.JrdKeySets.recognize(t);
-                    if (r == null || r.isEmpty()) {
-                        return;
-                    }
-                    if (cct == CodeCompletionType.STANDALONE) {
-                        normalCodeCompletionGuess(r);
-                    } else if (cct == CodeCompletionType.JRD) {
-                        for (CompletionItem.CompletionItemSet set : r) {
-                            if (SupportedKeySets.JrdKeySets.isByteman(set)) {
-                                codeCompletion = new KeywordBasedCodeCompletion(
-                                        bytecodeSyntaxTextArea,
-                                        new CompletionSettings(
-                                                new BytemanKeywords(), oldSettings.getOp(), oldSettings.isCaseSensitive(),
-                                                oldSettings.isShowHelp()
-                                        )
-                                );
-                                return;
-                            }
-                        }
-                        for (CompletionItem.CompletionItemSet set : r) {
-                            if (SupportedKeySets.JrdKeySets.isJasm(set)) {
-                                codeCompletion = new KeywordBasedCodeCompletion(
-                                        bytecodeSyntaxTextArea,
-                                        new CompletionSettings(
-                                                new BytecodeKeywordsWithHelp(), oldSettings.getOp(), oldSettings.isCaseSensitive(),
-                                                oldSettings.isShowHelp()
-                                        )
-                                );
-                                return;
-                            }
-                        }
-                        for (CompletionItem.CompletionItemSet set : r) {
-                            if (SupportedKeySets.JrdKeySets.isJava(set)) {
-                                codeCompletion = new KeywordBasedCodeCompletion(
-                                        bytecodeSyntaxTextArea,
-                                        new CompletionSettings(
-                                                new JrdApiKeywords(), oldSettings.getOp(), oldSettings.isCaseSensitive(),
-                                                oldSettings.isShowHelp()
-                                        )
-                                );
-                                return;
-                            }
-                        }
-                        //nothing found?
-                        normalCodeCompletionGuess(r);
-                    }
-                }
-            }
-        };
+        final RSyntaxTextArea rst = new RSyntaxTextAreaWithCompletion();
         rst.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -380,6 +326,62 @@ public class TextWithControls extends JPanel implements LinesProvider {
     public enum CodeCompletionType {
         FORBIDDEN,
         JRD,
-        STANDALONE;
+        STANDALONE
+    }
+
+    private class RSyntaxTextAreaWithCompletion extends RSyntaxTextArea {
+        @Override
+        public void setText(String t) {
+            super.setText(t);
+            if (cct != CodeCompletionType.FORBIDDEN) {
+                removeCodecompletion();
+                List<CompletionItem.CompletionItemSet> r = SupportedKeySets.JRD_KEY_SETS.recognize(t);
+                if (r == null || r.isEmpty()) {
+                    return;
+                }
+                if (cct == CodeCompletionType.STANDALONE) {
+                    normalCodeCompletionGuess(r);
+                } else if (cct == CodeCompletionType.JRD) {
+                    for (CompletionItem.CompletionItemSet set : r) {
+                        if (SupportedKeySets.JRD_KEY_SETS.isByteman(set)) {
+                            codeCompletion = new KeywordBasedCodeCompletion(
+                                    bytecodeSyntaxTextArea,
+                                    new CompletionSettings(
+                                            new BytemanKeywords(), oldSettings.getOp(), oldSettings.isCaseSensitive(),
+                                            oldSettings.isShowHelp()
+                                    )
+                            );
+                            return;
+                        }
+                    }
+                    for (CompletionItem.CompletionItemSet set : r) {
+                        if (SupportedKeySets.JRD_KEY_SETS.isJasm(set)) {
+                            codeCompletion = new KeywordBasedCodeCompletion(
+                                    bytecodeSyntaxTextArea,
+                                    new CompletionSettings(
+                                            new BytecodeKeywordsWithHelp(), oldSettings.getOp(), oldSettings.isCaseSensitive(),
+                                            oldSettings.isShowHelp()
+                                    )
+                            );
+                            return;
+                        }
+                    }
+                    for (CompletionItem.CompletionItemSet set : r) {
+                        if (SupportedKeySets.JRD_KEY_SETS.isJava(set)) {
+                            codeCompletion = new KeywordBasedCodeCompletion(
+                                    bytecodeSyntaxTextArea,
+                                    new CompletionSettings(
+                                            new JrdApiKeywords(), oldSettings.getOp(), oldSettings.isCaseSensitive(),
+                                            oldSettings.isShowHelp()
+                                    )
+                            );
+                            return;
+                        }
+                    }
+                    //nothing found?
+                    normalCodeCompletionGuess(r);
+                }
+            }
+        }
     }
 }

@@ -3,7 +3,6 @@ package org.jrd.frontend.frame.settings;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.ArchiveManagerOptions;
 import org.jrd.backend.data.Config;
-import org.jrd.frontend.frame.main.MainFrameView;
 
 import javax.swing.Box;
 import javax.swing.JButton;
