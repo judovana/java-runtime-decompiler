@@ -20,16 +20,20 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
 
     private final JLabel miscSettingsLabel;
     private final JCheckBox useJavapSignaturesCheckBox;
+    private final JCheckBox detectAutocompletionCheckBox;
     private final JComboBox<Config.DepndenceNumbers> dependenceNumbers;
     private final JTextField srcPath;
     private final JTextField classPath;
 
     public MiscellaneousSettingsPanel(
-            boolean initialUseJavapSignatures, Config.DepndenceNumbers initialConfigNumbers, String cp, String sp
+            boolean initialUseJavapSignatures, Config.DepndenceNumbers initialConfigNumbers, String cp, String sp, boolean detectAutocompletion
     ) {
         miscSettingsLabel = new JLabel("Miscellaneous settings");
         useJavapSignaturesCheckBox = new JCheckBox("Use Javap signatures in Agent API insertion menu", initialUseJavapSignatures);
-
+        detectAutocompletionCheckBox = new JCheckBox("Detect and enable autocompletion in text editor", detectAutocompletion);
+        detectAutocompletionCheckBox.setToolTipText(
+                BytecodeDecompilerView.styleTooltip() +
+                        "for assemblers, the bytecode will be loaded.<br/> For byteman, byteman.<br/> But for java, it depends on editor - in JRD it will runtime modification api");
         this.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.NORTHWEST;
@@ -42,8 +46,10 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
 
         gbc.gridy = 1;
         this.add(useJavapSignaturesCheckBox, gbc);
-        dependenceNumbers = new JComboBox(Config.DepndenceNumbers.values());
         gbc.gridy = 2;
+        this.add(detectAutocompletionCheckBox, gbc);
+        dependenceNumbers = new JComboBox(Config.DepndenceNumbers.values());
+        gbc.gridy = 3;
         this.add(dependenceNumbers, gbc);
         dependenceNumbers.addActionListener(a -> {
             dependenceNumbers.setToolTipText(
@@ -58,7 +64,7 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
         String hint = BytecodeDecompilerView.styleTooltip() +
                 "Additional source-path and classpath is used to show on-fs available src/bytecode of given classes" +
                 " and to help with possible compilation issues. <br>";
-        gbc.gridy = 3;
+        gbc.gridy = 4;
         JLabel aspl = new JLabel("Additional source-path");
         aspl.setToolTipText(
                 hint + "Although JRD was usually used no FS, it happened, that <b>decompilers</b> sucks," +
@@ -67,7 +73,7 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
         );
         srcPath.setToolTipText(aspl.getToolTipText());
         this.add(aspl, gbc);
-        gbc.gridy = 4;
+        gbc.gridy = 5;
         this.add(srcPath, gbc);
         gbc.weightx = 0;
         gbc.gridwidth = 1;
@@ -77,7 +83,7 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
         gbc.weightx = 0;
         gbc.gridwidth = 1;
         gbc.gridx = 1;
-        gbc.gridy = 5;
+        gbc.gridy = 6;
         JLabel acpl = new JLabel("Additional class-path");
         acpl.setToolTipText(
                 hint + "Although JRD was designed to <b>actually fill" + " missing classes</b> on FS from running VM,<br>" +
@@ -86,7 +92,7 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
         );
         classPath.setToolTipText(acpl.getToolTipText());
         this.add(acpl, gbc);
-        gbc.gridy = 6;
+        gbc.gridy = 7;
         this.add(classPath, gbc);
         gbc.weightx = 0;
         gbc.gridwidth = 1;
@@ -103,6 +109,10 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
         return useJavapSignaturesCheckBox.isSelected();
     }
 
+    public boolean shouldAutocomplete() {
+        return detectAutocompletionCheckBox.isSelected();
+    }
+
     public Config.DepndenceNumbers futurreDependenciesNumbers() {
         return (Config.DepndenceNumbers) dependenceNumbers.getSelectedItem();
     }
@@ -110,6 +120,7 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
     @Override
     public void setChangeReporter(ActionListener listener) {
         ChangeReporter.addCheckboxListener(listener, useJavapSignaturesCheckBox);
+        ChangeReporter.addCheckboxListener(listener, detectAutocompletionCheckBox);
         ChangeReporter.addTextChangeListener(listener, srcPath);
         ChangeReporter.addTextChangeListener(listener, classPath);
     }

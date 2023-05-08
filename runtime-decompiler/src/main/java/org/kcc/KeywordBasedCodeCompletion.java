@@ -36,9 +36,8 @@ public class KeywordBasedCodeCompletion {
 
     private Pattern nondelimiter;
     private CompletionItem[] keywords;
-    //private final List<JComponent> functional; //buttons/check/radio boxes below completion - ex settings
 
-    private final JFrame popup;
+    private final JFrame popup;//FIXME, rework to always dispose after hide, otherwise it is impossible to close application to often...
     private JFrame help;
     private final JList<CompletionItem> suggested;
     private final JScrollPane scroll;

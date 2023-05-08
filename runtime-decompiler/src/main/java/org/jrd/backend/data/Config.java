@@ -44,6 +44,7 @@ public final class Config {
     private static final String NESTED_JAR_EXTENSIONS = "NESTED_JAR_EXTENSIONS";
     private static final String COMPILER_ARGS = "COMPILER_ARGS";
     private static final String USE_JAVAP_SIGNATURES = "USE_JAVAP_SIGNATURES";
+    private static final String DETECT_AUTOCOMPLETION = "DETECT_AUTOCOMPLETION";
     private static final String ENFORCE_SOURCE_TARGET = "ENFORCE_SOURCE_TARGET";
     private static final String DEPNDENCE_NUMBERS = "DEPNDENCE_NUMBERS";
     private static final String ADDITIONAL_SOURCE_PATH = "ADDITIONAL_SOURCE_PATH";
@@ -251,6 +252,10 @@ public final class Config {
         return (boolean) configMap.getOrDefault(USE_JAVAP_SIGNATURES, true);
     }
 
+    public boolean doAutocompletion() {
+        return (boolean) configMap.getOrDefault(DETECT_AUTOCOMPLETION, true);
+    }
+
     public void setUseJavapSignatures(boolean shouldUseJavapSignatures) {
         boolean originalValue = doUseJavapSignatures();
 
@@ -259,6 +264,10 @@ public final class Config {
         }
 
         configMap.put(USE_JAVAP_SIGNATURES, shouldUseJavapSignatures);
+    }
+
+    public void setAutocomplete(boolean shouldAutocomplete) {
+        configMap.put(DETECT_AUTOCOMPLETION, shouldAutocomplete);
     }
 
     public boolean isSavedFsVm(VmInfo vmInfo) {

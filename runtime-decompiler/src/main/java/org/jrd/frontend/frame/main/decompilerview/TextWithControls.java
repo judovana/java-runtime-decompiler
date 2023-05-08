@@ -29,10 +29,13 @@ import javax.swing.JPopupMenu;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jrd.backend.core.Logger;
+import org.jrd.frontend.frame.main.GlobalConsole;
 import org.jrd.frontend.utility.ImageButtonFactory;
 import org.kcc.CompletionItem;
 import org.kcc.CompletionSettings;
 import org.kcc.KeywordBasedCodeCompletion;
+import org.kcc.wordsets.BytecodeKeywordsWithHelp;
+import org.kcc.wordsets.BytemanKeywords;
 import org.kcc.wordsets.ConnectedKeywords;
 import org.kcc.wordsets.JrdApiKeywords;
 
@@ -40,94 +43,69 @@ public class TextWithControls extends JPanel implements LinesProvider {
 
     private final RSyntaxTextArea bytecodeSyntaxTextArea;
     private final SearchControlsPanel bytecodeSearchControls;
+    private final CodeCompletionType cct;
     private DecompilationController.AgentApiGenerator popup;
     private File decorativeFilePlaceholder;
     private KeywordBasedCodeCompletion codeCompletion;
+    private CompletionSettings oldSettings;
 
-    public TextWithControls(String title) {
-        this(title, null);
+    public TextWithControls(String title, CodeCompletionType cct) {
+        this(title, null, cct);
     }
 
-    public TextWithControls(String title, String codeSelect) {
+    public TextWithControls(String title, String codeSelect, CodeCompletionType cct) {
+        this.cct = cct;
         HexWithControls.initTabLayers(this, title);
-        bytecodeSyntaxTextArea = createSrcTextArea(true);
+        bytecodeSyntaxTextArea = createSrcTextArea();
         bytecodeSearchControls = SearchControlsPanel.createBytecodeControls(this);
         RTextScrollPane bytecodeScrollPane = new RTextScrollPane(bytecodeSyntaxTextArea);
         this.add(bytecodeScrollPane);
         JPanel searchAndCode = new JPanel(new BorderLayout());
         this.add(searchAndCode, BorderLayout.SOUTH);
         searchAndCode.add(bytecodeSearchControls, BorderLayout.CENTER);
-        final JButton completion = ImageButtonFactory.createEditButton("Code completion and compilation");
-        completion.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                final JPopupMenu menu = new JPopupMenu("Settings");
-                JMenuItem completionMenu = new JMenuItem("Code completion");
-                completionMenu.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent actionEvent) {
-                        CompletionSettings oldSettings;
-                        if (codeCompletion == null) {
-                            oldSettings = SupportedKeySets.JrdDefault;
-                        } else {
-                            oldSettings = codeCompletion.getSettings();
-                        }
-                        CompletionSettings newSettings = new CompletionSettingsDialogue().showForResults(TextWithControls.this, oldSettings);
-                        if (newSettings != null) {
-                            if (codeCompletion != null) {
-                                codeCompletion.dispose();
-                                codeCompletion = null;
-                            }
-                            if (newSettings.getSet() != null) {
-                                codeCompletion = new KeywordBasedCodeCompletion(bytecodeSyntaxTextArea, newSettings);
+        if (cct != CodeCompletionType.FORBIDDEN) {
+            final JButton completion = ImageButtonFactory.createEditButton("Code completion and compilation");
+            completion.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent actionEvent) {
+                    final JPopupMenu menu = new JPopupMenu("Settings");
+                    JMenuItem completionMenu = new JMenuItem("Code completion");
+                    completionMenu.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent actionEvent) {
+                            CompletionSettings newSettings = new CompletionSettingsDialogue().showForResults(TextWithControls.this, oldSettings);
+                            if (newSettings != null) {
+                                removeCodecompletion();
+                                if (newSettings.getSet() != null) {
+                                    codeCompletion = new KeywordBasedCodeCompletion(bytecodeSyntaxTextArea, newSettings);
+                                }
                             }
                         }
-                    }
-                });
-                menu.add(completionMenu);
-                JMenuItem guess = new JMenuItem("guess completion (see verbose console for analyse)");
-                guess.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent actionEvent) {
-                        List<CompletionItem.CompletionItemSet> guessed = SupportedKeySets.JrdKeySets.recognize(bytecodeSyntaxTextArea.getText());
-                        {
-                            CompletionSettings oldSettings;
-                            if (codeCompletion == null) {
-                                oldSettings = SupportedKeySets.JrdDefault;
-                            } else {
-                                oldSettings = codeCompletion.getSettings();
-                            }
-                            if (codeCompletion != null) {
-                                codeCompletion.dispose();
-                                codeCompletion = null;
-                            }
-                            if (guessed.isEmpty()) {
-                                //nothing, removed
-                            } else if (guessed.size() == 1) {
-                                codeCompletion = new KeywordBasedCodeCompletion(bytecodeSyntaxTextArea, new CompletionSettings(
-                                        guessed.get(0),
-                                        oldSettings.getOp(),
-                                        oldSettings.isCaseSensitive(),
-                                        oldSettings.isShowHelp()
-                                ));
-                            } else {
-                                codeCompletion = new KeywordBasedCodeCompletion(bytecodeSyntaxTextArea, new CompletionSettings(
-                                        new ConnectedKeywords(guessed.toArray(new CompletionItem.CompletionItemSet[0])),
-                                        oldSettings.getOp(),
-                                        oldSettings.isCaseSensitive(),
-                                        oldSettings.isShowHelp()
-                                ));
-                            }
+                    });
+                    menu.add(completionMenu);
+                    JMenuItem guess = new JMenuItem("guess completion (see verbose console for analyse)");
+                    guess.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent actionEvent) {
+                            List<CompletionItem.CompletionItemSet> guessed = SupportedKeySets.JrdKeySets.recognize(bytecodeSyntaxTextArea.getText());
+                            normalCodeCompletionGuess(guessed);
                         }
-                    }
-                });
-                menu.add(guess);
-                menu.add(new JMenuItem("Dummy compilation"));
-                menu.show(completion, completion.getWidth() / 2, completion.getHeight() / 2);
-            }
-        });
-        searchAndCode.add(completion, BorderLayout.WEST);
-
+                    });
+                    menu.add(guess);
+                    menu.add(new JMenuItem("Dummy compilation"));
+                    JMenuItem logConsole = new JMenuItem("Log Console");
+                    logConsole.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent actionEvent) {
+                            GlobalConsole.getConsole().show();
+                        }
+                    });
+                    menu.add(logConsole);
+                    menu.show(completion, completion.getWidth() / 2, completion.getHeight() / 2);
+                }
+            });
+            searchAndCode.add(completion, BorderLayout.WEST);
+        }
         if (codeSelect != null) {
             JComboBox<String> hgltr = new JComboBox<String>(getAllLexers());
             hgltr.setSelectedItem(codeSelect);
@@ -140,6 +118,48 @@ public class TextWithControls extends JPanel implements LinesProvider {
                 }
             });
             this.add(hgltr, BorderLayout.NORTH);
+        }
+    }
+
+    private void normalCodeCompletionGuess(List<CompletionItem.CompletionItemSet> guessed) {
+        removeCodecompletion();
+        if (guessed.isEmpty()) {
+            //nothing, removed
+        } else if (guessed.size() == 1) {
+            codeCompletion = new KeywordBasedCodeCompletion(bytecodeSyntaxTextArea, new CompletionSettings(
+                    guessed.get(0),
+                    oldSettings.getOp(),
+                    oldSettings.isCaseSensitive(),
+                    oldSettings.isShowHelp()
+            ));
+        } else {
+            codeCompletion = new KeywordBasedCodeCompletion(bytecodeSyntaxTextArea, new CompletionSettings(
+                    new ConnectedKeywords(guessed.toArray(new CompletionItem.CompletionItemSet[0])),
+                    oldSettings.getOp(),
+                    oldSettings.isCaseSensitive(),
+                    oldSettings.isShowHelp()
+            ));
+        }
+    }
+
+    private void saveOldSettings() {
+        if (codeCompletion == null) {
+            if (oldSettings == null) {
+                if (oldSettings == null) {
+                    oldSettings = SupportedKeySets.JrdDefault;
+                }
+            }
+        } else {
+            oldSettings = codeCompletion.getSettings();
+        }
+
+    }
+
+    private void removeCodecompletion() {
+        saveOldSettings();
+        if (codeCompletion != null) {
+            codeCompletion.dispose();
+            codeCompletion = null;
         }
     }
 
@@ -171,9 +191,59 @@ public class TextWithControls extends JPanel implements LinesProvider {
         resetUndoRedo();
     }
 
-    private RSyntaxTextArea createSrcTextArea(boolean api) {
-        RSyntaxTextArea rst = new RSyntaxTextArea();
-        codeCompletion = new KeywordBasedCodeCompletion(rst, SupportedKeySets.JrdDefault);
+    private RSyntaxTextArea createSrcTextArea() {
+        final RSyntaxTextArea rst = new RSyntaxTextArea() {
+            @Override
+            public void setText(String t) {
+                super.setText(t);
+                if (cct != CodeCompletionType.FORBIDDEN) {
+                    removeCodecompletion();
+                    List<CompletionItem.CompletionItemSet> r = SupportedKeySets.JrdKeySets.recognize(t);
+                    if (r == null || r.isEmpty()) {
+                        return;
+                    }
+                    if (cct == CodeCompletionType.STANDALONE) {
+                        normalCodeCompletionGuess(r);
+                    } else if (cct == CodeCompletionType.JRD) {
+                        for (CompletionItem.CompletionItemSet set : r) {
+                            if (SupportedKeySets.JrdKeySets.isByteman(set)) {
+                                codeCompletion = new KeywordBasedCodeCompletion(bytecodeSyntaxTextArea, new CompletionSettings(
+                                        new BytemanKeywords(),
+                                        oldSettings.getOp(),
+                                        oldSettings.isCaseSensitive(),
+                                        oldSettings.isShowHelp()
+                                ));
+                                return;
+                            }
+                        }
+                        for (CompletionItem.CompletionItemSet set : r) {
+                            if (SupportedKeySets.JrdKeySets.isJasm(set)) {
+                                codeCompletion = new KeywordBasedCodeCompletion(bytecodeSyntaxTextArea, new CompletionSettings(
+                                        new BytecodeKeywordsWithHelp(),
+                                        oldSettings.getOp(),
+                                        oldSettings.isCaseSensitive(),
+                                        oldSettings.isShowHelp()
+                                ));
+                                return;
+                            }
+                        }
+                        for (CompletionItem.CompletionItemSet set : r) {
+                            if (SupportedKeySets.JrdKeySets.isJava(set)) {
+                                codeCompletion = new KeywordBasedCodeCompletion(bytecodeSyntaxTextArea, new CompletionSettings(
+                                        new JrdApiKeywords(),
+                                        oldSettings.getOp(),
+                                        oldSettings.isCaseSensitive(),
+                                        oldSettings.isShowHelp()
+                                ));
+                                return;
+                            }
+                        }
+                        //nothing found?
+                        normalCodeCompletionGuess(r);
+                    }
+                }
+            }
+        };
         rst.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -260,6 +330,11 @@ public class TextWithControls extends JPanel implements LinesProvider {
     }
 
     @Override
+    public void close() {
+        removeCodecompletion();
+    }
+
+    @Override
     public String getName() {
         if (getFile() != null) {
             return getFile().getName();
@@ -295,5 +370,9 @@ public class TextWithControls extends JPanel implements LinesProvider {
             //belive or not, rsyntax are can throw exception form here, and asnothing expects that, it may be fatal
             ex.printStackTrace();
         }
+    }
+
+    public enum CodeCompletionType {
+        FORBIDDEN, JRD, STANDALONE;
     }
 }

@@ -8,6 +8,7 @@ import org.jrd.frontend.frame.main.MainFrameView;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -37,7 +38,7 @@ public class SettingsView extends JDialog {
 
     private final Config config = Config.getConfig();
 
-    public SettingsView(MainFrameView mainFrameView) {
+    public SettingsView(JFrame mainFrameView) {
         JButton okButton = new JButton("OK");
         okButton.addActionListener(actionEvent -> {
             applySettings();
@@ -91,7 +92,7 @@ public class SettingsView extends JDialog {
         );
         nestedJarsSettingsPanel = new NestedJarsSettingsPanel();
         miscSettingsPanel = new MiscellaneousSettingsPanel(
-                config.doUseJavapSignatures(), config.doDepndenceNumbers(), config.getAdditionalCP(), config.getAdditionalSP()
+                config.doUseJavapSignatures(), config.doDepndenceNumbers(), config.getAdditionalCP(), config.getAdditionalSP(), config.doAutocompletion()
         );
 
         for (
@@ -138,7 +139,7 @@ public class SettingsView extends JDialog {
         this.setSize(new Dimension(800, 850));
         this.setMinimumSize(new Dimension(250, 600));
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        this.setLocationRelativeTo(mainFrameView.getMainFrame());
+        this.setLocationRelativeTo(mainFrameView);
         this.setModalityType(ModalityType.APPLICATION_MODAL);
         this.add(mainPanel);
         //this.pack(); this would kill the layout due to nested jars suffxes big box
@@ -160,6 +161,7 @@ public class SettingsView extends JDialog {
         config.setOverwriteST(compilationSettingsPanel.shouldOverwriteStCheckBox());
         config.setCompilerArguments(compilationSettingsPanel.getCompilerArgs());
         config.setUseJavapSignatures(miscSettingsPanel.shouldUseJavapSignatures());
+        config.setAutocomplete(miscSettingsPanel.shouldAutocomplete());
         config.setDepndenceNumbers(miscSettingsPanel.futurreDependenciesNumbers());
         config.setNestedJarExtensions(extensions);
         config.setAdditionalCP(miscSettingsPanel.getAdditioalCP());

@@ -519,11 +519,11 @@ public class BytecodeDecompilerView {
             }
         });
 
-        bytecodeBuffer = new TextWithControls("Source buffer");
+        bytecodeBuffer = new TextWithControls("Source buffer", TextWithControls.CodeCompletionType.JRD);
         binary = new HexWithControls("Binary buffer");
-        additionalBytecodeBuffer = new TextWithControls("Additional source buffer");
+        additionalBytecodeBuffer = new TextWithControls("Additional source buffer", TextWithControls.CodeCompletionType.JRD);
         additionalBinary = new HexWithControls("Additional binary buffer");
-        additionalSrcBuffer = new TextWithControls("Additional source");
+        additionalSrcBuffer = new TextWithControls("Additional source", TextWithControls.CodeCompletionType.JRD);
 
         classes = new JPanel();
         classes.setLayout(new BorderLayout());

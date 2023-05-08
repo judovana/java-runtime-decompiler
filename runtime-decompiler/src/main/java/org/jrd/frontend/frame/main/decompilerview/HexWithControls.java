@@ -210,4 +210,9 @@ public class HexWithControls extends JPanel implements LinesProvider {
     public void resetUndoRedo() {
         //nothig to do in hex
     }
+
+    @Override
+    public void close() {
+        //nope i hex
+    }
 }

@@ -7,6 +7,7 @@ import java.util.List;
 
 public interface LinesProvider {
 
+
     enum LinesFormat {
         CHARS,
         HEX
@@ -39,5 +40,7 @@ public interface LinesProvider {
     void redo();
 
     void resetUndoRedo();
+
+    void close();
 
 }

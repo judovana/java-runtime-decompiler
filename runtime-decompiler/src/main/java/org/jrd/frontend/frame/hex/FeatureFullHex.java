@@ -114,6 +114,7 @@ public class FeatureFullHex extends JPanel {
             }
         });
         close.addActionListener(a -> {
+            FeatureFullHex.this.hex.close();
             parent.remove(FeatureFullHex.this);
         });
         undo.addActionListener(a -> {

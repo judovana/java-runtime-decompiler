@@ -441,7 +441,7 @@ public class MainFrameView {
         jMenuConfig = new JMenu("Configure");
         jMenuSettings = new JMenuItem("Settings");
         jMenuSettings.addActionListener(actionEvent -> {
-            new SettingsView(this);
+            new SettingsView(this.getMainFrame());
         });
         jMenuConfig.add(jMenuSettings);
         jMenuOverrides = new JMenuItem("Overrides");

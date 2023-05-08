@@ -44,12 +44,14 @@ public class CompletionSettings {
         private final int hits;
         private final int percent;
         private final int index;
+        private final CompletionItem.CompletionItemSet set;
 
-        public RecognitionResult(int words, int hits, int percent, int index) {
+        public RecognitionResult(int words, int hits, int percent, int index, CompletionItem.CompletionItemSet set)  {
             this.words = words;
             this.hits = hits;
             this.percent = percent;
             this.index = index;
+            this.set = set;
         }
 
         public int getWords() {
@@ -66,6 +68,10 @@ public class CompletionSettings {
 
         public int getIndex() {
             return index;
+        }
+
+        public CompletionItem.CompletionItemSet getSet() {
+            return set;
         }
 
         @Override
@@ -111,12 +117,15 @@ public class CompletionSettings {
                     currentWord.append(currenChar);
                 }
             }
-            long percent = (int) (((long) h[i] * 100l) / w[i]);
+            long percent = 0;
+            if (w[i]>0) {
+                percent = (int) (((long) h[i] * 100l) / w[i]);
+            }
             p[i] = (int)percent;
         }
         RecognitionResult[] r= new RecognitionResult[sets.length];
         for (int i = 0; i < r.length; i++) {
-            r[i] = new RecognitionResult(w[i], h[i], p[i], i);
+            r[i] = new RecognitionResult(w[i], h[i], p[i], i, sets[i]);
         }
         Arrays.sort(r);
         return r;

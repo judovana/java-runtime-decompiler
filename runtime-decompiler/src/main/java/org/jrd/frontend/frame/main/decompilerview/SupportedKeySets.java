@@ -9,7 +9,6 @@ import org.kcc.wordsets.JavaKeywordsWithHelp;
 import org.kcc.wordsets.JrdApiKeywords;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class SupportedKeySets {
@@ -39,10 +38,22 @@ public class SupportedKeySets {
             Logger.getLogger().log(Logger.Level.DEBUG, sets[r.getIndex()].toString());
             Logger.getLogger().log(Logger.Level.DEBUG, r.toString());
             if (r.getPercent() > 5 && result.size() < 2) {
-                result.add(sets[r.getIndex()]);
+                result.add(r.getSet());
                 Logger.getLogger().log(Logger.Level.DEBUG, "accepted");
             }
         }
         return result;
+    }
+
+    public boolean isByteman(CompletionItem.CompletionItemSet set) {
+        return set.toString().equals(sets[1].toString());
+    }
+
+    public boolean isJasm(CompletionItem.CompletionItemSet set) {
+        return set.toString().equals(sets[2].toString());
+    }
+
+    public boolean isJava(CompletionItem.CompletionItemSet set) {
+        return set.toString().equals(sets[3].toString());
     }
 }
