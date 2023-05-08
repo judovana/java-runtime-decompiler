@@ -73,6 +73,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
                     completionMenu.addActionListener(new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent actionEvent) {
+                            saveOldSettings();
                             CompletionSettings newSettings = new CompletionSettingsDialogue().showForResults(TextWithControls.this, oldSettings);
                             if (newSettings != null) {
                                 removeCodecompletion();
