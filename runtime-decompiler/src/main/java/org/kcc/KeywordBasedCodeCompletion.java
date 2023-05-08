@@ -149,9 +149,8 @@ public class KeywordBasedCodeCompletion {
                     help.setUndecorated(true);
                     help.setSize(400, 200);
                     help.setAlwaysOnTop(true);
-                    JTextArea tt = new JTextArea(
-                            suggested.getSelectedValue().getKey() + "\n" +
-                                    suggested.getSelectedValue().getDescription());
+                    JTextArea tt =
+                            new JTextArea(suggested.getSelectedValue().getKey() + "\n" + suggested.getSelectedValue().getDescription());
                     tt.setLineWrap(true);
                     help.add(new JScrollPane(tt));
                     help.setLocation(popup.getLocationOnScreen().x, popup.getLocationOnScreen().y + popup.getHeight());
@@ -316,7 +315,8 @@ public class KeywordBasedCodeCompletion {
                         filtered.add(item);
                     }
                     break;
-                default: throw new RuntimeException("Unknown switch: " + settings.getOp());
+                default:
+                    throw new RuntimeException("Unknown switch: " + settings.getOp());
             }
         }
         setKeywordsImpl(filtered.toArray(new CompletionItem[0]));

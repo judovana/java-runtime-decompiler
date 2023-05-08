@@ -33,9 +33,7 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
         useJavapSignaturesCheckBox = new JCheckBox("Use Javap signatures in Agent API insertion menu", initialUseJavapSignatures);
         detectAutocompletionCheckBox = new JCheckBox("Detect and enable autocompletion in text editor", detectAutocompletion);
         detectAutocompletionCheckBox.setToolTipText(
-                BytecodeDecompilerView.styleTooltip() +
-                        "for assemblers, the bytecode will be loaded.<br/>" +
-                        "For byteman, byteman.<br/>" +
+                BytecodeDecompilerView.styleTooltip() + "for assemblers, the bytecode will be loaded.<br/>" + "For byteman, byteman.<br/>" +
                         "But for java, it depends on editor - in JRD it will runtime modification api"
         );
         this.setLayout(new GridBagLayout());
