@@ -155,7 +155,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
 
     }
 
-    private void removeCodecompletion() {
+    public void removeCodecompletion() {
         saveOldSettings();
         if (codeCompletion != null) {
             codeCompletion.dispose();

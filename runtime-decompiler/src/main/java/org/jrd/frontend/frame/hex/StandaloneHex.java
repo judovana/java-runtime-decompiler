@@ -1,7 +1,6 @@
 package org.jrd.frontend.frame.hex;
 
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
-import org.jrd.backend.core.Logger;
 import org.jrd.frontend.frame.main.decompilerview.HexWithControls;
 import org.jrd.frontend.frame.main.decompilerview.LinesProvider;
 import org.jrd.frontend.frame.main.decompilerview.TextWithControls;
@@ -115,7 +114,9 @@ public class StandaloneHex extends JFrame {
             @Override
             public void windowClosed(WindowEvent e) {
                 for (Component c : tp.getComponents()) {
-                    Logger.getLogger().log(Logger.Level.DEBUG, "Would dispose at " + c);
+                    if (c instanceof FeatureFullHex) {
+                        ((FeatureFullHex) c).removeCodecompletion();
+                    }
                 }
             }
         });

@@ -1,6 +1,7 @@
 package org.jrd.frontend.frame.hex;
 
 import org.jrd.frontend.frame.main.decompilerview.LinesProvider;
+import org.jrd.frontend.frame.main.decompilerview.TextWithControls;
 import org.jrd.frontend.frame.main.popup.DiffPopup;
 import org.jrd.frontend.utility.ImageButtonFactory;
 
@@ -128,6 +129,12 @@ public class FeatureFullHex extends JPanel {
     private static void updateTitles(JTabbedPane parent) {
         for (int x = 0; x < parent.getComponentCount(); x++) {
             parent.setTitleAt(x, parent.getComponent(x).getName());
+        }
+    }
+
+    public void removeCodecompletion() {
+        if (hex instanceof TextWithControls) {
+            ((TextWithControls) hex).removeCodecompletion();
         }
     }
 }
