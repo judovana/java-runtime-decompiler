@@ -231,10 +231,6 @@ public class KeywordBasedCodeCompletion {
         proceed(caretEvent, null);
     }
 
-    private void proceed(DocumentEvent documentEvent) {
-        proceed(null, documentEvent);
-    }
-
     private void proceed(CaretEvent caretEvent, DocumentEvent documentEvent) {
         try {
             debugln("");
@@ -358,18 +354,6 @@ public class KeywordBasedCodeCompletion {
 
             public CompletionItem getElementAt(int i) {
                 return listData[i];
-            }
-        };
-    }
-
-    private static ListModel createModel(final List<CompletionItem> listData) {
-        return (ListModel) new AbstractListModel<CompletionItem>() {
-            public int getSize() {
-                return listData.size();
-            }
-
-            public CompletionItem getElementAt(int i) {
-                return listData.get(i);
             }
         };
     }

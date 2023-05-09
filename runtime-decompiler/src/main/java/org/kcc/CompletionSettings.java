@@ -84,6 +84,23 @@ public class CompletionSettings {
         public int compareTo(RecognitionResult recognitionResult) {
             return recognitionResult.percent - percent;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            RecognitionResult that = (RecognitionResult) o;
+            return index == that.index;
+        }
+
+        @Override
+        public int hashCode() {
+            return index;
+        }
     }
 
     public static RecognitionResult[] recognize(String stext, CompletionItem.CompletionItemSet... sets) {

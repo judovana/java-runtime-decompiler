@@ -9,6 +9,7 @@ import org.kcc.wordsets.JavaKeywordsWithHelp;
 import org.kcc.wordsets.JrdApiKeywords;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class SupportedKeySets {
@@ -25,7 +26,7 @@ public class SupportedKeySets {
     }
 
     public CompletionItem.CompletionItemSet[] getSets() {
-        return sets;
+        return Arrays.copyOf(sets, sets.length);
     }
 
     public List<CompletionItem.CompletionItemSet> recognize(String textWithKeywords) {

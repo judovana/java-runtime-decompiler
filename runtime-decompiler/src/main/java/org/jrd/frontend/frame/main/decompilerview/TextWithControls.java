@@ -147,9 +147,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
     private void saveOldSettings() {
         if (codeCompletion == null) {
             if (oldSettings == null) {
-                if (oldSettings == null) {
-                    oldSettings = SupportedKeySets.JRD_DEFAULT;
-                }
+                oldSettings = SupportedKeySets.JRD_DEFAULT;
             }
         } else {
             oldSettings = codeCompletion.getSettings();

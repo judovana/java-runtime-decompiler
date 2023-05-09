@@ -1,6 +1,7 @@
 package org.kcc;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class CompletionItem implements Comparable<CompletionItem> {
@@ -60,6 +61,23 @@ public class CompletionItem implements Comparable<CompletionItem> {
         if (o == null) {
             return 1;
         }
-        return -o.getKey().compareTo(this.getKey());
+        return this.getKey().compareTo(o.getKey());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        CompletionItem that = (CompletionItem) o;
+        return key.equals(that.key);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(key);
     }
 }

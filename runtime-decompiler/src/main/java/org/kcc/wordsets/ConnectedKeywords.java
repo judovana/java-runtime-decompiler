@@ -54,6 +54,6 @@ public class ConnectedKeywords implements CompletionItem.CompletionItemSet {
     }
 
     public CompletionItem.CompletionItemSet[] getOriginalSets() {
-        return originalSets;
+        return Arrays.copyOf(originalSets, originalSets.length);
     }
 }
