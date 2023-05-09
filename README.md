@@ -143,7 +143,8 @@ usually the development command is:
 ```
 $ mvn clean install -Dcheckstyle.skip -Dspotbugs.skip=true 
 ```
-Which downloads also te plugins.
+Note, that `-Dcheckstyle.skip -Dspotbugs.skip=true ` is not cowardly avoiding the valid issues those two finds, but to **format sources**.
+It alo downloads all the plugins.
 usually the release command is:
 ```
 $ mvn clean install -DskipTests -Pimages -Plegacy
