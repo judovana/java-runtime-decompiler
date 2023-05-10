@@ -1,7 +1,12 @@
 package org.kcc.wordsets;
 
+import org.jrd.backend.core.Logger;
 import org.kcc.CompletionItem;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -367,7 +372,51 @@ public class JavaKeywordsWithHelp implements CompletionItem.CompletionItemSet {
         return result;
     }
 
-    private static final CompletionItem[] JAVA_KEYWORDS = concatWithArrayCopy(EXT_JAVA_KEYWORDS, BASE_JAVA_KEYWORDS);
+    static CompletionItem[] getSystemAndRuntimeAsCompletions() {
+        List<CompletionItem> result = new ArrayList<>();
+        getFields(System.class, result, true);
+        getMethods(System.class, result, true);
+        getFields(Runtime.class, result, false);
+        getMethods(Runtime.class, result, false);
+        return result.toArray(new CompletionItem[0]);
+    }
+
+    private static void getMethods(Class clazz, List<CompletionItem> result, boolean onlyStatic) {
+        try {
+            Method[] sMethods = clazz.getDeclaredMethods();
+            for (Method method : sMethods) {
+                addToList(onlyStatic, method.getModifiers(), result, method.toString());
+            }
+        } catch (Exception ex) {
+            Logger.getLogger().log(Logger.Level.ALL, ex.toString());
+        }
+    }
+
+    private static void getFields(Class clazz, List<CompletionItem> result, boolean onlyStatic) {
+        try {
+            Field[] sFields = clazz.getDeclaredFields();
+            for (Field field : sFields) {
+                addToList(onlyStatic, field.getModifiers(), result, field.toString());
+            }
+        } catch (Exception ex) {
+            Logger.getLogger().log(Logger.Level.ALL, ex.toString());
+        }
+    }
+
+    private static void addToList(boolean onlyStatic, int modifiers, List<CompletionItem> result, String stringRepresentation) {
+        if (onlyStatic) {
+            if (Modifier.isStatic(modifiers) && (Modifier.isPublic(modifiers))) {
+                result.add(new CompletionItem(stringRepresentation + ";"));
+            }
+        } else {
+            if (Modifier.isPublic(modifiers)) {
+                result.add(new CompletionItem(stringRepresentation + ";"));
+            }
+        }
+    }
+
+    private static final CompletionItem[] MANUAL_JAVA_KEYWORDS = concatWithArrayCopy(EXT_JAVA_KEYWORDS, BASE_JAVA_KEYWORDS);
+    private static final CompletionItem[] JAVA_KEYWORDS = concatWithArrayCopy(MANUAL_JAVA_KEYWORDS, getSystemAndRuntimeAsCompletions());
 
     @Override
     public CompletionItem[] getItemsArray() {

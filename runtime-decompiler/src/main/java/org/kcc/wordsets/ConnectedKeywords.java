@@ -27,12 +27,12 @@ public class ConnectedKeywords implements CompletionItem.CompletionItemSet {
         List<CompletionItem> l = new ArrayList<>();
         for (CompletionItem.CompletionItemSet item : originalSets) {
             l.addAll(
-                    item.getItemsList().stream()
-                            .map(a -> new CompletionItem(a.getKey(), a.getDescription() + "\n from: " + item.toString(), a.getRealReplacement()))
-                            .collect(Collectors.toList())
+                    item.getItemsList().stream().map(
+                            a -> new CompletionItem(a.getKey(), a.getDescription() + "\n from: " + item.toString(), a.getRealReplacement())
+                    ).collect(Collectors.toList())
             );
         }
-        ArrayList<CompletionItem> r = new ArrayList<>(new HashSet<>(l));
+        List<CompletionItem> r = new ArrayList<>(new HashSet<>(l));
         Collections.sort(r);
         return r;
     }
