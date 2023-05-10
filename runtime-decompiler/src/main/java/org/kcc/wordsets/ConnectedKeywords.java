@@ -5,6 +5,7 @@ import org.kcc.CompletionItem;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -27,12 +28,13 @@ public class ConnectedKeywords implements CompletionItem.CompletionItemSet {
         for (CompletionItem.CompletionItemSet item : originalSets) {
             l.addAll(
                     item.getItemsList().stream()
-                            .map(a -> new CompletionItem(a.getKey(), a.getDescription() + "\n from: " + item.toString()))
+                            .map(a -> new CompletionItem(a.getKey(), a.getDescription() + "\n from: " + item.toString(), a.getRealReplacement()))
                             .collect(Collectors.toList())
             );
         }
-        Collections.sort(l);
-        return l;
+        ArrayList<CompletionItem> r = new ArrayList<>(new HashSet<>(l));
+        Collections.sort(r);
+        return r;
     }
 
     @Override

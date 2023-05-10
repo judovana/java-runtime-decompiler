@@ -390,7 +390,7 @@ public class KeywordBasedCodeCompletion {
         ende();
         int pos = source.getCaretPosition();
         String lastWord = getLastWord(pos);
-        source.replaceRange(suggested.getSelectedValue().toString(), pos - lastWord.length(), pos);
+        source.replaceRange(suggested.getSelectedValue().getRealReplacement(), pos - lastWord.length(), pos);
         //source.insert(suggested.getSelectedValue().toString(), source.getCaretPosition());
     }
 

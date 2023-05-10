@@ -33,14 +33,20 @@ public class CompletionItem implements Comparable<CompletionItem> {
 
     private final String key;
     private final String description;
+    private final String realReplacement;
 
     public CompletionItem(String key) {
-        this(key, "");
+        this(key, "", "");
     }
 
     public CompletionItem(String key, String description) {
+        this(key, description, "");
+    }
+
+    public CompletionItem(String key, String description, String realReplacement) {
         this.key = key;
         this.description = description;
+        this.realReplacement = realReplacement;
     }
 
     @Override
@@ -54,6 +60,14 @@ public class CompletionItem implements Comparable<CompletionItem> {
 
     public String getDescription() {
         return description;
+    }
+
+    public String getRealReplacement() {
+        if (realReplacement.isEmpty()) {
+            return key;
+        } else {
+            return realReplacement;
+        }
     }
 
     @Override

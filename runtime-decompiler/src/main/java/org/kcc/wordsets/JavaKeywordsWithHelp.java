@@ -8,7 +8,22 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class JavaKeywordsWithHelp implements CompletionItem.CompletionItemSet {
-    private static final CompletionItem[] JAVA_KEYWORDS = {
+
+    static final CompletionItem[] EXT_JAVA_KEYWORDS = {
+            new CompletionItem(
+                    "sout", "abbreviation for std out", "System.out.println(\"String\");"
+            ),
+            new CompletionItem(
+                    "serr", "abbreviation for std err", "System.err.println(\"String\");"
+            ),
+            new CompletionItem(
+                    "ex.printStackTrace();",
+                    "abbreviation for printing stack trace",
+                    "new RuntimeException(\"my ex\").printStackTrace();"
+            ),
+    };
+
+    private static final CompletionItem[] BASE_JAVA_KEYWORDS = {
 
             new CompletionItem(
                     "_", "Added in Java 9, the underscore has become a keyword and cannot be used as a variable name " + "anymore.[3]"
@@ -350,6 +365,14 @@ public class JavaKeywordsWithHelp implements CompletionItem.CompletionItemSet {
                             "longer has any function.[25] Previously this keyword was used to restrict the precision and " +
                             "rounding of floating point calculations to ensure portability.[8]"
             )};
+
+    static <T> T[] concatWithArrayCopy(T[] array1, T[] array2) {
+        T[] result = Arrays.copyOf(array1, array1.length + array2.length);
+        System.arraycopy(array2, 0, result, array1.length, array2.length);
+        return result;
+    }
+
+    private static final CompletionItem[] JAVA_KEYWORDS = concatWithArrayCopy(EXT_JAVA_KEYWORDS, BASE_JAVA_KEYWORDS);
 
     @Override
     public CompletionItem[] getItemsArray() {
