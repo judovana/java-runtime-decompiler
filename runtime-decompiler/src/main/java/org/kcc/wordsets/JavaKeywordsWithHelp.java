@@ -10,18 +10,13 @@ import java.util.regex.Pattern;
 public class JavaKeywordsWithHelp implements CompletionItem.CompletionItemSet {
 
     static final CompletionItem[] EXT_JAVA_KEYWORDS = {
+            new CompletionItem("sout", "abbreviation for std out", "System.out.println(\"String\");"),
+            new CompletionItem("serr", "abbreviation for std err", "System.err.println(\"String\");"),
+            new CompletionItem("_sout", "abbreviation for std out", "System.out.println(\"String\");"),
+            new CompletionItem("_serr", "abbreviation for std err", "System.err.println(\"String\");"),
             new CompletionItem(
-                    "sout", "abbreviation for std out", "System.out.println(\"String\");"
-            ),
-            new CompletionItem(
-                    "serr", "abbreviation for std err", "System.err.println(\"String\");"
-            ),
-            new CompletionItem(
-                    "ex.printStackTrace();",
-                    "abbreviation for printing stack trace",
-                    "new RuntimeException(\"my ex\").printStackTrace();"
-            ),
-    };
+                    "ex.printStackTrace();", "abbreviation for printing stack trace", "new RuntimeException(\"my ex\").printStackTrace();"
+            )};
 
     private static final CompletionItem[] BASE_JAVA_KEYWORDS = {
 
