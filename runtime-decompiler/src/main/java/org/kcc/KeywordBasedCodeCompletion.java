@@ -2,6 +2,7 @@ package org.kcc;
 
 import javax.swing.AbstractListModel;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -14,6 +15,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.text.BadLocationException;
+
+import java.awt.BorderLayout;
 import java.awt.Point;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -33,6 +36,7 @@ public class KeywordBasedCodeCompletion {
 
     private final JTextArea source;
     private final CompletionSettings settings;
+    private final JLabel statusLabel;
 
     private Pattern nondelimiter;
     private CompletionItem[] keywords;
@@ -87,6 +91,8 @@ public class KeywordBasedCodeCompletion {
             }
         });
         popup.add(scroll);
+        statusLabel = new JLabel("...");
+        popup.add(statusLabel, BorderLayout.SOUTH);
 
         caretListenerToRemove = new CaretListener() {
             @Override
@@ -180,6 +186,7 @@ public class KeywordBasedCodeCompletion {
         f.setUndecorated(true);
         deductSize(f);
         f.setAlwaysOnTop(true);
+        f.setLayout(new BorderLayout());
         return f;
     }
 
@@ -243,6 +250,7 @@ public class KeywordBasedCodeCompletion {
                 if (popup.isVisible()) {
                     popup.setLocation(futureLocation);
                 }
+                statusLabel.setText(" " + suggested.getModel().getSize() + " for " + word);
             } else {
                 ende();
             }
@@ -383,7 +391,7 @@ public class KeywordBasedCodeCompletion {
                 width = w;
             }
         }
-        ff.setSize(width, 100);
+        ff.setSize(width, 130);
     }
 
     private void apply() {
