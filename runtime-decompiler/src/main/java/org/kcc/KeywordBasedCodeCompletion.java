@@ -48,7 +48,7 @@ public class KeywordBasedCodeCompletion {
     private final CaretListener caretListenerToRemove;
     private final KeyListener keyListenerToRemove;
     private final FocusListener focusListenerToRemove;
-    private boolean debug = false;
+    private boolean debug = true;
     private Point futureLocation;
 
     private ContextSuggestionsNarrower afterFilteringNarrowing;
@@ -57,6 +57,10 @@ public class KeywordBasedCodeCompletion {
     public KeywordBasedCodeCompletion(JTextArea source, CompletionSettings settings) {
         this.source = source;
         this.settings = settings;
+        if (debug) {
+            afterFilteringNarrowing = new ContextSuggestionsNarrower.DebugNarrower(5,2);
+            beforeFilteringNarrowing = new ContextSuggestionsNarrower.DebugNarrower(5,2);
+        }
         suggested = new JList<>(settings.getSet().getItemsArray());
         scroll = new JScrollPane(suggested);
         suggested.addMouseListener(new MouseAdapter() {
@@ -282,7 +286,7 @@ public class KeywordBasedCodeCompletion {
         if (beforeFilteringNarrowing!=null){
             keywordsMod = beforeFilteringNarrowing.narrowSuggestions(word, keywordsMod,
                     getBeforeLines(beforeFilteringNarrowing.getBeforeContextLinesCount(), caretpos, word, source.getText()),
-                    getAfterLines(beforeFilteringNarrowing.getAfterContextLinesCount(), caretpos, word, source.getText() ), settings.isCaseSensitive());
+                    getAfterLines(beforeFilteringNarrowing.getAfterContextLinesCount(), caretpos, source.getText() ), settings.isCaseSensitive());
         }
         if (!settings.isCaseSensitive()) {
             word = word.toLowerCase();
@@ -336,15 +340,45 @@ public class KeywordBasedCodeCompletion {
         if (afterFilteringNarrowing!=null){
             rr = afterFilteringNarrowing.narrowSuggestions(word, rr,
                     getBeforeLines(afterFilteringNarrowing.getBeforeContextLinesCount(), caretpos, word, source.getText()),
-                    getAfterLines(afterFilteringNarrowing.getAfterContextLinesCount(), caretpos, word, source.getText() ), settings.isCaseSensitive());
+                    getAfterLines(afterFilteringNarrowing.getAfterContextLinesCount(), caretpos, source.getText() ), settings.isCaseSensitive());
         }
         setKeywordsImpl(rr);
     }
 
-    private String[] getAfterLines(int afterContextLinesCount, int caretpos, String word, String text) {
+    static String[] getAfterLines(int afterContextLinesCount, int caretpos, String text) {
+        StringBuilder sb = new StringBuilder();
+        int nwLinesCount = 0;
+        for(int x = caretpos; x< text.length(); x++) {
+            char charAtPos = text.charAt(x);
+            if (charAtPos == '\n') {
+                nwLinesCount++;
+            }
+            if (nwLinesCount>afterContextLinesCount){
+                break;
+            }
+            sb.append(charAtPos);
+        }
+        return sb.toString().split("\n");
     }
 
-    private String[] getBeforeLines(int beforeContextLinesCount, int caretpos, String word, String text) {
+    static  String[] getBeforeLines(int beforeContextLinesCount, int caretpos, String word, String text) {
+        caretpos--;
+        if (caretpos>=text.length()) {
+            caretpos = text.length()-1;
+        }
+        StringBuilder sb = new StringBuilder();
+        int nwLinesCount = 0;
+        for(int x = caretpos-word.length(); x>= 0; x--) {
+            char charAtPos = text.charAt(x);
+            if (charAtPos == '\n') {
+                nwLinesCount++;
+            }
+            if (nwLinesCount>beforeContextLinesCount){
+                break;
+            }
+            sb.insert(0, charAtPos);
+        }
+        return sb.toString().split("\n");
     }
 
     private int calcCompletionPosition() {
