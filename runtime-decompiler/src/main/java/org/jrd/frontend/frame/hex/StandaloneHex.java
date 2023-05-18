@@ -1,6 +1,7 @@
 package org.jrd.frontend.frame.hex;
 
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.jrd.backend.completion.ClassesAndMethodsProvider;
 import org.jrd.frontend.frame.main.decompilerview.HexWithControls;
 import org.jrd.frontend.frame.main.decompilerview.LinesProvider;
 import org.jrd.frontend.frame.main.decompilerview.TextWithControls;
@@ -35,7 +36,7 @@ public class StandaloneHex extends JFrame {
     private static int counter = 0;
     File lastOpened = new File(System.getProperty("user.dir"));
 
-    public StandaloneHex(List<String> files, boolean hex) throws HeadlessException, IOException {
+    public StandaloneHex(List<String> files, boolean hex, ClassesAndMethodsProvider classesAndMethodsProvider) throws HeadlessException, IOException {
         super("JRD's hex diff and editor");
         this.setSize(900, 800);
         this.setLocationRelativeTo(null);
@@ -48,7 +49,8 @@ public class StandaloneHex extends JFrame {
             } else {
                 wrapper = new FeatureFullHex(
                         new File(s), tp,
-                        new TextWithControls(null, SyntaxConstants.SYNTAX_STYLE_JAVA, TextWithControls.CodeCompletionType.STANDALONE)
+                        new TextWithControls(null, SyntaxConstants.SYNTAX_STYLE_JAVA,
+                                TextWithControls.CodeCompletionType.STANDALONE, classesAndMethodsProvider)
                 );
             }
             tp.add(wrapper);
@@ -95,7 +97,8 @@ public class StandaloneHex extends JFrame {
         openText.addActionListener(a -> {
             addMainPanel(
                     tp, openHex, plus,
-                    new TextWithControls(null, SyntaxConstants.SYNTAX_STYLE_JAVA, TextWithControls.CodeCompletionType.STANDALONE)
+                    new TextWithControls(null, SyntaxConstants.SYNTAX_STYLE_JAVA,
+                            TextWithControls.CodeCompletionType.STANDALONE, classesAndMethodsProvider)
             );
         });
 
@@ -106,7 +109,8 @@ public class StandaloneHex extends JFrame {
         openEmptyText.addActionListener(a -> {
             addEmptyMainPanel(
                     tp, openHex, plus,
-                    new TextWithControls(null, SyntaxConstants.SYNTAX_STYLE_JAVA, TextWithControls.CodeCompletionType.STANDALONE)
+                    new TextWithControls(null, SyntaxConstants.SYNTAX_STYLE_JAVA,
+                            TextWithControls.CodeCompletionType.STANDALONE, classesAndMethodsProvider)
             );
         });
 

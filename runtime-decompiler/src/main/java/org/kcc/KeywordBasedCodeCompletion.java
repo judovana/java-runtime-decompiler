@@ -485,4 +485,13 @@ public class KeywordBasedCodeCompletion {
     public ContextSuggestionsNarrower getAfterFilteringNarrowing() {
         return afterFilteringNarrowing;
     }
+
+    public void setBeforeFilteringNarrowing(ContextSuggestionsNarrower beforeFilteringNarrowing) {
+        this.beforeFilteringNarrowing = beforeFilteringNarrowing;
+    }
+
+    public void setAfterFilteringNarrowing(ContextSuggestionsNarrower afterFilteringNarrowing) {
+        this.afterFilteringNarrowing = afterFilteringNarrowing;
+    }
+
 }
