@@ -51,6 +51,9 @@ public class KeywordBasedCodeCompletion {
     private boolean debug = false;
     private Point futureLocation;
 
+    private ContextSuggestionsNarrower afterFilteringNarrowing;
+    private ContextSuggestionsNarrower beforeFilteringNarrowing;
+
     public KeywordBasedCodeCompletion(JTextArea source, CompletionSettings settings) {
         this.source = source;
         this.settings = settings;
@@ -246,7 +249,7 @@ public class KeywordBasedCodeCompletion {
                 String lastLetter = source.getText().substring(caretpos - 1, caretpos);
                 debugln(lastLetter);
                 String word = getLastWord(caretpos);
-                filter(word);
+                filter(word, caretpos);
                 if (popup.isVisible()) {
                     popup.setLocation(futureLocation);
                 }
@@ -274,8 +277,13 @@ public class KeywordBasedCodeCompletion {
         return word;
     }
 
-    private void filter(String word) {
-        List<CompletionItem> filtered = new ArrayList<>(keywords.length);
+    private void filter(String word, int caretpos) {
+        CompletionItem[] keywordsMod = keywords;
+        if (beforeFilteringNarrowing!=null){
+            keywordsMod = beforeFilteringNarrowing.narrowSuggestions(word, keywordsMod,
+                    getBeforeLines(beforeFilteringNarrowing.getBeforeContextLinesCount(), caretpos, word, source.getText()),
+                    getAfterLines(beforeFilteringNarrowing.getAfterContextLinesCount(), caretpos, word, source.getText() ), settings.isCaseSensitive());
+        }
         if (!settings.isCaseSensitive()) {
             word = word.toLowerCase();
         }
@@ -297,7 +305,8 @@ public class KeywordBasedCodeCompletion {
                 break;
 
         }
-        for (CompletionItem item : keywords) {
+        List<CompletionItem> filtered = new ArrayList<>(keywords.length);
+        for (CompletionItem item : keywordsMod) {
             String itemKey = item.getKey();
             if (!settings.isCaseSensitive()) {
                 itemKey = itemKey.toLowerCase();
@@ -323,7 +332,19 @@ public class KeywordBasedCodeCompletion {
                     throw new RuntimeException("Unknown switch: " + settings.getOp());
             }
         }
-        setKeywordsImpl(filtered.toArray(new CompletionItem[0]));
+        CompletionItem[] rr = filtered.toArray(new CompletionItem[0]);
+        if (afterFilteringNarrowing!=null){
+            rr = afterFilteringNarrowing.narrowSuggestions(word, rr,
+                    getBeforeLines(afterFilteringNarrowing.getBeforeContextLinesCount(), caretpos, word, source.getText()),
+                    getAfterLines(afterFilteringNarrowing.getAfterContextLinesCount(), caretpos, word, source.getText() ), settings.isCaseSensitive());
+        }
+        setKeywordsImpl(rr);
+    }
+
+    private String[] getAfterLines(int afterContextLinesCount, int caretpos, String word, String text) {
+    }
+
+    private String[] getBeforeLines(int beforeContextLinesCount, int caretpos, String word, String text) {
     }
 
     private int calcCompletionPosition() {
@@ -421,5 +442,13 @@ public class KeywordBasedCodeCompletion {
 
     public CompletionSettings getSettings() {
         return settings;
+    }
+
+    public ContextSuggestionsNarrower getBeforeFilteringNarrowing() {
+        return beforeFilteringNarrowing;
+    }
+
+    public ContextSuggestionsNarrower getAfterFilteringNarrowing() {
+        return afterFilteringNarrowing;
     }
 }

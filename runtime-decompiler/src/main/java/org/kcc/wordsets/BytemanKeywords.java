@@ -446,7 +446,7 @@ public class BytemanKeywords implements CompletionItem.CompletionItemSet {
 
     @Override
     public Pattern getRecommendedDelimiterSet() {
-        return CompletionItem.CompletionItemSet.delimiterWordSet();
+        return CompletionItem.CompletionItemSet.delimiterStrictSet2();
     }
 
     @Override

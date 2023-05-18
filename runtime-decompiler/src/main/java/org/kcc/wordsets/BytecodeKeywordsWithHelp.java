@@ -480,11 +480,11 @@ public class BytecodeKeywordsWithHelp implements CompletionItem.CompletionItemSe
 
     @Override
     public Pattern getRecommendedDelimiterSet() {
-        return CompletionItem.CompletionItemSet.delimiterStrictSet();
+        return CompletionItem.CompletionItemSet.delimiterStrictSet1();
     }
 
     @Override
     public String toString() {
-        return "Bytecode assembler - good to concate with java";
+        return "Bytecode assembler - good to concat with java";
     }
 }
