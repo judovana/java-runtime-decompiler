@@ -16,12 +16,14 @@ public class Main {
             setLookAndFeel();
             if (!cli.getFilteredArgs().isEmpty()) {
                 Help.printHelpText();
-                StandaloneHex hexview = new StandaloneHex(cli.getFilteredArgs(), cli.isHex());
+                StandaloneHex hexview = new StandaloneHex(cli.getFilteredArgs(), cli.isHex(),
+                        null/*FIXME base on FS additional cp/sp from settings*/);
                 hexview.setVisible(true);
             } else {
                 if (cli.isHex() && cli.getFilteredArgs().isEmpty()) {
                     Help.printHelpText();
-                    StandaloneHex hexview = new StandaloneHex(cli.getFilteredArgs(), cli.isHex());
+                    StandaloneHex hexview = new StandaloneHex(cli.getFilteredArgs(), cli.isHex(),
+                            null/*FIXME base on FS additional cp/sp from settings*/);
                     hexview.setVisible(true);
                 } else {
                     MainFrameView mainView = new MainFrameView();

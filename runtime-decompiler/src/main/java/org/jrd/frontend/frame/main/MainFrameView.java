@@ -1,5 +1,6 @@
 package org.jrd.frontend.frame.main;
 
+import org.jrd.backend.completion.ClassesAndMethodsProvider;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.Directories;
 import org.jrd.backend.data.MetadataProperties;
@@ -429,7 +430,8 @@ public class MainFrameView {
         openEditor.addActionListener(a -> {
             StandaloneHex hexview = null;
             try {
-                hexview = new StandaloneHex(new ArrayList<>(), true);
+                hexview = new StandaloneHex(new ArrayList<>(), true,
+                        new ClassesAndMethodsProvider.JrdClassesAndMethodsProvider(MainFrameView.this.localVmList));
                 hexview.setVisible(true);
             } catch (IOException ex) {
                 Logger.getLogger().log(ex);

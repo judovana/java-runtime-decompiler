@@ -28,6 +28,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.jrd.backend.completion.ClassesAndMethodsProvider;
 import org.jrd.backend.core.Logger;
 import org.jrd.frontend.frame.main.GlobalConsole;
 import org.jrd.frontend.utility.ImageButtonFactory;
@@ -49,11 +50,11 @@ public class TextWithControls extends JPanel implements LinesProvider {
     private KeywordBasedCodeCompletion codeCompletion;
     private CompletionSettings oldSettings;
 
-    public TextWithControls(String title, CodeCompletionType cct) {
-        this(title, null, cct);
+    public TextWithControls(String title, CodeCompletionType cct, ClassesAndMethodsProvider classesAndMethodsProvider) {
+        this(title, null, cct, classesAndMethodsProvider);
     }
 
-    public TextWithControls(String title, String codeSelect, CodeCompletionType cct) {
+    public TextWithControls(String title, String codeSelect, CodeCompletionType cct, ClassesAndMethodsProvider classesAndMethodsProvider) {
         this.cct = cct;
         HexWithControls.initTabLayers(this, title);
         bytecodeSyntaxTextArea = createSrcTextArea();
