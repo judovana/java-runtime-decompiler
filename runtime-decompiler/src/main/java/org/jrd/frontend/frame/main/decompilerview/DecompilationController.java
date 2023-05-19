@@ -7,6 +7,7 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.jrd.backend.communication.FsAgent;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.communication.TopLevelErrorCandidate;
+import org.jrd.backend.completion.ClassesAndMethodsProvider;
 import org.jrd.backend.core.AgentAttachManager;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.AgentRequestAction.RequestAction;
@@ -64,7 +65,7 @@ import java.util.logging.Level;
  * This class provides Action listeners and request handling for
  * the GUI.
  */
-public class DecompilationController implements ModelProvider, LoadingDialogProvider {
+public class DecompilationController implements ModelProvider, LoadingDialogProvider, ClassesAndMethodsProvider {
 
     private final MainFrameView mainFrameView;
     private final BytecodeDecompilerView bytecodeDecompilerView;
@@ -492,6 +493,18 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
     @Override
     public RuntimeCompilerConnector.JrdClassesProvider getClassesProvider() {
         return new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager);
+    }
+
+    @Override
+    public String[] getClasses() {
+        return getClassesProvider().getClassPathListing().toArray(new String[0]);
+    }
+
+    @Override
+    public String[] getWhateverFromClass(String fqn) {
+        return new String[0];
+        //fixme decompile and extract methods
+        //return Config.getConfig().getAdditionalClassPathBytes(fqn);;
     }
 
     class QuickCompiler {

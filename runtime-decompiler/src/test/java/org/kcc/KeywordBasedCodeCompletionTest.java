@@ -76,6 +76,5 @@ class KeywordBasedCodeCompletionTest {
         a = KeywordBasedCodeCompletion.getBeforeLines(3, 31, "ex", "second line\nfirst line\nsome text");
         Assertions.assertArrayEquals(new String[]{"second line", "first line", "some t"}, a);
 
-
     }
 }

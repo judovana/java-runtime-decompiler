@@ -18,10 +18,6 @@ public class CompletionItem implements Comparable<CompletionItem> {
             return Pattern.compile("[a-zA-Z0-9_\\-\\.\\(\\)]");
         }
 
-        static Pattern delimiterStrictSet1() {
-            return Pattern.compile("[a-zA-Z0-9_]");
-        }
-
         static Pattern delimiterStrictSet2() {
             return Pattern.compile("[a-zA-Z0-9\\.]");
         }
@@ -33,7 +29,6 @@ public class CompletionItem implements Comparable<CompletionItem> {
         static Pattern delimiterWordSet() {
             return Pattern.compile("[a-zA-Z]");
         }
-
 
         static Pattern delimiterWordAndNumberSet() {
             return Pattern.compile("[a-zA-Z0-9]");

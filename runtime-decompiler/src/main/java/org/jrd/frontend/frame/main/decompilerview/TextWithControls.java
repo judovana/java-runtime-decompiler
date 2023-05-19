@@ -46,14 +46,21 @@ public class TextWithControls extends JPanel implements LinesProvider {
     private final RSyntaxTextArea bytecodeSyntaxTextArea;
     private final SearchControlsPanel bytecodeSearchControls;
     private final CodeCompletionType cct;
-    private final ClassesAndMethodsProvider classesAndMethodsProvider;
+    private ClassesAndMethodsProvider classesAndMethodsProvider;
     private DecompilationController.AgentApiGenerator popup;
     private File decorativeFilePlaceholder;
     private KeywordBasedCodeCompletion codeCompletion;
     private CompletionSettings oldSettings;
 
-    public TextWithControls(String title, CodeCompletionType cct, ClassesAndMethodsProvider classesAndMethodsProvider) {
-        this(title, null, cct, classesAndMethodsProvider);
+    public TextWithControls(String title, CodeCompletionType cct) {
+        this(title, null, cct, null);
+    }
+
+    public void setClassesAndMethodsProvider(ClassesAndMethodsProvider classesAndMethodsProvider) {
+        this.classesAndMethodsProvider = classesAndMethodsProvider;
+        if (codeCompletion!=null) {
+            codeCompletion.setBeforeFilteringNarrowing(new ContextSuggestionsNarrower.ClassesAndMethodsEnforcingNarrower(classesAndMethodsProvider));
+        }
     }
 
     public TextWithControls(String title, String codeSelect, CodeCompletionType cct, ClassesAndMethodsProvider classesAndMethodsProvider) {
@@ -84,7 +91,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
                                 removeCodecompletion();
                                 if (newSettings.getSet() != null) {
                                     codeCompletion = new KeywordBasedCodeCompletion(bytecodeSyntaxTextArea, newSettings);
-                                    codeCompletion.setBeforeFilteringNarrowing( new ContextSuggestionsNarrower.ClassesAndMethodsEnforcingNarrower(classesAndMethodsProvider));
+                                    setCompletionHelper();
                                 }
                             }
                         }
@@ -138,6 +145,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
                     bytecodeSyntaxTextArea,
                     new CompletionSettings(guessed.get(0), oldSettings.getOp(), oldSettings.isCaseSensitive(), oldSettings.isShowHelp())
             );
+            setCompletionHelper();
         } else {
             codeCompletion = new KeywordBasedCodeCompletion(
                     bytecodeSyntaxTextArea,
@@ -146,6 +154,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
                             oldSettings.isCaseSensitive(), oldSettings.isShowHelp()
                     )
             );
+            setCompletionHelper();
         }
     }
 
@@ -354,6 +363,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
                                             oldSettings.isShowHelp()
                                     )
                             );
+                            setCompletionHelper();
                             return;
                         }
                     }
@@ -366,6 +376,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
                                             oldSettings.isShowHelp()
                                     )
                             );
+                            setCompletionHelper();
                             return;
                         }
                     }
@@ -378,14 +389,19 @@ public class TextWithControls extends JPanel implements LinesProvider {
                                             oldSettings.isShowHelp()
                                     )
                             );
+                            setCompletionHelper();
                             return;
                         }
                     }
                     //nothing found?
                     normalCodeCompletionGuess(r);
-                    codeCompletion.setBeforeFilteringNarrowing( new ContextSuggestionsNarrower.ClassesAndMethodsEnforcingNarrower(classesAndMethodsProvider));
+                    setCompletionHelper();
                 }
             }
         }
+    }
+
+    private void setCompletionHelper() {
+        codeCompletion.setBeforeFilteringNarrowing( new ContextSuggestionsNarrower.ClassesAndMethodsEnforcingNarrower(classesAndMethodsProvider));
     }
 }

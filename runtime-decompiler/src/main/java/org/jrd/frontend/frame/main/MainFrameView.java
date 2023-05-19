@@ -430,7 +430,7 @@ public class MainFrameView {
         openEditor.addActionListener(a -> {
             StandaloneHex hexview = null;
             try {
-                hexview = new StandaloneHex(new ArrayList<>(), true, getListBasedNarrower());
+                hexview = new StandaloneHex(new ArrayList<>(), true, getBytecodeDecompilerView().getCompletionHelper());
                 hexview.setVisible(true);
             } catch (IOException ex) {
                 Logger.getLogger().log(ex);
@@ -513,19 +513,6 @@ public class MainFrameView {
                 killAllSession.actionPerformed(null);
             }
         });
-    }
-
-    private ClassesAndMethodsProvider getListBasedNarrower() {
-        if (localVmPanel.isVisible()) {
-        //    return new ClassesAndMethodsProvider.JrdClassesAndMethodsProvider(MainFrameView.this.localVmList, vm);
-        } else if (remoteVmPanel.isVisible()){
-          //  return new ClassesAndMethodsProvider.JrdClassesAndMethodsProvider(MainFrameView.this.remoteVmList);
-        } else if (fsVmPanel.isVisible()) {
-            //return new ClassesAndMethodsProvider.JrdClassesAndMethodsProvider(MainFrameView.this.fsVmList);
-        } else {
-            return null;
-        }
-        return null;
     }
 
     public void clearLocalListSelection() {
