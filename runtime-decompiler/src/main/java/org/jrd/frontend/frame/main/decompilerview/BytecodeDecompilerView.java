@@ -1,10 +1,8 @@
 package org.jrd.frontend.frame.main.decompilerview;
 
 import io.github.mkoncek.classpathless.api.ClassIdentifier;
-import io.github.mkoncek.classpathless.api.ClassesProvider;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
 
-import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.completion.ClassesAndMethodsProvider;
 import org.jrd.backend.core.ClassInfo;
 import org.jrd.backend.core.Logger;

@@ -1,16 +1,6 @@
 package org.jrd.backend.completion;
 
-import io.github.mkoncek.classpathless.api.ClassesProvider;
-import org.jrd.backend.core.ClassInfo;
 import org.jrd.backend.data.Config;
-import org.jrd.backend.data.VmInfo;
-import org.jrd.backend.data.VmManager;
-import org.jrd.backend.decompiling.PluginManager;
-import org.jrd.frontend.frame.main.decompilerview.DecompilationController;
-
-import javax.swing.JList;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 public interface ClassesAndMethodsProvider {
 
