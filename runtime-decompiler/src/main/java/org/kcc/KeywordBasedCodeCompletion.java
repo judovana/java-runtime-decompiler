@@ -48,7 +48,7 @@ public class KeywordBasedCodeCompletion {
     private final CaretListener caretListenerToRemove;
     private final KeyListener keyListenerToRemove;
     private final FocusListener focusListenerToRemove;
-    private boolean debug = true;
+    private boolean debug = false;
     private Point futureLocation;
 
     private ContextSuggestionsNarrower afterFilteringNarrowing;
@@ -378,7 +378,7 @@ public class KeywordBasedCodeCompletion {
             }
             sb.insert(0, charAtPos);
         }
-        return sb.toString().split("\n");
+        return sb.toString().split("\n", -1);
     }
 
     private int calcCompletionPosition() {

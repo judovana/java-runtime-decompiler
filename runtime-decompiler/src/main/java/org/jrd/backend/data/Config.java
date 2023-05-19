@@ -451,12 +451,12 @@ public final class Config {
     }
 
     private String[] getListingFromAdditionalPath(FsAgent fs) {
-        String base64 = fs.submitRequest(AgentRequestAction.RequestAction.CLASSES+"");
-        ErrorCandidate errorCandidate = new ErrorCandidate(base64);
+        String classes = fs.submitRequest(AgentRequestAction.RequestAction.CLASSES+"");
+        ErrorCandidate errorCandidate = new ErrorCandidate(classes);
         if (errorCandidate.isError()) {
             throw new RuntimeException(errorCandidate.getErrorMessage());
         }
-        String[] r = new String(Base64.getDecoder().decode(base64), StandardCharsets.UTF_8).split("\n");
+        String[] r = classes.split(";");
         return r;
     }
 }
