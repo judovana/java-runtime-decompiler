@@ -337,9 +337,9 @@ public class BytecodeDecompilerView {
                 GlobalConsole.getConsole().show();
                 Logger.getLogger().log("Compilation started");
                 if (isAdditionalBinaryBufferVisible()) {
-                    JOptionPane.showMessageDialog(buffers, "Unlike (compile) and upload, compile is onloy for source buffers");
+                    JOptionPane.showMessageDialog(buffers, "Unlike (compile) and upload, compile is only for source buffers");
                 } else if (isBinaryBufferVisible()) {
-                    JOptionPane.showMessageDialog(buffers, "Unlike (compile) and upload, compile is onloy for source buffers");
+                    JOptionPane.showMessageDialog(buffers, "Unlike (compile) and upload, compile is only for source buffers");
                 } else if (isDecompiledBytecodeBufferVisible()) {
                     compileAction.run(
                             (DecompilerWrapper) pluginComboBox.getSelectedItem(), false,
