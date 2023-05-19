@@ -505,8 +505,8 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
 
     @Override
     public String[] getWhateverFromClass(String fqn) {
-        Collection<IdentifiedBytecode> b  = getClassesProvider().getClass(new ClassIdentifier(fqn));
-        return ClassesAndMethodsProvider.bytesToMethods(b.stream().map(a->a.getFile()).collect(Collectors.toList()).get(0));
+        Collection<IdentifiedBytecode> b = getClassesProvider().getClass(new ClassIdentifier(fqn));
+        return ClassesAndMethodsProvider.bytesToMethods(b.stream().map(a -> a.getFile()).collect(Collectors.toList()).get(0));
     }
 
     class QuickCompiler {

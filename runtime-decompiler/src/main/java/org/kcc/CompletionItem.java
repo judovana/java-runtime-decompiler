@@ -51,6 +51,7 @@ public class CompletionItem implements Comparable<CompletionItem> {
     public CompletionItem(String key, String description, String realReplacement) {
         this(key, description, realReplacement, key);
     }
+
     public CompletionItem(String key, String description, String realReplacement, String searchable) {
         this.key = key;
         this.description = description;
@@ -68,7 +69,7 @@ public class CompletionItem implements Comparable<CompletionItem> {
     }
 
     public String getSearchable() {
-        if (searchable == "") {
+        if ("".equals(searchable)) {
             return key;
         } else {
             return searchable;

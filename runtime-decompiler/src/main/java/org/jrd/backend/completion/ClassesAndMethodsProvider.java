@@ -6,7 +6,6 @@ import org.jrd.backend.decompiling.JavapDisassemblerWrapper;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public interface ClassesAndMethodsProvider {
 
     String[] getClasses();
@@ -32,7 +31,7 @@ public interface ClassesAndMethodsProvider {
         String code = javap.decompile(b, new String[0]);
         String[] lines = code.split("\n");
         List<String> r = new ArrayList<>(lines.length);
-        for(String s: lines) {
+        for (String s : lines) {
             if (s.startsWith("  ") && s.contains("(") && s.contains(")")) {
                 r.add(s.trim());
             }
