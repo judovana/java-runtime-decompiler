@@ -480,7 +480,7 @@ public class BytecodeKeywordsWithHelp implements CompletionItem.CompletionItemSe
 
     @Override
     public Pattern getRecommendedDelimiterSet() {
-        return CompletionItem.CompletionItemSet.delimiterStrictSet1();
+        return CompletionItem.CompletionItemSet.delimiterStrictSet3();
     }
 
     @Override

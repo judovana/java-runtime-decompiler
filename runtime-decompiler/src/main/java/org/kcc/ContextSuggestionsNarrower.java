@@ -31,8 +31,9 @@ public interface ContextSuggestionsNarrower {
      *   afterLines[n]    + "\n"
      *   == whole surrounding
      */
-    CompletionItem[] narrowSuggestions(String currentKeyword, CompletionItem[] currentSet, String[] beforeLines,
-                                       String[] afterLines, boolean caseSensitive);
+    CompletionItem[] narrowSuggestions(
+            String currentKeyword, CompletionItem[] currentSet, String[] beforeLines, String[] afterLines, boolean caseSensitive
+    );
 
     class DebugNarrower implements ContextSuggestionsNarrower {
         private final int before;
@@ -54,8 +55,9 @@ public interface ContextSuggestionsNarrower {
         }
 
         @Override
-        public CompletionItem[] narrowSuggestions(String currentKeyword, CompletionItem[] currentSet,
-                                                  String[] beforeLines, String[] afterLines, boolean caseSensitive) {
+        public CompletionItem[] narrowSuggestions(
+                String currentKeyword, CompletionItem[] currentSet, String[] beforeLines, String[] afterLines, boolean caseSensitive
+        ) {
             System.err.println("###########");
             for (int x = 0; x < beforeLines.length - 1; x++) {
                 System.err.println(beforeLines[x]);
@@ -88,13 +90,15 @@ public interface ContextSuggestionsNarrower {
             return 0;
         }
 
-        public CompletionItem[] narrowSuggestions(String currentKeyword, CompletionItem[] currentSet,
-                                                  String[] beforeLines, String[] afterLines, boolean caseSensitive) {
+        public CompletionItem[] narrowSuggestions(
+                String currentKeyword, CompletionItem[] currentSet, String[] beforeLines, String[] afterLines, boolean caseSensitive
+        ) {
             if (provider != null && beforeLines.length > 0) {
                 String currentTrimedLine = beforeLines[beforeLines.length - 1].trim();
                 String[] currentLineTokens = currentTrimedLine.split("\\s+");
                 if (currentLineTokens[currentLineTokens.length - 1].equals("CLASS")) {
-                    return Arrays.stream(provider.getClasses()).map(a -> new CompletionItem(a)).collect(Collectors.toList()).toArray(new CompletionItem[0]);
+                    return Arrays.stream(provider.getClasses()).map(a -> new CompletionItem(a)).collect(Collectors.toList())
+                            .toArray(new CompletionItem[0]);
                 }
             }
             return currentSet;

@@ -1,8 +1,10 @@
 package org.jrd.frontend.frame.main.decompilerview;
 
 import io.github.mkoncek.classpathless.api.ClassIdentifier;
+import io.github.mkoncek.classpathless.api.ClassesProvider;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
 
+import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.completion.ClassesAndMethodsProvider;
 import org.jrd.backend.core.ClassInfo;
 import org.jrd.backend.core.Logger;
@@ -124,6 +126,7 @@ public class BytecodeDecompilerView {
     private ActionListener addActionListener;
     private ActionListener addJar;
     private DecompilationController.QuickCompiler compileAction;
+    private ClassesAndMethodsProvider completionHelper;
     private OverwriteActionListener overwriteActionListener;
     private DependenciesReader dependenciesReader;
 
@@ -520,15 +523,12 @@ public class BytecodeDecompilerView {
             }
         });
 
-        bytecodeBuffer = new TextWithControls("Source buffer", TextWithControls.CodeCompletionType.JRD,
-                new ClassesAndMethodsProvider.PreloadedClassesProvider(loadedClasses));
+        bytecodeBuffer = new TextWithControls("Source buffer", TextWithControls.CodeCompletionType.JRD);
         binary = new HexWithControls("Binary buffer");
         additionalBytecodeBuffer = new TextWithControls("Additional source buffer",
-                TextWithControls.CodeCompletionType.JRD,
-                new ClassesAndMethodsProvider.PreloadedClassesProvider(loadedClasses));
+                TextWithControls.CodeCompletionType.JRD);
         additionalBinary = new HexWithControls("Additional binary buffer");
-        additionalSrcBuffer = new TextWithControls("Additional source", TextWithControls.CodeCompletionType.JRD,
-                new ClassesAndMethodsProvider.PreloadedClassesProvider(loadedClasses));
+        additionalSrcBuffer = new TextWithControls("Additional source", TextWithControls.CodeCompletionType.JRD);
 
         classes = new JPanel();
         classes.setLayout(new BorderLayout());
@@ -860,6 +860,17 @@ public class BytecodeDecompilerView {
 
     public void setCompileListener(DecompilationController.QuickCompiler listener) {
         compileAction = listener;
+    }
+
+    public void setCompletionHelper(DecompilationController dec) {
+        completionHelper = dec;
+        bytecodeBuffer.setClassesAndMethodsProvider(completionHelper);
+        additionalSrcBuffer.setClassesAndMethodsProvider(completionHelper);
+        additionalBytecodeBuffer.setClassesAndMethodsProvider(completionHelper);
+    }
+
+    public ClassesAndMethodsProvider getCompletionHelper() {
+        return completionHelper;
     }
 
     public void setBytesActionListener(ActionListener listener) {

@@ -28,7 +28,8 @@ public class Main {
                     hexview.setVisible(true);
                 } else {
                     MainFrameView mainView = new MainFrameView();
-                    new DecompilationController(mainView, model, cli.shouldBeVerbose());
+                   DecompilationController dec = new DecompilationController(mainView, model, cli.shouldBeVerbose());
+                   mainView.getBytecodeDecompilerView().setCompletionHelper(dec);
                 }
             }
         } else {
