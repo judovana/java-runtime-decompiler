@@ -1,6 +1,7 @@
 package org.jrd.frontend.frame.main.decompilerview;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
@@ -58,8 +59,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 /**
  * This class provides Action listeners and request handling for
@@ -502,9 +505,8 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
 
     @Override
     public String[] getWhateverFromClass(String fqn) {
-        return new String[0];
-        //fixme decompile and extract methods
-        //return Config.getConfig().getAdditionalClassPathBytes(fqn);;
+        Collection<IdentifiedBytecode> b  = getClassesProvider().getClass(new ClassIdentifier(fqn));
+        return ClassesAndMethodsProvider.bytesToMethods(b.stream().map(a->a.getFile()).collect(Collectors.toList()).get(0));
     }
 
     class QuickCompiler {

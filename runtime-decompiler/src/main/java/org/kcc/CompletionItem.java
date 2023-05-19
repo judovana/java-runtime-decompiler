@@ -38,6 +38,7 @@ public class CompletionItem implements Comparable<CompletionItem> {
     private final String key;
     private final String description;
     private final String realReplacement;
+    private final String searchable;
 
     public CompletionItem(String key) {
         this(key, "", "");
@@ -48,9 +49,13 @@ public class CompletionItem implements Comparable<CompletionItem> {
     }
 
     public CompletionItem(String key, String description, String realReplacement) {
+        this(key, description, realReplacement, key);
+    }
+    public CompletionItem(String key, String description, String realReplacement, String searchable) {
         this.key = key;
         this.description = description;
         this.realReplacement = realReplacement;
+        this.searchable = searchable;
     }
 
     @Override
@@ -60,6 +65,14 @@ public class CompletionItem implements Comparable<CompletionItem> {
 
     public String getKey() {
         return key;
+    }
+
+    public String getSearchable() {
+        if (searchable == "") {
+            return key;
+        } else {
+            return searchable;
+        }
     }
 
     public String getDescription() {
