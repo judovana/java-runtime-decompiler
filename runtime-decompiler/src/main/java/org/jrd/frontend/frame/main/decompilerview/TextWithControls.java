@@ -34,6 +34,7 @@ import org.jrd.frontend.frame.main.GlobalConsole;
 import org.jrd.frontend.utility.ImageButtonFactory;
 import org.kcc.CompletionItem;
 import org.kcc.CompletionSettings;
+import org.kcc.ContextSuggestionsNarrower;
 import org.kcc.KeywordBasedCodeCompletion;
 import org.kcc.wordsets.BytecodeKeywordsWithHelp;
 import org.kcc.wordsets.BytemanKeywords;
@@ -45,6 +46,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
     private final RSyntaxTextArea bytecodeSyntaxTextArea;
     private final SearchControlsPanel bytecodeSearchControls;
     private final CodeCompletionType cct;
+    private final ClassesAndMethodsProvider classesAndMethodsProvider;
     private DecompilationController.AgentApiGenerator popup;
     private File decorativeFilePlaceholder;
     private KeywordBasedCodeCompletion codeCompletion;
@@ -56,6 +58,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
 
     public TextWithControls(String title, String codeSelect, CodeCompletionType cct, ClassesAndMethodsProvider classesAndMethodsProvider) {
         this.cct = cct;
+        this.classesAndMethodsProvider = classesAndMethodsProvider;
         HexWithControls.initTabLayers(this, title);
         bytecodeSyntaxTextArea = createSrcTextArea();
         bytecodeSearchControls = SearchControlsPanel.createBytecodeControls(this);
@@ -81,6 +84,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
                                 removeCodecompletion();
                                 if (newSettings.getSet() != null) {
                                     codeCompletion = new KeywordBasedCodeCompletion(bytecodeSyntaxTextArea, newSettings);
+                                    codeCompletion.setBeforeFilteringNarrowing( new ContextSuggestionsNarrower.ClassesAndMethodsEnforcingNarrower(classesAndMethodsProvider));
                                 }
                             }
                         }
@@ -379,6 +383,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
                     }
                     //nothing found?
                     normalCodeCompletionGuess(r);
+                    codeCompletion.setBeforeFilteringNarrowing( new ContextSuggestionsNarrower.ClassesAndMethodsEnforcingNarrower(classesAndMethodsProvider));
                 }
             }
         }

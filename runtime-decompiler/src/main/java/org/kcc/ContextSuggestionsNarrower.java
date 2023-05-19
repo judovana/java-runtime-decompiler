@@ -1,5 +1,10 @@
 package org.kcc;
 
+import org.jrd.backend.completion.ClassesAndMethodsProvider;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 public interface ContextSuggestionsNarrower {
 
     /*
@@ -29,7 +34,7 @@ public interface ContextSuggestionsNarrower {
     CompletionItem[] narrowSuggestions(String currentKeyword, CompletionItem[] currentSet, String[] beforeLines,
                                        String[] afterLines, boolean caseSensitive);
 
-    static class DebugNarrower implements ContextSuggestionsNarrower {
+    class DebugNarrower implements ContextSuggestionsNarrower {
         private final int before;
         private final int after;
 
@@ -52,16 +57,47 @@ public interface ContextSuggestionsNarrower {
         public CompletionItem[] narrowSuggestions(String currentKeyword, CompletionItem[] currentSet,
                                                   String[] beforeLines, String[] afterLines, boolean caseSensitive) {
             System.err.println("###########");
-            for (int x = 0; x < beforeLines.length; x++) {
+            for (int x = 0; x < beforeLines.length - 1; x++) {
                 System.err.println(beforeLines[x]);
             }
-            System.err.println("!" + currentKeyword + "!");
-            for (int x = 0; x < afterLines.length; x++) {
+            System.err.print(beforeLines[beforeLines.length - 1]);
+            System.err.print("!" + currentKeyword + "!");
+            System.err.println(afterLines[0]);
+            for (int x = 1; x < afterLines.length - 0; x++) {
                 System.err.println(afterLines[x]);
             }
             System.err.println("***********");
-            return  currentSet;
+            return currentSet;
         }
     }
 
+    class ClassesAndMethodsEnforcingNarrower implements ContextSuggestionsNarrower {
+        private final ClassesAndMethodsProvider provider;
+
+        public ClassesAndMethodsEnforcingNarrower(ClassesAndMethodsProvider classesAndMethodsProvider) {
+            this.provider = classesAndMethodsProvider;
+        }
+
+        @Override
+        public int getBeforeContextLinesCount() {
+            return 5;
+        }
+
+        @Override
+        public int getAfterContextLinesCount() {
+            return 0;
+        }
+
+        public CompletionItem[] narrowSuggestions(String currentKeyword, CompletionItem[] currentSet,
+                                                  String[] beforeLines, String[] afterLines, boolean caseSensitive) {
+            if (provider != null && beforeLines.length > 0) {
+                String currentTrimedLine = beforeLines[beforeLines.length - 1].trim();
+                String[] currentLineTokens = currentTrimedLine.split("\\s+");
+                if (currentLineTokens[currentLineTokens.length - 1].equals("CLASS")) {
+                    return Arrays.stream(provider.getClasses()).map(a -> new CompletionItem(a)).collect(Collectors.toList()).toArray(new CompletionItem[0]);
+                }
+            }
+            return currentSet;
+        }
+    }
 }
