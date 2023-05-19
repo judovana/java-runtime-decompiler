@@ -58,8 +58,9 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
         if (!GraphicsEnvironment.isHeadless()) {
             try {
                 verboseCplc = new JList(CPLC_ITEMS);
-                tmpLog = new TextWithControls("console", SyntaxConstants.SYNTAX_STYLE_SAS,
-                        TextWithControls.CodeCompletionType.FORBIDDEN, null);
+                tmpLog = new TextWithControls(
+                        "console", SyntaxConstants.SYNTAX_STYLE_SAS, TextWithControls.CodeCompletionType.FORBIDDEN, null
+                );
                 tmpClean = new JButton("Clean log");
                 tmpFrame = new JDialog((JFrame) null, "Log console");
                 tmpFrame.setLayout(new BorderLayout());

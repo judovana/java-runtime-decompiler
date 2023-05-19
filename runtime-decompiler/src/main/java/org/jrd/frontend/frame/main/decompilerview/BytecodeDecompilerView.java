@@ -525,8 +525,7 @@ public class BytecodeDecompilerView {
 
         bytecodeBuffer = new TextWithControls("Source buffer", TextWithControls.CodeCompletionType.JRD);
         binary = new HexWithControls("Binary buffer");
-        additionalBytecodeBuffer = new TextWithControls("Additional source buffer",
-                TextWithControls.CodeCompletionType.JRD);
+        additionalBytecodeBuffer = new TextWithControls("Additional source buffer", TextWithControls.CodeCompletionType.JRD);
         additionalBinary = new HexWithControls("Additional binary buffer");
         additionalSrcBuffer = new TextWithControls("Additional source", TextWithControls.CodeCompletionType.JRD);
 

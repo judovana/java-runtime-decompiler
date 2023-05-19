@@ -58,8 +58,8 @@ public class KeywordBasedCodeCompletion {
         this.source = source;
         this.settings = settings;
         if (debug) {
-            afterFilteringNarrowing = new ContextSuggestionsNarrower.DebugNarrower(5,2);
-            beforeFilteringNarrowing = new ContextSuggestionsNarrower.DebugNarrower(5,2);
+            afterFilteringNarrowing = new ContextSuggestionsNarrower.DebugNarrower(5, 2);
+            beforeFilteringNarrowing = new ContextSuggestionsNarrower.DebugNarrower(5, 2);
         }
         suggested = new JList<>(settings.getSet().getItemsArray());
         scroll = new JScrollPane(suggested);
@@ -210,8 +210,9 @@ public class KeywordBasedCodeCompletion {
         if (keyEvent.getKeyCode() == KeyEvent.VK_ESCAPE) {
             ende();
         }
-        if (keyEvent.getKeyCode() == KeyEvent.VK_DOWN || keyEvent.getKeyCode() == KeyEvent.VK_UP
-                || keyEvent.getKeyCode() == KeyEvent.VK_PAGE_DOWN || keyEvent.getKeyCode() == KeyEvent.VK_PAGE_DOWN) {
+        if (keyEvent.getKeyCode() == KeyEvent.VK_DOWN || keyEvent.getKeyCode() == KeyEvent.VK_UP ||
+                keyEvent.getKeyCode() == KeyEvent.VK_PAGE_DOWN ||
+                keyEvent.getKeyCode() == KeyEvent.VK_PAGE_DOWN) {
             if (popup.isVisible()) {
                 keyEvent.consume();
                 SwingUtilities.invokeLater(new Runnable() {
@@ -284,10 +285,13 @@ public class KeywordBasedCodeCompletion {
 
     private void filter(String word, int caretpos) {
         CompletionItem[] keywordsMod = keywords;
-        if (beforeFilteringNarrowing!=null){
-            keywordsMod = beforeFilteringNarrowing.narrowSuggestions(word, keywordsMod,
+        if (beforeFilteringNarrowing != null) {
+            keywordsMod = beforeFilteringNarrowing.narrowSuggestions(
+                    word, keywordsMod,
                     getBeforeLines(beforeFilteringNarrowing.getBeforeContextLinesCount(), caretpos, word, source.getText()),
-                    getAfterLines(beforeFilteringNarrowing.getAfterContextLinesCount(), caretpos, source.getText() ), settings.isCaseSensitive());
+                    getAfterLines(beforeFilteringNarrowing.getAfterContextLinesCount(), caretpos, source.getText()),
+                    settings.isCaseSensitive()
+            );
         }
         if (!settings.isCaseSensitive()) {
             word = word.toLowerCase();
@@ -338,10 +342,12 @@ public class KeywordBasedCodeCompletion {
             }
         }
         CompletionItem[] rr = filtered.toArray(new CompletionItem[0]);
-        if (afterFilteringNarrowing!=null){
-            rr = afterFilteringNarrowing.narrowSuggestions(word, rr,
-                    getBeforeLines(afterFilteringNarrowing.getBeforeContextLinesCount(), caretpos, word, source.getText()),
-                    getAfterLines(afterFilteringNarrowing.getAfterContextLinesCount(), caretpos, source.getText() ), settings.isCaseSensitive());
+        if (afterFilteringNarrowing != null) {
+            rr = afterFilteringNarrowing.narrowSuggestions(
+                    word, rr, getBeforeLines(afterFilteringNarrowing.getBeforeContextLinesCount(), caretpos, word, source.getText()),
+                    getAfterLines(afterFilteringNarrowing.getAfterContextLinesCount(), caretpos, source.getText()),
+                    settings.isCaseSensitive()
+            );
         }
         setKeywordsImpl(rr);
     }
@@ -349,12 +355,12 @@ public class KeywordBasedCodeCompletion {
     static String[] getAfterLines(int afterContextLinesCount, int caretpos, String text) {
         StringBuilder sb = new StringBuilder();
         int nwLinesCount = 0;
-        for(int x = caretpos; x< text.length(); x++) {
+        for (int x = caretpos; x < text.length(); x++) {
             char charAtPos = text.charAt(x);
             if (charAtPos == '\n') {
                 nwLinesCount++;
             }
-            if (nwLinesCount>afterContextLinesCount){
+            if (nwLinesCount > afterContextLinesCount) {
                 break;
             }
             sb.append(charAtPos);
@@ -362,19 +368,19 @@ public class KeywordBasedCodeCompletion {
         return sb.toString().split("\n");
     }
 
-    static  String[] getBeforeLines(int beforeContextLinesCount, int caretpos, String word, String text) {
+    static String[] getBeforeLines(int beforeContextLinesCount, int caretpos, String word, String text) {
         caretpos--;
-        if (caretpos>=text.length()) {
-            caretpos = text.length()-1;
+        if (caretpos >= text.length()) {
+            caretpos = text.length() - 1;
         }
         StringBuilder sb = new StringBuilder();
         int nwLinesCount = 0;
-        for(int x = caretpos-word.length(); x>= 0; x--) {
+        for (int x = caretpos - word.length(); x >= 0; x--) {
             char charAtPos = text.charAt(x);
             if (charAtPos == '\n') {
                 nwLinesCount++;
             }
-            if (nwLinesCount>beforeContextLinesCount){
+            if (nwLinesCount > beforeContextLinesCount) {
                 break;
             }
             sb.insert(0, charAtPos);

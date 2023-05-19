@@ -17,19 +17,21 @@ public class Main {
             setLookAndFeel();
             if (!cli.getFilteredArgs().isEmpty()) {
                 Help.printHelpText();
-                StandaloneHex hexview = new StandaloneHex(cli.getFilteredArgs(), cli.isHex(),
-                        new ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider());
+                StandaloneHex hexview = new StandaloneHex(
+                        cli.getFilteredArgs(), cli.isHex(), new ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider()
+                );
                 hexview.setVisible(true);
             } else {
                 if (cli.isHex() && cli.getFilteredArgs().isEmpty()) {
                     Help.printHelpText();
-                    StandaloneHex hexview = new StandaloneHex(cli.getFilteredArgs(), cli.isHex(),
-                            new ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider());
+                    StandaloneHex hexview = new StandaloneHex(
+                            cli.getFilteredArgs(), cli.isHex(), new ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider()
+                    );
                     hexview.setVisible(true);
                 } else {
                     MainFrameView mainView = new MainFrameView();
-                   DecompilationController dec = new DecompilationController(mainView, model, cli.shouldBeVerbose());
-                   mainView.getBytecodeDecompilerView().setCompletionHelper(dec);
+                    DecompilationController dec = new DecompilationController(mainView, model, cli.shouldBeVerbose());
+                    mainView.getBytecodeDecompilerView().setCompletionHelper(dec);
                 }
             }
         } else {
