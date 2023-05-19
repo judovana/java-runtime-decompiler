@@ -58,8 +58,10 @@ public class TextWithControls extends JPanel implements LinesProvider {
 
     public void setClassesAndMethodsProvider(ClassesAndMethodsProvider classesAndMethodsProvider) {
         this.classesAndMethodsProvider = classesAndMethodsProvider;
-        if (codeCompletion!=null) {
-            codeCompletion.setBeforeFilteringNarrowing(new ContextSuggestionsNarrower.ClassesAndMethodsEnforcingNarrower(classesAndMethodsProvider));
+        if (codeCompletion != null) {
+            codeCompletion.setBeforeFilteringNarrowing(
+                    new ContextSuggestionsNarrower.ClassesAndMethodsEnforcingNarrower(classesAndMethodsProvider)
+            );
         }
     }
 
@@ -402,6 +404,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
     }
 
     private void setCompletionHelper() {
-        codeCompletion.setBeforeFilteringNarrowing( new ContextSuggestionsNarrower.ClassesAndMethodsEnforcingNarrower(classesAndMethodsProvider));
+        codeCompletion
+                .setBeforeFilteringNarrowing(new ContextSuggestionsNarrower.ClassesAndMethodsEnforcingNarrower(classesAndMethodsProvider));
     }
 }

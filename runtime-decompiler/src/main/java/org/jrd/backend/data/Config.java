@@ -451,7 +451,7 @@ public final class Config {
     }
 
     private String[] getListingFromAdditionalPath(FsAgent fs) {
-        String classes = fs.submitRequest(AgentRequestAction.RequestAction.CLASSES+"");
+        String classes = fs.submitRequest(AgentRequestAction.RequestAction.CLASSES + "");
         ErrorCandidate errorCandidate = new ErrorCandidate(classes);
         if (errorCandidate.isError()) {
             throw new RuntimeException(errorCandidate.getErrorMessage());
