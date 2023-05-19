@@ -211,7 +211,8 @@ public class KeywordBasedCodeCompletion {
             ende();
         }
         if (keyEvent.getKeyCode() == KeyEvent.VK_DOWN || keyEvent.getKeyCode() == KeyEvent.VK_UP ||
-                keyEvent.getKeyCode() == KeyEvent.VK_PAGE_DOWN || keyEvent.getKeyCode() == KeyEvent.VK_PAGE_UP) {
+                keyEvent.getKeyCode() == KeyEvent.VK_PAGE_DOWN ||
+                keyEvent.getKeyCode() == KeyEvent.VK_PAGE_UP) {
             if (popup.isVisible()) {
                 keyEvent.consume();
                 SwingUtilities.invokeLater(new Runnable() {
@@ -315,7 +316,7 @@ public class KeywordBasedCodeCompletion {
         }
         List<CompletionItem> filtered = new ArrayList<>(keywords.length);
         for (CompletionItem item : keywordsMod) {
-            String itemKey = item.getKey();
+            String itemKey = item.getSearchable();
             if (!settings.isCaseSensitive()) {
                 itemKey = itemKey.toLowerCase();
             }
