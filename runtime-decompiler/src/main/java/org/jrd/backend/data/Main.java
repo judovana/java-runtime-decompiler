@@ -1,5 +1,6 @@
 package org.jrd.backend.data;
 
+import org.jrd.backend.completion.ClassesAndMethodsProvider;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.cli.Cli;
 import org.jrd.backend.data.cli.Help;
@@ -17,13 +18,13 @@ public class Main {
             if (!cli.getFilteredArgs().isEmpty()) {
                 Help.printHelpText();
                 StandaloneHex hexview = new StandaloneHex(cli.getFilteredArgs(), cli.isHex(),
-                        null/*FIXME base on FS additional cp/sp from settings*/);
+                        new ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider());
                 hexview.setVisible(true);
             } else {
                 if (cli.isHex() && cli.getFilteredArgs().isEmpty()) {
                     Help.printHelpText();
                     StandaloneHex hexview = new StandaloneHex(cli.getFilteredArgs(), cli.isHex(),
-                            null/*FIXME base on FS additional cp/sp from settings*/);
+                            new ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider());
                     hexview.setVisible(true);
                 } else {
                     MainFrameView mainView = new MainFrameView();

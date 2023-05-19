@@ -401,6 +401,19 @@ public final class Config {
         }
     }
 
+    public String[] getAdditionalClassPathListing() {
+        if (additionalClassPathAgent == null) {
+            return new String[0];
+        } else {
+            try {
+                return getListingFromAdditionalPath(additionalClassPathAgent);
+            } catch (Exception ex) {
+                Logger.getLogger().log(ex);
+                return new String[0];
+            }
+        }
+    }
+
     public String getAdditionalSourcePathString(String fqn) {
         if (additionalSourcePathAgent == null) {
             return "";
@@ -435,5 +448,15 @@ public final class Config {
         }
         byte[] bbytes = Base64.getDecoder().decode(base64);
         return bbytes;
+    }
+
+    private String[] getListingFromAdditionalPath(FsAgent fs) {
+        String base64 = fs.submitRequest(AgentRequestAction.RequestAction.CLASSES+"");
+        ErrorCandidate errorCandidate = new ErrorCandidate(base64);
+        if (errorCandidate.isError()) {
+            throw new RuntimeException(errorCandidate.getErrorMessage());
+        }
+        String[] r = new String(Base64.getDecoder().decode(base64), StandardCharsets.UTF_8).split("\n");
+        return r;
     }
 }

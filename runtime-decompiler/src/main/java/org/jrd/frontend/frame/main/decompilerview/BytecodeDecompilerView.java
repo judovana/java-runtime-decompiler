@@ -3,6 +3,7 @@ package org.jrd.frontend.frame.main.decompilerview;
 import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
 
+import org.jrd.backend.completion.ClassesAndMethodsProvider;
 import org.jrd.backend.core.ClassInfo;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.Config;
@@ -519,11 +520,15 @@ public class BytecodeDecompilerView {
             }
         });
 
-        bytecodeBuffer = new TextWithControls("Source buffer", TextWithControls.CodeCompletionType.JRD);
+        bytecodeBuffer = new TextWithControls("Source buffer", TextWithControls.CodeCompletionType.JRD,
+                new ClassesAndMethodsProvider.PreloadedClassesProvider(loadedClasses));
         binary = new HexWithControls("Binary buffer");
-        additionalBytecodeBuffer = new TextWithControls("Additional source buffer", TextWithControls.CodeCompletionType.JRD);
+        additionalBytecodeBuffer = new TextWithControls("Additional source buffer",
+                TextWithControls.CodeCompletionType.JRD,
+                new ClassesAndMethodsProvider.PreloadedClassesProvider(loadedClasses));
         additionalBinary = new HexWithControls("Additional binary buffer");
-        additionalSrcBuffer = new TextWithControls("Additional source", TextWithControls.CodeCompletionType.JRD);
+        additionalSrcBuffer = new TextWithControls("Additional source", TextWithControls.CodeCompletionType.JRD,
+                new ClassesAndMethodsProvider.PreloadedClassesProvider(loadedClasses));
 
         classes = new JPanel();
         classes.setLayout(new BorderLayout());

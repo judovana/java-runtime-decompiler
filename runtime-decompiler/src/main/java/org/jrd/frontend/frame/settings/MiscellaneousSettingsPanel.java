@@ -90,7 +90,8 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
         acpl.setToolTipText(
                 hint + "Although JRD was designed to <b>actually fill" + " missing classes</b> on FS from running VM,<br>" +
                         "it proved itself, that soem weird class may still be missing. Thus you can add those classes via cp.<br>" +
-                        "Future JRD should be able to also upload any non-existing classes to running VM."
+                        "Future JRD should be able to also upload any non-existing classes to running VM.<br><br>" +
+                        "In addition, this  classpath is used in standalone text editor's code completion"
         );
         classPath.setToolTipText(acpl.getToolTipText());
         this.add(acpl, gbc);

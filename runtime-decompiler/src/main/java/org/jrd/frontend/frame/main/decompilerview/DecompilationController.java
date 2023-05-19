@@ -93,6 +93,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         mainFrameView.setNewConnectionDialogListener(e -> createNewConnectionDialog());
         mainFrameView.setNewFsVmDialogListener(e -> createNewFsVMDialog());
         mainFrameView.setRemoveVmDialogListener(this::removeVmDialog);
+        //FIXMEbytecodeDecompilerView.setClassesAndMethodsProvider();
         bytecodeDecompilerView.setInitActionListener(e -> initClass(e.getActionCommand()));
         bytecodeDecompilerView.setAddActionListener(e -> addClass(e.getActionCommand()));
         bytecodeDecompilerView.setJarActionListener(e -> addJar(e.getActionCommand()));
