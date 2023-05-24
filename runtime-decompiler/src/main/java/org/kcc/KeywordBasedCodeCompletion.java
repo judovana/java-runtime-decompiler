@@ -289,8 +289,7 @@ public class KeywordBasedCodeCompletion {
             keywordsMod = beforeFilteringNarrowing.narrowSuggestions(
                     word, keywordsMod,
                     getBeforeLines(beforeFilteringNarrowing.getBeforeContextLinesCount(), caretpos, word, source.getText()),
-                    getAfterLines(beforeFilteringNarrowing.getAfterContextLinesCount(), caretpos, source.getText()),
-                    settings.isCaseSensitive()
+                    getAfterLines(beforeFilteringNarrowing.getAfterContextLinesCount(), caretpos, source.getText()), settings
             );
         }
         if (!settings.isCaseSensitive()) {
@@ -345,8 +344,7 @@ public class KeywordBasedCodeCompletion {
         if (afterFilteringNarrowing != null) {
             rr = afterFilteringNarrowing.narrowSuggestions(
                     word, rr, getBeforeLines(afterFilteringNarrowing.getBeforeContextLinesCount(), caretpos, word, source.getText()),
-                    getAfterLines(afterFilteringNarrowing.getAfterContextLinesCount(), caretpos, source.getText()),
-                    settings.isCaseSensitive()
+                    getAfterLines(afterFilteringNarrowing.getAfterContextLinesCount(), caretpos, source.getText()), settings
             );
         }
         setKeywordsImpl(rr);

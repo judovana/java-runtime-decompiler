@@ -32,7 +32,7 @@ public interface ContextSuggestionsNarrower {
      *   == whole surrounding
      */
     CompletionItem[] narrowSuggestions(
-            String currentKeyword, CompletionItem[] currentSet, String[] beforeLines, String[] afterLines, boolean caseSensitive
+            String currentKeyword, CompletionItem[] currentSet, String[] beforeLines, String[] afterLines, CompletionSettings settings
     );
 
     class DebugNarrower implements ContextSuggestionsNarrower {
@@ -56,7 +56,7 @@ public interface ContextSuggestionsNarrower {
 
         @Override
         public CompletionItem[] narrowSuggestions(
-                String currentKeyword, CompletionItem[] currentSet, String[] beforeLines, String[] afterLines, boolean caseSensitive
+                String currentKeyword, CompletionItem[] currentSet, String[] beforeLines, String[] afterLines, CompletionSettings settings
         ) {
             System.err.println("###########");
             for (int x = 0; x < beforeLines.length - 1; x++) {
@@ -91,7 +91,7 @@ public interface ContextSuggestionsNarrower {
         }
 
         public CompletionItem[] narrowSuggestions(
-                String currentKeyword, CompletionItem[] currentSet, String[] beforeLines, String[] afterLines, boolean caseSensitive
+                String currentKeyword, CompletionItem[] currentSet, String[] beforeLines, String[] afterLines, CompletionSettings settings
         ) {
             if (provider != null && beforeLines.length > 0) {
                 String currentTrimedLine = beforeLines[beforeLines.length - 1].trim();
