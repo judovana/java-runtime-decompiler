@@ -22,7 +22,12 @@ public interface ClassesAndMethodsProvider {
         @Override
         public String[] getWhateverFromClass(String fqn) {
             byte[] b = Config.getConfig().getAdditionalClassPathBytes(fqn);
-            return bytesToMethods(b);
+            String[] l = bytesToMethods(b);
+            if (l.length == 0) {
+                return new String[]{"Not found " + fqn + " or no methods in it"};
+            } else {
+                return l;
+            }
         }
     }
 

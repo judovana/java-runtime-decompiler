@@ -506,7 +506,17 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
     @Override
     public String[] getWhateverFromClass(String fqn) {
         Collection<IdentifiedBytecode> b = getClassesProvider().getClass(new ClassIdentifier(fqn));
-        return ClassesAndMethodsProvider.bytesToMethods(b.stream().map(a -> a.getFile()).collect(Collectors.toList()).get(0));
+        try {
+            String[] l = ClassesAndMethodsProvider.bytesToMethods(b.stream().map(a -> a.getFile()).collect(Collectors.toList()).get(0));
+            if (l.length == 0) {
+                return new String[]{"No methods found in " + fqn};
+            } else {
+                return l;
+            }
+        } catch (Exception ex) {
+            Logger.getLogger().log(Logger.Level.DEBUG, ex);
+            return new String[]{"Not found: " + fqn};
+        }
     }
 
     class QuickCompiler {
