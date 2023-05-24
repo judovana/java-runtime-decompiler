@@ -4,7 +4,9 @@ import org.jrd.backend.data.Config;
 import org.jrd.backend.decompiling.JavapDisassemblerWrapper;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public interface ClassesAndMethodsProvider {
 
@@ -36,11 +38,15 @@ public interface ClassesAndMethodsProvider {
         String code = javap.decompile(b, new String[0]);
         String[] lines = code.split("\n");
         List<String> r = new ArrayList<>(lines.length);
+        Set<String> shortened = new HashSet<>();
         for (String s : lines) {
             if (s.startsWith("  ") && s.contains("(") && s.contains(")")) {
+                String[] mtrim = s.replaceAll("\\(.*", "").split("\\s+");
+                shortened.add(mtrim[mtrim.length - 1] + "(..)");
                 r.add(s.trim());
             }
         }
+        r.addAll(shortened);
         return r.toArray(new String[0]);
     }
 
