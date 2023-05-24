@@ -1,5 +1,6 @@
 package org.jrd.frontend.frame.main.decompilerview;
 
+import org.jrd.backend.completion.ClassesAndMethodsProvider;
 import org.kcc.CompletionItem;
 import org.kcc.CompletionSettings;
 import org.kcc.wordsets.ConnectedKeywords;
@@ -36,7 +37,7 @@ public class CompletionSettingsDialogue extends JDialog {
     JButton cancel = new JButton("cancel");
     JCheckBox showHelp = new JCheckBox("Show help if available");
 
-    public CompletionSettingsDialogue() {
+    public CompletionSettingsDialogue(final ClassesAndMethodsProvider isDynamic) {
         this.setLayout(new GridLayout(1, 2));
         this.setModal(true);
         JPanel p1 = new JPanel(new BorderLayout());
@@ -67,7 +68,7 @@ public class CompletionSettingsDialogue extends JDialog {
         help.add(new JLabel("This is originally for byteman"));
         help.add(new JLabel("but works everywhere f completion is on"));
         p1.add(help, BorderLayout.SOUTH);
-        JPanel p2 = new JPanel(new GridLayout(10, 1));
+        JPanel p2 = new JPanel(new GridLayout(16, 1));
         p2.add(new JLabel("Select sensitivity"));
         ButtonGroup b1 = new ButtonGroup();
         b1.add(rb11);
@@ -87,6 +88,14 @@ public class CompletionSettingsDialogue extends JDialog {
         p2.add(rb21);
         p2.add(rb22);
         p2.add(showHelp);
+        p2.add(new JLabel("class/methods completion"));
+        if (!(isDynamic instanceof ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider)) {
+            p2.add(new JCheckBox("Look for classes in running vm"));
+        }
+        p2.add(new JCheckBox("Look for classes 'additional classpath'"));
+        p2.add(new JLabel("Methods granularity"));
+        p2.add(new JCheckBox("Add methods with full signatures"));
+        p2.add(new JCheckBox("Add just method names"));
         JPanel buttons = new JPanel(new GridLayout(1, 2));
         buttons.add(ok);
         buttons.add(cancel);
