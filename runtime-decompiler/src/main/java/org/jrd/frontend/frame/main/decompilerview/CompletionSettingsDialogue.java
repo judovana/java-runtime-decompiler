@@ -54,7 +54,19 @@ public class CompletionSettingsDialogue extends JDialog {
             }
         });
         p1.add(completions);
-        p1.add(status, BorderLayout.SOUTH);
+        p1.add(status, BorderLayout.NORTH);
+        JPanel help = new JPanel(new GridLayout(5, 2));
+        help.add(new JLabel("CLASS keyword"));
+        help.add(new JLabel("will offer list of classes"));
+        help.add(new JLabel("in JRD"));
+        help.add(new JLabel("from currently connected vm"));
+        help.add(new JLabel("in standalone editor"));
+        help.add(new JLabel("from settings additional CP"));
+        help.add(new JLabel("METHOD keyword"));
+        help.add(new JLabel("will offer list of methods from last CLASS"));
+        help.add(new JLabel("This is originally for byteman"));
+        help.add(new JLabel("but works everywhere f completion is on"));
+        p1.add(help, BorderLayout.SOUTH);
         JPanel p2 = new JPanel(new GridLayout(10, 1));
         p2.add(new JLabel("Select sensitivity"));
         ButtonGroup b1 = new ButtonGroup();
