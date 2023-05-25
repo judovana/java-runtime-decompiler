@@ -1,6 +1,7 @@
 package org.jrd.frontend.frame.main.decompilerview;
 
 import org.jrd.backend.completion.ClassesAndMethodsProvider;
+import org.jrd.backend.completion.JrdCompletionSettings;
 import org.kcc.CompletionItem;
 import org.kcc.CompletionSettings;
 import org.kcc.wordsets.ConnectedKeywords;
@@ -36,6 +37,10 @@ public class CompletionSettingsDialogue extends JDialog {
     JButton ok = new JButton("ok");
     JButton cancel = new JButton("cancel");
     JCheckBox showHelp = new JCheckBox("Show help if available");
+    JCheckBox cpRunning = new JCheckBox("Look for classes in running vm");
+    JCheckBox cpAdditional = new JCheckBox("Look for classes 'additional classpath'");
+    JCheckBox methodsFull = new JCheckBox("Add methods with full signatures");
+    JCheckBox methodsJustNames = new JCheckBox("Add just method names");
 
     public CompletionSettingsDialogue(final ClassesAndMethodsProvider isDynamic) {
         this.setLayout(new GridLayout(1, 2));
@@ -89,13 +94,17 @@ public class CompletionSettingsDialogue extends JDialog {
         p2.add(rb22);
         p2.add(showHelp);
         p2.add(new JLabel("class/methods completion"));
-        if (!(isDynamic instanceof ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider)) {
-            p2.add(new JCheckBox("Look for classes in running vm"));
+
+        if (JrdCompletionSettings.isDynamic(isDynamic)) {
+            cpRunning.setEnabled(true);
+        } else {
+            cpRunning.setEnabled(false);
         }
-        p2.add(new JCheckBox("Look for classes 'additional classpath'"));
+        p2.add(cpRunning);
+        p2.add(cpAdditional);
         p2.add(new JLabel("Methods granularity"));
-        p2.add(new JCheckBox("Add methods with full signatures"));
-        p2.add(new JCheckBox("Add just method names"));
+        p2.add(methodsFull);
+        p2.add(methodsJustNames);
         JPanel buttons = new JPanel(new GridLayout(1, 2));
         buttons.add(ok);
         buttons.add(cancel);
@@ -123,7 +132,7 @@ public class CompletionSettingsDialogue extends JDialog {
         }
     }
 
-    public CompletionSettings showForResults(Component parent, CompletionSettings settings) {
+    public CompletionSettings showForResults(Component parent, JrdCompletionSettings settings) {
         pre(settings);
         this.setLocationRelativeTo(parent);
         this.setVisible(true);
@@ -134,7 +143,7 @@ public class CompletionSettingsDialogue extends JDialog {
         }
     }
 
-    private CompletionSettings post() {
+    private JrdCompletionSettings post() {
         boolean caseSensitive = true;
         if (rb22.isSelected()) {
             caseSensitive = false;
@@ -149,11 +158,21 @@ public class CompletionSettingsDialogue extends JDialog {
         if (rb14.isSelected()) {
             op = CompletionSettings.OP.MAYHEM;
         }
-        return new CompletionSettings(result, op, caseSensitive, showHelp.isSelected());
+        return new JrdCompletionSettings(
+                result, op, caseSensitive, showHelp.isSelected(), cpRunning.isSelected(), cpAdditional.isSelected(),
+                methodsJustNames.isSelected(), methodsFull.isSelected()
+        );
     }
 
-    private void pre(CompletionSettings settings) {
+    private void pre(JrdCompletionSettings settings) {
         showHelp.setSelected(settings.isShowHelp());
+        cpRunning.setSelected(settings.isDynamicClasses());
+        if (!cpRunning.isEnabled()) {
+            cpAdditional.setSelected(false);
+        }
+        cpAdditional.setSelected(settings.isConfigAdditionalClasses());
+        methodsJustNames.setSelected(settings.isMethodNames());
+        methodsFull.setSelected(settings.isMethodFullSignatures());
         if (!settings.isCaseSensitive()) {
             rb22.setSelected(true);
         }

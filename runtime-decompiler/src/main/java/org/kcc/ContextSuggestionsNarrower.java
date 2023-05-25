@@ -97,7 +97,7 @@ public interface ContextSuggestionsNarrower {
                 String currentTrimedLine = beforeLines[beforeLines.length - 1].trim();
                 String[] currentLineTokens = currentTrimedLine.split("\\s+");
                 if (currentLineTokens[currentLineTokens.length - 1].equals("CLASS")) {
-                    return Arrays.stream(provider.getClasses()).map(a -> new CompletionItem(a)).collect(Collectors.toList())
+                    return Arrays.stream(provider.getClasses(settings)).map(a -> new CompletionItem(a)).collect(Collectors.toList())
                             .toArray(new CompletionItem[0]);
                 } else if (currentLineTokens[currentLineTokens.length - 1].equals("METHOD")) {
                     for (int x = beforeLines.length - 1; x >= 0; x--) {
@@ -105,7 +105,7 @@ public interface ContextSuggestionsNarrower {
                         for (int y = secondaryLineTokens.length - 2; y >= 0; y--) {
                             if (secondaryLineTokens[y].equals("CLASS")) {
                                 String fqn = secondaryLineTokens[y + 1];
-                                return Arrays.stream(provider.getWhateverFromClass(fqn)).map(a -> new CompletionItem(a))
+                                return Arrays.stream(provider.getWhateverFromClass(settings, fqn)).map(a -> new CompletionItem(a))
                                         .collect(Collectors.toList()).toArray(new CompletionItem[0]);
                             }
                         }

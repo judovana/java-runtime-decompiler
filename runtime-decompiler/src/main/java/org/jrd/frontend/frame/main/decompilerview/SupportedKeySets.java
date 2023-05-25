@@ -16,8 +16,11 @@ public class SupportedKeySets {
     public static final SupportedKeySets JRD_KEY_SETS =
             new SupportedKeySets(new JrdApiKeywords(), new BytemanKeywords(), new BytecodeKeywordsWithHelp(), new JavaKeywordsWithHelp());
 
-    public static final CompletionSettings JRD_DEFAULT =
-            new CompletionSettings(JRD_KEY_SETS.sets[0], CompletionSettings.OP.SPARSE, false, true);
+    public static final CompletionSettings JRD_DEFAULT = new CompletionSettings(getDefaultSet(), CompletionSettings.OP.SPARSE, false, true);
+
+    public static CompletionItem.CompletionItemSet getDefaultSet() {
+        return JRD_KEY_SETS.sets[0];
+    }
 
     private final CompletionItem.CompletionItemSet[] sets;
 

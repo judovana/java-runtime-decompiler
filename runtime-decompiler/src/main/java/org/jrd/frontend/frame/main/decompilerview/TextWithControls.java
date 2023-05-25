@@ -29,6 +29,7 @@ import javax.swing.JPopupMenu;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jrd.backend.completion.ClassesAndMethodsProvider;
+import org.jrd.backend.completion.JrdCompletionSettings;
 import org.jrd.backend.core.Logger;
 import org.jrd.frontend.frame.main.GlobalConsole;
 import org.jrd.frontend.utility.ImageButtonFactory;
@@ -50,7 +51,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
     private DecompilationController.AgentApiGenerator popup;
     private File decorativeFilePlaceholder;
     private KeywordBasedCodeCompletion codeCompletion;
-    private CompletionSettings oldSettings;
+    private JrdCompletionSettings oldSettings;
 
     public TextWithControls(String title, CodeCompletionType cct) {
         this(title, null, cct, null);
@@ -145,15 +146,20 @@ public class TextWithControls extends JPanel implements LinesProvider {
         } else if (guessed.size() == 1) {
             codeCompletion = new KeywordBasedCodeCompletion(
                     bytecodeSyntaxTextArea,
-                    new CompletionSettings(guessed.get(0), oldSettings.getOp(), oldSettings.isCaseSensitive(), oldSettings.isShowHelp())
+                    new JrdCompletionSettings(
+                            guessed.get(0), oldSettings.getOp(), oldSettings.isCaseSensitive(), oldSettings.isShowHelp(),
+                            oldSettings.isDynamicClasses(), oldSettings.isConfigAdditionalClasses(), oldSettings.isMethodNames(),
+                            oldSettings.isMethodFullSignatures()
+                    )
             );
             setCompletionHelper();
         } else {
             codeCompletion = new KeywordBasedCodeCompletion(
                     bytecodeSyntaxTextArea,
-                    new CompletionSettings(
+                    new JrdCompletionSettings(
                             new ConnectedKeywords(guessed.toArray(new CompletionItem.CompletionItemSet[0])), oldSettings.getOp(),
-                            oldSettings.isCaseSensitive(), oldSettings.isShowHelp()
+                            oldSettings.isCaseSensitive(), oldSettings.isShowHelp(), oldSettings.isDynamicClasses(),
+                            oldSettings.isConfigAdditionalClasses(), oldSettings.isMethodNames(), oldSettings.isMethodFullSignatures()
                     )
             );
             setCompletionHelper();
@@ -163,10 +169,11 @@ public class TextWithControls extends JPanel implements LinesProvider {
     private void saveOldSettings() {
         if (codeCompletion == null) {
             if (oldSettings == null) {
-                oldSettings = SupportedKeySets.JRD_DEFAULT;
+                oldSettings = JrdCompletionSettings.getDefault(classesAndMethodsProvider);
             }
         } else {
-            oldSettings = codeCompletion.getSettings();
+            //in JRD, we work ony with extended verison
+            oldSettings = (JrdCompletionSettings) codeCompletion.getSettings();
         }
 
     }
@@ -360,9 +367,11 @@ public class TextWithControls extends JPanel implements LinesProvider {
                         if (SupportedKeySets.JRD_KEY_SETS.isByteman(set)) {
                             codeCompletion = new KeywordBasedCodeCompletion(
                                     bytecodeSyntaxTextArea,
-                                    new CompletionSettings(
+                                    new JrdCompletionSettings(
                                             new BytemanKeywords(), oldSettings.getOp(), oldSettings.isCaseSensitive(),
-                                            oldSettings.isShowHelp()
+                                            oldSettings.isShowHelp(), oldSettings.isDynamicClasses(),
+                                            oldSettings.isConfigAdditionalClasses(), oldSettings.isMethodNames(),
+                                            oldSettings.isMethodFullSignatures()
                                     )
                             );
                             setCompletionHelper();
@@ -373,9 +382,11 @@ public class TextWithControls extends JPanel implements LinesProvider {
                         if (SupportedKeySets.JRD_KEY_SETS.isJasm(set)) {
                             codeCompletion = new KeywordBasedCodeCompletion(
                                     bytecodeSyntaxTextArea,
-                                    new CompletionSettings(
+                                    new JrdCompletionSettings(
                                             new BytecodeKeywordsWithHelp(), oldSettings.getOp(), oldSettings.isCaseSensitive(),
-                                            oldSettings.isShowHelp()
+                                            oldSettings.isShowHelp(), oldSettings.isDynamicClasses(),
+                                            oldSettings.isConfigAdditionalClasses(), oldSettings.isMethodNames(),
+                                            oldSettings.isMethodFullSignatures()
                                     )
                             );
                             setCompletionHelper();
@@ -386,9 +397,11 @@ public class TextWithControls extends JPanel implements LinesProvider {
                         if (SupportedKeySets.JRD_KEY_SETS.isJava(set)) {
                             codeCompletion = new KeywordBasedCodeCompletion(
                                     bytecodeSyntaxTextArea,
-                                    new CompletionSettings(
+                                    new JrdCompletionSettings(
                                             new JrdApiKeywords(), oldSettings.getOp(), oldSettings.isCaseSensitive(),
-                                            oldSettings.isShowHelp()
+                                            oldSettings.isShowHelp(), oldSettings.isDynamicClasses(),
+                                            oldSettings.isConfigAdditionalClasses(), oldSettings.isMethodNames(),
+                                            oldSettings.isMethodFullSignatures()
                                     )
                             );
                             setCompletionHelper();

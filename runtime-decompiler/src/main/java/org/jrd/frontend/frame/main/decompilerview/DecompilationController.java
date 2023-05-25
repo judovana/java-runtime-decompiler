@@ -9,6 +9,7 @@ import org.jrd.backend.communication.FsAgent;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.communication.TopLevelErrorCandidate;
 import org.jrd.backend.completion.ClassesAndMethodsProvider;
+import org.jrd.backend.completion.JrdCompletionSettings;
 import org.jrd.backend.core.AgentAttachManager;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.AgentRequestAction.RequestAction;
@@ -41,6 +42,7 @@ import org.jrd.frontend.frame.remote.NewConnectionController;
 import org.jrd.frontend.frame.remote.NewConnectionView;
 import org.jrd.frontend.utility.CommonUtils;
 import org.jrd.frontend.utility.ScreenFinder;
+import org.kcc.CompletionSettings;
 
 import javax.swing.JFrame;
 import javax.swing.JList;
@@ -499,24 +501,58 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
     }
 
     @Override
-    public String[] getClasses() {
-        return getClassesProvider().getClassPathListing().toArray(new String[0]);
+    public String[] getClasses(CompletionSettings settings) {
+        if (settings instanceof JrdCompletionSettings) {
+            String[] s1 = new String[0];
+            String[] s2 = new String[0];
+            if (((JrdCompletionSettings) settings).isDynamicClasses()) {
+                s1 = getClassesProvider().getClassPathListing().toArray(new String[0]);
+            }
+            if (((JrdCompletionSettings) settings).isConfigAdditionalClasses()) {
+                s2 = Config.getConfig().getAdditionalClassPathListing();
+            }
+            return ClassesAndMethodsProvider.concatWithArrayCopy(s1, s2);
+        } else {
+            return getClassesProvider().getClassPathListing().toArray(new String[0]);
+        }
     }
 
     @Override
-    public String[] getWhateverFromClass(String fqn) {
-        Collection<IdentifiedBytecode> b = getClassesProvider().getClass(new ClassIdentifier(fqn));
+    public String[] getWhateverFromClass(CompletionSettings settings, String fqn) {
+        if (settings instanceof JrdCompletionSettings) {
+            String[] l1 = new String[0];
+            String[] l2 = new String[0];
+            if (((JrdCompletionSettings) settings).isDynamicClasses()) {
+                l1 = getMethodsFromClassInRunningVmCatched(settings, fqn);
+            }
+            if (((JrdCompletionSettings) settings).isConfigAdditionalClasses()) {
+                l2 = ClassesAndMethodsProvider.getMethodsFromAdditionalClassPath(settings, fqn);
+            }
+            return ClassesAndMethodsProvider.concatWithArrayCopy(l1, l2);
+        } else {
+            return getMethodsFromClassInRunningVmCatched(settings, fqn);
+        }
+    }
+
+    private String[] getMethodsFromClassInRunningVmCatched(CompletionSettings settings, String fqn) {
         try {
-            String[] l = ClassesAndMethodsProvider.bytesToMethods(b.stream().map(a -> a.getFile()).collect(Collectors.toList()).get(0));
+            String[] l = getMethodsFromClassInRunningVm(settings, fqn);
             if (l.length == 0) {
-                return new String[]{"No methods found in " + fqn};
+                return new String[]{"No methods found in " + fqn + " in running vm"};
             } else {
                 return l;
             }
         } catch (Exception ex) {
             Logger.getLogger().log(Logger.Level.DEBUG, ex);
-            return new String[]{"Not found: " + fqn};
+            return new String[]{"Not found: " + fqn + " in running vm"};
         }
+    }
+
+    private String[] getMethodsFromClassInRunningVm(CompletionSettings settings, String fqn) {
+        Collection<IdentifiedBytecode> b = getClassesProvider().getClass(new ClassIdentifier(fqn));
+        String[] l =
+                ClassesAndMethodsProvider.bytesToMethods(settings, b.stream().map(a -> a.getFile()).collect(Collectors.toList()).get(0));
+        return l;
     }
 
     class QuickCompiler {
