@@ -26,6 +26,7 @@ import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.SwingUtilities;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jrd.backend.completion.ClassesAndMethodsProvider;
@@ -87,16 +88,22 @@ public class TextWithControls extends JPanel implements LinesProvider {
                     completionMenu.addActionListener(new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent actionEvent) {
-                            saveOldSettings();
-                            CompletionSettings newSettings = new CompletionSettingsDialogue(classesAndMethodsProvider)
-                                    .showForResults(TextWithControls.this, oldSettings);
-                            if (newSettings != null) {
-                                removeCodecompletion();
-                                if (newSettings.getSet() != null) {
-                                    codeCompletion = new KeywordBasedCodeCompletion(bytecodeSyntaxTextArea, newSettings);
-                                    setCompletionHelper();
+                            SwingUtilities.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    saveOldSettings();
+                                    CompletionSettings newSettings = new CompletionSettingsDialogue(classesAndMethodsProvider)
+                                            .showForResults(TextWithControls.this, oldSettings);
+                                    if (newSettings != null) {
+                                        removeCodecompletion();
+                                        if (newSettings.getSet() != null) {
+                                            codeCompletion = new KeywordBasedCodeCompletion(bytecodeSyntaxTextArea, newSettings);
+                                            setCompletionHelper();
+                                        }
+                                    }
                                 }
-                            }
+
+                            });
                         }
                     });
                     menu.add(completionMenu);

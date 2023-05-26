@@ -43,6 +43,7 @@ public class CompletionSettingsDialogue extends JDialog {
     JCheckBox methodsJustNames = new JCheckBox("Add just method names");
 
     public CompletionSettingsDialogue(final ClassesAndMethodsProvider isDynamic) {
+        this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setLayout(new GridLayout(1, 2));
         this.setModal(true);
         JPanel p1 = new JPanel(new BorderLayout());
