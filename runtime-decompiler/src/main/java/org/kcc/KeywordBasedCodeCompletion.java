@@ -9,6 +9,7 @@ import javax.swing.JTextArea;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.DocumentEvent;
@@ -41,7 +42,7 @@ public class KeywordBasedCodeCompletion {
     private Pattern nondelimiter;
     private CompletionItem[] keywords;
 
-    private final JFrame popup; //FIXME, rework to always dispose after hide, otherwise it is impossible to close application to often...
+    private JFrame popup;
     private JFrame help;
     private final JList<CompletionItem> suggested;
     private final JScrollPane scroll;
@@ -67,18 +68,23 @@ public class KeywordBasedCodeCompletion {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() > 1) {
-                    apply();
+                    if (!suggested.getSelectedValuesList().isEmpty()) {
+                        apply();
+                    } else {
+
+                    }
                 }
             }
         });
         suggested.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        popup = createFrame();
         setCompletionsSet(settings.getSet());
         this.nondelimiter = settings.getSet().getRecommendedDelimiterSet();
         suggested.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent listSelectionEvent) {
-                if (popup.isVisible() && suggested.getSelectedValue() != null && !suggested.getSelectedValue().getDescription().isEmpty()) {
+                if (popup != null && popup.isVisible() &&
+                        suggested.getSelectedValue() != null &&
+                        !suggested.getSelectedValue().getDescription().isEmpty()) {
                     showHelp();
                 } else {
                     removeHelp();
@@ -97,10 +103,7 @@ public class KeywordBasedCodeCompletion {
                 }
             }
         });
-        popup.add(scroll);
         statusLabel = new JLabel("...");
-        popup.add(statusLabel, BorderLayout.SOUTH);
-
         caretListenerToRemove = new CaretListener() {
             @Override
             public void caretUpdate(CaretEvent caretEvent) {
@@ -122,6 +125,11 @@ public class KeywordBasedCodeCompletion {
                     if (futureLocation == null) {
                         calcCompletionPosition();
                     }
+                    if (popup!=null){
+                        popup.setVisible(false);
+                        popup.dispose();
+                    }
+                    popup = createFrame();
                     popup.setVisible(true);
                     if (suggested.isShowing() && suggested.getSelectedValue() != null &&
                             !suggested.getSelectedValue().getDescription().isEmpty()) {
@@ -140,7 +148,9 @@ public class KeywordBasedCodeCompletion {
         focusListenerToRemove = new FocusListener() {
             @Override
             public void focusGained(FocusEvent focusEvent) {
-                popup.setFocusableWindowState(false);
+                if (popup != null) {
+                    popup.setFocusableWindowState(false);
+                }
             }
 
             @Override
@@ -157,7 +167,11 @@ public class KeywordBasedCodeCompletion {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
+                    if (help!=null) {
+                        removeHelp();
+                    }
                     help = new JFrame();
+                    help.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
                     help.setFocusableWindowState(false);
                     help.setUndecorated(true);
                     help.setSize(400, 200);
@@ -189,11 +203,15 @@ public class KeywordBasedCodeCompletion {
                 }
             }
         };
+        f.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         f.setFocusableWindowState(false);
         f.setUndecorated(true);
         deductSize(f);
         f.setAlwaysOnTop(true);
         f.setLayout(new BorderLayout());
+        f.add(scroll);
+        f.add(statusLabel, BorderLayout.SOUTH);
+        deductSize(f);
         return f;
     }
 
@@ -239,8 +257,12 @@ public class KeywordBasedCodeCompletion {
     }
 
     private void ende() {
-        popup.setFocusableWindowState(false);
-        popup.setVisible(false);
+        if (popup != null) {
+            popup.setFocusableWindowState(false);
+            popup.setVisible(false);
+            popup.dispose();
+        }
+        removeHelp();
     }
 
     private void proceed(CaretEvent caretEvent) {
@@ -256,7 +278,7 @@ public class KeywordBasedCodeCompletion {
                 debugln(lastLetter);
                 String word = getLastWord(caretpos);
                 filter(word, caretpos);
-                if (popup.isVisible()) {
+                if (popup != null && popup.isVisible()) {
                     popup.setLocation(futureLocation);
                 }
                 statusLabel.setText(" " + suggested.getModel().getSize() + " for " + word);
@@ -438,7 +460,6 @@ public class KeywordBasedCodeCompletion {
         if (suggested.getSelectedValue() == null && suggested.getModel().getSize() > 0) {
             suggested.setSelectedIndex(0);
         }
-        deductSize(popup);
     }
 
     private void deductSize(JFrame ff) {
@@ -463,8 +484,10 @@ public class KeywordBasedCodeCompletion {
     }
 
     public void dispose() {
-        popup.setVisible(false);
-        popup.dispose();
+        if (popup != null) {
+            popup.setVisible(false);
+            popup.dispose();
+        }
         removeHelp();
         source.removeFocusListener(focusListenerToRemove);
         source.removeKeyListener(keyListenerToRemove);
