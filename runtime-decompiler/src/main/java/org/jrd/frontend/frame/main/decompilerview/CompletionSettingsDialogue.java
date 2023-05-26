@@ -114,9 +114,11 @@ public class CompletionSettingsDialogue extends JDialog {
         ok.addActionListener(actionEvent -> {
             okState = true;
             setVisible(false);
+            dispose();
         });
         cancel.addActionListener(actionEvent -> {
             setVisible(false);
+            dispose();
         });
 
         this.add(p1);
