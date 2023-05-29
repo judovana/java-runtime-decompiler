@@ -8,10 +8,33 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class JrdApiKeywords implements CompletionItem.CompletionItemSet {
+    private static final String INTRO = "Unless you are running DCEVM jdk, most JVMs will not allow you to add field or methods.\n"
+            + "To help with this issue, JRD have appi where you can store instances of objects (eg runnable:) or boxed primitive). "
+            + "and then reuse the.\n"
+            + "You put them to the api via name and value, sometimes with parent class or instance, dependnign on api.\n"
+            + "In implementation, those are simple hashmaps. But still it is 200% replacement for\n"
+            + "Byteman's LinkMaps, CountDowns, Flags, Counters and Timers.\n"
+            + "When hesitating, feel free to decompile content of org.jrd.agent.api pacakge\n";
+    private static final String SAFE = "This operation is thread-safe (synchronised),\n";
+    private static final String UNSAFE = "This operation is NOT thread-safe,\n";
+    private static final String LOCAL = "Local fields and methods are bound to instacne of class - object.\n"
+            + "They represents Class' public fields/methods, so you can access them globally/\n"
+            + "Theirs main reason is as you would expect - to have field/method per instance.\n"
+            + "Thats why al those methods have Object object as first parameter - the owner object.\n";
+    private static final String CLAZZS = "Clazzs fields and methods are bound to class.\n"
+            + "They represents Class' public static fields/methods, so you can access them globally/\n"
+            + "Theirs main reason is if you really needs two methods/fields of same name in several classes.\n"
+            + "Thats why al those methods have Class clazz as first parameter - the owner class.\n";
     //FIXME! write help!
     private static final CompletionItem[] BASE_JRDAPI_KEYWORDS =
-            new CompletionItem[]{new CompletionItem("org.jrd.agent.api.Variables.NoSuchFakeVariableException", ""),
-                    new CompletionItem("(Object)(org.jrd.agent.api.Variables.Local.create(Object, String, Object));", ""),
+            new CompletionItem[]{new CompletionItem("org.jrd.agent.api.Variables.NoSuchFakeVariableException", "exception cast from "
+                    + " eg methods which are getting/setting/creating  new field/method but are not allowed to create or replace.\n"
+                    + "Extends FakeVariableException"),
+                    new CompletionItem("(Object)(org.jrd.agent.api.Variables.Local.create(Object, String, Object));",
+                            INTRO + LOCAL + SAFE + " allows you to create local field/method in object(1st param) of String name of "
+                                    + "Object(third param) initial value. Will throw NoSuchFakeVariableException if that variable "
+                                    + "already exists.\n"
+                                    + "it returns freshly created field (the 3rd argument)"),
                     new CompletionItem("(Object)(org.jrd.agent.api.Variables.Local.get(Object, String));", ""),
                     new CompletionItem("(Object)(org.jrd.agent.api.Variables.Local.getOrCreate(Object, String, Object));", ""),
                     new CompletionItem("(Object)(org.jrd.agent.api.Variables.Local.remove(Object, String));", ""),
