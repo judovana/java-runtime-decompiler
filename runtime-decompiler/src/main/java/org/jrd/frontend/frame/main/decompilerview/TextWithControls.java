@@ -80,55 +80,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
         searchAndCode.add(bytecodeSearchControls, BorderLayout.CENTER);
         if (cct != CodeCompletionType.FORBIDDEN) {
             final JButton completion = ImageButtonFactory.createEditButton("Code completion and compilation");
-            completion.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent actionEvent) {
-                    final JPopupMenu menu = new JPopupMenu("Settings");
-                    JMenuItem completionMenu = new JMenuItem("Code completion");
-                    completionMenu.addActionListener(new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent actionEvent) {
-                            SwingUtilities.invokeLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    saveOldSettings();
-                                    CompletionSettings newSettings = new CompletionSettingsDialogue(classesAndMethodsProvider)
-                                            .showForResults(TextWithControls.this, oldSettings);
-                                    if (newSettings != null) {
-                                        removeCodecompletion();
-                                        if (newSettings.getSet() != null) {
-                                            codeCompletion = new KeywordBasedCodeCompletion(bytecodeSyntaxTextArea, newSettings);
-                                            setCompletionHelper();
-                                        }
-                                    }
-                                }
-
-                            });
-                        }
-                    });
-                    menu.add(completionMenu);
-                    JMenuItem guess = new JMenuItem("guess completion (see verbose console for analyse)");
-                    guess.addActionListener(new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent actionEvent) {
-                            List<CompletionItem.CompletionItemSet> guessed =
-                                    SupportedKeySets.JRD_KEY_SETS.recognize(bytecodeSyntaxTextArea.getText());
-                            normalCodeCompletionGuess(guessed);
-                        }
-                    });
-                    menu.add(guess);
-                    menu.add(new JMenuItem("Dummy compilation"));
-                    JMenuItem logConsole = new JMenuItem("Log Console");
-                    logConsole.addActionListener(new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent actionEvent) {
-                            GlobalConsole.getConsole().show();
-                        }
-                    });
-                    menu.add(logConsole);
-                    menu.show(completion, completion.getWidth() / 2, completion.getHeight() / 2);
-                }
-            });
+            completion.addActionListener(new CompletionSettingsButtonPopUp(classesAndMethodsProvider, completion));
             searchAndCode.add(completion, BorderLayout.WEST);
         }
         if (codeSelect != null) {
@@ -426,5 +378,63 @@ public class TextWithControls extends JPanel implements LinesProvider {
     private void setCompletionHelper() {
         codeCompletion
                 .setBeforeFilteringNarrowing(new ContextSuggestionsNarrower.ClassesAndMethodsEnforcingNarrower(classesAndMethodsProvider));
+    }
+
+    private final class CompletionSettingsButtonPopUp implements ActionListener {
+        private final ClassesAndMethodsProvider mClassesAndMethodsProvider;
+        private final JButton mCompletion;
+
+        private CompletionSettingsButtonPopUp(ClassesAndMethodsProvider classesAndMethodsProvider, JButton completion) {
+            mClassesAndMethodsProvider = classesAndMethodsProvider;
+            mCompletion = completion;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            final JPopupMenu menu = new JPopupMenu("Settings");
+            JMenuItem completionMenu = new JMenuItem("Code completion");
+            completionMenu.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent actionEvent) {
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            saveOldSettings();
+                            CompletionSettings newSettings = new CompletionSettingsDialogue(mClassesAndMethodsProvider)
+                                    .showForResults(TextWithControls.this, oldSettings);
+                            if (newSettings != null) {
+                                removeCodecompletion();
+                                if (newSettings.getSet() != null) {
+                                    codeCompletion = new KeywordBasedCodeCompletion(bytecodeSyntaxTextArea, newSettings);
+                                    setCompletionHelper();
+                                }
+                            }
+                        }
+
+                    });
+                }
+            });
+            menu.add(completionMenu);
+            JMenuItem guess = new JMenuItem("guess completion (see verbose console for analyse)");
+            guess.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent actionEvent) {
+                    List<CompletionItem.CompletionItemSet> guessed =
+                            SupportedKeySets.JRD_KEY_SETS.recognize(bytecodeSyntaxTextArea.getText());
+                    normalCodeCompletionGuess(guessed);
+                }
+            });
+            menu.add(guess);
+            menu.add(new JMenuItem("Dummy compilation"));
+            JMenuItem logConsole = new JMenuItem("Log Console");
+            logConsole.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent actionEvent) {
+                    GlobalConsole.getConsole().show();
+                }
+            });
+            menu.add(logConsole);
+            menu.show(mCompletion, mCompletion.getWidth() / 2, mCompletion.getHeight() / 2);
+        }
     }
 }
