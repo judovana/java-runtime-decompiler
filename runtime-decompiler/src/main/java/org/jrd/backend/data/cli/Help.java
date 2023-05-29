@@ -57,6 +57,7 @@ public final class Help {
     public static final String ATTACH_FORMAT = ATTACH + " <PID>";
     public static final String DETACH_FORMAT = DETACH + " URL xor PORT xor PID";
     public static final String API_FORMAT = API + " <PUC>";
+    public static final String COMPLETION_FORMAT = COMPLETION + " [<completion1, completion2,...>]";
     public static final String SAVE_AS_FORMAT = SAVE_AS + " <PATH>";
     public static final String SAVE_LIKE_FORMAT = SAVE_LIKE + " <SAVE METHOD>";
 
@@ -136,7 +137,10 @@ public final class Help {
     private static final String DETACH_TEXT = "Will close and detach " + AgentLiveliness.PERMANENT +
             " agent from given localhost:port or url. To detach from PID, a valid mapping in " +
             KnownAgents.JRD_TMP_FILE.toFile().getAbsolutePath() + " file is needed";
-    private static final String API_TEXT = "Will print out which can be used to insert fields/methods to running vm";
+    private static final String API_TEXT = "Will print out dynamic, real-to-time api which can be used to insert fields/methods to "
+            + "running vm";
+    private static final String COMPLETION_TEXT = "Without parameter Will print available code completions. With parameter of"
+            + "coded completion names(delimited by ',' or ' '), will print details of that exact set of completion.";
     private static final String SAVE_AS_TEXT = "All outputs will be written to PATH instead of to standard output.";
     private static final String SAVE_LIKE_TEXT = "Specify how saving will behave.";
 
@@ -196,6 +200,7 @@ public final class Help {
         ALL_OPTIONS.put(AGENT_FORMAT, AGENT_TEXT);
         ALL_OPTIONS.put(DETACH_FORMAT, DETACH_TEXT);
         ALL_OPTIONS.put(API_FORMAT, API_TEXT);
+        ALL_OPTIONS.put(COMPLETION_FORMAT, COMPLETION_TEXT);
 
         SAVING_OPTIONS.put(SAVE_AS_FORMAT, SAVE_AS_TEXT);
         SAVING_OPTIONS.put(SAVE_LIKE_FORMAT, SAVE_LIKE_TEXT);
@@ -214,7 +219,8 @@ public final class Help {
         );
     }
 
-    private static final String[] UNSAVABLE_OPTIONS = new String[]{HELP, H, REVERT, HEX, BOOT_CLASS_LOADER, SYSTEM_CLASS_LOADER, OVERWRITE,
+    private static final String[] UNSAVABLE_OPTIONS = new String[]{HELP, H, COMPLETION, REVERT, HEX, BOOT_CLASS_LOADER,
+            SYSTEM_CLASS_LOADER, OVERWRITE,
             INIT, REMOVE_OVERRIDES, ADD_CLASS, ADD_CLASSES, ADD_JAR, LIST_OVERRIDES_FORMAT};
     private static final String[] SAVABLE_OPTIONS = new String[]{LIST_CLASSES, LIST_CLASSESDETAILS, BYTES, BASE64, DEPS, COMPILE, DECOMPILE,
             PATCH, API, LIST_JVMS, LIST_PLUGINS, LIST_CLASSESBYTECODEVERSIONS, LIST_CLASSESDETAILSBYTECODEVERSIONS, SEARCH};

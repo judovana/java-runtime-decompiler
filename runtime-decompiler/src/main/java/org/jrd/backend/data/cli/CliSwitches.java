@@ -38,6 +38,7 @@ public final class CliSwitches {
     public static final String ATTACH = "-attach";
     public static final String DETACH = "-detach";
     public static final String API = "-api";
+    public static final String COMPLETION = "-completion";
     public static final String VERSION = "-version";
     public static final String VERSIONS = "-versions";
     public static final String HELP = "-help";

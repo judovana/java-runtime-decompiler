@@ -26,13 +26,18 @@ import org.jrd.backend.data.cli.workers.OverwriteAndUpload;
 import org.jrd.backend.data.cli.workers.Patch;
 import org.jrd.backend.data.cli.workers.PrintBytes;
 import org.jrd.backend.decompiling.PluginManager;
+import org.kcc.CompletionItem;
+import org.kcc.wordsets.ConnectedKeywords;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 
 import static org.jrd.backend.data.cli.CliSwitches.*;
@@ -249,6 +254,9 @@ public class Cli {
                     VmInfo vmInfo8 = new Api(filteredArgs, saving, vmManager, pluginManager).api();
                     operatedOn.add(vmInfo8);
                     break;
+                case COMPLETION:
+                    printCompletion(filteredArgs);
+                    break;
                 case HELP:
                 case H:
                     printHelp();
@@ -306,14 +314,41 @@ public class Cli {
                 for (VmInfo status : operatedOn) {
                     if (localAgent) {
                         System.err.println(
-                                "agent is permanently attached to " + status.getVmPid() + " on port " +
-                                        status.getVmDecompilerStatus().getListenPort()
-                        );
+                                "agent is permanently attached to " + status.getVmPid() + " on port " + status.getVmDecompilerStatus().getListenPort());
                     }
                 }
                 if (operation.equals(ATTACH) || operation.equals(DETACH) || isVerbose) {
                     System.err.println("exiting");
                 }
+            }
+        }
+    }
+
+    private void printCompletion(List<String> filteredArgs)
+            throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException,
+            IllegalAccessException {
+        if (filteredArgs.size() == 1) {
+            System.out.println(org.kcc.wordsets.JrdApiKeywords.class.getSimpleName());
+            System.out.println(org.kcc.wordsets.BytecodeKeywordsWithHelp.class.getSimpleName());
+            System.out.println(org.kcc.wordsets.BytemanKeywords.class.getSimpleName());
+            System.out.println(org.kcc.wordsets.JavaKeywordsWithHelp.class.getSimpleName());
+        } else {
+            List<CompletionItem.CompletionItemSet> sets = new ArrayList<>();
+            for (int x = 1; x < filteredArgs.size(); x++) {
+                for (String s : filteredArgs.get(x).split(",")) {
+                    Class completion = Class.forName("org.kcc.wordsets." + s);
+                    Object obejct = completion.getDeclaredConstructor().newInstance();
+                    CompletionItem.CompletionItemSet cs = (CompletionItem.CompletionItemSet) obejct;
+                    sets.add(cs);
+                }
+            }
+            ConnectedKeywords ck = new ConnectedKeywords(sets.toArray(new CompletionItem.CompletionItemSet[0]));
+            for (CompletionItem ci : ck.getItemsList()) {
+                System.out.println("**** " + ci.getKey() + " ****");
+                if (!ci.getRealReplacement().equals(ci.getKey())) {
+                    System.out.println("-> " + ci.getRealReplacement());
+                }
+                System.out.println(ci.getDescription());
             }
         }
     }
