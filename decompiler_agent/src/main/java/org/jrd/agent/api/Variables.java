@@ -65,7 +65,7 @@ public class Variables {
         }
     }
 
-    public static class FakeVariableAlreadyDeclaredException extends RuntimeException {
+    public static class FakeVariableAlreadyDeclaredException extends FakeVariableException {
 
         public FakeVariableAlreadyDeclaredException() {
         }
