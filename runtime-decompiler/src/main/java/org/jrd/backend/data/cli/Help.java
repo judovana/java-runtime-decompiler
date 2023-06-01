@@ -137,10 +137,10 @@ public final class Help {
     private static final String DETACH_TEXT = "Will close and detach " + AgentLiveliness.PERMANENT +
             " agent from given localhost:port or url. To detach from PID, a valid mapping in " +
             KnownAgents.JRD_TMP_FILE.toFile().getAbsolutePath() + " file is needed";
-    private static final String API_TEXT = "Will print out dynamic, real-to-time api which can be used to insert fields/methods to "
-            + "running vm";
-    private static final String COMPLETION_TEXT = "Without parameter Will print available code completions. With parameter of"
-            + "coded completion names(delimited by ',' or ' '), will print details of that exact set of completion.";
+    private static final String API_TEXT =
+            "Will print out dynamic, real-to-time api which can be used to insert fields/methods to " + "running vm";
+    private static final String COMPLETION_TEXT = "Without parameter Will print available code completions. With parameter of" +
+            "coded completion names(delimited by ',' or ' '), will print details of that exact set of completion.";
     private static final String SAVE_AS_TEXT = "All outputs will be written to PATH instead of to standard output.";
     private static final String SAVE_LIKE_TEXT = "Specify how saving will behave.";
 
@@ -219,9 +219,8 @@ public final class Help {
         );
     }
 
-    private static final String[] UNSAVABLE_OPTIONS = new String[]{HELP, H, COMPLETION, REVERT, HEX, BOOT_CLASS_LOADER,
-            SYSTEM_CLASS_LOADER, OVERWRITE,
-            INIT, REMOVE_OVERRIDES, ADD_CLASS, ADD_CLASSES, ADD_JAR, LIST_OVERRIDES_FORMAT};
+    private static final String[] UNSAVABLE_OPTIONS = new String[]{HELP, H, COMPLETION, REVERT, HEX, BOOT_CLASS_LOADER, SYSTEM_CLASS_LOADER,
+            OVERWRITE, INIT, REMOVE_OVERRIDES, ADD_CLASS, ADD_CLASSES, ADD_JAR, LIST_OVERRIDES_FORMAT};
     private static final String[] SAVABLE_OPTIONS = new String[]{LIST_CLASSES, LIST_CLASSESDETAILS, BYTES, BASE64, DEPS, COMPILE, DECOMPILE,
             PATCH, API, LIST_JVMS, LIST_PLUGINS, LIST_CLASSESBYTECODEVERSIONS, LIST_CLASSESDETAILSBYTECODEVERSIONS, SEARCH};
 

@@ -71,7 +71,9 @@ public class KeywordBasedCodeCompletion {
                     if (!suggested.getSelectedValuesList().isEmpty()) {
                         apply();
                     } else {
-
+                        if (false) {
+                            System.out.println("dispose?");
+                        }
                     }
                 }
             }
@@ -125,7 +127,7 @@ public class KeywordBasedCodeCompletion {
                     if (futureLocation == null) {
                         calcCompletionPosition();
                     }
-                    if (popup!=null){
+                    if (popup != null) {
                         popup.setVisible(false);
                         popup.dispose();
                     }
@@ -167,7 +169,7 @@ public class KeywordBasedCodeCompletion {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
-                    if (help!=null) {
+                    if (help != null) {
                         removeHelp();
                     }
                     help = new JFrame();
