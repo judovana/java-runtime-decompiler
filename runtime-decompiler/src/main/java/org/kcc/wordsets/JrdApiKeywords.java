@@ -28,7 +28,7 @@ public class JrdApiKeywords implements CompletionItem.CompletionItemSet {
             "Note, that this is usually not used, and you are usually ok with `Global` field/method.\n\n";
     private static final String GLOBAL = "Global fields and methods are unbound.\n" +
             "They represents C/Pascal const wittou namesapce so you can access them globally.\n" +
-            "It is simplw pair name/value.\n\n";
+            "It is simple pair name/value.\n\n";
     //FIXME! write help!
     private static final CompletionItem[] BASE_JRDAPI_KEYWORDS =
             new CompletionItem[]{new CompletionItem(
