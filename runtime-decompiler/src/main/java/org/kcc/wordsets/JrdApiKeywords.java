@@ -14,21 +14,21 @@ public class JrdApiKeywords implements CompletionItem.CompletionItemSet {
             "You put them to the api via name and value, sometimes with parent class or instance, dependnign on api.\n" +
             "In implementation, those are simple hashmaps. But still it is 200% replacement for\n" +
             "Byteman's LinkMaps, CountDowns, Flags, Counters and Timers.\n" +
-            "When hesitating, feel free to decompile content of org.jrd.agent.api pacakge\n";
-    private static final String SAFE = "This operation is thread-safe (synchronised),\n";
+            "When hesitating, feel free to decompile content of org.jrd.agent.api package.\n\n";
+    private static final String SAFE = "This operation is thread-safe (synchronised).\n\n";
     private static final String UNSAFE = "This operation is NOT thread-safe. Oterwise same as its safe alignment\n";
     private static final String LOCAL = "Local fields and methods are bound to instacne of class - object.\n" +
             "They represents Class' public fields/methods, so you can access them globally.\n" +
             "Theirs main reason is as you would expect - to have field/method per instance.\n" +
-            "Thats why al those methods have Object object as first parameter - the owner object.\n";
+            "Thats why al those methods have Object object as first parameter - the owner object.\n\n";
     private static final String CLAZZS = "Clazzs fields and methods are bound to class.\n" +
             "They represents Class' public static fields/methods, so you can access them globally.\n" +
             "Theirs main reason is if you really needs two methods/fields of same name in several classes.\n" +
             "Thats why al those methods have Class clazz as first parameter - the owner class.\n" +
-            "Note, that this is usually not used, and you are usually ok with `Global` field/method \n";
+            "Note, that this is usually not used, and you are usually ok with `Global` field/method.\n\n";
     private static final String GLOBAL = "Global fields and methods are unbound.\n" +
             "They represents C/Pascal const wittou namesapce so you can access them globally.\n" +
-            "It is simplw pair name/value\n";
+            "It is simplw pair name/value.\n\n";
     //FIXME! write help!
     private static final CompletionItem[] BASE_JRDAPI_KEYWORDS =
             new CompletionItem[]{new CompletionItem(
