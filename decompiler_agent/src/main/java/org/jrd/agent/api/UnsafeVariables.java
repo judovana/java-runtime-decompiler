@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import static org.jrd.agent.api.Variables.NoSuchFakeVariableException;
 import static org.jrd.agent.api.Variables.FakeVariableException;
+import static org.jrd.agent.api.Variables.FakeVariableAlreadyDeclaredException;
 
 public class UnsafeVariables {
 
@@ -72,7 +73,7 @@ public class UnsafeVariables {
             return GLOBALS.getOrCreate(null, name, defaultValue);
         }
 
-        public static Object create(String name, Object defaultValue) throws NoSuchFakeVariableException {
+        public static Object create(String name, Object defaultValue) throws FakeVariableAlreadyDeclaredException {
             return GLOBALS.create(null, name, defaultValue);
         }
 
@@ -131,7 +132,7 @@ public class UnsafeVariables {
             return LOCALS.getOrCreate(owner, name, defaultValue);
         }
 
-        public static Object create(Object owner, String name, Object defaultValue) throws NoSuchFakeVariableException {
+        public static Object create(Object owner, String name, Object defaultValue) throws FakeVariableAlreadyDeclaredException {
             return LOCALS.getOrCreate(owner, name, defaultValue);
         }
 
@@ -260,23 +261,23 @@ public class UnsafeVariables {
             return CLAZZS.getOrCreate(owner, name, defaultValue);
         }
 
-        public static Object create(String name, Object defaultValue) throws FakeVariableException {
+        public static Object create(String name, Object defaultValue) throws FakeVariableAlreadyDeclaredException {
             return create((Class) null, name, defaultValue);
         }
 
-        public static Object create(String owner, String name, Object defaultValue) throws FakeVariableException {
+        public static Object create(String owner, String name, Object defaultValue) throws FakeVariableAlreadyDeclaredException {
             return create(nullOrClass(owner), name, defaultValue);
         }
 
-        public static Object create(Class owner, String name, Object defaultValue) throws NoSuchFakeVariableException {
-            return CLAZZS.getOrCreate(owner, name, defaultValue);
+        public static Object create(Class owner, String name, Object defaultValue) throws FakeVariableAlreadyDeclaredException {
+            return CLAZZS.create(owner, name, defaultValue);
         }
 
-        public static Object remove(String name) throws FakeVariableException {
+        public static Object remove(String name) throws NoSuchFakeVariableException {
             return remove((Class) null, name);
         }
 
-        public static Object remove(String owner, String name) throws FakeVariableException {
+        public static Object remove(String owner, String name) throws NoSuchFakeVariableException {
             return remove(nullOrClass(owner), name);
         }
 

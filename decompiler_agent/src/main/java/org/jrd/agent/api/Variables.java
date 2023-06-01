@@ -117,7 +117,7 @@ public class Variables {
             return GLOBALS.getOrCreate(null, name, defaultValue);
         }
 
-        public static Object create(String name, Object defaultValue) throws NoSuchFakeVariableException {
+        public static Object create(String name, Object defaultValue) throws FakeVariableAlreadyDeclaredException {
             return GLOBALS.create(null, name, defaultValue);
         }
 
@@ -176,7 +176,7 @@ public class Variables {
             return LOCALS.getOrCreate(owner, name, defaultValue);
         }
 
-        public static Object create(Object owner, String name, Object defaultValue) throws NoSuchFakeVariableException {
+        public static Object create(Object owner, String name, Object defaultValue) throws FakeVariableAlreadyDeclaredException {
             return LOCALS.getOrCreate(owner, name, defaultValue);
         }
 
@@ -305,16 +305,16 @@ public class Variables {
             return CLAZZS.getOrCreate(owner, name, defaultValue);
         }
 
-        public static Object create(String name, Object defaultValue) throws FakeVariableException {
+        public static Object create(String name, Object defaultValue) throws FakeVariableAlreadyDeclaredException {
             return create((Class) null, name, defaultValue);
         }
 
-        public static Object create(String owner, String name, Object defaultValue) throws FakeVariableException {
+        public static Object create(String owner, String name, Object defaultValue) throws FakeVariableAlreadyDeclaredException {
             return create(nullOrClass(owner), name, defaultValue);
         }
 
-        public static Object create(Class owner, String name, Object defaultValue) throws NoSuchFakeVariableException {
-            return CLAZZS.getOrCreate(owner, name, defaultValue);
+        public static Object create(Class owner, String name, Object defaultValue) throws FakeVariableAlreadyDeclaredException {
+            return CLAZZS.create(owner, name, defaultValue);
         }
 
         public static Object remove(String name) throws FakeVariableException {

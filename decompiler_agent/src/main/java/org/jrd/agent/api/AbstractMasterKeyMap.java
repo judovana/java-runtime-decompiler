@@ -59,7 +59,7 @@ public abstract class AbstractMasterKeyMap<T> {
         }
     }
 
-    public Object create(T key, String name, Object defaultValue) throws Variables.NoSuchFakeVariableException {
+    public Object create(T key, String name, Object defaultValue) throws Variables.FakeVariableAlreadyDeclaredException {
         Map<String, Object> subMap = getSubMap(key);
         if (subMap.containsKey(name)) {
             throw new Variables.FakeVariableAlreadyDeclaredException();
