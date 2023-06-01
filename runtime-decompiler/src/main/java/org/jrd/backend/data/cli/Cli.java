@@ -33,11 +33,9 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 
 import static org.jrd.backend.data.cli.CliSwitches.*;
@@ -314,7 +312,9 @@ public class Cli {
                 for (VmInfo status : operatedOn) {
                     if (localAgent) {
                         System.err.println(
-                                "agent is permanently attached to " + status.getVmPid() + " on port " + status.getVmDecompilerStatus().getListenPort());
+                                "agent is permanently attached to " + status.getVmPid() + " on port " +
+                                        status.getVmDecompilerStatus().getListenPort()
+                        );
                     }
                 }
                 if (operation.equals(ATTACH) || operation.equals(DETACH) || isVerbose) {
@@ -324,18 +324,17 @@ public class Cli {
         }
     }
 
-    private void printCompletion(List<String> filteredArgs)
-            throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException,
-            IllegalAccessException {
-        if (filteredArgs.size() == 1) {
+    private void printCompletion(List<String> filteredArgsLocal) throws ClassNotFoundException, NoSuchMethodException,
+            InvocationTargetException, InstantiationException, IllegalAccessException {
+        if (filteredArgsLocal.size() == 1) {
             System.out.println(org.kcc.wordsets.JrdApiKeywords.class.getSimpleName());
             System.out.println(org.kcc.wordsets.BytecodeKeywordsWithHelp.class.getSimpleName());
             System.out.println(org.kcc.wordsets.BytemanKeywords.class.getSimpleName());
             System.out.println(org.kcc.wordsets.JavaKeywordsWithHelp.class.getSimpleName());
         } else {
             List<CompletionItem.CompletionItemSet> sets = new ArrayList<>();
-            for (int x = 1; x < filteredArgs.size(); x++) {
-                for (String s : filteredArgs.get(x).split(",")) {
+            for (int x = 1; x < filteredArgsLocal.size(); x++) {
+                for (String s : filteredArgsLocal.get(x).split(",")) {
                     Class completion = Class.forName("org.kcc.wordsets." + s);
                     Object obejct = completion.getDeclaredConstructor().newInstance();
                     CompletionItem.CompletionItemSet cs = (CompletionItem.CompletionItemSet) obejct;
