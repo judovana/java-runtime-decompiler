@@ -233,7 +233,7 @@ public class KeywordBasedCodeCompletion {
         if (keyEvent.getKeyCode() == KeyEvent.VK_DOWN || keyEvent.getKeyCode() == KeyEvent.VK_UP ||
                 keyEvent.getKeyCode() == KeyEvent.VK_PAGE_DOWN ||
                 keyEvent.getKeyCode() == KeyEvent.VK_PAGE_UP) {
-            if (popup.isVisible()) {
+            if (popup !=null && popup.isVisible()) {
                 keyEvent.consume();
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
