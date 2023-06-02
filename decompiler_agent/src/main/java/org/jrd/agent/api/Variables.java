@@ -105,7 +105,7 @@ public class Variables {
             return GLOBALS.set(null, name, value);
         }
 
-        public static Object setNoReplace(String name, Object value) throws NoSuchFakeVariableException {
+        public static Object setNoReplace(String name, Object value) throws FakeVariableAlreadyDeclaredException {
             return GLOBALS.setNoReplace(null, name, value);
         }
 
@@ -164,7 +164,7 @@ public class Variables {
             return LOCALS.set(owner, name, value);
         }
 
-        public static Object setNoReplace(Object owner, String name, Object value) throws NoSuchFakeVariableException {
+        public static Object setNoReplace(Object owner, String name, Object value) throws FakeVariableAlreadyDeclaredException {
             return LOCALS.setNoReplace(owner, name, value);
         }
 
@@ -269,15 +269,15 @@ public class Variables {
             return CLAZZS.set(owner, name, value);
         }
 
-        public static Object setNoReplace(String name, Object value) throws FakeVariableException {
+        public static Object setNoReplace(String name, Object value) throws FakeVariableAlreadyDeclaredException {
             return setNoReplace((Class) null, name, value);
         }
 
-        public static Object setNoReplace(String owner, String name, Object value) throws FakeVariableException {
+        public static Object setNoReplace(String owner, String name, Object value) throws FakeVariableAlreadyDeclaredException {
             return setNoReplace(nullOrClass(owner), name, value);
         }
 
-        public static Object setNoReplace(Class owner, String name, Object value) throws NoSuchFakeVariableException {
+        public static Object setNoReplace(Class owner, String name, Object value) throws FakeVariableAlreadyDeclaredException {
             return CLAZZS.setNoReplace(owner, name, value);
         }
 

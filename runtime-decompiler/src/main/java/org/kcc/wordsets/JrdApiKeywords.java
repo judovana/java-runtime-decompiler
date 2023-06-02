@@ -26,6 +26,8 @@ public class JrdApiKeywords implements CompletionItem.CompletionItemSet {
             "Theirs main reason is if you really needs two methods/fields of same name in several classes.\n" +
             "Thats why al those methods have Class clazz as first parameter - the owner class.\n" +
             "Note, that this is usually not used, and you are usually ok with `Global` field/method.\n\n";
+    private static final String CLAZZS_FINAL = " Unlike global, it is bound to class. Unlike Local, which is bound to instance of " +
+            "class, this one is bound to Class declaration. Otherwise same as Local/Global fake fields/methods\n";
     private static final String GLOBAL = "Global fields and methods are unbound.\n" +
             "They represents C/Pascal const wittou namesapce so you can access them globally.\n" +
             "It is simple pair name/value.\n\n";
@@ -55,18 +57,26 @@ public class JrdApiKeywords implements CompletionItem.CompletionItemSet {
                             "initial value. If that variable already exists, will be rewritten.\n" +
                             "it returns freshly created field (the 3rd argument)"),
                     new CompletionItem("(Object)(org.jrd.agent.api.Variables.Local.remove(Object, String));",
-                            INTRO + LOCAL + SAFE + "Will remove the declared fake method/variable " +
+                            INTRO + LOCAL + SAFE +
+                                    "Will remove the declared fake method/variable " +
                                     "of name String from instance of Object"),
                     new CompletionItem("(Object)(org.jrd.agent.api.Variables.Local.set(Object, String, Object));",
-                            INTRO + LOCAL + SAFE),
+                            INTRO + LOCAL + SAFE +
+                                    "Will set the variable/method of String name to instance of Object (first param) to value of " +
+                                    "Object (3rd param). Unlike create, it do not throw exception if the field is already created. " +
+                                    "If field is not created, it will be.  Returns freshly inserted value."),
                     new CompletionItem("(Object)(org.jrd.agent.api.Variables.Local.setNoReplace(Object, String, Object));",
-                            INTRO + LOCAL + SAFE),
+                            INTRO + LOCAL + SAFE +
+                                    "Will set the variable/method of String name to instance of Object (first param) to value of " +
+                                    "Object (3rd param). Unlike create, it do not throw exception if the field is already created. " +
+                                    "But unlike set, if it already exists, it throws FakeVariableAlreadyDeclaredException if the " +
+                                    "variable/method is already set. Returns freshly inserted value."),
                     new CompletionItem("(String)(org.jrd.agent.api.Variables.Local.dump());",
-                            INTRO + LOCAL + SAFE),
+                            "Will dump to String all safe, local variables/methods currently declared"),
                     new CompletionItem("org.jrd.agent.api.Variables.Local.destroy();",
-                            INTRO + LOCAL + SAFE),
+                            "Will remove all safe, local variables/methods currently declared"),
                     new CompletionItem("org.jrd.agent.api.Variables.Local.removeAll(Object);",
-                            INTRO + LOCAL + SAFE),
+                            "Will remove all safe, local variables/methods bound to given Object"),
                     new CompletionItem("(Object)(org.jrd.agent.api.Variables.Global.create(String, Object));",
                             INTRO + GLOBAL + SAFE),
                     new CompletionItem("(Object)(org.jrd.agent.api.Variables.Global.get(String));",
@@ -84,57 +94,57 @@ public class JrdApiKeywords implements CompletionItem.CompletionItemSet {
                     new CompletionItem("org.jrd.agent.api.Variables.Global.removeAll();",
                             INTRO + GLOBAL + SAFE),
                     new CompletionItem("org.jrd.agent.api.Variables.FakeVariableException",
-                            "Generic forefather for all fake values operations"),
+                            "Generic forefather for all fake values exceptions"),
                     new CompletionItem("org.jrd.agent.api.Variables.FakeVariableAlreadyDeclaredException",
                             "exception cast from " +
-                                    "eg methods which are creating new field/method but are not allowed to replace.\n" +
+                                    "eg methods which are creating/setting new field/method but are not allowed to replace.\n" +
                                     "Extends FakeVariableException"),
                     new CompletionItem("(Object)(org.jrd.agent.api.Variables.Clazzs.create(Class, String, Object));",
-                            INTRO + CLAZZS + SAFE),
+                            INTRO + CLAZZS + SAFE + CLAZZS_FINAL),
                     new CompletionItem("(Object)(org.jrd.agent.api.Variables.Clazzs.create(String, Object));",
-                            INTRO + CLAZZS + SAFE),
+                            INTRO + CLAZZS + SAFE + CLAZZS_FINAL),
                     new CompletionItem("(Object)(org.jrd.agent.api.Variables.Clazzs.create(String, String, Object));",
-                            INTRO + CLAZZS + SAFE),
+                            INTRO + CLAZZS + SAFE + CLAZZS_FINAL),
                     new CompletionItem("(Object)(org.jrd.agent.api.Variables.Clazzs.get(Class, String));",
-                            INTRO + CLAZZS + SAFE),
+                            INTRO + CLAZZS + SAFE + CLAZZS_FINAL),
                     new CompletionItem("(Object)(org.jrd.agent.api.Variables.Clazzs.get(String));",
-                            INTRO + CLAZZS + SAFE),
+                            INTRO + CLAZZS + SAFE + CLAZZS_FINAL),
                     new CompletionItem("(Object)(org.jrd.agent.api.Variables.Clazzs.get(String, String));",
-                            INTRO + CLAZZS + SAFE),
+                            INTRO + CLAZZS + SAFE + CLAZZS_FINAL),
                     new CompletionItem("(Object)(org.jrd.agent.api.Variables.Clazzs.getOrCreate(Class, String, Object));",
-                            INTRO + CLAZZS + SAFE),
+                            INTRO + CLAZZS + SAFE + CLAZZS_FINAL),
                     new CompletionItem("(Object)(org.jrd.agent.api.Variables.Clazzs.getOrCreate(String, Object));",
-                            INTRO + CLAZZS + SAFE),
+                            INTRO + CLAZZS + SAFE + CLAZZS_FINAL),
                     new CompletionItem("(Object)(org.jrd.agent.api.Variables.Clazzs.getOrCreate(String, String, Object));",
-                            INTRO + CLAZZS + SAFE),
+                            INTRO + CLAZZS + SAFE + CLAZZS_FINAL),
                     new CompletionItem("(Object)(org.jrd.agent.api.Variables.Clazzs.remove(Class, String));",
-                            INTRO + CLAZZS + SAFE),
+                            INTRO + CLAZZS + SAFE + CLAZZS_FINAL),
                     new CompletionItem("(Object)(org.jrd.agent.api.Variables.Clazzs.remove(String));",
-                            INTRO + CLAZZS + SAFE),
+                            INTRO + CLAZZS + SAFE + CLAZZS_FINAL),
                     new CompletionItem("(Object)(org.jrd.agent.api.Variables.Clazzs.remove(String, String));",
-                            INTRO + CLAZZS + SAFE),
+                            INTRO + CLAZZS + SAFE + CLAZZS_FINAL),
                     new CompletionItem("(Object)(org.jrd.agent.api.Variables.Clazzs.set(Class, String, Object));",
-                            INTRO + CLAZZS + SAFE),
+                            INTRO + CLAZZS + SAFE + CLAZZS_FINAL),
                     new CompletionItem("(Object)(org.jrd.agent.api.Variables.Clazzs.set(String, Object));",
-                            INTRO + CLAZZS + SAFE),
+                            INTRO + CLAZZS + SAFE + CLAZZS_FINAL),
                     new CompletionItem("(Object)(org.jrd.agent.api.Variables.Clazzs.set(String, String, Object));",
-                            INTRO + CLAZZS + SAFE),
+                            INTRO + CLAZZS + SAFE + CLAZZS_FINAL),
                     new CompletionItem("(Object)(org.jrd.agent.api.Variables.Clazzs.setNoReplace(Class, String, Object));",
-                            INTRO + CLAZZS + SAFE),
+                            INTRO + CLAZZS + SAFE + CLAZZS_FINAL),
                     new CompletionItem("(Object)(org.jrd.agent.api.Variables.Clazzs.setNoReplace(String, Object));",
-                            INTRO + CLAZZS + SAFE),
+                            INTRO + CLAZZS + SAFE + CLAZZS_FINAL),
                     new CompletionItem("(Object)(org.jrd.agent.api.Variables.Clazzs.setNoReplace(String, String, Object));",
-                            INTRO + CLAZZS + SAFE),
+                            INTRO + CLAZZS + SAFE + CLAZZS_FINAL),
                     new CompletionItem("(String)(org.jrd.agent.api.Variables.Clazzs.dump());",
-                            INTRO + CLAZZS + SAFE),
+                            INTRO + CLAZZS + SAFE + CLAZZS_FINAL),
                     new CompletionItem("org.jrd.agent.api.Variables.Clazzs.destroy();",
-                            INTRO + CLAZZS + SAFE),
+                            INTRO + CLAZZS + SAFE + CLAZZS_FINAL),
                     new CompletionItem("org.jrd.agent.api.Variables.Clazzs.removeAll();",
-                            INTRO + CLAZZS + SAFE),
+                            INTRO + CLAZZS + SAFE + CLAZZS_FINAL),
                     new CompletionItem("org.jrd.agent.api.Variables.Clazzs.removeAll(Class);",
-                            INTRO + CLAZZS + SAFE),
+                            INTRO + CLAZZS + SAFE + CLAZZS_FINAL),
                     new CompletionItem("org.jrd.agent.api.Variables.Clazzs.removeAll(String);",
-                            INTRO + CLAZZS + SAFE),
+                            INTRO + CLAZZS + SAFE + CLAZZS_FINAL),
                     new CompletionItem("(String)(org.jrd.agent.api.Variables.dumpAll());",
                             "Will dump to String all safe variables currently declared"),
                     new CompletionItem("(Object)(org.jrd.agent.api.UnsafeVariables.Local.create(Object, String, Object));", UNSAFE),
@@ -178,8 +188,7 @@ public class JrdApiKeywords implements CompletionItem.CompletionItemSet {
                     new CompletionItem("org.jrd.agent.api.UnsafeVariables.Clazzs.removeAll(Class);", UNSAFE),
                     new CompletionItem("org.jrd.agent.api.UnsafeVariables.Clazzs.removeAll(String);", UNSAFE),
                     new CompletionItem("(String)(org.jrd.agent.api.UnsafeVariables.dumpAll());",
-                            "Will dump to String all unsafe variables currently declared")
-    };
+                            "Will dump to String all unsafe variables currently declared")};
 
     private static final CompletionItem[] JRDAPI_KEYWORDS =
             JavaKeywordsWithHelp.concatWithArrayCopy(JavaKeywordsWithHelp.EXT_JAVA_KEYWORDS, BASE_JRDAPI_KEYWORDS);

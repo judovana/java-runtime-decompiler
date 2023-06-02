@@ -24,7 +24,7 @@ public abstract class AbstractMasterKeyMap<T> {
         return value;
     }
 
-    public Object setNoReplace(T key, String name, Object value) throws Variables.NoSuchFakeVariableException {
+    public Object setNoReplace(T key, String name, Object value) throws Variables.FakeVariableAlreadyDeclaredException {
         Map<String, Object> subMap = getSubMap(key);
         if (subMap.containsKey(name)) {
             throw new Variables.FakeVariableAlreadyDeclaredException();
