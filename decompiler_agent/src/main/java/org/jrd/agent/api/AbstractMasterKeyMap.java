@@ -1,5 +1,6 @@
 package org.jrd.agent.api;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -86,10 +87,41 @@ public abstract class AbstractMasterKeyMap<T> {
         values.clear();
     }
 
+    public String dump(T... selection) {
+        Set<Map.Entry<T, Map<String, Object>>> mainFull = values.entrySet();
+        Set<Map.Entry<T, Map<String, Object>>> main = new HashSet<>();
+        for (Map.Entry<T, Map<String, Object>> subtable : mainFull) {
+            for (T select : selection) {
+                if (select == null && subtable.getKey() == null) {
+                    main.add(subtable);
+                } else {
+                    if (subtable.getKey() != null && subtable.getKey().equals(select)) {
+                        main.add(subtable);
+                    }
+                }
+            }
+        }
+        StringBuilder sb = new StringBuilder(
+                "table " + this.getClass().getName() + ": " + main.size() + " required groups " + selection.length + " found " + main.size()
+        );
+        sb.append("\n");
+        iterateMainToSb(main, sb);
+        sb.append("end " + this.getClass().getName());
+        sb.append("\n");
+        return sb.toString();
+    }
+
     public String dump() {
         Set<Map.Entry<T, Map<String, Object>>> main = values.entrySet();
         StringBuilder sb = new StringBuilder("table " + this.getClass().getName() + ": " + main.size() + " groups");
         sb.append("\n");
+        iterateMainToSb(main, sb);
+        sb.append("end " + this.getClass().getName());
+        sb.append("\n");
+        return sb.toString();
+    }
+
+    private void iterateMainToSb(Set<Map.Entry<T, Map<String, Object>>> main, StringBuilder sb) {
         for (Map.Entry<T, Map<String, Object>> subtable : main) {
             sb.append("  " + dumpKey(subtable.getKey()) + ": " + subtable.getValue().entrySet().size() + " items");
             sb.append("\n");
@@ -98,9 +130,6 @@ public abstract class AbstractMasterKeyMap<T> {
                 sb.append("\n");
             }
         }
-        sb.append("end " + this.getClass().getName());
-        sb.append("\n");
-        return sb.toString();
     }
 
     protected String dumpKey(T key) {

@@ -151,6 +151,10 @@ public class UnsafeVariables {
         public static String dump() {
             return LOCALS.dump();
         }
+
+        public static String dump(Object... owner) {
+            return LOCALS.dump(owner);
+        }
     }
 
     public static class Clazzs {
@@ -303,6 +307,10 @@ public class UnsafeVariables {
 
         public static String dump() {
             return CLAZZS.dump();
+        }
+
+        public static String dump(Class... owner) {
+            return CLAZZS.dump(owner);
         }
     }
 
