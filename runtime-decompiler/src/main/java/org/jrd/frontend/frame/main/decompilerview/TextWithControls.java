@@ -5,6 +5,7 @@ import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -36,6 +37,11 @@ import org.jrd.backend.core.Logger;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.main.GlobalConsole;
+import org.jrd.frontend.frame.main.decompilerview.dummycompiler.BytemanCompileAction;
+import org.jrd.frontend.frame.main.decompilerview.dummycompiler.CompileAction;
+import org.jrd.frontend.frame.main.decompilerview.dummycompiler.JasmCompileAction;
+import org.jrd.frontend.frame.main.decompilerview.dummycompiler.JavacCompileAction;
+import org.jrd.frontend.frame.main.decompilerview.dummycompiler.JustBearerAction;
 import org.jrd.frontend.utility.ImageButtonFactory;
 import org.kcc.CompletionItem;
 import org.kcc.CompletionSettings;
@@ -56,6 +62,8 @@ public class TextWithControls extends JPanel implements LinesProvider {
     private File decorativeFilePlaceholder;
     private KeywordBasedCodeCompletion codeCompletion;
     private JrdCompletionSettings oldSettings;
+    private CompileAction lastCompile;
+    private CompileAction lastCompileAndRun;
 
     public TextWithControls(String title, CodeCompletionType cct) {
         this(title, null, cct, null);
@@ -457,61 +465,86 @@ public class TextWithControls extends JPanel implements LinesProvider {
 
                 }
             }
-            compile.add(new JMenuItem("compile by javac - no CP"));
+            compile.add(new JavacCompileAction("compile by javac - no CP"));
             if (classesAndMethodsProvider != null) {
                 if (classesAndMethodsProvider instanceof DecompilationController) {
-                    compile.add(new JMenuItem("compile by javac - selected vm classpath (+additional)"));
+                    compile.add(new JavacCompileAction("compile by javac - selected vm classpath (+additional)",
+                            classesAndMethodsProvider));
                 }
                 if (classesAndMethodsProvider instanceof ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider) {
-                    compile.add(new JMenuItem("compile by javac - settings additional cp only"));
+                    compile.add(new JavacCompileAction("compile by javac - settings additional cp only",
+                            classesAndMethodsProvider));
                 }
             }
             if (jasm7 != null) {
-                compile.add(new JMenuItem("compile by asmtools7"));
+                compile.add(new JasmCompileAction("compile by asmtools7", jasm7, classesAndMethodsProvider));
             }
             if (jasm8 != null) {
-                compile.add(new JMenuItem("compile by asmtools8"));
+                compile.add(new JasmCompileAction("compile by asmtools8", jasm8, classesAndMethodsProvider));
             }
-            compile.add(new JMenuItem("compile by byteman"));
+            compile.add(new BytemanCompileAction("compile by byteman"));
             JMenu compileAndRun = new JMenu("Compile and run");
-            compileAndRun.add(new JMenuItem("compile by javac and run with no classpath"));
+            compileAndRun.add(new JavacCompileAction("compile by javac and run with no classpath"));
             if (classesAndMethodsProvider != null) {
                 if (classesAndMethodsProvider instanceof DecompilationController) {
-                    compileAndRun.add(new JMenuItem("compile by javac and run with selected vm classpath " +
-                            "(+additional)"));
+                    compileAndRun.add(new JavacCompileAction("compile by javac and run with selected vm classpath" +
+                            " (+additional)", classesAndMethodsProvider));
                 }
                 if (classesAndMethodsProvider instanceof ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider) {
-                    compileAndRun.add(new JMenuItem("compile by javac and run with settings additional cp"));
+                    compileAndRun.add(new JavacCompileAction("compile by javac and run with settings additional cp",
+                            classesAndMethodsProvider));
                 }
             }
             if (jasm7 != null) {
-                compileAndRun.add(new JMenuItem("compile by asmtools7 and run with no classpath"));
+                compileAndRun.add(new JasmCompileAction("compile by asmtools7 and run with no classpath", jasm7,
+                        classesAndMethodsProvider));
                 if (classesAndMethodsProvider != null) {
                     if (classesAndMethodsProvider instanceof DecompilationController) {
-                        compileAndRun.add(new JMenuItem("compile by asmtools7 and run with selected vm classpath " +
-                                "(+additional)"));
+                        compileAndRun.add(new JasmCompileAction("compile by asmtools7 and run with selected vm " +
+                                "classpath " +
+                                "(+additional)", jasm7, classesAndMethodsProvider));
                     }
                     if (classesAndMethodsProvider instanceof ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider) {
-                        compileAndRun.add(new JMenuItem("compile by asmtools7 and run with settings additional cp"));
+                        compileAndRun.add(new JasmCompileAction("compile by asmtools7 and run with settings " +
+                                "additional cp",
+                                jasm7, classesAndMethodsProvider));
                     }
                 }
             }
             if (jasm8 != null) {
-                compileAndRun.add(new JMenuItem("compile by asmtools8 and run with no classpath"));
+                compileAndRun.add(new JasmCompileAction("compile by asmtools8 and run with no classpath", jasm8, classesAndMethodsProvider));
                 if (classesAndMethodsProvider != null) {
                     if (classesAndMethodsProvider instanceof DecompilationController) {
-                        compileAndRun.add(new JMenuItem("compile by asmtools8 and run with selected vm classpath " +
-                                "(+additional)"));
+                        compileAndRun.add(new JasmCompileAction("compile by asmtools8 and run with selected vm " +
+                                "classpath " +
+                                "(+additional)", jasm8, classesAndMethodsProvider));
                     }
                     if (classesAndMethodsProvider instanceof ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider) {
-                        compileAndRun.add(new JMenuItem("compile by asmtools8 and run with settings additional cp"));
+                        compileAndRun.add(new JasmCompileAction("compile by asmtools8 and run with settings " +
+                                "additional cp", jasm8, classesAndMethodsProvider));
                     }
                 }
             }
-            compileAndRun.add(new JMenuItem("compile by byteman and inject to selected vm"));
+            compileAndRun.add(new BytemanCompileAction("compile by byteman and inject to selected vm"));
             menu.add(compileAndRun);
-            menu.add(new JMenuItem("Run last used compilation (F9)"));
-            menu.add(new JMenuItem("Run last used compile+run (F10)"));
+            for (Component c : compile.getMenuComponents()) {
+                ((CompileAction) c).addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent actionEvent) {
+                        lastCompile = ((CompileAction) actionEvent.getSource());
+                    }
+                });
+            }
+            for (Component c : compileAndRun.getMenuComponents()) {
+                ((CompileAction) c).addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent actionEvent) {
+                        lastCompileAndRun = ((CompileAction) actionEvent.getSource());
+                    }
+                });
+            }
+            menu.add(new JustBearerAction("Run last used compilation", "(F9)"));
+            menu.add(new JustBearerAction("Run last used compile+run", "(F10)"));
             JMenuItem logConsole = new JMenuItem("Log Console");
             logConsole.addActionListener(new ActionListener() {
                 @Override
@@ -520,6 +553,14 @@ public class TextWithControls extends JPanel implements LinesProvider {
                 }
             });
             menu.add(logConsole);
+            ((JMenuItem) menu.getComponents()[menu.getComponents().length - 3]).setEnabled(false);
+            if (lastCompile != null) {
+                ((JustBearerAction) menu.getComponents()[menu.getComponents().length - 3]).setOriginal(lastCompile);
+            }
+            ((JMenuItem) menu.getComponents()[menu.getComponents().length - 2]).setEnabled(false);
+            if (lastCompileAndRun != null) {
+                ((JustBearerAction) menu.getComponents()[menu.getComponents().length - 2]).setOriginal(lastCompileAndRun);
+            }
             menu.show(mCompletion, mCompletion.getWidth() / 2, mCompletion.getHeight() / 2);
         }
     }
