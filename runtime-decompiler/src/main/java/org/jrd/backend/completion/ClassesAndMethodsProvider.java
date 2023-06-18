@@ -16,6 +16,8 @@ public interface ClassesAndMethodsProvider {
 
     String[] getWhateverFromClass(CompletionSettings settings, String fqn);
 
+    byte[] getClassItself(CompletionSettings settings, String fqn);
+
     class SettingsClassesAndMethodsProvider implements ClassesAndMethodsProvider {
 
         @Override
@@ -26,6 +28,11 @@ public interface ClassesAndMethodsProvider {
         @Override
         public String[] getWhateverFromClass(CompletionSettings settings, String fqn) {
             return getMethodsFromAdditionalClassPath(settings, fqn);
+        }
+
+        @Override
+        public byte[] getClassItself(CompletionSettings settings, String fqn){
+            return Config.getConfig().getAdditionalClassPathBytes(fqn);
         }
 
     }

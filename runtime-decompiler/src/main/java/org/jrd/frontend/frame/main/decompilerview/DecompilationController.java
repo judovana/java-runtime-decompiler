@@ -518,6 +518,40 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
     }
 
     @Override
+    public byte[] getClassItself(CompletionSettings settings, String fqn) {
+        if (settings instanceof JrdCompletionSettings) {
+            if (((JrdCompletionSettings) settings).isDynamicClasses()) {
+                Collection<IdentifiedBytecode> b = getSingleClassFromRunningVmCatched(fqn);
+                if (b != null && b.size() > 0) {
+                    return new ArrayList<IdentifiedBytecode>(b).get(0).getFile();
+                }
+            }
+            if (((JrdCompletionSettings) settings).isConfigAdditionalClasses()) {
+                byte[] b = Config.getConfig().getAdditionalClassPathBytes(fqn);
+                if (b != null && b.length > 0) {
+                    return b;
+                }
+            }
+        } else {
+            Collection<IdentifiedBytecode> b = getSingleClassFromRunningVmCatched(fqn);
+            if (b != null && b.size() > 0) {
+                return new ArrayList<IdentifiedBytecode>(b).get(0).getFile();
+            }
+        }
+        return new byte[0];
+    }
+
+    private Collection<IdentifiedBytecode> getSingleClassFromRunningVmCatched(String fqn) {
+        Collection<IdentifiedBytecode> b = new ArrayList<>(0);
+        try {
+            b = getClassesProvider().getClass(new ClassIdentifier(fqn));
+        } catch (Exception ex) {
+            Logger.getLogger().log(ex);
+        }
+        return b;
+    }
+
+    @Override
     public String[] getWhateverFromClass(CompletionSettings settings, String fqn) {
         if (settings instanceof JrdCompletionSettings) {
             String[] l1 = new String[0];

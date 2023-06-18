@@ -1,5 +1,6 @@
 package org.jrd.frontend.frame.main.decompilerview;
 
+import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
@@ -18,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -477,10 +479,31 @@ public class TextWithControls extends JPanel implements LinesProvider {
                 }
             }
             if (jasm7 != null) {
-                compile.add(new JasmCompileAction("compile by asmtools7", jasm7, classesAndMethodsProvider));
+                final JasmCompileAction asm7compile =
+                        new JasmCompileAction("compile by asmtools7", jasm7, classesAndMethodsProvider);
+                asm7compile.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent actionEvent) {
+                        pluginManager.initializeWrapper(asm7compile.getWrapepr());
+                        Collection<IdentifiedBytecode> l =
+                                asm7compile.compile(bytecodeSyntaxTextArea.getText());
+                    }
+                });
+                compile.add(asm7compile);
+
             }
             if (jasm8 != null) {
-                compile.add(new JasmCompileAction("compile by asmtools8", jasm8, classesAndMethodsProvider));
+                final JasmCompileAction asm8compile =
+                        new JasmCompileAction("compile by asmtools8", jasm8, classesAndMethodsProvider);
+                asm8compile.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent actionEvent) {
+                        pluginManager.initializeWrapper(asm8compile.getWrapepr());
+                        Collection<IdentifiedBytecode> l =
+                                asm8compile.compile(bytecodeSyntaxTextArea.getText());
+                    }
+                });
+                compile.add(asm8compile);
             }
             compile.add(new BytemanCompileAction("compile by byteman"));
             JMenu compileAndRun = new JMenu("Compile and run");
@@ -555,13 +578,22 @@ public class TextWithControls extends JPanel implements LinesProvider {
             menu.add(logConsole);
             ((JMenuItem) menu.getComponents()[menu.getComponents().length - 3]).setEnabled(false);
             if (lastCompile != null) {
-                ((JustBearerAction) menu.getComponents()[menu.getComponents().length - 3]).setOriginal(lastCompile);
+                lastUsed(((JustBearerAction) menu.getComponents()[menu.getComponents().length - 3]), lastCompile);
+
             }
             ((JMenuItem) menu.getComponents()[menu.getComponents().length - 2]).setEnabled(false);
             if (lastCompileAndRun != null) {
-                ((JustBearerAction) menu.getComponents()[menu.getComponents().length - 2]).setOriginal(lastCompileAndRun);
+                lastUsed(((JustBearerAction) menu.getComponents()[menu.getComponents().length - 2]), lastCompileAndRun);
             }
             menu.show(mCompletion, mCompletion.getWidth() / 2, mCompletion.getHeight() / 2);
         }
+    }
+
+    private static void lastUsed(JustBearerAction component, CompileAction last) {
+        component.setOriginal(last);
+        if (last.getActionListeners().length > 1) {
+            component.addActionListener(last.getActionListeners()[0]);
+        }
+
     }
 }
