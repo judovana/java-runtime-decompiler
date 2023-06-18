@@ -485,6 +485,11 @@ public class KeywordBasedCodeCompletion {
         //source.insert(suggested.getSelectedValue().toString(), source.getCaretPosition());
     }
 
+    /**
+     * Needed to clean up all the listeners
+     *
+     * all the windows are disposed on every hide, so it is not mandatory for closing of generic application
+     */
     public void dispose() {
         if (popup != null) {
             popup.setVisible(false);
