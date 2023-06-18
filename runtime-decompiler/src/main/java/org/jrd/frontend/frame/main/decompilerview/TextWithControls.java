@@ -33,6 +33,8 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jrd.backend.completion.ClassesAndMethodsProvider;
 import org.jrd.backend.completion.JrdCompletionSettings;
 import org.jrd.backend.core.Logger;
+import org.jrd.backend.decompiling.DecompilerWrapper;
+import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.main.GlobalConsole;
 import org.jrd.frontend.utility.ImageButtonFactory;
 import org.kcc.CompletionItem;
@@ -428,26 +430,84 @@ public class TextWithControls extends JPanel implements LinesProvider {
             menu.add(guess);
             JMenu compile = new JMenu("Compilation");
             menu.add(compile);
-            compile.add(new JMenuItem("compile by javac - no classpath"));
-            compile.add(new JMenuItem("compile by javac - selected vm classpath"));
-            compile.add(new JMenuItem("compile by javac - settings additional cp"));
-            compile.add(new JMenuItem("compile by javac - both CPs"));
-            compile.add(new JMenuItem("compile by asmtools7"));
-            compile.add(new JMenuItem("compile by asmtools8"));
+            PluginManager pluginManager = new PluginManager();
+            List<DecompilerWrapper> wrappers = pluginManager.getWrappers();
+            DecompilerWrapper jasm7 = null;
+            DecompilerWrapper jasm8 = null;
+            for (DecompilerWrapper wrapper : wrappers) {
+                if (!wrapper.isInvalidWrapper()) {
+                    if (wrapper.getName().equals("jasm")) {
+                        if (jasm8 == null) {
+                            jasm8 = wrapper;
+                        } else {
+                            if (wrapper.isLocal()) {
+                                jasm8 = wrapper;
+                            }
+                        }
+                    }
+                    if (wrapper.getName().equals("jasm7")) {
+                        if (jasm7 == null) {
+                            jasm7 = wrapper;
+                        } else {
+                            if (wrapper.isLocal()) {
+                                jasm7 = wrapper;
+                            }
+                        }
+                    }
+
+                }
+            }
+            compile.add(new JMenuItem("compile by javac - no CP"));
+            if (classesAndMethodsProvider != null) {
+                if (classesAndMethodsProvider instanceof DecompilationController) {
+                    compile.add(new JMenuItem("compile by javac - selected vm classpath (+additional)"));
+                }
+                if (classesAndMethodsProvider instanceof ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider) {
+                    compile.add(new JMenuItem("compile by javac - settings additional cp only"));
+                }
+            }
+            if (jasm7 != null) {
+                compile.add(new JMenuItem("compile by asmtools7"));
+            }
+            if (jasm8 != null) {
+                compile.add(new JMenuItem("compile by asmtools8"));
+            }
             compile.add(new JMenuItem("compile by byteman"));
             JMenu compileAndRun = new JMenu("Compile and run");
             compileAndRun.add(new JMenuItem("compile by javac and run with no classpath"));
-            compileAndRun.add(new JMenuItem("compile by javac and run with selected vm classpath"));
-            compileAndRun.add(new JMenuItem("compile by javac and run with settings additional cp"));
-            compileAndRun.add(new JMenuItem("compile by javac and run with both CPs"));
-            compileAndRun.add(new JMenuItem("compile by asmtools7 and run with no classpath"));
-            compileAndRun.add(new JMenuItem("compile by asmtools7 and run with selected vm classpath"));
-            compileAndRun.add(new JMenuItem("compile by asmtools7 and run with settings additional cp"));
-            compileAndRun.add(new JMenuItem("compile by asmtools7 and run with both CPs"));
-            compileAndRun.add(new JMenuItem("compile by asmtools8 and run with no classpath"));
-            compileAndRun.add(new JMenuItem("compile by asmtools8 and run with selected vm classpath"));
-            compileAndRun.add(new JMenuItem("compile by asmtools8 and run with settings additional cp"));
-            compileAndRun.add(new JMenuItem("compile by asmtools8 and run with both CPs"));
+            if (classesAndMethodsProvider != null) {
+                if (classesAndMethodsProvider instanceof DecompilationController) {
+                    compileAndRun.add(new JMenuItem("compile by javac and run with selected vm classpath " +
+                            "(+additional)"));
+                }
+                if (classesAndMethodsProvider instanceof ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider) {
+                    compileAndRun.add(new JMenuItem("compile by javac and run with settings additional cp"));
+                }
+            }
+            if (jasm7 != null) {
+                compileAndRun.add(new JMenuItem("compile by asmtools7 and run with no classpath"));
+                if (classesAndMethodsProvider != null) {
+                    if (classesAndMethodsProvider instanceof DecompilationController) {
+                        compileAndRun.add(new JMenuItem("compile by asmtools7 and run with selected vm classpath " +
+                                "(+additional)"));
+                    }
+                    if (classesAndMethodsProvider instanceof ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider) {
+                        compileAndRun.add(new JMenuItem("compile by asmtools7 and run with settings additional cp"));
+                    }
+                }
+            }
+            if (jasm8 != null) {
+                compileAndRun.add(new JMenuItem("compile by asmtools8 and run with no classpath"));
+                if (classesAndMethodsProvider != null) {
+                    if (classesAndMethodsProvider instanceof DecompilationController) {
+                        compileAndRun.add(new JMenuItem("compile by asmtools8 and run with selected vm classpath " +
+                                "(+additional)"));
+                    }
+                    if (classesAndMethodsProvider instanceof ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider) {
+                        compileAndRun.add(new JMenuItem("compile by asmtools8 and run with settings additional cp"));
+                    }
+                }
+            }
             compileAndRun.add(new JMenuItem("compile by byteman and inject to selected vm"));
             menu.add(compileAndRun);
             menu.add(new JMenuItem("Run last used compilation (F9)"));
