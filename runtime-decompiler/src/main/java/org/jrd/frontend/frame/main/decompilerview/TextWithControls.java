@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -425,7 +426,32 @@ public class TextWithControls extends JPanel implements LinesProvider {
                 }
             });
             menu.add(guess);
-            menu.add(new JMenuItem("Dummy compilation"));
+            JMenu compile = new JMenu("Compilation");
+            menu.add(compile);
+            compile.add(new JMenuItem("compile by javac - no classpath"));
+            compile.add(new JMenuItem("compile by javac - selected vm classpath"));
+            compile.add(new JMenuItem("compile by javac - settings additional cp"));
+            compile.add(new JMenuItem("compile by javac - both CPs"));
+            compile.add(new JMenuItem("compile by asmtools7"));
+            compile.add(new JMenuItem("compile by asmtools8"));
+            compile.add(new JMenuItem("compile by byteman"));
+            JMenu compileAndRun = new JMenu("Compile and run");
+            compileAndRun.add(new JMenuItem("compile by javac and run with no classpath"));
+            compileAndRun.add(new JMenuItem("compile by javac and run with selected vm classpath"));
+            compileAndRun.add(new JMenuItem("compile by javac and run with settings additional cp"));
+            compileAndRun.add(new JMenuItem("compile by javac and run with both CPs"));
+            compileAndRun.add(new JMenuItem("compile by asmtools7 and run with no classpath"));
+            compileAndRun.add(new JMenuItem("compile by asmtools7 and run with selected vm classpath"));
+            compileAndRun.add(new JMenuItem("compile by asmtools7 and run with settings additional cp"));
+            compileAndRun.add(new JMenuItem("compile by asmtools7 and run with both CPs"));
+            compileAndRun.add(new JMenuItem("compile by asmtools8 and run with no classpath"));
+            compileAndRun.add(new JMenuItem("compile by asmtools8 and run with selected vm classpath"));
+            compileAndRun.add(new JMenuItem("compile by asmtools8 and run with settings additional cp"));
+            compileAndRun.add(new JMenuItem("compile by asmtools8 and run with both CPs"));
+            compileAndRun.add(new JMenuItem("compile by byteman and inject to selected vm"));
+            menu.add(compileAndRun);
+            menu.add(new JMenuItem("Run last used compilation (F9)"));
+            menu.add(new JMenuItem("Run last used compile+run (F10)"));
             JMenuItem logConsole = new JMenuItem("Log Console");
             logConsole.addActionListener(new ActionListener() {
                 @Override
