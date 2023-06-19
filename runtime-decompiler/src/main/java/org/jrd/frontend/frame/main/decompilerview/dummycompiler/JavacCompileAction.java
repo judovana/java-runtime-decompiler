@@ -2,7 +2,7 @@ package org.jrd.frontend.frame.main.decompilerview.dummycompiler;
 
 import org.jrd.backend.completion.ClassesAndMethodsProvider;
 
-public class JavacCompileAction extends CompileAction {
+public class JavacCompileAction extends AbstractCompileAction {
     public JavacCompileAction(String title) {
         this(title, null);
     }

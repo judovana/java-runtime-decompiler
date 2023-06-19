@@ -31,7 +31,7 @@ public interface ClassesAndMethodsProvider {
         }
 
         @Override
-        public byte[] getClassItself(CompletionSettings settings, String fqn){
+        public byte[] getClassItself(CompletionSettings settings, String fqn) {
             return Config.getConfig().getAdditionalClassPathBytes(fqn);
         }
 

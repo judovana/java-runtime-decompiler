@@ -43,7 +43,8 @@ public class QuickCompiler {
         GlobalConsole.getConsole().addMessage(Level.ALL, internalCompiler.getStatus());
         OverwriteClassDialog.CompilationWithResult compiler = new OverwriteClassDialog.CompilationWithResult(
                 OverwriteClassDialog.getClasspathlessCompiler(wrapper, internalCompiler.isEmbedded(), Logger.getLogger().isVerbose()),
-                modelProvider.getClassesProvider(), GlobalConsole.getConsole(), srcs) {
+                modelProvider.getClassesProvider(), GlobalConsole.getConsole(), srcs
+        ) {
 
             @Override
             public void run() {

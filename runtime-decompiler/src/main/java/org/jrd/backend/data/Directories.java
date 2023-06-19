@@ -15,7 +15,7 @@ public final class Directories {
     private static final String XDG_PLUGIN_SUFFIX = File.separator + "plugins";
     private static final String XDG_JRD_HOME = File.separator + ".config" + XDG_JRD_SUFFIX;
 
-    private static int JRD_LOCATION_FALLBACK = 0;
+    private static int jrdLlocationFalback = 0;
 
     private Directories() {
     }
@@ -65,11 +65,11 @@ public final class Directories {
 
     public static String getJrdLocation() {
         if (System.getProperty("jrd.location") == null) {
-            if (JRD_LOCATION_FALLBACK < 10) {
+            if (jrdLlocationFalback < 10) {
                 if (Logger.getLogger().isVerbose()) {
-                    JRD_LOCATION_FALLBACK++;
+                    jrdLlocationFalback++;
                 }
-                if (JRD_LOCATION_FALLBACK == 9) {
+                if (jrdLlocationFalback == 9) {
                     Logger.getLogger().log(Logger.Level.DEBUG, "jrd.location variable not found will no longer be reported");
                 }
                 Logger.getLogger().log(Logger.Level.DEBUG, "jrd.location environment variable not found, using fallback");

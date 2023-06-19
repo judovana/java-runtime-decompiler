@@ -28,6 +28,7 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
@@ -40,7 +41,7 @@ import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.main.GlobalConsole;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.BytemanCompileAction;
-import org.jrd.frontend.frame.main.decompilerview.dummycompiler.CompileAction;
+import org.jrd.frontend.frame.main.decompilerview.dummycompiler.AbstractCompileAction;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.JasmCompileAction;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.JavacCompileAction;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.JustBearerAction;
@@ -64,8 +65,8 @@ public class TextWithControls extends JPanel implements LinesProvider {
     private File decorativeFilePlaceholder;
     private KeywordBasedCodeCompletion codeCompletion;
     private JrdCompletionSettings oldSettings;
-    private CompileAction lastCompile;
-    private CompileAction lastCompileAndRun;
+    private AbstractCompileAction lastCompile;
+    private AbstractCompileAction lastCompileAndRun;
 
     public TextWithControls(String title, CodeCompletionType cct) {
         this(title, null, cct, null);
@@ -404,29 +405,14 @@ public class TextWithControls extends JPanel implements LinesProvider {
 
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
+            final JPopupMenu menu = createJPopupMenu();
+            menu.show(mCompletion, mCompletion.getWidth() / 2, mCompletion.getHeight() / 2);
+        }
+
+        private JPopupMenu createJPopupMenu() {
             final JPopupMenu menu = new JPopupMenu("Settings");
             JMenuItem completionMenu = new JMenuItem("Code completion");
-            completionMenu.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent actionEvent) {
-                    SwingUtilities.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            saveOldSettings();
-                            CompletionSettings newSettings = new CompletionSettingsDialogue(mClassesAndMethodsProvider)
-                                    .showForResults(TextWithControls.this, oldSettings);
-                            if (newSettings != null) {
-                                removeCodecompletion();
-                                if (newSettings.getSet() != null) {
-                                    codeCompletion = new KeywordBasedCodeCompletion(bytecodeSyntaxTextArea, newSettings);
-                                    setCompletionHelper();
-                                }
-                            }
-                        }
-
-                    });
-                }
-            });
+            completionMenu.addActionListener(new CodeCompletionMenuActionListener());
             menu.add(completionMenu);
             JMenuItem guess = new JMenuItem("guess completion (see verbose console for analyse)");
             guess.addActionListener(new ActionListener() {
@@ -438,131 +424,27 @@ public class TextWithControls extends JPanel implements LinesProvider {
                 }
             });
             menu.add(guess);
-            JMenu compile = new JMenu("Compilation");
+            Object[] detectedJasms = detectJasms();
+            PluginManager pluginManager = (PluginManager) detectedJasms[0];
+            DecompilerWrapper jasm7 = (DecompilerWrapper) detectedJasms[1];
+            DecompilerWrapper jasm8 = (DecompilerWrapper) detectedJasms[2];
+            JMenu compile = getCompileMenu(pluginManager, jasm7, jasm8);
             menu.add(compile);
-            PluginManager pluginManager = new PluginManager();
-            List<DecompilerWrapper> wrappers = pluginManager.getWrappers();
-            DecompilerWrapper jasm7 = null;
-            DecompilerWrapper jasm8 = null;
-            for (DecompilerWrapper wrapper : wrappers) {
-                if (!wrapper.isInvalidWrapper()) {
-                    if (wrapper.getName().equals("jasm")) {
-                        if (jasm8 == null) {
-                            jasm8 = wrapper;
-                        } else {
-                            if (wrapper.isLocal()) {
-                                jasm8 = wrapper;
-                            }
-                        }
-                    }
-                    if (wrapper.getName().equals("jasm7")) {
-                        if (jasm7 == null) {
-                            jasm7 = wrapper;
-                        } else {
-                            if (wrapper.isLocal()) {
-                                jasm7 = wrapper;
-                            }
-                        }
-                    }
-
-                }
-            }
-            compile.add(new JavacCompileAction("compile by javac - no CP"));
-            if (classesAndMethodsProvider != null) {
-                if (classesAndMethodsProvider instanceof DecompilationController) {
-                    compile.add(new JavacCompileAction("compile by javac - selected vm classpath (+additional)",
-                            classesAndMethodsProvider));
-                }
-                if (classesAndMethodsProvider instanceof ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider) {
-                    compile.add(new JavacCompileAction("compile by javac - settings additional cp only",
-                            classesAndMethodsProvider));
-                }
-            }
-            if (jasm7 != null) {
-                final JasmCompileAction asm7compile =
-                        new JasmCompileAction("compile by asmtools7", jasm7, classesAndMethodsProvider);
-                asm7compile.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent actionEvent) {
-                        pluginManager.initializeWrapper(asm7compile.getWrapepr());
-                        Collection<IdentifiedBytecode> l =
-                                asm7compile.compile(bytecodeSyntaxTextArea.getText());
-                    }
-                });
-                compile.add(asm7compile);
-
-            }
-            if (jasm8 != null) {
-                final JasmCompileAction asm8compile =
-                        new JasmCompileAction("compile by asmtools8", jasm8, classesAndMethodsProvider);
-                asm8compile.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent actionEvent) {
-                        pluginManager.initializeWrapper(asm8compile.getWrapepr());
-                        Collection<IdentifiedBytecode> l =
-                                asm8compile.compile(bytecodeSyntaxTextArea.getText());
-                    }
-                });
-                compile.add(asm8compile);
-            }
-            compile.add(new BytemanCompileAction("compile by byteman"));
-            JMenu compileAndRun = new JMenu("Compile and run");
-            compileAndRun.add(new JavacCompileAction("compile by javac and run with no classpath"));
-            if (classesAndMethodsProvider != null) {
-                if (classesAndMethodsProvider instanceof DecompilationController) {
-                    compileAndRun.add(new JavacCompileAction("compile by javac and run with selected vm classpath" +
-                            " (+additional)", classesAndMethodsProvider));
-                }
-                if (classesAndMethodsProvider instanceof ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider) {
-                    compileAndRun.add(new JavacCompileAction("compile by javac and run with settings additional cp",
-                            classesAndMethodsProvider));
-                }
-            }
-            if (jasm7 != null) {
-                compileAndRun.add(new JasmCompileAction("compile by asmtools7 and run with no classpath", jasm7,
-                        classesAndMethodsProvider));
-                if (classesAndMethodsProvider != null) {
-                    if (classesAndMethodsProvider instanceof DecompilationController) {
-                        compileAndRun.add(new JasmCompileAction("compile by asmtools7 and run with selected vm " +
-                                "classpath " +
-                                "(+additional)", jasm7, classesAndMethodsProvider));
-                    }
-                    if (classesAndMethodsProvider instanceof ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider) {
-                        compileAndRun.add(new JasmCompileAction("compile by asmtools7 and run with settings " +
-                                "additional cp",
-                                jasm7, classesAndMethodsProvider));
-                    }
-                }
-            }
-            if (jasm8 != null) {
-                compileAndRun.add(new JasmCompileAction("compile by asmtools8 and run with no classpath", jasm8, classesAndMethodsProvider));
-                if (classesAndMethodsProvider != null) {
-                    if (classesAndMethodsProvider instanceof DecompilationController) {
-                        compileAndRun.add(new JasmCompileAction("compile by asmtools8 and run with selected vm " +
-                                "classpath " +
-                                "(+additional)", jasm8, classesAndMethodsProvider));
-                    }
-                    if (classesAndMethodsProvider instanceof ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider) {
-                        compileAndRun.add(new JasmCompileAction("compile by asmtools8 and run with settings " +
-                                "additional cp", jasm8, classesAndMethodsProvider));
-                    }
-                }
-            }
-            compileAndRun.add(new BytemanCompileAction("compile by byteman and inject to selected vm"));
+            JMenu compileAndRun = getCompileAndRunMenu(pluginManager, jasm7, jasm8);
             menu.add(compileAndRun);
             for (Component c : compile.getMenuComponents()) {
-                ((CompileAction) c).addActionListener(new ActionListener() {
+                ((AbstractCompileAction) c).addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent actionEvent) {
-                        lastCompile = ((CompileAction) actionEvent.getSource());
+                        lastCompile = (AbstractCompileAction) actionEvent.getSource();
                     }
                 });
             }
             for (Component c : compileAndRun.getMenuComponents()) {
-                ((CompileAction) c).addActionListener(new ActionListener() {
+                ((AbstractCompileAction) c).addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent actionEvent) {
-                        lastCompileAndRun = ((CompileAction) actionEvent.getSource());
+                        lastCompileAndRun = (AbstractCompileAction) actionEvent.getSource();
                     }
                 });
             }
@@ -578,18 +460,175 @@ public class TextWithControls extends JPanel implements LinesProvider {
             menu.add(logConsole);
             ((JMenuItem) menu.getComponents()[menu.getComponents().length - 3]).setEnabled(false);
             if (lastCompile != null) {
-                lastUsed(((JustBearerAction) menu.getComponents()[menu.getComponents().length - 3]), lastCompile);
+                lastUsed((JustBearerAction) menu.getComponents()[menu.getComponents().length - 3], lastCompile);
 
             }
             ((JMenuItem) menu.getComponents()[menu.getComponents().length - 2]).setEnabled(false);
             if (lastCompileAndRun != null) {
-                lastUsed(((JustBearerAction) menu.getComponents()[menu.getComponents().length - 2]), lastCompileAndRun);
+                lastUsed((JustBearerAction) menu.getComponents()[menu.getComponents().length - 2], lastCompileAndRun);
             }
-            menu.show(mCompletion, mCompletion.getWidth() / 2, mCompletion.getHeight() / 2);
+            return menu;
+        }
+
+        private class CodeCompletionMenuActionListener implements ActionListener {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        saveOldSettings();
+                        CompletionSettings newSettings = new CompletionSettingsDialogue(mClassesAndMethodsProvider)
+                                .showForResults(TextWithControls.this, oldSettings);
+                        if (newSettings != null) {
+                            removeCodecompletion();
+                            if (newSettings.getSet() != null) {
+                                codeCompletion = new KeywordBasedCodeCompletion(bytecodeSyntaxTextArea, newSettings);
+                                setCompletionHelper();
+                            }
+                        }
+                    }
+
+                });
+            }
         }
     }
 
-    private static void lastUsed(JustBearerAction component, CompileAction last) {
+    private Object[] detectJasms() {
+        PluginManager pluginManager = new PluginManager();
+        List<DecompilerWrapper> wrappers = pluginManager.getWrappers();
+        DecompilerWrapper jasm7 = null;
+        DecompilerWrapper jasm8 = null;
+        for (DecompilerWrapper wrapper : wrappers) {
+            if (!wrapper.isInvalidWrapper()) {
+                if (wrapper.getName().equals("jasm")) {
+                    if (jasm8 == null) {
+                        jasm8 = wrapper;
+                    } else {
+                        if (wrapper.isLocal()) {
+                            jasm8 = wrapper;
+                        }
+                    }
+                }
+                if (wrapper.getName().equals("jasm7")) {
+                    if (jasm7 == null) {
+                        jasm7 = wrapper;
+                    } else {
+                        if (wrapper.isLocal()) {
+                            jasm7 = wrapper;
+                        }
+                    }
+                }
+
+            }
+        }
+        return new Object[]{pluginManager, jasm7, jasm8};
+    }
+
+    private JMenu getCompileAndRunMenu(PluginManager pluginManager, DecompilerWrapper jasm7, DecompilerWrapper jasm8) {
+        JMenu compileAndRun = new JMenu("Compile and run");
+        compileAndRun.add(new JavacCompileAction("compile by javac and run with no classpath"));
+        if (classesAndMethodsProvider != null) {
+            if (classesAndMethodsProvider instanceof DecompilationController) {
+                compileAndRun.add(
+                        new JavacCompileAction(
+                                "compile by javac and run with selected vm classpath" + " (+additional)", classesAndMethodsProvider
+                        )
+                );
+            }
+            if (classesAndMethodsProvider instanceof ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider) {
+                compileAndRun
+                        .add(new JavacCompileAction("compile by javac and run with settings additional cp", classesAndMethodsProvider));
+            }
+        }
+        if (jasm7 != null) {
+            compileAndRun.add(new JasmCompileAction("compile by asmtools7 and run with no classpath", jasm7, classesAndMethodsProvider));
+            if (classesAndMethodsProvider != null) {
+                if (classesAndMethodsProvider instanceof DecompilationController) {
+                    compileAndRun.add(
+                            new JasmCompileAction(
+                                    "compile by asmtools7 and run with selected vm " + "classpath " + "(+additional)", jasm7,
+                                    classesAndMethodsProvider
+                            )
+                    );
+                }
+                if (classesAndMethodsProvider instanceof ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider) {
+                    compileAndRun.add(
+                            new JasmCompileAction(
+                                    "compile by asmtools7 and run with settings " + "additional cp", jasm7, classesAndMethodsProvider
+                            )
+                    );
+                }
+            }
+        }
+        if (jasm8 != null) {
+            compileAndRun.add(new JasmCompileAction("compile by asmtools8 and run with no classpath", jasm8, classesAndMethodsProvider));
+            if (classesAndMethodsProvider != null) {
+                if (classesAndMethodsProvider instanceof DecompilationController) {
+                    compileAndRun.add(
+                            new JasmCompileAction(
+                                    "compile by asmtools8 and run with selected vm " + "classpath " + "(+additional)", jasm8,
+                                    classesAndMethodsProvider
+                            )
+                    );
+                }
+                if (classesAndMethodsProvider instanceof ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider) {
+                    compileAndRun.add(
+                            new JasmCompileAction(
+                                    "compile by asmtools8 and run with settings " + "additional cp", jasm8, classesAndMethodsProvider
+                            )
+                    );
+                }
+            }
+        }
+        compileAndRun.add(new BytemanCompileAction("compile by byteman and inject to selected vm"));
+        return compileAndRun;
+    }
+
+    private JMenu getCompileMenu(PluginManager pluginManager, DecompilerWrapper jasm7, DecompilerWrapper jasm8) {
+        JMenu compile = new JMenu("Compilation");
+        compile.add(new JavacCompileAction("compile by javac - no CP"));
+        if (classesAndMethodsProvider != null) {
+            if (classesAndMethodsProvider instanceof DecompilationController) {
+                compile.add(new JavacCompileAction("compile by javac - selected vm classpath (+additional)", classesAndMethodsProvider));
+            }
+            if (classesAndMethodsProvider instanceof ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider) {
+                compile.add(new JavacCompileAction("compile by javac - settings additional cp only", classesAndMethodsProvider));
+            }
+        }
+        if (jasm7 != null) {
+            final JasmCompileAction asm7compile = new JasmCompileAction("compile by asmtools7", jasm7, classesAndMethodsProvider);
+            asm7compile.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent actionEvent) {
+                    pluginManager.initializeWrapper(asm7compile.getWrapper());
+                    Collection<IdentifiedBytecode> l = asm7compile.compile(bytecodeSyntaxTextArea.getText());
+                    if (l.size() == 0 || new ArrayList<IdentifiedBytecode>(l).get(0).getFile().length == 0) {
+                        JOptionPane.showMessageDialog(null, "failure. Todo, move this out of popup");
+                    }
+                }
+            });
+            compile.add(asm7compile);
+
+        }
+        if (jasm8 != null) {
+            final JasmCompileAction asm8compile = new JasmCompileAction("compile by asmtools8", jasm8, classesAndMethodsProvider);
+            asm8compile.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent actionEvent) {
+                    pluginManager.initializeWrapper(asm8compile.getWrapper());
+                    Collection<IdentifiedBytecode> l = asm8compile.compile(bytecodeSyntaxTextArea.getText());
+                    if (l.size() == 0 || new ArrayList<IdentifiedBytecode>(l).get(0).getFile().length == 0) {
+                        JOptionPane.showMessageDialog(null, "failure. Todo, move this out of popup");
+                    }
+                }
+            });
+            compile.add(asm8compile);
+        }
+        compile.add(new BytemanCompileAction("compile by byteman"));
+        return compile;
+    }
+
+    private static void lastUsed(JustBearerAction component, AbstractCompileAction last) {
         component.setOriginal(last);
         if (last.getActionListeners().length > 1) {
             component.addActionListener(last.getActionListeners()[0]);

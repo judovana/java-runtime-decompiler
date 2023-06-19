@@ -1,16 +1,19 @@
 package org.jrd.frontend.frame.main.decompilerview.dummycompiler;
 
-public class JustBearerAction extends CompileAction {
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+public class JustBearerAction extends AbstractCompileAction {
 
     private final String append;
-    private CompileAction original;
+    private AbstractCompileAction original;
 
     public JustBearerAction(String placeholder, String append) {
         super(placeholder + " " + append);
         this.append = append;
     }
 
-    public void setOriginal(CompileAction original) {
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "looks good")
+    public void setOriginal(AbstractCompileAction original) {
         this.original = original;
         this.setEnabled(true);
         this.setText("last used - " + original.getText() + " " + append);
