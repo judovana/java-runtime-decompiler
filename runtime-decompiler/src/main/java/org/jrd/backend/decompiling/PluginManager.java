@@ -258,8 +258,11 @@ public class PluginManager {
     }
 
     public synchronized BundledCompilerStatus getBundledCompilerStatus(DecompilerWrapper decompiler) {
-        boolean haveBundledCompiler = this.hasBundledCompiler(decompiler);
         String message = "Default runtime compiler will be used";
+        if (decompiler == null) {
+            return new BundledCompilerStatus(false, message);
+        }
+        boolean haveBundledCompiler = this.hasBundledCompiler(decompiler);
         if (haveBundledCompiler) {
             message = decompiler.getName() + " plugin is delivered with its own compiler.";
         }

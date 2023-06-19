@@ -42,6 +42,7 @@ import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.main.GlobalConsole;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.BytemanCompileAction;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.AbstractCompileAction;
+import org.jrd.frontend.frame.main.decompilerview.dummycompiler.CanCompile;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.JasmCompileAction;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.JavacCompileAction;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.JustBearerAction;
@@ -528,7 +529,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
 
     private JMenu getCompileAndRunMenu(PluginManager pluginManager, DecompilerWrapper jasm7, DecompilerWrapper jasm8) {
         JMenu compileAndRun = new JMenu("Compile and run");
-        compileAndRun.add(new JavacCompileAction("compile by javac and run with no classpath"));
+        compileAndRun.add(new JavacCompileAction("compile by javac and run with no classpath", null));
         if (classesAndMethodsProvider != null) {
             if (classesAndMethodsProvider instanceof DecompilationController) {
                 compileAndRun.add(
@@ -588,52 +589,32 @@ public class TextWithControls extends JPanel implements LinesProvider {
 
     private JMenu getCompileMenu(PluginManager pluginManager, DecompilerWrapper jasm7, DecompilerWrapper jasm8) {
         JMenu compile = new JMenu("Compilation");
-        compile.add(new JavacCompileAction("compile by javac - no CP"));
+        final JavacCompileAction compileNoCp = new JavacCompileAction("compile by javac - no CP", null);
+        compileNoCp.addActionListener(new CompileActionListener(pluginManager, compileNoCp));
+        compile.add(compileNoCp);
         if (classesAndMethodsProvider != null) {
             if (classesAndMethodsProvider instanceof DecompilationController) {
-                compile.add(new JavacCompileAction("compile by javac - selected vm classpath (+additional)", classesAndMethodsProvider));
+                final JavacCompileAction compileCp1 =
+                        new JavacCompileAction("compile by javac - selected vm classpath (+additional)", classesAndMethodsProvider);
+                compileCp1.addActionListener(new CompileActionListener(pluginManager, compileCp1));
+                compile.add(compileCp1);
             }
             if (classesAndMethodsProvider instanceof ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider) {
-                compile.add(new JavacCompileAction("compile by javac - settings additional cp only", classesAndMethodsProvider));
+                final JavacCompileAction compileCp2 =
+                        new JavacCompileAction("compile by javac - settings additional cp only", classesAndMethodsProvider);
+                compileCp2.addActionListener(new CompileActionListener(pluginManager, compileCp2));
+                compile.add(compileCp2);
             }
         }
         if (jasm7 != null) {
             final JasmCompileAction asm7compile = new JasmCompileAction("compile by asmtools7", jasm7, classesAndMethodsProvider);
-            asm7compile.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent actionEvent) {
-                    completionButton.setBackground(Color.BLUE);
-                    completionButton.repaint();
-                    pluginManager.initializeWrapper(asm7compile.getWrapper());
-                    Collection<IdentifiedBytecode> l = asm7compile.compile(bytecodeSyntaxTextArea.getText(), pluginManager);
-                    if (l == null || l.size() == 0 || new ArrayList<IdentifiedBytecode>(l).get(0).getFile().length == 0) {
-                        completionButton.setBackground(Color.RED);
-                    } else {
-                        completionButton.setBackground(Color.GREEN);
-                    }
-                    compile.repaint();
-                }
-            });
+            asm7compile.addActionListener(new CompileActionListener(pluginManager, asm7compile));
             compile.add(asm7compile);
 
         }
         if (jasm8 != null) {
             final JasmCompileAction asm8compile = new JasmCompileAction("compile by asmtools8", jasm8, classesAndMethodsProvider);
-            asm8compile.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent actionEvent) {
-                    completionButton.setBackground(Color.BLUE);
-                    completionButton.repaint();
-                    pluginManager.initializeWrapper(asm8compile.getWrapper());
-                    Collection<IdentifiedBytecode> l = asm8compile.compile(bytecodeSyntaxTextArea.getText(), pluginManager);
-                    if (l == null || l.size() == 0 || new ArrayList<IdentifiedBytecode>(l).get(0).getFile().length == 0) {
-                        completionButton.setBackground(Color.RED);
-                    } else {
-                        completionButton.setBackground(Color.GREEN);
-                    }
-                    completionButton.repaint();
-                }
-            });
+            asm8compile.addActionListener(new CompileActionListener(pluginManager, asm8compile));
             compile.add(asm8compile);
         }
         compile.add(new BytemanCompileAction("compile by byteman"));
@@ -649,5 +630,31 @@ public class TextWithControls extends JPanel implements LinesProvider {
             component.addActionListener(last.getActionListeners()[1]);
         }
 
+    }
+
+    private class CompileActionListener implements ActionListener {
+        private final PluginManager pluginManager;
+        private final CanCompile compiler;
+
+        public CompileActionListener(PluginManager pluginManager, CanCompile compiler) {
+            this.pluginManager = pluginManager;
+            this.compiler = compiler;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            completionButton.setBackground(Color.BLUE);
+            completionButton.repaint();
+            if (compiler.getWrapper()!=null) {
+                pluginManager.initializeWrapper(compiler.getWrapper());
+            }
+            Collection<IdentifiedBytecode> l = compiler.compile(bytecodeSyntaxTextArea.getText(), pluginManager);
+            if (l == null || l.size() == 0 || new ArrayList<IdentifiedBytecode>(l).get(0).getFile().length == 0) {
+                completionButton.setBackground(Color.RED);
+            } else {
+                completionButton.setBackground(Color.GREEN);
+            }
+            completionButton.repaint();
+        }
     }
 }
