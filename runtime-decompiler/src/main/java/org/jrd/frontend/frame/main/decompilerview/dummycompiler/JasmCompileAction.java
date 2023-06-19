@@ -8,6 +8,7 @@ import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.completion.ClassesAndMethodsProvider;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.frontend.frame.main.GlobalConsole;
+import org.jrd.frontend.frame.main.decompilerview.QuickCompiler;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ public class JasmCompileAction extends CompileAction {
 
     private final DecompilerWrapper jasm;
     private final ClassesAndMethodsProvider classesAndMethodsProvider;
+    private QuickCompiler compileAction;
 
     public JasmCompileAction(String title, DecompilerWrapper jasm,
                              ClassesAndMethodsProvider classesAndMethodsProvider) {

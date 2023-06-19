@@ -123,7 +123,7 @@ public class BytecodeDecompilerView {
     private ActionListener initActionListener;
     private ActionListener addActionListener;
     private ActionListener addJar;
-    private DecompilationController.QuickCompiler compileAction;
+    private QuickCompiler compileAction;
     private ClassesAndMethodsProvider completionHelper;
     private OverwriteActionListener overwriteActionListener;
     private DependenciesReader dependenciesReader;
@@ -855,7 +855,7 @@ public class BytecodeDecompilerView {
         addJar = listener;
     }
 
-    public void setCompileListener(DecompilationController.QuickCompiler listener) {
+    public void setCompileListener(QuickCompiler listener) {
         compileAction = listener;
     }
 

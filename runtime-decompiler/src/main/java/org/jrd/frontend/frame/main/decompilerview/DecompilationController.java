@@ -3,7 +3,7 @@ package org.jrd.frontend.frame.main.decompilerview;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
-import io.github.mkoncek.classpathless.api.IdentifiedSource;
+
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.jrd.backend.communication.FsAgent;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
@@ -28,7 +28,6 @@ import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.filesystem.NewFsVmController;
 import org.jrd.frontend.frame.filesystem.NewFsVmView;
 import org.jrd.frontend.frame.main.AgentsManager;
-import org.jrd.frontend.frame.main.GlobalConsole;
 import org.jrd.frontend.frame.main.LoadingDialog;
 import org.jrd.frontend.frame.main.LoadingDialogProvider;
 import org.jrd.frontend.frame.main.MainFrameView;
@@ -40,7 +39,6 @@ import org.jrd.frontend.frame.plugins.PluginConfigurationEditorController;
 import org.jrd.frontend.frame.plugins.PluginConfigurationEditorView;
 import org.jrd.frontend.frame.remote.NewConnectionController;
 import org.jrd.frontend.frame.remote.NewConnectionView;
-import org.jrd.frontend.utility.CommonUtils;
 import org.jrd.frontend.utility.ScreenFinder;
 import org.kcc.CompletionSettings;
 
@@ -63,7 +61,6 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 /**
@@ -114,7 +111,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
             }
         });
         bytecodeDecompilerView.setOverwriteActionListener(new ClassOverwriter());
-        bytecodeDecompilerView.setCompileListener(new QuickCompiler());
+        bytecodeDecompilerView.setCompileListener(new QuickCompiler(this, pluginManager));
         bytecodeDecompilerView.setPopup(new AgentApiGenerator());
         bytecodeDecompilerView.setDepsProvider(new DependenciesReader(this, this));
         mainFrameView.setVmChanging(this::changeVm);
@@ -587,53 +584,6 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         String[] l =
                 ClassesAndMethodsProvider.bytesToMethods(settings, b.stream().map(a -> a.getFile()).collect(Collectors.toList()).get(0));
         return l;
-    }
-
-    class QuickCompiler {
-
-        public void upload(String clazz, byte[] body) {
-            CommonUtils.uploadByGui(vmInfo, vmManager, new CommonUtils.StatusKeeper() {
-                @Override
-                public void setText(String s) {
-                    GlobalConsole.getConsole().addMessage(Level.WARNING, s);
-                }
-
-                @Override
-                public void onException(Exception ex) {
-                    Logger.getLogger().log(ex);
-                    GlobalConsole.getConsole().addMessage(Level.WARNING, ex.toString());
-                }
-            }, clazz, body);
-        }
-
-        public void run(DecompilerWrapper wrapper, boolean upload, IdentifiedSource... srcs) {
-            PluginManager.BundledCompilerStatus internalCompiler = pluginManager.getBundledCompilerStatus(wrapper);
-            GlobalConsole.getConsole().addMessage(Level.ALL, internalCompiler.getStatus());
-            OverwriteClassDialog.CompilationWithResult compiler = new OverwriteClassDialog.CompilationWithResult(
-                    OverwriteClassDialog.getClasspathlessCompiler(wrapper, internalCompiler.isEmbedded(), isVerbose), getClassesProvider(),
-                    GlobalConsole.getConsole(), srcs
-            ) {
-
-                @Override
-                public void run() {
-                    super.run();
-                    if (this.getResult() != null && !this.getResult().isEmpty()) {
-                        for (IdentifiedBytecode bin : this.getResult()) {
-                            if (upload) {
-                                GlobalConsole.getConsole().addMessage(Level.ALL, "Uploading: " + bin.getClassIdentifier().getFullName());
-                                upload(bin.getClassIdentifier().getFullName(), bin.getFile());
-                            } else {
-                                GlobalConsole.getConsole().addMessage(Level.ALL, "Compiled " + bin.getClassIdentifier().getFullName());
-                            }
-                        }
-                    } else {
-                        GlobalConsole.getConsole().addMessage(Level.ALL, "No output from compilation");
-                    }
-                }
-            };
-            Thread t = new Thread(compiler);
-            t.start();
-        }
     }
 
     class ClassOverwriter {
