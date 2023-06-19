@@ -15,11 +15,14 @@ public final class Directories {
     private static final String XDG_PLUGIN_SUFFIX = File.separator + "plugins";
     private static final String XDG_JRD_HOME = File.separator + ".config" + XDG_JRD_SUFFIX;
 
+    private static int JRD_LOCATION_FALLBACK = 0;
+
     private Directories() {
     }
 
     /**
      * Locate configuration directory as per XDG base directory specification.
+     *
      * @return xdg config directory (e.g. ~/.config/java-runtime-decompiler/conf
      */
     public static String getConfigDirectory() {
@@ -62,7 +65,15 @@ public final class Directories {
 
     public static String getJrdLocation() {
         if (System.getProperty("jrd.location") == null) {
-            Logger.getLogger().log(Logger.Level.DEBUG, "jrd.location environment variable not found, using fallback");
+            if (JRD_LOCATION_FALLBACK < 10) {
+                if (Logger.getLogger().isVerbose()) {
+                    JRD_LOCATION_FALLBACK++;
+                }
+                if (JRD_LOCATION_FALLBACK == 9) {
+                    Logger.getLogger().log(Logger.Level.DEBUG, "jrd.location variable not found will no longer be reported");
+                }
+                Logger.getLogger().log(Logger.Level.DEBUG, "jrd.location environment variable not found, using fallback");
+            }
             return Paths.get(".").normalize().toAbsolutePath().toString();
         } else {
             return System.getProperty("jrd.location");
