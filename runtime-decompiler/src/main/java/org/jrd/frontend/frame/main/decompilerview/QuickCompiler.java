@@ -8,8 +8,10 @@ import org.jrd.frontend.frame.main.ModelProvider;
 import org.jrd.frontend.frame.overwrite.OverwriteClassDialog;
 import org.jrd.frontend.utility.CommonUtils;
 
+import java.util.Collection;
 import java.util.logging.Level;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
 
@@ -17,6 +19,8 @@ public class QuickCompiler {
 
     private final ModelProvider modelProvider;
     private final PluginManager pluginManager;
+    private Collection<IdentifiedBytecode> resultBackup;
+    private Thread lastThread;
 
     public QuickCompiler(ModelProvider modelProvider, PluginManager pluginManager) {
         this.modelProvider = modelProvider;
@@ -49,6 +53,7 @@ public class QuickCompiler {
             @Override
             public void run() {
                 super.run();
+                resultBackup = this.getResult();
                 if (this.getResult() != null && !this.getResult().isEmpty()) {
                     for (IdentifiedBytecode bin : this.getResult()) {
                         if (upload) {
@@ -63,7 +68,17 @@ public class QuickCompiler {
                 }
             }
         };
-        Thread t = new Thread(compiler);
-        t.start();
+        lastThread = new Thread(compiler);
+        lastThread.start();
+    }
+
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "looks good")
+    public Collection<IdentifiedBytecode> waitResult() {
+        try {
+            lastThread.join();
+            return resultBackup;
+        } catch (InterruptedException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 }

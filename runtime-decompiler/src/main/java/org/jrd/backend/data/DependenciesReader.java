@@ -1,6 +1,5 @@
 package org.jrd.backend.data;
 
-import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.frontend.frame.main.LoadingDialogProvider;
 import org.jrd.frontend.frame.main.ModelProvider;
 
@@ -8,6 +7,7 @@ import java.util.Base64;
 import java.util.Collection;
 
 import io.github.mkoncek.classpathless.api.ClassIdentifier;
+import io.github.mkoncek.classpathless.api.ClassesProvider;
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 
 public class DependenciesReader {
@@ -35,7 +35,7 @@ public class DependenciesReader {
         return provider.getVmManager();
     }
 
-    public RuntimeCompilerConnector.JrdClassesProvider getClassesProvider() {
+    public ClassesProvider getClassesProvider() {
         return provider.getClassesProvider();
     }
 

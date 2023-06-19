@@ -6,6 +6,7 @@ import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
@@ -28,7 +29,6 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
@@ -68,6 +68,8 @@ public class TextWithControls extends JPanel implements LinesProvider {
     private AbstractCompileAction lastCompile;
     private AbstractCompileAction lastCompileAndRun;
 
+    private final JButton completionButton = ImageButtonFactory.createEditButton("Code completion and compilation");
+
     public TextWithControls(String title, CodeCompletionType cct) {
         this(title, null, cct, null);
     }
@@ -93,9 +95,9 @@ public class TextWithControls extends JPanel implements LinesProvider {
         this.add(searchAndCode, BorderLayout.SOUTH);
         searchAndCode.add(bytecodeSearchControls, BorderLayout.CENTER);
         if (cct != CodeCompletionType.FORBIDDEN) {
-            final JButton completion = ImageButtonFactory.createEditButton("Code completion and compilation");
-            completion.addActionListener(new CompletionSettingsButtonPopUp(classesAndMethodsProvider, completion));
-            searchAndCode.add(completion, BorderLayout.WEST);
+            completionButton.addActionListener(new CompletionSettingsButtonPopUp(classesAndMethodsProvider, completionButton));
+            completionButton.setOpaque(true);
+            searchAndCode.add(completionButton, BorderLayout.WEST);
         }
         if (codeSelect != null) {
             JComboBox<String> hgltr = new JComboBox<String>(getAllLexers());
@@ -600,11 +602,16 @@ public class TextWithControls extends JPanel implements LinesProvider {
             asm7compile.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent actionEvent) {
+                    completionButton.setBackground(Color.BLUE);
+                    completionButton.repaint();
                     pluginManager.initializeWrapper(asm7compile.getWrapper());
-                    Collection<IdentifiedBytecode> l = asm7compile.compile(bytecodeSyntaxTextArea.getText());
-                    if (l.size() == 0 || new ArrayList<IdentifiedBytecode>(l).get(0).getFile().length == 0) {
-                        JOptionPane.showMessageDialog(null, "failure. Todo, move this out of popup");
+                    Collection<IdentifiedBytecode> l = asm7compile.compile(bytecodeSyntaxTextArea.getText(), pluginManager);
+                    if (l == null || l.size() == 0 || new ArrayList<IdentifiedBytecode>(l).get(0).getFile().length == 0) {
+                        completionButton.setBackground(Color.RED);
+                    } else {
+                        completionButton.setBackground(Color.GREEN);
                     }
+                    compile.repaint();
                 }
             });
             compile.add(asm7compile);
@@ -615,11 +622,16 @@ public class TextWithControls extends JPanel implements LinesProvider {
             asm8compile.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent actionEvent) {
+                    completionButton.setBackground(Color.BLUE);
+                    completionButton.repaint();
                     pluginManager.initializeWrapper(asm8compile.getWrapper());
-                    Collection<IdentifiedBytecode> l = asm8compile.compile(bytecodeSyntaxTextArea.getText());
-                    if (l.size() == 0 || new ArrayList<IdentifiedBytecode>(l).get(0).getFile().length == 0) {
-                        JOptionPane.showMessageDialog(null, "failure. Todo, move this out of popup");
+                    Collection<IdentifiedBytecode> l = asm8compile.compile(bytecodeSyntaxTextArea.getText(), pluginManager);
+                    if (l == null || l.size() == 0 || new ArrayList<IdentifiedBytecode>(l).get(0).getFile().length == 0) {
+                        completionButton.setBackground(Color.RED);
+                    } else {
+                        completionButton.setBackground(Color.GREEN);
                     }
+                    completionButton.repaint();
                 }
             });
             compile.add(asm8compile);
