@@ -630,8 +630,11 @@ public class TextWithControls extends JPanel implements LinesProvider {
 
     private static void lastUsed(JustBearerAction component, AbstractCompileAction last) {
         component.setOriginal(last);
+        for (ActionListener l : component.getActionListeners()) {
+            component.removeActionListener(l);
+        }
         if (last.getActionListeners().length > 1) {
-            component.addActionListener(last.getActionListeners()[0]);
+            component.addActionListener(last.getActionListeners()[1]);
         }
 
     }
