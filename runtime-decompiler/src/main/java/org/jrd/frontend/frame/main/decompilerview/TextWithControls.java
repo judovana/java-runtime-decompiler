@@ -538,10 +538,8 @@ public class TextWithControls extends JPanel implements LinesProvider {
                         )
                 );
             }
-            if (classesAndMethodsProvider instanceof ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider) {
                 compileAndRun
                         .add(new JavacCompileAction("compile by javac and run with settings additional cp", classesAndMethodsProvider));
-            }
         }
         if (jasm7 != null) {
             compileAndRun.add(new JasmCompileAction("compile by asmtools7 and run with no classpath", jasm7, classesAndMethodsProvider));
@@ -554,13 +552,11 @@ public class TextWithControls extends JPanel implements LinesProvider {
                             )
                     );
                 }
-                if (classesAndMethodsProvider instanceof ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider) {
                     compileAndRun.add(
                             new JasmCompileAction(
                                     "compile by asmtools7 and run with settings " + "additional cp", jasm7, classesAndMethodsProvider
                             )
                     );
-                }
             }
         }
         if (jasm8 != null) {
@@ -574,13 +570,11 @@ public class TextWithControls extends JPanel implements LinesProvider {
                             )
                     );
                 }
-                if (classesAndMethodsProvider instanceof ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider) {
                     compileAndRun.add(
                             new JasmCompileAction(
                                     "compile by asmtools8 and run with settings " + "additional cp", jasm8, classesAndMethodsProvider
                             )
                     );
-                }
             }
         }
         compileAndRun.add(new BytemanCompileAction("compile by byteman and inject to selected vm"));
@@ -599,12 +593,10 @@ public class TextWithControls extends JPanel implements LinesProvider {
                 compileCp1.addActionListener(new CompileActionListener(pluginManager, compileCp1));
                 compile.add(compileCp1);
             }
-            if (classesAndMethodsProvider instanceof ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider) {
                 final JavacCompileAction compileCp2 =
                         new JavacCompileAction("compile by javac - settings additional cp only", classesAndMethodsProvider);
                 compileCp2.addActionListener(new CompileActionListener(pluginManager, compileCp2));
                 compile.add(compileCp2);
-            }
         }
         if (jasm7 != null) {
             final JasmCompileAction asm7compile = new JasmCompileAction("compile by asmtools7", jasm7, classesAndMethodsProvider);
