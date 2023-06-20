@@ -56,22 +56,34 @@ public final class Lib {
     }
 
     public static String initClassNoThrow(VmInfo vmInfo, VmManager vmManager, String fqn) {
-        AgentRequestAction request = DecompilationController.createRequest(vmInfo, AgentRequestAction.RequestAction.INIT_CLASS, fqn);
+        AgentRequestAction request = DecompilationController.createRequest(vmInfo,
+                AgentRequestAction.RequestAction.INIT_CLASS, fqn);
         return DecompilationController.submitRequest(vmManager, request);
     }
 
-    @SuppressWarnings("CyclomaticComplexity") // un-refactorable
+
     public static String guessName(byte[] fileContents) throws IOException {
+        String[] r = guessNameImpl(fileContents);
+        if (r.length == 1) {
+            return r[0];
+        } else {
+            return r[0] + "." + r[1];
+        }
+    }
+
+    @SuppressWarnings("CyclomaticComplexity") // un-refactorable
+    public static String[] guessNameImpl(byte[] fileContents) throws IOException {
         String pkg = null;
         String clazz = null;
 
         try (
                 BufferedReader br =
-                        new BufferedReader(new InputStreamReader(new ByteArrayInputStream(fileContents), StandardCharsets.UTF_8))
+                        new BufferedReader(new InputStreamReader(new ByteArrayInputStream(fileContents),
+                                StandardCharsets.UTF_8))
         ) {
             while (true) {
                 if (clazz != null && pkg != null) {
-                    return pkg + "." + clazz; // this return should be most likely everywhere inline
+                    return new String[]{pkg, clazz}; // this return should be most likely everywhere inline
                 }
 
                 String line = br.readLine();
@@ -79,17 +91,20 @@ public final class Lib {
                     if (pkg == null && clazz == null) {
                         throw new RuntimeException("Neither package nor class was found.");
                     }
-                    if (pkg == null) {
-                        throw new RuntimeException("Package not found for class '" + clazz + "'.");
-                    }
                     if (clazz == null) {
                         throw new RuntimeException("Class not found for package '" + pkg + "'.");
                     }
+                    if (pkg == null) {
+                        return new String[]{clazz};
+                    }
 
-                    return pkg + "." + clazz;
+                    return new String[]{pkg, clazz};
                 }
 
                 line = line.trim();
+                line = line.replaceAll("/{2,}?", "// "); // jasm-g is using this, and si compilabel...
+                // but jasm compielr do not eed class name...
+                // but maye it woudl be better to get rid of most of the comemtns...
                 String[] commands = line.split(";");
 
                 for (String command : commands) {
@@ -99,7 +114,13 @@ public final class Lib {
                         String keyWord = words[i];
 
                         if ("0xCAFEBABE".equals(keyWord)) { // jcoder uses / and fully qualified class name
-                            return clazz.replace("/", ".");
+                            String fqn = clazz.replace("/", ".");
+                            if (fqn.contains(".")) {
+                                int lastDot = fqn.lastIndexOf('.');
+                                return new String[]{fqn.substring(0, lastDot), fqn.substring(lastDot + 1)};
+                            } else {
+                                return new String[]{fqn};
+                            }
                         }
                         if ("package".equals(keyWord)) {
                             pkg = words[i + 1].replace("/", "."); // jasm uses / instead of .
