@@ -22,6 +22,7 @@
         <jrd.jdk.arg4>jdk.jdeps/com.sun.tools.javap=ALL-UNNAMED</jrd.jdk.arg4>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
+        <cplc.version>2.2-SNAPSHOT</cplc.version>
     </properties>
     <repositories>
       <repository>
@@ -141,17 +142,17 @@
         <dependency>
             <groupId>io.github.mkoncek</groupId>
             <artifactId>classpathless-compiler-api</artifactId>
-            <version>[2.1.1,)</version>
+            <version>2.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>io.github.mkoncek</groupId>
             <artifactId>classpathless-compiler-util</artifactId>
-            <version>[2.1.1,)</version>
+            <version>${cplc.version}</version>
         </dependency>
         <dependency>
             <groupId>io.github.mkoncek</groupId>
             <artifactId>classpathless-compiler</artifactId>
-            <version>[2.1.1,)</version>
+            <version>${cplc.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
