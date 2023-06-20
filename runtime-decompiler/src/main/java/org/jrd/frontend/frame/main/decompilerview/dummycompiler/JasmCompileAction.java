@@ -56,14 +56,8 @@ public class JasmCompileAction extends AbstractCompileAction implements  CanComp
         }, pluginManager);
         try {
             byte[] file = s.getBytes(StandardCharsets.UTF_8);
-            String[] fqn = Lib.guessNameImpl(file);
-            String clazz;
-            if (fqn.length == 1) {
-                clazz = fqn[0];
-            } else {
-                clazz = fqn[0] + "." + fqn[1];
-            }
-            qc.run(jasm, false, new IdentifiedSource(new ClassIdentifier(clazz), file));
+            String fqn = Lib.guessName(file);
+            qc.run(jasm, false, new IdentifiedSource(new ClassIdentifier(fqn), file));
             return qc.waitResult();
         } catch (Exception ex) {
             Logger.getLogger().log(ex);
