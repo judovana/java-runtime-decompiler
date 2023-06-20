@@ -32,6 +32,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jrd.backend.completion.ClassesAndMethodsProvider;
@@ -635,18 +636,41 @@ public class TextWithControls extends JPanel implements LinesProvider {
 
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
-            completionButton.setBackground(Color.BLUE);
-            completionButton.repaint();
-            if (compiler.getWrapper()!=null) {
-                pluginManager.initializeWrapper(compiler.getWrapper());
+            new SwingWorker<Void, Void>() {
+                @Override
+                protected Void doInBackground() throws Exception {
+                    try {
+                        repaintButton(Color.BLUE);
+                        if (compiler.getWrapper() != null) {
+                            pluginManager.initializeWrapper(compiler.getWrapper());
+                        }
+                        Collection<IdentifiedBytecode> l = compiler.compile(bytecodeSyntaxTextArea.getText(),
+                                pluginManager);
+                        if (l == null || l.size() == 0 || new ArrayList<IdentifiedBytecode>(l).get(0).getFile().length == 0) {
+                            repaintButton(Color.RED);
+                        } else {
+                            repaintButton(Color.GREEN);
+                        }
+                    } catch (Throwable t) {
+                        Logger.getLogger().log(Logger.Level.ALL, t);
+                    }
+                    return null;
+                }
+            }.execute();
+        }
+
+        private void repaintButton(final Color color) {
+            try {
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        completionButton.setBackground(color);
+                        completionButton.repaint();
+                    }
+                });
+            } catch (Exception ex) {
+
             }
-            Collection<IdentifiedBytecode> l = compiler.compile(bytecodeSyntaxTextArea.getText(), pluginManager);
-            if (l == null || l.size() == 0 || new ArrayList<IdentifiedBytecode>(l).get(0).getFile().length == 0) {
-                completionButton.setBackground(Color.RED);
-            } else {
-                completionButton.setBackground(Color.GREEN);
-            }
-            completionButton.repaint();
         }
     }
 }
