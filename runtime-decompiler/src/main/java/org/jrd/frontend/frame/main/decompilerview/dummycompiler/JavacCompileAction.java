@@ -18,8 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 
-
-public class JavacCompileAction extends AbstractCompileAction implements  CanCompile{
+public class JavacCompileAction extends AbstractCompileAction implements CanCompile {
 
     private final ClassesAndMethodsProvider classesAndMethodsProvider;
 
@@ -54,10 +53,9 @@ public class JavacCompileAction extends AbstractCompileAction implements  CanCom
         try {
             byte[] file = s.getBytes(StandardCharsets.UTF_8);
             String fqn = Lib.guessName(file);
-            qc.run(null, false, new IdentifiedSource(new ClassIdentifier(fqn),
-                    file));
+            qc.run(null, false, new IdentifiedSource(new ClassIdentifier(fqn), file));
             return qc.waitResult();
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             Logger.getLogger().log(ex);
             return new ArrayList<>(0);
         }
@@ -68,6 +66,4 @@ public class JavacCompileAction extends AbstractCompileAction implements  CanCom
         return null;
     }
 
-
 }
-

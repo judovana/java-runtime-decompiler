@@ -56,11 +56,9 @@ public final class Lib {
     }
 
     public static String initClassNoThrow(VmInfo vmInfo, VmManager vmManager, String fqn) {
-        AgentRequestAction request = DecompilationController.createRequest(vmInfo,
-                AgentRequestAction.RequestAction.INIT_CLASS, fqn);
+        AgentRequestAction request = DecompilationController.createRequest(vmInfo, AgentRequestAction.RequestAction.INIT_CLASS, fqn);
         return DecompilationController.submitRequest(vmManager, request);
     }
-
 
     public static String guessName(byte[] fileContents) throws IOException {
         String[] r = guessNameImpl(fileContents);
@@ -78,8 +76,7 @@ public final class Lib {
 
         try (
                 BufferedReader br =
-                        new BufferedReader(new InputStreamReader(new ByteArrayInputStream(fileContents),
-                                StandardCharsets.UTF_8))
+                        new BufferedReader(new InputStreamReader(new ByteArrayInputStream(fileContents), StandardCharsets.UTF_8))
         ) {
             while (true) {
                 if (clazz != null && pkg != null) {

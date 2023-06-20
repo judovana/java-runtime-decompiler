@@ -539,8 +539,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
                         )
                 );
             }
-                compileAndRun
-                        .add(new JavacCompileAction("compile by javac and run with settings additional cp", classesAndMethodsProvider));
+            compileAndRun.add(new JavacCompileAction("compile by javac and run with settings additional cp", classesAndMethodsProvider));
         }
         if (jasm7 != null) {
             compileAndRun.add(new JasmCompileAction("compile by asmtools7 and run with no classpath", jasm7, classesAndMethodsProvider));
@@ -553,11 +552,11 @@ public class TextWithControls extends JPanel implements LinesProvider {
                             )
                     );
                 }
-                    compileAndRun.add(
-                            new JasmCompileAction(
-                                    "compile by asmtools7 and run with settings " + "additional cp", jasm7, classesAndMethodsProvider
-                            )
-                    );
+                compileAndRun.add(
+                        new JasmCompileAction(
+                                "compile by asmtools7 and run with settings " + "additional cp", jasm7, classesAndMethodsProvider
+                        )
+                );
             }
         }
         if (jasm8 != null) {
@@ -571,11 +570,11 @@ public class TextWithControls extends JPanel implements LinesProvider {
                             )
                     );
                 }
-                    compileAndRun.add(
-                            new JasmCompileAction(
-                                    "compile by asmtools8 and run with settings " + "additional cp", jasm8, classesAndMethodsProvider
-                            )
-                    );
+                compileAndRun.add(
+                        new JasmCompileAction(
+                                "compile by asmtools8 and run with settings " + "additional cp", jasm8, classesAndMethodsProvider
+                        )
+                );
             }
         }
         compileAndRun.add(new BytemanCompileAction("compile by byteman and inject to selected vm"));
@@ -594,10 +593,10 @@ public class TextWithControls extends JPanel implements LinesProvider {
                 compileCp1.addActionListener(new CompileActionListener(pluginManager, compileCp1));
                 compile.add(compileCp1);
             }
-                final JavacCompileAction compileCp2 =
-                        new JavacCompileAction("compile by javac - settings additional cp only", classesAndMethodsProvider);
-                compileCp2.addActionListener(new CompileActionListener(pluginManager, compileCp2));
-                compile.add(compileCp2);
+            final JavacCompileAction compileCp2 =
+                    new JavacCompileAction("compile by javac - settings additional cp only", classesAndMethodsProvider);
+            compileCp2.addActionListener(new CompileActionListener(pluginManager, compileCp2));
+            compile.add(compileCp2);
         }
         if (jasm7 != null) {
             final JasmCompileAction asm7compile = new JasmCompileAction("compile by asmtools7", jasm7, classesAndMethodsProvider);
@@ -625,11 +624,11 @@ public class TextWithControls extends JPanel implements LinesProvider {
 
     }
 
-    private class CompileActionListener implements ActionListener {
+    private final class CompileActionListener implements ActionListener {
         private final PluginManager pluginManager;
         private final CanCompile compiler;
 
-        public CompileActionListener(PluginManager pluginManager, CanCompile compiler) {
+        private CompileActionListener(PluginManager pluginManager, CanCompile compiler) {
             this.pluginManager = pluginManager;
             this.compiler = compiler;
         }
@@ -644,8 +643,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
                         if (compiler.getWrapper() != null) {
                             pluginManager.initializeWrapper(compiler.getWrapper());
                         }
-                        Collection<IdentifiedBytecode> l = compiler.compile(bytecodeSyntaxTextArea.getText(),
-                                pluginManager);
+                        Collection<IdentifiedBytecode> l = compiler.compile(bytecodeSyntaxTextArea.getText(), pluginManager);
                         if (l == null || l.size() == 0 || new ArrayList<IdentifiedBytecode>(l).get(0).getFile().length == 0) {
                             repaintButton(Color.RED);
                         } else {
@@ -669,7 +667,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
                     }
                 });
             } catch (Exception ex) {
-
+                Logger.getLogger().log(ex);
             }
         }
     }

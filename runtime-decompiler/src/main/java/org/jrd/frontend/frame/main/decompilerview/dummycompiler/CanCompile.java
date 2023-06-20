@@ -8,6 +8,7 @@ import java.util.Collection;
 
 public interface CanCompile {
 
-    Collection<IdentifiedBytecode> compile(final String s, final PluginManager pluginManager);
+    Collection<IdentifiedBytecode> compile(String s, PluginManager pluginManager);
+
     DecompilerWrapper getWrapper();
 }

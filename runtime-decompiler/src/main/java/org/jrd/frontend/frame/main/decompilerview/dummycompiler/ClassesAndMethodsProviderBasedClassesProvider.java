@@ -5,7 +5,6 @@ import io.github.mkoncek.classpathless.api.ClassesProvider;
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import org.jrd.backend.completion.ClassesAndMethodsProvider;
 import org.jrd.backend.core.Logger;
-import org.jrd.frontend.frame.main.GlobalConsole;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,7 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-class ClassesAndMethodsProviderBasedClassesProvider implements ClassesProvider {
+public class ClassesAndMethodsProviderBasedClassesProvider implements ClassesProvider {
     private final ClassesAndMethodsProvider classesAndMethodsProvider;
 
     public ClassesAndMethodsProviderBasedClassesProvider(ClassesAndMethodsProvider classesAndMethodsProvider) {
@@ -27,7 +26,7 @@ class ClassesAndMethodsProviderBasedClassesProvider implements ClassesProvider {
             try {
                 byte[] b = classesAndMethodsProvider.getClassItself(null, classIdentifiers[0].getFullName());
                 result.add(new IdentifiedBytecode(ci, b));
-            }catch (Exception ex) {
+            } catch (Exception ex) {
                 Logger.getLogger().log(ex);
             }
         }

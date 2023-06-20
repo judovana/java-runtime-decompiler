@@ -19,7 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class JasmCompileAction extends AbstractCompileAction implements  CanCompile {
+public class JasmCompileAction extends AbstractCompileAction implements CanCompile {
 
     private final DecompilerWrapper jasm;
     private final ClassesAndMethodsProvider classesAndMethodsProvider;
