@@ -442,8 +442,6 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         String additionalDecompiled = "";
         if (additionalBytes != null && additionalBytes.length > 0) {
             try {
-                //FIXME this have to fake vminfo and vmmanager to rovide origin form local cp only
-                //FIXME this actually discovered a bug in some wrappers, which have wrong fallback method (eg cfr, but fernflower is ok)
                 additionalDecompiled =
                         pluginManager.decompile(bytecodeDecompilerView.getSelectedDecompiler(), name, additionalBytes, null, null, null);
             } catch (Exception e) {

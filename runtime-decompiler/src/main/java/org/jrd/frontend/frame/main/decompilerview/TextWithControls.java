@@ -539,7 +539,12 @@ public class TextWithControls extends JPanel implements LinesProvider {
                         )
                 );
             }
-            compileAndRun.add(new JavacCompileAction("compile by javac and run with settings additional cp", new ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider()));
+            compileAndRun.add(
+                    new JavacCompileAction(
+                            "compile by javac and run with settings additional cp",
+                            new ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider()
+                    )
+            );
         }
         if (jasm7 != null) {
             compileAndRun.add(new JasmCompileAction("compile by asmtools7 and run with no classpath", jasm7, classesAndMethodsProvider));
@@ -593,8 +598,9 @@ public class TextWithControls extends JPanel implements LinesProvider {
                 compileCp1.addActionListener(new CompileActionListener(pluginManager, compileCp1));
                 compile.add(compileCp1);
             }
-            final JavacCompileAction compileCp2 =
-                    new JavacCompileAction("compile by javac - settings additional cp only", new ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider());
+            final JavacCompileAction compileCp2 = new JavacCompileAction(
+                    "compile by javac - settings additional cp only", new ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider()
+            );
             compileCp2.addActionListener(new CompileActionListener(pluginManager, compileCp2));
             compile.add(compileCp2);
         }

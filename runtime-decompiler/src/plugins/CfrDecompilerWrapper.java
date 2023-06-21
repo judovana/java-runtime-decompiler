@@ -93,7 +93,38 @@ public class CfrDecompilerWrapper {
     }
 
     private File getFileFrom(File dir, String fqn) {
-        return new File(dir.getAbsolutePath() + File.separator + fqn.replace('.', File.separatorChar)+".java");
+        File properFile =  new File(dir.getAbsolutePath() + File.separator + fqn.replace('.', File.separatorChar)+".java");
+        if (properFile.exists()) {
+            return properFile;
+        } else {
+            List<File> files = null;
+            try {
+                files = findFile(dir);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+            if (files == null || files.size() == 0) {
+                throw new RuntimeException("No output found in " + dir);
+            } else if (files.size() == 1) {
+                return files.get(0);
+            } else {
+                System.err.println("To much resutled from decompilation! Returning first");
+                return files.get(0);
+            }
+        }
+    }
+
+    List<File> findFile(File start) throws IOException {
+        File[] files = start.listFiles();
+        List<File> r  =new ArrayList<>(files.length);
+        for (File f: files) {
+            if (f.isFile()) {
+                r.add(f);
+            } else if (f.isDirectory()) {
+                r.addAll(findFile(f));
+            }
+        }
+        return r;
     }
 
     private String readStringFromFile(File filePath) throws IOException {
