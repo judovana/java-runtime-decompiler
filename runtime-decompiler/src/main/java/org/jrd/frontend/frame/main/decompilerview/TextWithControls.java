@@ -422,12 +422,17 @@ public class TextWithControls extends JPanel implements LinesProvider {
             guess.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent actionEvent) {
-                    List<CompletionItem.CompletionItemSet> guessed =
-                            SupportedKeySets.JRD_KEY_SETS.recognize(bytecodeSyntaxTextArea.getText());
+                    List<CompletionItem.CompletionItemSet> guessed = SupportedKeySets.JRD_KEY_SETS.recognize(
+                            bytecodeSyntaxTextArea.getText());
                     normalCodeCompletionGuess(guessed);
                 }
             });
             menu.add(guess);
+            JMenu templatesMenu = new JMenu("Templates");
+            templatesMenu.add(new JMenuItem("byteman"));
+            templatesMenu.add(new JMenuItem("jasm"));
+            templatesMenu.add(new JMenuItem("java"));
+            menu.add(templatesMenu);
             Object[] detectedJasms = detectJasms();
             PluginManager pluginManager = (PluginManager) detectedJasms[0];
             DecompilerWrapper jasm7 = (DecompilerWrapper) detectedJasms[1];
