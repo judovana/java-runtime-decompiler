@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JMenu;
@@ -35,6 +36,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import org.jrd.backend.completion.ClassesAndMethodsProvider;
 import org.jrd.backend.completion.JrdCompletionSettings;
 import org.jrd.backend.core.Logger;
@@ -45,6 +47,8 @@ import org.jrd.frontend.frame.main.decompilerview.dummycompiler.BytemanCompileAc
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.AbstractCompileAction;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.CanCompile;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.JasmCompileAction;
+import org.jrd.frontend.frame.main.decompilerview.dummycompiler.JasmTempalteMenuItem;
+import org.jrd.frontend.frame.main.decompilerview.dummycompiler.JavaTempalteMenuItem;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.JavacCompileAction;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.JustBearerAction;
 import org.jrd.frontend.utility.ImageButtonFactory;
@@ -69,6 +73,9 @@ public class TextWithControls extends JPanel implements LinesProvider {
     private JrdCompletionSettings oldSettings;
     private AbstractCompileAction lastCompile;
     private AbstractCompileAction lastCompileAndRun;
+    private String execute = "";
+    private File save = null;
+    private boolean addToRunningVm = false;//fixme, dont forget to reset it after sucesfull addition!
 
     private final JButton completionButton = ImageButtonFactory.createEditButton("Code completion and compilation");
 
@@ -428,10 +435,15 @@ public class TextWithControls extends JPanel implements LinesProvider {
                 }
             });
             menu.add(guess);
+            JMenu advanced = new JMenu("advanced");
+            advanced.add(new JMenuItem("set compilation output directory (otherwise in memory only)"));
+            advanced.add(new JMenuItem("set public static method for launch (\"start\" by default"));
+            advanced.add(new JCheckBox("add to running vm - this can be done only once for each class, not applicable to byteman"));
+            menu.add(advanced);
             JMenu templatesMenu = new JMenu("Templates");
             templatesMenu.add(new JMenuItem("byteman"));
-            templatesMenu.add(new JMenuItem("jasm"));
-            templatesMenu.add(new JMenuItem("java"));
+            templatesMenu.add(new JasmTempalteMenuItem(bytecodeSyntaxTextArea, "jasm"));
+            templatesMenu.add(new JavaTempalteMenuItem(bytecodeSyntaxTextArea, "java"));
             menu.add(templatesMenu);
             Object[] detectedJasms = detectJasms();
             PluginManager pluginManager = (PluginManager) detectedJasms[0];
@@ -535,42 +547,36 @@ public class TextWithControls extends JPanel implements LinesProvider {
 
     private JMenu getCompileAndRunMenu(PluginManager pluginManager, DecompilerWrapper jasm7, DecompilerWrapper jasm8) {
         JMenu compileAndRun = new JMenu("Compile and run");
-        compileAndRun.add(new JavacCompileAction("compile by javac and run with no classpath", null));
+        final JavacCompileAction compileNoCp = new JavacCompileAction("compile by javac and run with no classpath", null);
+        compileNoCp.addActionListener(new CompileActionListener(pluginManager, compileNoCp, execute));
+        compileAndRun.add(compileNoCp);
         if (classesAndMethodsProvider != null) {
             if (classesAndMethodsProvider instanceof DecompilationController) {
-                compileAndRun.add(
-                        new JavacCompileAction(
-                                "compile by javac and run with selected vm classpath" + " (+additional)", classesAndMethodsProvider
-                        )
-                );
+                compileAndRun.add(new JavacCompileAction("compile by javac and run with selected vm classpath" + " (+additional)",
+                        classesAndMethodsProvider));
             }
-            compileAndRun.add(
-                    new JavacCompileAction(
-                            "compile by javac and run with settings additional cp",
-                            new ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider()
-                    )
-            );
+            compileAndRun.add(new JavacCompileAction("compile by javac and run with settings additional cp",
+                    new ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider()));
         }
         if (jasm7 != null) {
-            compileAndRun.add(new JasmCompileAction("compile by asmtools7 and run with no classpath", jasm7, classesAndMethodsProvider));
+            final JasmCompileAction asm7compile = (new JasmCompileAction("compile by asmtools7 and run with no classpath", jasm7,
+                    null));
+            asm7compile.addActionListener(new CompileActionListener(pluginManager, asm7compile, execute));
+            compileAndRun.add(asm7compile);
             if (classesAndMethodsProvider != null) {
                 if (classesAndMethodsProvider instanceof DecompilationController) {
                     compileAndRun.add(
-                            new JasmCompileAction(
-                                    "compile by asmtools7 and run with selected vm " + "classpath " + "(+additional)", jasm7,
-                                    classesAndMethodsProvider
-                            )
-                    );
+                            new JasmCompileAction("compile by asmtools7 and run with selected vm " + "classpath " + "(+additional)",
+                                    jasm7, classesAndMethodsProvider));
                 }
                 compileAndRun.add(
-                        new JasmCompileAction(
-                                "compile by asmtools7 and run with settings " + "additional cp", jasm7, classesAndMethodsProvider
-                        )
+                        new JasmCompileAction("compile by asmtools7 and run with settings " + "additional cp", jasm7,
+                                new ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider())
                 );
             }
         }
         if (jasm8 != null) {
-            compileAndRun.add(new JasmCompileAction("compile by asmtools8 and run with no classpath", jasm8, classesAndMethodsProvider));
+            compileAndRun.add(new JasmCompileAction("compile by asmtools8 and run with no classpath", jasm8, null));
             if (classesAndMethodsProvider != null) {
                 if (classesAndMethodsProvider instanceof DecompilationController) {
                     compileAndRun.add(
@@ -581,9 +587,8 @@ public class TextWithControls extends JPanel implements LinesProvider {
                     );
                 }
                 compileAndRun.add(
-                        new JasmCompileAction(
-                                "compile by asmtools8 and run with settings " + "additional cp", jasm8, classesAndMethodsProvider
-                        )
+                        new JasmCompileAction("compile by asmtools8 and run with settings " + "additional cp", jasm8,
+                                new ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider())
                 );
             }
         }
@@ -594,30 +599,30 @@ public class TextWithControls extends JPanel implements LinesProvider {
     private JMenu getCompileMenu(PluginManager pluginManager, DecompilerWrapper jasm7, DecompilerWrapper jasm8) {
         JMenu compile = new JMenu("Compilation");
         final JavacCompileAction compileNoCp = new JavacCompileAction("compile by javac - no CP", null);
-        compileNoCp.addActionListener(new CompileActionListener(pluginManager, compileNoCp));
+        compileNoCp.addActionListener(new CompileActionListener(pluginManager, compileNoCp, null));
         compile.add(compileNoCp);
         if (classesAndMethodsProvider != null) {
             if (classesAndMethodsProvider instanceof DecompilationController) {
                 final JavacCompileAction compileCp1 =
                         new JavacCompileAction("compile by javac - selected vm classpath (+additional)", classesAndMethodsProvider);
-                compileCp1.addActionListener(new CompileActionListener(pluginManager, compileCp1));
+                compileCp1.addActionListener(new CompileActionListener(pluginManager, compileCp1, null));
                 compile.add(compileCp1);
             }
             final JavacCompileAction compileCp2 = new JavacCompileAction(
                     "compile by javac - settings additional cp only", new ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider()
             );
-            compileCp2.addActionListener(new CompileActionListener(pluginManager, compileCp2));
+            compileCp2.addActionListener(new CompileActionListener(pluginManager, compileCp2, null));
             compile.add(compileCp2);
         }
         if (jasm7 != null) {
-            final JasmCompileAction asm7compile = new JasmCompileAction("compile by asmtools7", jasm7, classesAndMethodsProvider);
-            asm7compile.addActionListener(new CompileActionListener(pluginManager, asm7compile));
+            final JasmCompileAction asm7compile = new JasmCompileAction("compile by asmtools7", jasm7, null);
+            asm7compile.addActionListener(new CompileActionListener(pluginManager, asm7compile, null));
             compile.add(asm7compile);
 
         }
         if (jasm8 != null) {
-            final JasmCompileAction asm8compile = new JasmCompileAction("compile by asmtools8", jasm8, classesAndMethodsProvider);
-            asm8compile.addActionListener(new CompileActionListener(pluginManager, asm8compile));
+            final JasmCompileAction asm8compile = new JasmCompileAction("compile by asmtools8", jasm8, null);
+            asm8compile.addActionListener(new CompileActionListener(pluginManager, asm8compile, null));
             compile.add(asm8compile);
         }
         compile.add(new BytemanCompileAction("compile by byteman"));
@@ -638,11 +643,14 @@ public class TextWithControls extends JPanel implements LinesProvider {
     private final class CompileActionListener implements ActionListener {
         private final PluginManager pluginManager;
         private final CanCompile compiler;
+        private final String execute;
 
-        private CompileActionListener(PluginManager pluginManager, CanCompile compiler) {
+        private CompileActionListener(PluginManager pluginManager, CanCompile compiler, String execute) {
             this.pluginManager = pluginManager;
             this.compiler = compiler;
+            this.execute = execute;
         }
+
 
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
@@ -654,7 +662,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
                         if (compiler.getWrapper() != null) {
                             pluginManager.initializeWrapper(compiler.getWrapper());
                         }
-                        Collection<IdentifiedBytecode> l = compiler.compile(bytecodeSyntaxTextArea.getText(), pluginManager);
+                        Collection<IdentifiedBytecode> l = compiler.compile(bytecodeSyntaxTextArea.getText(), pluginManager, execute);
                         if (l == null || l.size() == 0 || new ArrayList<IdentifiedBytecode>(l).get(0).getFile().length == 0) {
                             repaintButton(Color.RED);
                         } else {

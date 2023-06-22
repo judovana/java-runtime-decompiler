@@ -5,6 +5,7 @@ import org.jrd.frontend.frame.main.GlobalConsole;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.logging.Level;
 
 /**
  * Class for logging Strings and Exceptions
@@ -68,9 +69,9 @@ public class Logger {
                 ((Throwable) o).printStackTrace();
             }
             if (guiLogging) {
-                GlobalConsole.getConsole().addMessage(java.util.logging.Level.ALL, o.toString());
+                GlobalConsole.getConsole().addMessage(java.util.logging.Level.SEVERE, o.toString());
                 if (isVerbose()) {
-                    GlobalConsole.getConsole().addMessage(java.util.logging.Level.ALL, exToString((Throwable) o));
+                    GlobalConsole.getConsole().addMessage(java.util.logging.Level.SEVERE, exToString((Throwable) o));
                 }
             }
             // show gui error dialog? Add shownexttime checkbox?

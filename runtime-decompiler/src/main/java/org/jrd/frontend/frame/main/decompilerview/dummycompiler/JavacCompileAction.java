@@ -4,6 +4,7 @@ import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.ClassesProvider;
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
+
 import org.jrd.backend.completion.ClassesAndMethodsProvider;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.VmInfo;
@@ -14,6 +15,8 @@ import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.main.ModelProvider;
 import org.jrd.frontend.frame.main.decompilerview.QuickCompiler;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,7 +30,8 @@ public class JavacCompileAction extends AbstractCompileAction implements CanComp
         this.classesAndMethodsProvider = classesAndMethodsProvider;
     }
 
-    public Collection<IdentifiedBytecode> compile(final String s, final PluginManager pluginManager) {
+    @Override
+    public Collection<IdentifiedBytecode> compile(final String s, final PluginManager pluginManager, String execute) {
         final ClassesProvider classesProvider;
         if (classesAndMethodsProvider == null) {
             classesProvider = new NullClassesProvider();
@@ -50,16 +54,22 @@ public class JavacCompileAction extends AbstractCompileAction implements CanComp
                 return classesProvider;
             }
         }, pluginManager);
+        Collection<IdentifiedBytecode> result;
         try {
             byte[] file = s.getBytes(StandardCharsets.UTF_8);
             String fqn = Lib.guessName(file);
             qc.run(null, false, new IdentifiedSource(new ClassIdentifier(fqn), file));
-            return qc.waitResult();
+            result = qc.waitResult();
+            if (execute != null) {
+                CanCompile.run(fqn, result, execute);
+            }
         } catch (Exception ex) {
-            Logger.getLogger().log(ex);
+            Logger.getLogger().log(Logger.Level.ALL, ex);
             return new ArrayList<>(0);
         }
+        return result;
     }
+
 
     @Override
     public DecompilerWrapper getWrapper() {
