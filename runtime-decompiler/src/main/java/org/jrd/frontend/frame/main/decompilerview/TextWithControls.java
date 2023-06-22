@@ -438,7 +438,9 @@ public class TextWithControls extends JPanel implements LinesProvider {
             JMenu advanced = new JMenu("advanced");
             advanced.add(new JMenuItem("set compilation output directory (otherwise in memory only)"));
             advanced.add(new JMenuItem("set public static method for launch (\"start\" by default"));
-            advanced.add(new JCheckBox("add to running vm - this can be done only once for each class, not applicable to byteman"));
+            if (classesAndMethodsProvider instanceof DecompilationController) {
+                advanced.add(new JCheckBox("add to running vm - this can be done only once for each class, not applicable to byteman"));
+            }
             menu.add(advanced);
             JMenu templatesMenu = new JMenu("Templates");
             templatesMenu.add(new JMenuItem("byteman"));
