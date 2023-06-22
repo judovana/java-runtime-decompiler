@@ -120,10 +120,14 @@ public final class Lib {
                             }
                         }
                         if ("package".equals(keyWord)) {
-                            pkg = words[i + 1].replace("/", "."); // jasm uses / instead of .
+                            if (pkg == null) {
+                                pkg = words[i + 1].replace("/", "."); // jasm uses / instead of .
+                            }
                         }
                         if ("class".equals(keyWord) || "interface".equals(keyWord) || "enum".equals(keyWord)) {
-                            clazz = words[i + 1];
+                            if (clazz == null) {
+                                clazz = words[i + 1];
+                            }
                         }
                     }
                 }

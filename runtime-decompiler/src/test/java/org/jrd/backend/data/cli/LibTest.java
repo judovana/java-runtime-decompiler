@@ -19,6 +19,17 @@ class LibTest {
     }
 
     @Test
+    void guessNameJavaInner() throws IOException {
+        String s;
+        s = Lib.guessName(("package x;\n public class a {\n" + "\n" + "\tprivate class b {\n" + "\t\t\n" + "\t}\n" + "}\n").getBytes(
+                StandardCharsets.UTF_8));
+        Assertions.assertEquals("x.a", s);
+        s = Lib.guessName(
+                ("public class a {\n" + "\n" + "\tprivate class b {\n" + "\t\t\n" + "\t}\n" + "}\n").getBytes(StandardCharsets.UTF_8));
+        Assertions.assertEquals("a", s);
+    }
+
+    @Test
     void guessNameJava() throws IOException {
         String s;
         s = Lib.guessName("package a; class b".getBytes(StandardCharsets.UTF_8));
