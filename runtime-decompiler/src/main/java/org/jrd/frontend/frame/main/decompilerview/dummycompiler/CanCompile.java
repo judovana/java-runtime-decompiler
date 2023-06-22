@@ -18,7 +18,7 @@ public interface CanCompile {
     static void run(String fqn, Collection<IdentifiedBytecode> result, String execute)
             throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException,
             InvocationTargetException {
-        ClassLoader classLoader = new ClassLoader() {
+        ClassLoader classLoader = new ClassLoader(null) {
             @Override
             public Class findClass(String name) throws ClassNotFoundException {
                 for (IdentifiedBytecode ib : result) {
@@ -26,7 +26,16 @@ public interface CanCompile {
                         return defineClass(name, ib.getFile(), 0, ib.getFile().length);
                     }
                 }
-                return getParent().loadClass(name);
+                return loadClass(name);
+            }
+
+            @Override
+            public Class<?> loadClass(String name) throws ClassNotFoundException {
+                return super.loadClass(name);
+            }
+            @Override
+            public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+                return super.loadClass(name, resolve);
             }
 
         };

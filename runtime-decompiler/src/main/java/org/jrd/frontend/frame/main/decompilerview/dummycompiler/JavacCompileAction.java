@@ -15,8 +15,6 @@ import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.main.ModelProvider;
 import org.jrd.frontend.frame.main.decompilerview.QuickCompiler;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,7 +58,7 @@ public class JavacCompileAction extends AbstractCompileAction implements CanComp
             String fqn = Lib.guessName(file);
             qc.run(null, false, new IdentifiedSource(new ClassIdentifier(fqn), file));
             result = qc.waitResult();
-            if (execute != null) {
+            if (execute != null && result != null && result.size()>0) {
                 CanCompile.run(fqn, result, execute);
             }
         } catch (Exception ex) {

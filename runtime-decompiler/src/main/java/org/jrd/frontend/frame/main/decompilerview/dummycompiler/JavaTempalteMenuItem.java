@@ -16,7 +16,11 @@ public class JavaTempalteMenuItem extends JMenuItem {
                 source.append("\n" + "package jrd.template;\n\nimport java.awt.Color;\n" + "import java.awt.Dimension;\n" + "import "
                         + "java" + ".awt.FlowLayout;\n" + "\n" + "import javax.swing.BorderFactory;\n" + "import javax.swing.JFrame;\n"
                         + "import javax.swing.JLabel;\n" + "import javax.swing.border.Border;\n"
-                        + "import javax.swing.SwingUtilities;\n" + "\n" + "public class HelloWorldSwing {\n" + "\n"
+                        + "import javax.swing.SwingUtilities;\n"
+                        + "//import org.jrd.agent.Main;//should not be available on this-cp\n"
+                        + "//import org.jrd.frontend.frame.main.decompilerview.dummycompilerNullClassesProvider; " +
+                        "//should be available on this-cp\n"
+                        + "\n" + "public class HelloWorldSwing {\n" + "\n"
                         + "    public static void start() {\n" + "        JFrame jFrame = new JFrame(\"Hello World Swing Example\");\n"
                         + "        jFrame.setLayout(new FlowLayout());\n" + "        jFrame.setSize(500, 360);\n"
                         + "        jFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);\n" + "\n" + "\n"

@@ -552,14 +552,17 @@ public class TextWithControls extends JPanel implements LinesProvider {
         final JavacCompileAction compileNoCp = new JavacCompileAction("compile by javac and run with no classpath", null);
         compileNoCp.addActionListener(new CompileActionListener(pluginManager, compileNoCp, execute));
         compileAndRun.add(compileNoCp);
-        if (classesAndMethodsProvider != null) {
-            if (classesAndMethodsProvider instanceof DecompilationController) {
-                compileAndRun.add(new JavacCompileAction("compile by javac and run with selected vm classpath" + " (+additional)",
-                        classesAndMethodsProvider));
-            }
-            compileAndRun.add(new JavacCompileAction("compile by javac and run with settings additional cp",
-                    new ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider()));
+        if (classesAndMethodsProvider instanceof DecompilationController) {
+            final JavacCompileAction compileCp1 =
+                        new JavacCompileAction("compile by javac and run with selected vm classpath" + " " +
+                                "(+additional)", classesAndMethodsProvider);
+            compileCp1.addActionListener(new CompileActionListener(pluginManager, compileCp1, execute));
+            compileAndRun.add(compileCp1);
         }
+        final JavacCompileAction compileCp2 = new JavacCompileAction("compile by javac and run with settings " +
+                "additional cp", new ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider());
+        compileCp2.addActionListener(new CompileActionListener(pluginManager, compileCp2, execute));
+        compileAndRun.add(compileCp2);
         if (jasm7 != null) {
             final JasmCompileAction asm7compile = (new JasmCompileAction("compile by asmtools7 and run with no classpath", jasm7,
                     null));
