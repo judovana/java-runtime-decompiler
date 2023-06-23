@@ -18,7 +18,7 @@ public class JasmTempalteMenuItem extends JMenuItem {
                         + "\t\tinvokespecial\tMethod java/lang/Object.\"<init>\":\"()V\";\n" + "\t\treturn;\n" + "  }\n"
                         + "  public static Method start:\"()V\"\n" + "\tstack 2 locals 0\n" + "  {\n"
                         + "\t\tgetstatic\tField java/lang/System.out:\"Ljava/io/PrintStream;\";\n"
-                        + "\t\tldc\tString \"hello on stdout\";\n"
+                        + "\t\tldc\tString \"hello on stdout. See terminal!\";\n"
                         + "\t\tinvokevirtual\tMethod java/io/PrintStream.println:\"(Ljava/lang/String;)V\";\n" + "\t\treturn;\n"
                         + "  }\n" + "  public static Method main:\"([Ljava/lang/String;)V\"\n" + "\tstack 0 locals 1\n" + "  {\n"
                         + "\t\tinvokestatic\tMethod start:\"()V\";\n" + "\t\treturn;\n" + "  }\n" + "\n"

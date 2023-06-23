@@ -61,7 +61,7 @@ public class JasmCompileAction extends AbstractCompileAction implements CanCompi
             qc.run(jasm, false, new IdentifiedSource(new ClassIdentifier(fqn), file));
             result = qc.waitResult();
             if (execute != null && result != null && result.size()>0) {
-                CanCompile.run(fqn, result, execute);
+                CanCompile.run(fqn, result, execute, classesProvider);
             }
         } catch (Exception ex) {
             Logger.getLogger().log(Logger.Level.ALL, ex);

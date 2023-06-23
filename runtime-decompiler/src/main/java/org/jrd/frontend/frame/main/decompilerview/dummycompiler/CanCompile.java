@@ -1,5 +1,7 @@
 package org.jrd.frontend.frame.main.decompilerview.dummycompiler;
 
+import io.github.mkoncek.classpathless.api.ClassIdentifier;
+import io.github.mkoncek.classpathless.api.ClassesProvider;
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 
 import org.jrd.backend.decompiling.DecompilerWrapper;
@@ -7,6 +9,7 @@ import org.jrd.backend.decompiling.PluginManager;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
 
 public interface CanCompile {
@@ -15,7 +18,7 @@ public interface CanCompile {
 
     DecompilerWrapper getWrapper();
 
-    static void run(String fqn, Collection<IdentifiedBytecode> result, String execute)
+    static void run(String fqn, Collection<IdentifiedBytecode> result, String execute, ClassesProvider classesProvider)
             throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException,
             InvocationTargetException {
         ClassLoader classLoader = new ClassLoader(null) {
@@ -26,7 +29,12 @@ public interface CanCompile {
                         return defineClass(name, ib.getFile(), 0, ib.getFile().length);
                     }
                 }
-                return loadClass(name);
+                Collection<IdentifiedBytecode> classloaderSpecificClasses = classesProvider.getClass(new ClassIdentifier(name));
+                if (classloaderSpecificClasses.size() == 1) {
+                    IdentifiedBytecode clazz = new ArrayList<>(classloaderSpecificClasses).get(0);
+                    return defineClass(clazz.getClassIdentifier().getFullName(), clazz.getFile(), 0, clazz.getFile().length);
+                }
+                throw new ClassNotFoundException(name);
             }
 
             @Override
@@ -44,7 +52,7 @@ public interface CanCompile {
         //Object main = clz.newInstance();
         String methodnameAndSignature = execute.trim();
         if (methodnameAndSignature.isEmpty()) {
-            methodnameAndSignature = "start";
+            methodnameAndSignature = "start"; //fallback to main?
         }
         Method test = clz.getMethod(methodnameAndSignature);
         //test.invoke(main);

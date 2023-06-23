@@ -464,7 +464,7 @@ public class MainFrameView {
         jMenuHelp = new JMenu("Help");
         jMenuItemAbout = new JMenuItem("About");
         jMenuItemAbout.addActionListener(actionEvent -> {
-            new AboutView(this);
+            new AboutView(this.getMainFrame(), true);
         });
         jMenuItemUsage = new JMenuItem("Usage");
         jMenuItemUsage.addActionListener(actionEvent -> {
