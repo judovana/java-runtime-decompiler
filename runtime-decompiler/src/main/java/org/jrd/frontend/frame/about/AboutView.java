@@ -27,7 +27,7 @@ public class AboutView extends JDialog {
         JEditorPane editorPane = new JEditorPane(
                 "text/html",
                 "<html><body style=\"" + style + "\">" + "<h2>Java-Runtime-Decompiler</h2>" + "Version " +
-                        (showVersion?MetadataProperties.getInstance().getVersion():"No version") + "<br />" +
+                        (showVersion ? MetadataProperties.getInstance().getVersion() : "No version") + "<br />" +
                         "Licenced under the GNU General Public License v3.0<br />" +
                         "Visit <a href=\"https://github.com/pmikova/java-runtime-decompiler\">the GitHub repository</a>" +
                         " for more information.<br />" + "</body></html>"
@@ -48,8 +48,6 @@ public class AboutView extends JDialog {
         editorPane.setEditable(false);
         editorPane.setBackground(new Color(label.getBackground().getRGB()));
 
-        JOptionPane.showMessageDialog(
-                mainFrameView, editorPane, "About Java-Runtime-Decompiler", JOptionPane.INFORMATION_MESSAGE
-        );
+        JOptionPane.showMessageDialog(mainFrameView, editorPane, "About Java-Runtime-Decompiler", JOptionPane.INFORMATION_MESSAGE);
     }
 }

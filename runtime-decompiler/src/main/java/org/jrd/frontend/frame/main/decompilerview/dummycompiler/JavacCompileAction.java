@@ -58,7 +58,7 @@ public class JavacCompileAction extends AbstractCompileAction implements CanComp
             String fqn = Lib.guessName(file);
             qc.run(null, false, new IdentifiedSource(new ClassIdentifier(fqn), file));
             result = qc.waitResult();
-            if (execute != null && result != null && result.size()>0) {
+            if (execute != null && result != null && result.size() > 0) {
                 CanCompile.run(fqn, result, execute, classesProvider);
             }
         } catch (Exception ex) {
@@ -67,7 +67,6 @@ public class JavacCompileAction extends AbstractCompileAction implements CanComp
         }
         return result;
     }
-
 
     @Override
     public DecompilerWrapper getWrapper() {
