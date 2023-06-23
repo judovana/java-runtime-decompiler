@@ -46,6 +46,7 @@ import org.jrd.frontend.frame.main.GlobalConsole;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.BytemanCompileAction;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.AbstractCompileAction;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.CanCompile;
+import org.jrd.frontend.frame.main.decompilerview.dummycompiler.Jasm2TempalteMenuItem;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.JasmCompileAction;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.JasmTempalteMenuItem;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.JavaTempalteMenuItem;
@@ -439,12 +440,14 @@ public class TextWithControls extends JPanel implements LinesProvider {
             advanced.add(new JMenuItem("set compilation output directory (otherwise in memory only)"));
             advanced.add(new JMenuItem("set public static method for launch (\"start\" by default"));
             if (classesAndMethodsProvider instanceof DecompilationController) {
-                advanced.add(new JCheckBox("add to running vm - this can be done only once for each class, not applicable to byteman"));
+                advanced.add(
+                        new JCheckBox("add to running vm - this can be done only once for each class, not applicable to byteman"));
             }
             menu.add(advanced);
             JMenu templatesMenu = new JMenu("Templates");
             templatesMenu.add(new JMenuItem("byteman"));
-            templatesMenu.add(new JasmTempalteMenuItem(bytecodeSyntaxTextArea, "jasm"));
+            templatesMenu.add(new JasmTempalteMenuItem(bytecodeSyntaxTextArea, "jasm1"));
+            templatesMenu.add(new Jasm2TempalteMenuItem(bytecodeSyntaxTextArea, "jasm2"));
             templatesMenu.add(new JavaTempalteMenuItem(bytecodeSyntaxTextArea, "java"));
             menu.add(templatesMenu);
             Object[] detectedJasms = detectJasms();
@@ -570,14 +573,18 @@ public class TextWithControls extends JPanel implements LinesProvider {
             compileAndRun.add(asm7compile);
             if (classesAndMethodsProvider != null) {
                 if (classesAndMethodsProvider instanceof DecompilationController) {
-                    compileAndRun.add(
-                            new JasmCompileAction("compile by asmtools7 and run with selected vm " + "classpath " + "(+additional)",
-                                    jasm7, classesAndMethodsProvider));
+                    final JasmCompileAction asm7compileRunRuntime = new JasmCompileAction(
+                            "compile by asmtools7 and run with " + "selected vm " + "classpath " + "(+additional)", jasm7,
+                            classesAndMethodsProvider);
+                    asm7compileRunRuntime.addActionListener(new CompileActionListener(pluginManager, asm7compileRunRuntime, execute));
+                    compileAndRun.add(asm7compileRunRuntime);
                 }
-                compileAndRun.add(
-                        new JasmCompileAction("compile by asmtools7 and run with settings " + "additional cp", jasm7,
-                                new ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider())
-                );
+                final JasmCompileAction asm7compileRunsettings = new JasmCompileAction(
+                        "compile by asmtools7 and run with settings " + "additional cp", jasm7,
+                        new ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider());
+                asm7compileRunsettings.addActionListener(
+                        new CompileActionListener(pluginManager, asm7compileRunsettings, execute));
+                compileAndRun.add(asm7compileRunsettings);
             }
         }
         if (jasm8 != null) {
