@@ -1,5 +1,6 @@
 package org.jrd.frontend.frame.main.decompilerview.dummycompiler;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.ClassesProvider;
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
@@ -18,9 +19,12 @@ public interface CanCompile {
 
     DecompilerWrapper getWrapper();
 
+    @SuppressFBWarnings(value = "DP_CREATE_CLASSLOADER_INSIDE_DO_PRIVILEGED", justification = "safety is not an goal here")
     static void run(String fqn, Collection<IdentifiedBytecode> result, String execute, ClassesProvider classesProvider)
             throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException,
             InvocationTargetException {
+        // without parent, all classes form rt.jar/jdk's modules have to be find there.
+        // loadClass are there just for debugging
         ClassLoader classLoader = new ClassLoader(null) {
             @Override
             public Class findClass(String name) throws ClassNotFoundException {

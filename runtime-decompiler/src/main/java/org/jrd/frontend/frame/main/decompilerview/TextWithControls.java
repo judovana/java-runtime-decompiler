@@ -75,8 +75,8 @@ public class TextWithControls extends JPanel implements LinesProvider {
     private AbstractCompileAction lastCompile;
     private AbstractCompileAction lastCompileAndRun;
     private String execute = "";
-    private File save = null;
-    private boolean addToRunningVm = false;//fixme, dont forget to reset it after sucesfull addition!
+    private File save;
+    private boolean addToRunningVm = false; //fixme, dont forget to reset it after sucesfull addition!
 
     private final JButton completionButton = ImageButtonFactory.createEditButton("Code completion and compilation");
 
@@ -568,7 +568,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
         compileCp2.addActionListener(new CompileActionListener(pluginManager, compileCp2, execute));
         compileAndRun.add(compileCp2);
         if (jasm7 != null) {
-            final JasmCompileAction asm7compile = (new JasmCompileAction("compile by asmtools7 and run with no classpath", jasm7, null));
+            final JasmCompileAction asm7compile = new JasmCompileAction("compile by asmtools7 and run with no classpath", jasm7, null);
             asm7compile.addActionListener(new CompileActionListener(pluginManager, asm7compile, execute));
             compileAndRun.add(asm7compile);
             if (classesAndMethodsProvider != null) {

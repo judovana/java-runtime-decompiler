@@ -5,7 +5,6 @@ import org.jrd.frontend.frame.main.GlobalConsole;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
-import java.util.logging.Level;
 
 /**
  * Class for logging Strings and Exceptions

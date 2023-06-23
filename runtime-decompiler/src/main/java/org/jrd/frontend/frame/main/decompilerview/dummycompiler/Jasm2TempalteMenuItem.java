@@ -29,8 +29,8 @@ public class Jasm2TempalteMenuItem extends JMenuItem {
                                 "  {\n" + "\t\tinvokestatic\tMethod start:\"()V\";\n" + "\t\treturn;\n" + "  }\n" +
                                 "  public static Method showJrdAbout:\"()V\"\n" + "\tstack 4 locals 0\n" + "  {\n" +
                                 "\t\tnew\tclass org/jrd/frontend/frame/about/AboutView;\n" + "\t\tdup;\n" + "\t\taconst_null;\n" +
-                                "\t\ticonst_0;\n" +
-                                "\t\tinvokespecial\tMethod org/jrd/frontend/frame/about/AboutView.\"<init>\":\"(Ljavax/swing/JFrame;Z)V\";\n" +
+                                "\t\ticonst_0;\n" + "\t\tinvokespecial\t" +
+                                "Method org/jrd/frontend/frame/about/AboutView.\"<init>\":\"(Ljavax/swing/JFrame;Z)V\";\n" +
                                 "\t\ticonst_1;\n" +
                                 "\t\tinvokevirtual\tMethod org/jrd/frontend/frame/about/AboutView.setVisible:\"(Z)V\";\n" +
                                 "\t\treturn;\n" + "  }\n" + "  public static Method dunmpAgentVars:\"()V\"\n" + "\tstack 1 locals 0\n" +
