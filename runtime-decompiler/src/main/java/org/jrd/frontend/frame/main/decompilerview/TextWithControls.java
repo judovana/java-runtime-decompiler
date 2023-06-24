@@ -439,8 +439,13 @@ public class TextWithControls extends JPanel implements LinesProvider {
             JMenu advanced = new JMenu("advanced");
             advanced.add(new JMenuItem("set compilation output directory (otherwise in memory only)"));
             advanced.add(new JMenuItem("set public static method for launch (\"start\" by default"));
-            if (classesAndMethodsProvider instanceof DecompilationController) {
-                advanced.add(new JCheckBox("add to running vm - this can be done only once for each class, not applicable to byteman"));
+            if (hasVm(classesAndMethodsProvider)) {
+                advanced.add(
+                        new JCheckBox(
+                                "add to running vm - this can be done only once for each class, not " + "applicable to byteman - " +
+                                        ((DecompilationController) classesAndMethodsProvider).getVmInfo()
+                        )
+                );
             }
             menu.add(advanced);
             JMenu templatesMenu = new JMenu("Templates");
@@ -552,10 +557,12 @@ public class TextWithControls extends JPanel implements LinesProvider {
     private JMenu getCompileAndRunMenu(PluginManager pluginManager, DecompilerWrapper jasm7, DecompilerWrapper jasm8) {
         JMenu compileAndRun = new JMenu("Compile and run");
         addJavacAction(pluginManager, "compile by javac and run with no classpath", compileAndRun, null, execute);
-        if (classesAndMethodsProvider instanceof DecompilationController) {
+        if (hasVm(classesAndMethodsProvider)) {
             addJavacAction(
-                    pluginManager, "compile by javac and run with selected vm classpath" + " " + "(+additional)", compileAndRun,
-                    classesAndMethodsProvider, execute
+                    pluginManager,
+                    "compile by javac and run with selected vm classpath " +
+                            ((DecompilationController) classesAndMethodsProvider).getVmInfo() + "(+additional)",
+                    compileAndRun, classesAndMethodsProvider, execute
             );
         }
         addJavacAction(
@@ -565,9 +572,11 @@ public class TextWithControls extends JPanel implements LinesProvider {
         if (jasm7 != null) {
             addJasmAction(pluginManager, jasm7, "compile by asmtools7 and run with no classpath", compileAndRun, null, execute);
             if (classesAndMethodsProvider != null) {
-                if (classesAndMethodsProvider instanceof DecompilationController) {
+                if (hasVm(classesAndMethodsProvider)) {
                     addJasmAction(
-                            pluginManager, jasm7, "compile by asmtools7 and run with selected vm classpath " + "(+additional)",
+                            pluginManager, jasm7,
+                            "compile by asmtools7 and run with selected vm classpath " +
+                                    ((DecompilationController) classesAndMethodsProvider).getVmInfo() + "(+additional)",
                             compileAndRun, classesAndMethodsProvider, execute
                     );
                 }
@@ -580,9 +589,11 @@ public class TextWithControls extends JPanel implements LinesProvider {
         if (jasm8 != null) {
             addJasmAction(pluginManager, jasm8, "compile by asmtools8 and run with no classpath", compileAndRun, null, execute);
             if (classesAndMethodsProvider != null) {
-                if (classesAndMethodsProvider instanceof DecompilationController) {
+                if (hasVm(classesAndMethodsProvider)) {
                     addJasmAction(
-                            pluginManager, jasm8, "compile by asmtools8 and run with selected vm classpath " + "(+additional)",
+                            pluginManager, jasm8,
+                            "compile by asmtools8 and run with selected vm classpath " +
+                                    ((DecompilationController) classesAndMethodsProvider).getVmInfo() + "(+additional)",
                             compileAndRun, classesAndMethodsProvider, execute
                     );
                 }
@@ -596,13 +607,21 @@ public class TextWithControls extends JPanel implements LinesProvider {
         return compileAndRun;
     }
 
+    private static boolean hasVm(ClassesAndMethodsProvider lclassesAndMethodsProvider) {
+        return lclassesAndMethodsProvider instanceof DecompilationController &&
+                ((DecompilationController) lclassesAndMethodsProvider).getVmInfo() != null;
+    }
+
     private JMenu getCompileMenu(PluginManager pluginManager, DecompilerWrapper jasm7, DecompilerWrapper jasm8) {
         JMenu compile = new JMenu("Compilation");
         addJavacAction(pluginManager, "compile by javac - no CP", compile, null, null);
         if (classesAndMethodsProvider != null) {
-            if (classesAndMethodsProvider instanceof DecompilationController) {
+            if (hasVm(classesAndMethodsProvider)) {
                 addJavacAction(
-                        pluginManager, "compile by javac - selected vm classpath (+additional)", compile, classesAndMethodsProvider, null
+                        pluginManager,
+                        "compile by javac - selected vm classpath " + ((DecompilationController) classesAndMethodsProvider).getVmInfo() +
+                                "(+additional)",
+                        compile, classesAndMethodsProvider, null
                 );
             }
             addJavacAction(
