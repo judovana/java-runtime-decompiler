@@ -428,27 +428,8 @@ public class TextWithControls extends JPanel implements LinesProvider {
             completionMenu.addActionListener(new CodeCompletionMenuActionListener());
             menu.add(completionMenu);
             JMenuItem guess = new JMenuItem("guess completion (see verbose console for analyse)");
-            guess.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent actionEvent) {
-                    List<CompletionItem.CompletionItemSet> guessed =
-                            SupportedKeySets.JRD_KEY_SETS.recognize(bytecodeSyntaxTextArea.getText());
-                    normalCodeCompletionGuess(guessed);
-                }
-            });
-            menu.add(guess);
-            JMenu advanced = new JMenu("advanced");
-            advanced.add(new JMenuItem("set compilation output directory (otherwise in memory only)"));
-            advanced.add(new JMenuItem("set public static method for launch (\"start()\" by default)"));
-            if (hasVm(classesAndMethodsProvider)) {
-                advanced.add(
-                        new JCheckBox(
-                                "add to running vm - this can be done only once for each class, not " + "applicable to byteman - " +
-                                        ((DecompilationController) classesAndMethodsProvider).getVmInfo()
-                        )
-                );
-            }
-            menu.add(advanced);
+            addGuessCompletionItem(menu, guess);
+            createAdvancedSubmenu(menu);
             JMenu templatesMenu = new JMenu("Templates");
             templatesMenu.add(new JMenuItem("byteman"));
             templatesMenu.add(new JasmTempalteMenuItem(bytecodeSyntaxTextArea, "jasm1"));
@@ -523,6 +504,32 @@ public class TextWithControls extends JPanel implements LinesProvider {
                 });
             }
         }
+    }
+
+    private void createAdvancedSubmenu(JPopupMenu menu) {
+        JMenu advanced = new JMenu("advanced");
+        advanced.add(new JMenuItem("set compilation output directory (otherwise in memory only)"));
+        advanced.add(new JMenuItem("set public static method for launch (\"start()\" by default)"));
+        if (hasVm(classesAndMethodsProvider)) {
+            advanced.add(
+                    new JCheckBox(
+                            "add to running vm - this can be done only once for each class, not " + "applicable to byteman - " +
+                                    ((DecompilationController) classesAndMethodsProvider).getVmInfo()
+                    )
+            );
+        }
+        menu.add(advanced);
+    }
+
+    private void addGuessCompletionItem(JPopupMenu menu, JMenuItem guess) {
+        guess.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                List<CompletionItem.CompletionItemSet> guessed = SupportedKeySets.JRD_KEY_SETS.recognize(bytecodeSyntaxTextArea.getText());
+                normalCodeCompletionGuess(guessed);
+            }
+        });
+        menu.add(guess);
     }
 
     private Object[] detectJasms() {
