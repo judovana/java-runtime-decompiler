@@ -46,6 +46,7 @@ import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.main.GlobalConsole;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.BytemanCompileAction;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.AbstractCompileAction;
+import org.jrd.frontend.frame.main.decompilerview.dummycompiler.BytemanTempalteMenuItem;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.CanCompile;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.Jasm2TempalteMenuItem;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.JasmCompileAction;
@@ -431,7 +432,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
             addGuessCompletionItem(menu, guess);
             createAdvancedSubmenu(menu);
             JMenu templatesMenu = new JMenu("Templates");
-            templatesMenu.add(new JMenuItem("byteman"));
+            templatesMenu.add(new BytemanTempalteMenuItem(bytecodeSyntaxTextArea, "byteman"));
             templatesMenu.add(new JasmTempalteMenuItem(bytecodeSyntaxTextArea, "jasm1"));
             templatesMenu.add(new Jasm2TempalteMenuItem(bytecodeSyntaxTextArea, "jasm2"));
             templatesMenu.add(new JavaTempalteMenuItem(bytecodeSyntaxTextArea, "java"));
@@ -612,7 +613,16 @@ public class TextWithControls extends JPanel implements LinesProvider {
                 );
             }
         }
-        compileAndRun.add(new BytemanCompileAction("compile by byteman and inject to selected vm"));
+        if (hasVm(classesAndMethodsProvider)
+        /* thsi will need heavy thinking FIXME, based on how bmisntall works*/
+        /* && ((DecompilationController) classesAndMethodsProvider).getVmInfo().getType() == VmInfo.Type.LOCAL)*/) {
+            BytemanCompileAction btmSubm = new BytemanCompileAction(
+                    "compile by byteman and inject to selected vm - " + ((DecompilationController) classesAndMethodsProvider).getVmInfo(),
+                    ((DecompilationController) classesAndMethodsProvider).getVmInfo()
+            );
+            btmSubm.addActionListener(new CompileActionListener(pluginManager, btmSubm, execute));
+            compileAndRun.add(btmSubm);
+        }
         return compileAndRun;
     }
 
@@ -645,7 +655,9 @@ public class TextWithControls extends JPanel implements LinesProvider {
         if (jasm8 != null) {
             addJasmAction(pluginManager, jasm8, "compile by jasmtools8", compile, null, null);
         }
-        compile.add(new BytemanCompileAction("compile by byteman"));
+        BytemanCompileAction btmCheck = new BytemanCompileAction("compile by byteman", null);
+        btmCheck.addActionListener(new CompileActionListener(pluginManager, btmCheck, null));
+        compile.add(btmCheck);
         return compile;
     }
 

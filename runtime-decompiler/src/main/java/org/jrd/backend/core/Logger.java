@@ -82,7 +82,7 @@ public class Logger {
         if (isVerbose() || level == Level.ALL) {
             System.err.println(s);
             if (guiLogging) {
-                GlobalConsole.getConsole().addMessage(java.util.logging.Level.ALL, s);
+                GlobalConsole.getConsole().addMessage(java.util.logging.Level.SEVERE, s);
             }
         }
     }
