@@ -551,22 +551,17 @@ public class TextWithControls extends JPanel implements LinesProvider {
 
     private JMenu getCompileAndRunMenu(PluginManager pluginManager, DecompilerWrapper jasm7, DecompilerWrapper jasm8) {
         JMenu compileAndRun = new JMenu("Compile and run");
-        final JavacCompileAction compileNoCp = new JavacCompileAction("compile by javac and run with no classpath", null);
-        compileNoCp.addActionListener(new CompileActionListener(pluginManager, compileNoCp, execute));
-        compileAndRun.add(compileNoCp);
+        addJavacAction(pluginManager, "compile by javac and run with no classpath", compileAndRun, null, execute);
         if (classesAndMethodsProvider instanceof DecompilationController) {
-            final JavacCompileAction compileCp1 = new JavacCompileAction(
-                    "compile by javac and run with selected vm classpath" + " " + "(+additional)", classesAndMethodsProvider
+            addJavacAction(
+                    pluginManager, "compile by javac and run with selected vm classpath" + " " + "(+additional)", compileAndRun,
+                    classesAndMethodsProvider, execute
             );
-            compileCp1.addActionListener(new CompileActionListener(pluginManager, compileCp1, execute));
-            compileAndRun.add(compileCp1);
         }
-        final JavacCompileAction compileCp2 = new JavacCompileAction(
-                "compile by javac and run with settings " + "additional cp",
-                new ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider()
+        addJavacAction(
+                pluginManager, "compile by javac and run with settings " + "additional cp", compileAndRun,
+                new ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider(), execute
         );
-        compileCp2.addActionListener(new CompileActionListener(pluginManager, compileCp2, execute));
-        compileAndRun.add(compileCp2);
         if (jasm7 != null) {
             addJasmAction(pluginManager, jasm7, "compile by asmtools7 and run with no classpath", compileAndRun, null, execute);
             if (classesAndMethodsProvider != null) {
@@ -603,21 +598,17 @@ public class TextWithControls extends JPanel implements LinesProvider {
 
     private JMenu getCompileMenu(PluginManager pluginManager, DecompilerWrapper jasm7, DecompilerWrapper jasm8) {
         JMenu compile = new JMenu("Compilation");
-        final JavacCompileAction compileNoCp = new JavacCompileAction("compile by javac - no CP", null);
-        compileNoCp.addActionListener(new CompileActionListener(pluginManager, compileNoCp, null));
-        compile.add(compileNoCp);
+        addJavacAction(pluginManager, "compile by javac - no CP", compile, null, null);
         if (classesAndMethodsProvider != null) {
             if (classesAndMethodsProvider instanceof DecompilationController) {
-                final JavacCompileAction compileCp1 =
-                        new JavacCompileAction("compile by javac - selected vm classpath (+additional)", classesAndMethodsProvider);
-                compileCp1.addActionListener(new CompileActionListener(pluginManager, compileCp1, null));
-                compile.add(compileCp1);
+                addJavacAction(
+                        pluginManager, "compile by javac - selected vm classpath (+additional)", compile, classesAndMethodsProvider, null
+                );
             }
-            final JavacCompileAction compileCp2 = new JavacCompileAction(
-                    "compile by javac - settings additional cp only", new ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider()
+            addJavacAction(
+                    pluginManager, "compile by javac - settings additional cp only", compile,
+                    new ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider(), null
             );
-            compileCp2.addActionListener(new CompileActionListener(pluginManager, compileCp2, null));
-            compile.add(compileCp2);
         }
         if (jasm7 != null) {
             addJasmAction(pluginManager, jasm7, "compile by jasmtools7", compile, null, null);
@@ -630,9 +621,18 @@ public class TextWithControls extends JPanel implements LinesProvider {
         return compile;
     }
 
+    private void addJavacAction(
+            PluginManager pluginManager, String title, JMenu compile, ClassesAndMethodsProvider lclassesAndMethodsProvider, String lexecute
+    ) {
+        final JavacCompileAction compileJavac = new JavacCompileAction(title, lclassesAndMethodsProvider);
+        compileJavac.addActionListener(new CompileActionListener(pluginManager, compileJavac, lexecute));
+        compile.add(compileJavac);
+    }
+
     private void addJasmAction(
             PluginManager pluginManager, DecompilerWrapper jasm, String title, JMenu compile,
-            ClassesAndMethodsProvider lclassesAndMethodsProvider, String lexecute) {
+            ClassesAndMethodsProvider lclassesAndMethodsProvider, String lexecute
+    ) {
         final JasmCompileAction asmcompile = new JasmCompileAction(title, jasm, lclassesAndMethodsProvider);
         asmcompile.addActionListener(new CompileActionListener(pluginManager, asmcompile, lexecute));
         compile.add(asmcompile);
