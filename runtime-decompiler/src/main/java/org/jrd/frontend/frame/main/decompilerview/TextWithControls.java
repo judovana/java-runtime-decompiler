@@ -8,6 +8,7 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -438,7 +439,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
             menu.add(guess);
             JMenu advanced = new JMenu("advanced");
             advanced.add(new JMenuItem("set compilation output directory (otherwise in memory only)"));
-            advanced.add(new JMenuItem("set public static method for launch (\"start\" by default"));
+            advanced.add(new JMenuItem("set public static method for launch (\"start()\" by default)"));
             if (hasVm(classesAndMethodsProvider)) {
                 advanced.add(
                         new JCheckBox(
@@ -481,6 +482,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
             menu.add(new JustBearerAction("Run last used compilation", "(F9)"));
             menu.add(new JustBearerAction("Run last used compile+run", "(F10)"));
             JMenuItem logConsole = new JMenuItem("Log Console");
+            logConsole.setFont(logConsole.getFont().deriveFont(Font.BOLD));
             logConsole.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent actionEvent) {
