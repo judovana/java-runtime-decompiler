@@ -30,12 +30,18 @@ public interface CanCompile {
             public Class findClass(String name) throws ClassNotFoundException {
                 for (IdentifiedBytecode ib : result) {
                     if (ib.getClassIdentifier().getFullName().equals(name)) {
+                        if (ib.getFile().length == 0) {
+                            throw new ClassNotFoundException(name);
+                        }
                         return defineClass(name, ib.getFile(), 0, ib.getFile().length);
                     }
                 }
                 Collection<IdentifiedBytecode> classloaderSpecificClasses = classesProvider.getClass(new ClassIdentifier(name));
                 if (classloaderSpecificClasses.size() == 1) {
                     IdentifiedBytecode clazz = new ArrayList<>(classloaderSpecificClasses).get(0);
+                    if (clazz.getFile().length == 0) {
+                        throw new ClassNotFoundException(name);
+                    }
                     return defineClass(clazz.getClassIdentifier().getFullName(), clazz.getFile(), 0, clazz.getFile().length);
                 }
                 throw new ClassNotFoundException(name);
