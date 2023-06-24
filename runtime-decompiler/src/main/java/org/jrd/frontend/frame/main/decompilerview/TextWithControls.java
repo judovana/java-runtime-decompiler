@@ -568,42 +568,32 @@ public class TextWithControls extends JPanel implements LinesProvider {
         compileCp2.addActionListener(new CompileActionListener(pluginManager, compileCp2, execute));
         compileAndRun.add(compileCp2);
         if (jasm7 != null) {
-            final JasmCompileAction asm7compile = new JasmCompileAction("compile by asmtools7 and run with no classpath", jasm7, null);
-            asm7compile.addActionListener(new CompileActionListener(pluginManager, asm7compile, execute));
-            compileAndRun.add(asm7compile);
+            addJasmAction(pluginManager, jasm7, "compile by asmtools7 and run with no classpath", compileAndRun, null, execute);
             if (classesAndMethodsProvider != null) {
                 if (classesAndMethodsProvider instanceof DecompilationController) {
-                    final JasmCompileAction asm7compileRunRuntime = new JasmCompileAction(
-                            "compile by asmtools7 and run with " + "selected vm " + "classpath " + "(+additional)", jasm7,
-                            classesAndMethodsProvider
+                    addJasmAction(
+                            pluginManager, jasm7, "compile by asmtools7 and run with selected vm classpath " + "(+additional)",
+                            compileAndRun, classesAndMethodsProvider, execute
                     );
-                    asm7compileRunRuntime.addActionListener(new CompileActionListener(pluginManager, asm7compileRunRuntime, execute));
-                    compileAndRun.add(asm7compileRunRuntime);
                 }
-                final JasmCompileAction asm7compileRunsettings = new JasmCompileAction(
-                        "compile by asmtools7 and run with settings " + "additional cp", jasm7,
-                        new ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider()
+                addJasmAction(
+                        pluginManager, jasm7, "compile by asmtools7 and run with settings additional cp", compileAndRun,
+                        new ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider(), execute
                 );
-                asm7compileRunsettings.addActionListener(new CompileActionListener(pluginManager, asm7compileRunsettings, execute));
-                compileAndRun.add(asm7compileRunsettings);
             }
         }
         if (jasm8 != null) {
-            compileAndRun.add(new JasmCompileAction("compile by asmtools8 and run with no classpath", jasm8, null));
+            addJasmAction(pluginManager, jasm8, "compile by asmtools8 and run with no classpath", compileAndRun, null, execute);
             if (classesAndMethodsProvider != null) {
                 if (classesAndMethodsProvider instanceof DecompilationController) {
-                    compileAndRun.add(
-                            new JasmCompileAction(
-                                    "compile by asmtools8 and run with selected vm " + "classpath " + "(+additional)", jasm8,
-                                    classesAndMethodsProvider
-                            )
+                    addJasmAction(
+                            pluginManager, jasm8, "compile by asmtools8 and run with selected vm classpath " + "(+additional)",
+                            compileAndRun, classesAndMethodsProvider, execute
                     );
                 }
-                compileAndRun.add(
-                        new JasmCompileAction(
-                                "compile by asmtools8 and run with settings " + "additional cp", jasm8,
-                                new ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider()
-                        )
+                addJasmAction(
+                        pluginManager, jasm8, "compile by asmtools8 and run with settings additional cp", compileAndRun,
+                        new ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider(), execute
                 );
             }
         }
@@ -630,18 +620,22 @@ public class TextWithControls extends JPanel implements LinesProvider {
             compile.add(compileCp2);
         }
         if (jasm7 != null) {
-            final JasmCompileAction asm7compile = new JasmCompileAction("compile by asmtools7", jasm7, null);
-            asm7compile.addActionListener(new CompileActionListener(pluginManager, asm7compile, null));
-            compile.add(asm7compile);
+            addJasmAction(pluginManager, jasm7, "compile by jasmtools7", compile, null, null);
 
         }
         if (jasm8 != null) {
-            final JasmCompileAction asm8compile = new JasmCompileAction("compile by asmtools8", jasm8, null);
-            asm8compile.addActionListener(new CompileActionListener(pluginManager, asm8compile, null));
-            compile.add(asm8compile);
+            addJasmAction(pluginManager, jasm8, "compile by jasmtools8", compile, null, null);
         }
         compile.add(new BytemanCompileAction("compile by byteman"));
         return compile;
+    }
+
+    private void addJasmAction(
+            PluginManager pluginManager, DecompilerWrapper jasm, String title, JMenu compile,
+            ClassesAndMethodsProvider lclassesAndMethodsProvider, String lexecute) {
+        final JasmCompileAction asmcompile = new JasmCompileAction(title, jasm, lclassesAndMethodsProvider);
+        asmcompile.addActionListener(new CompileActionListener(pluginManager, asmcompile, lexecute));
+        compile.add(asmcompile);
     }
 
     private static void lastUsed(JustBearerAction component, AbstractCompileAction last) {
