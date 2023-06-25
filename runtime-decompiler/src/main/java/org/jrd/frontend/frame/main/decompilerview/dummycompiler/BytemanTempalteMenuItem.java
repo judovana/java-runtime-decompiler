@@ -13,7 +13,12 @@ public class BytemanTempalteMenuItem extends JMenuItem {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 source.append(
-                        "\n  RULE trace Object.finalize\n" + "  CLASS ^java.lang.Object\n" + "  METHOD finalize\n" + "  IF TRUE\n" +
+                        "\n# Warning! If you change name of the rule, the automatic unloads/updates/deletes may " +
+                                "stop to work.\n# use final name before first submit to remote vm\nRULE trace Object" +
+                                ".finalize\n" + "  CLASS ^java.lang.Object\n" +
+                                "  " +
+                                "METHOD " +
+                                "finalize\n" + "  IF TRUE\n" +
                                 "  DO System.out.println(\"Finalizing \" + $0)\n" + "  ENDRULE"
                 );
             }

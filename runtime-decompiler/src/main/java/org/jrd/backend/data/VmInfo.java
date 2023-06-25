@@ -13,11 +13,13 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.net.ServerSocket;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -36,6 +38,7 @@ public class VmInfo implements Serializable {
     private transient VmDecompilerStatus vmDecompilerStatus;
     private String vmId;
     private int vmPid;
+    private Optional<Integer> bytemanCompanion = Optional.empty();
     private String vmName;
     private Type type;
     private java.util.List<File> cp;
@@ -197,5 +200,20 @@ public class VmInfo implements Serializable {
     static VmInfo base64Deserialize(String base64Representation) throws IOException, ClassNotFoundException {
         ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(Base64.getDecoder().decode(base64Representation)));
         return (VmInfo) ois.readObject();
+    }
+
+    public Optional<Integer> getBytemanCompanion() {
+        return bytemanCompanion;
+    }
+
+    public void setBytemanCompanion(Integer bytemanCompanion) {
+        this.bytemanCompanion = Optional.ofNullable(bytemanCompanion);
+    }
+
+    public static int findFreePort() throws IOException {
+        try (ServerSocket serverSocket = new ServerSocket(0)) {
+            int port = serverSocket.getLocalPort();
+            return port;
+        }
     }
 }

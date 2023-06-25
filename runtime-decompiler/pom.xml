@@ -23,6 +23,7 @@
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
         <cplc.version>2.2-SNAPSHOT</cplc.version>
+        <btm.version>4.0.15</btm.version>
     </properties>
     <repositories>
       <repository>
@@ -172,13 +173,19 @@
         <dependency>
             <groupId>org.jboss.byteman</groupId>
             <artifactId>byteman-install</artifactId>
-            <version>4.0.15</version>
+            <version>${btm.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.jboss.byteman</groupId>
             <artifactId>byteman</artifactId>
-            <version>4.0.15</version>
+            <version>${btm.version}</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.byteman</groupId>
+            <artifactId>byteman-submit</artifactId>
+            <version>${btm.version}</version>
             <type>jar</type>
         </dependency>
 
