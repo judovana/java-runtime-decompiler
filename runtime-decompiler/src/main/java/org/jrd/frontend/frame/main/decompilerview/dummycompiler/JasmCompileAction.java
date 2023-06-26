@@ -15,6 +15,7 @@ import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.main.ModelProvider;
 import org.jrd.frontend.frame.main.decompilerview.QuickCompiler;
 
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,11 +24,13 @@ public class JasmCompileAction extends AbstractCompileAction implements CanCompi
 
     private final DecompilerWrapper jasm;
     private final ClassesAndMethodsProvider classesAndMethodsProvider;
+    private final File save;
 
-    public JasmCompileAction(String title, DecompilerWrapper jasm, ClassesAndMethodsProvider classesAndMethodsProvider) {
+    public JasmCompileAction(String title, DecompilerWrapper jasm, ClassesAndMethodsProvider classesAndMethodsProvider, File save) {
         super(title);
         this.jasm = jasm;
         this.classesAndMethodsProvider = classesAndMethodsProvider;
+        this.save = save;
     }
 
     @Override
@@ -60,8 +63,11 @@ public class JasmCompileAction extends AbstractCompileAction implements CanCompi
             String fqn = Lib.guessName(file);
             qc.run(jasm, false, new IdentifiedSource(new ClassIdentifier(fqn), file));
             result = qc.waitResult();
-            if (execute != null && result != null && result.size() > 0) {
-                CanCompile.run(fqn, result, execute, classesProvider);
+            if (result != null && result.size() > 0) {
+                CanCompile.save(result, save);
+                if (execute != null) {
+                    CanCompile.run(fqn, result, execute, classesProvider);
+                }
             }
         } catch (Exception ex) {
             Logger.getLogger().log(Logger.Level.ALL, ex);

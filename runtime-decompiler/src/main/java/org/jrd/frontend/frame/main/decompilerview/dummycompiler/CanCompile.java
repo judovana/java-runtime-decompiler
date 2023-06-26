@@ -8,12 +8,21 @@ import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 
 public interface CanCompile {
+
+    static void save(Collection<IdentifiedBytecode> result, File save) throws IOException {
+        for(IdentifiedBytecode ib: result){
+            Files.write(new File(save, ib.getClassIdentifier().getFullName()+".class").toPath(), ib.getFile());
+        }
+    }
 
     Collection<IdentifiedBytecode> compile(String s, PluginManager pluginManager, String execute);
 

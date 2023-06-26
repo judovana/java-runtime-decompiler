@@ -29,6 +29,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -510,7 +511,27 @@ public class TextWithControls extends JPanel implements LinesProvider {
 
     private void createAdvancedSubmenu(JPopupMenu menu) {
         JMenu advanced = new JMenu("advanced");
-        advanced.add(new JMenuItem("set compilation output directory (otherwise in memory only)"));
+        JMenuItem saveMenuItem = new JMenuItem("set compilation output directory (otherwise in memory only)");
+        if (save != null) {
+            saveMenuItem.setText("reset " + save.getAbsolutePath());
+        }
+        saveMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                JFileChooser jf;
+                if (save == null) {
+                    jf = new JFileChooser();
+                    jf.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                    int r = jf.showOpenDialog(saveMenuItem);
+                    if (r == JFileChooser.APPROVE_OPTION) {
+                        save = jf.getSelectedFile();
+                    }
+                } else {
+                    save = null;
+                }
+            }
+        });
+        advanced.add(saveMenuItem);
         JMenuItem setMethod = new JMenuItem("set public static method for launch"
                 + " (\"start\" by default, \"main [Ljava.lang.String;\" would be normal main(String... args)...");
         setMethod.addActionListener(new ActionListener() {
@@ -670,21 +691,39 @@ public class TextWithControls extends JPanel implements LinesProvider {
         return compile;
     }
 
-    private void addJavacAction(
-            PluginManager pluginManager, String title, JMenu compile, ClassesAndMethodsProvider lclassesAndMethodsProvider, String lexecute
-    ) {
-        final JavacCompileAction compileJavac = new JavacCompileAction(title + "{" + lexecute + "}", lclassesAndMethodsProvider);
+    private void addJavacAction(PluginManager pluginManager, String title, JMenu compile,
+            ClassesAndMethodsProvider lclassesAndMethodsProvider, String lexecute) {
+        final JavacCompileAction compileJavac = new JavacCompileAction(title + lex(lexecute) + sex(lexecute, save),
+                lclassesAndMethodsProvider, save);
         compileJavac.addActionListener(new CompileActionListener(pluginManager, compileJavac, lexecute));
         compile.add(compileJavac);
     }
 
-    private void addJasmAction(
-            PluginManager pluginManager, DecompilerWrapper jasm, String title, JMenu compile,
-            ClassesAndMethodsProvider lclassesAndMethodsProvider, String lexecute
-    ) {
-        final JasmCompileAction asmcompile = new JasmCompileAction(title + "{" + lexecute + "}", jasm, lclassesAndMethodsProvider);
+    private void addJasmAction(PluginManager pluginManager, DecompilerWrapper jasm, String title, JMenu compile,
+            ClassesAndMethodsProvider lclassesAndMethodsProvider, String lexecute) {
+        final JasmCompileAction asmcompile = new JasmCompileAction(title + lex(lexecute) + sex(lexecute, save), jasm,
+                lclassesAndMethodsProvider, save);
         asmcompile.addActionListener(new CompileActionListener(pluginManager, asmcompile, lexecute));
         compile.add(asmcompile);
+    }
+
+    private String lex(String lexecute) {
+        if (lexecute == null) {
+            return "";
+        } else {
+            return "{" + lexecute + "}";
+        }
+    }
+
+    private String sex(String lexecute, File lsave) {
+        if (lexecute != null) {
+            return "";
+        }
+        if (lsave == null) {
+            return "{memory}";
+        } else {
+            return "{" + lsave.getAbsolutePath() + "}";
+        }
     }
 
     private static void lastUsed(JustBearerAction component, AbstractCompileAction last) {
