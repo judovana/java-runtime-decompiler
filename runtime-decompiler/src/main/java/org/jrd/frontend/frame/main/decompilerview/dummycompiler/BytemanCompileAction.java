@@ -54,8 +54,7 @@ public class BytemanCompileAction extends AbstractCompileAction implements CanCo
                         Install.install("" + pid, false, "localhost", port, new String[]{});
                         vmInfo.setBytemanCompanion(port);
                     }
-                    Submit submit = new Submit("localhost", port, new PrintStream(new LogOutputStream(), true,
-                            StandardCharsets.UTF_8));
+                    Submit submit = new Submit("localhost", port, new PrintStream(new LogOutputStream(), true, StandardCharsets.UTF_8));
                     ScriptText st = new ScriptText("hi.btm", s);
                     if (lastCopyToUnload != null) {
                         String deleteAll = submit.deleteScripts(Collections.singletonList(lastCopyToUnload));

@@ -19,8 +19,8 @@ import java.util.Collection;
 public interface CanCompile {
 
     static void save(Collection<IdentifiedBytecode> result, File save) throws IOException {
-        for(IdentifiedBytecode ib: result){
-            Files.write(new File(save, ib.getClassIdentifier().getFullName()+".class").toPath(), ib.getFile());
+        for (IdentifiedBytecode ib : result) {
+            Files.write(new File(save, ib.getClassIdentifier().getFullName() + ".class").toPath(), ib.getFile());
         }
     }
 

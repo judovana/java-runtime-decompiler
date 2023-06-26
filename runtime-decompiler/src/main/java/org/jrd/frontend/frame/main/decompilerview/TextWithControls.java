@@ -208,6 +208,14 @@ public class TextWithControls extends JPanel implements LinesProvider {
         rst.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_F9 && lastCompile != null) {
+                    ActionListener[] acts = lastCompile.getActionListeners();
+                    acts[1].actionPerformed(null);
+                }
+                if (e.getKeyCode() == KeyEvent.VK_F10 && lastCompileAndRun != null) {
+                    ActionListener[] acts = lastCompileAndRun.getActionListeners();
+                    acts[1].actionPerformed(null);
+                }
                 if (e.getKeyCode() == KeyEvent.VK_F3) {
                     bytecodeSearchControls.clickNextButton();
                 }
@@ -532,8 +540,10 @@ public class TextWithControls extends JPanel implements LinesProvider {
             }
         });
         advanced.add(saveMenuItem);
-        JMenuItem setMethod = new JMenuItem("set public static method for launch"
-                + " (\"start\" by default, \"main [Ljava.lang.String;\" would be normal main(String... args)...");
+        JMenuItem setMethod = new JMenuItem(
+                "set public static method for launch" +
+                        " (\"start\" by default, \"main [Ljava.lang.String;\" would be normal main(String... args)..."
+        );
         setMethod.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -545,9 +555,12 @@ public class TextWithControls extends JPanel implements LinesProvider {
         });
         advanced.add(setMethod);
         if (hasVm(classesAndMethodsProvider)) {
-            advanced.add(new JCheckBox(
-                    "add to running vm - this can be done only once for each class, not " + "applicable to byteman - "
-                            + ((DecompilationController) classesAndMethodsProvider).getVmInfo()));
+            advanced.add(
+                    new JCheckBox(
+                            "add to running vm - this can be done only once for each class, not " + "applicable to byteman - " +
+                                    ((DecompilationController) classesAndMethodsProvider).getVmInfo()
+                    )
+            );
         }
         menu.add(advanced);
     }
@@ -691,18 +704,21 @@ public class TextWithControls extends JPanel implements LinesProvider {
         return compile;
     }
 
-    private void addJavacAction(PluginManager pluginManager, String title, JMenu compile,
-            ClassesAndMethodsProvider lclassesAndMethodsProvider, String lexecute) {
-        final JavacCompileAction compileJavac = new JavacCompileAction(title + lex(lexecute) + sex(lexecute, save),
-                lclassesAndMethodsProvider, save);
+    private void addJavacAction(
+            PluginManager pluginManager, String title, JMenu compile, ClassesAndMethodsProvider lclassesAndMethodsProvider, String lexecute
+    ) {
+        final JavacCompileAction compileJavac =
+                new JavacCompileAction(title + lex(lexecute) + sex(lexecute, save), lclassesAndMethodsProvider, save);
         compileJavac.addActionListener(new CompileActionListener(pluginManager, compileJavac, lexecute));
         compile.add(compileJavac);
     }
 
-    private void addJasmAction(PluginManager pluginManager, DecompilerWrapper jasm, String title, JMenu compile,
-            ClassesAndMethodsProvider lclassesAndMethodsProvider, String lexecute) {
-        final JasmCompileAction asmcompile = new JasmCompileAction(title + lex(lexecute) + sex(lexecute, save), jasm,
-                lclassesAndMethodsProvider, save);
+    private void addJasmAction(
+            PluginManager pluginManager, DecompilerWrapper jasm, String title, JMenu compile,
+            ClassesAndMethodsProvider lclassesAndMethodsProvider, String lexecute
+    ) {
+        final JasmCompileAction asmcompile =
+                new JasmCompileAction(title + lex(lexecute) + sex(lexecute, save), jasm, lclassesAndMethodsProvider, save);
         asmcompile.addActionListener(new CompileActionListener(pluginManager, asmcompile, lexecute));
         compile.add(asmcompile);
     }
