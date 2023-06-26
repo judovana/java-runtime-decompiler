@@ -47,8 +47,8 @@ public class BytemanCompileAction extends AbstractCompileAction implements CanCo
                 } else {
                     int pid = vmInfo.getVmPid();
                     int port;
-                    if (vmInfo.getBytemanCompanion().isPresent()) {
-                        port = vmInfo.getBytemanCompanion().get();
+                    if (vmInfo.getBytemanCompanion() != null) {
+                        port = vmInfo.getBytemanCompanion();
                     } else {
                         port = VmInfo.findFreePort();
                         Install.install("" + pid, false, "localhost", port, new String[]{});

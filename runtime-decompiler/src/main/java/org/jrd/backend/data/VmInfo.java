@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -38,7 +37,7 @@ public class VmInfo implements Serializable {
     private transient VmDecompilerStatus vmDecompilerStatus;
     private String vmId;
     private int vmPid;
-    private Optional<Integer> bytemanCompanion = Optional.empty();
+    private Integer bytemanCompanion;
     private String vmName;
     private Type type;
     private java.util.List<File> cp;
@@ -202,12 +201,12 @@ public class VmInfo implements Serializable {
         return (VmInfo) ois.readObject();
     }
 
-    public Optional<Integer> getBytemanCompanion() {
+    public Integer getBytemanCompanion() {
         return bytemanCompanion;
     }
 
     public void setBytemanCompanion(Integer bytemanCompanion) {
-        this.bytemanCompanion = Optional.ofNullable(bytemanCompanion);
+        this.bytemanCompanion = bytemanCompanion;
     }
 
     public static int findFreePort() throws IOException {
