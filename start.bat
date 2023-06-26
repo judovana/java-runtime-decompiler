@@ -113,7 +113,9 @@ rem Recursively find libraries (if this is a portable image, the first argument 
 call :findLib "com\fifesoft\rsyntaxtextarea","*rsyntaxtextarea-*.jar",RSYNTAXTEXTAREA
 call :findLib "com\google\code\gson\gson","*gson-*.jar",GSON
 call :findLib "io\github\java-diff-utils\java-diff-utils","*java-diff-utils-**.jar",JDIFF
-call :findLib "org\jboss\byteman\byteman-install","*byteman-install-*.jar",BYTEMAN
+call :findLib "org\jboss\byteman\byteman","*byteman-*.jar",BYTEMAN
+call :findLib "org\jboss\byteman\byteman-install","*byteman-install-*.jar",BYTEMAN_INSTALL
+call :findLib "org\jboss\byteman\byteman-submit","*byteman-submit-*.jar",BYTEMAN_SUBMIT
 call :findLib "java-runtime-decompiler\runtime-decompiler","*runtime-decompiler-*.jar",JRD
 call :findLib "io\github\mkoncek\classpathless-compiler","*classpathless-compiler-*.jar",CPLC
 call :findLib "io\github\mkoncek\classpathless-compiler-api","*classpathless-compiler-api-*.jar",CPLC_API
@@ -133,7 +135,7 @@ rem Create environment variable pointing to script's location
 set "PROPERTY_PURPOSE=-Djrd.purpose=%PURPOSE%"
 
 rem Concatenate classpath and launch the app
-set CLASSPATH=%TOOLS%;%RSYNTAXTEXTAREA%;%GSON%;%JDIFF%;%BYTEMAN%;%JRD%;%CPLC%;%CPLC_API%;%CPLC_UTIL%;%ASM_TREE%;%ASM_JAR%
+set CLASSPATH=%TOOLS%;%RSYNTAXTEXTAREA%;%GSON%;%JDIFF%;%BYTEMAN%;%BYTEMAN_INSTALL%;%BYTEMAN_SUBMIT%;%JRD%;%CPLC%;%CPLC_API%;%CPLC_UTIL%;%ASM_TREE%;%ASM_JAR%
 "%JDK_LOCATION%\bin\java.exe" --add-exports jdk.jdeps/com.sun.tools.javap=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED -Djdk.attach.allowAttachSelf=true --add-opens java.base/java.io=ALL-UNNAMED %PROPERTY_LOCATION% %PROPERTY_PURPOSE% -cp %CLASSPATH% org.jrd.backend.data.Main %*
 
 rem popd from network drive related pushd

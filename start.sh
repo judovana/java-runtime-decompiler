@@ -49,7 +49,9 @@ readonly GSON=$(findLib "com/google/code/gson/gson" "gson-.*\.jar")
 readonly JDIFF=$(findLib "io/github/java-diff-utils/java-diff-utils" "java-diff-utils-.*\.jar")
 readonly ASM_TREE=$(findLib "org/ow2/asm/asm-tree" "asm-tree-.*\.jar")
 readonly ASM_JAR=$(findLib "org/ow2/asm/asm" "asm-[0-9].*\.jar")
-readonly BYTEMAN=$(findLib "org/jboss/byteman/byteman-install" "byteman-install-.*\.jar")
+readonly BYTEMAN=$(findLib "org/jboss/byteman/byteman" "byteman-[[:digit:]].*\.jar")
+readonly BYTEMAN_INSTALL=$(findLib "org/jboss/byteman/byteman-install" "byteman-install-.*\.jar")
+readonly BYTEMAN_SUBMIT=$(findLib "org/jboss/byteman/byteman-submit" "byteman-submit-.*\.jar")
 readonly CPLC_API=$(findLib "io/github/mkoncek/classpathless-compiler-api" "classpathless-compiler-api-.*\.jar")
 readonly CPLC_UTIL=$(findLib "io/github/mkoncek/classpathless-compiler-util" "classpathless-compiler-util-.*\.jar")
 readonly CPLC=$(findLib "io/github/mkoncek/classpathless-compiler" "classpathless-compiler-[[:digit:]].*\.jar")
@@ -72,5 +74,5 @@ readonly PROPERTY_PURPOSE="-Djrd.purpose=$PURPOSE"
 --add-exports jdk.jdeps/com.sun.tools.javap=ALL-UNNAMED \
 --add-opens   java.base/java.lang=ALL-UNNAMED \
 --add-opens   java.base/java.io=ALL-UNNAMED \
--cp "$TOOLS:$JRD:$RSYNTAXTEXTAREA:$GSON:$JDIFF:$BYTEMAN:$CPLC_API:$CPLC_UTIL:$CPLC:$ASM_TREE:$ASM_JAR" \
+-cp "$TOOLS:$JRD:$RSYNTAXTEXTAREA:$GSON:$JDIFF:$BYTEMAN:$BYTEMAN_INSTALL:$BYTEMAN_SUBMIT:$CPLC_API:$CPLC_UTIL:$CPLC:$ASM_TREE:$ASM_JAR" \
 org.jrd.backend.data.Main "$@"
