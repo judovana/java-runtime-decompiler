@@ -20,6 +20,7 @@ public class JavaTempalteMenuItem extends JMenuItem {
                                 "import javax.swing.JFrame;\n" + "import javax.swing.JButton;\n" + "import javax.swing.JLabel;\n" +
                                 "import javax.swing.border.Border;\n" + "import javax.swing.SwingUtilities;\n" + "\n" +
                                 "public class HelloWorldSwing {\n" + "\n" + "    public static void start() {\n" +
+                                "        System.out.println(\"start!\");\n" +
                                 "        JFrame jFrame = new JFrame(\"Hello World Swing Example\");\n" +
                                 "        jFrame.setLayout(new FlowLayout());\n" + "        jFrame.setSize(500, 360);\n" +
                                 "        jFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);\n" + "\n" + "\n" +
@@ -40,7 +41,7 @@ public class JavaTempalteMenuItem extends JMenuItem {
                                 "                        //org.jrd.agent.api.Variables.dumpAll();\n" +
                                 "                        System.out.println(\"done\");\n" + "                    }\n" +
                                 "                });\n" + "\n" + "        jFrame.add(label);\n" + "        jFrame.setVisible(true);\n" +
-                                "    }\n" + "\n" + "    public static void main(String[] args) {\n" +
+                                "    }\n" + "\n" + "    public static void main(String[] args) {\n\t    System.out.println(\"main!\");\n" +
                                 "    \t    SwingUtilities.invokeLater(new Runnable() {\n" + "         @Override\n" +
                                 "         public void run() {\n" + "             start();\n" + "          }\n" + "         });\n" +
                                 "    }\n" + "}"

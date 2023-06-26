@@ -31,6 +31,7 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
@@ -76,7 +77,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
     private JrdCompletionSettings oldSettings;
     private AbstractCompileAction lastCompile;
     private AbstractCompileAction lastCompileAndRun;
-    private String execute = "";
+    private String execute = "start";
     private File save;
     private boolean addToRunningVm = false; //fixme, dont forget to reset it after sucesfull addition!
 
@@ -510,14 +511,22 @@ public class TextWithControls extends JPanel implements LinesProvider {
     private void createAdvancedSubmenu(JPopupMenu menu) {
         JMenu advanced = new JMenu("advanced");
         advanced.add(new JMenuItem("set compilation output directory (otherwise in memory only)"));
-        advanced.add(new JMenuItem("set public static method for launch (\"start()\" by default)"));
+        JMenuItem setMethod = new JMenuItem("set public static method for launch"
+                + " (\"start\" by default, \"main [Ljava.lang.String;\" would be normal main(String... args)...");
+        setMethod.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                String newExec = JOptionPane.showInputDialog(setMethod, "set method to launch", execute);
+                if (newExec != null && newExec.trim().length() > 0) {
+                    execute = newExec;
+                }
+            }
+        });
+        advanced.add(setMethod);
         if (hasVm(classesAndMethodsProvider)) {
-            advanced.add(
-                    new JCheckBox(
-                            "add to running vm - this can be done only once for each class, not " + "applicable to byteman - " +
-                                    ((DecompilationController) classesAndMethodsProvider).getVmInfo()
-                    )
-            );
+            advanced.add(new JCheckBox(
+                    "add to running vm - this can be done only once for each class, not " + "applicable to byteman - "
+                            + ((DecompilationController) classesAndMethodsProvider).getVmInfo()));
         }
         menu.add(advanced);
     }
@@ -664,7 +673,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
     private void addJavacAction(
             PluginManager pluginManager, String title, JMenu compile, ClassesAndMethodsProvider lclassesAndMethodsProvider, String lexecute
     ) {
-        final JavacCompileAction compileJavac = new JavacCompileAction(title, lclassesAndMethodsProvider);
+        final JavacCompileAction compileJavac = new JavacCompileAction(title + "{" + lexecute + "}", lclassesAndMethodsProvider);
         compileJavac.addActionListener(new CompileActionListener(pluginManager, compileJavac, lexecute));
         compile.add(compileJavac);
     }
@@ -673,7 +682,7 @@ public class TextWithControls extends JPanel implements LinesProvider {
             PluginManager pluginManager, DecompilerWrapper jasm, String title, JMenu compile,
             ClassesAndMethodsProvider lclassesAndMethodsProvider, String lexecute
     ) {
-        final JasmCompileAction asmcompile = new JasmCompileAction(title, jasm, lclassesAndMethodsProvider);
+        final JasmCompileAction asmcompile = new JasmCompileAction(title + "{" + lexecute + "}", jasm, lclassesAndMethodsProvider);
         asmcompile.addActionListener(new CompileActionListener(pluginManager, asmcompile, lexecute));
         compile.add(asmcompile);
     }

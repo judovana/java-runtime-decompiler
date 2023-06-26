@@ -59,14 +59,19 @@ public interface CanCompile {
 
         };
         Class<?> clz = classLoader.loadClass(fqn);
-        //we run on static methods oly now, othwrwise there woudl be messing with constructor
+        //we run on static methods only now, othwrwise there woudl be messing with constructor
         //Object main = clz.newInstance();
-        String methodnameAndSignature = execute.trim();
-        if (methodnameAndSignature.isEmpty()) {
-            methodnameAndSignature = "start"; //fallback to main?
+        String[] methodnameAndSignature = execute.trim().split("\\s+");
+        String methodName = methodnameAndSignature[0];
+        Class[] signature = new Class[methodnameAndSignature.length - 1];
+        Object[] values = new Object[methodnameAndSignature.length - 1];
+        for (int x = 1; x < methodnameAndSignature.length; x++) {
+            signature[x - 1] = Class.forName(methodnameAndSignature[x]);
+            values[x - 1] = null;
         }
-        Method test = clz.getMethod(methodnameAndSignature);
-        //test.invoke(main);
-        test.invoke(null);
+        Method test = clz.getMethod(methodName, signature);
+        //test = clz.getMethod("main", new Class[]{Class.forName("[Ljava.lang.String;")});
+        //test.invoke(null, new Object[]{null});
+        test.invoke(null, values);
     }
 }
