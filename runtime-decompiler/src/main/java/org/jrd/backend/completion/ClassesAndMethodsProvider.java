@@ -12,6 +12,8 @@ import java.util.Set;
 
 public interface ClassesAndMethodsProvider {
 
+    public String cpTextInfo();
+
     String[] getClasses(CompletionSettings settings);
 
     String[] getWhateverFromClass(CompletionSettings settings, String fqn);
@@ -19,6 +21,15 @@ public interface ClassesAndMethodsProvider {
     byte[] getClassItself(CompletionSettings settings, String fqn);
 
     class SettingsClassesAndMethodsProvider implements ClassesAndMethodsProvider {
+
+        @Override
+        public String cpTextInfo() {
+            String s = Config.getConfig().getAdditionalCP();
+            if (s.length()>300){
+                return "local cp; items count:" + s.split(System.getProperty("path.separator")).length;
+            }
+            return s;
+        }
 
         @Override
         public String[] getClasses(CompletionSettings settings) {

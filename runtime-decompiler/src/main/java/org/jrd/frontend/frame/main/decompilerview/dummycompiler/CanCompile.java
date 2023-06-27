@@ -7,6 +7,7 @@ import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
+import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.ExecuteMethodProvider;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +25,7 @@ public interface CanCompile {
         }
     }
 
-    Collection<IdentifiedBytecode> compile(String s, PluginManager pluginManager, String execute);
+    Collection<IdentifiedBytecode> compile(String s, PluginManager pluginManager);
 
     DecompilerWrapper getWrapper();
 

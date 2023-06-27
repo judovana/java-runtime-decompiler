@@ -136,7 +136,8 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
     // Method for opening plugin configuration window
     private void createConfigurationEditor() {
         pluginConfigurationEditorView = new PluginConfigurationEditorView(mainFrameView);
-        pluginConfigurationEditorController = new PluginConfigurationEditorController(pluginConfigurationEditorView, pluginManager);
+        pluginConfigurationEditorController = new PluginConfigurationEditorController(pluginConfigurationEditorView,
+                pluginManager);
         pluginConfigurationEditorController.setPluginsConfiguredListener(actionEvent -> {
             bytecodeDecompilerView.refreshComboBox(pluginManager.getWrappers());
         });
@@ -175,10 +176,12 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         }
 
         if (shouldRemoteDetachAgent) {
-            confirmMessage += "\nKilling the agent will prohibit any other connection in future. You will need to attach it again";
+            confirmMessage += "\nKilling the agent will prohibit any other connection in future. You will need to " +
+                    "attach it again";
         }
         int dialogResult =
-                JOptionPane.showConfirmDialog(mainFrameView.getMainFrame(), confirmMessage, "Warning", JOptionPane.OK_CANCEL_OPTION);
+                JOptionPane.showConfirmDialog(mainFrameView.getMainFrame(), confirmMessage, "Warning",
+                        JOptionPane.OK_CANCEL_OPTION);
         if (dialogResult == JOptionPane.CANCEL_OPTION || dialogResult < 0) {
             return;
         }
@@ -190,7 +193,8 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
 
         if (shouldRemoteDetachAgent) {
             DecompilerRequestReceiver.getHaltAction(
-                    selectedVm.getVmName(), selectedVm.getVmDecompilerStatus().getListenPort(), selectedVm.getVmId(), selectedVm.getVmPid(),
+                    selectedVm.getVmName(), selectedVm.getVmDecompilerStatus().getListenPort(), selectedVm.getVmId(),
+                    selectedVm.getVmPid(),
                     new AgentAttachManager(vmManager), vmManager, false
             );
         }
@@ -198,7 +202,8 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         if (!vmManager.removeVm(selectedVm)) {
             String removeFailMessage = "Failed to remove VM: " + selectedVm;
             Logger.getLogger().log(Logger.Level.ALL, removeFailMessage);
-            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), removeFailMessage, "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), removeFailMessage, "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
 
         if (isSavedFsVm) {
@@ -206,7 +211,8 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
                 Config.getConfig().removeSavedFsVm(selectedVm);
                 Config.getConfig().saveConfigFile();
             } catch (IOException e) {
-                Logger.getLogger().log(Logger.Level.ALL, "Unable to tag '" + vmInfo + "' as no longer to be saved. Cause:");
+                Logger.getLogger().log(Logger.Level.ALL, "Unable to tag '" + vmInfo + "' as no longer to be saved. " +
+                        "Cause:");
                 Logger.getLogger().log(e);
             }
         }
@@ -217,7 +223,8 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
     private boolean exitOnEmpty(String vmType, VmInfo selectedVm) {
         if (selectedVm == null) {
             Logger.getLogger().log(Logger.Level.ALL, "Attempted to remove " + vmType + " with none selected.");
-            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), "No " + vmType + " selected.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), "No " + vmType + " selected.", "Error",
+                    JOptionPane.ERROR_MESSAGE);
             return true;
         }
         return false;
@@ -236,7 +243,8 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
             } else {
                 omessage = omessage + overrides.size();
             }
-            omessage = omessage + "\n Where running JVM can restore original classes by design, FS ones are now permanently overridden." +
+            omessage = omessage + "\n Where running JVM can restore original classes by design, FS ones are now " +
+                    "permanently overridden." +
                     "\nPress Cancel to restore them manually";
             int r = JOptionPane.showConfirmDialog(parent, omessage, "Warning", JOptionPane.OK_CANCEL_OPTION);
             if (r != JOptionPane.OK_OPTION) {
@@ -357,7 +365,8 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
             loadClassNames();
         }
         if (new TopLevelErrorCandidate(response).isError()) {
-            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), response + "\n" + CLASSES_NOPE, "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), response + "\n" + CLASSES_NOPE, "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -371,7 +380,8 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
             loadClassNames();
         }
         if (new TopLevelErrorCandidate(response).isError()) {
-            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), response + "\n" + CLASSES_NOPE, "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), response + "\n" + CLASSES_NOPE, "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -385,7 +395,8 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
             loadClassNames();
         }
         if (new TopLevelErrorCandidate(response).isError()) {
-            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), response + "\n" + CLASSES_NOPE, "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), response + "\n" + CLASSES_NOPE, "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -396,14 +407,16 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
     private void loadClassNames() {
         showLoadingDialog("Loading classes");
         AgentRequestAction request =
-                createRequest(bytecodeDecompilerView.doShowClassInfo() ? RequestAction.CLASSES_WITH_INFO : RequestAction.CLASSES, "");
+                createRequest(bytecodeDecompilerView.doShowClassInfo() ? RequestAction.CLASSES_WITH_INFO :
+                        RequestAction.CLASSES, "");
         String response = submitRequest(request);
         if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
             bytecodeDecompilerView.reloadClassList(vmInfo.getVmDecompilerStatus().getLoadedClasses());
         }
         hideLoadingDialog();
         if (new TopLevelErrorCandidate(response).isError()) {
-            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), response + "\n" + CLASSES_NOPE, "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), response + "\n" + CLASSES_NOPE, "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -416,7 +429,8 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         }
         hideLoadingDialog();
         if (new TopLevelErrorCandidate(response).isError()) {
-            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), response + "\n" + CLASSES_NOPE, "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), response + "\n" + CLASSES_NOPE, "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -426,7 +440,8 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         String decompiledClass = "";
         if (new TopLevelErrorCandidate(response).isError()) {
             JOptionPane.showMessageDialog(
-                    mainFrameView.getMainFrame(), response + "\nBytecode couldn't be loaded.", "Error", JOptionPane.ERROR_MESSAGE
+                    mainFrameView.getMainFrame(), response + "\nBytecode couldn't be loaded.", "Error",
+                    JOptionPane.ERROR_MESSAGE
             );
             return;
         }
@@ -434,7 +449,8 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         String bytesInString = vmStatus.getLoadedClassBytes();
         byte[] bytes = Base64.getDecoder().decode(bytesInString);
         try {
-            decompiledClass = pluginManager.decompile(bytecodeDecompilerView.getSelectedDecompiler(), name, bytes, null, vmInfo, vmManager);
+            decompiledClass = pluginManager.decompile(bytecodeDecompilerView.getSelectedDecompiler(), name, bytes,
+                    null, vmInfo, vmManager);
         } catch (Exception e) {
             Logger.getLogger().log(Logger.Level.ALL, e);
         }
@@ -443,13 +459,15 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         if (additionalBytes != null && additionalBytes.length > 0) {
             try {
                 additionalDecompiled =
-                        pluginManager.decompile(bytecodeDecompilerView.getSelectedDecompiler(), name, additionalBytes, null, null, null);
+                        pluginManager.decompile(bytecodeDecompilerView.getSelectedDecompiler(), name, additionalBytes
+                                , null, null, null);
             } catch (Exception e) {
                 Logger.getLogger().log(Logger.Level.ALL, e);
             }
         }
         String additionalSrcClass = Config.getConfig().getAdditionalSourcePathString(name);
-        bytecodeDecompilerView.reloadTextField(name, decompiledClass, bytes, additionalDecompiled, additionalBytes, additionalSrcClass);
+        bytecodeDecompilerView.reloadTextField(name, decompiledClass, bytes, additionalDecompiled, additionalBytes,
+                additionalSrcClass);
     }
 
     public String getVm() {
@@ -580,20 +598,23 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
     private String[] getMethodsFromClassInRunningVm(CompletionSettings settings, String fqn) {
         Collection<IdentifiedBytecode> b = getClassesProvider().getClass(new ClassIdentifier(fqn));
         String[] l =
-                ClassesAndMethodsProvider.bytesToMethods(settings, b.stream().map(a -> a.getFile()).collect(Collectors.toList()).get(0));
+                ClassesAndMethodsProvider.bytesToMethods(settings,
+                        b.stream().map(a -> a.getFile()).collect(Collectors.toList()).get(0));
         return l;
     }
 
     class ClassOverwriter {
         private LatestPaths lastLoaded = new LatestPaths();
 
-        void overwriteClass(DecompilerWrapper selectedDecompiler, String name, String buffer, byte[] binBuffer, boolean isBinary) {
+        void overwriteClass(DecompilerWrapper selectedDecompiler, String name, String buffer, byte[] binBuffer,
+                            boolean isBinary) {
             if (name == null || name.trim().isEmpty()) {
                 name = "???";
             }
 
             final OverwriteClassDialog overwriteClassDialog = new OverwriteClassDialog(
-                    name, lastLoaded, buffer, binBuffer, vmInfo, vmManager, pluginManager, selectedDecompiler, isBinary, isVerbose
+                    name, lastLoaded, buffer, binBuffer, vmInfo, vmManager, pluginManager, selectedDecompiler,
+                    isBinary, isVerbose
             );
             ScreenFinder.centerWindowToCurrentScreen(overwriteClassDialog);
             overwriteClassDialog.setVisible(true);
@@ -678,7 +699,8 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
                 Logger.getLogger().log(Logger.Level.DEBUG, "Agent closing socket and exiting");
             }
         } catch (Exception e) {
-            Logger.getLogger().log(Logger.Level.ALL, new RuntimeException("Error when sending request to halt agent", e));
+            Logger.getLogger().log(Logger.Level.ALL, new RuntimeException("Error when sending request to halt agent",
+                    e));
         }
     }
 
@@ -777,5 +799,17 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         }
         String sub = text.substring(Math.max(0, start), caretPosition).trim();
         return sub;
+    }
+
+    public String cpTextInfo() {
+        if (getVmInfo() == null) {
+            return "No vm selected";
+        } else {
+            String fullName = getVmInfo().getVmName();
+            String shortName = fullName.split(" ")[0];
+            return getVmInfo().getVmPid() + " " +
+                    shortName + " (type " + getVmInfo().getType() + ")";
+
+        }
     }
 }

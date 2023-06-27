@@ -8,8 +8,17 @@ public class JustBearerAction extends AbstractCompileAction {
     private AbstractCompileAction original;
 
     public JustBearerAction(String placeholder, String append) {
-        super(placeholder + " " + append);
+        super(placeholder + " -  " + append);
         this.append = append;
+    }
+
+    @Override
+    public String getText() {
+        if (original == null) {
+            return super.getText() + "<br/>";
+        } else {
+            return super.getText() + "<br/>" + original.getText();
+        }
     }
 
     @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "looks good")

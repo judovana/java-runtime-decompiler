@@ -11,6 +11,8 @@ import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
+import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.ClasspathProvider;
+import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.LastScriptProvider;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -24,11 +26,11 @@ import java.util.List;
 
 public class BytemanCompileAction extends AbstractCompileAction implements CanCompile {
 
-    private final VmInfo vmInfo;
-    private ScriptText lastCopyToUnload;
+    private final ClasspathProvider vmInfoProvider;
+    private final LastScriptProvider lastScriptProvider;
 
     @Override
-    public Collection<IdentifiedBytecode> compile(String s, PluginManager pluginManager, String execute) {
+    public Collection<IdentifiedBytecode> compile(String s, PluginManager pluginManager) {
         //org.jboss.byteman.check.TestScript.main();
         RuleCheck check = new RuleCheck();
         if (Logger.getLogger().isVerbose()) {
@@ -42,9 +44,10 @@ public class BytemanCompileAction extends AbstractCompileAction implements CanCo
             if (!results.hasError()) {
                 List<IdentifiedBytecode> r = new ArrayList<>();
                 r.add(new IdentifiedBytecode(new ClassIdentifier("check.byteman"), s.getBytes(StandardCharsets.UTF_8)));
-                if (execute == null) {
+                if (vmInfoProvider == null) {
                     return r;
                 } else {
+                    VmInfo vmInfo = vmInfoProvider.getVmInfo();
                     int pid = vmInfo.getVmPid();
                     int port;
                     if (vmInfo.getBytemanCompanion() != null) {
@@ -56,13 +59,13 @@ public class BytemanCompileAction extends AbstractCompileAction implements CanCo
                     }
                     Submit submit = new Submit("localhost", port, new PrintStream(new LogOutputStream(), true, StandardCharsets.UTF_8));
                     ScriptText st = new ScriptText("hi.btm", s);
-                    if (lastCopyToUnload != null) {
-                        String deleteAll = submit.deleteScripts(Collections.singletonList(lastCopyToUnload));
+                    if (lastScriptProvider.getLastScript() != null) {
+                        String deleteAll = submit.deleteScripts(Collections.singletonList(lastScriptProvider.getLastScript()));
                         Logger.getLogger().log(Logger.Level.ALL, deleteAll);
-                        lastCopyToUnload = null;
+                        lastScriptProvider.setLastScript(null);
                     }
                     String add = submit.addScripts(Collections.singletonList(st));
-                    lastCopyToUnload = st;
+                    lastScriptProvider.setLastScript(st);
                     Logger.getLogger().log(Logger.Level.ALL, add);
                     return r;
                 }
@@ -94,9 +97,27 @@ public class BytemanCompileAction extends AbstractCompileAction implements CanCo
 
     }
 
-    public BytemanCompileAction(String title, VmInfo vmInfo) {
+    public BytemanCompileAction(String title, ClasspathProvider vmInfoProvider,
+                                LastScriptProvider lastScriptProvider) {
         super(title);
-        this.vmInfo = vmInfo;
+        this.vmInfoProvider = vmInfoProvider;
+        this.lastScriptProvider = lastScriptProvider;
+    }
+
+    @Override
+    public String getText() {
+        String s =  super.getText();
+        if (vmInfoProvider != null) {
+            s = s + "<br/> will be uploaded installed to:" + vmInfoProvider.getClasspath().cpTextInfo();
+            if (lastScriptProvider != null) {
+                if (lastScriptProvider.getLastScript() == null) {
+                    s = s + "<br/> nothing to unload";
+                } else {
+                    s = s + "<br/> previous script will be unloaded";
+                }
+            }
+        }
+        return s;
     }
 
 }
