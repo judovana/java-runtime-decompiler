@@ -5,9 +5,13 @@ import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.ClassesProvider;
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 
+import org.jrd.backend.data.VmInfo;
+import org.jrd.backend.data.VmManager;
+import org.jrd.backend.data.cli.Lib;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.ExecuteMethodProvider;
+import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.UploadProvider;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +27,10 @@ public interface CanCompile {
         for (IdentifiedBytecode ib : result) {
             Files.write(new File(save, ib.getClassIdentifier().getFullName() + ".class").toPath(), ib.getFile());
         }
+    }
+
+    static void upload(Collection<IdentifiedBytecode> result, UploadProvider up) throws IOException {
+        Lib.addByteClassesViaJar(up.getTarget().getVmInfo(), new ArrayList<>(result), up.isBoot(), up.getTarget().getVmManager());
     }
 
     Collection<IdentifiedBytecode> compile(String s, PluginManager pluginManager);

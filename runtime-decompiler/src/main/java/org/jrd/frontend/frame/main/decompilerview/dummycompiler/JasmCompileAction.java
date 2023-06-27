@@ -67,6 +67,10 @@ public class JasmCompileAction extends AbstractCompileAndRunAction implements Ca
                 if (save!=null) {
                     CanCompile.save(result, save.getSaveDirectory());
                 }
+                if (upload!=null && upload.isUploadEnabled()) {
+                    CanCompile.upload(result, upload);
+                    upload.resetUpload();
+                }
                 if (execute != null) {
                     CanCompile.run(fqn, result, execute.getMethodToExecute(), classesProvider);
                 }

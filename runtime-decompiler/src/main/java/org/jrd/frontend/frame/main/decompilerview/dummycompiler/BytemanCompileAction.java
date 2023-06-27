@@ -13,6 +13,7 @@ import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.ClasspathProvider;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.LastScriptProvider;
+import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.UploadProvider;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -28,6 +29,7 @@ public class BytemanCompileAction extends AbstractCompileAction implements CanCo
 
     private final ClasspathProvider vmInfoProvider;
     private final LastScriptProvider lastScriptProvider;
+    private final UploadProvider boot;
 
     @Override
     public Collection<IdentifiedBytecode> compile(String s, PluginManager pluginManager) {
@@ -54,7 +56,7 @@ public class BytemanCompileAction extends AbstractCompileAction implements CanCo
                         port = vmInfo.getBytemanCompanion();
                     } else {
                         port = VmInfo.findFreePort();
-                        Install.install("" + pid, false, "localhost", port, new String[]{});
+                        Install.install("" + pid, boot.isBoot(), "localhost", port, new String[]{});
                         vmInfo.setBytemanCompanion(port);
                     }
                     Submit submit = new Submit("localhost", port, new PrintStream(new LogOutputStream(), true, StandardCharsets.UTF_8));
@@ -98,10 +100,11 @@ public class BytemanCompileAction extends AbstractCompileAction implements CanCo
     }
 
     public BytemanCompileAction(String title, ClasspathProvider vmInfoProvider,
-                                LastScriptProvider lastScriptProvider) {
+                                LastScriptProvider lastScriptProvider, UploadProvider boot) {
         super(title);
         this.vmInfoProvider = vmInfoProvider;
         this.lastScriptProvider = lastScriptProvider;
+        this.boot = boot;
     }
 
     @Override
@@ -116,6 +119,9 @@ public class BytemanCompileAction extends AbstractCompileAction implements CanCo
                     s = s + "<br/> previous script will be unloaded";
                 }
             }
+        }
+        if (boot != null) {
+            s = s + "<br/> boot classlaoder = " + boot.isBoot();
         }
         return s;
     }

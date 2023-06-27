@@ -9,5 +9,8 @@ public interface UploadProvider {
     boolean isUploadEnabled();
     void resetUpload();
 
+    boolean isBoot();
+
+
 
 }

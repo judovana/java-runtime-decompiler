@@ -48,7 +48,10 @@ public abstract class AbstractCompileAndRunAction extends AbstractCompileAction 
             if (!upload.isUploadEnabled()) {
                 s = s + "; no adding to running vm";
             } else {
-                s = s + "; <b>will be added to: " + upload.getTarget().getClasspath().cpTextInfo() ;
+                s = s + "; <b>will be added to:</b> " + upload.getTarget().getClasspath().cpTextInfo() ;
+                if (upload.isBoot()) {
+                    s = s + " to Boot cp!!!" ;
+                }
             }
         }
         return s;

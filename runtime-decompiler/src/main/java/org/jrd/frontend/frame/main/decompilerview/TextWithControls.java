@@ -45,6 +45,7 @@ import org.jrd.backend.completion.ClassesAndMethodsProvider;
 import org.jrd.backend.completion.JrdCompletionSettings;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.VmInfo;
+import org.jrd.backend.data.VmManager;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.main.GlobalConsole;
@@ -90,7 +91,8 @@ public class TextWithControls extends JPanel
     private String execute = "start";
     private File save;
     private ScriptText lastScriptForByteman;
-    private boolean addToRunningVm = false; //fixme, dont forget to reset it after sucesfull addition!
+    private boolean addToRunningVm = false;
+    private boolean useBootForBytemanAndUpload = false;
 
     private final JButton completionButton = ImageButtonFactory.createEditButton("Code completion and compilation");
 
@@ -481,12 +483,14 @@ public class TextWithControls extends JPanel
                 });
             }
             for (Component c : compileAndRun.getMenuComponents()) {
-                ((AbstractCompileAction) c).addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent actionEvent) {
-                        lastCompileAndRun = (AbstractCompileAction) actionEvent.getSource();
-                    }
-                });
+                if (c instanceof AbstractCompileAction) {
+                    ((AbstractCompileAction) c).addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent actionEvent) {
+                            lastCompileAndRun = (AbstractCompileAction) actionEvent.getSource();
+                        }
+                    });
+                }
             }
             menu.add(new JustBearerAction("Run last used compilation", "(F9)"));
             menu.add(new JustBearerAction("Run last used compile+run", "(F10)"));
@@ -554,6 +558,7 @@ public class TextWithControls extends JPanel
                 } else {
                     save = null;
                 }
+                repaintMenu(menu);
             }
         });
         advanced.add(saveMenuItem);
@@ -567,26 +572,46 @@ public class TextWithControls extends JPanel
                 String newExec = JOptionPane.showInputDialog(setMethod, "set method to launch", execute);
                 if (newExec != null && newExec.trim().length() > 0) {
                     execute = newExec;
+                    repaintMenu(menu);
                 }
             }
         });
         advanced.add(setMethod);
         if (hasVm(classesAndMethodsProvider)) {
+            JCheckBox addToBoot = new JCheckBox(
+                    "instead of adding to classpath of - " +
+                            ((DecompilationController) classesAndMethodsProvider).cpTextInfo() +
+                            " - class/or byteman agent - will be added to boot classpath");
+            addToBoot.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent actionEvent) {
+                    useBootForBytemanAndUpload = addToBoot.isSelected();
+                    repaintMenu(menu);
+                }
+            });
+            addToBoot.setSelected(useBootForBytemanAndUpload);
+            advanced.add(addToBoot);
             JCheckBox addToSeelctedVm = new JCheckBox(
-                    "instead of running against running vm classpath - " +
-                            ((DecompilationController) classesAndMethodsProvider).getVmInfo() +
+                    "after compiling  running vm classpath - " +
+                            ((DecompilationController) classesAndMethodsProvider).cpTextInfo() +
                             " - class will be added to it - this can be done only once for each class." +
                             " Not  applicable to byteman");
             addToSeelctedVm.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent actionEvent) {
                     addToRunningVm = addToSeelctedVm.isSelected();
+                    repaintMenu(menu);
                 }
             });
             addToSeelctedVm.setSelected(addToRunningVm);
             advanced.add(addToSeelctedVm);
         }
         menu.add(advanced);
+    }
+
+    private static void repaintMenu(JPopupMenu menu) {
+        menu.setVisible(false);
+        menu.setVisible(true);
     }
 
     private void addGuessCompletionItem(JPopupMenu menu, JMenuItem guess) {
@@ -634,7 +659,8 @@ public class TextWithControls extends JPanel
 
     private JMenu getCompileAndRunMenu(PluginManager pluginManager, DecompilerWrapper jasm7, DecompilerWrapper jasm8) {
         JMenu compileAndRun = new JMenu("Compile and run");
-        addJavacAction(pluginManager, "compile by <b>javac</b> and run with no classpath", compileAndRun, null, this, this,
+        addJavacAction(pluginManager, "compile by <b>javac</b> and run with no classpath", compileAndRun, null, this,
+                this,
                 null);
         if (hasVm(classesAndMethodsProvider)) {
             addJavacAction(
@@ -646,7 +672,8 @@ public class TextWithControls extends JPanel
                 pluginManager, "compile by <b>javac</b> and run with settings additional cp", compileAndRun,
                 new SettingsClasspathProvider(), this, this, null);
         if (jasm7 != null) {
-            addJasmAction(pluginManager, jasm7, "compile by <b>jasmtools7</b> and run with no classpath", compileAndRun, null
+            addJasmAction(pluginManager, jasm7, "compile by <b>jasmtools7</b> and run with no classpath",
+                    compileAndRun, null
                     , this, this, null);
             if (classesAndMethodsProvider != null) {
                 if (hasVm(classesAndMethodsProvider)) {
@@ -657,12 +684,14 @@ public class TextWithControls extends JPanel
                     );
                 }
                 addJasmAction(
-                        pluginManager, jasm7, "compile by <b>jasmtools7</b> and run with settings additional cp", compileAndRun,
+                        pluginManager, jasm7, "compile by <b>jasmtools7</b> and run with settings additional cp",
+                        compileAndRun,
                         new SettingsClasspathProvider(), this, this, null);
             }
         }
         if (jasm8 != null) {
-            addJasmAction(pluginManager, jasm8, "compile by <b>jasmtools8</b> and run with no classpath", compileAndRun, null
+            addJasmAction(pluginManager, jasm8, "compile by <b>jasmtools8</b> and run with no classpath",
+                    compileAndRun, null
                     , this, this, null);
             if (classesAndMethodsProvider != null) {
                 if (hasVm(classesAndMethodsProvider)) {
@@ -672,7 +701,8 @@ public class TextWithControls extends JPanel
                             compileAndRun, this, this, this, null);
                 }
                 addJasmAction(
-                        pluginManager, jasm8, "compile by <b>jasmtools8</b> and run with settings additional cp", compileAndRun,
+                        pluginManager, jasm8, "compile by <b>jasmtools8</b> and run with settings additional cp",
+                        compileAndRun,
                         new SettingsClasspathProvider(), this, this, null);
             }
         }
@@ -681,13 +711,17 @@ public class TextWithControls extends JPanel
             /* && ((DecompilationController) classesAndMethodsProvider).getVmInfo().getType() == VmInfo.Type.LOCAL)*/) {
             BytemanCompileAction btmSubm = new BytemanCompileAction(
                     "compile by byteman and inject to selected vm ",
-                    this, this);
+                    this, this, this);
             btmSubm.addActionListener(new CompileActionListener(pluginManager, btmSubm));
             compileAndRun.add(btmSubm);
             BytemanCompileAction btmDeSubm = new BytemanCompileAction(
                     "TODO unload this byteman script ",
-                    this, this);
+                    this, this, null);
+            btmDeSubm.setEnabled(false);
             compileAndRun.add(btmDeSubm);
+            JMenuItem btmList = new JMenuItem("TODO list byteman rules");
+            btmList.setEnabled(false);
+            compileAndRun.add(btmList);
         }
         return compileAndRun;
     }
@@ -718,7 +752,7 @@ public class TextWithControls extends JPanel
         if (jasm8 != null) {
             addJasmAction(pluginManager, jasm8, "compile by <b>jasmtools8</b>", compile, null, null, this, this);
         }
-        BytemanCompileAction btmCheck = new BytemanCompileAction("compile by byteman", null, this);
+        BytemanCompileAction btmCheck = new BytemanCompileAction("compile by byteman", null, this, null);
         btmCheck.addActionListener(new CompileActionListener(pluginManager, btmCheck));
         compile.add(btmCheck);
         return compile;
@@ -828,13 +862,22 @@ public class TextWithControls extends JPanel
 
     @Override
     public void resetUpload() {
-        addToRunningVm = true;
+        addToRunningVm = false;
     }
 
     @Override
     public VmInfo getVmInfo() {
         if (classesAndMethodsProvider instanceof DecompilationController) {
             return ((DecompilationController) classesAndMethodsProvider).getVmInfo();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public VmManager getVmManager() {
+        if (classesAndMethodsProvider instanceof DecompilationController) {
+            return ((DecompilationController) classesAndMethodsProvider).getVmManager();
         } else {
             return null;
         }
@@ -853,5 +896,10 @@ public class TextWithControls extends JPanel
     @Override
     public ClasspathProvider getTarget() {
         return this;
+    }
+
+    @Override
+    public boolean isBoot() {
+        return useBootForBytemanAndUpload;
     }
 }

@@ -64,6 +64,10 @@ public class JavacCompileAction extends AbstractCompileAndRunAction implements C
                 if (save!=null) {
                     CanCompile.save(result, save.getSaveDirectory());
                 }
+                if (upload!=null && upload.isUploadEnabled()) {
+                    CanCompile.upload(result, upload);
+                    upload.resetUpload();
+                }
                 if (execute != null) {
                     CanCompile.run(fqn, result, execute.getMethodToExecute(), classesProvider);
                 }
