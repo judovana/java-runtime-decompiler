@@ -22,7 +22,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class JasmCompileAction extends AbstractCompileAndRunAction implements CanCompile {
 
@@ -39,7 +38,6 @@ public class JasmCompileAction extends AbstractCompileAndRunAction implements Ca
 
     @Override
     public Collection<IdentifiedBytecode> compile(final List<String> scripts, final PluginManager pluginManager) {
-        String script = scripts.stream().collect(Collectors.joining("\n\n"));
         final ClassesProvider classesProvider;
         if (classesAndMethodsProvider == null) {
             classesProvider = new NullClassesProvider();
@@ -63,10 +61,18 @@ public class JasmCompileAction extends AbstractCompileAndRunAction implements Ca
             }
         }, pluginManager);
         Collection<IdentifiedBytecode> result;
+        String firstfqn = null;
         try {
-            byte[] file = script.getBytes(StandardCharsets.UTF_8);
-            String fqn = Lib.guessName(file);
-            qc.run(jasm, false, new IdentifiedSource(new ClassIdentifier(fqn), file));
+            IdentifiedSource[] identifiedSources = new IdentifiedSource[scripts.size()];
+            for (int i = 0; i < scripts.size(); i++) {
+                byte[] file = scripts.get(i).getBytes(StandardCharsets.UTF_8);
+                String fqn = Lib.guessName(file);
+                if (i == 0) {
+                    firstfqn = fqn;
+                }
+                identifiedSources[i] = new IdentifiedSource(new ClassIdentifier(fqn), file);
+            }
+            qc.run(jasm, false, identifiedSources);
             result = qc.waitResult();
             if (result != null && result.size() > 0) {
                 if (save != null) {
@@ -77,7 +83,7 @@ public class JasmCompileAction extends AbstractCompileAndRunAction implements Ca
                     upload.resetUpload();
                 }
                 if (execute != null) {
-                    CanCompile.run(fqn, result, execute.getMethodToExecute(), classesProvider);
+                    CanCompile.run(firstfqn, result, execute.getMethodToExecute(), classesProvider);
                 }
             }
         } catch (Exception ex) {
