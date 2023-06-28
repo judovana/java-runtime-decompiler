@@ -7,12 +7,12 @@ import org.jrd.backend.data.VmManager;
 public interface ClasspathProvider {
 
     ClassesAndMethodsProvider getClasspath();
+
     VmInfo getVmInfo();
 
     VmManager getVmManager();
 
-    class SettingsClasspathProvider implements  ClasspathProvider{
-
+    class SettingsClasspathProvider implements ClasspathProvider {
 
         @Override
         public ClassesAndMethodsProvider getClasspath() {

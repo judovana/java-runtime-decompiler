@@ -99,8 +99,9 @@ public class BytemanCompileAction extends AbstractCompileAction implements CanCo
 
     }
 
-    public BytemanCompileAction(String title, ClasspathProvider vmInfoProvider,
-                                LastScriptProvider lastScriptProvider, UploadProvider boot) {
+    public BytemanCompileAction(
+            String title, ClasspathProvider vmInfoProvider, LastScriptProvider lastScriptProvider, UploadProvider boot
+    ) {
         super(title);
         this.vmInfoProvider = vmInfoProvider;
         this.lastScriptProvider = lastScriptProvider;
@@ -109,7 +110,7 @@ public class BytemanCompileAction extends AbstractCompileAction implements CanCo
 
     @Override
     public String getText() {
-        String s =  super.getText();
+        String s = super.getText();
         if (vmInfoProvider != null) {
             s = s + "<br/> will be uploaded installed to:" + vmInfoProvider.getClasspath().cpTextInfo();
             if (lastScriptProvider != null) {

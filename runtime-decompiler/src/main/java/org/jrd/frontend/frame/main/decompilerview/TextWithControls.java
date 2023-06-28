@@ -62,6 +62,7 @@ import org.jrd.frontend.frame.main.decompilerview.dummycompiler.JustBearerAction
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.ClasspathProvider;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.ExecuteMethodProvider;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.LastScriptProvider;
+import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.MainProviders;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.SaveProvider;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.UploadProvider;
 import org.jrd.frontend.utility.ImageButtonFactory;
@@ -74,9 +75,7 @@ import org.kcc.wordsets.BytemanKeywords;
 import org.kcc.wordsets.ConnectedKeywords;
 import org.kcc.wordsets.JrdApiKeywords;
 
-public class TextWithControls extends JPanel
-        implements LinesProvider, ClasspathProvider, ExecuteMethodProvider, SaveProvider, UploadProvider,
-        LastScriptProvider {
+public class TextWithControls extends JPanel implements LinesProvider, ClasspathProvider, ExecuteMethodProvider, SaveProvider, UploadProvider, LastScriptProvider {
 
     private final RSyntaxTextArea bytecodeSyntaxTextArea;
     private final SearchControlsPanel bytecodeSearchControls;
@@ -109,8 +108,7 @@ public class TextWithControls extends JPanel
         }
     }
 
-    public TextWithControls(String title, String codeSelect, CodeCompletionType cct,
-                            ClassesAndMethodsProvider classesAndMethodsProvider) {
+    public TextWithControls(String title, String codeSelect, CodeCompletionType cct, ClassesAndMethodsProvider classesAndMethodsProvider) {
         this.cct = cct;
         this.classesAndMethodsProvider = classesAndMethodsProvider;
         HexWithControls.initTabLayers(this, title);
@@ -122,8 +120,7 @@ public class TextWithControls extends JPanel
         this.add(searchAndCode, BorderLayout.SOUTH);
         searchAndCode.add(bytecodeSearchControls, BorderLayout.CENTER);
         if (cct != CodeCompletionType.FORBIDDEN) {
-            completionButton.addActionListener(new CompletionSettingsButtonPopUp(classesAndMethodsProvider,
-                    completionButton));
+            completionButton.addActionListener(new CompletionSettingsButtonPopUp(classesAndMethodsProvider, completionButton));
             completionButton.setOpaque(true);
             searchAndCode.add(completionButton, BorderLayout.WEST);
         }
@@ -150,10 +147,8 @@ public class TextWithControls extends JPanel
             codeCompletion = new KeywordBasedCodeCompletion(
                     bytecodeSyntaxTextArea,
                     new JrdCompletionSettings(
-                            guessed.get(0), oldSettings.getOp(), oldSettings.isCaseSensitive(),
-                            oldSettings.isShowHelp(),
-                            oldSettings.isDynamicClasses(), oldSettings.isConfigAdditionalClasses(),
-                            oldSettings.isMethodNames(),
+                            guessed.get(0), oldSettings.getOp(), oldSettings.isCaseSensitive(), oldSettings.isShowHelp(),
+                            oldSettings.isDynamicClasses(), oldSettings.isConfigAdditionalClasses(), oldSettings.isMethodNames(),
                             oldSettings.isMethodFullSignatures()
                     )
             );
@@ -162,11 +157,9 @@ public class TextWithControls extends JPanel
             codeCompletion = new KeywordBasedCodeCompletion(
                     bytecodeSyntaxTextArea,
                     new JrdCompletionSettings(
-                            new ConnectedKeywords(guessed.toArray(new CompletionItem.CompletionItemSet[0])),
-                            oldSettings.getOp(),
+                            new ConnectedKeywords(guessed.toArray(new CompletionItem.CompletionItemSet[0])), oldSettings.getOp(),
                             oldSettings.isCaseSensitive(), oldSettings.isShowHelp(), oldSettings.isDynamicClasses(),
-                            oldSettings.isConfigAdditionalClasses(), oldSettings.isMethodNames(),
-                            oldSettings.isMethodFullSignatures()
+                            oldSettings.isConfigAdditionalClasses(), oldSettings.isMethodNames(), oldSettings.isMethodFullSignatures()
                     )
             );
             setCompletionHelper();
@@ -398,8 +391,7 @@ public class TextWithControls extends JPanel
                             codeCompletion = new KeywordBasedCodeCompletion(
                                     bytecodeSyntaxTextArea,
                                     new JrdCompletionSettings(
-                                            new BytecodeKeywordsWithHelp(), oldSettings.getOp(),
-                                            oldSettings.isCaseSensitive(),
+                                            new BytecodeKeywordsWithHelp(), oldSettings.getOp(), oldSettings.isCaseSensitive(),
                                             oldSettings.isShowHelp(), oldSettings.isDynamicClasses(),
                                             oldSettings.isConfigAdditionalClasses(), oldSettings.isMethodNames(),
                                             oldSettings.isMethodFullSignatures()
@@ -579,9 +571,9 @@ public class TextWithControls extends JPanel
         advanced.add(setMethod);
         if (hasVm(classesAndMethodsProvider)) {
             JCheckBox addToBoot = new JCheckBox(
-                    "instead of adding to classpath of - " +
-                            ((DecompilationController) classesAndMethodsProvider).cpTextInfo() +
-                            " - class/or byteman agent - will be added to boot classpath");
+                    "instead of adding to classpath of - " + ((DecompilationController) classesAndMethodsProvider).cpTextInfo() +
+                            " - class/or byteman agent - will be added to boot classpath"
+            );
             addToBoot.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent actionEvent) {
@@ -592,10 +584,9 @@ public class TextWithControls extends JPanel
             addToBoot.setSelected(useBootForBytemanAndUpload);
             advanced.add(addToBoot);
             JCheckBox addToSeelctedVm = new JCheckBox(
-                    "after compiling  running vm classpath - " +
-                            ((DecompilationController) classesAndMethodsProvider).cpTextInfo() +
-                            " - class will be added to it - this can be done only once for each class." +
-                            " Not  applicable to byteman");
+                    "after compiling  running vm classpath - " + ((DecompilationController) classesAndMethodsProvider).cpTextInfo() +
+                            " - class will be added to it - this can be done only once for each class." + " Not  applicable to byteman"
+            );
             addToSeelctedVm.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent actionEvent) {
@@ -618,8 +609,7 @@ public class TextWithControls extends JPanel
         guess.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                List<CompletionItem.CompletionItemSet> guessed =
-                        SupportedKeySets.JRD_KEY_SETS.recognize(bytecodeSyntaxTextArea.getText());
+                List<CompletionItem.CompletionItemSet> guessed = SupportedKeySets.JRD_KEY_SETS.recognize(bytecodeSyntaxTextArea.getText());
                 normalCodeCompletionGuess(guessed);
             }
         });
@@ -659,64 +649,59 @@ public class TextWithControls extends JPanel
 
     private JMenu getCompileAndRunMenu(PluginManager pluginManager, DecompilerWrapper jasm7, DecompilerWrapper jasm8) {
         JMenu compileAndRun = new JMenu("Compile and run");
-        addJavacAction(pluginManager, "compile by <b>javac</b> and run with no classpath", compileAndRun, null, this,
-                this,
-                null);
+        addJavacAction(pluginManager, "compile by <b>javac</b> and run with no classpath", compileAndRun, null, this, this, null);
         if (hasVm(classesAndMethodsProvider)) {
             addJavacAction(
-                    pluginManager,
-                    "compile by <b>javac</b> and run with selected vm classpath ",
-                    compileAndRun, this, this, this, null);
+                    pluginManager, "compile by <b>javac</b> and run with selected vm classpath ", compileAndRun, this, this, this, null
+            );
         }
         addJavacAction(
                 pluginManager, "compile by <b>javac</b> and run with settings additional cp", compileAndRun,
-                new SettingsClasspathProvider(), this, this, null);
+                new SettingsClasspathProvider(), this, this, null
+        );
         if (jasm7 != null) {
-            addJasmAction(pluginManager, jasm7, "compile by <b>jasmtools7</b> and run with no classpath",
-                    compileAndRun, null
-                    , this, this, null);
+            addJasmAction(
+                    pluginManager, jasm7, "compile by <b>jasmtools7</b> and run with no classpath", compileAndRun,
+                    new MainProviders(null, this, this, null)
+            );
             if (classesAndMethodsProvider != null) {
                 if (hasVm(classesAndMethodsProvider)) {
                     addJasmAction(
-                            pluginManager, jasm7,
-                            "compile by <b>jasmtools7</b> and run with selected vm classpath ",
-                            compileAndRun, this, this, this, null
+                            pluginManager, jasm7, "compile by <b>jasmtools7</b> and run with selected vm classpath ", compileAndRun,
+                            new MainProviders(this, this, this, null)
                     );
                 }
                 addJasmAction(
-                        pluginManager, jasm7, "compile by <b>jasmtools7</b> and run with settings additional cp",
-                        compileAndRun,
-                        new SettingsClasspathProvider(), this, this, null);
+                        pluginManager, jasm7, "compile by <b>jasmtools7</b> and run with settings additional cp", compileAndRun,
+                        new MainProviders(new SettingsClasspathProvider(), this, this, null)
+                );
             }
         }
         if (jasm8 != null) {
-            addJasmAction(pluginManager, jasm8, "compile by <b>jasmtools8</b> and run with no classpath",
-                    compileAndRun, null
-                    , this, this, null);
+            addJasmAction(
+                    pluginManager, jasm8, "compile by <b>jasmtools8</b> and run with no classpath", compileAndRun,
+                    new MainProviders(null, this, this, null)
+            );
             if (classesAndMethodsProvider != null) {
                 if (hasVm(classesAndMethodsProvider)) {
                     addJasmAction(
-                            pluginManager, jasm8,
-                            "compile by <b>jasmtools8</b> and run with selected vm classpath ",
-                            compileAndRun, this, this, this, null);
+                            pluginManager, jasm8, "compile by <b>jasmtools8</b> and run with selected vm classpath ", compileAndRun,
+                            new MainProviders(this, this, this, null)
+                    );
                 }
                 addJasmAction(
-                        pluginManager, jasm8, "compile by <b>jasmtools8</b> and run with settings additional cp",
-                        compileAndRun,
-                        new SettingsClasspathProvider(), this, this, null);
+                        pluginManager, jasm8, "compile by <b>jasmtools8</b> and run with settings additional cp", compileAndRun,
+                        new MainProviders(new SettingsClasspathProvider(), this, this, null)
+                );
             }
         }
         if (hasVm(classesAndMethodsProvider)
-            /* thsi will need heavy thinking FIXME, based on how bmisntall works*/
-            /* && ((DecompilationController) classesAndMethodsProvider).getVmInfo().getType() == VmInfo.Type.LOCAL)*/) {
-            BytemanCompileAction btmSubm = new BytemanCompileAction(
-                    "compile by byteman and inject to selected vm ",
-                    this, this, this);
+        /* thsi will need heavy thinking FIXME, based on how bmisntall works*/
+        /* && ((DecompilationController) classesAndMethodsProvider).getVmInfo().getType() == VmInfo.Type.LOCAL)*/) {
+            BytemanCompileAction btmSubm = new BytemanCompileAction("compile by byteman and inject to selected vm ", this, this, this);
             btmSubm.addActionListener(new CompileActionListener(pluginManager, btmSubm));
             compileAndRun.add(btmSubm);
-            BytemanCompileAction btmDeSubm = new BytemanCompileAction(
-                    "TODO unload this byteman script ",
-                    this, this, null);
+            BytemanCompileAction btmDeSubm = new BytemanCompileAction("TODO unload this byteman script ", this, this, null);
             btmDeSubm.setEnabled(false);
             compileAndRun.add(btmDeSubm);
             JMenuItem btmList = new JMenuItem("TODO list byteman rules");
@@ -736,21 +721,19 @@ public class TextWithControls extends JPanel
         addJavacAction(pluginManager, "compile by <b>javac</b> - no CP", compile, null, null, this, this);
         if (classesAndMethodsProvider != null) {
             if (hasVm(classesAndMethodsProvider)) {
-                addJavacAction(
-                        pluginManager,
-                        "compile by <b>javac</b> - selected vm classpath ",
-                        compile, this, null, this, this);
+                addJavacAction(pluginManager, "compile by <b>javac</b> - selected vm classpath ", compile, this, null, this, this);
             }
             addJavacAction(
-                    pluginManager, "compile by <b>javac</b> - with settings additional cp", compile,
-                    new SettingsClasspathProvider(), null, this, this);
+                    pluginManager, "compile by <b>javac</b> - with settings additional cp", compile, new SettingsClasspathProvider(), null,
+                    this, this
+            );
         }
         if (jasm7 != null) {
-            addJasmAction(pluginManager, jasm7, "compile by <b>jasmtools7</b>", compile, null, null, this, this);
+            addJasmAction(pluginManager, jasm7, "compile by <b>jasmtools7</b>", compile, new MainProviders(null, null, this, this));
 
         }
         if (jasm8 != null) {
-            addJasmAction(pluginManager, jasm8, "compile by <b>jasmtools8</b>", compile, null, null, this, this);
+            addJasmAction(pluginManager, jasm8, "compile by <b>jasmtools8</b>", compile, new MainProviders(null, null, this, this));
         }
         BytemanCompileAction btmCheck = new BytemanCompileAction("compile by byteman", null, this, null);
         btmCheck.addActionListener(new CompileActionListener(pluginManager, btmCheck));
@@ -759,26 +742,24 @@ public class TextWithControls extends JPanel
     }
 
     private void addJavacAction(
-            PluginManager pluginManager, String title, JMenu compile, ClasspathProvider classpathProvider,
-            ExecuteMethodProvider lexecute, SaveProvider save, UploadProvider uploadProvider
+            PluginManager pluginManager, String title, JMenu compile, ClasspathProvider classpathProvider, ExecuteMethodProvider lexecute,
+            SaveProvider lsave, UploadProvider uploadProvider
     ) {
-        final JavacCompileAction compileJavac =
-                new JavacCompileAction(title, classpathProvider, save, uploadProvider, lexecute);
+        final JavacCompileAction compileJavac = new JavacCompileAction(title, classpathProvider, lsave, uploadProvider, lexecute);
         compileJavac.addActionListener(new CompileActionListener(pluginManager, compileJavac));
         compile.add(compileJavac);
     }
 
-    private void addJasmAction(
-            PluginManager pluginManager, DecompilerWrapper jasm, String title, JMenu compile,
-            ClasspathProvider classpathProvider, ExecuteMethodProvider lexecute, SaveProvider save,
-            UploadProvider uploadProvider
-    ) {
-        final JasmCompileAction asmcompile =
-                new JasmCompileAction(title, jasm, classpathProvider, save, uploadProvider, lexecute);
+    private
+            void
+            addJasmAction(PluginManager pluginManager, DecompilerWrapper jasm, String title, JMenu compile, MainProviders mainProviders) {
+        final JasmCompileAction asmcompile = new JasmCompileAction(
+                title, jasm, mainProviders.getClasspathProvider(), mainProviders.getSave(), mainProviders.getUploadProvider(),
+                mainProviders.getExecute()
+        );
         asmcompile.addActionListener(new CompileActionListener(pluginManager, asmcompile));
         compile.add(asmcompile);
     }
-
 
     private static void lastUsed(JustBearerAction component, AbstractCompileAction last) {
         component.setOriginal(last);
@@ -810,8 +791,7 @@ public class TextWithControls extends JPanel
                         if (compiler.getWrapper() != null) {
                             pluginManager.initializeWrapper(compiler.getWrapper());
                         }
-                        Collection<IdentifiedBytecode> l = compiler.compile(bytecodeSyntaxTextArea.getText(),
-                                pluginManager);
+                        Collection<IdentifiedBytecode> l = compiler.compile(bytecodeSyntaxTextArea.getText(), pluginManager);
                         if (l == null || l.size() == 0 || new ArrayList<IdentifiedBytecode>(l).get(0).getFile().length == 0) {
                             repaintButton(Color.RED);
                         } else {

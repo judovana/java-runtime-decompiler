@@ -12,7 +12,7 @@ import java.util.Set;
 
 public interface ClassesAndMethodsProvider {
 
-    public String cpTextInfo();
+    String cpTextInfo();
 
     String[] getClasses(CompletionSettings settings);
 
@@ -25,7 +25,7 @@ public interface ClassesAndMethodsProvider {
         @Override
         public String cpTextInfo() {
             String s = Config.getConfig().getAdditionalCP();
-            if (s.length()>300){
+            if (s.length() > 300) {
                 return "local cp; items count:" + s.split(System.getProperty("path.separator")).length;
             }
             return s;

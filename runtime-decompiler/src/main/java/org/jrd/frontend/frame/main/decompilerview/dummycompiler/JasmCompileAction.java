@@ -26,9 +26,11 @@ public class JasmCompileAction extends AbstractCompileAndRunAction implements Ca
 
     private final DecompilerWrapper jasm;
 
-    public JasmCompileAction(String title, DecompilerWrapper jasm, ClasspathProvider classesAndMethodsProvider, SaveProvider save,
-                             UploadProvider upload, ExecuteMethodProvider execute) {
-        super(title,classesAndMethodsProvider, save, upload, execute);
+    public JasmCompileAction(
+            String title, DecompilerWrapper jasm, ClasspathProvider classesAndMethodsProvider, SaveProvider save, UploadProvider upload,
+            ExecuteMethodProvider execute
+    ) {
+        super(title, classesAndMethodsProvider, save, upload, execute);
         this.jasm = jasm;
 
     }
@@ -64,10 +66,10 @@ public class JasmCompileAction extends AbstractCompileAndRunAction implements Ca
             qc.run(jasm, false, new IdentifiedSource(new ClassIdentifier(fqn), file));
             result = qc.waitResult();
             if (result != null && result.size() > 0) {
-                if (save!=null) {
+                if (save != null) {
                     CanCompile.save(result, save.getSaveDirectory());
                 }
-                if (upload!=null && upload.isUploadEnabled()) {
+                if (upload != null && upload.isUploadEnabled()) {
                     CanCompile.upload(result, upload);
                     upload.resetUpload();
                 }

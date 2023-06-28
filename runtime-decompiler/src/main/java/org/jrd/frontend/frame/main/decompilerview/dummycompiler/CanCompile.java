@@ -5,12 +5,9 @@ import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.ClassesProvider;
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 
-import org.jrd.backend.data.VmInfo;
-import org.jrd.backend.data.VmManager;
 import org.jrd.backend.data.cli.Lib;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
-import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.ExecuteMethodProvider;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.UploadProvider;
 
 import java.io.File;

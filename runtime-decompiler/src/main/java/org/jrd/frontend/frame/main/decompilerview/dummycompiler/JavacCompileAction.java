@@ -18,16 +18,17 @@ import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.Execut
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.SaveProvider;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.UploadProvider;
 
-import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 
 public class JavacCompileAction extends AbstractCompileAndRunAction implements CanCompile {
 
-    public JavacCompileAction(String title, ClasspathProvider classesAndMethodsProvider, SaveProvider save,
-                              UploadProvider upload, ExecuteMethodProvider execute) {
-        super(title,classesAndMethodsProvider, save, upload, execute);
+    public JavacCompileAction(
+            String title, ClasspathProvider classesAndMethodsProvider, SaveProvider save, UploadProvider upload,
+            ExecuteMethodProvider execute
+    ) {
+        super(title, classesAndMethodsProvider, save, upload, execute);
     }
 
     @Override
@@ -61,10 +62,10 @@ public class JavacCompileAction extends AbstractCompileAndRunAction implements C
             qc.run(null, false, new IdentifiedSource(new ClassIdentifier(fqn), file));
             result = qc.waitResult();
             if (result != null && result.size() > 0) {
-                if (save!=null) {
+                if (save != null) {
                     CanCompile.save(result, save.getSaveDirectory());
                 }
-                if (upload!=null && upload.isUploadEnabled()) {
+                if (upload != null && upload.isUploadEnabled()) {
                     CanCompile.upload(result, upload);
                     upload.resetUpload();
                 }
