@@ -12,6 +12,8 @@ import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.Config;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
+import org.jrd.backend.data.cli.Lib;
+import org.jrd.backend.data.cli.utils.FqnAndClassToJar;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.main.decompilerview.DecompilationController;
@@ -101,7 +103,7 @@ public class OverwriteClassDialog extends JDialog {
     private final JTextField filePath;
     private final JTextField className;
     private final JButton selectSrc;
-    private final JLabel nothing;
+    private final JComboBox rewriteOrAdd;
     private final JButton ok;
     private final PluginManager pluginManager;
     private final DecompilerWrapper decompiler;
@@ -182,7 +184,7 @@ public class OverwriteClassDialog extends JDialog {
         filePath = new JTextField(latestPaths.getLastManualUpload());
         className = new JTextField(origName);
         selectSrc = new JButton("...");
-        nothing = new JLabel();
+        rewriteOrAdd = new JComboBox(new String[]{"Overwrite", "Add", "Add to boot"});
         ok = new JButton("upload to vm - " + vmInfo.getVmId());
 
         externalFiles = new JPanel(new GridLayout(0, 1));
@@ -349,10 +351,22 @@ public class OverwriteClassDialog extends JDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    String response = CommonUtils.uploadBytecode(
-                            className.getText(), vmManager, vmInfo, DecompilationController.fileToBytes(filePath.getText())
-                    );
-
+                    String response = null;
+                    if (rewriteOrAdd.getSelectedIndex() == 0) {
+                        response = CommonUtils.uploadBytecode(
+                                className.getText(), vmManager, vmInfo, DecompilationController.fileToBytes(filePath.getText())
+                        );
+                    } else if (rewriteOrAdd.getSelectedIndex() == 1) {
+                        response = Lib.addFileClassesViaJar(
+                                vmInfo, Collections.singletonList(new FqnAndClassToJar(className.getText(), new File(filePath.getText()))),
+                                false, vmManager
+                        );
+                    } else if (rewriteOrAdd.getSelectedIndex() == 2) {
+                        response = Lib.addFileClassesViaJar(
+                                vmInfo, Collections.singletonList(new FqnAndClassToJar(className.getText(), new File(filePath.getText()))),
+                                true, vmManager
+                        );
+                    }
                     if (new TopLevelErrorCandidate(response).isError()) {
                         JOptionPane.showMessageDialog(null, response + "\nClass overwrite failed.", "Error", JOptionPane.ERROR_MESSAGE);
                     } else {
@@ -480,7 +494,7 @@ public class OverwriteClassDialog extends JDialog {
         inputs.add(className);
         inputs.add(validation);
         buttons.add(selectSrc);
-        buttons.add(nothing);
+        buttons.add(rewriteOrAdd);
         buttons.add(ok);
         manualPane.add(inputs);
         manualPane.add(buttons, BorderLayout.EAST);
