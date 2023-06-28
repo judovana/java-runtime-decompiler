@@ -1,5 +1,6 @@
 package org.jrd.frontend.frame.hex;
 
+import org.jrd.frontend.frame.main.decompilerview.HexWithControls;
 import org.jrd.frontend.frame.main.decompilerview.LinesProvider;
 import org.jrd.frontend.frame.main.decompilerview.TextWithControls;
 import org.jrd.frontend.frame.main.popup.DiffPopup;
@@ -136,5 +137,17 @@ public class FeatureFullHex extends JPanel {
         if (hex instanceof TextWithControls) {
             ((TextWithControls) hex).removeCodecompletion();
         }
+    }
+
+    public List<String> getLines() {
+        return hex.getLines(LinesProvider.LinesFormat.CHARS);
+    }
+
+    public boolean isHex() {
+        return hex instanceof HexWithControls;
+    }
+
+    public boolean isText() {
+        return hex instanceof TextWithControls;
     }
 }

@@ -21,6 +21,7 @@ import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.Upload
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public class JavacCompileAction extends AbstractCompileAndRunAction implements CanCompile {
 
@@ -32,7 +33,7 @@ public class JavacCompileAction extends AbstractCompileAndRunAction implements C
     }
 
     @Override
-    public Collection<IdentifiedBytecode> compile(final String s, final PluginManager pluginManager) {
+    public Collection<IdentifiedBytecode> compile(final List<String> scripts, final PluginManager pluginManager) {
         final ClassesProvider classesProvider;
         if (classesAndMethodsProvider == null) {
             classesProvider = new NullClassesProvider();
@@ -56,10 +57,18 @@ public class JavacCompileAction extends AbstractCompileAndRunAction implements C
             }
         }, pluginManager);
         Collection<IdentifiedBytecode> result;
+        String firstfqn = null;
         try {
-            byte[] file = s.getBytes(StandardCharsets.UTF_8);
-            String fqn = Lib.guessName(file);
-            qc.run(null, false, new IdentifiedSource(new ClassIdentifier(fqn), file));
+            IdentifiedSource[] identifiedSources = new IdentifiedSource[scripts.size()];
+            for (int i = 0; i < scripts.size(); i++) {
+                byte[] file = scripts.get(i).getBytes(StandardCharsets.UTF_8);
+                String fqn = Lib.guessName(file);
+                if (i == 0) {
+                    firstfqn = fqn;
+                }
+                identifiedSources[i] = new IdentifiedSource(new ClassIdentifier(fqn), file);
+            }
+            qc.run(null, false, identifiedSources);
             result = qc.waitResult();
             if (result != null && result.size() > 0) {
                 if (save != null) {
@@ -70,7 +79,7 @@ public class JavacCompileAction extends AbstractCompileAndRunAction implements C
                     upload.resetUpload();
                 }
                 if (execute != null) {
-                    CanCompile.run(fqn, result, execute.getMethodToExecute(), classesProvider);
+                    CanCompile.run(firstfqn, result, execute.getMethodToExecute(), classesProvider);
                 }
             }
         } catch (Exception ex) {

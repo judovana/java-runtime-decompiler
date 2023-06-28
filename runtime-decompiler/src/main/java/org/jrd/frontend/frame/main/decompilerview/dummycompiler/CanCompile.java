@@ -17,6 +17,7 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public interface CanCompile {
 
@@ -30,7 +31,7 @@ public interface CanCompile {
         Lib.addByteClassesViaJar(up.getTarget().getVmInfo(), new ArrayList<>(result), up.isBoot(), up.getTarget().getVmManager());
     }
 
-    Collection<IdentifiedBytecode> compile(String s, PluginManager pluginManager);
+    Collection<IdentifiedBytecode> compile(List<String> s, PluginManager pluginManager);
 
     DecompilerWrapper getWrapper();
 

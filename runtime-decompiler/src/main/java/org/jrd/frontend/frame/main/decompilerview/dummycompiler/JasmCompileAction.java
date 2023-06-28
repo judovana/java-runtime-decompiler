@@ -21,6 +21,8 @@ import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.Upload
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class JasmCompileAction extends AbstractCompileAndRunAction implements CanCompile {
 
@@ -36,7 +38,8 @@ public class JasmCompileAction extends AbstractCompileAndRunAction implements Ca
     }
 
     @Override
-    public Collection<IdentifiedBytecode> compile(final String s, final PluginManager pluginManager) {
+    public Collection<IdentifiedBytecode> compile(final List<String> scripts, final PluginManager pluginManager) {
+        String script = scripts.stream().collect(Collectors.joining("\n\n"));
         final ClassesProvider classesProvider;
         if (classesAndMethodsProvider == null) {
             classesProvider = new NullClassesProvider();
@@ -61,7 +64,7 @@ public class JasmCompileAction extends AbstractCompileAndRunAction implements Ca
         }, pluginManager);
         Collection<IdentifiedBytecode> result;
         try {
-            byte[] file = s.getBytes(StandardCharsets.UTF_8);
+            byte[] file = script.getBytes(StandardCharsets.UTF_8);
             String fqn = Lib.guessName(file);
             qc.run(jasm, false, new IdentifiedSource(new ClassIdentifier(fqn), file));
             result = qc.waitResult();

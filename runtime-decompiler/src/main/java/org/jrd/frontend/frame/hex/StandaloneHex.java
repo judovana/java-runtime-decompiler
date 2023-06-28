@@ -18,7 +18,9 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -35,6 +37,8 @@ public class StandaloneHex extends JFrame {
 
     private static int counter = 0;
     File lastOpened = new File(System.getProperty("user.dir"));
+    private boolean treatAllTabsAsOneBatch = false;
+    private final JTabbedPane mainTabs;
 
     public StandaloneHex(List<String> files, boolean hex, ClassesAndMethodsProvider classesAndMethodsProvider)
             throws HeadlessException, IOException {
@@ -42,21 +46,21 @@ public class StandaloneHex extends JFrame {
         this.setSize(900, 800);
         this.setLocationRelativeTo(null);
         this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        final JTabbedPane tp = new JTabbedPane();
+        mainTabs = new JTabbedPane();
         for (String s : files) {
             JPanel wrapper;
             if (hex) {
-                wrapper = new FeatureFullHex(new File(s), tp, new HexWithControls(null));
+                wrapper = new FeatureFullHex(new File(s), mainTabs, new HexWithControls(null));
             } else {
                 wrapper = new FeatureFullHex(
-                        new File(s), tp,
+                        new File(s), mainTabs,
                         new TextWithControls(
                                 null, SyntaxConstants.SYNTAX_STYLE_JAVA, TextWithControls.CodeCompletionType.STANDALONE,
                                 classesAndMethodsProvider
                         )
                 );
             }
-            tp.add(wrapper);
+            mainTabs.add(wrapper);
         }
         JPanel topButtons = new JPanel(new GridLayout(1, 2));
         JButton openHex = new JButton("Open file (hex)");
@@ -84,8 +88,8 @@ public class StandaloneHex extends JFrame {
         plus.add(center, BorderLayout.CENTER);
         plus.add(lowButtons, BorderLayout.SOUTH);
         plus.setName("+");
-        tp.add(plus);
-        this.add(tp);
+        mainTabs.add(plus);
+        this.add(mainTabs);
         settings.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -94,12 +98,12 @@ public class StandaloneHex extends JFrame {
         });
         exit.addActionListener(a -> StandaloneHex.this.dispose());
         openHex.addActionListener(a -> {
-            addMainPanel(tp, openHex, plus, new HexWithControls(null));
+            addMainPanel(mainTabs, openHex, plus, new HexWithControls(null));
         });
 
         openText.addActionListener(a -> {
             addMainPanel(
-                    tp, openHex, plus,
+                    mainTabs, openHex, plus,
                     new TextWithControls(
                             null, SyntaxConstants.SYNTAX_STYLE_JAVA, TextWithControls.CodeCompletionType.STANDALONE,
                             classesAndMethodsProvider
@@ -108,12 +112,12 @@ public class StandaloneHex extends JFrame {
         });
 
         openEmptyHex.addActionListener(a -> {
-            addEmptyMainPanel(tp, openHex, plus, new HexWithControls(null));
+            addEmptyMainPanel(mainTabs, openHex, plus, new HexWithControls(null));
         });
 
         openEmptyText.addActionListener(a -> {
             addEmptyMainPanel(
-                    tp, openHex, plus,
+                    mainTabs, openHex, plus,
                     new TextWithControls(
                             null, SyntaxConstants.SYNTAX_STYLE_JAVA, TextWithControls.CodeCompletionType.STANDALONE,
                             classesAndMethodsProvider
@@ -124,7 +128,7 @@ public class StandaloneHex extends JFrame {
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosed(WindowEvent e) {
-                for (Component c : tp.getComponents()) {
+                for (Component c : mainTabs.getComponents()) {
                     if (c instanceof FeatureFullHex) {
                         ((FeatureFullHex) c).removeCodecompletion();
                     }
@@ -174,4 +178,27 @@ public class StandaloneHex extends JFrame {
         }
     }
 
+    public void setTreatAllTabsAsOneBatch(boolean selected) {
+        treatAllTabsAsOneBatch = selected;
+    }
+
+    public boolean isTreatAllTabsAsOneBatch() {
+        return treatAllTabsAsOneBatch;
+    }
+
+    public List<String> getAllTexts(FeatureFullHex caller) {
+        List<String> r = new ArrayList<>();
+        for (Component c : mainTabs.getComponents()) {
+            if (c instanceof FeatureFullHex) {
+                if (((FeatureFullHex) c).isText()) {
+                    if (c == caller) {
+                        r.add(0, ((FeatureFullHex) c).getLines().stream().collect(Collectors.joining("\n")));
+                    } else {
+                        r.add(((FeatureFullHex) c).getLines().stream().collect(Collectors.joining("\n")));
+                    }
+                }
+            }
+        }
+        return r;
+    }
 }

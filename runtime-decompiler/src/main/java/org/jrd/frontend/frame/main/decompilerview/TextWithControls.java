@@ -8,6 +8,7 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Font;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
@@ -22,6 +23,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,6 +50,8 @@ import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
+import org.jrd.frontend.frame.hex.FeatureFullHex;
+import org.jrd.frontend.frame.hex.StandaloneHex;
 import org.jrd.frontend.frame.main.GlobalConsole;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.BytemanCompileAction;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.AbstractCompileAction;
@@ -75,7 +79,8 @@ import org.kcc.wordsets.BytemanKeywords;
 import org.kcc.wordsets.ConnectedKeywords;
 import org.kcc.wordsets.JrdApiKeywords;
 
-public class TextWithControls extends JPanel implements LinesProvider, ClasspathProvider, ExecuteMethodProvider, SaveProvider, UploadProvider, LastScriptProvider {
+public class TextWithControls extends JPanel
+        implements LinesProvider, ClasspathProvider, ExecuteMethodProvider, SaveProvider, UploadProvider, LastScriptProvider {
 
     private final RSyntaxTextArea bytecodeSyntaxTextArea;
     private final SearchControlsPanel bytecodeSearchControls;
@@ -569,6 +574,19 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
             }
         });
         advanced.add(setMethod);
+        JCheckBox treatAllAsOne = new JCheckBox("Treat all tabs in this window as single batch");
+        Container parent = getParentWindow();
+        if (parent != null) {
+            treatAllAsOne.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent actionEvent) {
+                    setTreatAllTabsAsOneBatch(treatAllAsOne.isSelected());
+                    repaintMenu(menu);
+                }
+            });
+            treatAllAsOne.setSelected(isTreatAllTabsAsOneBatch());
+            advanced.add(treatAllAsOne);
+        }
         if (hasVm(classesAndMethodsProvider)) {
             JCheckBox addToBoot = new JCheckBox(
                     "instead of adding to classpath of - " + ((DecompilationController) classesAndMethodsProvider).cpTextInfo() +
@@ -791,7 +809,13 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
                         if (compiler.getWrapper() != null) {
                             pluginManager.initializeWrapper(compiler.getWrapper());
                         }
-                        Collection<IdentifiedBytecode> l = compiler.compile(bytecodeSyntaxTextArea.getText(), pluginManager);
+                        List<String> toCompile = new ArrayList<>();
+                        if (isTreatAllTabsAsOneBatch()) {
+                            toCompile.addAll(getAllTabsTexts());
+                        } else {
+                            toCompile.add(bytecodeSyntaxTextArea.getText());
+                        }
+                        Collection<IdentifiedBytecode> l = compiler.compile(toCompile, pluginManager);
                         if (l == null || l.size() == 0 || new ArrayList<IdentifiedBytecode>(l).get(0).getFile().length == 0) {
                             repaintButton(Color.RED);
                         } else {
@@ -881,5 +905,46 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
     @Override
     public boolean isBoot() {
         return useBootForBytemanAndUpload;
+    }
+
+    private void setTreatAllTabsAsOneBatch(boolean selected) {
+        getParentWindow().setTreatAllTabsAsOneBatch(selected);
+    }
+
+    private boolean isTreatAllTabsAsOneBatch() {
+        return getParentWindow().isTreatAllTabsAsOneBatch();
+    }
+
+    private Collection<String> getAllTabsTexts() {
+        //it is necessary, that THIS tab is first in array
+        // for correct detection of pkg.class for running of "main" method
+        if (getParentPane() == null) {
+            return Collections.singletonList(bytecodeSyntaxTextArea.getText());
+        }
+        return getParentWindow().getAllTexts(getParentPane());
+    }
+
+    private StandaloneHex getParentWindow() {
+        FeatureFullHex pane = getParentPane();
+        if (pane == null) {
+            return null;
+        }
+        Container r = pane;
+        while (r != null) {
+            if (r instanceof StandaloneHex) {
+                return (StandaloneHex) r;
+            }
+            r = r.getParent();
+        }
+        return null;
+    }
+
+    private FeatureFullHex getParentPane() {
+        Container parent = this.getParent();
+        if (parent instanceof FeatureFullHex) {
+            return (FeatureFullHex) parent;
+        } else {
+            return null;
+        }
     }
 }

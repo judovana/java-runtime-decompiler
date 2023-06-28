@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class BytemanCompileAction extends AbstractCompileAction implements CanCompile {
 
@@ -32,20 +33,20 @@ public class BytemanCompileAction extends AbstractCompileAction implements CanCo
     private final UploadProvider boot;
 
     @Override
-    public Collection<IdentifiedBytecode> compile(String s, PluginManager pluginManager) {
-        //org.jboss.byteman.check.TestScript.main();
+    public Collection<IdentifiedBytecode> compile(List<String> scripts, PluginManager pluginManager) {
+        String script = scripts.stream().collect(Collectors.joining("\n\n"));
         RuleCheck check = new RuleCheck();
         if (Logger.getLogger().isVerbose()) {
             check.setVerbose();
         }
         try {
             check.setPrintStream(new PrintStream(new LogOutputStream(), true, StandardCharsets.UTF_8));
-            check.addRule(new Date().toString(), s);
+            check.addRule(new Date().toString(), script);
             check.checkRules();
             RuleCheckResult results = check.getResult();
             if (!results.hasError()) {
                 List<IdentifiedBytecode> r = new ArrayList<>();
-                r.add(new IdentifiedBytecode(new ClassIdentifier("check.byteman"), s.getBytes(StandardCharsets.UTF_8)));
+                r.add(new IdentifiedBytecode(new ClassIdentifier("check.byteman"), script.getBytes(StandardCharsets.UTF_8)));
                 if (vmInfoProvider == null) {
                     return r;
                 } else {
@@ -60,7 +61,7 @@ public class BytemanCompileAction extends AbstractCompileAction implements CanCo
                         vmInfo.setBytemanCompanion(port);
                     }
                     Submit submit = new Submit("localhost", port, new PrintStream(new LogOutputStream(), true, StandardCharsets.UTF_8));
-                    ScriptText st = new ScriptText("hi.btm", s);
+                    ScriptText st = new ScriptText("hi.btm", script);
                     if (lastScriptProvider.getLastScript() != null) {
                         String deleteAll = submit.deleteScripts(Collections.singletonList(lastScriptProvider.getLastScript()));
                         Logger.getLogger().log(Logger.Level.ALL, deleteAll);
