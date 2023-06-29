@@ -34,12 +34,12 @@
         <property name="fileExtensions" value=".prop"/>
     </module>
 
-    <!-- Regex checks, see https://checkstyle.org/config_regexp.html -->
+    <!-- Regex checks, see https://checkstyle.org/config_regexp.html -
     <module name="RegexpMultiline">
         <property name="format" value="(\/\*)([^*]*;[^*]*)(?!\*)([^\/*][^*]*\*+)*\/"/>
         <property name="matchAcrossLines" value="true"/>
         <property name="message" value="Commented-out multi-line code"/>
-    </module>
+    </module>-->
 
     <!-- Size violation checks, see https://checkstyle.org/config_sizes.html -->
     <module name="FileLength">

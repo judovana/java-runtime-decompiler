@@ -713,9 +713,9 @@ public class TextWithControls extends JPanel
                 );
             }
         }
-        if (hasVm(classesAndMethodsProvider)
-        /* thsi will need heavy thinking FIXME, based on how bmisntall works*/
-        /* && ((DecompilationController) classesAndMethodsProvider).getVmInfo().getType() == VmInfo.Type.LOCAL)*/) {
+        /*if (hasVm(classesAndMethodsProvider)
+        // thsi will need heavy thinking FIXME, based on how bmisntall works
+        // && ((DecompilationController) classesAndMethodsProvider).getVmInfo().getType() == VmInfo.Type.LOCAL)) {
             BytemanCompileAction btmSubm = new BytemanCompileAction("compile by byteman and inject to selected vm ", this, this, this);
             btmSubm.addActionListener(new CompileActionListener(pluginManager, btmSubm));
             compileAndRun.add(btmSubm);
@@ -725,7 +725,7 @@ public class TextWithControls extends JPanel
             JMenuItem btmList = new JMenuItem("TODO list byteman rules");
             btmList.setEnabled(false);
             compileAndRun.add(btmList);
-        }
+        }*/
         return compileAndRun;
     }
 
