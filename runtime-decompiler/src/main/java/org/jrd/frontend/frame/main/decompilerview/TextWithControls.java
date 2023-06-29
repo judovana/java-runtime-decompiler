@@ -458,10 +458,10 @@ public class TextWithControls extends JPanel
             addGuessCompletionItem(menu, guess);
             createAdvancedSubmenu(menu);
             JMenu templatesMenu = new JMenu("Templates");
-            templatesMenu.add(new BytemanTempalteMenuItem(bytecodeSyntaxTextArea, "byteman"));
-            templatesMenu.add(new JasmTempalteMenuItem(bytecodeSyntaxTextArea, "jasm1"));
-            templatesMenu.add(new Jasm2TempalteMenuItem(bytecodeSyntaxTextArea, "jasm2"));
-            templatesMenu.add(new JavaTempalteMenuItem(bytecodeSyntaxTextArea, "java"));
+            templatesMenu.add(new BytemanTempalteMenuItem(bytecodeSyntaxTextArea));
+            templatesMenu.add(new JasmTempalteMenuItem(bytecodeSyntaxTextArea));
+            templatesMenu.add(new Jasm2TempalteMenuItem(bytecodeSyntaxTextArea));
+            templatesMenu.add(new JavaTempalteMenuItem(bytecodeSyntaxTextArea));
             menu.add(templatesMenu);
             Object[] detectedJasms = detectJasms();
             PluginManager pluginManager = (PluginManager) detectedJasms[0];

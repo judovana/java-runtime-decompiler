@@ -8,8 +8,8 @@ import java.awt.event.ActionListener;
 import javax.swing.JMenuItem;
 
 public class JasmTempalteMenuItem extends JMenuItem {
-    public JasmTempalteMenuItem(final RSyntaxTextArea source, String java) {
-        super(java);
+    public JasmTempalteMenuItem(final RSyntaxTextArea source) {
+        super("jasm hello world");
         this.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {

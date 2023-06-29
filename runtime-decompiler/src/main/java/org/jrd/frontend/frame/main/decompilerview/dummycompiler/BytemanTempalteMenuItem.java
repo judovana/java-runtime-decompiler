@@ -7,8 +7,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class BytemanTempalteMenuItem extends JMenuItem {
-    public BytemanTempalteMenuItem(final RSyntaxTextArea source, String java) {
-        super(java);
+    public BytemanTempalteMenuItem(final RSyntaxTextArea source) {
+        super("byteman");
         this.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {

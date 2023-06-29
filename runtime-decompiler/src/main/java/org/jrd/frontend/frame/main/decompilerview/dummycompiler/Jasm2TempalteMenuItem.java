@@ -8,8 +8,8 @@ import java.awt.event.ActionListener;
 import javax.swing.JMenuItem;
 
 public class Jasm2TempalteMenuItem extends JMenuItem {
-    public Jasm2TempalteMenuItem(final RSyntaxTextArea source, String java) {
-        super(java);
+    public Jasm2TempalteMenuItem(final RSyntaxTextArea source) {
+        super("jasm swing hello with dependence example");
         this.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
