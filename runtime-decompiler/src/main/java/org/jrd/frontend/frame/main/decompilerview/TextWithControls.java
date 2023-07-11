@@ -574,18 +574,20 @@ public class TextWithControls extends JPanel
             }
         });
         advanced.add(setMethod);
-        JCheckBox treatAllAsOne = new JCheckBox("Treat all tabs in this window as single batch");
-        Container parent = getParentWindow();
-        if (parent != null) {
-            treatAllAsOne.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent actionEvent) {
-                    setTreatAllTabsAsOneBatch(treatAllAsOne.isSelected());
-                    repaintMenu(menu);
-                }
-            });
-            treatAllAsOne.setSelected(isTreatAllTabsAsOneBatch());
-            advanced.add(treatAllAsOne);
+        if (getParentWindow() != null) {
+            JCheckBox treatAllAsOne = new JCheckBox("Treat all tabs in this window as single batch");
+            Container parent = getParentWindow();
+            if (parent != null) {
+                treatAllAsOne.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent actionEvent) {
+                        setTreatAllTabsAsOneBatch(treatAllAsOne.isSelected());
+                        repaintMenu(menu);
+                    }
+                });
+                treatAllAsOne.setSelected(isTreatAllTabsAsOneBatch());
+                advanced.add(treatAllAsOne);
+            }
         }
         if (hasVm(classesAndMethodsProvider)) {
             JCheckBox addToBoot = new JCheckBox(
@@ -908,10 +910,16 @@ public class TextWithControls extends JPanel
     }
 
     private void setTreatAllTabsAsOneBatch(boolean selected) {
+        if (getParentWindow() == null) {
+            return;
+        }
         getParentWindow().setTreatAllTabsAsOneBatch(selected);
     }
 
     private boolean isTreatAllTabsAsOneBatch() {
+        if (getParentWindow() == null) {
+            return false;
+        }
         return getParentWindow().isTreatAllTabsAsOneBatch();
     }
 
