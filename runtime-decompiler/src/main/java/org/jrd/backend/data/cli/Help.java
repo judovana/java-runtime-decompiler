@@ -129,7 +129,7 @@ public final class Help {
                     Arrays.stream(AgentLoneliness.values()).map(i -> "  " + i.toString() + " - " + i.toHelp())
                             .collect(Collectors.joining("\n")) +
                     "\n" + "optional, defaults to " + AgentLoneliness.SINGLE_INSTANCE + "\n" +
-                    "You can also specify port where the agent will listen, otherwise default port is calculated.\n" +
+                    "You can also specify *port* where the agent will listen, otherwise default port is calculated.\n" +
                     "JRD keep record of all permanent and session agents, so they can be listed/reused/removed.\n" +
                     "This list is still checked for consistency.\n" + "File is " + KnownAgents.JRD_TMP_FILE.toFile().getAbsolutePath() +
                     "\nThe " + ADD_CLASS + ", " + ADD_CLASSES + ", " + ADD_JAR + " is not " + AgentLiveliness.SESSION + " or " +

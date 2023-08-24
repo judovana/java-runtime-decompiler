@@ -16,14 +16,16 @@ public enum AgentLoneliness {
     public String toHelp() {
         switch (this) {
             case SINGLE_INSTANCE:
-                return "Agent be allowed to attach to each process only once, unless " + FORCING + " is put to following attachment";
+                return "Agent be allowed to attach to each process only once, unless " + FORCING + " is put to " +
+                        "following attachment (default)";
             case ANONYMOUS:
-                return "Agent will attach, but will not set the flag about its presence. Still, the property will be set.";
+                return "Agent will attach, but will not set the flag about its presence. Still, the property will be " +
+                        "set. (weird)";
             case FORCING:
-                return "Agent will attach, but will skip the check for single instance";
+                return "Agent will attach, but will skip the check for single instance (sometimes useful)";
             case AF:
                 return "Agent will attach, but will skip the check for single instance" +
-                        "and will not set the flag about its presence. Still, the property will be set.";
+                        "and will not set the flag about its presence. Still, the property will be set. (super weird)";
             default:
                 throw new RuntimeException("Unknown " + AgentLoneliness.class.getSimpleName() + " value " + this);
         }
