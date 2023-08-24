@@ -19,8 +19,7 @@ public enum AgentLoneliness {
                 return "Agent be allowed to attach to each process only once, unless " + FORCING + " is put to " +
                         "following attachment (default)";
             case ANONYMOUS:
-                return "Agent will attach, but will not set the flag about its presence. Still, the property will be " +
-                        "set. (weird)";
+                return "Agent will attach, but will not set the flag about its presence. Still, the property will be " + "set. (weird)";
             case FORCING:
                 return "Agent will attach, but will skip the check for single instance (sometimes useful)";
             case AF:

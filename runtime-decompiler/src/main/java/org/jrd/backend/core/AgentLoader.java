@@ -17,7 +17,6 @@ import java.util.List;
  */
 public class AgentLoader {
 
-    private static AgentConfig defaultConfig = new AgentConfig();
     static final int INVALID_PORT = -1;
     private static final int PORT_MIN = 10900;
     private static final int MAX_PORT_SLOTS = 200;
@@ -34,16 +33,15 @@ public class AgentLoader {
      * @param pid PID of the VM
      * @return port number if successful, else {@link #INVALID_PORT}
      */
-    public int attach(int pid) {
-        int port = defaultConfig.getPort().orElse(findPort());
+    public int attach(int pid, AgentConfig aconf) {
+        int port = aconf.getPort().orElse(findPort());
         String[] installProps = createProperties(port);
 
         Logger.getLogger().log(Logger.Level.DEBUG, "Attempting to attach decompiler agent for VM '" + pid + "' on port '" + port + "'");
 
         try {
             InstallDecompilerAgentImpl.install(
-                    Integer.toString(pid), false, false, "localhost", port, defaultConfig.getLoneliness(), defaultConfig.getLiveliness(),
-                    installProps
+                    Integer.toString(pid), false, false, "localhost", port, aconf.getLoneliness(), aconf.getLiveliness(), installProps
             );
         } catch (IllegalArgumentException |
                 IOException |
@@ -83,13 +81,5 @@ public class AgentLoader {
         properties.add(AGENT_PORT_PROPERTY + "=" + port);
 
         return properties.toArray(new String[]{});
-    }
-
-    public static void setDefaultConfig(AgentConfig defaultConfig) {
-        AgentLoader.defaultConfig = defaultConfig;
-    }
-
-    public static AgentConfig getDefaultConfig() {
-        return defaultConfig;
     }
 }

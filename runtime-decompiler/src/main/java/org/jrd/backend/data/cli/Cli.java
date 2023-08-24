@@ -1,6 +1,5 @@
 package org.jrd.backend.data.cli;
 
-import org.jrd.backend.core.AgentLoader;
 import org.jrd.backend.core.agentstore.AgentLiveliness;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.Config;
@@ -50,6 +49,7 @@ public class Cli {
     private boolean isHex;
     private boolean isRevert;
     private boolean isBoot;
+    private AgentConfig currentAgent = new AgentConfig();
 
     public Cli(String[] orig, Model model) {
         this.filteredArgs = prefilterArgs(orig);
@@ -111,15 +111,13 @@ public class Cli {
 
     @SuppressWarnings("indentation") //conflict of checkstyle and formatter plugins
     private void setDefaultAgentConfig(List<String> args, List<String> agentArgs) {
-        AgentLoader.setDefaultConfig(
-                AgentConfig.create(
-                        agentArgs,
-                        args.stream().map(a -> CliUtils.cleanParameter(a)).anyMatch(a -> a.equals(OVERWRITE)) ||
-                                args.stream().map(a -> CliUtils.cleanParameter(a)).anyMatch(a -> a.equals(ATTACH)) ||
-                                args.stream().map(a -> CliUtils.cleanParameter(a)).anyMatch(a -> a.equals(PATCH)) ||
-                                (args.stream().map(a -> CliUtils.cleanParameter(a))
-                                        .anyMatch(a -> a.equals(COMPILE) && Compile.shouldUpload(saving)))
-                )
+        currentAgent = AgentConfig.create(
+                agentArgs,
+                args.stream().map(a -> CliUtils.cleanParameter(a)).anyMatch(a -> a.equals(OVERWRITE)) ||
+                        args.stream().map(a -> CliUtils.cleanParameter(a)).anyMatch(a -> a.equals(ATTACH)) ||
+                        args.stream().map(a -> CliUtils.cleanParameter(a)).anyMatch(a -> a.equals(PATCH)) ||
+                        (args.stream().map(a -> CliUtils.cleanParameter(a))
+                                .anyMatch(a -> a.equals(COMPILE) && Compile.shouldUpload(saving)))
         );
     }
 
@@ -242,7 +240,7 @@ public class Cli {
                     operatedOn.add(vmInfo6);
                     break;
                 case ATTACH:
-                    VmInfo vmInfo7 = new AttachDetach(filteredArgs, vmManager).attach();
+                    VmInfo vmInfo7 = new AttachDetach(filteredArgs, vmManager).attach(currentAgent);
                     operatedOn.add(vmInfo7);
                     break;
                 case DETACH:
@@ -276,7 +274,7 @@ public class Cli {
                     localAgent = true;
                 }
             }
-            if (AgentLoader.getDefaultConfig().getLiveliness() == AgentLiveliness.SESSION) {
+            if (currentAgent.getLiveliness() == AgentLiveliness.SESSION) {
                 Runtime.getRuntime().addShutdownHook(new Thread() {
                     @Override
                     public void run() {
@@ -297,7 +295,7 @@ public class Cli {
                         Thread.sleep(1000);
                     }
                 }
-            } else if (AgentLoader.getDefaultConfig().getLiveliness() == AgentLiveliness.ONE_SHOT) {
+            } else if (currentAgent.getLiveliness() == AgentLiveliness.ONE_SHOT) {
                 for (VmInfo status : operatedOn) {
                     if (operation.equals(ATTACH)) {
                         System.err.println("agent was just attached.. and is detaching right away. Weird, yah?");
