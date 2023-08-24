@@ -10,6 +10,7 @@ import org.jrd.backend.core.AgentRequestAction.RequestAction;
 import org.jrd.backend.core.agentstore.KnownAgents;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
+import org.jrd.backend.data.cli.utils.AgentConfig;
 import org.jrd.backend.decompiling.PluginManager;
 
 import java.io.Serializable;
@@ -304,7 +305,7 @@ public class DecompilerRequestReceiver {
             return port;
         }
         int actualListenPort = AgentRequestAction.NOT_ATTACHED_PORT;
-        VmDecompilerStatus status = attachManager.attachAgentToVm(vmId, vmPid);
+        VmDecompilerStatus status = attachManager.attachAgentToVm(vmId, vmPid, new AgentConfig());
         if (status != null) {
             actualListenPort = status.getListenPort();
         }
