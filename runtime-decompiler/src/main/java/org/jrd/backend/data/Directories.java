@@ -13,6 +13,7 @@ public final class Directories {
     private static final String XDG_JRD_SUFFIX = File.separator + "java-runtime-decompiler";
     private static final String XDG_CONFIG_SUFFIX = File.separator + "conf";
     private static final String XDG_PLUGIN_SUFFIX = File.separator + "plugins";
+    private static final String XDG_BYTEMAN_SUFFIX = File.separator + "byteman-scripts";
     private static final String XDG_JRD_HOME = File.separator + ".config" + XDG_JRD_SUFFIX;
 
     private static int jrdLlocationFalback = 0;
@@ -27,6 +28,13 @@ public final class Directories {
      */
     public static String getConfigDirectory() {
         return getXdgJrdBaseDir() + XDG_CONFIG_SUFFIX;
+    }
+
+    public static File getBytemanDirectory() {
+        String s =  getXdgJrdBaseDir() + XDG_BYTEMAN_SUFFIX;
+        File f = new File(s);
+        f.mkdir();
+        return f;
     }
 
     /**

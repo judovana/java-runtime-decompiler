@@ -425,7 +425,7 @@ public final class Config {
                         byte[] bytes = getFileFromAdditionalPath(additionalSourcePathAgent, fqn);
                         return new String(bytes, Charset.defaultCharset());
                     } catch (Exception ex) {
-                        byte[] bytes = getFileFromAdditionalPath(additionalSourcePathAgent, fqn.replaceAll("\\$.*", ""));
+                        byte[] bytes = getFileFromAdditionalPath(additionalSourcePathAgent, sanitizeInnerClass(fqn));
                         return "/*WARNING! showing wrapper class! Do not use for upload!*/\n" + "/*The class amy still be used as " + fqn +
                                 " WARNING!*/\n" + new String(bytes, Charset.defaultCharset());
                     }
@@ -458,5 +458,14 @@ public final class Config {
         }
         String[] r = classes.split(";");
         return r;
+    }
+
+    public File getBytemanScriptFile(String fqn) {
+        File script = new File(Directories.getBytemanDirectory(), sanitizeInnerClass(fqn) + ".btm");
+        return script;
+    }
+
+    public static String sanitizeInnerClass(String fqn) {
+        return fqn.replaceAll("\\$.*", "");
     }
 }

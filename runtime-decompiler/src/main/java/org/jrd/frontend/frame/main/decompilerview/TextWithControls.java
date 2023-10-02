@@ -63,6 +63,7 @@ import org.jrd.frontend.frame.main.decompilerview.dummycompiler.JasmTempalteMenu
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.JavaTempalteMenuItem;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.JavacCompileAction;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.JustBearerAction;
+import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.BytemanSkeletonTempalteMenuItem;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.ClasspathProvider;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.ExecuteMethodProvider;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.LastScriptProvider;
@@ -240,11 +241,26 @@ public class TextWithControls extends JPanel
                         bytecodeSearchControls.focus(); //!!global :(
                     }
                 }
+                if ((e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) != 0) {
+                    if (e.getKeyCode() == KeyEvent.VK_S && getFile()!=null) {
+                        quickSave();
+                    }
+                }
             }
         });
         rst.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
         rst.setCodeFoldingEnabled(true);
         return rst;
+    }
+
+    private void quickSave() {
+        try {
+            Logger.getLogger().log(Logger.Level.ALL, "saving " + getFile().getAbsolutePath());
+            save(getFile());
+            Logger.getLogger().log(Logger.Level.ALL, "saved " + getFile().getAbsolutePath());
+        } catch (Exception ex) {
+            Logger.getLogger().log(Logger.Level.ALL, ex);
+        }
     }
 
     public void setPopup(DecompilationController.AgentApiGenerator ap) {
@@ -451,6 +467,11 @@ public class TextWithControls extends JPanel
 
         private JPopupMenu createJPopupMenu() {
             final JPopupMenu menu = new JPopupMenu("Settings");
+            if (getFile() != null) {
+                JMenuItem quickSave = new JMenuItem("ctrl+s - " + getFile().getAbsolutePath());
+                quickSave.addActionListener(actionEvent -> quickSave());
+                menu.add(quickSave);
+            }
             JMenuItem completionMenu = new JMenuItem("Code completion");
             completionMenu.addActionListener(new CodeCompletionMenuActionListener());
             menu.add(completionMenu);
@@ -459,6 +480,7 @@ public class TextWithControls extends JPanel
             createAdvancedSubmenu(menu);
             JMenu templatesMenu = new JMenu("Templates");
             templatesMenu.add(new BytemanTempalteMenuItem(bytecodeSyntaxTextArea));
+            templatesMenu.add(new BytemanSkeletonTempalteMenuItem(bytecodeSyntaxTextArea));
             templatesMenu.add(new JasmTempalteMenuItem(bytecodeSyntaxTextArea));
             templatesMenu.add(new Jasm2TempalteMenuItem(bytecodeSyntaxTextArea));
             templatesMenu.add(new JavaTempalteMenuItem(bytecodeSyntaxTextArea));

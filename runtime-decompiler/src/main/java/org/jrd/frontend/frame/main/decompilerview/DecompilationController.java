@@ -330,7 +330,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
     private void cleanup(boolean halt) {
         mainFrameView.switchPanel(false);
         mainFrameView.getBytecodeDecompilerView().reloadClassList(new ClassInfo[0]);
-        mainFrameView.getBytecodeDecompilerView().reloadTextField("", "", new byte[16], "", new byte[16], "");
+        mainFrameView.getBytecodeDecompilerView().reloadTextField("", "", new byte[16], "", new byte[16]);
         if (halt) {
             haltAgent();
         }
@@ -448,8 +448,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
                 Logger.getLogger().log(Logger.Level.ALL, e);
             }
         }
-        String additionalSrcClass = Config.getConfig().getAdditionalSourcePathString(name);
-        bytecodeDecompilerView.reloadTextField(name, decompiledClass, bytes, additionalDecompiled, additionalBytes, additionalSrcClass);
+        bytecodeDecompilerView.reloadTextField(name, decompiledClass, bytes, additionalDecompiled, additionalBytes);
     }
 
     public String getVm() {
