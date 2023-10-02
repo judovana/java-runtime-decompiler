@@ -8,6 +8,7 @@ import org.jrd.backend.core.ClassInfo;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.Config;
 import org.jrd.backend.data.DependenciesReader;
+import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.cli.InMemoryJar;
 import org.jrd.backend.data.cli.Lib;
 import org.jrd.backend.decompiling.DecompilerWrapper;
@@ -81,6 +82,7 @@ import java.util.regex.Pattern;
 @SuppressWarnings("Indentation") // indented Swing components greatly help with orientation
 public class BytecodeDecompilerView {
 
+    public static final String BYTEMAN_SCRIPT_TITLE = "Byteman script";
     private JPanel bytecodeDecompilerPanel;
     private JSplitPane splitPane;
     private JPanel classes;
@@ -339,7 +341,9 @@ public class BytecodeDecompilerView {
             public void actionPerformed(ActionEvent actionEvent) {
                 GlobalConsole.getConsole().show();
                 Logger.getLogger().log("Compilation started");
-                if (isAdditionalBinaryBufferVisible()) {
+                if (isBytemanBufferVisible()) {
+                    JOptionPane.showMessageDialog(buffers, "todo compile byteman buffer");
+                } else if (isAdditionalBinaryBufferVisible()) {
                     JOptionPane.showMessageDialog(buffers, "Unlike (compile) and upload, compile is only for source buffers");
                 } else if (isBinaryBufferVisible()) {
                     JOptionPane.showMessageDialog(buffers, "Unlike (compile) and upload, compile is only for source buffers");
@@ -370,7 +374,9 @@ public class BytecodeDecompilerView {
             public void actionPerformed(ActionEvent actionEvent) {
                 GlobalConsole.getConsole().show();
                 Logger.getLogger().log("Compilation with upload started");
-                if (isAdditionalBinaryBufferVisible()) {
+                if (isBytemanBufferVisible()) {
+                    JOptionPane.showMessageDialog(buffers, "todo compile and upload byteman buffer");
+                } else if (isAdditionalBinaryBufferVisible()) {
                     compileAction.upload(lastDecompiledClass, additionalBinary.get());
                 } else if (isBinaryBufferVisible()) {
                     compileAction.upload(lastDecompiledClass, binary.get());
@@ -406,7 +412,10 @@ public class BytecodeDecompilerView {
         buffers.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent changeEvent) {
-                if (isDecompiledBytecodeBufferVisible() || isAdditionalDecompiledBytecodeBufferVisible() ||
+                if (isBytemanBufferVisible()) {
+                    compileButton.setEnabled(true);
+                    insertButton.setEnabled(false);
+                } else if (isDecompiledBytecodeBufferVisible() || isAdditionalDecompiledBytecodeBufferVisible() ||
                         isAdditionalSrcBufferVisible()) {
                     compileButton.setEnabled(true);
                     insertButton.setEnabled(true);
@@ -433,6 +442,9 @@ public class BytecodeDecompilerView {
         undoButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
+                if (BytecodeDecompilerView.this.isBytemanBufferVisible()) {
+                    bytemanScript.undo();
+                }
                 if (BytecodeDecompilerView.this.isDecompiledBytecodeBufferVisible()) {
                     bytecodeBuffer.undo();
                 }
@@ -453,6 +465,9 @@ public class BytecodeDecompilerView {
         redoButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
+                if (BytecodeDecompilerView.this.isBytemanBufferVisible()) {
+                    bytemanScript.redo();
+                }
                 if (BytecodeDecompilerView.this.isDecompiledBytecodeBufferVisible()) {
                     bytecodeBuffer.redo();
                 }
@@ -528,7 +543,12 @@ public class BytecodeDecompilerView {
         additionalBytecodeBuffer = new TextWithControls("Additional source buffer", TextWithControls.CodeCompletionType.JRD);
         additionalBinary = new HexWithControls("Additional binary buffer");
         additionalSrcBuffer = new TextWithControls("Additional source", TextWithControls.CodeCompletionType.STANDALONE);
-        bytemanScript = new TextWithControls("Byteman script", TextWithControls.CodeCompletionType.STANDALONE);
+        bytemanScript = new TextWithControls(BYTEMAN_SCRIPT_TITLE, TextWithControls.CodeCompletionType.STANDALONE) {
+            @Override
+            public String getName() {
+                return getOrigName();
+            }
+        };
 
         classes = new JPanel();
         classes.setLayout(new BorderLayout());
@@ -664,6 +684,10 @@ public class BytecodeDecompilerView {
         return buffers.getSelectedComponent().equals(additionalSrcBuffer);
     }
 
+    private boolean isBytemanBufferVisible() {
+        return buffers.getSelectedComponent().equals(bytemanScript);
+    }
+
     private void handleBuffersDetaching() {
         if (shouldAttach) {
             shouldAttach = false;
@@ -792,21 +816,29 @@ public class BytecodeDecompilerView {
      * @param decompiledClass String of source code of decompiler class
      */
     public void reloadTextField(
-            String name, String decompiledClass, byte[] source, String additionalDecompiledClass, byte[] additionalSource) {
+            String name, String decompiledClass, byte[] source, String additionalDecompiledClass,
+            byte[] additionalSource, VmInfo.Type vmInfoType) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
                 BytecodeDecompilerView.this
-                        .setDecompiledClass(name, decompiledClass, source, additionalDecompiledClass, additionalSource);
+                        .setDecompiledClass(name, decompiledClass, source, additionalDecompiledClass,
+                                additionalSource, vmInfoType);
             }
         });
     }
 
     private void setDecompiledClass(
-            String name, String data, byte[] source, String additionalData, byte[] additionalSource) {
+            String name, String data, byte[] source, String additionalData, byte[] additionalSource,
+            VmInfo.Type vmInfoType) {
         String additionalSrcClass = Config.getConfig().getAdditionalSourcePathString(name);
         additionalSrcBuffer.resetSrcArea(additionalSrcClass);
-        setByteman(name);
+        if (vmInfoType == VmInfo.Type.LOCAL) {
+            setByteman(name);
+            buffers.add(bytemanScript);
+        } else {
+            buffers.remove(bytemanScript);
+        }
         additionalBytecodeBuffer.resetSrcArea(additionalData);
         bytecodeBuffer.resetSrcArea(data);
         int buildJavaPerVersion = Lib.getBuildJavaPerVersion(source);
@@ -856,6 +888,7 @@ public class BytecodeDecompilerView {
         if (bytemanScript.getText().trim().isEmpty()) {
             bytemanScript.setText(BytemanSkeletonTempalteMenuItem.getDynamicSkeleton(Config.sanitizeInnerClass(name)));
         }
+        bytemanScript.setName(BYTEMAN_SCRIPT_TITLE);
     }
 
     public void setSearchInActionListener(ActionListener o) {

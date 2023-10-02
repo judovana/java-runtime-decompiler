@@ -344,6 +344,10 @@ public class TextWithControls extends JPanel
         }
     }
 
+    public String getOrigName() {
+        return super.getName();
+    }
+
     private static String[] getAllLexers() {
         try {
             List<String> r = new ArrayList<>();
