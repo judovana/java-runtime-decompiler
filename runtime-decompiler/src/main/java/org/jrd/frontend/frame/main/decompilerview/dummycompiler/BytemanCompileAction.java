@@ -29,7 +29,11 @@ import java.util.stream.Collectors;
 public class BytemanCompileAction extends AbstractCompileAction implements CanCompile {
 
     private final ClasspathProvider vmInfoProvider;
+    //to unlaod last script may be awesome idea
+    //but is very confusing for expereinced byteman users
+    //better to provide unload all and unload this as separate buttons
     private final LastScriptProvider lastScriptProvider;
+    private final boolean unloadLastScript = false;
     private final UploadProvider boot;
 
     @Override
@@ -62,7 +66,7 @@ public class BytemanCompileAction extends AbstractCompileAction implements CanCo
                     }
                     Submit submit = new Submit("localhost", port, new PrintStream(new LogOutputStream(), true, StandardCharsets.UTF_8));
                     ScriptText st = new ScriptText("hi.btm", script);
-                    if (lastScriptProvider.getLastScript() != null) {
+                    if (lastScriptProvider.getLastScript() != null && unloadLastScript) {
                         String deleteAll = submit.deleteScripts(Collections.singletonList(lastScriptProvider.getLastScript()));
                         Logger.getLogger().log(Logger.Level.ALL, deleteAll);
                         lastScriptProvider.setLastScript(null);
@@ -114,11 +118,13 @@ public class BytemanCompileAction extends AbstractCompileAction implements CanCo
         String s = super.getText();
         if (vmInfoProvider != null) {
             s = s + "<br/> will be uploaded installed to:" + vmInfoProvider.getClasspath().cpTextInfo();
-            if (lastScriptProvider != null) {
-                if (lastScriptProvider.getLastScript() == null) {
-                    s = s + "<br/> nothing to unload";
-                } else {
-                    s = s + "<br/> previous script will be unloaded";
+            if (unloadLastScript) {
+                if (lastScriptProvider != null) {
+                    if (lastScriptProvider.getLastScript() == null) {
+                        s = s + "<br/> nothing to unload";
+                    } else {
+                        s = s + "<br/> previous script will be unloaded";
+                    }
                 }
             }
         }
