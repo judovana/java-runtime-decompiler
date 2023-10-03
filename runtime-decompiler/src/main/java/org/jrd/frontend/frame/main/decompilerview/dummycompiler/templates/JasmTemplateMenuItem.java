@@ -1,4 +1,4 @@
-package org.jrd.frontend.frame.main.decompilerview.dummycompiler;
+package org.jrd.frontend.frame.main.decompilerview.dummycompiler.templates;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
@@ -7,8 +7,8 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JMenuItem;
 
-public class JasmTempalteMenuItem extends JMenuItem {
-    public JasmTempalteMenuItem(final RSyntaxTextArea source) {
+public class JasmTemplateMenuItem extends JMenuItem {
+    public JasmTemplateMenuItem(final RSyntaxTextArea source) {
         super("jasm hello world");
         this.addActionListener(new ActionListener() {
             @Override

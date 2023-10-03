@@ -1,4 +1,4 @@
-package org.jrd.frontend.frame.main.decompilerview.dummycompiler;
+package org.jrd.frontend.frame.main.decompilerview.dummycompiler.templates;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
@@ -7,8 +7,8 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JMenuItem;
 
-public class Jasm2TempalteMenuItem extends JMenuItem {
-    public Jasm2TempalteMenuItem(final RSyntaxTextArea source) {
+public class Jasm2TemplateMenuItem extends JMenuItem {
+    public Jasm2TemplateMenuItem(final RSyntaxTextArea source) {
         super("jasm swing hello with dependence example");
         this.addActionListener(new ActionListener() {
             @Override
