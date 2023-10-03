@@ -13,7 +13,7 @@ import org.jrd.backend.data.cli.InMemoryJar;
 import org.jrd.backend.data.cli.Lib;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.frontend.frame.main.GlobalConsole;
-import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.BytemanSkeletonTempalteMenuItem;
+import org.jrd.frontend.frame.main.decompilerview.dummycompiler.templates.BytemanSkeletonTemplateMenuItem;
 import org.jrd.frontend.frame.main.popup.ClassListPopupMenu;
 import org.jrd.frontend.frame.main.popup.DiffPopup;
 import org.jrd.frontend.frame.main.renderer.ClassListRenderer;
@@ -839,7 +839,14 @@ public class BytecodeDecompilerView {
         } else {
             buffers.remove(bytemanScript);
         }
-        additionalBytecodeBuffer.resetSrcArea(additionalData);
+        if (additionalData.trim().isEmpty()) {
+            additionalBytecodeBuffer.resetSrcArea("You cans elect additional source class-path-like and additional local classapth "
+                    + "in settngs\n binary jars/dirs or source jars/dirs are supported.\nThe local source/class-path helps to see "
+                    + "various views or versions of classes.\niIf you need more copies, you can always open additional hex/text notes"
+                    + " (via connect menu)");
+        } else {
+            additionalBytecodeBuffer.resetSrcArea(additionalData);
+        }
         bytecodeBuffer.resetSrcArea(data);
         int buildJavaPerVersion = Lib.getBuildJavaPerVersion(source);
         Config.getConfig().setBestSourceTarget(Optional.of(buildJavaPerVersion));
@@ -886,7 +893,7 @@ public class BytecodeDecompilerView {
             }
         }
         if (bytemanScript.getText().trim().isEmpty()) {
-            bytemanScript.setText(BytemanSkeletonTempalteMenuItem.getDynamicSkeleton(Config.sanitizeInnerClass(name)));
+            bytemanScript.setText(BytemanSkeletonTemplateMenuItem.getDynamicSkeleton(Config.sanitizeInnerClass(name)));
         }
         bytemanScript.setName(BYTEMAN_SCRIPT_TITLE);
     }

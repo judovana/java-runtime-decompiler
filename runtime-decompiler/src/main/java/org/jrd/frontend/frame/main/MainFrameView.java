@@ -224,6 +224,11 @@ public class MainFrameView {
                     new JListPopupMenu<>(localVmList, true, bytecodeDecompilerView.getDependenciesReader())
                             .addItem("name(s)", VmInfo::getVmName, true)
                             .addItem("PID(s)", vmInfo -> String.valueOf(vmInfo.getVmPid()), false)
+                            .addItem("Byteman companion port(s)",
+                                    vmInfo -> vmInfo.getBytemanCompanion()!=null?
+                                            String.valueOf(vmInfo.getBytemanCompanion().getBytemanPort()):"0", false)
+                            .addItem("Post byteman port(s)", vmInfo -> vmInfo.getBytemanCompanion()!=null?
+                                    String.valueOf(vmInfo.getBytemanCompanion().getPostBytemanAgentPort()):"0", false)
                             .show(localVmList, mouseEvent.getX(), mouseEvent.getY());
                 }
             }

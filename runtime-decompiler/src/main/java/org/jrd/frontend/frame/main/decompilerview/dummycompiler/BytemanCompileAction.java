@@ -8,6 +8,7 @@ import org.jboss.byteman.agent.submit.Submit;
 import org.jboss.byteman.check.RuleCheck;
 import org.jboss.byteman.check.RuleCheckResult;
 import org.jrd.backend.core.Logger;
+import org.jrd.backend.data.BytemanCompanion;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
@@ -55,16 +56,13 @@ public class BytemanCompileAction extends AbstractCompileAction implements CanCo
                     return r;
                 } else {
                     VmInfo vmInfo = vmInfoProvider.getVmInfo();
-                    int pid = vmInfo.getVmPid();
-                    int port;
-                    if (vmInfo.getBytemanCompanion() != null) {
-                        port = vmInfo.getBytemanCompanion();
-                    } else {
-                        port = VmInfo.findFreePort();
-                        Install.install("" + pid, boot.isBoot(), "localhost", port, new String[]{});
-                        vmInfo.setBytemanCompanion(port);
+                    BytemanCompanion was = vmInfo.getBytemanCompanion();
+                    BytemanCompanion bytemanCompanion = vmInfo.setBytemanCompanion(boot.isBoot());
+                    if (was == null){
+                        //FIXME adda localhost bytemanCompanion.getPostBytemanAgentPort() REMOTE vm!!!
                     }
-                    Submit submit = new Submit("localhost", port, new PrintStream(new LogOutputStream(), true, StandardCharsets.UTF_8));
+                    Submit submit = new Submit("localhost", bytemanCompanion.getBytemanPort(), new PrintStream(new LogOutputStream(), true,
+                            StandardCharsets.UTF_8));
                     ScriptText st = new ScriptText("hi.btm", script);
                     if (lastScriptProvider.getLastScript() != null && unloadLastScript) {
                         String deleteAll = submit.deleteScripts(Collections.singletonList(lastScriptProvider.getLastScript()));

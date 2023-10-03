@@ -34,6 +34,10 @@ public class AgentLoader {
      * @return port number if successful, else {@link #INVALID_PORT}
      */
     public int attach(int pid, AgentConfig aconf) {
+        return attachImpl(pid, aconf);
+    }
+
+    public static int attachImpl(int pid, AgentConfig aconf) {
         int port = aconf.getPort().orElse(findPort());
         String[] installProps = createProperties(port);
 
@@ -59,7 +63,7 @@ public class AgentLoader {
         }
     }
 
-    private int findPort() {
+    private static int findPort() {
         for (int i = PORT_MIN; i <= PORT_MAX; i++) {
             try {
                 try (ServerSocket s = new ServerSocket(i)) {
@@ -75,7 +79,7 @@ public class AgentLoader {
         throw new IllegalStateException("No ports available in range [" + PORT_MIN + "," + PORT_MAX + "]");
     }
 
-    private String[] createProperties(int port) {
+    private static String[] createProperties(int port) {
         List<String> properties = new ArrayList<>();
 
         properties.add(AGENT_PORT_PROPERTY + "=" + port);

@@ -64,7 +64,7 @@ public class VmListRenderer extends JPanel implements ListCellRenderer<VmInfo> {
 
                 this.setToolTipText(
                         BytecodeDecompilerView.styleTooltip() + "NAME: " + vmInfo.getVmName().split(" ")[0] + "<br />" + "PID: " +
-                                vmInfo.getVmPid() + "</html>"
+                                vmInfo.getVmPid() + addBytemanTooltip(vmInfo) + "</html>"
                 );
                 break;
             case REMOTE:
@@ -105,5 +105,14 @@ public class VmListRenderer extends JPanel implements ListCellRenderer<VmInfo> {
             setForeground(list.getForeground());
         }
         return this;
+    }
+
+    private String addBytemanTooltip(VmInfo vmInfo) {
+        if (vmInfo.getBytemanCompanion() != null) {
+            return "<br/>" + "Byteman companion port: " + vmInfo.getBytemanCompanion().getBytemanPort() + "<br/>"
+                    + "Post byteman port: " + vmInfo.getBytemanCompanion().getPostBytemanAgentPort();
+        } else {
+            return "";
+        }
     }
 }

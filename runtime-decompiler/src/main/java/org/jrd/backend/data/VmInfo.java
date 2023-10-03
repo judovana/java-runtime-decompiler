@@ -1,10 +1,20 @@
 package org.jrd.backend.data;
 
+import com.sun.tools.attach.AgentInitializationException;
+import com.sun.tools.attach.AgentLoadException;
+import com.sun.tools.attach.AttachNotSupportedException;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+import org.jboss.byteman.agent.install.Install;
+import org.jrd.backend.core.AgentLoader;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
+import org.jrd.backend.core.agentstore.AgentLiveliness;
+import org.jrd.backend.core.agentstore.AgentLoneliness;
 import org.jrd.backend.core.agentstore.KnownAgent;
 import org.jrd.backend.core.agentstore.KnownAgents;
+import org.jrd.backend.data.cli.utils.AgentConfig;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -19,6 +29,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -37,7 +48,7 @@ public class VmInfo implements Serializable {
     private transient VmDecompilerStatus vmDecompilerStatus;
     private String vmId;
     private int vmPid;
-    private Integer bytemanCompanion;
+    private BytemanCompanion bytemanCompanion;
     private String vmName;
     private Type type;
     private java.util.List<File> cp;
@@ -201,12 +212,26 @@ public class VmInfo implements Serializable {
         return (VmInfo) ois.readObject();
     }
 
-    public Integer getBytemanCompanion() {
+    public BytemanCompanion getBytemanCompanion() {
         return bytemanCompanion;
     }
 
-    public void setBytemanCompanion(Integer bytemanCompanion) {
-        this.bytemanCompanion = bytemanCompanion;
+    public BytemanCompanion setBytemanCompanion(boolean boot)
+            throws AgentLoadException, IOException, AttachNotSupportedException, AgentInitializationException {
+        if (bytemanCompanion == null) {
+            int bytemanPort = attachByteman(boot);
+            int secondJrdPort = AgentLoader.attachImpl(getVmPid(), new AgentConfig(AgentLoneliness.AF, AgentLiveliness.PERMANENT,
+                    Optional.empty()));
+            bytemanCompanion = new BytemanCompanion(bytemanPort, secondJrdPort);
+        }
+        return bytemanCompanion;
+    }
+
+    private int attachByteman(boolean boot)
+            throws IOException, AgentLoadException, AttachNotSupportedException, AgentInitializationException {
+        int futurePort = VmInfo.findFreePort();
+        Install.install("" + getVmPid(), boot, "localhost", futurePort, new String[]{});
+        return futurePort;
     }
 
     public static int findFreePort() throws IOException {

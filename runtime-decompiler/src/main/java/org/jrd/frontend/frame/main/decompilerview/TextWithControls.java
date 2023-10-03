@@ -55,15 +55,15 @@ import org.jrd.frontend.frame.hex.StandaloneHex;
 import org.jrd.frontend.frame.main.GlobalConsole;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.BytemanCompileAction;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.AbstractCompileAction;
-import org.jrd.frontend.frame.main.decompilerview.dummycompiler.BytemanTempalteMenuItem;
+import org.jrd.frontend.frame.main.decompilerview.dummycompiler.templates.BytemanTemplateMenuItem;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.CanCompile;
-import org.jrd.frontend.frame.main.decompilerview.dummycompiler.Jasm2TempalteMenuItem;
+import org.jrd.frontend.frame.main.decompilerview.dummycompiler.templates.Jasm2TemplateMenuItem;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.JasmCompileAction;
-import org.jrd.frontend.frame.main.decompilerview.dummycompiler.JasmTempalteMenuItem;
-import org.jrd.frontend.frame.main.decompilerview.dummycompiler.JavaTempalteMenuItem;
+import org.jrd.frontend.frame.main.decompilerview.dummycompiler.templates.JasmTemplateMenuItem;
+import org.jrd.frontend.frame.main.decompilerview.dummycompiler.templates.JavaTemplateMenuItem;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.JavacCompileAction;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.JustBearerAction;
-import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.BytemanSkeletonTempalteMenuItem;
+import org.jrd.frontend.frame.main.decompilerview.dummycompiler.templates.BytemanSkeletonTemplateMenuItem;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.ClasspathProvider;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.ExecuteMethodProvider;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.LastScriptProvider;
@@ -483,11 +483,11 @@ public class TextWithControls extends JPanel
             addGuessCompletionItem(menu, guess);
             createAdvancedSubmenu(menu);
             JMenu templatesMenu = new JMenu("Templates");
-            templatesMenu.add(new BytemanTempalteMenuItem(bytecodeSyntaxTextArea));
-            templatesMenu.add(new BytemanSkeletonTempalteMenuItem(bytecodeSyntaxTextArea));
-            templatesMenu.add(new JasmTempalteMenuItem(bytecodeSyntaxTextArea));
-            templatesMenu.add(new Jasm2TempalteMenuItem(bytecodeSyntaxTextArea));
-            templatesMenu.add(new JavaTempalteMenuItem(bytecodeSyntaxTextArea));
+            templatesMenu.add(new BytemanTemplateMenuItem(bytecodeSyntaxTextArea));
+            templatesMenu.add(new BytemanSkeletonTemplateMenuItem(bytecodeSyntaxTextArea));
+            templatesMenu.add(new JasmTemplateMenuItem(bytecodeSyntaxTextArea));
+            templatesMenu.add(new Jasm2TemplateMenuItem(bytecodeSyntaxTextArea));
+            templatesMenu.add(new JavaTemplateMenuItem(bytecodeSyntaxTextArea));
             menu.add(templatesMenu);
             Object[] detectedJasms = detectJasms();
             PluginManager pluginManager = (PluginManager) detectedJasms[0];
@@ -741,19 +741,20 @@ public class TextWithControls extends JPanel
                 );
             }
         }
-        /*if (hasVm(classesAndMethodsProvider)
-        // thsi will need heavy thinking FIXME, based on how bmisntall works
-        // && ((DecompilationController) classesAndMethodsProvider).getVmInfo().getType() == VmInfo.Type.LOCAL)) {
-            BytemanCompileAction btmSubm = new BytemanCompileAction("compile by byteman and inject to selected vm ", this, this, this);
+        if (hasVm(classesAndMethodsProvider) && ((DecompilationController) classesAndMethodsProvider).getVmInfo().getType() == VmInfo.Type.LOCAL) {
+            BytemanCompileAction btmSubm = new BytemanCompileAction("compile by byteman and inject to selected vm " +  + ((DecompilationController) classesAndMethodsProvider).getVmInfo().getVmPid(), this, this,
+                    this);
             btmSubm.addActionListener(new CompileActionListener(pluginManager, btmSubm));
             compileAndRun.add(btmSubm);
-            BytemanCompileAction btmDeSubm = new BytemanCompileAction("TODO unload this byteman script ", this, this, null);
-            btmDeSubm.setEnabled(false);
-            compileAndRun.add(btmDeSubm);
-            JMenuItem btmList = new JMenuItem("TODO list byteman rules");
-            btmList.setEnabled(false);
-            compileAndRun.add(btmList);
-        }*/
+            JMenuItem btmRemove =
+                    new JMenuItem("TODO remove current rules from " + ((DecompilationController) classesAndMethodsProvider).getVmInfo().getVmPid());
+            btmRemove.setEnabled(false);
+            compileAndRun.add(btmRemove);
+            JMenuItem btmRemoveAll =
+                    new JMenuItem("TODO remove all byteman rules from " + ((DecompilationController) classesAndMethodsProvider).getVmInfo().getVmPid());
+            btmRemoveAll.setEnabled(false);
+            compileAndRun.add(btmRemoveAll);
+        }
         return compileAndRun;
     }
 
