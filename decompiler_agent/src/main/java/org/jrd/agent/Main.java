@@ -18,17 +18,13 @@ public final class Main {
 
     private static final String ADDRESS_STRING = "address:";
     private static final String PORT_STRING = "port:";
-    private static String hostname;
-    private static Integer port;
-    private static boolean firstTime = true;
 
-    static String getHostname() {
-        return hostname;
-    }
-
-    static Integer getPort() {
-        return port;
-    }
+    private static final String LONELINESS_STRING = "loneliness:";
+    private static final String LONELINESS_VAL_S = "SINGLE_INSTANCE";
+    private static final String LONELINESS_VAL_A = "ANONYMOUS";
+    private static final String LONELINESS_VAL_F = "FORCING";
+    private static final String LONELINESS_VAL_AF = "AF";
+    private static int confirmedAttaches = 0;
 
     private Main() {
     }
@@ -41,23 +37,23 @@ public final class Main {
      * @param inst      instance of instrumentation of given VM
      */
     public static void premain(String agentArgs, Instrumentation inst) {
+        String hostname = null;
+        Integer port = null;
+        final String loneliness;
         // guard against the agent being loaded twice
         synchronized (Main.class) {
-            if (firstTime) {
-                firstTime = false;
-            } else {
-                throw new RuntimeException("Main : attempting to load JRD agent more than once");
-            }
+            loneliness = checkLonelienss(agentArgs);
         }
         System.setProperty(JRD_AGENT_LOADED, String.valueOf(Integer.parseInt(System.getProperty(JRD_AGENT_LOADED, "0")) + 1));
         Variables.init();
         UnsafeVariables.init();
+        final String lonelinessCopy = loneliness;
         Transformer transformer = new Transformer();
         inst.addTransformer(transformer, true);
         InstrumentationProvider p = AccessController.doPrivileged(new PrivilegedAction<InstrumentationProvider>() {
             @Override
             public InstrumentationProvider run() {
-                InstrumentationProvider p = new InstrumentationProvider(inst, transformer);
+                InstrumentationProvider p = new InstrumentationProvider(inst, transformer, lonelinessCopy);
                 return p;
             }
         });
@@ -94,7 +90,52 @@ public final class Main {
         premain(args, inst);
     }
 
-    public static void setFirstTime(boolean b) {
-        firstTime = b;
+    public static void decFirstTime() {
+        confirmedAttaches--;
     }
+
+    public static void deregister(String loneliness) {
+        if (loneliness.equals(LONELINESS_VAL_S)) {
+            confirmedAttaches--;
+            System.err.println("Removed JRD agent: " + loneliness);
+        } else if (loneliness.equals(LONELINESS_VAL_A)) {
+            System.err.println("Removed JRD agent: " + loneliness);
+        } else if (loneliness.equals(LONELINESS_VAL_F)) {
+            confirmedAttaches--;
+            System.err.println("Removed JRD agent: " + loneliness);
+        } else if (loneliness.equals(LONELINESS_VAL_AF)) {
+            System.err.println("Removed JRD agent: " + loneliness);
+        }
+    }
+
+    private static String checkLonelienss(String agentArgs) {
+        String loneliness = "SINGLE_INSTANCE";
+        if (agentArgs != null) {
+            String[] argsArray = agentArgs.split(",");
+            for (String arg : argsArray) {
+                if (arg.startsWith(LONELINESS_STRING)) {
+                    loneliness = arg.substring(LONELINESS_STRING.length());
+                }
+            }
+        }
+        if (loneliness.equals(LONELINESS_VAL_S)) {
+            if (confirmedAttaches != 0) {
+                throw new RuntimeException("Main : attempting to load JRD agent more than once in mode: " + loneliness);
+            }
+            System.err.println("Added JRD agent: " + loneliness);
+            confirmedAttaches++;
+        } else if (loneliness.equals(LONELINESS_VAL_A)) {
+            if (confirmedAttaches != 0) {
+                throw new RuntimeException("Main : attempting to load JRD agent more than once in mode: " + loneliness);
+            }
+            System.err.println("Added JRD agent: " + loneliness);
+        } else if (loneliness.equals(LONELINESS_VAL_F)) {
+            confirmedAttaches++;
+            System.err.println("Added JRD agent: " + loneliness);
+        } else if (loneliness.equals(LONELINESS_VAL_AF)) {
+            System.err.println("Added JRD agent: " + loneliness);
+        }
+        return loneliness;
+    }
+
 }

@@ -10,8 +10,6 @@ import org.jboss.byteman.agent.install.Install;
 import org.jrd.backend.core.AgentLoader;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
-import org.jrd.backend.core.agentstore.AgentLiveliness;
-import org.jrd.backend.core.agentstore.AgentLoneliness;
 import org.jrd.backend.core.agentstore.KnownAgent;
 import org.jrd.backend.core.agentstore.KnownAgents;
 import org.jrd.backend.data.cli.utils.AgentConfig;
@@ -29,7 +27,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -48,7 +45,6 @@ public class VmInfo implements Serializable {
     private transient VmDecompilerStatus vmDecompilerStatus;
     private String vmId;
     private int vmPid;
-    private BytemanCompanion bytemanCompanion;
     private String vmName;
     private Type type;
     private java.util.List<File> cp;
@@ -213,18 +209,22 @@ public class VmInfo implements Serializable {
     }
 
     public BytemanCompanion getBytemanCompanion() {
-        return bytemanCompanion;
+        if (vmDecompilerStatus == null) {
+            return null;
+        }
+        return vmDecompilerStatus.getBytemanCompanion();
     }
 
     public BytemanCompanion setBytemanCompanion(boolean boot)
             throws AgentLoadException, IOException, AttachNotSupportedException, AgentInitializationException {
-        if (bytemanCompanion == null) {
+        if (vmDecompilerStatus.getBytemanCompanion() == null) {
             int bytemanPort = attachByteman(boot);
-            int secondJrdPort = AgentLoader.attachImpl(getVmPid(), new AgentConfig(AgentLoneliness.AF, AgentLiveliness.PERMANENT,
-                    Optional.empty()));
-            bytemanCompanion = new BytemanCompanion(bytemanPort, secondJrdPort);
+            int secondJrdPort = AgentLoader.attachImpl(getVmPid(), AgentConfig.getAnnonymousForcingPermanentAgent());
+            vmDecompilerStatus.setBytemanCompanion(new BytemanCompanion(bytemanPort, secondJrdPort));
+            KnownAgents.getInstance().setBytemanCompanion(vmPid, vmDecompilerStatus.getBytemanCompanion());
+
         }
-        return bytemanCompanion;
+        return vmDecompilerStatus.getBytemanCompanion();
     }
 
     private int attachByteman(boolean boot)

@@ -29,6 +29,7 @@ public class AgentAttachManager {
             status.setHostname(knownAgentsOnPid.get(0).getHost());
             status.setListenPort(knownAgentsOnPid.get(0).getPort());
             status.setVmId(vmId);
+            status.setBytemanCompanion(knownAgentsOnPid.get(0).getBytemanCompanion());
             vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
             return status;
         } else {

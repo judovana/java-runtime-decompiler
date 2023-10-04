@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import org.jrd.backend.communication.InstallDecompilerAgentImpl;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.Logger;
+import org.jrd.backend.data.BytemanCompanion;
 
 import javax.net.SocketFactory;
 import java.io.BufferedReader;
@@ -19,6 +20,8 @@ public class KnownAgent {
 
     private final int port;
     private final int pid;
+
+    private BytemanCompanion bytemanCompanion = null;
     private final String host;
     private final long owner; //to close only my connections on exit
 
@@ -59,6 +62,14 @@ public class KnownAgent {
         return owner;
     }
 
+    public BytemanCompanion getBytemanCompanion() {
+        return bytemanCompanion;
+    }
+
+    public void setBytemanCompanion(BytemanCompanion bytemanCompanion) {
+        this.bytemanCompanion = bytemanCompanion;
+    }
+
     public boolean matches(String hostname, int listenPort, int vmPid) {
         return this.host.equals(hostname) && this.port == listenPort && this.pid == vmPid;
     }
@@ -71,8 +82,10 @@ public class KnownAgent {
     }
 
     public String toPrint() {
-        return "" + "local pid " + pid + " = " + host + ':' + port + " (owner pid=" + owner + ", ttl=" + ttl + ", deadSince=" + deadSince +
-                ')';
+        return "" + "local pid " + pid + " = " + host + ':' + port + " (owner pid=" + owner + ", ttl=" + ttl + ", " +
+                "deadSince=" + deadSince +
+                bytemanCompanion==null?"no companion":", companionBytemanPort=" + bytemanCompanion.getBytemanPort() +
+                ", " + "afterBytemanCompanion=" + bytemanCompanion.getPostBytemanAgentPort() + ')';
     }
 
     public boolean verify() {

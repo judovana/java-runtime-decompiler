@@ -49,7 +49,7 @@ public class Cli {
     private boolean isHex;
     private boolean isRevert;
     private boolean isBoot;
-    private AgentConfig currentAgent = new AgentConfig();
+    private AgentConfig currentAgent = AgentConfig.getDefaultSinglePermanentAgent();
 
     public Cli(String[] orig, Model model) {
         this.filteredArgs = prefilterArgs(orig);

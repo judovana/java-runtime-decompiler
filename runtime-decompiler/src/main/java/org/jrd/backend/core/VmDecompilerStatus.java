@@ -1,5 +1,7 @@
 package org.jrd.backend.core;
 
+import org.jrd.backend.data.BytemanCompanion;
+
 import java.util.Arrays;
 
 /**
@@ -15,6 +17,7 @@ public class VmDecompilerStatus {
     private int listenPort;
     private ClassInfo[] loadedClasses;
     private String loadedClassBytes;
+    private BytemanCompanion bytemanCompanion;
 
     public VmDecompilerStatus() {
         this(false);
@@ -72,5 +75,13 @@ public class VmDecompilerStatus {
 
     public boolean isReused() {
         return reused;
+    }
+
+    public void setBytemanCompanion(BytemanCompanion bytemanCompanion) {
+        this.bytemanCompanion = bytemanCompanion;
+    }
+
+    public BytemanCompanion getBytemanCompanion() {
+        return bytemanCompanion;
     }
 }

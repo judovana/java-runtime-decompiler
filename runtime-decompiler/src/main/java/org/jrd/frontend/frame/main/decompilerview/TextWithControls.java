@@ -126,6 +126,8 @@ public class TextWithControls extends JPanel
         this.add(searchAndCode, BorderLayout.SOUTH);
         searchAndCode.add(bytecodeSearchControls, BorderLayout.CENTER);
         if (cct != CodeCompletionType.FORBIDDEN) {
+            completionButton.setToolTipText(BytecodeDecompilerView.styleTooltip() + "F8 - code completion, run and " +
+                    "compile and more");
             completionButton.addActionListener(new CompletionSettingsButtonPopUp(classesAndMethodsProvider, completionButton));
             completionButton.setOpaque(true);
             searchAndCode.add(completionButton, BorderLayout.WEST);
@@ -225,6 +227,17 @@ public class TextWithControls extends JPanel
         rst.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_F8) {
+                    CompletionSettingsButtonPopUp keyBound= new CompletionSettingsButtonPopUp(classesAndMethodsProvider,
+                            null);
+                    Point caretPosition = rst.getCaret().getMagicCaretPosition();
+                    if (caretPosition == null) {
+                        return;
+                    }
+                    // y is offset to the next row
+                    keyBound.showEslewhere(rst, caretPosition.x,
+                            caretPosition.y + rst.getFontMetrics(rst.getFont()).getHeight());
+                }
                 if (e.getKeyCode() == KeyEvent.VK_F9 && lastCompile != null) {
                     ActionListener[] acts = lastCompile.getActionListeners();
                     acts[1].actionPerformed(null);
@@ -465,8 +478,16 @@ public class TextWithControls extends JPanel
 
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
+            showEslewhere(mCompletion, mCompletion.getWidth() / 2, mCompletion.getHeight() / 2);
+        }
+
+        void showEslewhere(JComponent c, int x, int y){
             final JPopupMenu menu = createJPopupMenu();
-            menu.show(mCompletion, mCompletion.getWidth() / 2, mCompletion.getHeight() / 2);
+            SwingUtilities.invokeLater(() -> {
+                menu.show(c, x, y);
+                menu.requestFocusInWindow();
+            });
+
         }
 
         private JPopupMenu createJPopupMenu() {

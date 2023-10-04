@@ -25,12 +25,13 @@ public class InstrumentationProvider {
 
     private final Transformer transformer;
     private final Instrumentation instrumentation;
+    private final String loneliness;
     private static final String INFO_DELIMITER = "|";
 
-    InstrumentationProvider(Instrumentation inst, Transformer transformer) {
+    InstrumentationProvider(Instrumentation inst, Transformer transformer, String loneliness) {
         this.transformer = transformer;
         this.instrumentation = inst;
-
+        this.loneliness = loneliness;
     }
 
     public void setClassBody(String cname, byte[] nwBody) throws UnmodifiableClassException {
@@ -158,7 +159,7 @@ public class InstrumentationProvider {
     public void detach() {
         cleanOverrides(".*"); //optional?
         instrumentation.removeTransformer(transformer);
-        Main.setFirstTime(true);
+        Main.deregister(loneliness);
         int loader = Integer.parseInt(System.getProperty(Main.JRD_AGENT_LOADED, "0")) - 1;
         System.setProperty(Main.JRD_AGENT_LOADED, String.valueOf(loader));
         AgentLogger.getLogger().log("done");

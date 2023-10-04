@@ -7,6 +7,7 @@ import org.jrd.backend.communication.InstallDecompilerAgentImpl;
 import org.jrd.backend.core.AgentAttachManager;
 import org.jrd.backend.core.DecompilerRequestReceiver;
 import org.jrd.backend.core.Logger;
+import org.jrd.backend.data.BytemanCompanion;
 import org.jrd.backend.data.VmManager;
 
 import java.io.File;
@@ -186,5 +187,18 @@ public final class KnownAgents {
         //TODO load, merge..lock.. save?
         verifyAgents();
         return Collections.unmodifiableList(agents);
+    }
+
+    public void setBytemanCompanion(int vmPid, BytemanCompanion bytemanCompanion) {
+        load();
+        List<KnownAgent> agnets = KnownAgents.getInstance().findAgents(vmPid);
+        if (agnets == null || agnets.size()!=1){
+            Logger.getLogger().log(Logger.Level.ALL, "no suitable agent found for " + vmPid + " to save byteman " +
+                    "companion.");
+        } else {
+            agnets.get(0).setBytemanCompanion(bytemanCompanion);
+            Logger.getLogger().log(Logger.Level.DEBUG, "set byteman companion for " + vmPid);
+        }
+        save();
     }
 }

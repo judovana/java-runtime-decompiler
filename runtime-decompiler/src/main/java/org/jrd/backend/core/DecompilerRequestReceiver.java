@@ -305,7 +305,7 @@ public class DecompilerRequestReceiver {
             return port;
         }
         int actualListenPort = AgentRequestAction.NOT_ATTACHED_PORT;
-        VmDecompilerStatus status = attachManager.attachAgentToVm(vmId, vmPid, new AgentConfig());
+        VmDecompilerStatus status = attachManager.attachAgentToVm(vmId, vmPid, AgentConfig.getDefaultSinglePermanentAgent());
         if (status != null) {
             actualListenPort = status.getListenPort();
         }

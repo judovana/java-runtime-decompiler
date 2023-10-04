@@ -44,6 +44,8 @@ public final class ConnectionDelegator extends Thread {
             initServerSocket = new ServerSocket();
             initServerSocket.bind(new InetSocketAddress(hostname, port));
         } catch (IOException e) {
+            //maybe detach and rather rethrow?
+            ///FIXME
             AgentLogger.getLogger().log(new RuntimeException("Exception occurred when opening the socket: ", e));
             return false;
         }

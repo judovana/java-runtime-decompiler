@@ -1,8 +1,10 @@
 package org.jrd.frontend.frame.main;
 
+import org.jrd.backend.core.AgentLoader;
 import org.jrd.backend.core.agentstore.AgentLiveliness;
 import org.jrd.backend.core.agentstore.AgentLoneliness;
 import org.jrd.backend.data.VmInfo;
+import org.jrd.backend.data.cli.utils.AgentConfig;
 import org.jrd.frontend.frame.main.decompilerview.BytecodeDecompilerView;
 import org.jrd.frontend.utility.ScreenFinder;
 
@@ -18,14 +20,16 @@ import javax.swing.JToggleButton;
 import javax.swing.WindowConstants;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.util.Optional;
 
 public final class NewAgentDialog extends JDialog {
 
-    private static final NewAgentDialog NAD = NewAgentDialog.create();
+
     private JList<VmInfo> vmsList;
     private JButton selectButton;
 
     public static void show(JList<VmInfo> vms) {
+        NewAgentDialog NAD = NewAgentDialog.create();
         NAD.setVms(vms);
         NAD.setVisible(true);
     }
@@ -69,7 +73,30 @@ public final class NewAgentDialog extends JDialog {
         JPanel okCancelPanel = new JPanel();
         JButton attach = new JButton("Attach");
         attach.addActionListener(a -> {
-            JOptionPane.showMessageDialog(nad, "why failed or port");
+            Optional<Integer> port;
+            if (portField.getText().trim().isEmpty()) {
+                port = Optional.empty();
+            } else {
+                int futurePort = Integer.parseInt(portField.getText().trim());
+                if (futurePort <= 0) {
+                    port = Optional.empty();
+                } else {
+                    port = Optional.ofNullable(futurePort);
+                }
+            }
+            String lonelinessSel = loneliness.getSelection().getActionCommand();
+            String livelinessSel = liveliness.getSelection().getActionCommand();
+            int secondJrdPort = AgentLoader.attachImpl(Integer.parseInt(pidField.getText()),
+                    new AgentConfig(AgentLoneliness.fromString(lonelinessSel),
+                            AgentLiveliness.fromString(livelinessSel),
+                            port));
+            if (secondJrdPort >0){
+                JOptionPane.showConfirmDialog(nad, "also ask if to add it to remote vms " + secondJrdPort);
+                //after OK
+                //FIXME adda localhost bytemanCompanion.getPostBytemanAgentPort() REMOTE vm!!!
+            } else {
+                JOptionPane.showMessageDialog(nad, "why failed or port " + secondJrdPort);
+            }
             nad.setVisible(false);
         });
         okCancelPanel.add(attach, BorderLayout.WEST);
@@ -88,6 +115,7 @@ public final class NewAgentDialog extends JDialog {
             JToggleButton t = new JToggleButton(al.toButton());
             loneliness.add(t);
             buttonsPanel.add(t);
+            t.setActionCommand(al.toString());
             t.setToolTipText(BytecodeDecompilerView.styleTooltip() + al.toHelp());
             if (al.equals(AgentLoneliness.SINGLE_INSTANCE)) {
                 t.setSelected(true);
@@ -100,6 +128,7 @@ public final class NewAgentDialog extends JDialog {
             JToggleButton t = new JToggleButton(al.toButton());
             liveliness.add(t);
             buttonsPanel.add(t);
+            t.setActionCommand(al.toString());
             t.setToolTipText(BytecodeDecompilerView.styleTooltip() + al.toHelp());
             if (al.equals(AgentLiveliness.PERMANENT)) {
                 t.setSelected(true);
