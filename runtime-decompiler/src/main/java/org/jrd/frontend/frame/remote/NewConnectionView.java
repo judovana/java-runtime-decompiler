@@ -5,6 +5,7 @@ import org.jrd.frontend.frame.main.MainFrameView;
 
 import javax.swing.Box;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -121,6 +122,9 @@ public class NewConnectionView extends JDialog {
         gbc.weighty = 1;
         mainPanel.add(Box.createVerticalGlue(), gbc);
         gbc.gridy = 2;
+        gbc.weighty = 0;
+        mainPanel.add(new JCheckBox("Save this connection after JRD is closed"), gbc);
+        gbc.gridy = 3;
         gbc.weighty = 0;
         mainPanel.add(configureOkCancelPanel, gbc);
 
