@@ -32,7 +32,8 @@ public final class ConnectionDelegator extends Thread {
      *
      * @return boolean true if ran correctly, else false
      */
-    public static synchronized boolean initialize(String hostname, Integer port, InstrumentationProvider provider) {
+    public static synchronized void initialize(String hostname, Integer port, InstrumentationProvider provider, String loneliness)
+            throws IOException {
         ServerSocket initServerSocket = null;
         try {
             if (port == null) {
@@ -44,15 +45,16 @@ public final class ConnectionDelegator extends Thread {
             initServerSocket = new ServerSocket();
             initServerSocket.bind(new InetSocketAddress(hostname, port));
         } catch (IOException e) {
-            //maybe detach and rather rethrow?
-            ///FIXME
-            AgentLogger.getLogger().log(new RuntimeException("Exception occurred when opening the socket: ", e));
-            return false;
+            try {
+                Main.deregister(loneliness);
+            } finally {
+                AgentLogger.getLogger().log(new RuntimeException("Exception occurred when opening the socket: ", e));
+                throw e;
+            }
         }
 
         connectionDelegator = new ConnectionDelegator(provider, initServerSocket);
         connectionDelegator.start();
-        return true;
     }
 
     /**

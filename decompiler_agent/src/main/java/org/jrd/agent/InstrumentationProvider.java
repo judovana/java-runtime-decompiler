@@ -157,9 +157,9 @@ public class InstrumentationProvider {
     }
 
     public void detach() {
+        Main.deregister(loneliness);
         cleanOverrides(".*"); //optional?
         instrumentation.removeTransformer(transformer);
-        Main.deregister(loneliness);
         int loader = Integer.parseInt(System.getProperty(Main.JRD_AGENT_LOADED, "0")) - 1;
         System.setProperty(Main.JRD_AGENT_LOADED, String.valueOf(loader));
         AgentLogger.getLogger().log("done");

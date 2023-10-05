@@ -36,7 +36,7 @@ public final class Main {
      * @param agentArgs arguments with parameters for listener
      * @param inst      instance of instrumentation of given VM
      */
-    public static void premain(String agentArgs, Instrumentation inst) {
+    public static void premain(String agentArgs, Instrumentation inst) throws Exception {
         String hostname = null;
         Integer port = null;
         final String loneliness;
@@ -77,7 +77,7 @@ public final class Main {
                 }
             }
         }
-        ConnectionDelegator.initialize(hostname, port, p);
+        ConnectionDelegator.initialize(hostname, port, p, loneliness);
     }
 
     /**
@@ -86,12 +86,8 @@ public final class Main {
      * @param args arguments with parameters for listener
      * @param inst instance of instrumentation of given VM
      */
-    public static void agentmain(String args, Instrumentation inst) {
+    public static void agentmain(String args, Instrumentation inst) throws Exception {
         premain(args, inst);
-    }
-
-    public static void decFirstTime() {
-        confirmedAttaches--;
     }
 
     public static void deregister(String loneliness) {
