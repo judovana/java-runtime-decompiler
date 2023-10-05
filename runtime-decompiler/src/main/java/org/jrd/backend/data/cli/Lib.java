@@ -408,7 +408,7 @@ public final class Lib {
     }
 
     public static HandhshakeResult handshakeAgent(KnownAgent agent, VmManager vmManager) {
-        VmInfo vmInfo = vmManager.createRemoteVM(agent.getHost(), agent.getPort(), "" + agent.getPid());
+        VmInfo vmInfo = vmManager.createRemoteVM(agent.getHost(), agent.getPort(), "" + agent.getPid(), false);
         return handshakeAgent(agent, vmInfo, vmManager);
     }
 

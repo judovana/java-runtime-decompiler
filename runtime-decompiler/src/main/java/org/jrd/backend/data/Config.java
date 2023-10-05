@@ -39,6 +39,7 @@ public final class Config {
     public static final String AGENT_PATH_OVERWRITE_PROPERTY = "org.jrd.agent.jar";
     private static final String AGENT_PATH_KEY = "AGENT_PATH";
     private static final String SAVED_FS_VMS_KEY = "FS_VMS";
+    private static final String SAVED_REMOTE_VMS_KEY = "REMOTE_VMS";
     private static final String USE_HOST_SYSTEM_CLASSES_KEY = "USE_HOST_SYSTEM_CLASSES";
     private static final String USE_HOST_JAVA_LANG_OBJECT = "USE_HOST_JAVA_LANG_OBJECT";
     private static final String NESTED_JAR_EXTENSIONS = "NESTED_JAR_EXTENSIONS";
@@ -147,27 +148,45 @@ public final class Config {
     @SuppressWarnings("unchecked") // gson reads JSON arrays as List<String>
     private List<String> getOrCreateSavedFsVms() {
         List<String> savedFsVms = (List<String>) configMap.get(SAVED_FS_VMS_KEY);
-
         if (savedFsVms == null) {
             savedFsVms = new ArrayList<>();
             configMap.put(SAVED_FS_VMS_KEY, savedFsVms);
         }
-
         return savedFsVms;
+    }
+
+    @SuppressWarnings("unchecked") // gson reads JSON arrays as List<String>
+    private List<String> getOrCreateSavedRemoteVms() {
+        List<String> savedRemoteVms = (List<String>) configMap.get(SAVED_REMOTE_VMS_KEY);
+        if (savedRemoteVms == null) {
+            savedRemoteVms = new ArrayList<>();
+            configMap.put(SAVED_REMOTE_VMS_KEY, savedRemoteVms);
+        }
+        return savedRemoteVms;
     }
 
     public List<VmInfo> getSavedFsVms() throws IOException, ClassNotFoundException {
         List<VmInfo> result = new ArrayList<>();
-
         for (String base64String : getOrCreateSavedFsVms()) {
             result.add(VmInfo.base64Deserialize(base64String));
         }
+        return result;
+    }
 
+    public List<VmInfo> getSavedRemoteVms() throws IOException, ClassNotFoundException {
+        List<VmInfo> result = new ArrayList<>();
+        for (String base64String : getOrCreateSavedRemoteVms()) {
+            result.add(VmInfo.base64Deserialize(base64String));
+        }
         return result;
     }
 
     public void addSavedFsVm(VmInfo vmInfo) throws IOException {
         getOrCreateSavedFsVms().add(vmInfo.base64Serialize());
+    }
+
+    public void addSavedRemoteVm(VmInfo vmInfo) throws IOException {
+        getOrCreateSavedRemoteVms().add(vmInfo.base64Serialize());
     }
 
     public void setUseHostSystemClasses(boolean useHostJavaClasses) {
@@ -274,7 +293,17 @@ public final class Config {
         try {
             return getOrCreateSavedFsVms().contains(vmInfo.base64Serialize());
         } catch (IOException e) {
-            Logger.getLogger().log(Logger.Level.ALL, "Unable to determine if '" + vmInfo + "' is saved. Cause:");
+            Logger.getLogger().log(Logger.Level.ALL, "Unable to determine if FS '" + vmInfo + "' is saved. Cause:");
+            Logger.getLogger().log(e);
+            return false;
+        }
+    }
+
+    public boolean isSavedRemoteVm(VmInfo vmInfo) {
+        try {
+            return getOrCreateSavedRemoteVms().contains(vmInfo.base64Serialize());
+        } catch (IOException e) {
+            Logger.getLogger().log(Logger.Level.ALL, "Unable to determine if REMOTE '" + vmInfo + "' is saved. Cause:");
             Logger.getLogger().log(e);
             return false;
         }
@@ -282,6 +311,10 @@ public final class Config {
 
     public void removeSavedFsVm(VmInfo vmInfo) throws IOException {
         getOrCreateSavedFsVms().remove(vmInfo.base64Serialize());
+    }
+
+    public void removeSavedRemoteVm(VmInfo vmInfo) throws IOException {
+        getOrCreateSavedRemoteVms().remove(vmInfo.base64Serialize());
     }
 
     @SuppressWarnings("unchecked") // gson.fromJson returns a Map<String, Object> when called with configMap.getClass()

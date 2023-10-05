@@ -61,20 +61,27 @@ public class VmListRenderer extends JPanel implements ListCellRenderer<VmInfo> {
                 name.setText(vmInfo.getVmName().split(" ")[0]);
                 pid.setText("PID: " + vmInfo.getVmPid());
                 cp.setVisible(false);
-
+                String lrport = "not yet connected";
+                if (vmInfo.getVmDecompilerStatus() != null) {
+                    lrport = "" + vmInfo.getVmDecompilerStatus().getListenPort();
+                }
                 this.setToolTipText(
                         BytecodeDecompilerView.styleTooltip() + "NAME: " + vmInfo.getVmName().split(" ")[0] + "<br />" + "PID: " +
-                                vmInfo.getVmPid() + addBytemanTooltip(vmInfo) + "</html>"
+                                vmInfo.getVmPid() +  "<br />" + "port: " +
+                                lrport + addBytemanTooltip(vmInfo) + "</html>"
                 );
                 break;
             case REMOTE:
                 name.setText("Hostname: " + vmInfo.getVmName());
-                pid.setText("Port: " + vmInfo.getVmDecompilerStatus().getListenPort());
+                String srport = "not yet connected";
+                if (vmInfo.getVmDecompilerStatus() != null) {
+                    srport = "" + vmInfo.getVmDecompilerStatus().getListenPort();
+                }
+                pid.setText("Port: " + srport);
                 cp.setVisible(false);
-
                 this.setToolTipText(
                         BytecodeDecompilerView.styleTooltip() + "Hostname: " + vmInfo.getVmName() + "<br />" + "Port: " +
-                                vmInfo.getVmDecompilerStatus().getListenPort() + "</html>"
+                                srport+ "</html>"
                 );
                 break;
             case FS:

@@ -173,7 +173,10 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         if (isSavedFsVm) {
             confirmMessage += "\nRemoving it will also no longer keep it saved between JRD instances.";
         }
-
+        boolean isSavedRemoteVm = selectedVm.getType() == VmInfo.Type.REMOTE && Config.getConfig().isSavedRemoteVm(selectedVm);
+        if (isSavedRemoteVm) {
+            confirmMessage += "\nRemoving it will also no longer keep it saved between JRD instances.";
+        }
         if (shouldRemoteDetachAgent) {
             confirmMessage += "\nKilling the agent will prohibit any other connection in future. You will need to " + "attach it again";
         }
@@ -204,6 +207,15 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         if (isSavedFsVm) {
             try {
                 Config.getConfig().removeSavedFsVm(selectedVm);
+                Config.getConfig().saveConfigFile();
+            } catch (IOException e) {
+                Logger.getLogger().log(Logger.Level.ALL, "Unable to tag '" + vmInfo + "' as no longer to be saved. " + "Cause:");
+                Logger.getLogger().log(e);
+            }
+        }
+        if (isSavedRemoteVm) {
+            try {
+                Config.getConfig().removeSavedRemoteVm(selectedVm);
                 Config.getConfig().saveConfigFile();
             } catch (IOException e) {
                 Logger.getLogger().log(Logger.Level.ALL, "Unable to tag '" + vmInfo + "' as no longer to be saved. " + "Cause:");

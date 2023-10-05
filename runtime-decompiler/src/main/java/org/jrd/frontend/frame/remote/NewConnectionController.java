@@ -20,6 +20,8 @@ public class NewConnectionController {
     private void addRemoteVmInfo() {
         String hostname = newConnectionView.getHostname();
         String portString = newConnectionView.getPortString();
+        boolean shouldBeSaved = newConnectionView.shouldBeSaved();
+
         if (hostname.isEmpty()) {
             JOptionPane.showMessageDialog(newConnectionView, "Hostname is Empty.", " ", JOptionPane.WARNING_MESSAGE);
             return;
@@ -28,7 +30,7 @@ public class NewConnectionController {
             int port = Integer.parseInt(portString);
             newConnectionView.reSetLastHostname();
             newConnectionView.reSetLastPort();
-            vmManager.createRemoteVM(hostname, port);
+            vmManager.createRemoteVM(hostname, port, shouldBeSaved);
             newConnectionView.dispose();
         } else {
             JOptionPane.showMessageDialog(newConnectionView, "VM port is invalid.", " ", JOptionPane.WARNING_MESSAGE);

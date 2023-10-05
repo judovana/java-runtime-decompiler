@@ -22,6 +22,7 @@ import java.util.UUID;
  */
 public class VmManager {
 
+    public static final String PORT_ID_SPLIT = "#:#";
     private Set<VmInfo> vmInfoSet;
     private Set<ActionListener> actionListeners = new HashSet<>();
     boolean changed;
@@ -30,6 +31,7 @@ public class VmManager {
         this.vmInfoSet = new HashSet<>();
         updateLocalVMs();
         loadSavedFsVms();
+        loadSavedRemoteVms();
 
         Thread vmUpdateThread = new Thread(() -> {
             while (true) {
@@ -54,20 +56,48 @@ public class VmManager {
             Logger.getLogger().log(Logger.Level.ALL, e);
             return;
         }
-
         if (savedFsVms.isEmpty()) {
             Logger.getLogger().log("No saved FS VMs to load.");
             return;
         }
-
         // re-adjust IDs for saved VMs to be at the top of the list
         for (VmInfo savedFsVm : savedFsVms) {
             savedFsVm.setVmPid(getNextAvailableFsVmPid());
             savedFsVm.setVmId(String.valueOf(getNextAvailableFsVmPid()));
-
             vmInfoSet.add(savedFsVm);
         }
 
+        setChanged();
+        notifyListeners();
+    }
+
+    private void loadSavedRemoteVms() {
+        List<VmInfo> savedVms;
+        try {
+            savedVms = Config.getConfig().getSavedRemoteVms();
+        } catch (IOException | ClassNotFoundException e) {
+            Logger.getLogger().log(Logger.Level.ALL, "Failed to load saved remote VMs. Cause: ");
+            Logger.getLogger().log(Logger.Level.ALL, e);
+            return;
+        }
+        if (savedVms.isEmpty()) {
+            Logger.getLogger().log("No saved remote VMs to load.");
+            return;
+        }
+        for (VmInfo savedVm : savedVms) {
+            try{
+            VmDecompilerStatus status = new VmDecompilerStatus();
+            status.setVmId(savedVm.getVmId());
+            status.setHostname(savedVm.getVmName());
+            status.setListenPort(Integer.parseInt(savedVm.getVmId().split(PORT_ID_SPLIT)[0]));
+            savedVm.setVmDecompilerStatus(status);
+            vmInfoSet.add(savedVm);
+            } catch (Exception e) {
+                Logger.getLogger().log(Logger.Level.ALL, "Failed to prepare saved remote VMs. Cause: ");
+                Logger.getLogger().log(Logger.Level.ALL, e);
+                return;
+            }
+        }
         setChanged();
         notifyListeners();
     }
@@ -112,14 +142,14 @@ public class VmManager {
         notifyListeners();
     }
 
-    public VmInfo createRemoteVM(String hostname, int port) {
-        return createRemoteVM(hostname, port, null);
+    public VmInfo createRemoteVM(String hostname, int port, boolean shouldBeSaved) {
+        return createRemoteVM(hostname, port, null, shouldBeSaved);
     }
 
-    public VmInfo createRemoteVM(String hostname, int port, String idOverride) {
+    public VmInfo createRemoteVM(String hostname, int port, String idOverride, boolean shouldBeSaved) {
         String id;
         if (idOverride == null) {
-            id = UUID.randomUUID().toString();
+            id = port + PORT_ID_SPLIT + UUID.randomUUID().toString();
         } else {
             id = idOverride;
         }
@@ -130,6 +160,17 @@ public class VmManager {
         status.setListenPort(port);
         vmInfo.setVmDecompilerStatus(status);
         vmInfoSet.add(vmInfo);
+
+        if (shouldBeSaved) {
+            try {
+                Config.getConfig().addSavedRemoteVm(vmInfo);
+                Config.getConfig().saveConfigFile();
+            } catch (IOException e) {
+                Logger.getLogger().log(Logger.Level.ALL, "Failed to save remote VM '" + vmInfo + "'.");
+                Logger.getLogger().log(Logger.Level.ALL, e);
+            }
+        }
+
         setChanged();
         notifyListeners();
         return vmInfo;

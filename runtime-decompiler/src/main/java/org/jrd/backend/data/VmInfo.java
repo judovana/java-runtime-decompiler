@@ -50,8 +50,20 @@ public class VmInfo implements Serializable {
     private java.util.List<File> cp;
 
     private static final Comparator<VmInfo> HOSTNAME_COMPARATOR =
-            Comparator.comparing(info -> info.getVmDecompilerStatus().getHostname(), String::compareTo);
-    private static final Comparator<VmInfo> PORT_COMPARATOR = Comparator.comparingInt(info -> info.getVmDecompilerStatus().getListenPort());
+            Comparator.comparing(info -> {
+                if (info.getVmDecompilerStatus()!=null) {
+                    return info.getVmDecompilerStatus().getHostname();
+                } else {
+                    return "localhost";
+                }
+            }, String::compareTo);
+    private static final Comparator<VmInfo> PORT_COMPARATOR = Comparator.comparingInt(info -> {
+        if (info.getVmDecompilerStatus()!=null) {
+            return info.getVmDecompilerStatus().getListenPort();
+        } else {
+            return -1;
+        }
+    });
     public static final Comparator<VmInfo> LOCAL_VM_COMPARATOR = Comparator.comparingInt(VmInfo::getVmPid);
     public static final Comparator<VmInfo> REMOTE_VM_COMPARATOR = HOSTNAME_COMPARATOR.thenComparing(PORT_COMPARATOR);
     public static final Comparator<VmInfo> FS_VM_COMPARATOR = LOCAL_VM_COMPARATOR.reversed();
@@ -74,6 +86,9 @@ public class VmInfo implements Serializable {
 
     public VmDecompilerStatus getVmDecompilerStatus() {
         if (getType() == Type.FS) {
+            return vmDecompilerStatus;
+        }
+        if (getType() == Type.REMOTE) {
             return vmDecompilerStatus;
         }
         if (vmDecompilerStatus != null) {

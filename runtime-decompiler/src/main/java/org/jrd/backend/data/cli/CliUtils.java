@@ -56,7 +56,7 @@ public final class CliUtils {
                 return vmManager.createFsVM(NewFsVmController.cpToFilesCaught(param), null, false);
             case REMOTE:
                 String[] hostnamePort = param.split(":");
-                return vmManager.createRemoteVM(hostnamePort[0], Integer.parseInt(hostnamePort[1]));
+                return vmManager.createRemoteVM(hostnamePort[0], Integer.parseInt(hostnamePort[1]), false);
             default:
                 throw new RuntimeException("Unknown VmInfo.Type.");
         }

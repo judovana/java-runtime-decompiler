@@ -24,6 +24,7 @@ public class NewConnectionView extends JDialog {
     private JPanel configureOkCancelPanel;
     private JButton okButton;
     private JButton cancelButton;
+    private JCheckBox saveVm;
 
     private ActionListener addButtonListener;
 
@@ -123,7 +124,8 @@ public class NewConnectionView extends JDialog {
         mainPanel.add(Box.createVerticalGlue(), gbc);
         gbc.gridy = 2;
         gbc.weighty = 0;
-        mainPanel.add(new JCheckBox("Save this connection after JRD is closed"), gbc);
+        saveVm = new JCheckBox("Keep this connection after JRD is closed");
+        mainPanel.add(saveVm, gbc);
         gbc.gridy = 3;
         gbc.weighty = 0;
         mainPanel.add(configureOkCancelPanel, gbc);
@@ -157,5 +159,9 @@ public class NewConnectionView extends JDialog {
 
     void setAddButtonListener(ActionListener addButtonListener) {
         this.addButtonListener = addButtonListener;
+    }
+
+    boolean shouldBeSaved() {
+        return saveVm.isSelected();
     }
 }
