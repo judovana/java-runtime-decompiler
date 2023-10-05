@@ -20,6 +20,8 @@ public interface ClassesAndMethodsProvider {
 
     byte[] getClassItself(CompletionSettings settings, String fqn);
 
+    boolean isMissingVmInfo();
+
     class SettingsClassesAndMethodsProvider implements ClassesAndMethodsProvider {
 
         @Override
@@ -29,6 +31,11 @@ public interface ClassesAndMethodsProvider {
                 return "local cp; items count:" + s.split(System.getProperty("path.separator")).length;
             }
             return s;
+        }
+
+        @Override
+        public boolean isMissingVmInfo() {
+            return Config.getConfig().getAdditionalCP().trim().isEmpty();
         }
 
         @Override

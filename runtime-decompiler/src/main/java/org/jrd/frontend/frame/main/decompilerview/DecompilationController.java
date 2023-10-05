@@ -536,6 +536,11 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         return new byte[0];
     }
 
+    @Override
+    public boolean isMissingVmInfo() {
+        return vmInfo == null;
+    }
+
     private Collection<IdentifiedBytecode> getSingleClassFromRunningVmCatched(String fqn) {
         Collection<IdentifiedBytecode> b = new ArrayList<>(0);
         try {

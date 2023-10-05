@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 public interface ContextSuggestionsNarrower {
 
+
     /*
      * How many lines before current position it should provide. Note, that last line is always the incomplete
      * current one
@@ -74,6 +75,12 @@ public interface ContextSuggestionsNarrower {
     }
 
     class ClassesAndMethodsEnforcingNarrower implements ContextSuggestionsNarrower {
+
+        CompletionItem[] COMPLETION_ITEMS_HELP = {
+                new CompletionItem("you can select any running, remote ot FS vm to provide class/methods sugestions"),
+                new CompletionItem("You can fill additional CP in settings to provide standalone global classes/methods suggestions")
+        };
+
         private final ClassesAndMethodsProvider provider;
 
         public ClassesAndMethodsEnforcingNarrower(ClassesAndMethodsProvider classesAndMethodsProvider) {
@@ -97,6 +104,9 @@ public interface ContextSuggestionsNarrower {
                 String currentTrimedLine = beforeLines[beforeLines.length - 1].trim();
                 String[] currentLineTokens = currentTrimedLine.split("\\s+");
                 if (currentLineTokens[currentLineTokens.length - 1].equals("CLASS")) {
+                    if (provider.isMissingVmInfo()) {
+                        return COMPLETION_ITEMS_HELP;
+                    }
                     return Arrays.stream(provider.getClasses(settings)).map(a -> new CompletionItem(a)).collect(Collectors.toList())
                             .toArray(new CompletionItem[0]);
                 } else if (currentLineTokens[currentLineTokens.length - 1].equals("METHOD")) {
@@ -104,6 +114,9 @@ public interface ContextSuggestionsNarrower {
                         String[] secondaryLineTokens = beforeLines[x].split("\\s+");
                         for (int y = secondaryLineTokens.length - 2; y >= 0; y--) {
                             if (secondaryLineTokens[y].equals("CLASS")) {
+                                if (provider.isMissingVmInfo()) {
+                                    return COMPLETION_ITEMS_HELP;
+                                }
                                 String fqn = secondaryLineTokens[y + 1];
                                 return Arrays.stream(provider.getWhateverFromClass(settings, fqn)).map(a -> new CompletionItem(a))
                                         .collect(Collectors.toList()).toArray(new CompletionItem[0]);
