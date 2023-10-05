@@ -94,6 +94,7 @@ public final class NewAgentDialog extends JDialog {
                 JOptionPane.showConfirmDialog(nad, "also ask if to add it to remote vms " + secondJrdPort);
                 //after OK
                 //FIXME adda localhost bytemanCompanion.getPostBytemanAgentPort() REMOTE vm!!!
+                //cancel no yes - nothing, create-no save, create save
             } else {
                 JOptionPane.showMessageDialog(nad, "why failed or port " + secondJrdPort);
             }
