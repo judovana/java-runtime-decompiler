@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 public interface ContextSuggestionsNarrower {
 
-
     /*
      * How many lines before current position it should provide. Note, that last line is always the incomplete
      * current one
@@ -76,10 +75,9 @@ public interface ContextSuggestionsNarrower {
 
     class ClassesAndMethodsEnforcingNarrower implements ContextSuggestionsNarrower {
 
-        CompletionItem[] COMPLETION_ITEMS_HELP = {
+        private static final CompletionItem[] COMPLETION_ITEMS_HELP = {
                 new CompletionItem("you can select any running, remote ot FS vm to provide class/methods sugestions"),
-                new CompletionItem("You can fill additional CP in settings to provide standalone global classes/methods suggestions")
-        };
+                new CompletionItem("You can fill additional CP in settings to provide standalone global classes/methods suggestions")};
 
         private final ClassesAndMethodsProvider provider;
 

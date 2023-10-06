@@ -442,7 +442,8 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         String bytesInString = vmStatus.getLoadedClassBytes();
         byte[] bytes = Base64.getDecoder().decode(bytesInString);
         try {
-            decompiledClass = getPluginManager().decompile(bytecodeDecompilerView.getSelectedDecompiler(), name, bytes, null, vmInfo, getVmManager());
+            decompiledClass =
+                    getPluginManager().decompile(bytecodeDecompilerView.getSelectedDecompiler(), name, bytes, null, vmInfo, getVmManager());
         } catch (Exception e) {
             Logger.getLogger().log(Logger.Level.ALL, e);
         }
@@ -450,14 +451,13 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         String additionalDecompiled = "";
         if (additionalBytes != null && additionalBytes.length > 0) {
             try {
-                additionalDecompiled =
-                        getPluginManager().decompile(bytecodeDecompilerView.getSelectedDecompiler(), name, additionalBytes, null, null, null);
+                additionalDecompiled = getPluginManager()
+                        .decompile(bytecodeDecompilerView.getSelectedDecompiler(), name, additionalBytes, null, null, null);
             } catch (Exception e) {
                 Logger.getLogger().log(Logger.Level.ALL, e);
             }
         }
-        bytecodeDecompilerView.reloadTextField(name, decompiledClass, bytes, additionalDecompiled, additionalBytes,
-                vmInfo.getType());
+        bytecodeDecompilerView.reloadTextField(name, decompiledClass, bytes, additionalDecompiled, additionalBytes, vmInfo.getType());
     }
 
     public String getVm() {
@@ -495,7 +495,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
 
     @Override
     public VmManager getVmManager() {
-        return Model.getMODEL().getVmManager();
+        return Model.getModel().getVmManager();
     }
 
     @Override
@@ -598,7 +598,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
     }
 
     public PluginManager getPluginManager() {
-        return Model.getMODEL().getPluginManager();
+        return Model.getModel().getPluginManager();
     }
 
     class ClassOverwriter {

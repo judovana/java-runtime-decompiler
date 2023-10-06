@@ -816,21 +816,21 @@ public class BytecodeDecompilerView {
      * @param decompiledClass String of source code of decompiler class
      */
     public void reloadTextField(
-            String name, String decompiledClass, byte[] source, String additionalDecompiledClass,
-            byte[] additionalSource, VmInfo.Type vmInfoType) {
+            String name, String decompiledClass, byte[] source, String additionalDecompiledClass, byte[] additionalSource,
+            VmInfo.Type vmInfoType
+    ) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
                 BytecodeDecompilerView.this
-                        .setDecompiledClass(name, decompiledClass, source, additionalDecompiledClass,
-                                additionalSource, vmInfoType);
+                        .setDecompiledClass(name, decompiledClass, source, additionalDecompiledClass, additionalSource, vmInfoType);
             }
         });
     }
 
     private void setDecompiledClass(
-            String name, String data, byte[] source, String additionalData, byte[] additionalSource,
-            VmInfo.Type vmInfoType) {
+            String name, String data, byte[] source, String additionalData, byte[] additionalSource, VmInfo.Type vmInfoType
+    ) {
         String additionalSrcClass = Config.getConfig().getAdditionalSourcePathString(name);
         additionalSrcBuffer.resetSrcArea(additionalSrcClass);
         if (vmInfoType == VmInfo.Type.LOCAL) {
@@ -840,10 +840,12 @@ public class BytecodeDecompilerView {
             buffers.remove(bytemanScript);
         }
         if (additionalData.trim().isEmpty()) {
-            additionalBytecodeBuffer.resetSrcArea("You cans elect additional source class-path-like and additional local classapth "
-                    + "in settngs\n binary jars/dirs or source jars/dirs are supported.\nThe local source/class-path helps to see "
-                    + "various views or versions of classes.\niIf you need more copies, you can always open additional hex/text notes"
-                    + " (via connect menu)");
+            additionalBytecodeBuffer.resetSrcArea(
+                    "You cans elect additional source class-path-like and additional local classapth " +
+                            "in settngs\n binary jars/dirs or source jars/dirs are supported.\nThe local source/class-path helps to see " +
+                            "various views or versions of classes.\niIf you need more copies, you can always open additional hex/text notes" +
+                            " (via connect menu)"
+            );
         } else {
             additionalBytecodeBuffer.resetSrcArea(additionalData);
         }
@@ -888,7 +890,7 @@ public class BytecodeDecompilerView {
                     String additionalBytemanScript = Files.readString(additionalBytemanScriptFile.toPath());
                     bytemanScript.resetSrcArea(additionalBytemanScript);
                 }
-            } catch (IOException ex){
+            } catch (IOException ex) {
                 Logger.getLogger().log(ex);
             }
         }

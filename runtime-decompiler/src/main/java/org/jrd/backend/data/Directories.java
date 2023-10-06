@@ -31,7 +31,7 @@ public final class Directories {
     }
 
     public static File getBytemanDirectory() {
-        String s =  getXdgJrdBaseDir() + XDG_BYTEMAN_SUFFIX;
+        String s = getXdgJrdBaseDir() + XDG_BYTEMAN_SUFFIX;
         File f = new File(s);
         f.mkdir();
         return f;

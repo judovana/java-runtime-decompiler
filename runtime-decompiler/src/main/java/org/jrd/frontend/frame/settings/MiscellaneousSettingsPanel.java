@@ -47,6 +47,14 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
                 BytecodeDecompilerView.styleTooltip() + "for assemblers, the bytecode will be loaded.<br/>" + "For byteman, byteman.<br/>" +
                         "But for java, it depends on editor - in JRD it will runtime modification api"
         );
+        dependenceNumbers = new JComboBox(Config.DepndenceNumbers.values());
+        srcPath = new JTextField(sp);
+        classPath = new JTextField(cp);
+
+        initMainPanel(initialConfigNumbers, additionalAgentAction);
+    }
+
+    private void initMainPanel(Config.DepndenceNumbers initialConfigNumbers, Config.AdditionalAgentAction additionalAgentAction) {
         JPanel mainPanel = this;
         mainPanel.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -62,7 +70,6 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
         mainPanel.add(useJavapSignaturesCheckBox, gbc);
         gbc.gridy = 2;
         mainPanel.add(detectAutocompletionCheckBox, gbc);
-        dependenceNumbers = new JComboBox(Config.DepndenceNumbers.values());
         gbc.gridy = 3;
         mainPanel.add(dependenceNumbers, gbc);
         dependenceNumbers.addActionListener(a -> {
@@ -71,10 +78,6 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
             );
         });
         dependenceNumbers.setSelectedItem(initialConfigNumbers);
-
-        srcPath = new JTextField(sp);
-        classPath = new JTextField(cp);
-
         String hint = BytecodeDecompilerView.styleTooltip() +
                 "Additional source-path and classpath is used to show on-fs available src/bytecode of given classes" +
                 " and to help with possible compilation issues. <br>";
@@ -140,11 +143,10 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
         additionalAgentPlace.add(add);
         additionalAgentPlace.add(addAndSave);
         ask.setSelected(true);
-        Enumeration<AbstractButton> enumeration =  additionalAgentPlace.getElements();
+        Enumeration<AbstractButton> enumeration = additionalAgentPlace.getElements();
         while (enumeration.hasMoreElements()) {
             AbstractButton ab = enumeration.nextElement();
-            Config.AdditionalAgentAction current =
-                    Config.AdditionalAgentAction.fromString(ab.getActionCommand());
+            Config.AdditionalAgentAction current = Config.AdditionalAgentAction.fromString(ab.getActionCommand());
             if (current == additionalAgentAction) {
                 ab.setSelected(true);
             } else {

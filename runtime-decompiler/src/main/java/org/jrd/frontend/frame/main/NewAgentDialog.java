@@ -24,18 +24,19 @@ import javax.swing.WindowConstants;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Optional;
 
 public final class NewAgentDialog extends JDialog {
-
 
     private JList<VmInfo> vmsList;
     private JButton selectButton;
 
     public static void show(JList<VmInfo> vms) {
-        NewAgentDialog NAD = NewAgentDialog.create();
-        NAD.setVms(vms);
-        NAD.setVisible(true);
+        NewAgentDialog nad = NewAgentDialog.create();
+        nad.setVms(vms);
+        nad.setVisible(true);
     }
 
     private NewAgentDialog() {
@@ -76,34 +77,7 @@ public final class NewAgentDialog extends JDialog {
         nad.add(vmPanel, BorderLayout.NORTH);
         JPanel okCancelPanel = new JPanel();
         JButton attach = new JButton("Attach");
-        attach.addActionListener(a -> {
-            Optional<Integer> port;
-            if (portField.getText().trim().isEmpty()) {
-                port = Optional.empty();
-            } else {
-                int futurePort = Integer.parseInt(portField.getText().trim());
-                if (futurePort <= 0) {
-                    port = Optional.empty();
-                } else {
-                    port = Optional.ofNullable(futurePort);
-                }
-            }
-            String lonelinessSel = loneliness.getSelection().getActionCommand();
-            String livelinessSel = liveliness.getSelection().getActionCommand();
-            AgentConfig aconf = new AgentConfig(AgentLoneliness.fromString(lonelinessSel),
-                    AgentLiveliness.fromString(livelinessSel), port);
-            int targetPid = -1;
-            try {
-                targetPid = Integer.parseInt(pidField.getText());
-            } catch (Exception ex) {
-                Logger.getLogger().log(Logger.Level.ALL, ex.getMessage());
-                Logger.getLogger().log(Logger.Level.DEBUG, ex);
-                JOptionPane.showMessageDialog(null, "No pid? " + ex.getMessage());
-                return;
-            }
-            manualAttach(nad, aconf, targetPid, true);
-            nad.setVisible(false);
-        });
+        attach.addActionListener(new AttachActionListener(portField, loneliness, liveliness, pidField, nad));
         okCancelPanel.add(attach, BorderLayout.WEST);
         okCancelPanel.add(new JButton("Reset to Defaults"), BorderLayout.CENTER);
         JButton hide = new JButton("Hide");
@@ -115,11 +89,10 @@ public final class NewAgentDialog extends JDialog {
         return nad;
     }
 
-    public static int manualAttach(Component parent, AgentConfig aconf, int targetPid,
-                                   boolean gui) {
+    public static int manualAttach(Component parent, AgentConfig aconf, int targetPid, boolean gui) {
         int secondJrdPort = 0;
         try {
-          secondJrdPort = AgentLoader.attachImpl(targetPid, aconf);
+            secondJrdPort = AgentLoader.attachImpl(targetPid, aconf);
         } catch (Exception ex) {
             Logger.getLogger().log(Logger.Level.ALL, ex.getMessage());
             Logger.getLogger().log(Logger.Level.DEBUG, ex);
@@ -130,30 +103,33 @@ public final class NewAgentDialog extends JDialog {
         if (secondJrdPort > 0) {
             switch (Config.getConfig().getAdditionalAgentAction()) {
                 case ADD:
-                    Model.getMODEL().getVmManager().createRemoteVM("localhost", secondJrdPort, false);
+                    Model.getModel().getVmManager().createRemoteVM("localhost", secondJrdPort, false);
                     break;
                 case ADD_AND_SAVE:
-                    Model.getMODEL().getVmManager().createRemoteVM("localhost", secondJrdPort, true);
+                    Model.getModel().getVmManager().createRemoteVM("localhost", secondJrdPort, true);
                     break;
                 case NOTHING:
                     break;
                 case ASK:
                     if (gui) {
-                        int r = JOptionPane.showConfirmDialog(parent,
-                                " Do you want to connect to VM via port " + secondJrdPort + " via JRD asap? save? " +
-                                        "Pres yes for " +
-                                        "add and save, no for add and cancel for nothing. If nothing, write donw the " +
-                                        "port :) " + secondJrdPort);
+                        int r = JOptionPane.showConfirmDialog(
+                                parent,
+                                " Do you want to connect to VM via port " + secondJrdPort + " via JRD asap? save? " + "Pres yes for " +
+                                        "add and save, no for add and cancel for nothing. If nothing, write donw the " + "port :) " +
+                                        secondJrdPort
+                        );
                         if (r == JOptionPane.YES_OPTION) {
-                            Model.getMODEL().getVmManager().createRemoteVM("localhost", secondJrdPort, true);
+                            Model.getModel().getVmManager().createRemoteVM("localhost", secondJrdPort, true);
                         } else if (r == JOptionPane.NO_OPTION) {
-                            Model.getMODEL().getVmManager().createRemoteVM("localhost", secondJrdPort, false);
+                            Model.getModel().getVmManager().createRemoteVM("localhost", secondJrdPort, false);
                         }
                     } else {
-                        Logger.getLogger().log(Logger.Level.ALL,
-                                "Ask mode is on. Without gui, no-op. Connect to " + secondJrdPort + " manually");
+                        Logger.getLogger()
+                                .log(Logger.Level.ALL, "Ask mode is on. Without gui, no-op. Connect to " + secondJrdPort + " manually");
                     }
                     break;
+                default:
+                    throw new RuntimeException("Undefined case: " + Config.getConfig().getAdditionalAgentAction());
             }
         } else {
             String s = "Attach failed, consult logs of *foreign* process.";
@@ -192,6 +168,55 @@ public final class NewAgentDialog extends JDialog {
                 t.setEnabled(false);
                 t.setToolTipText(t.getToolTipText() + "<br>Although this agent exists for CLI, have no reason for gui");
             }
+        }
+    }
+
+    private static class AttachActionListener implements ActionListener {
+        private final JTextField portField;
+        private final ButtonGroup loneliness;
+        private final ButtonGroup liveliness;
+        private final JTextField pidField;
+        private final NewAgentDialog nad;
+
+        AttachActionListener(JTextField portField,
+                                    ButtonGroup loneliness,
+                                    ButtonGroup liveliness,
+                                    JTextField pidField,
+                                    NewAgentDialog nad) {
+            this.portField = portField;
+            this.loneliness = loneliness;
+            this.liveliness = liveliness;
+            this.pidField = pidField;
+            this.nad = nad;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent a) {
+            Optional<Integer> port;
+            if (portField.getText().trim().isEmpty()) {
+                port = Optional.empty();
+            } else {
+                int futurePort = Integer.parseInt(portField.getText().trim());
+                if (futurePort <= 0) {
+                    port = Optional.empty();
+                } else {
+                    port = Optional.ofNullable(futurePort);
+                }
+            }
+            String lonelinessSel = loneliness.getSelection().getActionCommand();
+            String livelinessSel = liveliness.getSelection().getActionCommand();
+            AgentConfig aconf = new AgentConfig(AgentLoneliness.fromString(lonelinessSel), AgentLiveliness.fromString(livelinessSel), port);
+            int targetPid = -1;
+            try {
+                targetPid = Integer.parseInt(pidField.getText());
+            } catch (Exception ex) {
+                Logger.getLogger().log(Logger.Level.ALL, ex.getMessage());
+                Logger.getLogger().log(Logger.Level.DEBUG, ex);
+                JOptionPane.showMessageDialog(null, "No pid? " + ex.getMessage());
+                return;
+            }
+            manualAttach(nad, aconf, targetPid, true);
+            nad.setVisible(false);
         }
     }
 }

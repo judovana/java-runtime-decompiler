@@ -2,7 +2,6 @@ package org.jrd.frontend.frame.main.decompilerview.dummycompiler;
 
 import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
-import org.jboss.byteman.agent.install.Install;
 import org.jboss.byteman.agent.submit.ScriptText;
 import org.jboss.byteman.agent.submit.Submit;
 import org.jboss.byteman.check.RuleCheck;
@@ -56,10 +55,12 @@ public class BytemanCompileAction extends AbstractCompileAction implements CanCo
                     return r;
                 } else {
                     VmInfo vmInfo = vmInfoProvider.getVmInfo();
-                    BytemanCompanion bytemanCompanion = vmInfo.setBytemanCompanion(boot.isBoot(),
-                            vmInfo.getVmDecompilerStatus().getListenPort());
-                    Submit submit = new Submit("localhost", bytemanCompanion.getBytemanPort(), new PrintStream(new LogOutputStream(), true,
-                            StandardCharsets.UTF_8));
+                    BytemanCompanion bytemanCompanion =
+                            vmInfo.setBytemanCompanion(boot.isBoot(), vmInfo.getVmDecompilerStatus().getListenPort());
+                    Submit submit = new Submit(
+                            "localhost", bytemanCompanion.getBytemanPort(),
+                            new PrintStream(new LogOutputStream(), true, StandardCharsets.UTF_8)
+                    );
                     ScriptText st = new ScriptText("hi.btm", script);
                     if (lastScriptProvider.getLastScript() != null && unloadLastScript) {
                         String deleteAll = submit.deleteScripts(Collections.singletonList(lastScriptProvider.getLastScript()));

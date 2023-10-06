@@ -105,6 +105,7 @@ public final class KnownAgents {
         }
         return result;
     }
+
     public List<KnownAgent> findAgents(int pid, int port) {
         List<KnownAgent> result = new ArrayList<>();
         for (KnownAgent agent : agents) {
@@ -201,9 +202,9 @@ public final class KnownAgents {
     public void setBytemanCompanion(int vmPid, int port, BytemanCompanion bytemanCompanion) {
         load();
         List<KnownAgent> agnets = KnownAgents.getInstance().findAgents(vmPid, port);
-        if (agnets == null || agnets.size()!=1){
-            Logger.getLogger().log(Logger.Level.ALL, "no suitable agent found for pid " + vmPid + ", port " + port +
-                    " to save byteman companion.");
+        if (agnets == null || agnets.size() != 1) {
+            Logger.getLogger()
+                    .log(Logger.Level.ALL, "no suitable agent found for pid " + vmPid + ", port " + port + " to save byteman companion.");
         } else {
             agnets.get(0).setBytemanCompanion(bytemanCompanion);
             Logger.getLogger().log(Logger.Level.DEBUG, "set byteman companion for pid" + vmPid + ", port " + port);

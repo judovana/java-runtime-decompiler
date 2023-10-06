@@ -126,8 +126,7 @@ public class TextWithControls extends JPanel
         this.add(searchAndCode, BorderLayout.SOUTH);
         searchAndCode.add(bytecodeSearchControls, BorderLayout.CENTER);
         if (cct != CodeCompletionType.FORBIDDEN) {
-            completionButton.setToolTipText(BytecodeDecompilerView.styleTooltip() + "F8 - code completion, run and " +
-                    "compile and more");
+            completionButton.setToolTipText(BytecodeDecompilerView.styleTooltip() + "F8 - code completion, run and " + "compile and more");
             completionButton.addActionListener(new CompletionSettingsButtonPopUp(classesAndMethodsProvider, completionButton));
             completionButton.setOpaque(true);
             searchAndCode.add(completionButton, BorderLayout.WEST);
@@ -224,43 +223,7 @@ public class TextWithControls extends JPanel
 
     private RSyntaxTextArea createSrcTextArea() {
         final RSyntaxTextArea rst = new RSyntaxTextAreaWithCompletion();
-        rst.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_F8) {
-                    CompletionSettingsButtonPopUp keyBound= new CompletionSettingsButtonPopUp(classesAndMethodsProvider,
-                            null);
-                    Point caretPosition = rst.getCaret().getMagicCaretPosition();
-                    if (caretPosition == null) {
-                        return;
-                    }
-                    // y is offset to the next row
-                    keyBound.showEslewhere(rst, caretPosition.x,
-                            caretPosition.y + rst.getFontMetrics(rst.getFont()).getHeight());
-                }
-                if (e.getKeyCode() == KeyEvent.VK_F9 && lastCompile != null) {
-                    ActionListener[] acts = lastCompile.getActionListeners();
-                    acts[1].actionPerformed(null);
-                }
-                if (e.getKeyCode() == KeyEvent.VK_F10 && lastCompileAndRun != null) {
-                    ActionListener[] acts = lastCompileAndRun.getActionListeners();
-                    acts[1].actionPerformed(null);
-                }
-                if (e.getKeyCode() == KeyEvent.VK_F3) {
-                    bytecodeSearchControls.clickNextButton();
-                }
-                if ((e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) != 0) {
-                    if (e.getKeyCode() == KeyEvent.VK_F) {
-                        bytecodeSearchControls.focus(); //!!global :(
-                    }
-                }
-                if ((e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) != 0) {
-                    if (e.getKeyCode() == KeyEvent.VK_S && getFile()!=null) {
-                        quickSave();
-                    }
-                }
-            }
-        });
+        rst.addKeyListener(new MainRsyntaxKeyListener(rst));
         rst.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
         rst.setCodeFoldingEnabled(true);
         return rst;
@@ -481,7 +444,7 @@ public class TextWithControls extends JPanel
             showEslewhere(mCompletion, mCompletion.getWidth() / 2, mCompletion.getHeight() / 2);
         }
 
-        void showEslewhere(JComponent c, int x, int y){
+        void showEslewhere(JComponent c, int x, int y) {
             final JPopupMenu menu = createJPopupMenu();
             SwingUtilities.invokeLater(() -> {
                 menu.show(c, x, y);
@@ -503,12 +466,7 @@ public class TextWithControls extends JPanel
             JMenuItem guess = new JMenuItem("guess completion (see verbose console for analyse)");
             addGuessCompletionItem(menu, guess);
             createAdvancedSubmenu(menu);
-            JMenu templatesMenu = new JMenu("Templates");
-            templatesMenu.add(new BytemanTemplateMenuItem(bytecodeSyntaxTextArea));
-            templatesMenu.add(new BytemanSkeletonTemplateMenuItem(bytecodeSyntaxTextArea));
-            templatesMenu.add(new JasmTemplateMenuItem(bytecodeSyntaxTextArea));
-            templatesMenu.add(new Jasm2TemplateMenuItem(bytecodeSyntaxTextArea));
-            templatesMenu.add(new JavaTemplateMenuItem(bytecodeSyntaxTextArea));
+            JMenu templatesMenu = createTemplatesMenu();
             menu.add(templatesMenu);
             Object[] detectedJasms = detectJasms();
             PluginManager pluginManager = (PluginManager) detectedJasms[0];
@@ -557,6 +515,16 @@ public class TextWithControls extends JPanel
                 lastUsed((JustBearerAction) menu.getComponents()[menu.getComponents().length - 2], lastCompileAndRun);
             }
             return menu;
+        }
+
+        private JMenu createTemplatesMenu() {
+            JMenu templatesMenu = new JMenu("Templates");
+            templatesMenu.add(new BytemanTemplateMenuItem(bytecodeSyntaxTextArea));
+            templatesMenu.add(new BytemanSkeletonTemplateMenuItem(bytecodeSyntaxTextArea));
+            templatesMenu.add(new JasmTemplateMenuItem(bytecodeSyntaxTextArea));
+            templatesMenu.add(new Jasm2TemplateMenuItem(bytecodeSyntaxTextArea));
+            templatesMenu.add(new JavaTemplateMenuItem(bytecodeSyntaxTextArea));
+            return templatesMenu;
         }
 
         private class CodeCompletionMenuActionListener implements ActionListener {
@@ -762,17 +730,23 @@ public class TextWithControls extends JPanel
                 );
             }
         }
-        if (hasVm(classesAndMethodsProvider) && ((DecompilationController) classesAndMethodsProvider).getVmInfo().getType() == VmInfo.Type.LOCAL) {
-            BytemanCompileAction btmSubm = new BytemanCompileAction("compile by byteman and inject to selected vm " +  + ((DecompilationController) classesAndMethodsProvider).getVmInfo().getVmPid(), this, this,
-                    this);
+        if (hasVm(classesAndMethodsProvider) &&
+                ((DecompilationController) classesAndMethodsProvider).getVmInfo().getType() == VmInfo.Type.LOCAL) {
+            BytemanCompileAction btmSubm = new BytemanCompileAction(
+                    "compile by byteman and inject to selected vm " +
+                            +((DecompilationController) classesAndMethodsProvider).getVmInfo().getVmPid(),
+                    this, this, this
+            );
             btmSubm.addActionListener(new CompileActionListener(pluginManager, btmSubm));
             compileAndRun.add(btmSubm);
-            JMenuItem btmRemove =
-                    new JMenuItem("TODO remove current rules from " + ((DecompilationController) classesAndMethodsProvider).getVmInfo().getVmPid());
+            JMenuItem btmRemove = new JMenuItem(
+                    "TODO remove current rules from " + ((DecompilationController) classesAndMethodsProvider).getVmInfo().getVmPid()
+            );
             btmRemove.setEnabled(false);
             compileAndRun.add(btmRemove);
-            JMenuItem btmRemoveAll =
-                    new JMenuItem("TODO remove all byteman rules from " + ((DecompilationController) classesAndMethodsProvider).getVmInfo().getVmPid());
+            JMenuItem btmRemoveAll = new JMenuItem(
+                    "TODO remove all byteman rules from " + ((DecompilationController) classesAndMethodsProvider).getVmInfo().getVmPid()
+            );
             btmRemoveAll.setEnabled(false);
             compileAndRun.add(btmRemoveAll);
         }
@@ -1001,6 +975,59 @@ public class TextWithControls extends JPanel
             return (FeatureFullHex) parent;
         } else {
             return null;
+        }
+    }
+
+    private class MainRsyntaxKeyListener extends KeyAdapter {
+        private final RSyntaxTextArea rst;
+
+        private MainRsyntaxKeyListener(RSyntaxTextArea rst) {
+            this.rst = rst;
+        }
+
+        @Override
+        public void keyPressed(KeyEvent e) {
+            if (proceedFkeys(e)) {
+                return;
+            }
+            proceedCtrlKeys(e);
+        }
+
+        private void proceedCtrlKeys(KeyEvent e) {
+            if ((e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) != 0) {
+                if (e.getKeyCode() == KeyEvent.VK_F) {
+                    bytecodeSearchControls.focus(); //!!global :(
+                }
+            }
+            if ((e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) != 0) {
+                if (e.getKeyCode() == KeyEvent.VK_S && getFile() != null) {
+                    quickSave();
+                }
+            }
+        }
+
+        private boolean proceedFkeys(KeyEvent e) {
+            if (e.getKeyCode() == KeyEvent.VK_F8) {
+                CompletionSettingsButtonPopUp keyBound = new CompletionSettingsButtonPopUp(classesAndMethodsProvider, null);
+                Point caretPosition = rst.getCaret().getMagicCaretPosition();
+                if (caretPosition == null) {
+                    return true;
+                }
+                // y is offset to the next row
+                keyBound.showEslewhere(rst, caretPosition.x, caretPosition.y + rst.getFontMetrics(rst.getFont()).getHeight());
+            }
+            if (e.getKeyCode() == KeyEvent.VK_F9 && lastCompile != null) {
+                ActionListener[] acts = lastCompile.getActionListeners();
+                acts[1].actionPerformed(null);
+            }
+            if (e.getKeyCode() == KeyEvent.VK_F10 && lastCompileAndRun != null) {
+                ActionListener[] acts = lastCompileAndRun.getActionListeners();
+                acts[1].actionPerformed(null);
+            }
+            if (e.getKeyCode() == KeyEvent.VK_F3) {
+                bytecodeSearchControls.clickNextButton();
+            }
+            return false;
         }
     }
 }

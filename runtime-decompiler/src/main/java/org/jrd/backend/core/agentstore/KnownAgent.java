@@ -21,7 +21,7 @@ public class KnownAgent {
     private final int port;
     private final int pid;
 
-    private BytemanCompanion bytemanCompanion = null;
+    private BytemanCompanion bytemanCompanion;
     private final String host;
     private final long owner; //to close only my connections on exit
 
@@ -82,10 +82,10 @@ public class KnownAgent {
     }
 
     public String toPrint() {
-        return "" + "local pid " + pid + " = " + host + ':' + port + " (owner pid=" + owner + ", ttl=" + ttl + ", " +
-                "deadSince=" + deadSince +
-                bytemanCompanion==null?"no companion":", companionBytemanPort=" + bytemanCompanion.getBytemanPort() +
-                ", " + "afterBytemanCompanion=" + bytemanCompanion.getPostBytemanAgentPort() + ')';
+        return "" + "local pid " + pid + " = " + host + ':' + port + " (owner pid=" + owner + ", ttl=" + ttl + ", " + "deadSince=" +
+                deadSince + bytemanCompanion == null ? "no companion" :
+                ", companionBytemanPort=" + bytemanCompanion.getBytemanPort() + ", " + "afterBytemanCompanion=" +
+                                bytemanCompanion.getPostBytemanAgentPort() + ')';
     }
 
     public boolean verify() {

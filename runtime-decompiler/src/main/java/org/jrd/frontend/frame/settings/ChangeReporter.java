@@ -1,6 +1,5 @@
 package org.jrd.frontend.frame.settings;
 
-import javax.swing.JCheckBox;
 import javax.swing.JList;
 import javax.swing.JToggleButton;
 import javax.swing.event.DocumentEvent;

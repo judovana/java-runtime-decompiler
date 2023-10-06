@@ -75,7 +75,10 @@ public final class Config {
     }
 
     public enum AdditionalAgentAction {
-        ADD, ADD_AND_SAVE, ASK, NOTHING;
+        ADD,
+        ADD_AND_SAVE,
+        ASK,
+        NOTHING;
 
         public static AdditionalAgentAction fromString(String s) throws IllegalArgumentException {
             return Arrays.stream(AdditionalAgentAction.values()).filter(v -> v.toString().equals(s)).findFirst()
@@ -234,8 +237,8 @@ public final class Config {
     }
 
     public AdditionalAgentAction getAdditionalAgentAction() {
-        return AdditionalAgentAction.fromString((configMap.getOrDefault(ADDITIONAL_AGENT_ACTION_KEY,
-                AdditionalAgentAction.ASK.toString())).toString());
+        return AdditionalAgentAction
+                .fromString((configMap.getOrDefault(ADDITIONAL_AGENT_ACTION_KEY, AdditionalAgentAction.ASK.toString())).toString());
     }
 
     public void setNestedJarExtensions(List<String> extensions) {

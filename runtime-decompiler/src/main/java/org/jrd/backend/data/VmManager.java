@@ -85,13 +85,13 @@ public class VmManager {
             return;
         }
         for (VmInfo savedVm : savedVms) {
-            try{
-            VmDecompilerStatus status = new VmDecompilerStatus();
-            status.setVmId(savedVm.getVmId());
-            status.setHostname(savedVm.getVmName());
-            status.setListenPort(Integer.parseInt(savedVm.getVmId().split(PORT_ID_SPLIT)[0]));
-            savedVm.setVmDecompilerStatus(status);
-            vmInfoSet.add(savedVm);
+            try {
+                VmDecompilerStatus status = new VmDecompilerStatus();
+                status.setVmId(savedVm.getVmId());
+                status.setHostname(savedVm.getVmName());
+                status.setListenPort(Integer.parseInt(savedVm.getVmId().split(PORT_ID_SPLIT)[0]));
+                savedVm.setVmDecompilerStatus(status);
+                vmInfoSet.add(savedVm);
             } catch (Exception e) {
                 Logger.getLogger().log(Logger.Level.ALL, "Failed to prepare saved remote VMs. Cause: ");
                 Logger.getLogger().log(Logger.Level.ALL, e);

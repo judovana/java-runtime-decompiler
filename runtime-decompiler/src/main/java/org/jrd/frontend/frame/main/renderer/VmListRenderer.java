@@ -67,8 +67,7 @@ public class VmListRenderer extends JPanel implements ListCellRenderer<VmInfo> {
                 }
                 this.setToolTipText(
                         BytecodeDecompilerView.styleTooltip() + "NAME: " + vmInfo.getVmName().split(" ")[0] + "<br />" + "PID: " +
-                                vmInfo.getVmPid() +  "<br />" + "port: " +
-                                lrport + addBytemanTooltip(vmInfo) + "</html>"
+                                vmInfo.getVmPid() + "<br />" + "port: " + lrport + addBytemanTooltip(vmInfo) + "</html>"
                 );
                 break;
             case REMOTE:
@@ -80,8 +79,7 @@ public class VmListRenderer extends JPanel implements ListCellRenderer<VmInfo> {
                 pid.setText("Port: " + srport);
                 cp.setVisible(false);
                 this.setToolTipText(
-                        BytecodeDecompilerView.styleTooltip() + "Hostname: " + vmInfo.getVmName() + "<br />" + "Port: " +
-                                srport+ "</html>"
+                        BytecodeDecompilerView.styleTooltip() + "Hostname: " + vmInfo.getVmName() + "<br />" + "Port: " + srport + "</html>"
                 );
                 break;
             case FS:
@@ -116,8 +114,8 @@ public class VmListRenderer extends JPanel implements ListCellRenderer<VmInfo> {
 
     private String addBytemanTooltip(VmInfo vmInfo) {
         if (vmInfo.getBytemanCompanion() != null) {
-            return "<br/>" + "Byteman companion port: " + vmInfo.getBytemanCompanion().getBytemanPort() + "<br/>"
-                    + "Post byteman port: " + vmInfo.getBytemanCompanion().getPostBytemanAgentPort();
+            return "<br/>" + "Byteman companion port: " + vmInfo.getBytemanCompanion().getBytemanPort() + "<br/>" + "Post byteman port: " +
+                    vmInfo.getBytemanCompanion().getPostBytemanAgentPort();
         } else {
             return "";
         }

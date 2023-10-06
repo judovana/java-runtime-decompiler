@@ -215,7 +215,8 @@ public class Cli {
                     operatedOn.add(patchVmInfo);
                     break;
                 case OVERWRITE:
-                    VmInfo vmInfo5 = new OverwriteAndUpload(filteredArgs, getVmManager(), isBoot, isHex).overwrite(ReceivedType.OVERWRITE_CLASS);
+                    VmInfo vmInfo5 =
+                            new OverwriteAndUpload(filteredArgs, getVmManager(), isBoot, isHex).overwrite(ReceivedType.OVERWRITE_CLASS);
                     operatedOn.add(vmInfo5);
                     break;
                 case ADD_CLASS:
@@ -224,7 +225,8 @@ public class Cli {
                     operatedOn.add(vmInfoAddClass);
                     break;
                 case ADD_JAR:
-                    VmInfo vmInfoAddJar = new OverwriteAndUpload(filteredArgs, getVmManager(), isBoot, isHex).overwrite(ReceivedType.ADD_JAR);
+                    VmInfo vmInfoAddJar =
+                            new OverwriteAndUpload(filteredArgs, getVmManager(), isBoot, isHex).overwrite(ReceivedType.ADD_JAR);
                     operatedOn.add(vmInfoAddJar);
                     break;
                 case ADD_CLASSES:
@@ -371,10 +373,10 @@ public class Cli {
     }
 
     public VmManager getVmManager() {
-        return Model.getMODEL().getVmManager();
+        return Model.getModel().getVmManager();
     }
 
     public PluginManager getPluginManager() {
-        return Model.getMODEL().getPluginManager();
+        return Model.getModel().getPluginManager();
     }
 }

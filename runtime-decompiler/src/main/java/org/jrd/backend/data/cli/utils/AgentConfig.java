@@ -17,6 +17,7 @@ public final class AgentConfig {
     public static AgentConfig getDefaultSinglePermanentAgent() {
         return new AgentConfig(AgentLoneliness.SINGLE_INSTANCE, AgentLiveliness.PERMANENT, Optional.empty());
     }
+
     public static AgentConfig getAnnonymousForcingPermanentAgent() {
         return new AgentConfig(AgentLoneliness.AF, AgentLiveliness.PERMANENT, Optional.empty());
     }

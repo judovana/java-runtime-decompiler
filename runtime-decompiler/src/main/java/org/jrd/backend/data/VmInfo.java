@@ -7,7 +7,6 @@ import com.sun.tools.attach.AttachNotSupportedException;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import org.jboss.byteman.agent.install.Install;
-import org.jrd.backend.core.AgentLoader;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.core.agentstore.KnownAgent;
@@ -50,16 +49,15 @@ public class VmInfo implements Serializable {
     private Type type;
     private java.util.List<File> cp;
 
-    private static final Comparator<VmInfo> HOSTNAME_COMPARATOR =
-            Comparator.comparing(info -> {
-                if (info.getVmDecompilerStatus()!=null) {
-                    return info.getVmDecompilerStatus().getHostname();
-                } else {
-                    return "localhost";
-                }
-            }, String::compareTo);
+    private static final Comparator<VmInfo> HOSTNAME_COMPARATOR = Comparator.comparing(info -> {
+        if (info.getVmDecompilerStatus() != null) {
+            return info.getVmDecompilerStatus().getHostname();
+        } else {
+            return "localhost";
+        }
+    }, String::compareTo);
     private static final Comparator<VmInfo> PORT_COMPARATOR = Comparator.comparingInt(info -> {
-        if (info.getVmDecompilerStatus()!=null) {
+        if (info.getVmDecompilerStatus() != null) {
             return info.getVmDecompilerStatus().getListenPort();
         } else {
             return -1;
@@ -239,8 +237,7 @@ public class VmInfo implements Serializable {
             AgentConfig aconf = AgentConfig.getAnnonymousForcingPermanentAgent();
             int secondJrdPort = NewAgentDialog.manualAttach(null, aconf, pid, true/*?*/);
             vmDecompilerStatus.setBytemanCompanion(new BytemanCompanion(bytemanPort, secondJrdPort));
-            KnownAgents.getInstance().setBytemanCompanion(vmPid, parentPort,
-                    vmDecompilerStatus.getBytemanCompanion());
+            KnownAgents.getInstance().setBytemanCompanion(vmPid, parentPort, vmDecompilerStatus.getBytemanCompanion());
 
         }
         return vmDecompilerStatus.getBytemanCompanion();
