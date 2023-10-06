@@ -231,7 +231,7 @@ public class VmInfo implements Serializable {
         return vmDecompilerStatus.getBytemanCompanion();
     }
 
-    public BytemanCompanion setBytemanCompanion(boolean boot)
+    public BytemanCompanion setBytemanCompanion(boolean boot, int parentPort)
             throws AgentLoadException, IOException, AttachNotSupportedException, AgentInitializationException {
         if (vmDecompilerStatus.getBytemanCompanion() == null) {
             int bytemanPort = attachByteman(boot);
@@ -239,7 +239,8 @@ public class VmInfo implements Serializable {
             AgentConfig aconf = AgentConfig.getAnnonymousForcingPermanentAgent();
             int secondJrdPort = NewAgentDialog.manualAttach(null, aconf, pid, true/*?*/);
             vmDecompilerStatus.setBytemanCompanion(new BytemanCompanion(bytemanPort, secondJrdPort));
-            KnownAgents.getInstance().setBytemanCompanion(vmPid, vmDecompilerStatus.getBytemanCompanion());
+            KnownAgents.getInstance().setBytemanCompanion(vmPid, parentPort,
+                    vmDecompilerStatus.getBytemanCompanion());
 
         }
         return vmDecompilerStatus.getBytemanCompanion();
