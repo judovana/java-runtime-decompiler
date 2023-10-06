@@ -11,8 +11,7 @@ import org.jrd.frontend.frame.main.MainFrameView;
 public class Main {
 
     public static void main(String[] allArgs) throws Exception {
-        Model model = new Model();
-        Cli cli = new Cli(allArgs, model);
+        Cli cli = new Cli(allArgs);
         if (cli.isGui()) {
             setLookAndFeel();
             if (!cli.getFilteredArgs().isEmpty()) {
@@ -30,7 +29,7 @@ public class Main {
                     hexview.setVisible(true);
                 } else {
                     MainFrameView mainView = new MainFrameView();
-                    DecompilationController dec = new DecompilationController(mainView, model, cli.shouldBeVerbose());
+                    DecompilationController dec = new DecompilationController(mainView, cli.shouldBeVerbose());
                     mainView.getBytecodeDecompilerView().setCompletionHelper(dec);
                 }
             }

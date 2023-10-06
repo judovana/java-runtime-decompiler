@@ -76,23 +76,19 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
     private PluginConfigurationEditorView pluginConfigurationEditorView;
     private PluginConfigurationEditorController pluginConfigurationEditorController;
     private LoadingDialog loadingDialog;
-    private VmManager vmManager;
     private VmInfo vmInfo;
-    private PluginManager pluginManager;
     private boolean isVerbose;
 
-    public DecompilationController(MainFrameView mainFrameView, Model model, boolean isVerbose) {
+    public DecompilationController(MainFrameView mainFrameView, boolean isVerbose) {
         this.mainFrameView = mainFrameView;
         this.bytecodeDecompilerView = mainFrameView.getBytecodeDecompilerView();
-        this.vmManager = model.getVmManager();
-        this.pluginManager = model.getPluginManager();
         this.isVerbose = isVerbose;
 
         updateVmLists();
 
-        vmManager.subscribeToVMChange(e -> updateVmLists());
+        getVmManager().subscribeToVMChange(e -> updateVmLists());
 
-        mainFrameView.setRefreshLocalVmsListener(e -> vmManager.updateLocalVMs());
+        mainFrameView.setRefreshLocalVmsListener(e -> getVmManager().updateLocalVMs());
         mainFrameView.setNewConnectionDialogListener(e -> createNewConnectionDialog());
         mainFrameView.setNewFsVmDialogListener(e -> createNewFsVMDialog());
         mainFrameView.setRemoveVmDialogListener(this::removeVmDialog);
@@ -111,7 +107,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
             }
         });
         bytecodeDecompilerView.setOverwriteActionListener(new ClassOverwriter());
-        bytecodeDecompilerView.setCompileListener(new QuickCompiler(this, pluginManager));
+        bytecodeDecompilerView.setCompileListener(new QuickCompiler(this, getPluginManager()));
         bytecodeDecompilerView.setPopup(new AgentApiGenerator());
         bytecodeDecompilerView.setDepsProvider(new DependenciesReader(this, this));
         mainFrameView.setVmChanging(this::changeVm);
@@ -127,25 +123,25 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         mainFrameView.setManageAgents(new Runnable() {
             @Override
             public void run() {
-                AgentsManager.showFor(mainFrameView.getMainFrame(), vmManager);
+                AgentsManager.showFor(mainFrameView.getMainFrame(), getVmManager());
             }
         });
-        bytecodeDecompilerView.refreshComboBox(pluginManager.getWrappers());
+        bytecodeDecompilerView.refreshComboBox(getPluginManager().getWrappers());
     }
 
     // Method for opening plugin configuration window
     private void createConfigurationEditor() {
         pluginConfigurationEditorView = new PluginConfigurationEditorView(mainFrameView);
-        pluginConfigurationEditorController = new PluginConfigurationEditorController(pluginConfigurationEditorView, pluginManager);
+        pluginConfigurationEditorController = new PluginConfigurationEditorController(pluginConfigurationEditorView, getPluginManager());
         pluginConfigurationEditorController.setPluginsConfiguredListener(actionEvent -> {
-            bytecodeDecompilerView.refreshComboBox(pluginManager.getWrappers());
+            bytecodeDecompilerView.refreshComboBox(getPluginManager().getWrappers());
         });
         pluginConfigurationEditorView.setVisible(true);
     }
 
     private void createNewConnectionDialog() {
         newConnectionDialog = new NewConnectionView(mainFrameView);
-        new NewConnectionController(newConnectionDialog, vmManager);
+        new NewConnectionController(newConnectionDialog, getVmManager());
         newConnectionDialog.setVisible(true);
 
         mainFrameView.switchTabsToRemoteVms(); // for JMenuItem ActionEvent origin
@@ -153,7 +149,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
 
     private void createNewFsVMDialog() {
         newFsVmDialog = new NewFsVmView(mainFrameView);
-        new NewFsVmController(newFsVmDialog, vmManager);
+        new NewFsVmController(newFsVmDialog, getVmManager());
         newFsVmDialog.setVisible(true);
     }
 
@@ -194,11 +190,11 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         if (shouldRemoteDetachAgent) {
             DecompilerRequestReceiver.getHaltAction(
                     selectedVm.getVmName(), selectedVm.getVmDecompilerStatus().getListenPort(), selectedVm.getVmId(), selectedVm.getVmPid(),
-                    new AgentAttachManager(vmManager), vmManager, false
+                    new AgentAttachManager(getVmManager()), getVmManager(), false
             );
         }
 
-        if (!vmManager.removeVm(selectedVm)) {
+        if (!getVmManager().removeVm(selectedVm)) {
             String removeFailMessage = "Failed to remove VM: " + selectedVm;
             Logger.getLogger().log(Logger.Level.ALL, removeFailMessage);
             JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), removeFailMessage, "Error", JOptionPane.ERROR_MESSAGE);
@@ -263,7 +259,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         List<VmInfo> remoteVms = new ArrayList<>();
         List<VmInfo> fsVms = new ArrayList<>();
 
-        vmManager.getVmInfoSet().forEach(info -> {
+        getVmManager().getVmInfoSet().forEach(info -> {
             if (info.getType() == VmInfo.Type.LOCAL) {
                 localVms.add(info);
             } else if (info.getType() == VmInfo.Type.REMOTE) {
@@ -446,7 +442,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         String bytesInString = vmStatus.getLoadedClassBytes();
         byte[] bytes = Base64.getDecoder().decode(bytesInString);
         try {
-            decompiledClass = pluginManager.decompile(bytecodeDecompilerView.getSelectedDecompiler(), name, bytes, null, vmInfo, vmManager);
+            decompiledClass = getPluginManager().decompile(bytecodeDecompilerView.getSelectedDecompiler(), name, bytes, null, vmInfo, getVmManager());
         } catch (Exception e) {
             Logger.getLogger().log(Logger.Level.ALL, e);
         }
@@ -455,7 +451,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         if (additionalBytes != null && additionalBytes.length > 0) {
             try {
                 additionalDecompiled =
-                        pluginManager.decompile(bytecodeDecompilerView.getSelectedDecompiler(), name, additionalBytes, null, null, null);
+                        getPluginManager().decompile(bytecodeDecompilerView.getSelectedDecompiler(), name, additionalBytes, null, null, null);
             } catch (Exception e) {
                 Logger.getLogger().log(Logger.Level.ALL, e);
             }
@@ -499,12 +495,12 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
 
     @Override
     public VmManager getVmManager() {
-        return vmManager;
+        return Model.getMODEL().getVmManager();
     }
 
     @Override
     public RuntimeCompilerConnector.JrdClassesProvider getClassesProvider() {
-        return new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager);
+        return new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, getVmManager());
     }
 
     @Override
@@ -601,6 +597,10 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         return l;
     }
 
+    public PluginManager getPluginManager() {
+        return Model.getMODEL().getPluginManager();
+    }
+
     class ClassOverwriter {
         private LatestPaths lastLoaded = new LatestPaths();
 
@@ -610,7 +610,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
             }
 
             final OverwriteClassDialog overwriteClassDialog = new OverwriteClassDialog(
-                    name, lastLoaded, buffer, binBuffer, vmInfo, vmManager, pluginManager, selectedDecompiler, isBinary, isVerbose
+                    name, lastLoaded, buffer, binBuffer, vmInfo, getVmManager(), getPluginManager(), selectedDecompiler, isBinary, isVerbose
             );
             ScreenFinder.centerWindowToCurrentScreen(overwriteClassDialog);
             overwriteClassDialog.setVisible(true);
@@ -700,7 +700,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
     }
 
     private void killAllSession() {
-        KnownAgents.getInstance().killAllSessionAgents(vmManager);
+        KnownAgents.getInstance().killAllSessionAgents(getVmManager());
     }
 
     private AgentRequestAction createRequest(RequestAction action, String... commands) {
@@ -752,7 +752,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
     }
 
     String submitRequest(AgentRequestAction request) {
-        return submitRequest(vmManager, request);
+        return submitRequest(getVmManager(), request);
     }
 
     public static String submitRequest(VmManager vmManager, AgentRequestAction request) {
@@ -764,7 +764,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
     public class AgentApiGenerator {
         public JPopupMenu getFor(RSyntaxTextArea text, boolean filtered) {
             if (vmInfo.getVmPid() >= 0) {
-                org.jrd.frontend.utility.AgentApiGenerator.initItems(vmInfo, vmManager, pluginManager);
+                org.jrd.frontend.utility.AgentApiGenerator.initItems(vmInfo, getVmManager(), getPluginManager());
                 return org.jrd.frontend.utility.AgentApiGenerator
                         .create(text, filtered ? createFilter(text.getText(), text.getCaretPosition()) : null);
             } else {

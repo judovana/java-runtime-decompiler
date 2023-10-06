@@ -42,8 +42,6 @@ import static org.jrd.backend.data.cli.CliSwitches.*;
 public class Cli {
 
     private final List<String> filteredArgs;
-    private final VmManager vmManager;
-    private final PluginManager pluginManager;
     private Saving saving;
     private boolean isVerbose;
     private boolean isHex;
@@ -51,10 +49,8 @@ public class Cli {
     private boolean isBoot;
     private AgentConfig currentAgent = AgentConfig.getDefaultSinglePermanentAgent();
 
-    public Cli(String[] orig, Model model) {
+    public Cli(String[] orig) {
         this.filteredArgs = prefilterArgs(orig);
-        this.vmManager = model.getVmManager();
-        this.pluginManager = model.getPluginManager();
     }
 
     public boolean shouldBeVerbose() {
@@ -163,91 +159,91 @@ public class Cli {
         try {
             switch (operation) {
                 case LIST_JVMS:
-                    new ListJvms(filteredArgs, saving, vmManager).listJvms();
+                    new ListJvms(filteredArgs, saving, getVmManager()).listJvms();
                     break;
                 case LIST_PLUGINS:
-                    new ListPlugins(filteredArgs, saving, pluginManager).listPlugins();
+                    new ListPlugins(filteredArgs, saving, getPluginManager()).listPlugins();
                     break;
                 case LIST_AGENTS:
-                    List<VmInfo> vmInfos = new ListAgents(isVerbose, vmManager).listAgents(filteredArgs);
+                    List<VmInfo> vmInfos = new ListAgents(isVerbose, getVmManager()).listAgents(filteredArgs);
                     operatedOn.addAll(vmInfos);
                     break;
                 case LIST_OVERRIDES:
-                    VmInfo vmInfo0 = new Overrides(filteredArgs, vmManager).listOverrides();
+                    VmInfo vmInfo0 = new Overrides(filteredArgs, getVmManager()).listOverrides();
                     operatedOn.add(vmInfo0);
                     break;
                 case REMOVE_OVERRIDES:
-                    VmInfo vmInfo00 = new Overrides(filteredArgs, vmManager).removeOverrides();
+                    VmInfo vmInfo00 = new Overrides(filteredArgs, getVmManager()).removeOverrides();
                     operatedOn.add(vmInfo00);
                     break;
                 case SEARCH:
-                    VmInfo vmInfoSearch = new Classes(filteredArgs, vmManager, isHex, saving).searchClasses();
+                    VmInfo vmInfoSearch = new Classes(filteredArgs, getVmManager(), isHex, saving).searchClasses();
                     operatedOn.add(vmInfoSearch);
                     break;
                 case LIST_CLASSES:
-                    VmInfo vmInfo1 = new Classes(filteredArgs, vmManager, isHex, saving).listClasses(false, false, Optional.empty());
+                    VmInfo vmInfo1 = new Classes(filteredArgs, getVmManager(), isHex, saving).listClasses(false, false, Optional.empty());
                     operatedOn.add(vmInfo1);
                     break;
                 case LIST_CLASSESDETAILS:
-                    VmInfo vmInfo2 = new Classes(filteredArgs, vmManager, isHex, saving).listClasses(true, false, Optional.empty());
+                    VmInfo vmInfo2 = new Classes(filteredArgs, getVmManager(), isHex, saving).listClasses(true, false, Optional.empty());
                     operatedOn.add(vmInfo2);
                     break;
                 case LIST_CLASSESBYTECODEVERSIONS:
-                    VmInfo vmInfo11 = new Classes(filteredArgs, vmManager, isHex, saving).listClasses(false, true, Optional.empty());
+                    VmInfo vmInfo11 = new Classes(filteredArgs, getVmManager(), isHex, saving).listClasses(false, true, Optional.empty());
                     operatedOn.add(vmInfo11);
                     break;
                 case LIST_CLASSESDETAILSBYTECODEVERSIONS:
-                    VmInfo vmInfo21 = new Classes(filteredArgs, vmManager, isHex, saving).listClasses(true, true, Optional.empty());
+                    VmInfo vmInfo21 = new Classes(filteredArgs, getVmManager(), isHex, saving).listClasses(true, true, Optional.empty());
                     operatedOn.add(vmInfo21);
                     break;
                 case BYTES:
                 case BASE64:
                 case DEPS:
-                    VmInfo vmInfo3 = new PrintBytes(isHex, filteredArgs, saving, vmManager, pluginManager).printBytes(operation);
+                    VmInfo vmInfo3 = new PrintBytes(isHex, filteredArgs, saving, getVmManager(), getPluginManager()).printBytes(operation);
                     operatedOn.add(vmInfo3);
                     break;
                 case DECOMPILE:
-                    VmInfo vmInfo4 = new Decompile(isHex, filteredArgs, saving, vmManager, pluginManager).decompile();
+                    VmInfo vmInfo4 = new Decompile(isHex, filteredArgs, saving, getVmManager(), getPluginManager()).decompile();
                     operatedOn.add(vmInfo4);
                     break;
                 case COMPILE:
-                    new Compile(isHex, isVerbose, filteredArgs, saving, vmManager, pluginManager).compileWrapper(operatedOn);
+                    new Compile(isHex, isVerbose, filteredArgs, saving, getVmManager(), getPluginManager()).compileWrapper(operatedOn);
                     break;
                 case PATCH:
                     VmInfo patchVmInfo =
-                            new Patch(isHex, isVerbose, filteredArgs, isRevert, vmManager, pluginManager, isBoot, saving).patch();
+                            new Patch(isHex, isVerbose, filteredArgs, isRevert, getVmManager(), getPluginManager(), isBoot, saving).patch();
                     operatedOn.add(patchVmInfo);
                     break;
                 case OVERWRITE:
-                    VmInfo vmInfo5 = new OverwriteAndUpload(filteredArgs, vmManager, isBoot, isHex).overwrite(ReceivedType.OVERWRITE_CLASS);
+                    VmInfo vmInfo5 = new OverwriteAndUpload(filteredArgs, getVmManager(), isBoot, isHex).overwrite(ReceivedType.OVERWRITE_CLASS);
                     operatedOn.add(vmInfo5);
                     break;
                 case ADD_CLASS:
                     VmInfo vmInfoAddClass =
-                            new OverwriteAndUpload(filteredArgs, vmManager, isBoot, isHex).overwrite(ReceivedType.ADD_CLASS);
+                            new OverwriteAndUpload(filteredArgs, getVmManager(), isBoot, isHex).overwrite(ReceivedType.ADD_CLASS);
                     operatedOn.add(vmInfoAddClass);
                     break;
                 case ADD_JAR:
-                    VmInfo vmInfoAddJar = new OverwriteAndUpload(filteredArgs, vmManager, isBoot, isHex).overwrite(ReceivedType.ADD_JAR);
+                    VmInfo vmInfoAddJar = new OverwriteAndUpload(filteredArgs, getVmManager(), isBoot, isHex).overwrite(ReceivedType.ADD_JAR);
                     operatedOn.add(vmInfoAddJar);
                     break;
                 case ADD_CLASSES:
-                    VmInfo vmInfoAddClasses = new AddClasses(filteredArgs, vmManager, isBoot).addClasses();
+                    VmInfo vmInfoAddClasses = new AddClasses(filteredArgs, getVmManager(), isBoot).addClasses();
                     operatedOn.add(vmInfoAddClasses);
                     break;
                 case INIT:
-                    VmInfo vmInfo6 = new InitClass(filteredArgs, vmManager).init();
+                    VmInfo vmInfo6 = new InitClass(filteredArgs, getVmManager()).init();
                     operatedOn.add(vmInfo6);
                     break;
                 case ATTACH:
-                    VmInfo vmInfo7 = new AttachDetach(filteredArgs, vmManager).attach(currentAgent);
+                    VmInfo vmInfo7 = new AttachDetach(filteredArgs, getVmManager()).attach(currentAgent);
                     operatedOn.add(vmInfo7);
                     break;
                 case DETACH:
-                    new AttachDetach(filteredArgs, vmManager).detach();
+                    new AttachDetach(filteredArgs, getVmManager()).detach();
                     break;
                 case API:
-                    VmInfo vmInfo8 = new Api(filteredArgs, saving, vmManager, pluginManager).api();
+                    VmInfo vmInfo8 = new Api(filteredArgs, saving, getVmManager(), getPluginManager()).api();
                     operatedOn.add(vmInfo8);
                     break;
                 case COMPLETION:
@@ -280,7 +276,7 @@ public class Cli {
                     public void run() {
                         for (VmInfo status : operatedOn) {
                             if (status.getType() == VmInfo.Type.LOCAL && !status.getVmDecompilerStatus().isReused()) {
-                                AttachDetach.detachLocalhost(status.getVmDecompilerStatus().getListenPort(), vmManager);
+                                AttachDetach.detachLocalhost(status.getVmDecompilerStatus().getListenPort(), getVmManager());
                             }
                         }
                     }
@@ -303,7 +299,7 @@ public class Cli {
                         Logger.getLogger().log("Detaching single attach agent(s), if any");
                     }
                     if (status.getType() == VmInfo.Type.LOCAL) {
-                        AttachDetach.detachLocalhost(status.getVmDecompilerStatus().getListenPort(), vmManager);
+                        AttachDetach.detachLocalhost(status.getVmDecompilerStatus().getListenPort(), getVmManager());
                     }
                 }
             } else {
@@ -367,10 +363,18 @@ public class Cli {
     }
 
     private VmInfo getVmInfo(String param) {
-        return CliUtils.getVmInfo(param, vmManager);
+        return CliUtils.getVmInfo(param, getVmManager());
     }
 
     public List<String> getFilteredArgs() {
         return Collections.unmodifiableList(filteredArgs);
+    }
+
+    public VmManager getVmManager() {
+        return Model.getMODEL().getVmManager();
+    }
+
+    public PluginManager getPluginManager() {
+        return Model.getMODEL().getPluginManager();
     }
 }
