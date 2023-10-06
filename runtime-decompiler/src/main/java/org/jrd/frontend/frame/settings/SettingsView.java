@@ -92,7 +92,7 @@ public class SettingsView extends JDialog {
         nestedJarsSettingsPanel.setMinimumSize(new Dimension(200,200));
         miscSettingsPanel = new MiscellaneousSettingsPanel(
                 config.doUseJavapSignatures(), config.doDepndenceNumbers(), config.getAdditionalCP(), config.getAdditionalSP(),
-                config.doAutocompletion()
+                config.doAutocompletion(), config.getAdditionalAgentAction()
         );
 
         for (
@@ -148,6 +148,7 @@ public class SettingsView extends JDialog {
         config.setNestedJarExtensions(extensions);
         config.setAdditionalCP(miscSettingsPanel.getAdditioalCP());
         config.setAdditionalSP(miscSettingsPanel.getAdditionalSP());
+        config.setAdditionalAgentAction(miscSettingsPanel.getAdditionalAgentAction());
 
         try {
             config.saveConfigFile();

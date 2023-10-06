@@ -34,10 +34,9 @@ public final class Config {
     private Map<String, Object> configMap;
 
     private static final String CONFIG_PATH = Directories.getConfigDirectory() + File.separator + "config.json";
-    private static final String LEGACY_CONFIG_PATH = Directories.getConfigDirectory() + File.separator + "config.cfg";
-
     public static final String AGENT_PATH_OVERWRITE_PROPERTY = "org.jrd.agent.jar";
     private static final String AGENT_PATH_KEY = "AGENT_PATH";
+    private static final String ADDITIONAL_AGENT_ACTION_KEY = "ADDITIONAL_AGENT_ACTION";
     private static final String SAVED_FS_VMS_KEY = "FS_VMS";
     private static final String SAVED_REMOTE_VMS_KEY = "REMOTE_VMS";
     private static final String USE_HOST_SYSTEM_CLASSES_KEY = "USE_HOST_SYSTEM_CLASSES";
@@ -71,6 +70,15 @@ public final class Config {
 
         public static DepndenceNumbers fromString(String s) throws IllegalArgumentException {
             return Arrays.stream(DepndenceNumbers.values()).filter(v -> v.toString().equals(s)).findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("unknown value: " + s));
+        }
+    }
+
+    public enum AdditionalAgentAction {
+        ADD, ADD_AND_SAVE, ASK, NOTHING;
+
+        public static AdditionalAgentAction fromString(String s) throws IllegalArgumentException {
+            return Arrays.stream(AdditionalAgentAction.values()).filter(v -> v.toString().equals(s)).findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("unknown value: " + s));
         }
     }
@@ -205,6 +213,10 @@ public final class Config {
         configMap.put(DEPNDENCE_NUMBERS, dn);
     }
 
+    public void setAdditionalAgentAction(AdditionalAgentAction aaa) {
+        configMap.put(ADDITIONAL_AGENT_ACTION_KEY, aaa);
+    }
+
     public boolean doUseHostSystemClasses() {
         return (boolean) configMap.getOrDefault(USE_HOST_SYSTEM_CLASSES_KEY, true);
     }
@@ -219,6 +231,11 @@ public final class Config {
 
     public DepndenceNumbers doDepndenceNumbers() {
         return DepndenceNumbers.fromString((configMap.getOrDefault(DEPNDENCE_NUMBERS, DepndenceNumbers.ALL_INNERS.toString())).toString());
+    }
+
+    public AdditionalAgentAction getAdditionalAgentAction() {
+        return AdditionalAgentAction.fromString((configMap.getOrDefault(ADDITIONAL_AGENT_ACTION_KEY,
+                AdditionalAgentAction.ASK.toString())).toString());
     }
 
     public void setNestedJarExtensions(List<String> extensions) {
@@ -321,7 +338,6 @@ public final class Config {
     private void loadConfigFile() throws IOException {
         configMap = new HashMap<>();
         File confFile = getConfFile();
-        File legacyConfFile = new File(LEGACY_CONFIG_PATH);
         if (confFile.exists()) {
             try (FileReader reader = new FileReader(confFile, StandardCharsets.UTF_8)) {
                 Map<String, Object> tempMap = gson.fromJson(reader, configMap.getClass());
@@ -329,13 +345,6 @@ public final class Config {
                     configMap = tempMap;
                 }
             }
-        } else if (legacyConfFile.exists()) {
-            Files.readAllLines(Paths.get(LEGACY_CONFIG_PATH)).forEach(s -> {
-                String[] kv = s.split("===");
-                configMap.put(kv[0], kv[1]);
-            });
-            saveConfigFile();
-            Files.delete(legacyConfFile.toPath());
         }
         initAdditionalAgents();
     }

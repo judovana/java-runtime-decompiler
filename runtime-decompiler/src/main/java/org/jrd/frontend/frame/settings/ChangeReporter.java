@@ -2,6 +2,7 @@ package org.jrd.frontend.frame.settings;
 
 import javax.swing.JCheckBox;
 import javax.swing.JList;
+import javax.swing.JToggleButton;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListDataEvent;
@@ -42,7 +43,7 @@ public interface ChangeReporter {
         });
     }
 
-    static void addCheckboxListener(ActionListener listener, JCheckBox checkBox) {
+    static void addCheckboxListener(ActionListener listener, JToggleButton checkBox) {
         checkBox.addActionListener(checked -> listener.actionPerformed(createChangeActionEvent(checkBox)));
     }
 

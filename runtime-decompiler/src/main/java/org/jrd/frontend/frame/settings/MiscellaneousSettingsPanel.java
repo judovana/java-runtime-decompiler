@@ -4,6 +4,7 @@ import org.jrd.backend.data.Config;
 import org.jrd.frontend.frame.filesystem.NewFsVmView;
 import org.jrd.frontend.frame.main.decompilerview.BytecodeDecompilerView;
 
+import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -18,6 +19,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionListener;
+import java.util.Enumeration;
 
 public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter {
 
@@ -27,10 +29,15 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
     private final JComboBox<Config.DepndenceNumbers> dependenceNumbers;
     private final JTextField srcPath;
     private final JTextField classPath;
+    ButtonGroup additionalAgentPlace = new ButtonGroup();
+    JRadioButton nothing = new JRadioButton("do nothing");
+    JRadioButton add = new JRadioButton("add them to remote vms");
+    JRadioButton ask = new JRadioButton("ask");
+    JRadioButton addAndSave = new JRadioButton("add them to remote vms and save");
 
     public MiscellaneousSettingsPanel(
             boolean initialUseJavapSignatures, Config.DepndenceNumbers initialConfigNumbers, String cp, String sp,
-            boolean detectAutocompletion
+            boolean detectAutocompletion, Config.AdditionalAgentAction additionalAgentAction
     ) {
         miscSettingsLabel = new JLabel("Miscellaneous settings");
         this.setName(miscSettingsLabel.getText());
@@ -115,10 +122,10 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
         gbc.gridy = 8;
         JLabel additionalAgents = new JLabel("Byteman companion/additional agents:");
         mainPanel.add(additionalAgents, gbc);
-        JRadioButton nothing = new JRadioButton("do nothing");
-        JRadioButton add = new JRadioButton("add them to remote vms");
-        JRadioButton ask = new JRadioButton("ask");
-        JRadioButton addAndSave = new JRadioButton("add them to remote vms and save");
+        nothing.setActionCommand(Config.AdditionalAgentAction.NOTHING.toString());
+        add.setActionCommand(Config.AdditionalAgentAction.ADD.toString());
+        ask.setActionCommand(Config.AdditionalAgentAction.ASK.toString());
+        addAndSave.setActionCommand(Config.AdditionalAgentAction.ADD_AND_SAVE.toString());
         gbc.weightx = 0;
         gbc.gridwidth = 2;
         gbc.gridx = 1;
@@ -128,12 +135,22 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
         radioPanel.add(ask);
         radioPanel.add(add);
         radioPanel.add(addAndSave);
-        ButtonGroup additionalAgentPlace = new ButtonGroup();
         additionalAgentPlace.add(nothing);
         additionalAgentPlace.add(ask);
         additionalAgentPlace.add(add);
         additionalAgentPlace.add(addAndSave);
         ask.setSelected(true);
+        Enumeration<AbstractButton> enumeration =  additionalAgentPlace.getElements();
+        while (enumeration.hasMoreElements()) {
+            AbstractButton ab = enumeration.nextElement();
+            Config.AdditionalAgentAction current =
+                    Config.AdditionalAgentAction.fromString(ab.getActionCommand());
+            if (current == additionalAgentAction) {
+                ab.setSelected(true);
+            } else {
+                ab.setSelected(false);
+            }
+        }
         mainPanel.add(radioPanel, gbc);
     }
 
@@ -155,6 +172,10 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
         ChangeReporter.addCheckboxListener(listener, detectAutocompletionCheckBox);
         ChangeReporter.addTextChangeListener(listener, srcPath);
         ChangeReporter.addTextChangeListener(listener, classPath);
+        ChangeReporter.addCheckboxListener(listener, add);
+        ChangeReporter.addCheckboxListener(listener, addAndSave);
+        ChangeReporter.addCheckboxListener(listener, nothing);
+        ChangeReporter.addCheckboxListener(listener, ask);
     }
 
     public String getAdditioalCP() {
@@ -163,5 +184,9 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
 
     public String getAdditionalSP() {
         return srcPath.getText();
+    }
+
+    public Config.AdditionalAgentAction getAdditionalAgentAction() {
+        return Config.AdditionalAgentAction.fromString(additionalAgentPlace.getSelection().getActionCommand());
     }
 }
