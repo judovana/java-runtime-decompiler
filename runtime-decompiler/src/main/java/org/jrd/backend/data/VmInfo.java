@@ -13,6 +13,7 @@ import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.core.agentstore.KnownAgent;
 import org.jrd.backend.core.agentstore.KnownAgents;
 import org.jrd.backend.data.cli.utils.AgentConfig;
+import org.jrd.frontend.frame.main.NewAgentDialog;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -234,7 +235,9 @@ public class VmInfo implements Serializable {
             throws AgentLoadException, IOException, AttachNotSupportedException, AgentInitializationException {
         if (vmDecompilerStatus.getBytemanCompanion() == null) {
             int bytemanPort = attachByteman(boot);
-            int secondJrdPort = AgentLoader.attachImpl(getVmPid(), AgentConfig.getAnnonymousForcingPermanentAgent());
+            int pid = getVmPid();
+            AgentConfig aconf = AgentConfig.getAnnonymousForcingPermanentAgent();
+            int secondJrdPort = NewAgentDialog.manualAttach(null, aconf, pid, true/*?*/);
             vmDecompilerStatus.setBytemanCompanion(new BytemanCompanion(bytemanPort, secondJrdPort));
             KnownAgents.getInstance().setBytemanCompanion(vmPid, vmDecompilerStatus.getBytemanCompanion());
 

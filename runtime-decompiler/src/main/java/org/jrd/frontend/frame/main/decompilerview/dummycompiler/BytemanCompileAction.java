@@ -56,12 +56,7 @@ public class BytemanCompileAction extends AbstractCompileAction implements CanCo
                     return r;
                 } else {
                     VmInfo vmInfo = vmInfoProvider.getVmInfo();
-                    BytemanCompanion was = vmInfo.getBytemanCompanion();
                     BytemanCompanion bytemanCompanion = vmInfo.setBytemanCompanion(boot.isBoot());
-                    if (was == null){
-                        //FIXME adda localhost bytemanCompanion.getPostBytemanAgentPort() REMOTE vm!!!
-                        //cancel no yes - nothing, create-no save, create save
-                    }
                     Submit submit = new Submit("localhost", bytemanCompanion.getBytemanPort(), new PrintStream(new LogOutputStream(), true,
                             StandardCharsets.UTF_8));
                     ScriptText st = new ScriptText("hi.btm", script);

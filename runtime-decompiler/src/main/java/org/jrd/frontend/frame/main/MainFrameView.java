@@ -131,8 +131,9 @@ public class MainFrameView {
             "It's a built-in project and can usually be found at '" + Directories.getRelativePotentialAgentLocation() + "'.\n" +
             "On JDK 9 and higher, the agent is not allowed to attach by default.\n" +
             "You must run the target process with '-Djdk.attach.allowAttachSelf=true'.\n" + "\n" +
-            "Internal javap disassembling tools are available by default.\n" +
-            "You can also download external decompilers/disassemblers via 'mvn clean install -PdownloadPlugins'.\n" +
+            "asmtools and internal javap disassembling tools are available by default.\n" +
+            "Usually you have additional external decompilers/disassemblers available. If not, for development try" +
+            " 'mvn clean install -PdownloadPlugins'.\n" +
             "We currently support the following plugins: Fernflower, Procyon, Cfr, Jasm & Jcoder.\n" +
             "These can be easily setup with the 'Import' button in 'Configure -> Plugins', but nothing is stopping you from writing your own.\n" +
             "\n" +
@@ -143,7 +144,10 @@ public class MainFrameView {
             "JRD is NOT an IDE. If you need to do a bigger changes, copypaste the code to IDE, and maybe let JRD to get more classes for you.\n" +
             "Then do your changes, and copypaste/upload  through JRD to the target VM\n" +
             "Decompilers are not perfect, JRD offers you to set up source paths(s) so you can edit and compile original code, not decompiled one\n" +
-            "Local class path is here more over for completeness, and may be slowing down JRD. But sometimes there are interesting differences between your local build and runtime version\n";
+            "Local class path is here more over for completeness, and may be slowing down JRD. But sometimes there are interesting differences between your local build and runtime version\n" +
+            "Last supported way to modify runtime JDK is embedded byteman compiler and injector. Use with caution. " +
+            "JRD automatically creates second inspector after you inject byteman rules, so you can see byteman " +
+            "instrumentation live.\n";
 
     public JFrame getMainFrame() {
         return mainFrame;

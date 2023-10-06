@@ -1,8 +1,11 @@
 package org.jrd.frontend.frame.main;
 
 import org.jrd.backend.core.AgentLoader;
+import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.agentstore.AgentLiveliness;
 import org.jrd.backend.core.agentstore.AgentLoneliness;
+import org.jrd.backend.data.Config;
+import org.jrd.backend.data.Model;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.cli.utils.AgentConfig;
 import org.jrd.frontend.frame.main.decompilerview.BytecodeDecompilerView;
@@ -19,6 +22,7 @@ import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.WindowConstants;
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.GridLayout;
 import java.util.Optional;
 
@@ -86,18 +90,18 @@ public final class NewAgentDialog extends JDialog {
             }
             String lonelinessSel = loneliness.getSelection().getActionCommand();
             String livelinessSel = liveliness.getSelection().getActionCommand();
-            int secondJrdPort = AgentLoader.attachImpl(Integer.parseInt(pidField.getText()),
-                    new AgentConfig(AgentLoneliness.fromString(lonelinessSel),
-                            AgentLiveliness.fromString(livelinessSel),
-                            port));
-            if (secondJrdPort >0){
-                JOptionPane.showConfirmDialog(nad, "also ask if to add it to remote vms " + secondJrdPort);
-                //after OK
-                //FIXME adda localhost bytemanCompanion.getPostBytemanAgentPort() REMOTE vm!!!
-                //cancel no yes - nothing, create-no save, create save
-            } else {
-                JOptionPane.showMessageDialog(nad, "why failed or port " + secondJrdPort);
+            AgentConfig aconf = new AgentConfig(AgentLoneliness.fromString(lonelinessSel),
+                    AgentLiveliness.fromString(livelinessSel), port);
+            int targetPid = -1;
+            try {
+                targetPid = Integer.parseInt(pidField.getText());
+            } catch (Exception ex) {
+                Logger.getLogger().log(Logger.Level.ALL, ex.getMessage());
+                Logger.getLogger().log(Logger.Level.DEBUG, ex);
+                JOptionPane.showMessageDialog(null, "No pid? " + ex.getMessage());
+                return;
             }
+            manualAttach(nad, aconf, targetPid, true);
             nad.setVisible(false);
         });
         okCancelPanel.add(attach, BorderLayout.WEST);
@@ -109,6 +113,56 @@ public final class NewAgentDialog extends JDialog {
         nad.pack();
         ScreenFinder.centerWindowToCurrentScreen(nad);
         return nad;
+    }
+
+    public static int manualAttach(Component parent, AgentConfig aconf, int targetPid,
+                                   boolean gui) {
+        int secondJrdPort = 0;
+        try {
+          secondJrdPort = AgentLoader.attachImpl(targetPid, aconf);
+        } catch (Exception ex) {
+            Logger.getLogger().log(Logger.Level.ALL, ex.getMessage());
+            Logger.getLogger().log(Logger.Level.DEBUG, ex);
+            if (gui) {
+                JOptionPane.showMessageDialog(parent, ex.getMessage());
+            }
+        }
+        if (secondJrdPort > 0) {
+            switch (Config.getConfig().getAdditionalAgentAction()) {
+                case ADD:
+                    Model.getMODEL().getVmManager().createRemoteVM("localhost", secondJrdPort, false);
+                    break;
+                case ADD_AND_SAVE:
+                    Model.getMODEL().getVmManager().createRemoteVM("localhost", secondJrdPort, true);
+                    break;
+                case NOTHING:
+                    break;
+                case ASK:
+                    if (gui) {
+                        int r = JOptionPane.showConfirmDialog(parent,
+                                " Do you want to connect to VM via port " + secondJrdPort + " via JRD asap? save? " +
+                                        "Pres yes for " +
+                                        "add and save, no for add and cancel for nothing. If nothing, write donw the " +
+                                        "port :) " + secondJrdPort);
+                        if (r == JOptionPane.YES_OPTION) {
+                            Model.getMODEL().getVmManager().createRemoteVM("localhost", secondJrdPort, true);
+                        } else if (r == JOptionPane.NO_OPTION) {
+                            Model.getMODEL().getVmManager().createRemoteVM("localhost", secondJrdPort, false);
+                        }
+                    } else {
+                        Logger.getLogger().log(Logger.Level.ALL,
+                                "Ask mode is on. Without gui, no-op. Connect to " + secondJrdPort + " manually");
+                    }
+                    break;
+            }
+        } else {
+            String s = "Attach failed, consult logs of *foreign* process.";
+            Logger.getLogger().log(Logger.Level.ALL, s);
+            if (gui) {
+                JOptionPane.showMessageDialog(parent, s);
+            }
+        }
+        return secondJrdPort;
     }
 
     private static void addLonelinessButtons(JPanel buttonsPanel, ButtonGroup loneliness) {
