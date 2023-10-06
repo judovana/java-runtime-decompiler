@@ -42,6 +42,7 @@ public class NestedJarsSettingsPanel extends JPanel implements ChangeReporter {
         this.setLayout(new GridBagLayout());
 
         nestedJars = new JLabel("Nested Jars Settings:");
+        this.setName(nestedJars.getText());
         newExtensionsTextField = new JTextField();
         newExtensionsTextField.addKeyListener(new KeyAdapter() {
             @Override
@@ -84,7 +85,7 @@ public class NestedJarsSettingsPanel extends JPanel implements ChangeReporter {
             }
         });
 
-        useDefaults = new JCheckBox("Use default extensions");
+        useDefaults = new JCheckBox("Use default extensions for nested jars");
         ActionListener a = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {

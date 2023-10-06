@@ -26,6 +26,7 @@ public class CompilationSettingsPanel extends JPanel implements ChangeReporter {
             boolean initialOverwriteStValue
     ) {
         compilationSettingsLabel = new JLabel("Compilation settings");
+        this.setName(compilationSettingsLabel.getText());
         useHostSystemClassesCheckBox =
                 new JCheckBox("Use host system classes during compilation phase of class overwrite", initialUseHostSystemClasses);
         useHostJavaLangObjectCheckBox =

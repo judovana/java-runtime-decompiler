@@ -10,9 +10,11 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -26,7 +28,8 @@ import java.util.List;
 
 public class SettingsView extends JDialog {
 
-    private final JPanel mainPanel;
+    private final JPanel mainPanelWrapper;
+    private final JTabbedPane mainPanel;
     private final AgentSettingsPanel agentSettingsPanel;
     private final CompilationSettingsPanel compilationSettingsPanel;
     private final NestedJarsSettingsPanel nestedJarsSettingsPanel;
@@ -67,29 +70,26 @@ public class SettingsView extends JDialog {
 
         okCancelPanel = new JPanel(new GridBagLayout());
         okCancelPanel.setPreferredSize(new Dimension(0, 60));
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.anchor = GridBagConstraints.EAST;
-        gbc.fill = GridBagConstraints.BOTH;
-
-        gbc.gridy = 0;
-        gbc.weightx = 1;
-        okCancelPanel.add(Box.createHorizontalGlue(), gbc);
-
-        gbc.weightx = 0;
-        gbc.gridx = 1;
-        okCancelPanel.add(okButton, gbc);
-
-        gbc.gridx = 2;
-        okCancelPanel.add(Box.createHorizontalStrut(15), gbc);
-
-        gbc.gridx = 3;
-        okCancelPanel.add(cancelButton, gbc);
+        GridBagConstraints okGbc = new GridBagConstraints();
+        okGbc.anchor = GridBagConstraints.EAST;
+        okGbc.fill = GridBagConstraints.BOTH;
+        okGbc.gridy = 0;
+        okGbc.weightx = 1;
+        okCancelPanel.add(Box.createHorizontalGlue(), okGbc);
+        okGbc.weightx = 0;
+        okGbc.gridx = 1;
+        okCancelPanel.add(okButton, okGbc);
+        okGbc.gridx = 2;
+        okCancelPanel.add(Box.createHorizontalStrut(15), okGbc);
+        okGbc.gridx = 3;
+        okCancelPanel.add(cancelButton, okGbc);
 
         agentSettingsPanel = new AgentSettingsPanel(config.getAgentRawPath());
         compilationSettingsPanel = new CompilationSettingsPanel(
                 config.doUseHostSystemClasses(), config.getCompilerArgsString(), config.doUseHostJavaLangObject(), config.doOverwriteST()
         );
         nestedJarsSettingsPanel = new NestedJarsSettingsPanel();
+        nestedJarsSettingsPanel.setMinimumSize(new Dimension(200,200));
         miscSettingsPanel = new MiscellaneousSettingsPanel(
                 config.doUseJavapSignatures(), config.doDepndenceNumbers(), config.getAdditionalCP(), config.getAdditionalSP(),
                 config.doAutocompletion()
@@ -102,46 +102,28 @@ public class SettingsView extends JDialog {
             panel.setChangeReporter(e -> isChanged = true);
         }
 
-        mainPanel = new JPanel(new GridBagLayout());
-        mainPanel.setBorder(new EmptyBorder(0, 15, 0, 15));
-        gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.anchor = GridBagConstraints.NORTHWEST;
-        gbc.insets = new Insets(10, 0, 10, 0);
-        gbc.weightx = 1;
+        mainPanelWrapper = new JPanel(new BorderLayout());
+        mainPanelWrapper.setBorder(new EmptyBorder(0, 15, 0, 15));
+        mainPanel = new JTabbedPane();
 
         JTextField thisSettings = new JTextField(Config.getConfig().getConfFile().getAbsolutePath());
         thisSettings.setEditable(false);
         thisSettings.setFont(new Font("Monospaced", thisSettings.getFont().getStyle(), (thisSettings.getFont().getSize() * 2) / 3));
-        mainPanel.add(thisSettings, gbc);
-
-        gbc.gridy = 1;
-        mainPanel.add(agentSettingsPanel, gbc);
-
-        gbc.gridy = 2;
-        mainPanel.add(compilationSettingsPanel, gbc);
-
-        gbc.gridy = 3;
-        gbc.weighty = 1;
-        mainPanel.add(nestedJarsSettingsPanel, gbc);
-
-        gbc.gridy = 4;
-        gbc.weighty = 0;
-        mainPanel.add(miscSettingsPanel, gbc);
-
-        gbc.gridy = 5;
-        mainPanel.add(Box.createVerticalGlue(), gbc);
-
-        gbc.gridy = 6;
-        mainPanel.add(okCancelPanel, gbc);
+        mainPanelWrapper.add(thisSettings, BorderLayout.NORTH);
+        mainPanel.add(agentSettingsPanel);
+        mainPanel.add(compilationSettingsPanel);
+        mainPanel.add(nestedJarsSettingsPanel);
+        mainPanel.add(miscSettingsPanel);
+        mainPanelWrapper.add(mainPanel);
+        mainPanelWrapper.add(okCancelPanel, BorderLayout.SOUTH);
 
         this.setTitle("Settings");
-        this.setSize(new Dimension(800, 850));
+        this.setSize(new Dimension(800, 600));
         this.setMinimumSize(new Dimension(250, 600));
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setLocationRelativeTo(mainFrameView);
         this.setModalityType(ModalityType.APPLICATION_MODAL);
-        this.add(mainPanel);
+        this.add(mainPanelWrapper);
         //this.pack(); this would kill the layout due to nested jars suffxes big box
         this.setVisible(true);
     }

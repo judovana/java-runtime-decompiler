@@ -4,13 +4,16 @@ import org.jrd.backend.data.Config;
 import org.jrd.frontend.frame.filesystem.NewFsVmView;
 import org.jrd.frontend.frame.main.decompilerview.BytecodeDecompilerView;
 
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -30,13 +33,15 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
             boolean detectAutocompletion
     ) {
         miscSettingsLabel = new JLabel("Miscellaneous settings");
+        this.setName(miscSettingsLabel.getText());
         useJavapSignaturesCheckBox = new JCheckBox("Use Javap signatures in Agent API insertion menu", initialUseJavapSignatures);
         detectAutocompletionCheckBox = new JCheckBox("Detect and enable autocompletion in text editor", detectAutocompletion);
         detectAutocompletionCheckBox.setToolTipText(
                 BytecodeDecompilerView.styleTooltip() + "for assemblers, the bytecode will be loaded.<br/>" + "For byteman, byteman.<br/>" +
                         "But for java, it depends on editor - in JRD it will runtime modification api"
         );
-        this.setLayout(new GridBagLayout());
+        JPanel mainPanel = this;
+        mainPanel.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.NORTHWEST;
         gbc.fill = GridBagConstraints.BOTH;
@@ -44,15 +49,15 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
         gbc.gridwidth = 2;
         gbc.weightx = 1; // required or else contents are centered
 
-        this.add(miscSettingsLabel, gbc);
+        mainPanel.add(miscSettingsLabel, gbc);
 
         gbc.gridy = 1;
-        this.add(useJavapSignaturesCheckBox, gbc);
+        mainPanel.add(useJavapSignaturesCheckBox, gbc);
         gbc.gridy = 2;
-        this.add(detectAutocompletionCheckBox, gbc);
+        mainPanel.add(detectAutocompletionCheckBox, gbc);
         dependenceNumbers = new JComboBox(Config.DepndenceNumbers.values());
         gbc.gridy = 3;
-        this.add(dependenceNumbers, gbc);
+        mainPanel.add(dependenceNumbers, gbc);
         dependenceNumbers.addActionListener(a -> {
             dependenceNumbers.setToolTipText(
                     BytecodeDecompilerView.styleTooltip() + ((Config.DepndenceNumbers) (dependenceNumbers.getSelectedItem())).description
@@ -74,14 +79,14 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
                         " it is good habit to have original source available."
         );
         srcPath.setToolTipText(aspl.getToolTipText());
-        this.add(aspl, gbc);
+        mainPanel.add(aspl, gbc);
         gbc.gridy = 5;
-        this.add(srcPath, gbc);
+        mainPanel.add(srcPath, gbc);
         gbc.weightx = 0;
         gbc.gridwidth = 1;
         gbc.gridx = 2;
         JButton selectSrcPath = new JButton("...");
-        this.add(selectSrcPath, gbc);
+        mainPanel.add(selectSrcPath, gbc);
         gbc.weightx = 0;
         gbc.gridwidth = 1;
         gbc.gridx = 1;
@@ -94,18 +99,42 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
                         "In addition, this  classpath is used in standalone text editor's code completion"
         );
         classPath.setToolTipText(acpl.getToolTipText());
-        this.add(acpl, gbc);
+        mainPanel.add(acpl, gbc);
         gbc.gridy = 7;
-        this.add(classPath, gbc);
+        mainPanel.add(classPath, gbc);
         gbc.weightx = 0;
         gbc.gridwidth = 1;
         gbc.gridx = 2;
         JButton selectClassPath = new JButton("...");
-        this.add(selectClassPath, gbc);
-
+        mainPanel.add(selectClassPath, gbc);
         selectSrcPath.addActionListener(actionEvent -> NewFsVmView.CpNamePanel.selectCp(srcPath, selectSrcPath));
         selectClassPath.addActionListener(actionEvent -> NewFsVmView.CpNamePanel.selectCp(classPath, selectClassPath));
-
+        gbc.weightx = 0;
+        gbc.gridwidth = 1;
+        gbc.gridx = 1;
+        gbc.gridy = 8;
+        JLabel additionalAgents = new JLabel("Byteman companion/additional agents:");
+        mainPanel.add(additionalAgents, gbc);
+        JRadioButton nothing = new JRadioButton("do nothing");
+        JRadioButton add = new JRadioButton("add them to remote vms");
+        JRadioButton ask = new JRadioButton("ask");
+        JRadioButton addAndSave = new JRadioButton("add them to remote vms and save");
+        gbc.weightx = 0;
+        gbc.gridwidth = 2;
+        gbc.gridx = 1;
+        gbc.gridy = 9;
+        JPanel radioPanel = new JPanel(new FlowLayout());
+        radioPanel.add(nothing);
+        radioPanel.add(ask);
+        radioPanel.add(add);
+        radioPanel.add(addAndSave);
+        ButtonGroup additionalAgentPlace = new ButtonGroup();
+        additionalAgentPlace.add(nothing);
+        additionalAgentPlace.add(ask);
+        additionalAgentPlace.add(add);
+        additionalAgentPlace.add(addAndSave);
+        ask.setSelected(true);
+        mainPanel.add(radioPanel, gbc);
     }
 
     public boolean shouldUseJavapSignatures() {
