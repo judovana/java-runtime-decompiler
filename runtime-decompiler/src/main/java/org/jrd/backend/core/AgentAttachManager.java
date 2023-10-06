@@ -24,7 +24,7 @@ public class AgentAttachManager {
     public VmDecompilerStatus attachAgentToVm(String vmId, int vmPid, AgentConfig agntConfig) {
         List<KnownAgent> knownAgentsOnPid = KnownAgents.getInstance().findAgents(vmPid);
         if (knownAgentsOnPid.size() > 1) {
-            Logger.getLogger().log(Logger.Level.ALL, "warning, but more then one agent found " +  vmId + " Taking " +
+            Logger.getLogger().log(Logger.Level.DEBUG, "warning, but more then one agent found " +  vmId + " Taking " +
                     "first one - "  + knownAgentsOnPid.get(0).toString());
             Logger.getLogger().log("reusing " + knownAgentsOnPid.get(0).toString());
             VmDecompilerStatus status = new VmDecompilerStatus(true);
