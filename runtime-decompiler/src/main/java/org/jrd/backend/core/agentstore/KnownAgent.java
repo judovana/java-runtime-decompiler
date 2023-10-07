@@ -83,9 +83,16 @@ public class KnownAgent {
 
     public String toPrint() {
         return "" + "local pid " + pid + " = " + host + ':' + port + " (owner pid=" + owner + ", ttl=" + ttl + ", " + "deadSince=" +
-                deadSince + bytemanCompanion == null ? "no companion"
-                        : ", companionBytemanPort=" + bytemanCompanion.getBytemanPort() + ", " + "afterBytemanCompanion=" +
-                                bytemanCompanion.getPostBytemanAgentPort() + ')';
+                deadSince + getCompaion();
+    }
+
+    private String getCompaion() {
+        if (bytemanCompanion == null) {
+            return "no companion";
+        } else {
+            return ", companionBytemanPort=" + bytemanCompanion.getBytemanPort() + ", " + "afterBytemanCompanion=" +
+                    bytemanCompanion.getPostBytemanAgentPort() + ')';
+        }
     }
 
     public boolean verify() {

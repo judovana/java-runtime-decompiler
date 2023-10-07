@@ -54,6 +54,7 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
         initMainPanel(initialConfigNumbers, additionalAgentAction);
     }
 
+    @SuppressWarnings({"ExecutableStatementCount", "JavaNCSS"}) // un-refactorable
     private void initMainPanel(Config.DepndenceNumbers initialConfigNumbers, Config.AdditionalAgentAction additionalAgentAction) {
         JPanel mainPanel = this;
         mainPanel.setLayout(new GridBagLayout());

@@ -59,7 +59,7 @@ public abstract class AbstractAgentNeedingTest {
         }
         Assertions.assertTrue(dummy.isAlive());
 
-        model = Model.getModel();//new Model(); // must be below dummy process execution to be aware of it during
+        model = Model.getModel();
         // VmManager
         // instantiation
         while (model.getVmManager().findVmFromPidNoException(dummy.getPid()) == null) {

@@ -1,6 +1,7 @@
 package org.jrd.frontend.frame.main;
 
 import org.jrd.backend.core.Logger;
+import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.data.Directories;
 import org.jrd.backend.data.MetadataProperties;
 import org.jrd.backend.data.VmInfo;
@@ -170,6 +171,32 @@ public class MainFrameView {
         vmChangingListener = listener;
     }
 
+    public void setMaintitle(String name) {
+        mainFrame.setTitle("jrd - " + name + " (" + getSelectedVm() + ")");
+    }
+
+    private String getSelectedVm() {
+        if (localVmPanel.isVisible()) {
+            return "local " + localVmList.getSelectedValue().getVmName().split(" ")[0] + " " + localVmList.getSelectedValue().getVmPid() +
+                    "/" + decostatst(localVmList.getSelectedValue().getVmDecompilerStatus());
+        } else if (remoteVmPanel.isVisible()) {
+            return "remote " + remoteVmList.getSelectedValue().getVmName() + ":" +
+                    decostatst(remoteVmList.getSelectedValue().getVmDecompilerStatus());
+        } else if (fsVmPanel.isVisible()) {
+            return "fs" + fsVmList.getSelectedValue().getVmId();
+        } else {
+            return "unknown";
+        }
+    }
+
+    private static String decostatst(VmDecompilerStatus vmDecompilerStatus) {
+        if (vmDecompilerStatus == null) {
+            return "?";
+        } else {
+            return "" + vmDecompilerStatus.getListenPort();
+        }
+    }
+
     /**
      * Custom JList that disables selection with mouse drag.
      */
@@ -218,40 +245,7 @@ public class MainFrameView {
         localVmList.setCellRenderer(new VmListRenderer());
         localVmList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         //localVmList Listener
-        localVmList.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent mouseEvent) {
-                if (SwingUtilities.isLeftMouseButton(mouseEvent)) {
-                    ActionEvent event = new ActionEvent(localVmList, 0, null);
-                    vmChangingListener.actionPerformed(event);
-                } else if (SwingUtilities.isRightMouseButton(mouseEvent)) {
-                    new JListPopupMenu<>(localVmList, true, bytecodeDecompilerView.getDependenciesReader())
-                            .addItem("name(s)", VmInfo::getVmName, true)
-                            .addItem("PID(s)", vmInfo -> String.valueOf(vmInfo.getVmPid()), false)
-                            .addItem(
-                                    "PORT(s)",
-                                    vmInfo -> vmInfo.getVmDecompilerStatus() != null
-                                            ? String.valueOf(vmInfo.getVmDecompilerStatus().getListenPort())
-                                            : "not yet connected",
-                                    false
-                            )
-                            .addItem(
-                                    "Byteman companion port(s)",
-                                    vmInfo -> vmInfo.getBytemanCompanion() != null
-                                            ? String.valueOf(vmInfo.getBytemanCompanion().getBytemanPort())
-                                            : "0",
-                                    false
-                            )
-                            .addItem(
-                                    "Post byteman port(s)",
-                                    vmInfo -> vmInfo.getBytemanCompanion() != null
-                                            ? String.valueOf(vmInfo.getBytemanCompanion().getPostBytemanAgentPort())
-                                            : "0",
-                                    false
-                            ).show(localVmList, mouseEvent.getX(), mouseEvent.getY());
-                }
-            }
-        });
+        localVmList.addMouseListener(new LocalVmListMouseListener());
 
         localVmRefreshButton = ImageButtonFactory.createRefreshButton("Refresh local VMs");
         localVmRefreshButton.addActionListener(actionEvent -> {
@@ -429,7 +423,7 @@ public class MainFrameView {
                 mainFrame.dispose();
             }
         });
-        bytecodeDecompilerView = new BytecodeDecompilerView(mainFrame);
+        bytecodeDecompilerView = new BytecodeDecompilerView(this);
 
         cardLayout = new CardLayout();
         centerPanel = new JPanel(cardLayout);
@@ -618,4 +612,37 @@ public class MainFrameView {
     public void switchTabsToRemoteVms() {
         this.tabbedPane.setSelectedComponent(remoteVmPanel);
     }
+
+    private class LocalVmListMouseListener extends MouseAdapter {
+        @Override
+        public void mouseClicked(MouseEvent mouseEvent) {
+            if (SwingUtilities.isLeftMouseButton(mouseEvent)) {
+                ActionEvent event = new ActionEvent(localVmList, 0, null);
+                vmChangingListener.actionPerformed(event);
+            } else if (SwingUtilities.isRightMouseButton(mouseEvent)) {
+                new JListPopupMenu<>(localVmList, true, bytecodeDecompilerView.getDependenciesReader())
+                        .addItem("name(s)", VmInfo::getVmName, true).addItem("PID(s)", vmInfo -> String.valueOf(vmInfo.getVmPid()), false)
+                        .addItem("PORT(s)", vmInfo -> {
+                            if (vmInfo.getVmDecompilerStatus() != null) {
+                                return String.valueOf(vmInfo.getVmDecompilerStatus().getListenPort());
+                            } else {
+                                return "not yet connected";
+                            }
+                        }, false).addItem("Byteman companion port(s)", vmInfo -> {
+                            if (vmInfo.getBytemanCompanion() != null) {
+                                return String.valueOf(vmInfo.getBytemanCompanion().getBytemanPort());
+                            } else {
+                                return "0";
+                            }
+                        }, false).addItem("Post byteman port(s)", vmInfo -> {
+                            if (vmInfo.getBytemanCompanion() != null) {
+                                return String.valueOf(vmInfo.getBytemanCompanion().getPostBytemanAgentPort());
+                            } else {
+                                return "0";
+                            }
+                        }, false).show(localVmList, mouseEvent.getX(), mouseEvent.getY());
+            }
+        }
+    }
+
 }

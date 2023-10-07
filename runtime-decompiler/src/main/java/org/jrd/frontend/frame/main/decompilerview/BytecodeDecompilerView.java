@@ -13,6 +13,7 @@ import org.jrd.backend.data.cli.InMemoryJar;
 import org.jrd.backend.data.cli.Lib;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.frontend.frame.main.GlobalConsole;
+import org.jrd.frontend.frame.main.MainFrameView;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.templates.BytemanSkeletonTemplateMenuItem;
 import org.jrd.frontend.frame.main.popup.ClassListPopupMenu;
 import org.jrd.frontend.frame.main.popup.DiffPopup;
@@ -79,7 +80,7 @@ import java.util.regex.Pattern;
 /**
  * Class that creates GUI for attached VM.
  */
-@SuppressWarnings("Indentation") // indented Swing components greatly help with orientation
+@SuppressWarnings({"Indentation"}) // indented Swing components greatly help with orientation
 public class BytecodeDecompilerView {
 
     public static final String BYTEMAN_SCRIPT_TITLE = "Byteman script";
@@ -121,7 +122,7 @@ public class BytecodeDecompilerView {
     private HexWithControls additionalBinary;
     private TextWithControls bytemanScript;
 
-    private ActionListener bytesActionListener;
+    private DecompilationController.BytesActionListener bytesActionListener;
     private ActionListener classesActionListener;
     private ActionListener searchClassesActionListener;
     private ActionListener initActionListener;
@@ -142,7 +143,7 @@ public class BytecodeDecompilerView {
     private boolean splitPaneFirstResize = true;
     private boolean shouldAttach = false;
 
-    private final JFrame mainFrame;
+    private final MainFrameView mainFrame;
     private JFrame detachedBytecodeFrame;
 
     private static final Set<Integer> CLASS_LIST_REGISTERED_KEY_CODES =
@@ -161,7 +162,7 @@ public class BytecodeDecompilerView {
         return bytecodeDecompilerPanel;
     }
 
-    public BytecodeDecompilerView(JFrame mainFrameReference) {
+    public BytecodeDecompilerView(MainFrameView mainFrameReference) {
         mainFrame = mainFrameReference;
 
         bytecodeDecompilerPanel = new JPanel(new BorderLayout());
@@ -229,6 +230,7 @@ public class BytecodeDecompilerView {
                             .addItem("class loader(s)", ClassInfo::getClassLoader, false).show(filteredClassesJList, e.getX(), e.getY());
                 }
             }
+
         });
         // unfortunately MouseAdapter's mouseDragged() does not get triggered on a JList, hence this 2nd listener
         filteredClassesJList.addMouseMotionListener(new MouseMotionListener() {
@@ -270,31 +272,35 @@ public class BytecodeDecompilerView {
         detachButton.addActionListener(e -> handleBuffersDetaching());
 
         initClassButton = ImageButtonFactory.createInitButton();
-        initClassButton.addActionListener(new InitAddClassJar());
+        initClassButton.addActionListener(new InitAddClassJar(this));
 
         searchInClassesButton = new JButton("?");
         searchInClassesButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 String substring = JOptionPane.showInputDialog(
-                        mainFrameReference,
+                        mainFrameReference.getMainFrame(),
                         "Search case-sensitive substring in currently displayed list of classes\n" +
                                 "This runs on ascii/utf view of binaries in VM.. Takes time!\n" +
                                 "To search in decompiled code, use CLI and grep.",
                         lastSearch
                 );
                 if (substring == null || substring.isEmpty()) {
-                    JOptionPane.showMessageDialog(mainFrameReference, "Please enter valid substring", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(
+                            mainFrameReference.getMainFrame(), "Please enter valid substring", "Error", JOptionPane.ERROR_MESSAGE
+                    );
                     return;
                 }
                 if (classesSortField.getText() == null || classesSortField.getText().trim().isEmpty()) {
-                    JOptionPane.showMessageDialog(mainFrameReference, "Please set valid class filter", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(
+                            mainFrameReference.getMainFrame(), "Please set valid class filter", "Error", JOptionPane.ERROR_MESSAGE
+                    );
                     return;
                 }
                 try {
                     Pattern.compile(classesSortField.getText());
                 } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(mainFrameReference, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(mainFrameReference.getMainFrame(), ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 lastSearch = substring;
@@ -533,7 +539,10 @@ public class BytecodeDecompilerView {
             public void actionPerformed(ActionEvent actionEvent) {
                 if (filteredClassesJList.getSelectedIndex() != -1) {
                     ActionEvent event = new ActionEvent(this, 1, filteredClassesJList.getSelectedValue().getName());
-                    bytesActionListener.actionPerformed(event);
+                    boolean r = bytesActionListener.actionPerformed(event);
+                    if (r) {
+                        setMaintitle();
+                    }
                 }
             }
         });
@@ -664,23 +673,23 @@ public class BytecodeDecompilerView {
         this.dependenciesReader = depsReader;
     }
 
-    private boolean isDecompiledBytecodeBufferVisible() {
+    boolean isDecompiledBytecodeBufferVisible() {
         return buffers.getSelectedComponent().equals(bytecodeBuffer);
     }
 
-    private boolean isBinaryBufferVisible() {
+    boolean isBinaryBufferVisible() {
         return buffers.getSelectedComponent().equals(binary);
     }
 
-    private boolean isAdditionalBinaryBufferVisible() {
+    boolean isAdditionalBinaryBufferVisible() {
         return buffers.getSelectedComponent().equals(additionalBinary);
     }
 
-    private boolean isAdditionalDecompiledBytecodeBufferVisible() {
+    boolean isAdditionalDecompiledBytecodeBufferVisible() {
         return buffers.getSelectedComponent().equals(additionalBytecodeBuffer);
     }
 
-    private boolean isAdditionalSrcBufferVisible() {
+    boolean isAdditionalSrcBufferVisible() {
         return buffers.getSelectedComponent().equals(additionalSrcBuffer);
     }
 
@@ -709,7 +718,8 @@ public class BytecodeDecompilerView {
             public void windowClosing(WindowEvent e) {
                 super.windowClosing(e);
 
-                mainFrame.setSize(mainFrame.getWidth() + buffersPanel.getWidth(), mainFrame.getHeight());
+                mainFrame.getMainFrame()
+                        .setSize(mainFrame.getMainFrame().getWidth() + buffersPanel.getWidth(), mainFrame.getMainFrame().getHeight());
                 ImageButtonFactory.flipDetachButton(detachButton, shouldAttach, DETACH_BUTTON_TEXT);
 
                 splitPane.setEnabled(true);
@@ -718,9 +728,10 @@ public class BytecodeDecompilerView {
             }
         });
 
-        detachedBytecodeFrame.setSize(buffersPanel.getWidth(), mainFrame.getHeight());
-        mainFrame.setSize(mainFrame.getWidth() - buffersPanel.getWidth(), mainFrame.getHeight());
-        ScreenFinder.moveWindowNextTo(mainFrame, detachedBytecodeFrame);
+        detachedBytecodeFrame.setSize(buffersPanel.getWidth(), mainFrame.getMainFrame().getHeight());
+        mainFrame.getMainFrame()
+                .setSize(mainFrame.getMainFrame().getWidth() - buffersPanel.getWidth(), mainFrame.getMainFrame().getHeight());
+        ScreenFinder.moveWindowNextTo(mainFrame.getMainFrame(), detachedBytecodeFrame);
         detachedBytecodeFrame.setVisible(true);
     }
 
@@ -841,10 +852,10 @@ public class BytecodeDecompilerView {
         }
         if (additionalData.trim().isEmpty()) {
             additionalBytecodeBuffer.resetSrcArea(
-                    "You cans elect additional source class-path-like and additional local classapth " +
-                            "in settngs\n binary jars/dirs or source jars/dirs are supported.\nThe local source/class-path helps to see " +
-                            "various views or versions of classes.\niIf you need more copies, you can always open additional hex/text notes" +
-                            " (via connect menu)"
+                    "You can select additional source class-path-like and additional local classpath " +
+                            "in settings\n binary jars/dirs or source jars/dirs are supported.\n" +
+                            "The local source/class-path helps to see " + "various views or versions of classes.\n" +
+                            "iIf you need more copies, you can always open additional hex/text notes (via connect menu)"
             );
         } else {
             additionalBytecodeBuffer.resetSrcArea(additionalData);
@@ -936,7 +947,7 @@ public class BytecodeDecompilerView {
         return completionHelper;
     }
 
-    public void setBytesActionListener(ActionListener listener) {
+    public void setBytesActionListener(DecompilationController.BytesActionListener listener) {
         bytesActionListener = listener;
     }
 
@@ -946,45 +957,8 @@ public class BytecodeDecompilerView {
         additionalSrcBuffer.setPopup(ap);
     }
 
-    private class OverwriteActionListener implements ActionListener {
-
-        private final DecompilationController.ClassOverwriter worker;
-
-        OverwriteActionListener(DecompilationController.ClassOverwriter worker) {
-            this.worker = worker;
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent actionEvent) {
-            if (isBinaryBufferVisible() || isDecompiledBytecodeBufferVisible()) {
-                worker.overwriteClass(
-                        getSelectedDecompiler(), BytecodeDecompilerView.this.lastDecompiledClass,
-                        BytecodeDecompilerView.this.bytecodeBuffer.getText(), BytecodeDecompilerView.this.binary.get(),
-                        isBinaryBufferVisible()
-                );
-            } else if (isAdditionalBinaryBufferVisible() || isAdditionalDecompiledBytecodeBufferVisible()) {
-                worker.overwriteClass(
-                        getSelectedDecompiler(), BytecodeDecompilerView.this.lastDecompiledClass,
-                        BytecodeDecompilerView.this.additionalBytecodeBuffer.getText(), BytecodeDecompilerView.this.additionalBinary.get(),
-                        isAdditionalBinaryBufferVisible()
-                );
-            } else if (isAdditionalSrcBufferVisible()) {
-                worker.overwriteClass(
-                        getSelectedDecompiler(), BytecodeDecompilerView.this.lastDecompiledClass,
-                        BytecodeDecompilerView.this.additionalSrcBuffer.getText(), new byte[0], isAdditionalBinaryBufferVisible()
-                );
-            } else {
-                JOptionPane.showMessageDialog(
-                        BytecodeDecompilerView.this.buffers,
-                        "No tab selected? \n " + BytecodeDecompilerView.this.buffers.getSelectedComponent()
-                );
-            }
-
-        }
-    }
-
-    public void setOverwriteActionListener(DecompilationController.ClassOverwriter worker) {
-        this.overwriteActionListener = new OverwriteActionListener(worker);
+    public void setOverwriteActionListener(ClassOverwriter worker) {
+        this.overwriteActionListener = new OverwriteActionListener(this, worker);
     }
 
     public void refreshComboBox(List<DecompilerWrapper> wrappers) {
@@ -1025,7 +999,10 @@ public class BytecodeDecompilerView {
             protected Void doInBackground() throws Exception {
                 try {
                     ActionEvent event = new ActionEvent(this, 1, name);
-                    bytesActionListener.actionPerformed(event);
+                    boolean r = bytesActionListener.actionPerformed(event);
+                    if (r) {
+                        setMaintitle();
+                    }
                 } catch (Throwable t) {
                     Logger.getLogger().log(Logger.Level.ALL, t);
                 }
@@ -1042,38 +1019,46 @@ public class BytecodeDecompilerView {
         return metadata.isSelected();
     }
 
-    private class InitAddClassJar implements ActionListener {
-        @Override
-        public void actionPerformed(ActionEvent actionEvent) {
-            try {
-                String[] fqn = new InitAddClassDialog(lastFqn, lastAddedFqn, lastAddedFile).showAndGet();
-
-                if (fqn != null && fqn.length > 0) {
-                    if (fqn.length == 1) {
-                        initGui(fqn[0]);
-                    } else if (fqn.length == 2) {
-                        addClassGui(fqn[0], fqn[1]);
-                    } else if (fqn.length == 3) {
-                        addJar(Boolean.parseBoolean(fqn[0]), fqn[2], fqn[1]);
-                    } else {
-                        addClassesGui(Boolean.parseBoolean(fqn[0]), Arrays.copyOfRange(fqn, 4, fqn.length));
-                    }
-                }
-            } catch (Exception ex) {
-                Logger.getLogger().log(Logger.Level.ALL, ex);
-                JOptionPane.showMessageDialog(BytecodeDecompilerView.this.buffers, ex.getMessage());
-            }
-        }
+    TextWithControls getBytecodeBuffer() {
+        return bytecodeBuffer;
     }
 
-    private void addJar(boolean boot, String file, String name) {
-        lastAddedFile = new File(file);
+    String getLastDecompiledClass() {
+        return lastDecompiledClass;
+    }
+
+    JTabbedPane getBuffers() {
+        return buffers;
+    }
+
+    HexWithControls getBinary() {
+        return binary;
+    }
+
+    TextWithControls getAdditionalBytecodeBuffer() {
+        return additionalBytecodeBuffer;
+    }
+
+    HexWithControls getAdditionalBinary() {
+        return additionalBinary;
+    }
+
+    TextWithControls getBytemanScript() {
+        return bytemanScript;
+    }
+
+    TextWithControls getAdditionalSrcBuffer() {
+        return additionalSrcBuffer;
+    }
+
+    void addJar(boolean boot, String file, String name) {
+        setLastAddedFile(new File(file));
         new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() throws Exception {
                 try {
                     String prefix = Lib.getPrefixByBoot(boot);
-                    String body = Base64.getEncoder().encodeToString(Files.readAllBytes(lastAddedFile.toPath()));
+                    String body = Base64.getEncoder().encodeToString(Files.readAllBytes(getLastAddedFile().toPath()));
                     ActionEvent event = new ActionEvent(this, 7, prefix + "/" + name + " " + body);
                     addJar.actionPerformed(event);
                 } catch (Throwable t) {
@@ -1084,15 +1069,15 @@ public class BytecodeDecompilerView {
         }.execute();
     }
 
-    private void addClassGui(String fqn, String file) {
-        lastAddedFqn = fqn;
-        lastAddedFile = new File(file);
+    void addClassGui(String fqn, String file) {
+        setLastAddedFqn(fqn);
+        setLastAddedFile(new File(file));
         new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() throws Exception {
                 try {
-                    String body = Base64.getEncoder().encodeToString(Files.readAllBytes(lastAddedFile.toPath()));
-                    ActionEvent event = new ActionEvent(this, 6, lastAddedFqn + " " + body);
+                    String body = Base64.getEncoder().encodeToString(Files.readAllBytes(getLastAddedFile().toPath()));
+                    ActionEvent event = new ActionEvent(this, 6, getLastAddedFqn() + " " + body);
                     addActionListener.actionPerformed(event);
                 } catch (Throwable t) {
                     Logger.getLogger().log(Logger.Level.ALL, t);
@@ -1102,13 +1087,13 @@ public class BytecodeDecompilerView {
         }.execute();
     }
 
-    private void initGui(String fqn) {
-        lastFqn = fqn;
+    void initGui(String fqn) {
+        setLastFqn(fqn);
         new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() throws Exception {
                 try {
-                    ActionEvent event = new ActionEvent(this, 4, lastFqn);
+                    ActionEvent event = new ActionEvent(this, 4, getLastFqn());
                     initActionListener.actionPerformed(event);
                 } catch (Throwable t) {
                     Logger.getLogger().log(Logger.Level.ALL, t);
@@ -1118,18 +1103,48 @@ public class BytecodeDecompilerView {
         }.execute();
     }
 
-    private void addClassesGui(boolean boot, String[] fqnFilePairs) throws IOException {
-        Object[] carier = new Object[]{lastAddedFqn, lastAddedFile};
+    void addClassesGui(boolean boot, String[] fqnFilePairs) throws IOException {
+        Object[] carier = new Object[]{getLastAddedFqn(), getLastAddedFile()};
         try {
             InMemoryJar imjar = Lib.jarFromClasses(fqnFilePairs, carier);
             String prefix = Lib.getPrefixByBoot(boot);
             byte[] jar = imjar.toBytes();
             String body = Base64.getEncoder().encodeToString(jar);
-            ActionEvent event = new ActionEvent(this, 8, prefix + "/jrd" + (fqnFilePairs.length / 2) + "customClasses.jar" + " " + body);
+            ActionEvent event =
+                    new ActionEvent(this, 8, prefix + "/jrd" + (fqnFilePairs.length / 2) + "customClasses" + ".jar" + " " + body);
             addJar.actionPerformed(event);
         } finally {
-            lastAddedFqn = (String) carier[0];
-            lastAddedFile = (File) carier[1];
+            setLastAddedFqn((String) carier[0]);
+            setLastAddedFile((File) carier[1]);
         }
     }
+
+    public String getLastFqn() {
+        return lastFqn;
+    }
+
+    void setLastFqn(String lastFqn) {
+        this.lastFqn = lastFqn;
+    }
+
+    public String getLastAddedFqn() {
+        return lastAddedFqn;
+    }
+
+    void setLastAddedFqn(String lastAddedFqn) {
+        this.lastAddedFqn = lastAddedFqn;
+    }
+
+    public File getLastAddedFile() {
+        return lastAddedFile;
+    }
+
+    void setLastAddedFile(File lastAddedFile) {
+        this.lastAddedFile = lastAddedFile;
+    }
+
+    private void setMaintitle() {
+        mainFrame.setMaintitle(filteredClassesJList.getSelectedValue().getName());
+    }
+
 }

@@ -23,7 +23,6 @@ import org.jrd.backend.data.DependenciesReader;
 import org.jrd.backend.data.Model;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
-import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.filesystem.NewFsVmController;
 import org.jrd.frontend.frame.filesystem.NewFsVmView;
@@ -33,8 +32,6 @@ import org.jrd.frontend.frame.main.LoadingDialogProvider;
 import org.jrd.frontend.frame.main.MainFrameView;
 import org.jrd.frontend.frame.main.ModelProvider;
 import org.jrd.frontend.frame.main.OverridesManager;
-import org.jrd.frontend.frame.overwrite.LatestPaths;
-import org.jrd.frontend.frame.overwrite.OverwriteClassDialog;
 import org.jrd.frontend.frame.plugins.PluginConfigurationEditorController;
 import org.jrd.frontend.frame.plugins.PluginConfigurationEditorView;
 import org.jrd.frontend.frame.remote.NewConnectionController;
@@ -98,15 +95,8 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         bytecodeDecompilerView.setJarActionListener(e -> addJar(e.getActionCommand()));
         bytecodeDecompilerView.setClassesActionListener(e -> loadClassNames());
         bytecodeDecompilerView.setSearchInActionListener(e -> searchInClasses(e.getActionCommand()));
-        bytecodeDecompilerView.setBytesActionListener(e -> {
-            showLoadingDialog(a -> hideLoadingDialog(), "Loading bytecode");
-            try {
-                loadClassBytecode(e.getActionCommand());
-            } finally {
-                hideLoadingDialog();
-            }
-        });
-        bytecodeDecompilerView.setOverwriteActionListener(new ClassOverwriter());
+        bytecodeDecompilerView.setBytesActionListener(new BytesActionListener());
+        bytecodeDecompilerView.setOverwriteActionListener(new ClassOverwriter(this));
         bytecodeDecompilerView.setCompileListener(new QuickCompiler(this, getPluginManager()));
         bytecodeDecompilerView.setPopup(new AgentApiGenerator());
         bytecodeDecompilerView.setDepsProvider(new DependenciesReader(this, this));
@@ -428,7 +418,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         }
     }
 
-    private void loadClassBytecode(String name) {
+    private boolean loadClassBytecode(String name) {
         AgentRequestAction request = createRequest(RequestAction.BYTES, name);
         String response = submitRequest(request);
         String decompiledClass = "";
@@ -436,7 +426,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
             JOptionPane.showMessageDialog(
                     mainFrameView.getMainFrame(), response + "\nBytecode couldn't be loaded.", "Error", JOptionPane.ERROR_MESSAGE
             );
-            return;
+            return false;
         }
         VmDecompilerStatus vmStatus = vmInfo.getVmDecompilerStatus();
         String bytesInString = vmStatus.getLoadedClassBytes();
@@ -458,6 +448,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
             }
         }
         bytecodeDecompilerView.reloadTextField(name, decompiledClass, bytes, additionalDecompiled, additionalBytes, vmInfo.getType());
+        return true;
     }
 
     public String getVm() {
@@ -601,29 +592,6 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         return Model.getModel().getPluginManager();
     }
 
-    class ClassOverwriter {
-        private LatestPaths lastLoaded = new LatestPaths();
-
-        void overwriteClass(DecompilerWrapper selectedDecompiler, String name, String buffer, byte[] binBuffer, boolean isBinary) {
-            if (name == null || name.trim().isEmpty()) {
-                name = "???";
-            }
-
-            final OverwriteClassDialog overwriteClassDialog = new OverwriteClassDialog(
-                    name, lastLoaded, buffer, binBuffer, vmInfo, getVmManager(), getPluginManager(), selectedDecompiler, isBinary, isVerbose
-            );
-            ScreenFinder.centerWindowToCurrentScreen(overwriteClassDialog);
-            overwriteClassDialog.setVisible(true);
-
-            lastLoaded.setLastManualUpload(overwriteClassDialog.getManualUploadPath());
-            lastLoaded.setLastSaveSrc(overwriteClassDialog.getSaveSrcPath());
-            lastLoaded.setLastSaveBin(overwriteClassDialog.getSaveBinPath());
-            lastLoaded.setFilesToCompile(overwriteClassDialog.getFilesToCompile());
-            lastLoaded.setOutputExternalFilesDir(overwriteClassDialog.getOutputExternalFilesDir());
-            lastLoaded.setOutputBinaries(overwriteClassDialog.getOutputBinaries());
-        }
-    }
-
     public static String fileToBase64(String path, boolean deHex) {
         try {
             if (deHex) {
@@ -761,6 +729,14 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         return receiver.processRequest(request); //listener
     }
 
+    public boolean isVerbose() {
+        return isVerbose;
+    }
+
+    public void setVerbose(boolean verbose) {
+        isVerbose = verbose;
+    }
+
     public class AgentApiGenerator {
         public JPopupMenu getFor(RSyntaxTextArea text, boolean filtered) {
             if (vmInfo.getVmPid() >= 0) {
@@ -804,6 +780,20 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
             String shortName = fullName.split(" ")[0];
             return getVmInfo().getVmPid() + " " + shortName + " (type " + getVmInfo().getType() + ")";
 
+        }
+    }
+
+    public class BytesActionListener {
+
+        public boolean actionPerformed(ActionEvent e) {
+            boolean r = false;
+            DecompilationController.this.showLoadingDialog(a -> DecompilationController.this.hideLoadingDialog(), "Loading bytecode");
+            try {
+                r = DecompilationController.this.loadClassBytecode(e.getActionCommand());
+            } finally {
+                DecompilationController.this.hideLoadingDialog();
+            }
+            return r;
         }
     }
 }

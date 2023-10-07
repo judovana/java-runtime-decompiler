@@ -288,6 +288,7 @@ public class PluginManager {
     /**
      * Compiles wrapper plugin, loads it into JVM and stores it for later.
      */
+    @SuppressWarnings("CyclomaticComplexity") // un-refactorable
     public void initializeWrapper(DecompilerWrapper wrapper) {
         if (wrapper.isJavap() || wrapper.isJavapVerbose()) {
             try {

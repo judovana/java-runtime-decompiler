@@ -33,7 +33,12 @@ public final class Directories {
     public static File getBytemanDirectory() {
         String s = getXdgJrdBaseDir() + XDG_BYTEMAN_SUFFIX;
         File f = new File(s);
-        f.mkdir();
+        if (!f.exists()) {
+            boolean created = f.mkdir();
+            if (!created) {
+                Logger.getLogger().log(Logger.Level.ALL, "Failed to create " + s);
+            }
+        }
         return f;
     }
 

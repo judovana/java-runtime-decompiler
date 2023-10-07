@@ -1,5 +1,6 @@
 package org.jrd.frontend.frame.main.decompilerview.dummycompiler;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import org.jboss.byteman.agent.submit.ScriptText;
@@ -26,6 +27,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("NestedIfDepth") // the unloadLastScript is moreover dead. probably best to drop it later
 public class BytemanCompileAction extends AbstractCompileAction implements CanCompile {
 
     private final ClasspathProvider vmInfoProvider;
@@ -33,6 +35,8 @@ public class BytemanCompileAction extends AbstractCompileAction implements CanCo
     //but is very confusing for expereinced byteman users
     //better to provide unload all and unload this as separate buttons
     private final LastScriptProvider lastScriptProvider;
+
+    @SuppressFBWarnings(value = "SS_SHOULD_BE_STATIC", justification = "this is placeholder for future removal, unless found useful")
     private final boolean unloadLastScript = false;
     private final UploadProvider boot;
 

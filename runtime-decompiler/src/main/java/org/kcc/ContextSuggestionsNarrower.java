@@ -1,10 +1,12 @@
 package org.kcc;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jrd.backend.completion.ClassesAndMethodsProvider;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("NestedIfDepth") // un-refactorable
 public interface ContextSuggestionsNarrower {
 
     /*
@@ -75,6 +77,7 @@ public interface ContextSuggestionsNarrower {
 
     class ClassesAndMethodsEnforcingNarrower implements ContextSuggestionsNarrower {
 
+        @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "unimportant")
         private static final CompletionItem[] COMPLETION_ITEMS_HELP = {
                 new CompletionItem("you can select any running, remote ot FS vm to provide class/methods sugestions"),
                 new CompletionItem("You can fill additional CP in settings to provide standalone global classes/methods suggestions")};

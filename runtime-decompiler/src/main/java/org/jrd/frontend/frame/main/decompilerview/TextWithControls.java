@@ -80,6 +80,7 @@ import org.kcc.wordsets.BytemanKeywords;
 import org.kcc.wordsets.ConnectedKeywords;
 import org.kcc.wordsets.JrdApiKeywords;
 
+@SuppressWarnings("LineLength") // un-refactorable
 public class TextWithControls extends JPanel implements LinesProvider, ClasspathProvider, ExecuteMethodProvider, SaveProvider, UploadProvider, LastScriptProvider {
 
     private final RSyntaxTextArea bytecodeSyntaxTextArea;
@@ -977,7 +978,7 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
         }
     }
 
-    private class MainRsyntaxKeyListener extends KeyAdapter {
+    private final class MainRsyntaxKeyListener extends KeyAdapter {
         private final RSyntaxTextArea rst;
 
         private MainRsyntaxKeyListener(RSyntaxTextArea rst) {
