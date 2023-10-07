@@ -230,24 +230,23 @@ public class MainFrameView {
                             .addItem("PID(s)", vmInfo -> String.valueOf(vmInfo.getVmPid()), false)
                             .addItem(
                                     "PORT(s)",
-                                    vmInfo -> vmInfo.getVmDecompilerStatus() != null ?
-                                            String.valueOf(vmInfo.getVmDecompilerStatus().getListenPort()) :
-                                            "not yet connected",
+                                    vmInfo -> vmInfo.getVmDecompilerStatus() != null
+                                            ? String.valueOf(vmInfo.getVmDecompilerStatus().getListenPort())
+                                            : "not yet connected",
                                     false
                             )
                             .addItem(
                                     "Byteman companion port(s)",
-                                    vmInfo -> vmInfo.getBytemanCompanion() != null ?
-                                            String.valueOf(vmInfo.getBytemanCompanion().getBytemanPort()) :
-                                            "0",
+                                    vmInfo -> vmInfo.getBytemanCompanion() != null
+                                            ? String.valueOf(vmInfo.getBytemanCompanion().getBytemanPort())
+                                            : "0",
                                     false
                             )
                             .addItem(
                                     "Post byteman port(s)",
-                                    vmInfo ->
-                                            vmInfo.getBytemanCompanion() != null ?
-                                            String.valueOf(vmInfo.getBytemanCompanion().getPostBytemanAgentPort()) :
-                                            "0",
+                                    vmInfo -> vmInfo.getBytemanCompanion() != null
+                                            ? String.valueOf(vmInfo.getBytemanCompanion().getPostBytemanAgentPort())
+                                            : "0",
                                     false
                             ).show(localVmList, mouseEvent.getX(), mouseEvent.getY());
                 }

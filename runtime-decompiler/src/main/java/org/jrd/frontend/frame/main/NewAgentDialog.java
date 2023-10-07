@@ -178,11 +178,9 @@ public final class NewAgentDialog extends JDialog {
         private final JTextField pidField;
         private final NewAgentDialog nad;
 
-        AttachActionListener(JTextField portField,
-                                    ButtonGroup loneliness,
-                                    ButtonGroup liveliness,
-                                    JTextField pidField,
-                                    NewAgentDialog nad) {
+        AttachActionListener(
+                JTextField portField, ButtonGroup loneliness, ButtonGroup liveliness, JTextField pidField, NewAgentDialog nad
+        ) {
             this.portField = portField;
             this.loneliness = loneliness;
             this.liveliness = liveliness;

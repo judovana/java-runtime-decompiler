@@ -80,8 +80,7 @@ import org.kcc.wordsets.BytemanKeywords;
 import org.kcc.wordsets.ConnectedKeywords;
 import org.kcc.wordsets.JrdApiKeywords;
 
-public class TextWithControls extends JPanel
-        implements LinesProvider, ClasspathProvider, ExecuteMethodProvider, SaveProvider, UploadProvider, LastScriptProvider {
+public class TextWithControls extends JPanel implements LinesProvider, ClasspathProvider, ExecuteMethodProvider, SaveProvider, UploadProvider, LastScriptProvider {
 
     private final RSyntaxTextArea bytecodeSyntaxTextArea;
     private final SearchControlsPanel bytecodeSearchControls;

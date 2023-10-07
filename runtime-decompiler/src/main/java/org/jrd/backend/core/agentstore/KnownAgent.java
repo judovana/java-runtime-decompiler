@@ -83,8 +83,8 @@ public class KnownAgent {
 
     public String toPrint() {
         return "" + "local pid " + pid + " = " + host + ':' + port + " (owner pid=" + owner + ", ttl=" + ttl + ", " + "deadSince=" +
-                deadSince + bytemanCompanion == null ? "no companion" :
-                ", companionBytemanPort=" + bytemanCompanion.getBytemanPort() + ", " + "afterBytemanCompanion=" +
+                deadSince + bytemanCompanion == null ? "no companion"
+                        : ", companionBytemanPort=" + bytemanCompanion.getBytemanPort() + ", " + "afterBytemanCompanion=" +
                                 bytemanCompanion.getPostBytemanAgentPort() + ')';
     }
 

@@ -77,22 +77,22 @@ public class CliTest extends AbstractAgentNeedingTest {
     void testShouldBeVerbose() {
         // gui verbose
         args = new String[]{VERBOSE};
-        cli = new Cli(args, model);
+        cli = new Cli(args);
         assertTrue(cli.shouldBeVerbose());
 
         // gui not verbose
         args = new String[]{};
-        cli = new Cli(args, model);
+        cli = new Cli(args);
         assertFalse(cli.shouldBeVerbose());
 
         // cli verbose
         args = new String[]{VERBOSE, UNKNOWN_FLAG};
-        cli = new Cli(args, model);
+        cli = new Cli(args);
         assertTrue(cli.shouldBeVerbose());
 
         // cli not verbose
         args = new String[]{UNKNOWN_FLAG};
-        cli = new Cli(args, model);
+        cli = new Cli(args);
         assertFalse(cli.shouldBeVerbose());
     }
 
@@ -100,27 +100,35 @@ public class CliTest extends AbstractAgentNeedingTest {
     void testIsGui() {
         // is gui
         args = new String[]{};
-        cli = new Cli(args, model);
+        cli = new Cli(args);
         assertTrue(cli.isGui());
 
         args = new String[]{VERBOSE};
-        cli = new Cli(args, model);
+        cli = new Cli(args);
+        assertTrue(cli.isGui());
+
+        args = new String[]{UNKNOWN_FLAG};
+        cli = new Cli(args);
+        assertTrue(cli.isGui());
+
+        args = new String[]{VERBOSE, UNKNOWN_FLAG};
+        cli = new Cli(args);
         assertTrue(cli.isGui());
 
         // is cli
-        args = new String[]{UNKNOWN_FLAG};
-        cli = new Cli(args, model);
+        args = new String[]{ADD_CLASS};
+        cli = new Cli(args);
         assertFalse(cli.isGui());
 
-        args = new String[]{VERBOSE, UNKNOWN_FLAG};
-        cli = new Cli(args, model);
+        args = new String[]{PATCH};
+        cli = new Cli(args);
         assertFalse(cli.isGui());
     }
 
     @Test
     void testHelp() throws Exception {
         args = new String[]{HELP};
-        cli = new Cli(args, model);
+        cli = new Cli(args);
 
         cli.consumeCli();
         String cliResult = streams.getOut();
@@ -134,7 +142,7 @@ public class CliTest extends AbstractAgentNeedingTest {
     @Test
     void testVersion() throws Exception {
         args = new String[]{VERSION};
-        cli = new Cli(args, model);
+        cli = new Cli(args);
 
         cli.consumeCli();
         String cliResult = streams.getOut();
@@ -187,7 +195,7 @@ public class CliTest extends AbstractAgentNeedingTest {
     @MethodSource("validOperationSource")
     void testValidOperation(String operation) {
         args = processArgs(operation);
-        cli = new Cli(args, model);
+        cli = new Cli(args);
 
         assertDoesNotThrow(cli::consumeCli);
     }
@@ -195,7 +203,7 @@ public class CliTest extends AbstractAgentNeedingTest {
     @Test
     void testValidOperationOverwrite() {
         args = processArgs(OVERWRITE_FORMAT + " " + AGENT + " " + AgentLiveliness.PERMANENT);
-        cli = new Cli(args, model);
+        cli = new Cli(args);
 
         assertDoesNotThrow(cli::consumeCli);
     }
@@ -205,7 +213,7 @@ public class CliTest extends AbstractAgentNeedingTest {
     void testValidOperationTwoSlashes(String operation) {
         args = processArgs(operation);
         args[0] = twoSlashes(args[0]);
-        cli = new Cli(args, model);
+        cli = new Cli(args);
 
         assertDoesNotThrow(cli::consumeCli);
     }
@@ -218,7 +226,7 @@ public class CliTest extends AbstractAgentNeedingTest {
         } else {
             args = new String[]{operation, UNKNOWN_FLAG};
         }
-        cli = new Cli(args, model);
+        cli = new Cli(args);
 
         assertThrows(RuntimeException.class, () -> cli.consumeCli());
     }
@@ -226,14 +234,14 @@ public class CliTest extends AbstractAgentNeedingTest {
     @Test
     void testInvalidOperation() {
         args = new String[]{UNKNOWN_FLAG};
-        cli = new Cli(args, model);
+        cli = new Cli(args);
 
         assertThrows(RuntimeException.class, () -> cli.consumeCli());
     }
 
     private List<String> queryJvmList() throws Exception {
         args = new String[]{LIST_JVMS};
-        cli = new Cli(args, model);
+        cli = new Cli(args);
 
         cli.consumeCli();
         String jvms = streams.getOut();
@@ -259,7 +267,7 @@ public class CliTest extends AbstractAgentNeedingTest {
     void testListClasses(String pucComponent) throws Exception {
         // no regex
         args = new String[]{VERBOSE, LIST_CLASSES, pucComponent};
-        cli = new Cli(args, model);
+        cli = new Cli(args);
 
         cli.consumeCli();
         String allClassesDefault = streams.getOut();
@@ -271,7 +279,7 @@ public class CliTest extends AbstractAgentNeedingTest {
 
         // all regex
         args = new String[]{LIST_CLASSES, pucComponent, ".*"};
-        cli = new Cli(args, model);
+        cli = new Cli(args);
 
         cli.consumeCli();
         String allClassesRegex = streams.getOut();
@@ -297,7 +305,7 @@ public class CliTest extends AbstractAgentNeedingTest {
     private void classListMatchesExactly(String pucComponent, Pattern exactClassRegex) throws Exception {
         Matcher m;
         args = new String[]{LIST_CLASSES, pucComponent, exactClassRegex.toString()};
-        cli = new Cli(args, model);
+        cli = new Cli(args);
 
         cli.consumeCli();
         String ourClass = streams.getOut();
@@ -314,7 +322,7 @@ public class CliTest extends AbstractAgentNeedingTest {
     @Test
     void testListPlugins() throws Exception {
         args = new String[]{LIST_PLUGINS};
-        cli = new Cli(args, model);
+        cli = new Cli(args);
 
         cli.consumeCli();
         String plugins = streams.getOut();
@@ -325,7 +333,7 @@ public class CliTest extends AbstractAgentNeedingTest {
 
     void testBytes(String pucComponent) throws Exception {
         args = new String[]{BYTES, pucComponent, dummy.getClassRegex()};
-        cli = new Cli(args, model);
+        cli = new Cli(args);
 
         cli.consumeCli();
 
@@ -343,7 +351,7 @@ public class CliTest extends AbstractAgentNeedingTest {
 
     void testBase64Bytes(String pucComponent) throws Exception {
         args = new String[]{BASE64, pucComponent, dummy.getClassRegex()};
-        cli = new Cli(args, model);
+        cli = new Cli(args);
 
         cli.consumeCli();
 
@@ -362,13 +370,13 @@ public class CliTest extends AbstractAgentNeedingTest {
 
     void testBytesAndBase64BytesEqual(String pucComponent) throws Exception {
         args = new String[]{BYTES, pucComponent, dummy.getClassRegex()};
-        cli = new Cli(args, model);
+        cli = new Cli(args);
 
         cli.consumeCli();
         byte[] bytes = streams.getOutBytes();
 
         args = new String[]{BASE64, pucComponent, dummy.getClassRegex()};
-        cli = new Cli(args, model);
+        cli = new Cli(args);
 
         cli.consumeCli();
         String base64 = streams.getOut().trim();
@@ -398,13 +406,13 @@ public class CliTest extends AbstractAgentNeedingTest {
     @MethodSource("tooFewArgumentsSource")
     void testTooFewArguments(String[] wrongArgs) {
         args = wrongArgs;
-        cli = new Cli(args, model);
+        cli = new Cli(args);
         assertThrows(IllegalArgumentException.class, () -> cli.consumeCli());
     }
 
     void testDecompileJavap(String pucComponent, String option) throws Exception {
         args = new String[]{DECOMPILE, pucComponent, DecompilerWrapper.JAVAP_NAME + option, dummy.getClassRegex()};
-        cli = new Cli(args, model);
+        cli = new Cli(args);
 
         cli.consumeCli();
         String jrdDisassembled = streams.getOut().trim();
@@ -424,7 +432,7 @@ public class CliTest extends AbstractAgentNeedingTest {
     @Test
     void testDecompileUnknownPlugin() {
         args = new String[]{DECOMPILE, dummy.getPid(), UNKNOWN_FLAG, dummy.getClassRegex()};
-        cli = new Cli(args, model);
+        cli = new Cli(args);
 
         assertThrows(RuntimeException.class, () -> cli.consumeCli());
     }
@@ -439,7 +447,7 @@ public class CliTest extends AbstractAgentNeedingTest {
         }
 
         args = new String[]{DECOMPILE, dummy.getPid(), emptyFilePlugin, dummy.getClassRegex()};
-        cli = new Cli(args, model);
+        cli = new Cli(args);
 
         assertThrows(RuntimeException.class, () -> cli.consumeCli());
     }
@@ -453,7 +461,7 @@ public class CliTest extends AbstractAgentNeedingTest {
 
         // nothing gets cleaned
         args = new String[]{LIST_CLASSES, dummy.getPid(), "--"}; // weird regex, but should not get cleaned
-        cli = new Cli(args, model);
+        cli = new Cli(args);
         cli.consumeCli();
 
         String[] filteredArgs = ((List<String>) field.get(cli)).toArray(new String[0]);
@@ -461,7 +469,7 @@ public class CliTest extends AbstractAgentNeedingTest {
 
         // only operation gets cleaned, but is still valid
         args = new String[]{twoSlashes(LIST_CLASSES), dummy.getPid(), "--"};
-        cli = new Cli(args, model);
+        cli = new Cli(args);
         cli.consumeCli();
 
         filteredArgs = ((List<String>) field.get(cli)).toArray(new String[0]);
@@ -472,7 +480,7 @@ public class CliTest extends AbstractAgentNeedingTest {
         createReplacement(NEW_GREETINGS);
 
         args = new String[]{OVERWRITE, pucComponent, dummy.getFqn(), dummy.getDotClassPath(), AGENT, AgentLiveliness.PERMANENT.toString()};
-        cli = new Cli(args, model);
+        cli = new Cli(args);
 
         assertDoesNotThrow(() -> cli.consumeCli());
         assertTrue(streams.getOut().contains("success"));
@@ -504,7 +512,7 @@ public class CliTest extends AbstractAgentNeedingTest {
         createReplacement(NEW_GREETINGS);
 
         args = new String[]{OVERWRITE, pucComponent, dummy.getFqn(), AGENT, AgentLiveliness.PERMANENT.toString()};
-        cli = new Cli(args, model);
+        cli = new Cli(args);
 
         // setup input stream
         ByteArrayInputStream fakeIn = new ByteArrayInputStream(Files.readAllBytes(Path.of(dummy.getDotClassPath())));
@@ -558,7 +566,7 @@ public class CliTest extends AbstractAgentNeedingTest {
 
     private void bytecodeContainsNewString(String pucComponent, String newString) throws Exception {
         args = new String[]{DECOMPILE, pucComponent, DecompilerWrapper.JAVAP_VERBOSE_NAME, dummy.getClassRegex()};
-        cli = new Cli(args, model);
+        cli = new Cli(args);
 
         cli.consumeCli();
         String overwrittenClassInVm = streams.getOut();
@@ -577,7 +585,7 @@ public class CliTest extends AbstractAgentNeedingTest {
         }
 
         args = new String[]{OVERWRITE, dummy.getPid(), dummy.getFqn(), nonClassFile, AGENT, AgentLiveliness.PERMANENT.toString()};
-        cli = new Cli(args, model);
+        cli = new Cli(args);
 
         assertDoesNotThrow(() -> cli.consumeCli());
         String output = streams.getErr();
@@ -587,7 +595,7 @@ public class CliTest extends AbstractAgentNeedingTest {
     @Test
     void testOverwriteError() {
         args = new String[]{OVERWRITE, dummy.getPid(), dummy.getFqn(), dummy.getTargetDir()};
-        cli = new Cli(args, model);
+        cli = new Cli(args);
 
         assertThrows(RuntimeException.class, () -> cli.consumeCli()); // wrapped IOException
         String output = streams.getErr();
@@ -598,7 +606,7 @@ public class CliTest extends AbstractAgentNeedingTest {
     void testOverwriteAgentError() {
         args = new String[]{OVERWRITE, dummy.getPid(), UNKNOWN_FLAG, // non-FQN makes agent not find the class
                 dummy.getDotClassPath()};
-        cli = new Cli(args, model);
+        cli = new Cli(args);
 
         RuntimeException e = assertThrows(RuntimeException.class, () -> cli.consumeCli());
         assertEquals(DecompilationController.CLASSES_NOPE, e.getMessage());
@@ -608,7 +616,7 @@ public class CliTest extends AbstractAgentNeedingTest {
     void testInit() throws Exception {
         String targetClass = "java.lang.Override";
         args = new String[]{INIT, dummy.getPid(), targetClass};
-        cli = new Cli(args, model);
+        cli = new Cli(args);
 
         assertDoesNotThrow(() -> cli.consumeCli());
 
@@ -619,7 +627,7 @@ public class CliTest extends AbstractAgentNeedingTest {
     @Test
     void testInitAgentError() {
         args = new String[]{INIT, dummy.getPid(), UNKNOWN_FLAG};
-        cli = new Cli(args, model);
+        cli = new Cli(args);
 
         assertThrows(RuntimeException.class, () -> cli.consumeCli());
     }

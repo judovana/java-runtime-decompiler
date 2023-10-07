@@ -35,7 +35,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
 
     void testBytes(String pucComponent) throws Exception {
         String[] args = new String[]{BYTES, pucComponent, dummy.getClassRegex()};
-        Cli cli = new Cli(args, model);
+        Cli cli = new Cli(args);
 
         cli.consumeCli();
 
@@ -53,7 +53,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
 
     void testBase64Bytes(String pucComponent) throws Exception {
         String[] args = new String[]{BASE64, pucComponent, dummy.getClassRegex()};
-        Cli cli = new Cli(args, model);
+        Cli cli = new Cli(args);
 
         cli.consumeCli();
 
@@ -72,13 +72,13 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
 
     void testBytesAndBase64BytesEqual(String pucComponent) throws Exception {
         String[] args = new String[]{BYTES, pucComponent, dummy.getClassRegex()};
-        Cli cli = new Cli(args, model);
+        Cli cli = new Cli(args);
 
         cli.consumeCli();
         byte[] bytes = streams.getOutBytes();
 
         args = new String[]{BASE64, pucComponent, dummy.getClassRegex()};
-        cli = new Cli(args, model);
+        cli = new Cli(args);
 
         cli.consumeCli();
         String base64 = streams.getOut().trim();
@@ -95,7 +95,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
 
     void testDecompileJavap(String pucComponent, String option) throws Exception {
         String[] args = new String[]{DECOMPILE, pucComponent, DecompilerWrapper.JAVAP_NAME + option, dummy.getClassRegex()};
-        Cli cli = new Cli(args, model);
+        Cli cli = new Cli(args);
 
         cli.consumeCli();
         String jrdDisassembled = streams.getOut().trim();
@@ -136,7 +136,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
         createReplacement(NEW_GREETING);
 
         String[] args = new String[]{OVERWRITE, pucComponent, dummy.getFqn(), AGENT, AgentLiveliness.PERMANENT.toString()};
-        Cli cli = new Cli(args, model);
+        Cli cli = new Cli(args);
 
         // setup input stream
         ByteArrayInputStream fakeIn = new ByteArrayInputStream(Files.readAllBytes(Path.of(dummy.getDotClassPath())));
@@ -190,7 +190,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
 
     private void bytecodeContainsNewString(String pucComponent, String newString) throws Exception {
         String[] args = new String[]{DECOMPILE, pucComponent, DecompilerWrapper.JAVAP_VERBOSE_NAME, dummy.getClassRegex()};
-        Cli cli = new Cli(args, model);
+        Cli cli = new Cli(args);
 
         cli.consumeCli();
         String overwrittenClassInVm = streams.getOut();
@@ -227,7 +227,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
         assertEqualsWithTolerance(sOrig, sNoCommnets, 0.9);
         assertEqualsWithTolerance(sNoCommnets, dummy.getDefaultContentWithPackage(), 0.85);
 
-        File compiledFile = compile(null, dummy, model, decompiledFile);
+        File compiledFile = compile(plugin, dummy, model, decompiledFile);
         String compiled = readBinaryAsString(compiledFile);
         String original = readBinaryAsString(new File(dummy.getDotClassPath()));
         assertEqualsWithTolerance(compiled, original, 0.9);
@@ -246,7 +246,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
 
     static void overwrite(String pid, String fqn, Model model, File bin) throws Exception {
         String[] args = new String[]{OVERWRITE, pid, fqn, bin.getAbsolutePath(), AGENT, AgentLiveliness.PERMANENT.toString()};
-        Cli cli = new Cli(args, model);
+        Cli cli = new Cli(args);
         cli.consumeCli();
     }
 
@@ -263,7 +263,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
         } else {
             args = new String[]{COMPILE, CP, pid, src.getAbsolutePath(), SAVE_LIKE, Saving.EXACT, SAVE_AS, compiledFile.getAbsolutePath()};
         }
-        Cli cli = new Cli(args, model);
+        Cli cli = new Cli(args);
         cli.consumeCli();
         return compiledFile;
     }
@@ -272,7 +272,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
         File decompiledFile = File.createTempFile("jrd", "test.java");
         String[] args = new String[]{DECOMPILE, dummy.getPid(), plugin, dummy.getFqn(), SAVE_LIKE, Saving.EXACT, SAVE_AS,
                 decompiledFile.getAbsolutePath()};
-        Cli cli = new Cli(args, model);
+        Cli cli = new Cli(args);
         cli.consumeCli();
         return decompiledFile;
     }
@@ -330,7 +330,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
     @Test
     void testGlobalApi() throws Exception {
         String[] args = new String[]{API, dummy.getPid()};
-        Cli cli = new Cli(args, model);
+        Cli cli = new Cli(args);
         cli.consumeCli();
         String apiHelp = streams.getOut();
         Assertions.assertTrue(apiHelp.contains("org.jrd.agent.api.Variables.Global.get"));
@@ -356,7 +356,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
                         "org.jrd.agent.api.Variables.Global.set(\"counter\", i);\n" + "System.out.println(\"API: \"+i+\" had spoken\");\n"
         );
         Files.write(decompiledFile.toPath(), withApi.getBytes(StandardCharsets.UTF_8));
-        File compiledFile = compile(null, dummy, model, decompiledFile);
+        File compiledFile = compile("Cfr", dummy, model, decompiledFile);
         String compiled = readBinaryAsString(compiledFile);
         String original = readBinaryAsString(new File(dummy.getDotClassPath()));
         assertEqualsWithTolerance(compiled, original, 0.4);

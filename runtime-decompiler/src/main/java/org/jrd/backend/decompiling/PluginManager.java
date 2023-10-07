@@ -302,8 +302,18 @@ public class PluginManager {
 
         try {
             // Compile Wrapper
-            compileWrapper(wrapper, null);
-
+            ByteArrayOutputStream compilerOutput = new ByteArrayOutputStream();
+            int compileResult = compileWrapper(wrapper, compilerOutput);
+            if (compileResult != 0) {
+                Logger.getLogger().log(Logger.Level.ALL, "Compilation of wrapper " + wrapper + " failed");
+                Logger.getLogger().log(Logger.Level.ALL, compilerOutput.toString(StandardCharsets.UTF_8));
+                Logger.getLogger().log(Logger.Level.ALL, "json, java and deps:");
+                Logger.getLogger().log(Logger.Level.ALL, wrapper.getFileLocation());
+                Logger.getLogger().log(Logger.Level.ALL, wrapper.getWrapperUrl().toString());
+                for (ExpandableUrl ex : wrapper.getDependencyUrls()) {
+                    Logger.getLogger().log(Logger.Level.ALL, ex.toString());
+                }
+            }
             // Load wrapper
             List<URL> classPathList = new LinkedList<>();
             for (ExpandableUrl url : wrapper.getDependencyUrls()) {
