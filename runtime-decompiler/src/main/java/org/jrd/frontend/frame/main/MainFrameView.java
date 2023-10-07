@@ -26,6 +26,7 @@ import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -100,6 +101,7 @@ public class MainFrameView {
     private JMenuBar menuBar;
     private JMenu jMenuConnect;
     private JMenuItem jMenuItemNewConnection;
+    private JMenuItem jMenuStandaloneBytemanAgent;
     private JMenuItem openEditor;
     private JMenu jMenuConfig;
     private JMenuItem jMenuSettings;
@@ -443,6 +445,17 @@ public class MainFrameView {
             newConnectionDialogListener.actionPerformed(actionEvent);
         });
         jMenuConnect.add(jMenuItemNewConnection);
+
+        jMenuStandaloneBytemanAgent = new JMenuItem("Add standalone byteman companion");
+        jMenuStandaloneBytemanAgent.addActionListener(
+                e -> JOptionPane.showMessageDialog(
+                        jMenuConnect,
+                        "Byteman agent is submited via any byteman action on " +
+                                "LOCAL vms. However under some circumstances, you may connect to it manually. This is a bit " +
+                                "hidden in Byteman tab in Overwrite Dialogue (buttons left from decompiler)"
+                )
+        );
+        jMenuConnect.add(jMenuStandaloneBytemanAgent);
         openEditor = new JMenuItem("Open Hex/Text notes");
         openEditor.addActionListener(a -> {
             StandaloneHex hexview = null;

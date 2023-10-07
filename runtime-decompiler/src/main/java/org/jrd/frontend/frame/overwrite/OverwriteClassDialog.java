@@ -281,8 +281,7 @@ public class OverwriteClassDialog extends JDialog {
         setValidation();
         setSelectListener();
         setOkListener(isVerbose);
-        addComponentsToPanels(vmInfo.getType() == VmInfo.Type.LOCAL/*FIXME byteman shouldbe made available also for
-                                                                   remote vms.. Byteman companion for remote vms?*/);
+        addComponentsToPanels();
 
         this.pluginManager = pluginManager;
         this.decompiler = selectedDecompiler;
@@ -535,7 +534,7 @@ public class OverwriteClassDialog extends JDialog {
         compilerArgs.add(3, "" + Config.getConfig().getBestSourceTarget().get());
     }
 
-    private void addComponentsToPanels(boolean bytemanTab) {
+    private void addComponentsToPanels() {
         inputs.add(filePath);
         inputs.add(className);
         inputs.add(className);
@@ -569,7 +568,11 @@ public class OverwriteClassDialog extends JDialog {
         dualPane.add(manualPane);
         dualPane.add(externalFiles);
         dualPane.add(binaryView);
-        if (bytemanTab) {
+        if (vmInfo.getType() != VmInfo.Type.FS) {
+            //FIXME rework?
+            if (vmInfo.getBytemanCompanion() == null) {
+                bytemanView.setName("Byteman companion");
+            }
             dualPane.add(bytemanView);
         }
         this.add(dualPane);

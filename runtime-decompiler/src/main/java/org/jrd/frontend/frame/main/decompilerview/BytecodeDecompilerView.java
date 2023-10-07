@@ -844,7 +844,7 @@ public class BytecodeDecompilerView {
     ) {
         String additionalSrcClass = Config.getConfig().getAdditionalSourcePathString(name);
         additionalSrcBuffer.resetSrcArea(additionalSrcClass);
-        if (vmInfoType == VmInfo.Type.LOCAL) {
+        if (vmInfoType != VmInfo.Type.FS) {
             setByteman(name);
             buffers.add(bytemanScript);
         } else {
