@@ -569,9 +569,14 @@ public class OverwriteClassDialog extends JDialog {
         dualPane.add(externalFiles);
         dualPane.add(binaryView);
         if (vmInfo.getType() != VmInfo.Type.FS) {
-            //FIXME rework?
             if (vmInfo.getBytemanCompanion() == null) {
-                bytemanView.setName("Byteman companion");
+                if (vmInfo.getType() == VmInfo.Type.REMOTE) {
+                    bytemanView.setName("Byteman companion - for remote have sense the manual one always.");
+                } else {
+                    //local
+                    bytemanView.setName("Byteman companion - allow addition, but otherwise keep intact. it will work");
+                }
+
             }
             dualPane.add(bytemanView);
         }
