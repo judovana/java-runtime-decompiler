@@ -303,7 +303,7 @@ public class CompileUploadCliTest extends AbstractAgentNeedingTest {
         File compiledFile = compile(plugin, dummy, model, decompiledFile);
         String compiled = readBinaryAsString(compiledFile);
         String original = readBinaryAsString(new File(dummy.getDotClassPath()));
-        assertEqualsWithTolerance(compiled, original, 0.4); //yah, jasm performance is not great
+        assertEqualsWithTolerance(compiled, original, 0.3); //yah, jasm performance is not great
 
         Assertions.assertDoesNotThrow(() -> overwrite(dummy, model, compiledFile));
         Assertions.assertThrows(Exception.class, () -> overwrite(dummy, model, decompiledFile)); //src instead of bin == nonsense

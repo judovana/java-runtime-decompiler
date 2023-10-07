@@ -45,6 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Timeout(60)
 public class CliTest extends AbstractAgentNeedingTest {
     private String[] args;
     private Cli cli;
@@ -633,9 +634,9 @@ public class CliTest extends AbstractAgentNeedingTest {
     }
 
     @Test
-    public void testGuessNameIncorrectNoPkg() {
+    public void testGuessNameIncorrectNoPkg() throws Exception {
         byte[] contents = dummy.getDefaultContentWithoutPackage().getBytes(StandardCharsets.UTF_8);
-        assertThrows(RuntimeException.class, () -> Lib.guessName(contents));
+        assertEquals("TestingDummy", Lib.guessName(contents));
     }
 
     @Test
