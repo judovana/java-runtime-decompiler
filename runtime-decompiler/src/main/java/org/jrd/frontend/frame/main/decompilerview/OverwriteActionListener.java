@@ -16,26 +16,28 @@ class OverwriteActionListener implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
+        int tab = getTab();
         if (
-            bytecodeDecompilerView.isBinaryBufferVisible() || bytecodeDecompilerView.isDecompiledBytecodeBufferVisible()) {
+            isAnyPrimaryTabSelected()) {
             worker.overwriteClass(
                     bytecodeDecompilerView.getSelectedDecompiler(), bytecodeDecompilerView.getLastDecompiledClass(),
-                    bytecodeDecompilerView.getBytecodeBuffer().getText(), bytecodeDecompilerView.getBinary().get(),
-                    bytecodeDecompilerView.isBinaryBufferVisible()
+                    bytecodeDecompilerView.getBytecodeBuffer().getText(), bytecodeDecompilerView.getBinary().get(), tab
             );
         } else if (
-            bytecodeDecompilerView.isAdditionalBinaryBufferVisible() ||
-                    bytecodeDecompilerView.isAdditionalDecompiledBytecodeBufferVisible()) {
+            isSecondaryTabSelected()) {
             worker.overwriteClass(
                     bytecodeDecompilerView.getSelectedDecompiler(), bytecodeDecompilerView.getLastDecompiledClass(),
-                    bytecodeDecompilerView.getAdditionalBytecodeBuffer().getText(), bytecodeDecompilerView.getAdditionalBinary().get(),
-                    bytecodeDecompilerView.isAdditionalBinaryBufferVisible()
+                    bytecodeDecompilerView.getAdditionalBytecodeBuffer().getText(), bytecodeDecompilerView.getAdditionalBinary().get(), tab
             );
         } else if (bytecodeDecompilerView.isAdditionalSrcBufferVisible()) {
             worker.overwriteClass(
                     bytecodeDecompilerView.getSelectedDecompiler(), bytecodeDecompilerView.getLastDecompiledClass(),
-                    bytecodeDecompilerView.getAdditionalSrcBuffer().getText(), new byte[0],
-                    bytecodeDecompilerView.isAdditionalBinaryBufferVisible()
+                    bytecodeDecompilerView.getAdditionalSrcBuffer().getText(), new byte[0], tab
+            );
+        } else if (bytecodeDecompilerView.isBytemanBufferVisible()) {
+            worker.overwriteClass(
+                    bytecodeDecompilerView.getSelectedDecompiler(), bytecodeDecompilerView.getLastDecompiledClass(),
+                    bytecodeDecompilerView.getBytemanScript().getText(), new byte[0], tab
             );
         } else {
             JOptionPane.showMessageDialog(
@@ -43,5 +45,31 @@ class OverwriteActionListener implements ActionListener {
             );
         }
 
+    }
+
+    private boolean isSecondaryTabSelected() {
+        return bytecodeDecompilerView.isAdditionalBinaryBufferVisible() ||
+                bytecodeDecompilerView.isAdditionalDecompiledBytecodeBufferVisible();
+    }
+
+    private boolean isAnyPrimaryTabSelected() {
+        return bytecodeDecompilerView.isBinaryBufferVisible() || bytecodeDecompilerView.isDecompiledBytecodeBufferVisible();
+    }
+
+    private int getTab() {
+        int tab = -1;
+        if (bytecodeDecompilerView.isBytemanBufferVisible()) {
+            tab = 3;
+        }
+        if (bytecodeDecompilerView.isBinaryBufferVisible() || bytecodeDecompilerView.isAdditionalBinaryBufferVisible()) {
+            tab = 2;
+        }
+        if (bytecodeDecompilerView.isDecompiledBytecodeBufferVisible() ||
+                bytecodeDecompilerView.isAdditionalDecompiledBytecodeBufferVisible() ||
+                bytecodeDecompilerView.isAdditionalSrcBufferVisible()
+        ) {
+            tab = 1;
+        }
+        return tab;
     }
 }

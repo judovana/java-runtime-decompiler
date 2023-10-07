@@ -129,6 +129,16 @@ public class OverwriteClassDialog extends JDialog {
     private final JButton uploadBinary;
     private final JTextField statusBinary;
 
+    private final JPanel bytemanView;
+    private final JTextField saveBytemanAsFile; //read only!
+    private final JTextField bytemanStatus; //read only!
+    private final JButton saveByteman;
+    private final JButton saveBytemanAs;
+    private final JButton loadByteman;
+    private final JButton compileByteman;
+    private final JButton compileAndUploadByteman;
+    private final JButton unloadByteman;
+    private final JButton unloadAllBytemans;
     private final String origName;
     private final String origBuffer;
     private final byte[] origBin;
@@ -137,8 +147,7 @@ public class OverwriteClassDialog extends JDialog {
 
     public OverwriteClassDialog(
             final String name, final LatestPaths latestPaths, final String currentBuffer, final byte[] cBinBuffer, VmInfo vmInfo,
-            VmManager vmManager, PluginManager pluginManager, DecompilerWrapper selectedDecompiler, boolean isBinaryVisible,
-            boolean isVerbose
+            VmManager vmManager, PluginManager pluginManager, DecompilerWrapper selectedDecompiler, int tab, boolean isVerbose
     ) {
         super((JFrame) null, "Specify class and selectSrc its bytecode", true);
         this.setSize(400, 400);
@@ -238,11 +247,42 @@ public class OverwriteClassDialog extends JDialog {
         binaryView.add(uploadBinary);
         binaryView.add(statusBinary);
 
+        bytemanView = new JPanel(new GridLayout(5, 1));
+        bytemanView.setName("Current byteman script");
+        saveBytemanAsFile = new JTextField(Config.getConfig().getBytemanScriptFile(name).getAbsolutePath());
+        saveBytemanAsFile.setEditable(false);
+        saveByteman = new JButton("Save");
+        saveBytemanAs = new JButton("Save copy as");
+        loadByteman = new JButton("Replace from file");
+        compileByteman = new JButton("Type check");
+        compileAndUploadByteman = new JButton("Inject to vm: " + vmInfo.getVmPid());
+        compileAndUploadByteman.setFont(compileAndUploadByteman.getFont().deriveFont(Font.BOLD));
+        unloadByteman = new JButton("Unload rules from this file");
+        unloadAllBytemans = new JButton("Unload all byteman rules");
+        bytemanView.add(saveBytemanAsFile);
+        JPanel saveBytemanButtons = new JPanel(new GridLayout(1, 3));
+        saveBytemanButtons.add(saveByteman);
+        saveBytemanButtons.add(saveBytemanAs);
+        saveBytemanButtons.add(loadByteman);
+        bytemanView.add(saveBytemanButtons);
+        JPanel compileBytemanButtons = new JPanel(new GridLayout(1, 2));
+        compileBytemanButtons.add(compileByteman);
+        compileBytemanButtons.add(compileAndUploadByteman);
+        bytemanView.add(compileBytemanButtons);
+        JPanel unloadBytemanButtons = new JPanel(new GridLayout(1, 2));
+        unloadBytemanButtons.add(unloadByteman);
+        unloadBytemanButtons.add(unloadAllBytemans);
+        bytemanView.add(unloadBytemanButtons);
+        bytemanStatus = new JTextField("check/install status");
+        bytemanStatus.setEditable(false);
+        bytemanView.add(bytemanStatus);
+
         setLocationRelativeTo(null);
         setValidation();
         setSelectListener();
         setOkListener(isVerbose);
-        addComponentsToPanels();
+        addComponentsToPanels(vmInfo.getType() == VmInfo.Type.LOCAL/*FIXME byteman shouldbe made available also for
+                                                                   remote vms.. Byteman companion for remote vms?*/);
 
         this.pluginManager = pluginManager;
         this.decompiler = selectedDecompiler;
@@ -255,8 +295,15 @@ public class OverwriteClassDialog extends JDialog {
             statusCompileCurrentBuffer.setText(ex.getMessage());
             dualPane.setSelectedIndex(1);
         }
-        if (isBinaryVisible) {
+
+        if (tab == 1) {
+            dualPane.setSelectedIndex(0);
+        } else if (tab == 2) {
             dualPane.setSelectedIndex(3);
+        } else if (tab == 3) {
+            dualPane.setSelectedIndex(4);
+        } else {
+            dualPane.setSelectedIndex(2);
         }
 
         saveSrcBuffer.addActionListener(new ActionListener() {
@@ -488,7 +535,7 @@ public class OverwriteClassDialog extends JDialog {
         compilerArgs.add(3, "" + Config.getConfig().getBestSourceTarget().get());
     }
 
-    private void addComponentsToPanels() {
+    private void addComponentsToPanels(boolean bytemanTab) {
         inputs.add(filePath);
         inputs.add(className);
         inputs.add(className);
@@ -522,6 +569,9 @@ public class OverwriteClassDialog extends JDialog {
         dualPane.add(manualPane);
         dualPane.add(externalFiles);
         dualPane.add(binaryView);
+        if (bytemanTab) {
+            dualPane.add(bytemanView);
+        }
         this.add(dualPane);
         this.pack();
     }

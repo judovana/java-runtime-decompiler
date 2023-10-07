@@ -693,7 +693,7 @@ public class BytecodeDecompilerView {
         return buffers.getSelectedComponent().equals(additionalSrcBuffer);
     }
 
-    private boolean isBytemanBufferVisible() {
+    boolean isBytemanBufferVisible() {
         return buffers.getSelectedComponent().equals(bytemanScript);
     }
 

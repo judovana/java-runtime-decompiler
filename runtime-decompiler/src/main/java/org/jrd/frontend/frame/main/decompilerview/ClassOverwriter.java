@@ -13,14 +13,14 @@ class ClassOverwriter {
         this.decompilationController = decompilationController;
     }
 
-    void overwriteClass(DecompilerWrapper selectedDecompiler, String name, String buffer, byte[] binBuffer, boolean isBinary) {
+    void overwriteClass(DecompilerWrapper selectedDecompiler, String name, String buffer, byte[] binBuffer, int tab) {
         if (name == null || name.trim().isEmpty()) {
             name = "???";
         }
 
         final OverwriteClassDialog overwriteClassDialog = new OverwriteClassDialog(
                 name, lastLoaded, buffer, binBuffer, decompilationController.getVmInfo(), decompilationController.getVmManager(),
-                decompilationController.getPluginManager(), selectedDecompiler, isBinary, decompilationController.isVerbose()
+                decompilationController.getPluginManager(), selectedDecompiler, tab, decompilationController.isVerbose()
         );
 
         ScreenFinder.centerWindowToCurrentScreen(overwriteClassDialog);
