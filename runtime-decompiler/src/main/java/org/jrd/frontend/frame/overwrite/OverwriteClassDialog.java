@@ -280,8 +280,8 @@ public class OverwriteClassDialog extends JDialog {
         bytemanView.add(unloadBytemanButtons);
 
         JPanel companion = new JPanel(new GridLayout(2, 2));
-        bytemanHostPort = new JTextField("localhost:99666");
-        bytemanCompanionHostPort = new JTextField("localhost:19001");
+        bytemanHostPort = new JTextField("bytemanHostAndPort:99666");
+        bytemanCompanionHostPort = new JTextField("secondJrdAgenHosttIfPresentAndWanted:19001");
         bytemanPid = new JTextField("-1");
         bytemanPid.setEditable(false);
         createUpdateCompanion = new JButton("create/update companion");
@@ -589,23 +589,42 @@ public class OverwriteClassDialog extends JDialog {
         this.pack();
     }
 
+    /*
+    *for byteman for remote vm it is simple:
+    *   simply set byteman connection to user-set byteman host/port to byteman agent
+    *   the local pid/companion have no meaning, and should be empty and disabled
+    *
+    * fore local vm it is wierder
+    *   if the companion exists,then it can be updated to absolutely anything. User should be warned
+    *   if it does not exists, then what?
+    *   Offer auto creation - that would do first action? Offer manual creation as in remote case?
+    *     Is companion field good for anything?
+    */
     private void prepareBytemanLayout() {
         if (vmInfo.getType() != VmInfo.Type.FS) {
             if (vmInfo.getBytemanCompanion() == null) {
                 createUpdateCompanion.setText("Create byteman connector");
                 if (vmInfo.getType() == VmInfo.Type.REMOTE) {
-                    bytemanStatus.setText("Byteman companion can be created manually, but be sure you know what you " + "are doing.");
+                    bytemanStatus.setText("Byteman companion can be created manually, but be sure you know what you are doing.");
+                    compileAndUploadByteman.setEnabled(false);
                 } else {
                     //local
                     bytemanStatus.setText(
-                            "Byteman companion will be created automatically on first action. It can be" +
-                                    " created also manually if you really know what youa re doing."
+                            "Byteman companion will be created automatically on first Inject action. It can be" +
+                                    " created also manually if you really shold know what you are doing."
                     );
                 }
 
             } else {
+                if (vmInfo.getType() == VmInfo.Type.REMOTE) {
+                    compileAndUpload.setText(
+                            "Inject rules to vm: " + vmInfo.getBytemanCompanion().getBytemanHost() + ":" +
+                                    vmInfo.getBytemanCompanion().getBytemanPort()
+                    );
+                }
                 bytemanHostPort
                         .setText(vmInfo.getBytemanCompanion().getBytemanHost() + ":" + vmInfo.getBytemanCompanion().getBytemanPort());
+
                 bytemanCompanionHostPort.setText(
                         vmInfo.getBytemanCompanion().getPostBytemanAgentHost() + ":" +
                                 vmInfo.getBytemanCompanion().getPostBytemanAgentPort()
@@ -617,6 +636,9 @@ public class OverwriteClassDialog extends JDialog {
             dualPane.add(bytemanView);
         } else {
             bytemanStatus.setText("Byteman is useless for FS classpath operations");
+        }
+        if (vmInfo.getType() == VmInfo.Type.LOCAL) {
+            bytemanPid.setText("" + vmInfo.getVmPid());
         }
     }
 
