@@ -6,6 +6,7 @@ import io.github.mkoncek.classpathless.api.IdentifiedSource;
 import org.jrd.backend.completion.ClassesAndMethodsProvider;
 import org.jrd.backend.core.ClassInfo;
 import org.jrd.backend.core.Logger;
+import org.jrd.backend.data.BytemanCompanion;
 import org.jrd.backend.data.Config;
 import org.jrd.backend.data.DependenciesReader;
 import org.jrd.backend.data.VmInfo;
@@ -828,25 +829,36 @@ public class BytecodeDecompilerView {
      */
     public void reloadTextField(
             String name, String decompiledClass, byte[] source, String additionalDecompiledClass, byte[] additionalSource,
-            VmInfo.Type vmInfoType
+            VmInfo.Type vmInfoType, BytemanCompanion bytemanCompanion
     ) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                BytecodeDecompilerView.this
-                        .setDecompiledClass(name, decompiledClass, source, additionalDecompiledClass, additionalSource, vmInfoType);
+                BytecodeDecompilerView.this.setDecompiledClass(
+                        name, decompiledClass, source, additionalDecompiledClass, additionalSource, vmInfoType, bytemanCompanion
+                );
             }
         });
     }
 
     private void setDecompiledClass(
-            String name, String data, byte[] source, String additionalData, byte[] additionalSource, VmInfo.Type vmInfoType
+            String name, String data, byte[] source, String additionalData, byte[] additionalSource, VmInfo.Type vmInfoType,
+            BytemanCompanion bytemanCompanion
     ) {
         String additionalSrcClass = Config.getConfig().getAdditionalSourcePathString(name);
         additionalSrcBuffer.resetSrcArea(additionalSrcClass);
         if (vmInfoType != VmInfo.Type.FS) {
-            setByteman(name);
-            buffers.add(bytemanScript);
+            if (vmInfoType == VmInfo.Type.LOCAL) {
+                setByteman(name);
+                buffers.add(bytemanScript);
+            } else if (vmInfoType == VmInfo.Type.REMOTE) {
+                if (bytemanCompanion != null) {
+                    setByteman(name);
+                    buffers.add(bytemanScript);
+                } else {
+                    buffers.remove(bytemanScript);
+                }
+            }
         } else {
             buffers.remove(bytemanScript);
         }

@@ -568,20 +568,31 @@ public class OverwriteClassDialog extends JDialog {
         dualPane.add(manualPane);
         dualPane.add(externalFiles);
         dualPane.add(binaryView);
+        prepareBytemanLayout();
+        this.add(dualPane);
+        this.pack();
+    }
+
+    private void prepareBytemanLayout() {
         if (vmInfo.getType() != VmInfo.Type.FS) {
             if (vmInfo.getBytemanCompanion() == null) {
                 if (vmInfo.getType() == VmInfo.Type.REMOTE) {
-                    bytemanView.setName("Byteman companion - for remote have sense the manual one always.");
+                    bytemanStatus.setText("Byteman companion can be created manually, but be sure you know what you " + "are doing.");
                 } else {
                     //local
-                    bytemanView.setName("Byteman companion - allow addition, but otherwise keep intact. it will work");
+                    bytemanStatus.setText(
+                            "Byteman companion will be created automatically on first action. It can be" +
+                                    " created also manually if you really know what youa re doing."
+                    );
                 }
 
+            } else {
+                bytemanStatus.setText("Byteman companion is already set up");
             }
             dualPane.add(bytemanView);
+        } else {
+            bytemanStatus.setText("Byteman is useless for FS classpath operations");
         }
-        this.add(dualPane);
-        this.pack();
     }
 
     public String getManualUploadPath() {
