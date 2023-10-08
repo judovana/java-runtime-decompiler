@@ -62,7 +62,7 @@ public class BytemanCompileAction extends AbstractCompileAction implements CanCo
                     BytemanCompanion bytemanCompanion =
                             vmInfo.setBytemanCompanion(boot.isBoot(), vmInfo.getVmDecompilerStatus().getListenPort());
                     Submit submit = new Submit(
-                            "localhost", bytemanCompanion.getBytemanPort(),
+                            bytemanCompanion.getBytemanHost(), bytemanCompanion.getBytemanPort(),
                             new PrintStream(new LogOutputStream(), true, StandardCharsets.UTF_8)
                     );
                     ScriptText st = new ScriptText("hi.btm", script);

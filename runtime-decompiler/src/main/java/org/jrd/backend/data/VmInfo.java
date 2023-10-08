@@ -7,6 +7,7 @@ import com.sun.tools.attach.AttachNotSupportedException;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import org.jboss.byteman.agent.install.Install;
+import org.jrd.backend.communication.CallDecompilerAgent;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.core.agentstore.KnownAgent;
@@ -53,7 +54,7 @@ public class VmInfo implements Serializable {
         if (info.getVmDecompilerStatus() != null) {
             return info.getVmDecompilerStatus().getHostname();
         } else {
-            return "localhost";
+            return CallDecompilerAgent.DEFAULT_ADDRESS;
         }
     }, String::compareTo);
     private static final Comparator<VmInfo> PORT_COMPARATOR = Comparator.comparingInt(info -> {
@@ -236,7 +237,11 @@ public class VmInfo implements Serializable {
             int pid = getVmPid();
             AgentConfig aconf = AgentConfig.getAnnonymousForcingPermanentAgent();
             int secondJrdPort = NewAgentDialog.manualAttach(null, aconf, pid, true/*?*/);
-            vmDecompilerStatus.setBytemanCompanion(new BytemanCompanion(bytemanPort, secondJrdPort));
+            vmDecompilerStatus.setBytemanCompanion(
+                    new BytemanCompanion(
+                            CallDecompilerAgent.DEFAULT_ADDRESS, bytemanPort, CallDecompilerAgent.DEFAULT_ADDRESS, secondJrdPort
+                    )
+            );
             KnownAgents.getInstance().setBytemanCompanion(vmPid, parentPort, vmDecompilerStatus.getBytemanCompanion());
 
         }
@@ -246,7 +251,7 @@ public class VmInfo implements Serializable {
     private int attachByteman(boolean boot)
             throws IOException, AgentLoadException, AttachNotSupportedException, AgentInitializationException {
         int futurePort = VmInfo.findFreePort();
-        Install.install("" + getVmPid(), boot, "localhost", futurePort, new String[]{});
+        Install.install("" + getVmPid(), boot, CallDecompilerAgent.DEFAULT_ADDRESS, futurePort, new String[]{});
         return futurePort;
     }
 

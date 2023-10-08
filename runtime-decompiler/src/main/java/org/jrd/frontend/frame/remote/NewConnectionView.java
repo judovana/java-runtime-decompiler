@@ -1,6 +1,7 @@
 package org.jrd.frontend.frame.remote;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.jrd.backend.communication.CallDecompilerAgent;
 import org.jrd.frontend.frame.main.MainFrameView;
 
 import javax.swing.Box;
@@ -30,7 +31,7 @@ public class NewConnectionView extends JDialog {
 
     public static class HostnamePortInputPanel extends JPanel {
 
-        private static String lastHost = "localhost";
+        private static String lastHost = CallDecompilerAgent.DEFAULT_ADDRESS;
         private static String lastPort = "10900";
 
         JTextField hostnameTextField;

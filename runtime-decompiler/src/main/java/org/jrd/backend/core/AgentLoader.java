@@ -4,6 +4,7 @@ import com.sun.tools.attach.AgentInitializationException;
 import com.sun.tools.attach.AgentLoadException;
 import com.sun.tools.attach.AttachNotSupportedException;
 
+import org.jrd.backend.communication.CallDecompilerAgent;
 import org.jrd.backend.communication.InstallDecompilerAgentImpl;
 import org.jrd.backend.data.cli.utils.AgentConfig;
 
@@ -45,7 +46,8 @@ public class AgentLoader {
 
         try {
             InstallDecompilerAgentImpl.install(
-                    Integer.toString(pid), false, false, "localhost", port, aconf.getLoneliness(), aconf.getLiveliness(), installProps
+                    Integer.toString(pid), false, false, CallDecompilerAgent.DEFAULT_ADDRESS, port, aconf.getLoneliness(),
+                    aconf.getLiveliness(), installProps
             );
         } catch (IllegalArgumentException |
                 IOException |

@@ -5,6 +5,7 @@ import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.jrd.backend.communication.CallDecompilerAgent;
 import org.jrd.backend.communication.FsAgent;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.communication.TopLevelErrorCandidate;
@@ -680,7 +681,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
     public static AgentRequestAction createRequest(VmInfo vmInfo, RequestAction action, String... commands) {
         VmDecompilerStatus status = vmInfo.getVmDecompilerStatus();
         int listenPort = AgentRequestAction.NOT_ATTACHED_PORT;
-        String hostname = "localhost";
+        String hostname = CallDecompilerAgent.DEFAULT_ADDRESS;
         if (status != null) {
             listenPort = status.getListenPort();
             hostname = status.getHostname();

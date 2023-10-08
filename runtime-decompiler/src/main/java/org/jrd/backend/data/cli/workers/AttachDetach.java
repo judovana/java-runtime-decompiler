@@ -1,5 +1,6 @@
 package org.jrd.backend.data.cli.workers;
 
+import org.jrd.backend.communication.CallDecompilerAgent;
 import org.jrd.backend.core.AgentAttachManager;
 import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.data.VmInfo;
@@ -53,7 +54,7 @@ public class AttachDetach {
     }
 
     public static void detachLocalhost(int port, VmManager vmManager) {
-        Lib.detach("localhost", port, vmManager);
+        Lib.detach(CallDecompilerAgent.DEFAULT_ADDRESS, port, vmManager);
     }
 
 }

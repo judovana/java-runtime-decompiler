@@ -117,7 +117,7 @@ public class DecompilerRequestReceiver {
 
     private static int getPort(String hostname, int listenPort, String vmId, int vmPid, AgentAttachManager attachManager) {
         int actualListenPort;
-        if ("localhost".equals(hostname)) {
+        if (CallDecompilerAgent.DEFAULT_ADDRESS.equals(hostname)) {
             try {
                 actualListenPort = checkIfAgentIsLoaded(listenPort, vmId, vmPid, attachManager);
             } catch (Exception ex) {
@@ -162,7 +162,7 @@ public class DecompilerRequestReceiver {
         } else {
             VmInfo vmInfo = vmManager.findVmFromPid(vmId);
             VmDecompilerStatus status = new VmDecompilerStatus();
-            status.setHostname("localhost");
+            status.setHostname(CallDecompilerAgent.DEFAULT_ADDRESS);
             status.setListenPort(vmPid);
             status.setVmId(vmId);
             vmInfo.setVmDecompilerStatus(status);

@@ -1,5 +1,6 @@
 package org.jrd.frontend.frame.main;
 
+import org.jrd.backend.communication.CallDecompilerAgent;
 import org.jrd.backend.core.AgentLoader;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.agentstore.AgentLiveliness;
@@ -103,10 +104,10 @@ public final class NewAgentDialog extends JDialog {
         if (secondJrdPort > 0) {
             switch (Config.getConfig().getAdditionalAgentAction()) {
                 case ADD:
-                    Model.getModel().getVmManager().createRemoteVM("localhost", secondJrdPort, false);
+                    Model.getModel().getVmManager().createRemoteVM(CallDecompilerAgent.DEFAULT_ADDRESS, secondJrdPort, false);
                     break;
                 case ADD_AND_SAVE:
-                    Model.getModel().getVmManager().createRemoteVM("localhost", secondJrdPort, true);
+                    Model.getModel().getVmManager().createRemoteVM(CallDecompilerAgent.DEFAULT_ADDRESS, secondJrdPort, true);
                     break;
                 case NOTHING:
                     break;
@@ -119,9 +120,9 @@ public final class NewAgentDialog extends JDialog {
                                         secondJrdPort
                         );
                         if (r == JOptionPane.YES_OPTION) {
-                            Model.getModel().getVmManager().createRemoteVM("localhost", secondJrdPort, true);
+                            Model.getModel().getVmManager().createRemoteVM(CallDecompilerAgent.DEFAULT_ADDRESS, secondJrdPort, true);
                         } else if (r == JOptionPane.NO_OPTION) {
-                            Model.getModel().getVmManager().createRemoteVM("localhost", secondJrdPort, false);
+                            Model.getModel().getVmManager().createRemoteVM(CallDecompilerAgent.DEFAULT_ADDRESS, secondJrdPort, false);
                         }
                     } else {
                         Logger.getLogger()

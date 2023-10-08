@@ -139,12 +139,17 @@ public class OverwriteClassDialog extends JDialog {
     private final JButton compileAndUploadByteman;
     private final JButton unloadByteman;
     private final JButton unloadAllBytemans;
+    private final JTextField bytemanHostPort;
+    private final JTextField bytemanCompanionHostPort;
+    private final JTextField bytemanPid;
+    private final JButton createUpdateCompanion;
     private final String origName;
     private final String origBuffer;
     private final byte[] origBin;
     private final VmInfo vmInfo;
     private final VmManager vmManager;
 
+    @SuppressWarnings("VariableDeclarationUsageDistance")
     public OverwriteClassDialog(
             final String name, final LatestPaths latestPaths, final String currentBuffer, final byte[] cBinBuffer, VmInfo vmInfo,
             VmManager vmManager, PluginManager pluginManager, DecompilerWrapper selectedDecompiler, int tab, boolean isVerbose
@@ -247,7 +252,7 @@ public class OverwriteClassDialog extends JDialog {
         binaryView.add(uploadBinary);
         binaryView.add(statusBinary);
 
-        bytemanView = new JPanel(new GridLayout(5, 1));
+        bytemanView = new JPanel(new GridLayout(6, 1));
         bytemanView.setName("Current byteman script");
         saveBytemanAsFile = new JTextField(Config.getConfig().getBytemanScriptFile(name).getAbsolutePath());
         saveBytemanAsFile.setEditable(false);
@@ -255,7 +260,7 @@ public class OverwriteClassDialog extends JDialog {
         saveBytemanAs = new JButton("Save copy as");
         loadByteman = new JButton("Replace from file");
         compileByteman = new JButton("Type check");
-        compileAndUploadByteman = new JButton("Inject to vm: " + vmInfo.getVmPid());
+        compileAndUploadByteman = new JButton("Inject rules to vm: " + vmInfo.getVmPid());
         compileAndUploadByteman.setFont(compileAndUploadByteman.getFont().deriveFont(Font.BOLD));
         unloadByteman = new JButton("Unload rules from this file");
         unloadAllBytemans = new JButton("Unload all byteman rules");
@@ -273,10 +278,21 @@ public class OverwriteClassDialog extends JDialog {
         unloadBytemanButtons.add(unloadByteman);
         unloadBytemanButtons.add(unloadAllBytemans);
         bytemanView.add(unloadBytemanButtons);
+
+        JPanel companion = new JPanel(new GridLayout(2, 2));
+        bytemanHostPort = new JTextField("localhost:99666");
+        bytemanCompanionHostPort = new JTextField("localhost:19001");
+        bytemanPid = new JTextField("-1");
+        bytemanPid.setEditable(false);
+        createUpdateCompanion = new JButton("create/update companion");
+        companion.add(bytemanHostPort);
+        companion.add(bytemanCompanionHostPort);
+        companion.add(bytemanPid);
+        companion.add(createUpdateCompanion);
+        bytemanView.add(companion);
         bytemanStatus = new JTextField("check/install status");
         bytemanStatus.setEditable(false);
         bytemanView.add(bytemanStatus);
-
         setLocationRelativeTo(null);
         setValidation();
         setSelectListener();
@@ -576,6 +592,7 @@ public class OverwriteClassDialog extends JDialog {
     private void prepareBytemanLayout() {
         if (vmInfo.getType() != VmInfo.Type.FS) {
             if (vmInfo.getBytemanCompanion() == null) {
+                createUpdateCompanion.setText("Create byteman connector");
                 if (vmInfo.getType() == VmInfo.Type.REMOTE) {
                     bytemanStatus.setText("Byteman companion can be created manually, but be sure you know what you " + "are doing.");
                 } else {
@@ -587,6 +604,14 @@ public class OverwriteClassDialog extends JDialog {
                 }
 
             } else {
+                bytemanHostPort
+                        .setText(vmInfo.getBytemanCompanion().getBytemanHost() + ":" + vmInfo.getBytemanCompanion().getBytemanPort());
+                bytemanCompanionHostPort.setText(
+                        vmInfo.getBytemanCompanion().getPostBytemanAgentHost() + ":" +
+                                vmInfo.getBytemanCompanion().getPostBytemanAgentPort()
+                );
+                bytemanPid.setText("" + vmInfo.getVmPid());
+                createUpdateCompanion.setText("Update byteman connector");
                 bytemanStatus.setText("Byteman companion is already set up");
             }
             dualPane.add(bytemanView);

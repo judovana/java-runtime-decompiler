@@ -1,5 +1,6 @@
 package org.jrd.backend.core;
 
+import org.jrd.backend.communication.CallDecompilerAgent;
 import org.jrd.backend.core.agentstore.KnownAgent;
 import org.jrd.backend.core.agentstore.KnownAgents;
 import org.jrd.backend.data.VmManager;
@@ -49,7 +50,7 @@ public class AgentAttachManager {
                 return null;
             }
             VmDecompilerStatus status = new VmDecompilerStatus();
-            status.setHostname("localhost");
+            status.setHostname(CallDecompilerAgent.DEFAULT_ADDRESS);
             status.setListenPort(attachedPort);
             status.setVmId(vmId);
             vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
