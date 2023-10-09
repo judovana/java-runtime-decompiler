@@ -30,7 +30,7 @@ public class NewConnectionController {
             int port = Integer.parseInt(portString);
             newConnectionView.reSetLastHostname();
             newConnectionView.reSetLastPort();
-            vmManager.createRemoteVM(hostname, port, shouldBeSaved);
+            vmManager.createRemoteVM(hostname, port, shouldBeSaved, null);
             newConnectionView.dispose();
         } else {
             JOptionPane.showMessageDialog(newConnectionView, "VM port is invalid.", " ", JOptionPane.WARNING_MESSAGE);

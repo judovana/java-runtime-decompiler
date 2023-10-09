@@ -5,6 +5,7 @@ import org.jrd.backend.core.AgentLoader;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.agentstore.AgentLiveliness;
 import org.jrd.backend.core.agentstore.AgentLoneliness;
+import org.jrd.backend.data.BytemanCompanion;
 import org.jrd.backend.data.Config;
 import org.jrd.backend.data.Model;
 import org.jrd.backend.data.VmInfo;
@@ -90,7 +91,7 @@ public final class NewAgentDialog extends JDialog {
         return nad;
     }
 
-    public static int manualAttach(Component parent, AgentConfig aconf, int targetPid, boolean gui) {
+    public static int manualAttach(Component parent, AgentConfig aconf, int targetPid, boolean gui, BytemanCompanion caller) {
         int secondJrdPort = 0;
         try {
             secondJrdPort = AgentLoader.attachImpl(targetPid, aconf);
@@ -104,10 +105,10 @@ public final class NewAgentDialog extends JDialog {
         if (secondJrdPort > 0) {
             switch (Config.getConfig().getAdditionalAgentAction()) {
                 case ADD:
-                    Model.getModel().getVmManager().createRemoteVM(CallDecompilerAgent.DEFAULT_ADDRESS, secondJrdPort, false);
+                    Model.getModel().getVmManager().createRemoteVM(CallDecompilerAgent.DEFAULT_ADDRESS, secondJrdPort, false, caller);
                     break;
                 case ADD_AND_SAVE:
-                    Model.getModel().getVmManager().createRemoteVM(CallDecompilerAgent.DEFAULT_ADDRESS, secondJrdPort, true);
+                    Model.getModel().getVmManager().createRemoteVM(CallDecompilerAgent.DEFAULT_ADDRESS, secondJrdPort, true, caller);
                     break;
                 case NOTHING:
                     break;
@@ -120,9 +121,11 @@ public final class NewAgentDialog extends JDialog {
                                         secondJrdPort
                         );
                         if (r == JOptionPane.YES_OPTION) {
-                            Model.getModel().getVmManager().createRemoteVM(CallDecompilerAgent.DEFAULT_ADDRESS, secondJrdPort, true);
+                            Model.getModel().getVmManager()
+                                    .createRemoteVM(CallDecompilerAgent.DEFAULT_ADDRESS, secondJrdPort, true, caller);
                         } else if (r == JOptionPane.NO_OPTION) {
-                            Model.getModel().getVmManager().createRemoteVM(CallDecompilerAgent.DEFAULT_ADDRESS, secondJrdPort, false);
+                            Model.getModel().getVmManager()
+                                    .createRemoteVM(CallDecompilerAgent.DEFAULT_ADDRESS, secondJrdPort, false, caller);
                         }
                     } else {
                         Logger.getLogger()
@@ -214,7 +217,7 @@ public final class NewAgentDialog extends JDialog {
                 JOptionPane.showMessageDialog(null, "No pid? " + ex.getMessage());
                 return;
             }
-            manualAttach(nad, aconf, targetPid, true);
+            manualAttach(nad, aconf, targetPid, true, null);
             nad.setVisible(false);
         }
     }

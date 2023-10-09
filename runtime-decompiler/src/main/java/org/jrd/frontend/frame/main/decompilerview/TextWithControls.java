@@ -682,6 +682,7 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
         return new Object[]{pluginManager, jasm7, jasm8};
     }
 
+    @SuppressWarnings("UnnecessaryParentheses")
     private JMenu getCompileAndRunMenu(PluginManager pluginManager, DecompilerWrapper jasm7, DecompilerWrapper jasm8) {
         JMenu compileAndRun = new JMenu("Compile and run");
         addJavacAction(pluginManager, "compile by <b>javac</b> and run with no classpath", compileAndRun, null, this, this, null);
@@ -731,10 +732,12 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
             }
         }
         if (hasVm(classesAndMethodsProvider) &&
-                ((DecompilationController) classesAndMethodsProvider).getVmInfo().getType() == VmInfo.Type.LOCAL) {
+                (((DecompilationController) classesAndMethodsProvider).getVmInfo().getType() == VmInfo.Type.LOCAL ||
+                        (((DecompilationController) classesAndMethodsProvider).getVmInfo().getType() == VmInfo.Type.REMOTE &&
+                                ((DecompilationController) classesAndMethodsProvider).getVmInfo().getBytemanCompanion() != null))) {
             BytemanCompileAction btmSubm = new BytemanCompileAction(
                     "compile by byteman and inject to selected vm " +
-                            +((DecompilationController) classesAndMethodsProvider).getVmInfo().getVmPid(),
+                            pidOrHost(((DecompilationController) classesAndMethodsProvider).getVmInfo()),
                     this, this, this
             );
             btmSubm.addActionListener(new CompileActionListener(pluginManager, btmSubm));
@@ -751,6 +754,17 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
             compileAndRun.add(btmRemoveAll);
         }
         return compileAndRun;
+    }
+
+    private String pidOrHost(VmInfo vmInfo) {
+        if (vmInfo.getType() == VmInfo.Type.LOCAL) {
+            return "" + vmInfo.getVmPid();
+        } else if (vmInfo.getType() == VmInfo.Type.REMOTE) {
+            return vmInfo.getVmName() + ":" + vmInfo.getVmDecompilerStatus().getListenPort() + "/" +
+                    vmInfo.getBytemanCompanion().getBytemanPort();
+        } else {
+            return "fs vm leakage?";
+        }
     }
 
     private static boolean hasVm(ClassesAndMethodsProvider lclassesAndMethodsProvider) {

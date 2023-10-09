@@ -142,11 +142,12 @@ public class VmManager {
         notifyListeners();
     }
 
-    public VmInfo createRemoteVM(String hostname, int port, boolean shouldBeSaved) {
-        return createRemoteVM(hostname, port, null, shouldBeSaved);
+    public VmInfo createRemoteVM(String hostname, int port, boolean shouldBeSaved, BytemanCompanion bytemanCompanion) {
+        return createRemoteVM(hostname, port, null, shouldBeSaved, bytemanCompanion);
     }
 
-    public VmInfo createRemoteVM(String hostname, int port, String idOverride, boolean shouldBeSaved) {
+    @SuppressWarnings("VariableDeclarationUsageDistance")
+    public VmInfo createRemoteVM(String hostname, int port, String idOverride, boolean shouldBeSaved, BytemanCompanion bytemanCompanion) {
         String id;
         if (idOverride == null) {
             id = port + PORT_ID_SPLIT + UUID.randomUUID().toString();
@@ -158,6 +159,9 @@ public class VmManager {
         status.setVmId(id);
         status.setHostname(hostname);
         status.setListenPort(port);
+        if (bytemanCompanion != null) {
+            status.setBytemanCompanion(bytemanCompanion);
+        }
         vmInfo.setVmDecompilerStatus(status);
         vmInfoSet.add(vmInfo);
 

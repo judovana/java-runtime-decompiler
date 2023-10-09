@@ -236,7 +236,13 @@ public class VmInfo implements Serializable {
             int bytemanPort = attachByteman(boot);
             int pid = getVmPid();
             AgentConfig aconf = AgentConfig.getAnnonymousForcingPermanentAgent();
-            int secondJrdPort = NewAgentDialog.manualAttach(null, aconf, pid, true/*?*/);
+            int secondJrdPort = NewAgentDialog.manualAttach(
+                    null, aconf, pid, true/*?*/,
+                    new BytemanCompanion(
+                            CallDecompilerAgent.DEFAULT_ADDRESS, bytemanPort, CallDecompilerAgent.DEFAULT_ADDRESS,
+                            this.vmDecompilerStatus.getListenPort()
+                    )
+            );
             vmDecompilerStatus.setBytemanCompanion(
                     new BytemanCompanion(
                             CallDecompilerAgent.DEFAULT_ADDRESS, bytemanPort, CallDecompilerAgent.DEFAULT_ADDRESS, secondJrdPort
