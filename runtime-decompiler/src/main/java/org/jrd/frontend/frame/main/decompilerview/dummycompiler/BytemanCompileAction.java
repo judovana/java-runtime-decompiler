@@ -52,7 +52,7 @@ public class BytemanCompileAction extends AbstractCompileAction implements CanCo
             check.addRule(new Date().toString(), script);
             check.checkRules();
             RuleCheckResult results = check.getResult();
-            if (!results.hasError()) {
+            if (!results.hasError() || vmInfoProvider != null) {
                 List<IdentifiedBytecode> r = new ArrayList<>();
                 r.add(new IdentifiedBytecode(new ClassIdentifier("check.byteman"), script.getBytes(StandardCharsets.UTF_8)));
                 if (vmInfoProvider == null) {

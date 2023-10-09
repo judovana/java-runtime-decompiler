@@ -736,7 +736,7 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
                         (((DecompilationController) classesAndMethodsProvider).getVmInfo().getType() == VmInfo.Type.REMOTE &&
                                 ((DecompilationController) classesAndMethodsProvider).getVmInfo().getBytemanCompanion() != null))) {
             BytemanCompileAction btmSubm = new BytemanCompileAction(
-                    "compile by byteman and inject to selected vm " +
+                    "inject byteman rules (without check) to selected vm " +
                             pidOrHost(((DecompilationController) classesAndMethodsProvider).getVmInfo()),
                     this, this, this
             );
