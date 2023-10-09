@@ -72,7 +72,7 @@ public class VmManager {
     }
 
     private void loadSavedRemoteVms() {
-        List<VmInfo> savedVms;
+        List<Config.VminfoWithDuplicatedBytemanCompanion> savedVms;
         try {
             savedVms = Config.getConfig().getSavedRemoteVms();
         } catch (IOException | ClassNotFoundException e) {
@@ -84,14 +84,19 @@ public class VmManager {
             Logger.getLogger().log("No saved remote VMs to load.");
             return;
         }
-        for (VmInfo savedVm : savedVms) {
+        for (Config.VminfoWithDuplicatedBytemanCompanion savedVm : savedVms) {
             try {
+                VmInfo vmInfo = savedVm.getVmInfo();
+                BytemanCompanion possibleCompanion = savedVm.getBytemanCompanion();
                 VmDecompilerStatus status = new VmDecompilerStatus();
-                status.setVmId(savedVm.getVmId());
-                status.setHostname(savedVm.getVmName());
-                status.setListenPort(Integer.parseInt(savedVm.getVmId().split(PORT_ID_SPLIT)[0]));
-                savedVm.setVmDecompilerStatus(status);
-                vmInfoSet.add(savedVm);
+                status.setVmId(vmInfo.getVmId());
+                status.setHostname(vmInfo.getVmName());
+                status.setListenPort(Integer.parseInt(vmInfo.getVmId().split(PORT_ID_SPLIT)[0]));
+                if (possibleCompanion != null) {
+                    status.setBytemanCompanion(possibleCompanion);
+                }
+                vmInfo.setVmDecompilerStatus(status);
+                vmInfoSet.add(vmInfo);
             } catch (Exception e) {
                 Logger.getLogger().log(Logger.Level.ALL, "Failed to prepare saved remote VMs. Cause: ");
                 Logger.getLogger().log(Logger.Level.ALL, e);

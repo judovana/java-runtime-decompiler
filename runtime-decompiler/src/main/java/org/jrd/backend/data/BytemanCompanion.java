@@ -1,6 +1,8 @@
 package org.jrd.backend.data;
 
-public class BytemanCompanion {
+import java.io.Serializable;
+
+public class BytemanCompanion implements Serializable {
     private final int bytemanPort;
     private final String bytemanHost;
     private final int postBytemanAgentPort;

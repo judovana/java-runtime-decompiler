@@ -15,15 +15,10 @@ import org.jrd.backend.core.agentstore.KnownAgents;
 import org.jrd.backend.data.cli.utils.AgentConfig;
 import org.jrd.frontend.frame.main.NewAgentDialog;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.ServerSocket;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -206,21 +201,12 @@ public class VmInfo implements Serializable {
         return Objects.hash(vmId, vmPid, vmName, type, cp);
     }
 
-    private byte[] serialize() throws IOException {
-        try (ByteArrayOutputStream bo = new ByteArrayOutputStream(1024); ObjectOutputStream so = new ObjectOutputStream(bo)) {
-            so.writeObject(this);
-            so.flush();
-            return bo.toByteArray();
-        }
-    }
-
-    String base64Serialize() throws IOException {
-        return Base64.getEncoder().encodeToString(serialize());
+    public String base64Serialize() throws IOException {
+        return Config.base64Serialize(this);
     }
 
     static VmInfo base64Deserialize(String base64Representation) throws IOException, ClassNotFoundException {
-        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(Base64.getDecoder().decode(base64Representation)));
-        return (VmInfo) ois.readObject();
+        return (VmInfo) Config.base64Deserialize(base64Representation);
     }
 
     public BytemanCompanion getBytemanCompanion() {

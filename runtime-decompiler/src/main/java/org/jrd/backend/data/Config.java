@@ -8,9 +8,14 @@ import org.jrd.backend.core.Logger;
 import org.jrd.backend.decompiling.ExpandableUrl;
 import org.jrd.frontend.utility.AgentApiGenerator;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -24,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * Singleton class for storing and retrieving configuration strings.
@@ -184,10 +191,10 @@ public final class Config {
         return result;
     }
 
-    public List<VmInfo> getSavedRemoteVms() throws IOException, ClassNotFoundException {
-        List<VmInfo> result = new ArrayList<>();
+    public List<VminfoWithDuplicatedBytemanCompanion> getSavedRemoteVms() throws IOException, ClassNotFoundException {
+        List<VminfoWithDuplicatedBytemanCompanion> result = new ArrayList<>();
         for (String base64String : getOrCreateSavedRemoteVms()) {
-            result.add(VmInfo.base64Deserialize(base64String));
+            result.add(VminfoWithDuplicatedBytemanCompanion.base64Deserialize(base64String));
         }
         return result;
     }
@@ -197,7 +204,7 @@ public final class Config {
     }
 
     public void addSavedRemoteVm(VmInfo vmInfo) throws IOException {
-        getOrCreateSavedRemoteVms().add(vmInfo.base64Serialize());
+        getOrCreateSavedRemoteVms().add(new VminfoWithDuplicatedBytemanCompanion(vmInfo, vmInfo.getBytemanCompanion()).base64Serialize());
     }
 
     public void setUseHostSystemClasses(boolean useHostJavaClasses) {
@@ -512,5 +519,67 @@ public final class Config {
 
     public static String sanitizeInnerClass(String fqn) {
         return fqn.replaceAll("\\$.*", "");
+    }
+
+    public static byte[] serialize(Object o) throws IOException {
+        try (ByteArrayOutputStream bo = new ByteArrayOutputStream(1024); ObjectOutputStream so = new ObjectOutputStream(bo)) {
+            so.writeObject(o);
+            so.flush();
+            return bo.toByteArray();
+        }
+    }
+
+    public static String base64Serialize(Object o) throws IOException {
+        return Base64.getEncoder().encodeToString(serialize(o));
+    }
+
+    public static Object base64Deserialize(String base64Representation) throws IOException, ClassNotFoundException {
+        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(Base64.getDecoder().decode(base64Representation)));
+        return ois.readObject();
+    }
+
+    @SuppressFBWarnings("EI_EXPOSE_REP")
+    public static final class VminfoWithDuplicatedBytemanCompanion implements Serializable {
+
+        private final VmInfo vmInfo;
+        private final BytemanCompanion mBytemanCompanion;
+
+        public VminfoWithDuplicatedBytemanCompanion(VmInfo vmInfo, BytemanCompanion bytemanCompanion) {
+            this.vmInfo = vmInfo;
+            mBytemanCompanion = bytemanCompanion;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            return vmInfo.equals(((VminfoWithDuplicatedBytemanCompanion) o).getVmInfo());
+        }
+
+        @Override
+        public int hashCode() {
+            return vmInfo.hashCode();
+        }
+
+        public VmInfo getVmInfo() {
+            return vmInfo;
+        }
+
+        public BytemanCompanion getBytemanCompanion() {
+            return mBytemanCompanion;
+        }
+
+        public String base64Serialize() throws IOException {
+            return Config.base64Serialize(this);
+        }
+
+        static VminfoWithDuplicatedBytemanCompanion base64Deserialize(String base64Representation)
+                throws IOException, ClassNotFoundException {
+            return (VminfoWithDuplicatedBytemanCompanion) Config.base64Deserialize(base64Representation);
+        }
     }
 }
