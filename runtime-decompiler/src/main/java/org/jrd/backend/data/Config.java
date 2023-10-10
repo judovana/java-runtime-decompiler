@@ -328,7 +328,8 @@ public final class Config {
 
     public boolean isSavedRemoteVm(VmInfo vmInfo) {
         try {
-            return getOrCreateSavedRemoteVms().contains(vmInfo.base64Serialize());
+            return getOrCreateSavedRemoteVms()
+                    .contains(new VminfoWithDuplicatedBytemanCompanion(vmInfo, vmInfo.getBytemanCompanion()).base64Serialize());
         } catch (IOException e) {
             Logger.getLogger().log(Logger.Level.ALL, "Unable to determine if REMOTE '" + vmInfo + "' is saved. Cause:");
             Logger.getLogger().log(e);
@@ -341,7 +342,8 @@ public final class Config {
     }
 
     public void removeSavedRemoteVm(VmInfo vmInfo) throws IOException {
-        getOrCreateSavedRemoteVms().remove(vmInfo.base64Serialize());
+        getOrCreateSavedRemoteVms()
+                .remove(new VminfoWithDuplicatedBytemanCompanion(vmInfo, vmInfo.getBytemanCompanion()).base64Serialize());
     }
 
     @SuppressWarnings("unchecked") // gson.fromJson returns a Map<String, Object> when called with configMap.getClass()

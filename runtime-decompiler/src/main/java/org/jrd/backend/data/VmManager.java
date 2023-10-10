@@ -62,8 +62,6 @@ public class VmManager {
         }
         // re-adjust IDs for saved VMs to be at the top of the list
         for (VmInfo savedFsVm : savedFsVms) {
-            savedFsVm.setVmPid(getNextAvailableFsVmPid());
-            savedFsVm.setVmId(String.valueOf(getNextAvailableFsVmPid()));
             vmInfoSet.add(savedFsVm);
         }
 
