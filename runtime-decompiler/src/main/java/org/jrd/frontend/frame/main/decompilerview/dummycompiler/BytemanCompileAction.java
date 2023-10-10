@@ -1,5 +1,8 @@
 package org.jrd.frontend.frame.main.decompilerview.dummycompiler;
 
+import com.sun.tools.attach.AgentInitializationException;
+import com.sun.tools.attach.AgentLoadException;
+import com.sun.tools.attach.AttachNotSupportedException;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
@@ -21,6 +24,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -36,9 +40,34 @@ public class BytemanCompileAction extends AbstractCompileAction implements CanCo
     //better to provide unload all and unload this as separate buttons
     private final LastScriptProvider lastScriptProvider;
 
-    @SuppressFBWarnings(value = "SS_SHOULD_BE_STATIC", justification = "this is placeholder for future removal, unless found useful")
+    @SuppressFBWarnings(value = "SS_SHOULD_BE_STATIC", justification = "unloadLastScript is placeholder for future " +
+            "removal, unless found useful")
     private final boolean unloadLastScript = false;
     private final UploadProvider boot;
+
+    public String listAll() {
+        try {
+            return createSubmit().listAllRules();
+        } catch (Exception ex) {
+            Logger.getLogger().log(Logger.Level.ALL, ex);
+            return ex.getMessage();
+        }
+    }
+
+    /**
+     * it is not list of lines, but list of scripts. So common input is list of size of 1
+     *
+     * @param scripts
+     * @return
+     */
+    public String listSingleFile(List<String> scripts) {
+        try {
+            return scripts.stream().collect(Collectors.joining("\n\n"));
+        } catch (Exception ex) {
+            Logger.getLogger().log(Logger.Level.ALL, ex);
+            return ex.getMessage();
+        }
+    }
 
     @Override
     public Collection<IdentifiedBytecode> compile(List<String> scripts, PluginManager pluginManager) {
@@ -58,13 +87,7 @@ public class BytemanCompileAction extends AbstractCompileAction implements CanCo
                 if (vmInfoProvider == null) {
                     return r;
                 } else {
-                    VmInfo vmInfo = vmInfoProvider.getVmInfo();
-                    BytemanCompanion bytemanCompanion =
-                            vmInfo.setBytemanCompanion(boot.isBoot(), vmInfo.getVmDecompilerStatus().getListenPort());
-                    Submit submit = new Submit(
-                            bytemanCompanion.getBytemanHost(), bytemanCompanion.getBytemanPort(),
-                            new PrintStream(new LogOutputStream(), true, StandardCharsets.UTF_8)
-                    );
+                    Submit submit = createSubmit();
                     ScriptText st = new ScriptText("hi.btm", script);
                     if (lastScriptProvider.getLastScript() != null && unloadLastScript) {
                         String deleteAll = submit.deleteScripts(Collections.singletonList(lastScriptProvider.getLastScript()));
@@ -81,6 +104,18 @@ public class BytemanCompileAction extends AbstractCompileAction implements CanCo
             Logger.getLogger().log(Logger.Level.ALL, ex);
         }
         return null;
+    }
+
+    private Submit createSubmit() throws AgentLoadException, IOException, AttachNotSupportedException,
+            AgentInitializationException {
+        VmInfo vmInfo = vmInfoProvider.getVmInfo();
+        BytemanCompanion bytemanCompanion =
+                vmInfo.setBytemanCompanion(boot.isBoot(), vmInfo.getVmDecompilerStatus().getListenPort());
+        Submit submit = new Submit(
+                bytemanCompanion.getBytemanHost(), bytemanCompanion.getBytemanPort(),
+                new PrintStream(new LogOutputStream(), true, StandardCharsets.UTF_8)
+        );
+        return submit;
     }
 
     @Override

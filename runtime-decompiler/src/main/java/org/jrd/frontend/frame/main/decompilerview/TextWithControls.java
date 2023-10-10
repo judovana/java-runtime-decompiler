@@ -31,14 +31,19 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
+import javax.swing.WindowConstants;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -743,12 +748,36 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
             btmSubm.addActionListener(new CompileActionListener(pluginManager, btmSubm));
             compileAndRun.add(btmSubm);
             JMenuItem btmRemove = new JMenuItem(
-                    "list/unload current script rules from " +  pidOrHost(((DecompilationController) classesAndMethodsProvider).getVmInfo()));
-            btmRemove.setEnabled(false);
+                    "list/unload current script rules from " + pidOrHost(((DecompilationController) classesAndMethodsProvider).getVmInfo()));
+            btmRemove.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent actionEvent) {
+                    JFrame f = new JFrame();
+                    String s = btmSubm.listSingleFile(getCaredFiles());
+                    TextWithControls tf = new TextWithControls("", CodeCompletionType.FORBIDDEN);
+                    tf.setText(s);
+                    f.add(tf);
+                    f.setSize(800, 600);
+                    f.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+                    f.setVisible(true);
+                }
+            });
             compileAndRun.add(btmRemove);
             JMenuItem btmRemoveAll = new JMenuItem(
-                    "list/unload all byteman rules from " +   pidOrHost(((DecompilationController) classesAndMethodsProvider).getVmInfo()));
-            btmRemoveAll.setEnabled(false);
+                    "list/unload all byteman rules from " + pidOrHost(((DecompilationController) classesAndMethodsProvider).getVmInfo()));
+            btmRemoveAll.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent actionEvent) {
+                    JFrame f = new JFrame();
+                    String s = btmSubm.listAll();
+                    TextWithControls tf = new TextWithControls("", CodeCompletionType.FORBIDDEN);
+                    tf.setText(s);
+                    f.add(tf);
+                    f.setSize(800, 600);
+                    f.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+                    f.setVisible(true);
+                }
+            });
             compileAndRun.add(btmRemoveAll);
         }
         return compileAndRun;
@@ -845,12 +874,7 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
                         if (compiler.getWrapper() != null) {
                             pluginManager.initializeWrapper(compiler.getWrapper());
                         }
-                        List<String> toCompile = new ArrayList<>();
-                        if (isTreatAllTabsAsOneBatch()) {
-                            toCompile.addAll(getAllTabsTexts());
-                        } else {
-                            toCompile.add(bytecodeSyntaxTextArea.getText());
-                        }
+                        List<String> toCompile = getCaredFiles();
                         Collection<IdentifiedBytecode> l = compiler.compile(toCompile, pluginManager);
                         if (l == null || l.size() == 0 || new ArrayList<IdentifiedBytecode>(l).get(0).getFile().length == 0) {
                             repaintButton(Color.RED);
@@ -878,6 +902,16 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
                 Logger.getLogger().log(ex);
             }
         }
+    }
+
+    private List<String> getCaredFiles() {
+        List<String> toCompile = new ArrayList<>();
+        if (isTreatAllTabsAsOneBatch()) {
+            toCompile.addAll(getAllTabsTexts());
+        } else {
+            toCompile.add(bytecodeSyntaxTextArea.getText());
+        }
+        return toCompile;
     }
 
     @Override
