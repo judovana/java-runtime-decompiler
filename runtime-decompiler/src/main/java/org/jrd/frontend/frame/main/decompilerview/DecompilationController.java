@@ -33,6 +33,7 @@ import org.jrd.frontend.frame.main.LoadingDialogProvider;
 import org.jrd.frontend.frame.main.MainFrameView;
 import org.jrd.frontend.frame.main.ModelProvider;
 import org.jrd.frontend.frame.main.OverridesManager;
+import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.ClasspathProvider;
 import org.jrd.frontend.frame.plugins.PluginConfigurationEditorController;
 import org.jrd.frontend.frame.plugins.PluginConfigurationEditorView;
 import org.jrd.frontend.frame.remote.NewConnectionController;
@@ -65,7 +66,7 @@ import java.util.stream.Collectors;
  * This class provides Action listeners and request handling for
  * the GUI.
  */
-public class DecompilationController implements ModelProvider, LoadingDialogProvider, ClassesAndMethodsProvider {
+public class DecompilationController implements ModelProvider, LoadingDialogProvider, ClassesAndMethodsProvider, ClasspathProvider {
 
     private final MainFrameView mainFrameView;
     private final BytecodeDecompilerView bytecodeDecompilerView;
@@ -479,6 +480,11 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         if (!DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
             throw new RuntimeException(response);
         }
+    }
+
+    @Override
+    public ClassesAndMethodsProvider getClasspath() {
+        return this;
     }
 
     @Override

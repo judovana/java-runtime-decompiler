@@ -1,20 +1,27 @@
 package org.jrd.frontend.frame.main.decompilerview;
 
 import io.github.mkoncek.classpathless.api.ClassIdentifier;
+import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
 
+import org.jboss.byteman.agent.submit.ScriptText;
 import org.jrd.backend.completion.ClassesAndMethodsProvider;
 import org.jrd.backend.core.ClassInfo;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.BytemanCompanion;
 import org.jrd.backend.data.Config;
 import org.jrd.backend.data.DependenciesReader;
+import org.jrd.backend.data.Model;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.cli.InMemoryJar;
 import org.jrd.backend.data.cli.Lib;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.frontend.frame.main.GlobalConsole;
 import org.jrd.frontend.frame.main.MainFrameView;
+import org.jrd.frontend.frame.main.decompilerview.dummycompiler.BytemanCompileAction;
+import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.ClasspathProvider;
+import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.LastScriptProvider;
+import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.UploadProvider;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.templates.BytemanSkeletonTemplateMenuItem;
 import org.jrd.frontend.frame.main.popup.ClassListPopupMenu;
 import org.jrd.frontend.frame.main.popup.DiffPopup;
@@ -72,6 +79,8 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -131,6 +140,7 @@ public class BytecodeDecompilerView {
     private ActionListener addJar;
     private QuickCompiler compileAction;
     private ClassesAndMethodsProvider completionHelper;
+    private ClasspathProvider classpathProvider;
     private OverwriteActionListener overwriteActionListener;
     private DependenciesReader dependenciesReader;
 
@@ -349,7 +359,23 @@ public class BytecodeDecompilerView {
                 GlobalConsole.getConsole().show();
                 Logger.getLogger().log("Compilation started");
                 if (isBytemanBufferVisible()) {
-                    JOptionPane.showMessageDialog(buffers, "todo compile byteman buffer");
+                    Logger.getLogger().log(Logger.Level.ALL, "Byteman typecheck  called");
+                    BytemanCompileAction btmcheck = new BytemanCompileAction("Byteman typecheck  called", null, null, null);
+                    Collection<IdentifiedBytecode> l =
+                            btmcheck.compile(Collections.singletonList(bytemanScript.getText()), Model.getModel().getPluginManager());
+                    if (l == null || l.size() == 0 || new ArrayList<IdentifiedBytecode>(l).get(0).getFile().length == 0) {
+                        Logger.getLogger().log(Logger.Level.ALL, "Faield");
+                        Logger.getLogger().log(Logger.Level.ALL, "Note, Errors of ERROR : Could not load class...");
+                        Logger.getLogger().log(Logger.Level.ALL, "  As current byteman validator can not see to remote VM.");
+                        Logger.getLogger().log(Logger.Level.ALL, "  Thus they can be ignored. But not the others.");
+                        Logger.getLogger().log(
+                                Logger.Level.ALL, "To allow such scripts injection, we ignore result of tyepcheck " + "before injection"
+                        );
+                        Logger.getLogger().log(Logger.Level.ALL, "  be sure you fixed all other issues");
+                    } else {
+                        Logger.getLogger().log(Logger.Level.ALL, "Ok.");
+                    }
+                    Logger.getLogger().log(Logger.Level.ALL, "Byteman typecheck  finished");
                 } else if (isAdditionalBinaryBufferVisible()) {
                     JOptionPane.showMessageDialog(buffers, "Unlike (compile) and upload, compile is only for source buffers");
                 } else if (isBinaryBufferVisible()) {
@@ -382,7 +408,47 @@ public class BytecodeDecompilerView {
                 GlobalConsole.getConsole().show();
                 Logger.getLogger().log("Compilation with upload started");
                 if (isBytemanBufferVisible()) {
-                    JOptionPane.showMessageDialog(buffers, "todo compile and upload byteman buffer");
+                    Logger.getLogger().log(Logger.Level.ALL, "Byteman injection called");
+                    BytemanCompileAction btmcheck =
+                            new BytemanCompileAction("Byteman injection  called", classpathProvider, new LastScriptProvider() {
+                                @Override
+                                public ScriptText getLastScript() {
+                                    return null;
+                                }
+
+                                @Override
+                                public void setLastScript(ScriptText st) {
+
+                                }
+                            }, new UploadProvider() {
+                                @Override
+                                public ClasspathProvider getTarget() {
+                                    return classpathProvider;
+                                }
+
+                                @Override
+                                public boolean isUploadEnabled() {
+                                    return true;
+                                }
+
+                                @Override
+                                public void resetUpload() {
+
+                                }
+
+                                @Override
+                                public boolean isBoot() {
+                                    return false;
+                                }
+                            });
+                    Collection<IdentifiedBytecode> l =
+                            btmcheck.compile(Collections.singletonList(bytemanScript.getText()), Model.getModel().getPluginManager());
+                    if (l == null || l.size() == 0 || new ArrayList<IdentifiedBytecode>(l).get(0).getFile().length == 0) {
+                        Logger.getLogger().log(Logger.Level.ALL, "Faield");
+                    } else {
+                        Logger.getLogger().log(Logger.Level.ALL, "Ok.");
+                    }
+                    Logger.getLogger().log(Logger.Level.ALL, "Byteman inject finished");
                 } else if (isAdditionalBinaryBufferVisible()) {
                     compileAction.upload(lastDecompiledClass, additionalBinary.get());
                 } else if (isBinaryBufferVisible()) {
@@ -949,6 +1015,7 @@ public class BytecodeDecompilerView {
 
     public void setCompletionHelper(DecompilationController dec) {
         completionHelper = dec;
+        classpathProvider = dec;
         bytecodeBuffer.setClassesAndMethodsProvider(completionHelper);
         additionalSrcBuffer.setClassesAndMethodsProvider(completionHelper);
         additionalBytecodeBuffer.setClassesAndMethodsProvider(completionHelper);
