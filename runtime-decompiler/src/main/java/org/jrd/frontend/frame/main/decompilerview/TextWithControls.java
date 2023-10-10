@@ -743,13 +743,11 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
             btmSubm.addActionListener(new CompileActionListener(pluginManager, btmSubm));
             compileAndRun.add(btmSubm);
             JMenuItem btmRemove = new JMenuItem(
-                    "TODO remove current rules from " + ((DecompilationController) classesAndMethodsProvider).getVmInfo().getVmPid()
-            );
+                    "list/unload current script rules from " +  pidOrHost(((DecompilationController) classesAndMethodsProvider).getVmInfo()));
             btmRemove.setEnabled(false);
             compileAndRun.add(btmRemove);
             JMenuItem btmRemoveAll = new JMenuItem(
-                    "TODO remove all byteman rules from " + ((DecompilationController) classesAndMethodsProvider).getVmInfo().getVmPid()
-            );
+                    "list/unload all byteman rules from " +   pidOrHost(((DecompilationController) classesAndMethodsProvider).getVmInfo()));
             btmRemoveAll.setEnabled(false);
             compileAndRun.add(btmRemoveAll);
         }

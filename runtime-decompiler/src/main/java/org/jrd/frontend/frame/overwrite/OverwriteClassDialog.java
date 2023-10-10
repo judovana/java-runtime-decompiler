@@ -262,8 +262,8 @@ public class OverwriteClassDialog extends JDialog {
         compileByteman = new JButton("Type check");
         compileAndUploadByteman = new JButton("Inject rules to vm: " + vmInfo.getVmPid());
         compileAndUploadByteman.setFont(compileAndUploadByteman.getFont().deriveFont(Font.BOLD));
-        unloadByteman = new JButton("Unload rules from this file");
-        unloadAllBytemans = new JButton("Unload all byteman rules");
+        unloadByteman = new JButton("List/Unload rules from this file");
+        unloadAllBytemans = new JButton("List/Unload all byteman rules");
         bytemanView.add(saveBytemanAsFile);
         JPanel saveBytemanButtons = new JPanel(new GridLayout(1, 3));
         saveBytemanButtons.add(saveByteman);
