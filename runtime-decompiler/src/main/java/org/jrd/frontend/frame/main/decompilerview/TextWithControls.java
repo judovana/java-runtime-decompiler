@@ -9,9 +9,11 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dialog;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Point;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -32,8 +34,8 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -75,6 +77,7 @@ import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.MainPr
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.SaveProvider;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.UploadProvider;
 import org.jrd.frontend.utility.ImageButtonFactory;
+import org.jrd.frontend.utility.ScreenFinder;
 import org.kcc.CompletionItem;
 import org.kcc.CompletionSettings;
 import org.kcc.ContextSuggestionsNarrower;
@@ -480,6 +483,10 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
             menu.add(compile);
             JMenu compileAndRun = getCompileAndRunMenu(pluginManager, jasm7, jasm8);
             menu.add(compileAndRun);
+            if (shouldBytemanAdd()) {
+                JMenu bytemanMenu = getBytemanMenu(pluginManager);
+                menu.add(bytemanMenu);
+            }
             for (Component c : compile.getMenuComponents()) {
                 ((AbstractCompileAction) c).addActionListener(new ActionListener() {
                     @Override
@@ -686,7 +693,6 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
         return new Object[]{pluginManager, jasm7, jasm8};
     }
 
-    @SuppressWarnings("UnnecessaryParentheses")
     private JMenu getCompileAndRunMenu(PluginManager pluginManager, DecompilerWrapper jasm7, DecompilerWrapper jasm8) {
         JMenu compileAndRun = new JMenu("Compile and run");
         addJavacAction(pluginManager, "compile by <b>javac</b> and run with no classpath", compileAndRun, null, this, this, null);
@@ -735,44 +741,64 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
                 );
             }
         }
-        if (hasVm(classesAndMethodsProvider) &&
-                (((DecompilationController) classesAndMethodsProvider).getVmInfo().getType() == VmInfo.Type.LOCAL ||
-                        (((DecompilationController) classesAndMethodsProvider).getVmInfo().getType() == VmInfo.Type.REMOTE &&
-                                ((DecompilationController) classesAndMethodsProvider).getVmInfo().getBytemanCompanion() != null))) {
-            BytemanCompileAction btmSubm = new BytemanCompileAction(
-                    "inject byteman rules (without check) to selected vm " +
-                            pidOrHost(((DecompilationController) classesAndMethodsProvider).getVmInfo()),
-                    this, this, this
-            );
-            btmSubm.addActionListener(new CompileActionListener(pluginManager, btmSubm));
+        if (shouldBytemanAdd()) {
+            BytemanCompileAction btmSubm = createBytemanCompileRunItem(pluginManager);
             compileAndRun.add(btmSubm);
-            JMenuItem btmRemove = new JMenuItem(
-                    "list/unload current script rules from " + pidOrHost(((DecompilationController) classesAndMethodsProvider).getVmInfo())
-            );
-            btmRemove.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent actionEvent) {
-                    String s = btmSubm.listSingleFile(getCaredFiles());
-                    listRulesDialog(s, a -> btmSubm.removeSingleRuleSet(s));
-                }
-            });
-            compileAndRun.add(btmRemove);
-            JMenuItem btmRemoveAll = new JMenuItem(
-                    "list/unload all byteman rules from " + pidOrHost(((DecompilationController) classesAndMethodsProvider).getVmInfo())
-            );
-            btmRemoveAll.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent actionEvent) {
-                    String s = btmSubm.listAll();
-                    listRulesDialog(s, actionEvent1 -> btmSubm.removeAllRules());
-                }
-            });
-            compileAndRun.add(btmRemoveAll);
         }
         return compileAndRun;
     }
 
-    private static void listRulesDialog(String s, ActionListener worker) {
+    private BytemanCompileAction createBytemanCompileRunItem(PluginManager pluginManager) {
+        BytemanCompileAction btmSubm = new BytemanCompileAction(
+                "inject byteman rules (without check) to selected vm " +
+                        pidOrHost(((DecompilationController) classesAndMethodsProvider).getVmInfo()),
+                this, this, this
+        );
+        btmSubm.addActionListener(new CompileActionListener(pluginManager, btmSubm));
+        return btmSubm;
+    }
+
+    @SuppressWarnings("UnnecessaryParentheses")
+    private boolean shouldBytemanAdd() {
+        return hasVm(classesAndMethodsProvider) &&
+                (((DecompilationController) classesAndMethodsProvider).getVmInfo().getType() == VmInfo.Type.LOCAL ||
+                        (((DecompilationController) classesAndMethodsProvider).getVmInfo().getType() == VmInfo.Type.REMOTE &&
+                                ((DecompilationController) classesAndMethodsProvider).getVmInfo().getBytemanCompanion() != null));
+    }
+
+    @SuppressWarnings("UnnecessaryParentheses")
+    private JMenu getBytemanMenu(PluginManager pluginManager) {
+        JMenu bytemanmenu = new JMenu("byteman menu");
+        bytemanTypeCheckitem(pluginManager, bytemanmenu);
+
+        BytemanCompileAction btmSubm = createBytemanCompileRunItem(pluginManager);
+        bytemanmenu.add(btmSubm);
+        JMenuItem btmRemove = new JMenuItem(
+                "list/unload current script rules from " + pidOrHost(((DecompilationController) classesAndMethodsProvider).getVmInfo())
+        );
+        btmRemove.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                String s = btmSubm.listSingleFile(getCaredFiles());
+                listRulesDialog(s, a -> btmSubm.removeSingleRuleSet(s), btmRemove.getText(), null);
+            }
+        });
+        bytemanmenu.add(btmRemove);
+        JMenuItem btmRemoveAll = new JMenuItem(
+                "list/unload all byteman rules from " + pidOrHost(((DecompilationController) classesAndMethodsProvider).getVmInfo())
+        );
+        btmRemoveAll.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                String s = btmSubm.listAll();
+                listRulesDialog(s, actionEvent1 -> btmSubm.removeAllRules(), btmRemoveAll.getText(), null);
+            }
+        });
+        bytemanmenu.add(btmRemoveAll);
+        return bytemanmenu;
+    }
+
+    private static void listRulesDialog(String s, ActionListener worker, String title, Window parent) {
         JTabbedPane view = new JTabbedPane();
         TextWithControls tf = new TextWithControls("", CodeCompletionType.FORBIDDEN);
         tf.setText(s);
@@ -788,9 +814,12 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
         if (!rules.trim().isEmpty()) {
             view.setSelectedIndex(1);
         }
-        JFrame f = new JFrame();
+        JDialog f = new JDialog(parent, title, Dialog.ModalityType.APPLICATION_MODAL);
         f.add(view);
         f.setSize(800, 600);
+        if (parent == null) {
+            ScreenFinder.centerWindowToCurrentScreen(f);
+        }
         f.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         JPanel bottom = new JPanel(new GridLayout(1, 2));
         JButton remove = new JButton("remove all above rules");
@@ -841,10 +870,14 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
         if (jasm8 != null) {
             addJasmAction(pluginManager, jasm8, "compile by <b>jasmtools8</b>", compile, new MainProviders(null, null, this, this));
         }
-        BytemanCompileAction btmCheck = new BytemanCompileAction("compile by byteman", null, this, null);
+        bytemanTypeCheckitem(pluginManager, compile);
+        return compile;
+    }
+
+    private void bytemanTypeCheckitem(PluginManager pluginManager, JMenu compile) {
+        BytemanCompileAction btmCheck = new BytemanCompileAction("byteman typecheck", null, this, null);
         btmCheck.addActionListener(new CompileActionListener(pluginManager, btmCheck));
         compile.add(btmCheck);
-        return compile;
     }
 
     private void addJavacAction(
