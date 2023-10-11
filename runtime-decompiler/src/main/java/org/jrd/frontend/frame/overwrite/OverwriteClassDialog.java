@@ -18,6 +18,10 @@ import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.main.decompilerview.DecompilationController;
 import org.jrd.frontend.frame.main.GlobalConsole;
+import org.jrd.frontend.frame.main.decompilerview.TextWithControls;
+import org.jrd.frontend.frame.main.decompilerview.dummycompiler.BytemanCompileAction;
+import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.ClasspathProvider;
+import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.UploadProvider;
 import org.jrd.frontend.utility.CommonUtils;
 import org.jrd.frontend.utility.TeeOutputStream;
 
@@ -148,13 +152,18 @@ public class OverwriteClassDialog extends JDialog {
     private final byte[] origBin;
     private final VmInfo vmInfo;
     private final VmManager vmManager;
+    private final ClasspathProvider cp;
 
-    @SuppressWarnings("VariableDeclarationUsageDistance")
+    @SuppressWarnings({"VariableDeclarationUsageDistance", "CyclomaticComplexity"})
     public OverwriteClassDialog(
             final String name, final LatestPaths latestPaths, final String currentBuffer, final byte[] cBinBuffer, VmInfo vmInfo,
-            VmManager vmManager, PluginManager pluginManager, DecompilerWrapper selectedDecompiler, int tab, boolean isVerbose
+            VmManager vmManager, PluginManager pluginManager, DecompilerWrapper selectedDecompiler, int tab, boolean isVerbose,
+            ClasspathProvider cp
     ) {
         super((JFrame) null, "Specify class and selectSrc its bytecode", true);
+
+        bytemanStatus = new JTextField("check/install status");
+
         this.setSize(400, 400);
         this.setLayout(new BorderLayout());
 
@@ -163,6 +172,7 @@ public class OverwriteClassDialog extends JDialog {
         this.origBin = Arrays.copyOf(cBinBuffer, cBinBuffer.length);
         this.vmInfo = vmInfo;
         this.vmManager = vmManager;
+        this.cp = cp;
 
         dualPane = new JTabbedPane();
 
@@ -260,10 +270,40 @@ public class OverwriteClassDialog extends JDialog {
         saveBytemanAs = new JButton("Save copy as");
         loadByteman = new JButton("Replace from file");
         compileByteman = new JButton("Type check");
-        compileAndUploadByteman = new JButton("Inject rules to vm: " + vmInfo.getVmPid());
+        compileByteman.addActionListener(a -> {
+            BytemanCompileAction bca = new BytemanCompileAction("unused", null, new DummyUploadProvider(cp));
+            Collection<IdentifiedBytecode> l = bca.compile(Collections.singletonList(origBuffer), pluginManager);
+            if (l == null || l.size() == 0 || new ArrayList<IdentifiedBytecode>(l).get(0).getFile().length == 0) {
+                bytemanStatus.setText("typecheck failed, consult console log");
+            } else {
+                bytemanStatus.setText("typecheck OK, consult console log");
+            }
+        });
+        compileAndUploadByteman = new JButton("Inject rules to vm: " + pidOrPort());
+        compileAndUploadByteman.addActionListener(a -> {
+            BytemanCompileAction bca = new BytemanCompileAction("unused", cp, new DummyUploadProvider(cp));
+            Collection<IdentifiedBytecode> l = bca.compile(Collections.singletonList(origBuffer), pluginManager);
+            if (l == null || l.size() == 0 || new ArrayList<IdentifiedBytecode>(l).get(0).getFile().length == 0) {
+                bytemanStatus.setText("inject failed, consult console log");
+            } else {
+                bytemanStatus.setText("inject OK, consult console log");
+            }
+        });
         compileAndUploadByteman.setFont(compileAndUploadByteman.getFont().deriveFont(Font.BOLD));
         unloadByteman = new JButton("List/Unload rules from this file");
+        unloadByteman.addActionListener(a -> {
+            BytemanCompileAction bca = new BytemanCompileAction("this file rules", cp, new DummyUploadProvider(cp));
+            String s = origBuffer;
+            TextWithControls.listRulesDialog(s, b -> bca.removeSingleRuleSet(s), bca.getText(), null);
+            bytemanStatus.setText("consult console log");
+        });
         unloadAllBytemans = new JButton("List/Unload all byteman rules");
+        unloadAllBytemans.addActionListener(a -> {
+            BytemanCompileAction bca = new BytemanCompileAction("all rules", cp, new DummyUploadProvider(cp));
+            String s = bca.listAll();
+            TextWithControls.listRulesDialog(s, actionEvent1 -> bca.removeAllRules(), bca.getText(), null);
+            bytemanStatus.setText("consult console log");
+        });
         bytemanView.add(saveBytemanAsFile);
         JPanel saveBytemanButtons = new JPanel(new GridLayout(1, 3));
         saveBytemanButtons.add(saveByteman);
@@ -290,7 +330,6 @@ public class OverwriteClassDialog extends JDialog {
         companion.add(bytemanPid);
         companion.add(createUpdateCompanion);
         bytemanView.add(companion);
-        bytemanStatus = new JTextField("check/install status");
         bytemanStatus.setEditable(false);
         bytemanView.add(bytemanStatus);
         setLocationRelativeTo(null);
@@ -347,6 +386,14 @@ public class OverwriteClassDialog extends JDialog {
                 CommonUtils.uploadByGui(vmInfo, vmManager, new TextFieldBasedStus(statusBinary), origName, origBin);
             }
         });
+    }
+
+    private String pidOrPort() {
+        if (vmInfo.getType() == VmInfo.Type.LOCAL) {
+            return "" + vmInfo.getVmPid();
+        } else {
+            return vmInfo.getVmName() + vmInfo.getVmDecompilerStatus().getListenPort();
+        }
     }
 
     private void setValidation() {
@@ -891,6 +938,34 @@ public class OverwriteClassDialog extends JDialog {
                     }
                 }
             }
+        }
+    }
+
+    private static final class DummyUploadProvider implements UploadProvider {
+        private final ClasspathProvider mCp;
+
+        private DummyUploadProvider(ClasspathProvider cp) {
+            mCp = cp;
+        }
+
+        @Override
+        public ClasspathProvider getTarget() {
+            return mCp;
+        }
+
+        @Override
+        public boolean isUploadEnabled() {
+            return true;
+        }
+
+        @Override
+        public void resetUpload() {
+
+        }
+
+        @Override
+        public boolean isBoot() {
+            return false;
         }
     }
 }

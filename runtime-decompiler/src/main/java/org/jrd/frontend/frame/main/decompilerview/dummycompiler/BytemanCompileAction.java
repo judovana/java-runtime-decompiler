@@ -3,7 +3,6 @@ package org.jrd.frontend.frame.main.decompilerview.dummycompiler;
 import com.sun.tools.attach.AgentInitializationException;
 import com.sun.tools.attach.AgentLoadException;
 import com.sun.tools.attach.AttachNotSupportedException;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import org.jboss.byteman.agent.submit.ScriptText;
@@ -16,7 +15,6 @@ import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.ClasspathProvider;
-import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.LastScriptProvider;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.UploadProvider;
 
 import java.io.IOException;
@@ -34,15 +32,7 @@ import java.util.stream.Collectors;
 public class BytemanCompileAction extends AbstractCompileAction implements CanCompile {
 
     private final ClasspathProvider vmInfoProvider;
-    //to unlaod last script may be awesome idea
-    //but is very confusing for expereinced byteman users
-    //better to provide unload all and unload this as separate buttons
-    private final LastScriptProvider lastScriptProvider;
 
-    @SuppressFBWarnings(
-            value = "SS_SHOULD_BE_STATIC", justification = "unloadLastScript is placeholder for future " + "removal, unless found useful"
-    )
-    private final boolean unloadLastScript = false;
     private final UploadProvider boot;
 
     public String listAll() {
@@ -89,13 +79,7 @@ public class BytemanCompileAction extends AbstractCompileAction implements CanCo
                 } else {
                     Submit submit = createSubmit();
                     ScriptText st = new ScriptText("hi.btm", script);
-                    if (lastScriptProvider.getLastScript() != null && unloadLastScript) {
-                        String deleteAll = submit.deleteScripts(Collections.singletonList(lastScriptProvider.getLastScript()));
-                        Logger.getLogger().log(Logger.Level.ALL, deleteAll);
-                        lastScriptProvider.setLastScript(null);
-                    }
                     String add = submit.addScripts(Collections.singletonList(st));
-                    lastScriptProvider.setLastScript(st);
                     Logger.getLogger().log(Logger.Level.ALL, add);
                     return r;
                 }
@@ -125,9 +109,6 @@ public class BytemanCompileAction extends AbstractCompileAction implements CanCo
         try {
             String deleteAll = createSubmit().deleteAllRules();
             Logger.getLogger().log(Logger.Level.ALL, deleteAll);
-            if (lastScriptProvider != null) {
-                lastScriptProvider.setLastScript(null);
-            }
         } catch (Exception ex) {
             Logger.getLogger().log(Logger.Level.ALL, ex);
         }
@@ -138,9 +119,6 @@ public class BytemanCompileAction extends AbstractCompileAction implements CanCo
             ScriptText st = new ScriptText("by.btm", s);
             String deleteAll = createSubmit().deleteScripts(Collections.singletonList(st));
             Logger.getLogger().log(Logger.Level.ALL, deleteAll);
-            if (lastScriptProvider != null) {
-                lastScriptProvider.setLastScript(null);
-            }
         } catch (Exception ex) {
             Logger.getLogger().log(Logger.Level.ALL, ex);
         }
@@ -162,12 +140,9 @@ public class BytemanCompileAction extends AbstractCompileAction implements CanCo
 
     }
 
-    public BytemanCompileAction(
-            String title, ClasspathProvider vmInfoProvider, LastScriptProvider lastScriptProvider, UploadProvider boot
-    ) {
+    public BytemanCompileAction(String title, ClasspathProvider vmInfoProvider, UploadProvider boot) {
         super(title);
         this.vmInfoProvider = vmInfoProvider;
-        this.lastScriptProvider = lastScriptProvider;
         this.boot = boot;
     }
 
@@ -176,15 +151,6 @@ public class BytemanCompileAction extends AbstractCompileAction implements CanCo
         String s = super.getText();
         if (vmInfoProvider != null) {
             s = s + "<br/> will be uploaded installed to:" + vmInfoProvider.getClasspath().cpTextInfo();
-            if (unloadLastScript) {
-                if (lastScriptProvider != null) {
-                    if (lastScriptProvider.getLastScript() == null) {
-                        s = s + "<br/> nothing to unload";
-                    } else {
-                        s = s + "<br/> previous script will be unloaded";
-                    }
-                }
-            }
         }
         if (boot != null) {
             s = s + "<br/> boot classlaoder = " + boot.isBoot();

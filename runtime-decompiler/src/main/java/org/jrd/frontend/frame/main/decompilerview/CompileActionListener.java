@@ -30,7 +30,7 @@ class CompileActionListener implements ActionListener {
         Logger.getLogger().log("Compilation started");
         if (mBytecodeDecompilerView.isBytemanBufferVisible()) {
             Logger.getLogger().log(Logger.Level.ALL, "Byteman typecheck  called");
-            BytemanCompileAction btmcheck = new BytemanCompileAction("Byteman typecheck  called", null, null, null);
+            BytemanCompileAction btmcheck = new BytemanCompileAction("Byteman typecheck  called", null, null);
             Collection<IdentifiedBytecode> l = btmcheck.compile(
                     Collections.singletonList(mBytecodeDecompilerView.getBytemanScript().getText()), Model.getModel().getPluginManager()
             );

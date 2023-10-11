@@ -48,7 +48,6 @@ import javax.swing.WindowConstants;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
-import org.jboss.byteman.agent.submit.ScriptText;
 import org.jrd.backend.completion.ClassesAndMethodsProvider;
 import org.jrd.backend.completion.JrdCompletionSettings;
 import org.jrd.backend.core.Logger;
@@ -72,7 +71,6 @@ import org.jrd.frontend.frame.main.decompilerview.dummycompiler.JustBearerAction
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.templates.BytemanSkeletonTemplateMenuItem;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.ClasspathProvider;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.ExecuteMethodProvider;
-import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.LastScriptProvider;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.MainProviders;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.SaveProvider;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.UploadProvider;
@@ -88,7 +86,7 @@ import org.kcc.wordsets.ConnectedKeywords;
 import org.kcc.wordsets.JrdApiKeywords;
 
 @SuppressWarnings("LineLength") // un-refactorable
-public class TextWithControls extends JPanel implements LinesProvider, ClasspathProvider, ExecuteMethodProvider, SaveProvider, UploadProvider, LastScriptProvider {
+public class TextWithControls extends JPanel implements LinesProvider, ClasspathProvider, ExecuteMethodProvider, SaveProvider, UploadProvider {
 
     private final RSyntaxTextArea bytecodeSyntaxTextArea;
     private final SearchControlsPanel bytecodeSearchControls;
@@ -102,7 +100,6 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
     private AbstractCompileAction lastCompileAndRun;
     private String execute = "start";
     private File save;
-    private ScriptText lastScriptForByteman;
     private boolean addToRunningVm = false;
     private boolean useBootForBytemanAndUpload = false;
 
@@ -752,7 +749,7 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
         BytemanCompileAction btmSubm = new BytemanCompileAction(
                 "inject byteman rules (without check) to selected vm " +
                         pidOrHost(((DecompilationController) classesAndMethodsProvider).getVmInfo()),
-                this, this, this
+                this, this
         );
         btmSubm.addActionListener(new CompileActionListener(pluginManager, btmSubm));
         return btmSubm;
@@ -798,7 +795,7 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
         return bytemanmenu;
     }
 
-    private static void listRulesDialog(String s, ActionListener worker, String title, Window parent) {
+    public static void listRulesDialog(String s, ActionListener worker, String title, Window parent) {
         JTabbedPane view = new JTabbedPane();
         TextWithControls tf = new TextWithControls("", CodeCompletionType.FORBIDDEN);
         tf.setText(s);
@@ -875,7 +872,7 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
     }
 
     private void bytemanTypeCheckitem(PluginManager pluginManager, JMenu compile) {
-        BytemanCompileAction btmCheck = new BytemanCompileAction("byteman typecheck", null, this, null);
+        BytemanCompileAction btmCheck = new BytemanCompileAction("byteman typecheck", null, null);
         btmCheck.addActionListener(new CompileActionListener(pluginManager, btmCheck));
         compile.add(btmCheck);
     }
@@ -1011,16 +1008,6 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
         } else {
             return null;
         }
-    }
-
-    @Override
-    public ScriptText getLastScript() {
-        return lastScriptForByteman;
-    }
-
-    @Override
-    public void setLastScript(ScriptText st) {
-        lastScriptForByteman = st;
     }
 
     @Override

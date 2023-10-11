@@ -1,12 +1,10 @@
 package org.jrd.frontend.frame.main.decompilerview;
 
-import org.jboss.byteman.agent.submit.ScriptText;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.Model;
 import org.jrd.frontend.frame.main.GlobalConsole;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.BytemanCompileAction;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.ClasspathProvider;
-import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.LastScriptProvider;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.UploadProvider;
 
 import java.awt.event.ActionEvent;
@@ -35,17 +33,7 @@ class CompileAndUploadActionListener implements ActionListener {
         if (mBytecodeDecompilerView.isBytemanBufferVisible()) {
             Logger.getLogger().log(Logger.Level.ALL, "Byteman injection called");
             BytemanCompileAction btmcheck = new BytemanCompileAction(
-                    "Byteman injection  called", mBytecodeDecompilerView.getClasspathProvider(), new LastScriptProvider() {
-                        @Override
-                        public ScriptText getLastScript() {
-                            return null;
-                        }
-
-                        @Override
-                        public void setLastScript(ScriptText st) {
-
-                        }
-                    }, new UploadProvider() {
+                    "Byteman injection  called", mBytecodeDecompilerView.getClasspathProvider(), new UploadProvider() {
                         @Override
                         public ClasspathProvider getTarget() {
                             return mBytecodeDecompilerView.getClasspathProvider();

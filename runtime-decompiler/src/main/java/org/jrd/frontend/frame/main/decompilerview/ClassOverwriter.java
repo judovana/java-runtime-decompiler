@@ -20,7 +20,8 @@ class ClassOverwriter {
 
         final OverwriteClassDialog overwriteClassDialog = new OverwriteClassDialog(
                 name, lastLoaded, buffer, binBuffer, decompilationController.getVmInfo(), decompilationController.getVmManager(),
-                decompilationController.getPluginManager(), selectedDecompiler, tab, decompilationController.isVerbose()
+                decompilationController.getPluginManager(), selectedDecompiler, tab, decompilationController.isVerbose(),
+                decompilationController
         );
 
         ScreenFinder.centerWindowToCurrentScreen(overwriteClassDialog);
