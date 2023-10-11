@@ -24,7 +24,6 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -40,8 +39,9 @@ public class BytemanCompileAction extends AbstractCompileAction implements CanCo
     //better to provide unload all and unload this as separate buttons
     private final LastScriptProvider lastScriptProvider;
 
-    @SuppressFBWarnings(value = "SS_SHOULD_BE_STATIC", justification = "unloadLastScript is placeholder for future " +
-            "removal, unless found useful")
+    @SuppressFBWarnings(
+            value = "SS_SHOULD_BE_STATIC", justification = "unloadLastScript is placeholder for future " + "removal, unless found useful"
+    )
     private final boolean unloadLastScript = false;
     private final UploadProvider boot;
 
@@ -106,11 +106,9 @@ public class BytemanCompileAction extends AbstractCompileAction implements CanCo
         return null;
     }
 
-    private Submit createSubmit() throws AgentLoadException, IOException, AttachNotSupportedException,
-            AgentInitializationException {
+    private Submit createSubmit() throws AgentLoadException, IOException, AttachNotSupportedException, AgentInitializationException {
         VmInfo vmInfo = vmInfoProvider.getVmInfo();
-        BytemanCompanion bytemanCompanion =
-                vmInfo.setBytemanCompanion(boot.isBoot(), vmInfo.getVmDecompilerStatus().getListenPort());
+        BytemanCompanion bytemanCompanion = vmInfo.setBytemanCompanion(boot.isBoot(), vmInfo.getVmDecompilerStatus().getListenPort());
         Submit submit = new Submit(
                 bytemanCompanion.getBytemanHost(), bytemanCompanion.getBytemanPort(),
                 new PrintStream(new LogOutputStream(), true, StandardCharsets.UTF_8)
@@ -121,6 +119,31 @@ public class BytemanCompileAction extends AbstractCompileAction implements CanCo
     @Override
     public DecompilerWrapper getWrapper() {
         return null;
+    }
+
+    public void removeAllRules() {
+        try {
+            String deleteAll = createSubmit().deleteAllRules();
+            Logger.getLogger().log(Logger.Level.ALL, deleteAll);
+            if (lastScriptProvider != null) {
+                lastScriptProvider.setLastScript(null);
+            }
+        } catch (Exception ex) {
+            Logger.getLogger().log(Logger.Level.ALL, ex);
+        }
+    }
+
+    public void removeSingleRuleSet(String s) {
+        try {
+            ScriptText st = new ScriptText("by.btm", s);
+            String deleteAll = createSubmit().deleteScripts(Collections.singletonList(st));
+            Logger.getLogger().log(Logger.Level.ALL, deleteAll);
+            if (lastScriptProvider != null) {
+                lastScriptProvider.setLastScript(null);
+            }
+        } catch (Exception ex) {
+            Logger.getLogger().log(Logger.Level.ALL, ex);
+        }
     }
 
     public static class LogOutputStream extends OutputStream {

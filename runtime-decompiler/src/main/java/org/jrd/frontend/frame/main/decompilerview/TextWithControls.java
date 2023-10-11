@@ -10,6 +10,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -31,7 +32,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -39,8 +39,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
+import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.WindowConstants;
@@ -748,39 +747,63 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
             btmSubm.addActionListener(new CompileActionListener(pluginManager, btmSubm));
             compileAndRun.add(btmSubm);
             JMenuItem btmRemove = new JMenuItem(
-                    "list/unload current script rules from " + pidOrHost(((DecompilationController) classesAndMethodsProvider).getVmInfo()));
+                    "list/unload current script rules from " + pidOrHost(((DecompilationController) classesAndMethodsProvider).getVmInfo())
+            );
             btmRemove.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent actionEvent) {
-                    JFrame f = new JFrame();
                     String s = btmSubm.listSingleFile(getCaredFiles());
-                    TextWithControls tf = new TextWithControls("", CodeCompletionType.FORBIDDEN);
-                    tf.setText(s);
-                    f.add(tf);
-                    f.setSize(800, 600);
-                    f.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-                    f.setVisible(true);
+                    listRulesDialog(s, a -> btmSubm.removeSingleRuleSet(s));
                 }
             });
             compileAndRun.add(btmRemove);
             JMenuItem btmRemoveAll = new JMenuItem(
-                    "list/unload all byteman rules from " + pidOrHost(((DecompilationController) classesAndMethodsProvider).getVmInfo()));
+                    "list/unload all byteman rules from " + pidOrHost(((DecompilationController) classesAndMethodsProvider).getVmInfo())
+            );
             btmRemoveAll.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent actionEvent) {
-                    JFrame f = new JFrame();
                     String s = btmSubm.listAll();
-                    TextWithControls tf = new TextWithControls("", CodeCompletionType.FORBIDDEN);
-                    tf.setText(s);
-                    f.add(tf);
-                    f.setSize(800, 600);
-                    f.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-                    f.setVisible(true);
+                    listRulesDialog(s, actionEvent1 -> btmSubm.removeAllRules());
                 }
             });
             compileAndRun.add(btmRemoveAll);
         }
         return compileAndRun;
+    }
+
+    private static void listRulesDialog(String s, ActionListener worker) {
+        JTabbedPane view = new JTabbedPane();
+        TextWithControls tf = new TextWithControls("", CodeCompletionType.FORBIDDEN);
+        tf.setText(s);
+        tf.setName("all");
+        view.add(tf);
+        String[] ss = s.split("\n");
+        String rules = Arrays.stream(ss).map(a -> a.trim()).filter(a -> a.startsWith("RULE")).map(a -> a.replaceFirst("RULE\\s*", ""))
+                .collect(Collectors.joining("\n"));
+        TextWithControls rulesTf = new TextWithControls("", CodeCompletionType.FORBIDDEN);
+        rulesTf.setText(rules);
+        rulesTf.setName("rules");
+        view.add(rulesTf);
+        if (!rules.trim().isEmpty()) {
+            view.setSelectedIndex(1);
+        }
+        JFrame f = new JFrame();
+        f.add(view);
+        f.setSize(800, 600);
+        f.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        JPanel bottom = new JPanel(new GridLayout(1, 2));
+        JButton remove = new JButton("remove all above rules");
+        remove.addActionListener(a -> {
+            worker.actionPerformed(a);
+            f.dispose();
+        });
+        JButton close = new JButton("close");
+        close.addActionListener(a -> f.dispose());
+        bottom.add(remove);
+        bottom.add(close);
+        f.add(bottom, BorderLayout.SOUTH);
+        f.setVisible(true);
     }
 
     private String pidOrHost(VmInfo vmInfo) {
