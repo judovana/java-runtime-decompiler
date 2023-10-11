@@ -47,6 +47,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -267,6 +268,30 @@ public class OverwriteClassDialog extends JDialog {
         saveBytemanAsFile = new JTextField(Config.getConfig().getBytemanScriptFile(name).getAbsolutePath());
         saveBytemanAsFile.setEditable(false);
         saveByteman = new JButton("Save");
+        saveByteman.addActionListener(a -> {
+            try {
+                byte[] src = origBuffer.getBytes(StandardCharsets.UTF_8);
+                if (Config.getConfig().getBytemanScriptFile(name).exists()) {
+                    long target = Config.getConfig().getBytemanScriptFile(name).length();
+                    long origin = src.length;
+                    int answer = JOptionPane.showConfirmDialog(OverwriteClassDialog.this,
+                            "Do you want to replace existing " + Config.getConfig().getBytemanScriptFile(name).getAbsolutePath() + " "
+                                    + target + " bytes by content of " + origin + " bytes?");
+                    if (answer == JOptionPane.OK_OPTION) {
+                        Files.write(Config.getConfig().getBytemanScriptFile(name).toPath(), src);
+                        bytemanStatus.setText("written: " + Config.getConfig().getBytemanScriptFile(name));
+                    } else {
+                        bytemanStatus.setText("canceled");
+                    }
+                } else {
+                    Files.write(Config.getConfig().getBytemanScriptFile(name).toPath(), src);
+                    bytemanStatus.setText("written: " + Config.getConfig().getBytemanScriptFile(name));
+                }
+            } catch (Exception ex) {
+                Logger.getLogger().log(ex);
+                bytemanStatus.setText(ex.getMessage());
+            }
+        });
         saveBytemanAs = new JButton("Save copy as");
         loadByteman = new JButton("Replace from file");
         compileByteman = new JButton("Type check");
