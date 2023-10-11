@@ -1,5 +1,6 @@
 package org.jrd.frontend.frame.overwrite;
 
+import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
 import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.ClassesProvider;
 import io.github.mkoncek.classpathless.api.ClasspathlessCompiler;
@@ -45,6 +46,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -136,6 +138,7 @@ public class OverwriteClassDialog extends JDialog {
 
     private final JPanel bytemanView;
     private final JTextField saveBytemanAsFile; //read only!
+    private final JLabel saveBytemanAsFileSize;
     private final JTextField bytemanStatus; //read only!
     private final JButton saveByteman;
     private final JButton saveBytemanAs;
@@ -265,34 +268,40 @@ public class OverwriteClassDialog extends JDialog {
 
         bytemanView = new JPanel(new GridLayout(6, 1));
         bytemanView.setName("Current byteman script");
+        JPanel saveBytemanAsFilePane = new JPanel(new BorderLayout());
         saveBytemanAsFile = new JTextField(Config.getConfig().getBytemanScriptFile(name).getAbsolutePath());
         saveBytemanAsFile.setEditable(false);
+        saveBytemanAsFilePane.add(saveBytemanAsFile);
+        saveBytemanAsFileSize = new JLabel(origBuffer.length()+" chars");
+        saveBytemanAsFilePane.add(saveBytemanAsFileSize, BorderLayout.EAST);
+        bytemanView.add(saveBytemanAsFilePane);
         saveByteman = new JButton("Save");
         saveByteman.addActionListener(a -> {
             try {
-                byte[] src = origBuffer.getBytes(StandardCharsets.UTF_8);
-                if (Config.getConfig().getBytemanScriptFile(name).exists()) {
-                    long target = Config.getConfig().getBytemanScriptFile(name).length();
-                    long origin = src.length;
-                    int answer = JOptionPane.showConfirmDialog(OverwriteClassDialog.this,
-                            "Do you want to replace existing " + Config.getConfig().getBytemanScriptFile(name).getAbsolutePath() + " "
-                                    + target + " bytes by content of " + origin + " bytes?");
-                    if (answer == JOptionPane.OK_OPTION) {
-                        Files.write(Config.getConfig().getBytemanScriptFile(name).toPath(), src);
-                        bytemanStatus.setText("written: " + Config.getConfig().getBytemanScriptFile(name));
-                    } else {
-                        bytemanStatus.setText("canceled");
-                    }
-                } else {
-                    Files.write(Config.getConfig().getBytemanScriptFile(name).toPath(), src);
-                    bytemanStatus.setText("written: " + Config.getConfig().getBytemanScriptFile(name));
-                }
+                File ff = Config.getConfig().getBytemanScriptFile(name);
+                dealWithOverWrite(ff);
             } catch (Exception ex) {
                 Logger.getLogger().log(ex);
                 bytemanStatus.setText(ex.getMessage());
             }
         });
         saveBytemanAs = new JButton("Save copy as");
+        saveBytemanAs.addActionListener(a -> {
+            try {
+                VFSJFileChooser chooser =
+                        new VFSJFileChooser(Config.getConfig().getBytemanScriptFile(name).getParentFile());
+                chooser.setDialogType(VFSJFileChooser.DIALOG_TYPE.SAVE);
+                VFSJFileChooser.RETURN_TYPE selcted = chooser.showOpenDialog(OverwriteClassDialog.this);
+                if (selcted != VFSJFileChooser.RETURN_TYPE.APPROVE) {
+                    bytemanStatus.setText("not saving");
+                    return;
+                }
+                dealWithOverWrite(chooser.getSelectedFile());
+            } catch (Exception ex) {
+                Logger.getLogger().log(ex);
+                bytemanStatus.setText(ex.getMessage());
+            }
+        });
         loadByteman = new JButton("Replace from file");
         compileByteman = new JButton("Type check");
         compileByteman.addActionListener(a -> {
@@ -329,7 +338,6 @@ public class OverwriteClassDialog extends JDialog {
             TextWithControls.listRulesDialog(s, actionEvent1 -> bca.removeAllRules(), bca.getText(), null);
             bytemanStatus.setText("consult console log");
         });
-        bytemanView.add(saveBytemanAsFile);
         JPanel saveBytemanButtons = new JPanel(new GridLayout(1, 3));
         saveBytemanButtons.add(saveByteman);
         saveBytemanButtons.add(saveBytemanAs);
@@ -411,6 +419,26 @@ public class OverwriteClassDialog extends JDialog {
                 CommonUtils.uploadByGui(vmInfo, vmManager, new TextFieldBasedStus(statusBinary), origName, origBin);
             }
         });
+    }
+
+    private void dealWithOverWrite(File ff) throws IOException {
+        byte[] src = origBuffer.getBytes(StandardCharsets.UTF_8);
+        if (ff.exists()) {
+            long target = ff.length();
+            long origin = src.length;
+            int answer = JOptionPane.showConfirmDialog(OverwriteClassDialog.this,
+                    "Do you want to replace existing " + ff.getAbsolutePath() + " "
+                            + target + " bytes by content of " + origin + " bytes?");
+            if (answer == JOptionPane.OK_OPTION) {
+                Files.write(ff.toPath(), src);
+                bytemanStatus.setText("written: " + ff);
+            } else {
+                bytemanStatus.setText("canceled");
+            }
+        } else {
+            Files.write(ff.toPath(), src);
+            bytemanStatus.setText("written: " + ff);
+        }
     }
 
     private String pidOrPort() {
