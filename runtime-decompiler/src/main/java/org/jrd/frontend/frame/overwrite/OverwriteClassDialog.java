@@ -12,6 +12,8 @@ import io.github.mkoncek.classpathless.api.MessagesListener;
 import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.communication.TopLevelErrorCandidate;
 import org.jrd.backend.core.Logger;
+import org.jrd.backend.core.agentstore.KnownAgents;
+import org.jrd.backend.data.BytemanCompanion;
 import org.jrd.backend.data.Config;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
@@ -378,6 +380,18 @@ public class OverwriteClassDialog extends JDialog {
         companion.add(bytemanCompanionHostPort);
         companion.add(bytemanPid);
         companion.add(createUpdateCompanion);
+        createUpdateCompanion.addActionListener(a -> {
+            if (vmInfo.getVmDecompilerStatus() == null) {
+                bytemanStatus.setText("Can't create/update companion, the selected vm was never connected. Connect it first");
+            }
+            BytemanCompanion original = vmInfo.getVmDecompilerStatus().getBytemanCompanion();
+            BytemanCompanion future = new BytemanCompanion(bytemanHostPort.getText(), bytemanCompanionHostPort.getText());
+            vmInfo.getVmDecompilerStatus().setBytemanCompanion(future);
+            if (vmInfo.getType() == VmInfo.Type.LOCAL) {
+                KnownAgents.getInstance().setBytemanCompanion(vmInfo.getVmPid(), vmInfo.getVmDecompilerStatus().getListenPort(), future);
+            }
+            bytemanStatus.setText("updated");
+        });
         bytemanView.add(companion);
         bytemanStatus.setEditable(false);
         bytemanView.add(bytemanStatus);

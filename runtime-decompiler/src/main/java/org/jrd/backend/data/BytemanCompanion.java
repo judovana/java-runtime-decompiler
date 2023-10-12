@@ -15,6 +15,13 @@ public class BytemanCompanion implements Serializable {
         this.postBytemanAgentPort = postBytemanAgentPort;
     }
 
+    public BytemanCompanion(String byteman, String companion) {
+        this(
+                byteman.split(":")[0], Integer.parseInt(byteman.split(":")[1]), companion.split(":")[0],
+                Integer.parseInt(companion.split(":")[1])
+        );
+    }
+
     public int getBytemanPort() {
         return bytemanPort;
     }
