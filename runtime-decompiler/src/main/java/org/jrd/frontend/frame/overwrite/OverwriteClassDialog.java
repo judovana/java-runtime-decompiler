@@ -152,7 +152,7 @@ public class OverwriteClassDialog extends JDialog {
     private final JTextField bytemanPid;
     private final JButton createUpdateCompanion;
     private final String origName;
-    private final String origBuffer;
+    private String origBuffer;
     private final byte[] origBin;
     private final VmInfo vmInfo;
     private final VmManager vmManager;
@@ -303,6 +303,22 @@ public class OverwriteClassDialog extends JDialog {
             }
         });
         loadByteman = new JButton("Replace from file");
+        loadByteman.addActionListener( a-> {
+            try {
+                VFSJFileChooser chooser =
+                        new VFSJFileChooser(Config.getConfig().getBytemanScriptFile(name).getParentFile());
+                chooser.setDialogType(VFSJFileChooser.DIALOG_TYPE.OPEN);
+                VFSJFileChooser.RETURN_TYPE selcted = chooser.showOpenDialog(OverwriteClassDialog.this);
+                if (selcted != VFSJFileChooser.RETURN_TYPE.APPROVE) {
+                    bytemanStatus.setText("not loading");
+                    return;
+                }
+                dealWithNewContent(chooser.getSelectedFile());
+            } catch (Exception ex) {
+                Logger.getLogger().log(ex);
+                bytemanStatus.setText(ex.getMessage());
+            }
+        });
         compileByteman = new JButton("Type check");
         compileByteman.addActionListener(a -> {
             BytemanCompileAction bca = new BytemanCompileAction("unused", null, new DummyUploadProvider(cp));
@@ -421,23 +437,45 @@ public class OverwriteClassDialog extends JDialog {
         });
     }
 
-    private void dealWithOverWrite(File ff) throws IOException {
+    private void dealWithOverWrite(File toSaveTo) throws IOException {
         byte[] src = origBuffer.getBytes(StandardCharsets.UTF_8);
-        if (ff.exists()) {
-            long target = ff.length();
+        if (toSaveTo.exists()) {
+            long target = toSaveTo.length();
             long origin = src.length;
             int answer = JOptionPane.showConfirmDialog(OverwriteClassDialog.this,
-                    "Do you want to replace existing " + ff.getAbsolutePath() + " "
+                    "Do you want to replace existing " + toSaveTo.getAbsolutePath() + " "
                             + target + " bytes by content of " + origin + " bytes?");
             if (answer == JOptionPane.OK_OPTION) {
-                Files.write(ff.toPath(), src);
-                bytemanStatus.setText("written: " + ff);
+                Files.write(toSaveTo.toPath(), src);
+                bytemanStatus.setText("written: " + toSaveTo);
             } else {
                 bytemanStatus.setText("canceled");
             }
         } else {
-            Files.write(ff.toPath(), src);
-            bytemanStatus.setText("written: " + ff);
+            Files.write(toSaveTo.toPath(), src);
+            bytemanStatus.setText("written: " + toSaveTo);
+        }
+    }
+    private void dealWithNewContent(File toLoadFrom) throws IOException {
+        byte[] internalTarget = origBuffer.getBytes(StandardCharsets.UTF_8);
+        if (toLoadFrom.exists()) {
+            long nwContent = toLoadFrom.length();
+            long target = internalTarget.length;
+            int answer = JOptionPane.showConfirmDialog(OverwriteClassDialog.this,
+                    "Do you want to replace current byteman script of "
+                            + target + " bytes by content from " + toLoadFrom.getAbsolutePath() +
+                            " of " + nwContent + " bytes?");
+            if (answer == JOptionPane.OK_OPTION) {
+                String override = Files.readString(toLoadFrom.toPath(), StandardCharsets.UTF_8);
+                bytemanStatus.setText("loaded: " + toLoadFrom + " (reload editor manually)");
+                origBuffer = override;
+                Files.write(new File(saveBytemanAsFile.getText()).toPath(), override.getBytes(StandardCharsets.UTF_8));
+                saveBytemanAsFileSize.setText(origBuffer.length()+" chars");
+            } else {
+                bytemanStatus.setText("canceled");
+            }
+        } else {
+            bytemanStatus.setText("don't exists: " + toLoadFrom);
         }
     }
 
