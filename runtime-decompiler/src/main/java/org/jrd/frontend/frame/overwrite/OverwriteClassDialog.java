@@ -1,12 +1,14 @@
 package org.jrd.frontend.frame.overwrite;
 
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
+
 import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.ClassesProvider;
 import io.github.mkoncek.classpathless.api.ClasspathlessCompiler;
 import io.github.mkoncek.classpathless.api.IdentifiedBytecode;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
 import io.github.mkoncek.classpathless.api.MessagesListener;
+
 import org.jrd.backend.communication.RuntimeCompilerConnector;
 import org.jrd.backend.communication.TopLevelErrorCandidate;
 import org.jrd.backend.core.Logger;
@@ -158,7 +160,7 @@ public class OverwriteClassDialog extends JDialog {
     private final VmManager vmManager;
     private final ClasspathProvider cp;
 
-    @SuppressWarnings({"VariableDeclarationUsageDistance", "CyclomaticComplexity"})
+    @SuppressWarnings({"VariableDeclarationUsageDistance", "CyclomaticComplexity", "LambdaBodyLength"})
     public OverwriteClassDialog(
             final String name, final LatestPaths latestPaths, final String currentBuffer, final byte[] cBinBuffer, VmInfo vmInfo,
             VmManager vmManager, PluginManager pluginManager, DecompilerWrapper selectedDecompiler, int tab, boolean isVerbose,
@@ -272,7 +274,7 @@ public class OverwriteClassDialog extends JDialog {
         saveBytemanAsFile = new JTextField(Config.getConfig().getBytemanScriptFile(name).getAbsolutePath());
         saveBytemanAsFile.setEditable(false);
         saveBytemanAsFilePane.add(saveBytemanAsFile);
-        saveBytemanAsFileSize = new JLabel(origBuffer.length()+" chars");
+        saveBytemanAsFileSize = new JLabel(origBuffer == null ? "?" : origBuffer.length() + " chars");
         saveBytemanAsFilePane.add(saveBytemanAsFileSize, BorderLayout.EAST);
         bytemanView.add(saveBytemanAsFilePane);
         saveByteman = new JButton("Save");
@@ -288,8 +290,7 @@ public class OverwriteClassDialog extends JDialog {
         saveBytemanAs = new JButton("Save copy as");
         saveBytemanAs.addActionListener(a -> {
             try {
-                VFSJFileChooser chooser =
-                        new VFSJFileChooser(Config.getConfig().getBytemanScriptFile(name).getParentFile());
+                VFSJFileChooser chooser = new VFSJFileChooser(Config.getConfig().getBytemanScriptFile(name).getParentFile());
                 chooser.setDialogType(VFSJFileChooser.DIALOG_TYPE.SAVE);
                 VFSJFileChooser.RETURN_TYPE selcted = chooser.showOpenDialog(OverwriteClassDialog.this);
                 if (selcted != VFSJFileChooser.RETURN_TYPE.APPROVE) {
@@ -303,10 +304,9 @@ public class OverwriteClassDialog extends JDialog {
             }
         });
         loadByteman = new JButton("Replace from file");
-        loadByteman.addActionListener( a-> {
+        loadByteman.addActionListener(a -> {
             try {
-                VFSJFileChooser chooser =
-                        new VFSJFileChooser(Config.getConfig().getBytemanScriptFile(name).getParentFile());
+                VFSJFileChooser chooser = new VFSJFileChooser(Config.getConfig().getBytemanScriptFile(name).getParentFile());
                 chooser.setDialogType(VFSJFileChooser.DIALOG_TYPE.OPEN);
                 VFSJFileChooser.RETURN_TYPE selcted = chooser.showOpenDialog(OverwriteClassDialog.this);
                 if (selcted != VFSJFileChooser.RETURN_TYPE.APPROVE) {
@@ -442,9 +442,11 @@ public class OverwriteClassDialog extends JDialog {
         if (toSaveTo.exists()) {
             long target = toSaveTo.length();
             long origin = src.length;
-            int answer = JOptionPane.showConfirmDialog(OverwriteClassDialog.this,
-                    "Do you want to replace existing " + toSaveTo.getAbsolutePath() + " "
-                            + target + " bytes by content of " + origin + " bytes?");
+            int answer = JOptionPane.showConfirmDialog(
+                    OverwriteClassDialog.this,
+                    "Do you want to replace existing " + toSaveTo.getAbsolutePath() + " " + target + " bytes by content of " + origin +
+                            " bytes?"
+            );
             if (answer == JOptionPane.OK_OPTION) {
                 Files.write(toSaveTo.toPath(), src);
                 bytemanStatus.setText("written: " + toSaveTo);
@@ -456,21 +458,23 @@ public class OverwriteClassDialog extends JDialog {
             bytemanStatus.setText("written: " + toSaveTo);
         }
     }
+
     private void dealWithNewContent(File toLoadFrom) throws IOException {
         byte[] internalTarget = origBuffer.getBytes(StandardCharsets.UTF_8);
         if (toLoadFrom.exists()) {
             long nwContent = toLoadFrom.length();
             long target = internalTarget.length;
-            int answer = JOptionPane.showConfirmDialog(OverwriteClassDialog.this,
-                    "Do you want to replace current byteman script of "
-                            + target + " bytes by content from " + toLoadFrom.getAbsolutePath() +
-                            " of " + nwContent + " bytes?");
+            int answer = JOptionPane.showConfirmDialog(
+                    OverwriteClassDialog.this,
+                    "Do you want to replace current byteman script of " + target + " bytes by content from " +
+                            toLoadFrom.getAbsolutePath() + " of " + nwContent + " bytes?"
+            );
             if (answer == JOptionPane.OK_OPTION) {
                 String override = Files.readString(toLoadFrom.toPath(), StandardCharsets.UTF_8);
                 bytemanStatus.setText("loaded: " + toLoadFrom + " (reload editor manually)");
                 origBuffer = override;
                 Files.write(new File(saveBytemanAsFile.getText()).toPath(), override.getBytes(StandardCharsets.UTF_8));
-                saveBytemanAsFileSize.setText(origBuffer.length()+" chars");
+                saveBytemanAsFileSize.setText(origBuffer.length() + " chars");
             } else {
                 bytemanStatus.setText("canceled");
             }
@@ -728,16 +732,16 @@ public class OverwriteClassDialog extends JDialog {
     }
 
     /*
-    *for byteman for remote vm it is simple:
-    *   simply set byteman connection to user-set byteman host/port to byteman agent
-    *   the local pid/companion have no meaning, and should be empty and disabled
-    *
-    * fore local vm it is wierder
-    *   if the companion exists,then it can be updated to absolutely anything. User should be warned
-    *   if it does not exists, then what?
-    *   Offer auto creation - that would do first action? Offer manual creation as in remote case?
-    *     Is companion field good for anything?
-    */
+     *for byteman for remote vm it is simple:
+     *   simply set byteman connection to user-set byteman host/port to byteman agent
+     *   the local pid/companion have no meaning, and should be empty and disabled
+     *
+     * fore local vm it is wierder
+     *   if the companion exists,then it can be updated to absolutely anything. User should be warned
+     *   if it does not exists, then what?
+     *   Offer auto creation - that would do first action? Offer manual creation as in remote case?
+     *     Is companion field good for anything?
+     */
     private void prepareBytemanLayout() {
         if (vmInfo.getType() != VmInfo.Type.FS) {
             if (vmInfo.getBytemanCompanion() == null) {
