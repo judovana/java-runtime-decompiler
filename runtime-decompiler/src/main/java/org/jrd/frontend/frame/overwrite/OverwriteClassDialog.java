@@ -1,7 +1,5 @@
 package org.jrd.frontend.frame.overwrite;
 
-import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
-
 import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.ClassesProvider;
 import io.github.mkoncek.classpathless.api.ClasspathlessCompiler;
@@ -292,10 +290,10 @@ public class OverwriteClassDialog extends JDialog {
         saveBytemanAs = new JButton("Save copy as");
         saveBytemanAs.addActionListener(a -> {
             try {
-                VFSJFileChooser chooser = new VFSJFileChooser(Config.getConfig().getBytemanScriptFile(name).getParentFile());
-                chooser.setDialogType(VFSJFileChooser.DIALOG_TYPE.SAVE);
-                VFSJFileChooser.RETURN_TYPE selcted = chooser.showOpenDialog(OverwriteClassDialog.this);
-                if (selcted != VFSJFileChooser.RETURN_TYPE.APPROVE) {
+                JFileChooser chooser = new JFileChooser(Config.getConfig().getBytemanScriptFile(name).getParentFile());
+                chooser.setDialogType(JFileChooser.SAVE_DIALOG);
+                int selcted = chooser.showOpenDialog(OverwriteClassDialog.this);
+                if (selcted != JFileChooser.APPROVE_OPTION) {
                     bytemanStatus.setText("not saving");
                     return;
                 }
@@ -308,10 +306,10 @@ public class OverwriteClassDialog extends JDialog {
         loadByteman = new JButton("Replace from file");
         loadByteman.addActionListener(a -> {
             try {
-                VFSJFileChooser chooser = new VFSJFileChooser(Config.getConfig().getBytemanScriptFile(name).getParentFile());
-                chooser.setDialogType(VFSJFileChooser.DIALOG_TYPE.OPEN);
-                VFSJFileChooser.RETURN_TYPE selcted = chooser.showOpenDialog(OverwriteClassDialog.this);
-                if (selcted != VFSJFileChooser.RETURN_TYPE.APPROVE) {
+                JFileChooser chooser = new JFileChooser(Config.getConfig().getBytemanScriptFile(name).getParentFile());
+                chooser.setDialogType(JFileChooser.OPEN_DIALOG);
+                int selcted = chooser.showOpenDialog(OverwriteClassDialog.this);
+                if (selcted != JFileChooser.APPROVE_OPTION) {
                     bytemanStatus.setText("not loading");
                     return;
                 }

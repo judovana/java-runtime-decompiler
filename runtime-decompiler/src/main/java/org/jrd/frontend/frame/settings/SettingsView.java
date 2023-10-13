@@ -91,7 +91,7 @@ public class SettingsView extends JDialog {
         nestedJarsSettingsPanel.setMinimumSize(new Dimension(200, 200));
         miscSettingsPanel = new MiscellaneousSettingsPanel(
                 config.doUseJavapSignatures(), config.doDepndenceNumbers(), config.getAdditionalCP(), config.getAdditionalSP(),
-                config.doAutocompletion(), config.getAdditionalAgentAction()
+                config.doAutocompletion(), config.getAdditionalAgentAction(), mainFrameView
         );
 
         for (

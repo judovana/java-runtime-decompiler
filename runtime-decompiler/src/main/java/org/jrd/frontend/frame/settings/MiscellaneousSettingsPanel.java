@@ -1,5 +1,6 @@
 package org.jrd.frontend.frame.settings;
 
+import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.Config;
 import org.jrd.frontend.frame.filesystem.NewFsVmView;
 import org.jrd.frontend.frame.main.decompilerview.BytecodeDecompilerView;
@@ -9,16 +10,24 @@ import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 
+import java.awt.Container;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Arrays;
 import java.util.Enumeration;
 
 public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter {
@@ -27,6 +36,7 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
     private final JCheckBox useJavapSignaturesCheckBox;
     private final JCheckBox detectAutocompletionCheckBox;
     private final JComboBox<Config.DepndenceNumbers> dependenceNumbers;
+    private final JComboBox<String> lookAndFeel;
     private final JTextField srcPath;
     private final JTextField classPath;
     ButtonGroup additionalAgentPlace = new ButtonGroup();
@@ -37,7 +47,7 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
 
     public MiscellaneousSettingsPanel(
             boolean initialUseJavapSignatures, Config.DepndenceNumbers initialConfigNumbers, String cp, String sp,
-            boolean detectAutocompletion, Config.AdditionalAgentAction additionalAgentAction
+            boolean detectAutocompletion, Config.AdditionalAgentAction additionalAgentAction, final JFrame parent
     ) {
         miscSettingsLabel = new JLabel("Miscellaneous settings");
         this.setName(miscSettingsLabel.getText());
@@ -51,7 +61,17 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
         srcPath = new JTextField(sp);
         classPath = new JTextField(cp);
 
+        lookAndFeel =
+                new JComboBox<>(Arrays.stream(UIManager.getInstalledLookAndFeels()).map(a -> a.getClassName()).toArray(String[]::new));
+        for (int x = 0; x < lookAndFeel.getModel().getSize(); x++) {
+            if (lookAndFeel.getItemAt(x).equals(UIManager.getLookAndFeel().getClass().getName())) {
+                lookAndFeel.setSelectedIndex(x);
+            }
+        }
+        lookAndFeel.addActionListener(new ChangeLafListener(parent));
+
         initMainPanel(initialConfigNumbers, additionalAgentAction);
+
     }
 
     @SuppressWarnings({"ExecutableStatementCount", "JavaNCSS"}) // un-refactorable
@@ -155,6 +175,9 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
             }
         }
         mainPanel.add(radioPanel, gbc);
+        gbc.gridwidth = 1;
+        gbc.gridy = 10;
+        mainPanel.add(lookAndFeel, gbc);
     }
 
     public boolean shouldUseJavapSignatures() {
@@ -191,5 +214,33 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
 
     public Config.AdditionalAgentAction getAdditionalAgentAction() {
         return Config.AdditionalAgentAction.fromString(additionalAgentPlace.getSelection().getActionCommand());
+    }
+
+    private final class ChangeLafListener implements ActionListener {
+        private final JFrame parent;
+
+        private ChangeLafListener(JFrame parent) {
+            this.parent = parent;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent a) {
+            try {
+                UIManager.setLookAndFeel(lookAndFeel.getSelectedItem().toString());
+                SwingUtilities.updateComponentTreeUI(parent);
+                Container configParent = MiscellaneousSettingsPanel.this.getParent();
+                while (true) {
+                    if (configParent instanceof JDialog) {
+                        SwingUtilities.updateComponentTreeUI(configParent);
+                        break;
+                    }
+                    configParent = configParent.getParent();
+                }
+                Config.getConfig().setLaF(lookAndFeel.getSelectedItem().toString());
+            } catch (Exception e) {
+                Logger.getLogger().log(Logger.Level.DEBUG, e);
+                JOptionPane.showMessageDialog(MiscellaneousSettingsPanel.this, e.toString());
+            }
+        }
     }
 }

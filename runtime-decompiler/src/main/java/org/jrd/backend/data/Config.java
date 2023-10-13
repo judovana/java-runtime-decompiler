@@ -56,6 +56,7 @@ public final class Config {
     private static final String DEPNDENCE_NUMBERS = "DEPNDENCE_NUMBERS";
     private static final String ADDITIONAL_SOURCE_PATH = "ADDITIONAL_SOURCE_PATH";
     private static final String ADDITIONAL_CLASS_PATH = "ADDITIONAL_CLASS_PATH";
+    private static final String LOOK_AND_FEEL_KEY = "LOOK_AND_FEEL";
     //this is not persistent, is used for transfering detected value to compiler with other settings
     private Optional<Integer> sourceTargetValue;
     private FsAgent additionalClassPathAgent;
@@ -440,6 +441,19 @@ public final class Config {
             s = "";
         }
         return s.toString();
+    }
+
+    public String getLaF() {
+        Object s = configMap.get(LOOK_AND_FEEL_KEY);
+        if (s == null) {
+            s = null;
+        }
+        return (String) s;
+    }
+
+    public void setLaF(String fqn) throws IOException {
+        configMap.put(LOOK_AND_FEEL_KEY, fqn);
+        saveConfigFile();
     }
 
     public byte[] getAdditionalClassPathBytes(String fqn) {

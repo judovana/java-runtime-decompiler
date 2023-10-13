@@ -8,6 +8,8 @@ import org.jrd.frontend.frame.hex.StandaloneHex;
 import org.jrd.frontend.frame.main.decompilerview.DecompilationController;
 import org.jrd.frontend.frame.main.MainFrameView;
 
+import javax.swing.UIManager;
+
 public class Main {
 
     public static void main(String[] allArgs) throws Exception {
@@ -40,16 +42,15 @@ public class Main {
     }
 
     public static void setLookAndFeel() {
-        for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-            if ("com.sun.java.swing.plaf.gtk.GTKLookAndFeel".equals(info.getClassName()) ||
-                    Directories.isOsWindows() && "com.sun.java.swing.plaf.windows.WindowsLookAndFeel".equals(info.getClassName())) {
-                try {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                } catch (Exception e) {
-                    Logger.getLogger().log(Logger.Level.DEBUG, e);
-                }
-                break;
+        try {
+            String laf = Config.getConfig().getLaF();
+            if (laf == null) {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } else {
+                UIManager.setLookAndFeel(laf);
             }
+        } catch (Exception e) {
+            Logger.getLogger().log(Logger.Level.DEBUG, e);
         }
     }
 
