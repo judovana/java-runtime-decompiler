@@ -106,8 +106,11 @@ public class AgentActionWorker extends Thread {
     }
 
     private void writeToStreamBasedOnLine(
-            Socket socket, InstrumentationProvider localProvider, BufferedReader inputStream, BufferedWriter outputStream, String line
+            Socket socket, InstrumentationProvider localProvider, BufferedReader inputStream, BufferedWriter outputStream, String origLine
     ) throws IOException {
+        StringAndClassLoader cmdAndClasslaoder = new StringAndClassLoader(origLine);
+        String line = cmdAndClasslaoder.getLine();
+        String classloader = cmdAndClasslaoder.getClassloader();
         switch (line) {
             case "HALT":
                 AgentLogger.getLogger().log("Agent received HALT command, closing socket.");
@@ -119,16 +122,16 @@ public class AgentActionWorker extends Thread {
                 getAllFilteredClasses(inputStream, outputStream);
                 break;
             case "CLASSES":
-                getAllLoadedClasses(outputStream, false);
+                getAllLoadedClasses(outputStream, false, classloader);
                 break;
             case "CLASSES_WITH_INFO":
-                getAllLoadedClasses(outputStream, true);
+                getAllLoadedClasses(outputStream, true, classloader);
                 break;
             case "OVERRIDES":
                 getAllOverridesClasses(outputStream);
                 break;
             case "BYTES":
-                sendByteCode(inputStream, outputStream);
+                sendByteCode(inputStream, outputStream, classloader);
                 break;
             case "VERSION":
                 getVersion(outputStream);
@@ -189,25 +192,107 @@ public class AgentActionWorker extends Thread {
         out.flush();
     }
 
-    private void getAllLoadedClasses(BufferedWriter out, boolean doGetInfo) throws IOException {
+    private void getAllLoadedClasses(BufferedWriter out, boolean doGetInfo, String classlaoder) throws IOException {
         getList(out, "CLASSES", new ListInjector<String>() {
             @Override
             public void inject(BlockingQueue<String> target) throws InterruptedException {
-                provider.getClasses(target, abort, doGetInfo, Optional.empty());
+                provider.getClasses(target, abort, doGetInfo, Optional.empty(), classlaoder);
             }
         });
     }
 
     private void getAllFilteredClasses(BufferedReader in, BufferedWriter out) throws IOException {
-        final String substringAndRegexLineAndDetails = in.readLine();
-        boolean doGetInfo = (substringAndRegexLineAndDetails != null) ? substringAndRegexLineAndDetails.endsWith(" true") : false;
-        final Optional<ClassFilter> filter = ClassFilter.create(substringAndRegexLineAndDetails);
+        final String line = in.readLine();
+        //it can be  jsut  - "" - jsut nothing
+        //it can be    regex
+        //it can be    regex bodySubstring
+        //it can be    true/false
+        //it can be    regex true/false
+        //it can be    regex bodySubstring true/false
+        //it can be    regex true/false  classloader
+        //it can be    regex bodySubstring true/false classloader
+        // ??
+        //it can be    regex bodySubstring  classloader
+        //??!?!?!!? - no
+        //it can be    regex  classloader
+        Optional<ClassFilter> filter = ClassFilter.create(".*");
+        boolean doGetInfo = false;
+        String classloader = null;
+        if (line == null || line.trim().isEmpty()) {
+            filter = ClassFilter.create(line);
+        } else if (line.contains(" true") || line
+                .contains("true ") || line.contains(" false") || line.contains("false ") || line.equals("true") || line.equals("false")) {
+            String[] parts = line.split("\\s+");
+            switch (parts.length) {
+                case 1:
+                    //    true/false
+                    doGetInfo = Boolean.parseBoolean(parts[0]);
+                    break;
+                case 2:
+                    //    regex true/false
+                    filter = ClassFilter.create(parts[0]);
+                    doGetInfo = Boolean.parseBoolean(parts[1]);
+                    break;
+                case 3:
+                    if (parts[2].equals("false") || parts[2].equals("true")) {
+                        //    regex bodySubstring true/false
+                        filter = ClassFilter.create(parts[0] + " " + parts[1]);
+                        doGetInfo = Boolean.parseBoolean(parts[2]);
+                    } else if (parts[1].equals("false") || parts[1].equals("true")) {
+                        //    regex true/false  classloader
+                        filter = ClassFilter.create(parts[0]);
+                        doGetInfo = Boolean.parseBoolean(parts[1]);
+                        classloader = parts[2];
+                    } else {
+                        throw new IOException("bad arguments 3 in " + line);
+                    }
+                    break;
+                case 4:
+                    //    regex bodySubstring true/false classloader
+                    if (parts[2].equals("false") || parts[2].equals("true")) {
+                        filter = ClassFilter.create(parts[0] + " " + parts[1]);
+                        doGetInfo = Boolean.parseBoolean(parts[2]);
+                        classloader = parts[3];
+                    } else {
+                        throw new IOException("bad arguments 4 in " + line);
+                    }
+                    break;
+                default:
+                    throw new IOException("bad arguments 1-4 in " + line);
+            }
+        } else {
+            String[] parts = line.split("\\s+");
+            switch (parts.length) {
+                case 1:
+                    //    regex
+                    filter = ClassFilter.create(parts[0]);
+                    break;
+                case 2:
+                    //    regex bodySubstring
+                    filter = ClassFilter.create(parts[0] + " " + parts[1]);
+                    break;
+                case 3:
+                    //    regex bodySubstring  classloader
+                    filter = ClassFilter.create(parts[0] + " " + parts[1]);
+                    classloader = parts[2];
+                    break;
+                default:
+                    throw new IOException("bad arguments 1-3 in " + line);
+            }
+        }
+        final boolean finalDoGetInfo = doGetInfo;
+        final Optional<ClassFilter> finalFilter = filter;
+        final String finalClassloader = classloader;
         getList(out, "SEARCH_CLASSES", new ListInjector<String>() {
             @Override
             public void inject(BlockingQueue<String> target) throws InterruptedException {
-                provider.getClasses(target, abort, doGetInfo, filter);
+                provider.getClasses(target, abort, finalDoGetInfo, finalFilter, finalClassloader);
             }
         });
+    }
+
+    private static String decryptClassloader(String item) {
+        return new String(Base64.getDecoder().decode(item), StandardCharsets.UTF_8);
     }
 
     private void getAllOverridesClasses(BufferedWriter out) throws IOException {
@@ -219,7 +304,7 @@ public class AgentActionWorker extends Thread {
         });
     }
 
-    private void sendByteCode(BufferedReader in, BufferedWriter out) throws IOException {
+    private void sendByteCode(BufferedReader in, BufferedWriter out, String classloader) throws IOException {
         String className = in.readLine();
         if (className == null) {
             out.write(toError("No class name provided for the get bytes command.") + "\n");
@@ -227,7 +312,7 @@ public class AgentActionWorker extends Thread {
             return;
         }
         try {
-            byte[] body = provider.findClassBody(className);
+            byte[] body = provider.findClassBody(className, classloader);
             String encoded = Base64.getEncoder().encodeToString(body);
             out.write("BYTES");
             out.newLine();
@@ -254,7 +339,7 @@ public class AgentActionWorker extends Thread {
     }
 
     private interface ParametrisedRunner {
-        void run(String args) throws Exception;
+        void run(String arg1) throws Exception;
     }
 
     private void executeParametrisedNoReturnCommand(
@@ -302,22 +387,25 @@ public class AgentActionWorker extends Thread {
         executeParametrisedNoReturnCommand(in, out, "No class name provided for the overwrite command.", new ParametrisedRunner() {
             @Override
             public void run(String className) throws Exception {
-                String classBodyBase64 = in.readLine();
-                if (classBodyBase64 == null) {
+                String classBodyBase64AndMaybeClassLoader = in.readLine();
+                if (classBodyBase64AndMaybeClassLoader == null) {
                     out.write(toError("No class body provided for the overwrite command.") + "\n");
                     out.flush();
                     return;
                 }
+                StringAndClassLoader classBodyBase64AndMaybeClassLoaderParsed =
+                        new StringAndClassLoader(classBodyBase64AndMaybeClassLoader);
+                byte[] body = Base64.getDecoder().decode(classBodyBase64AndMaybeClassLoaderParsed.getLine());
                 switch (rewroteAddJar) {
                     case OVERWRITE_CLASS:
-                        provider.setClassBody(className, Base64.getDecoder().decode(classBodyBase64));
+                        provider.setClassBody(className, body, classBodyBase64AndMaybeClassLoaderParsed.getClassloader());
                         break;
                     case ADD_CLASS:
-                        provider.addClass(className, Base64.getDecoder().decode(classBodyBase64));
+                        provider.addClass(className, body);
                         //initClass(in, out); returns
                         break;
                     case ADD_JAR:
-                        provider.addJar(className, Base64.getDecoder().decode(classBodyBase64));
+                        provider.addJar(className, body);
                         break;
                     default:
                         throw new RuntimeException("Unknown action to receiveByteCode: " + rewroteAddJar);
@@ -332,5 +420,30 @@ public class AgentActionWorker extends Thread {
         socket.close();
         ConnectionDelegator.gracefulShutdown();
         AgentLogger.getLogger().log("done");
+    }
+
+    private static class StringAndClassLoader {
+
+        private final String line;
+        private final String classloader;
+
+        public StringAndClassLoader(String origLine) {
+            String[] lines = origLine.split("\\s");
+            String line = lines[0];
+            String classloader = null;
+            if (lines.length > 1) {
+                classloader = decryptClassloader(lines[1]);
+            }
+            this.line = line;
+            this.classloader = classloader;
+        }
+
+        public String getLine() {
+            return line;
+        }
+
+        public String getClassloader() {
+            return classloader;
+        }
     }
 }

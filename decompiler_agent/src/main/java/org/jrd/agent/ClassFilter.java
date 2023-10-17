@@ -28,10 +28,10 @@ public class ClassFilter {
         return Optional.of(new ClassFilter(Optional.of(substringAndRegex[0]), Optional.of(substringAndRegex[1])));
     }
 
-    public boolean match(InstrumentationProvider instrumentationProvider, Class loadedClass) {
+    public boolean match(InstrumentationProvider instrumentationProvider, Class loadedClass, String classLoader) {
         try {
             if (nameFilter.matcher(loadedClass.getName()).matches()) {
-                byte[] b = instrumentationProvider.getClassBody(loadedClass);
+                byte[] b = instrumentationProvider.getClassBody(loadedClass, classLoader);
                 String ascii = new String(b, StandardCharsets.US_ASCII);
                 if (ascii.contains(bodySubstring)) {
                     return true;
