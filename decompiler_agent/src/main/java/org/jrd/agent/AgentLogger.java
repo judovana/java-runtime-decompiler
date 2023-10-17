@@ -31,4 +31,12 @@ public class AgentLogger {
 
         System.err.println(s);
     }
+
+    public static String classLoaderId(ClassLoader cl) {
+        if (cl == null) {
+            return "unknown";
+        } else {
+            return cl.toString();
+        }
+    }
 }

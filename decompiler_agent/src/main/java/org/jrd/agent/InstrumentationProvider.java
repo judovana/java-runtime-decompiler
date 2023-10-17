@@ -34,15 +34,15 @@ public class InstrumentationProvider {
         this.loneliness = loneliness;
     }
 
-    public void setClassBody(String cname, byte[] nwBody) throws UnmodifiableClassException {
-        Class clazz = findClass(cname);
+    public void setClassBody(String cname, byte[] nwBody, String classloader) throws UnmodifiableClassException {
+        Class clazz = findClass(cname, classloader);
         transformer.allowToSaveBytecode();
         try {
-            transformer.setOverride(clazz.getName(), nwBody);
+            transformer.setOverride(clazz.getName(), nwBody, classloader);
             try {
                 instrumentation.retransformClasses(clazz);
             } catch (Throwable ex) {
-                transformer.removeOverride(clazz.getName());
+                transformer.removeOverride(clazz.getName(), classloader);
                 throw ex;
             }
         } finally {
@@ -51,16 +51,16 @@ public class InstrumentationProvider {
         }
     }
 
-    byte[] getClassBody(Class clazz) throws UnmodifiableClassException {
+    byte[] getClassBody(Class clazz, String classloader) throws UnmodifiableClassException {
         byte[] result;
         transformer.allowToSaveBytecode();
         try {
             try {
                 instrumentation.retransformClasses(clazz);
             } catch (Throwable ex) {
-                transformer.removeOverride(clazz.getName());
+                transformer.removeOverride(clazz.getName(), classloader);
             }
-            result = transformer.getResult(clazz.getName());
+            result = transformer.getResult(clazz.getName(), classloader);
         } finally {
             transformer.denyToSaveBytecode();
             transformer.resetLastValidResult();
@@ -76,19 +76,27 @@ public class InstrumentationProvider {
      * @return bytecode of given class
      * @throws UnmodifiableClassException if the class can not be re-transformed
      */
-    public byte[] findClassBody(String className) throws UnmodifiableClassException {
-        return getClassBody(findClass(className));
+    public byte[] findClassBody(String className, String classloader) throws UnmodifiableClassException {
+        return getClassBody(findClass(className, classloader), classloader);
 
     }
 
-    private Class findClass(String className) {
+    private Class findClass(String className, String classLoader) {
         Class[] classes = instrumentation.getAllLoadedClasses();
-        for (Class clazz : classes) {
-            if (clazz.getName().equals(className)) {
-                return clazz;
+        if (classLoader == null) {
+            for (Class clazz : classes) {
+                if (clazz.getName().equals(className)) {
+                    return clazz;
+                }
+            }
+        } else {
+            for (Class clazz : classes) {
+                if (clazz.getName().equals(className) && AgentLogger.classLoaderId(clazz.getClassLoader()).equals(classLoader)) {
+                    return clazz;
+                }
             }
         }
-        throw new RuntimeException("Class " + className + " not found in loaded classes.");
+        throw new RuntimeException("Class " + className + " not found in loaded classes. In classloader " + classLoader);
     }
 
     /**
@@ -99,14 +107,14 @@ public class InstrumentationProvider {
      * @param abort abort signal
      * @throws InterruptedException interrupted exception
      */
-    public void getClasses(BlockingQueue<String> queue, Boolean abort, boolean doGetInfo, Optional<ClassFilter> filter)
+    public void getClasses(BlockingQueue<String> queue, Boolean abort, boolean doGetInfo, Optional<ClassFilter> filter, String classlaoder)
             throws InterruptedException {
         Class[] loadedClasses = instrumentation.getAllLoadedClasses();
         for (Class loadedClass : loadedClasses) {
             String className = loadedClass.getName();
             boolean found = false;
             if (filter.isPresent()) {
-                found = filter.get().match(this, loadedClass);
+                found = filter.get().match(this, loadedClass, classlaoder);
             } else {
                 found = true;
             }
@@ -118,14 +126,8 @@ public class InstrumentationProvider {
                     } catch (Exception ex) {
                         location = "unknown";
                     }
-
                     String classLoader;
-                    try {
-                        classLoader = loadedClass.getClassLoader().toString();
-                    } catch (Exception ex) {
-                        classLoader = "unknown";
-                    }
-
+                    classLoader = AgentLogger.classLoaderId(loadedClass.getClassLoader());
                     queue.put(className + INFO_DELIMITER + location + INFO_DELIMITER + classLoader);
                 } else {
                     queue.put(className);
@@ -148,7 +150,9 @@ public class InstrumentationProvider {
     public int cleanOverrides(String pattern) {
         List<String> removed = transformer.cleanOverrides(Pattern.compile(pattern));
         try {
-            instrumentation.retransformClasses(removed.stream().map(this::findClass).toArray(Class[]::new));
+            instrumentation.retransformClasses(removed.stream().map(a -> {
+                return this.findClass(a, null);
+            }).toArray(Class[]::new));
         } catch (RuntimeException | UnmodifiableClassException e) {
             AgentLogger.getLogger().log(e);
         }
