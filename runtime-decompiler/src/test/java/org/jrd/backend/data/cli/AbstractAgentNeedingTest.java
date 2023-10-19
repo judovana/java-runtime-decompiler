@@ -81,9 +81,7 @@ public abstract class AbstractAgentNeedingTest {
 
     private static boolean isDifferenceTolerable(double samenessPercentage, int actualChanges, int totalSize) {
         assert samenessPercentage >= 0 && samenessPercentage <= 1.0;
-
-        double changesAllowed = (1.0 - samenessPercentage) * totalSize;
-        return actualChanges <= changesAllowed;
+        return LevenshteinDistance.isDifferenceTolerableImpl(samenessPercentage, actualChanges, totalSize, false);
     }
 
     static void assertEqualsWithTolerance(String s1, String s2, double samenessPercentage) {
@@ -143,6 +141,20 @@ public abstract class AbstractAgentNeedingTest {
 
         private static int min3(int a, int b, int c) {
             return Math.min(a, Math.min(b, c));
+        }
+
+        public static boolean isDifferenceTolerable(String s1, String s2, double samenessPercentage, boolean verbose) {
+            return isDifferenceTolerableImpl(
+                    samenessPercentage, LevenshteinDistance.calculate(s1, s2), Math.max(s1.length(), s2.length()), verbose
+            );
+        }
+
+        public static boolean isDifferenceTolerableImpl(double samenessPercentage, int actualChanges, int totalSize, boolean verbose) {
+            double changesAllowed = (1.0 - samenessPercentage) * totalSize;
+            if (verbose) {
+                System.err.println(100 - ((actualChanges * 100) / totalSize) + "% <? " + samenessPercentage * 100 + "%");
+            }
+            return actualChanges <= changesAllowed;
         }
     }
 
