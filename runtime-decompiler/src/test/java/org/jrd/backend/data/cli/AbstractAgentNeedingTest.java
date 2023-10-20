@@ -229,7 +229,7 @@ public abstract class AbstractAgentNeedingTest {
 
     private static String findFreshAgent() throws IOException {
         File agentDir = Directories.getFreshlyBuiltAgent();
-        if (!agentDir.exists() || !agentDir.isDirectory()) {
+        if (!agentDir.exists()) {
             return null;
         }
         return agentDir.getCanonicalPath();
