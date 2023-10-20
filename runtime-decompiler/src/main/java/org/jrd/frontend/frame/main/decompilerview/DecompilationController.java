@@ -395,8 +395,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
      */
     private void loadClassNames() {
         showLoadingDialog("Loading classes");
-        AgentRequestAction request =
-                createRequest(bytecodeDecompilerView.doShowClassInfo() ? RequestAction.CLASSES_WITH_INFO : RequestAction.CLASSES, "");
+        AgentRequestAction request = createRequest(RequestAction.CLASSES_WITH_INFO, "");
         String response = submitRequest(request);
         if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
             bytecodeDecompilerView.reloadClassList(vmInfo.getVmDecompilerStatus().getLoadedClasses());

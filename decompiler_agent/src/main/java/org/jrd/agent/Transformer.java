@@ -29,13 +29,13 @@ public class Transformer implements ClassFileTransformer {
             //some parts of instrumentation works on p/k/g/class some on p.l.g.class, lets unify that
             String nameWithoutSlashes = clazz.getName().replace("/", ".");
             synchronized (this) {
-                b = overrides.get(nameWithoutSlashes, loader.toString());
+                b = overrides.get(nameWithoutSlashes, AgentLogger.classLoaderId(loader));
             }
             if (b != null) {
-                results.put(nameWithoutSlashes, b, loader.toString());
+                results.put(nameWithoutSlashes, b, AgentLogger.classLoaderId(loader));
                 return b;
             } else {
-                results.put(nameWithoutSlashes, classfileBuffer, loader.toString());
+                results.put(nameWithoutSlashes, classfileBuffer, AgentLogger.classLoaderId(loader));
             }
         }
         return null;
@@ -57,6 +57,10 @@ public class Transformer implements ClassFileTransformer {
 
     public List<String> getOverriddenFqns() {
         return Collections.unmodifiableList(new ArrayList<>(overrides.keySet()));
+    }
+
+    public List<String[]> getOverriddenFqnPairs() {
+        return Collections.unmodifiableList(new ArrayList<>(overrides.keySetPairs()));
     }
 
     /**
@@ -88,15 +92,26 @@ public class Transformer implements ClassFileTransformer {
         overrides.remove(clazz, classloader);
     }
 
-    public synchronized List<String> cleanOverrides(Pattern cleanPattern) {
-        List<String> fqns = getOverriddenFqns();
-        List<String> removed = new ArrayList<>();
+    public synchronized List<String[]> cleanOverrides(String patterns) {
+        List<String[]> fqns = getOverriddenFqnPairs();
+        List<String[]> removed = new ArrayList<>();
 
-        for (String fqn : fqns) {
-            if (cleanPattern.matcher(fqn).matches()) {
-                removeOverride(fqn);
-                removed.add(fqn);
-                AgentLogger.getLogger().log("Removed " + fqn + " override");
+        Pattern fqn = Pattern.compile(".*");
+        Pattern loader = Pattern.compile(".*");
+
+        if (patterns.contains(":")) {
+            fqn = Pattern.compile(patterns.split(":")[0]);
+            loader = Pattern.compile(patterns.replace(fqn.toString() + ":", ""));
+        } else {
+            fqn = Pattern.compile(patterns);
+        }
+
+        for (String[] fqnAndLoader : fqns) {
+            if (fqn.matcher(fqnAndLoader[0]).matches() && loader.matcher(fqnAndLoader[1]).matches()) {
+                String cl = ClassClassLoaderMap.unknownToNullClasslaoder(fqnAndLoader[1]);
+                removeOverride(fqnAndLoader[0], cl);
+                removed.add(new String[]{fqnAndLoader[0], cl});
+                AgentLogger.getLogger().log("Removed  override " + fqnAndLoader[0] + ":" + fqnAndLoader[1]);
             }
         }
         return removed;

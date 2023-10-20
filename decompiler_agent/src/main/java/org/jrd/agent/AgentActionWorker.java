@@ -205,12 +205,12 @@ public class AgentActionWorker extends Thread {
         final String line = in.readLine();
         //it can be  jsut  - "" - jsut nothing
         //it can be    regex
-        //it can be    regex bodySubstring
+        //it can be    bodySubstring regex
         //it can be    true/false
-        //it can be    regex true/false
-        //it can be    regex bodySubstring true/false
+        //it can be    true/false regex
+        //it can be    bodySubstring regex  true/false
         //it can be    regex true/false  classloader
-        //it can be    regex bodySubstring true/false classloader
+        //it can be    bodySubstring regex true/false classloader
         // ??
         //it can be    regex bodySubstring  classloader
         //??!?!?!!? - no
@@ -235,8 +235,8 @@ public class AgentActionWorker extends Thread {
                     break;
                 case 3:
                     if (parts[2].equals("false") || parts[2].equals("true")) {
-                        //    regex bodySubstring true/false
-                        filter = ClassFilter.create(parts[0] + " " + parts[1]);
+                        //    bodySubstring regex true/false
+                        filter = ClassFilter.create(parts[1] + " " + parts[0]);
                         doGetInfo = Boolean.parseBoolean(parts[2]);
                     } else if (parts[1].equals("false") || parts[1].equals("true")) {
                         //    regex true/false  classloader
@@ -248,9 +248,9 @@ public class AgentActionWorker extends Thread {
                     }
                     break;
                 case 4:
-                    //    regex bodySubstring true/false classloader
+                    //    bodySubstring regex true/false classloader
                     if (parts[2].equals("false") || parts[2].equals("true")) {
-                        filter = ClassFilter.create(parts[0] + " " + parts[1]);
+                        filter = ClassFilter.create(parts[1] + " " + parts[0]);
                         doGetInfo = Boolean.parseBoolean(parts[2]);
                         classloader = parts[3];
                     } else {
@@ -268,12 +268,12 @@ public class AgentActionWorker extends Thread {
                     filter = ClassFilter.create(parts[0]);
                     break;
                 case 2:
-                    //    regex bodySubstring
-                    filter = ClassFilter.create(parts[0] + " " + parts[1]);
+                    //    bodySubstring regex
+                    filter = ClassFilter.create(parts[1] + " " + parts[0]);
                     break;
                 case 3:
-                    //    regex bodySubstring  classloader
-                    filter = ClassFilter.create(parts[0] + " " + parts[1]);
+                    //    bodySubstring regex  classloader
+                    filter = ClassFilter.create(parts[1] + " " + parts[0]);
                     classloader = parts[2];
                     break;
                 default:
@@ -292,6 +292,10 @@ public class AgentActionWorker extends Thread {
     }
 
     private static String decryptClassloader(String item) {
+        return base64toSring(item);
+    }
+
+    public static String base64toSring(String item) {
         return new String(Base64.getDecoder().decode(item), StandardCharsets.UTF_8);
     }
 
