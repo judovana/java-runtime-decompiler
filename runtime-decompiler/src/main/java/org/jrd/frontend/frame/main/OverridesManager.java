@@ -1,5 +1,6 @@
 package org.jrd.frontend.frame.main;
 
+import org.jrd.frontend.frame.main.decompilerview.BytecodeDecompilerView;
 import org.jrd.frontend.frame.main.decompilerview.DecompilationController;
 import org.jrd.frontend.utility.ScreenFinder;
 
@@ -47,7 +48,7 @@ public final class OverridesManager {
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() >= 2) {
                     if (activeOverrides.getSelectedValue() != null) {
-                        removalRegex.setText(activeOverrides.getSelectedValue());
+                        removalRegex.setText(activeOverrides.getSelectedValue().replace("$", "\\$"));
                     } else {
                         removalRegex.setText(".*");
                     }
@@ -61,6 +62,10 @@ public final class OverridesManager {
         refresh.addActionListener(a -> loadOverrides());
 
         removalRegex = new JTextField(".*");
+        removalRegex.setToolTipText(
+                BytecodeDecompilerView.getStyledRegexTooltip() + "<br>In additon, those are in reality two regexes" +
+                        " split by \":\". One for class, second for loader."
+        );
         final Color originalForeground = removalRegex.getForeground();
         final Color originalBackground = removalRegex.getBackground();
         removalRegex.getDocument().addDocumentListener(new DocumentListener() {

@@ -162,11 +162,12 @@ public final class Lib {
             if (filter.size() != 1) {
                 throw new RuntimeException("Search allows only one regex, you have " + filter.size());
             }
+            String ecodedSearch = Base64.getEncoder().encodeToString(search.get().getBytes(StandardCharsets.UTF_8));
             if (details) {
-                allClasses = Arrays.stream(searchWithClassesDetails(vmInfo, vmManager, search.get(), filter.get(0).pattern()))
+                allClasses = Arrays.stream(searchWithClassesDetails(vmInfo, vmManager, ecodedSearch, filter.get(0).pattern()))
                         .collect(Collectors.toList());
             } else {
-                allClasses = Arrays.stream(searchClasses(vmInfo, vmManager, search.get(), filter.get(0).pattern()))
+                allClasses = Arrays.stream(searchClasses(vmInfo, vmManager, ecodedSearch, filter.get(0).pattern()))
                         .map(a -> new ClassInfo(a, null, null)).collect(Collectors.toList());
             }
         } else {

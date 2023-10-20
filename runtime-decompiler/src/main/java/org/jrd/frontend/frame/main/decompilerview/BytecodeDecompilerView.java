@@ -65,6 +65,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -170,12 +171,7 @@ public class BytecodeDecompilerView {
 
         classesSortField = new JTextField(".*");
         classesSortFieldColor = classesSortField.getForeground();
-        classesSortField.setToolTipText(
-                styleTooltip() + "Search for classes using regular expressions.<br/>" +
-                        "Look for specific classes or packages using '.*SomeClass.*' or '.*some.package.*'<br/>" +
-                        "Don't forget to escape dollar signs '$' of inner classes to '\\$'.<br/>" +
-                        "For negation use the negative lookahead '^(?!.*unwanted).*$' syntax." + "</div><html>"
-        );
+        classesSortField.setToolTipText(getStyledRegexTooltip());
         classesSortField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent documentEvent) {
@@ -308,7 +304,9 @@ public class BytecodeDecompilerView {
                     protected Void doInBackground() throws Exception {
                         try {
                             ActionEvent event = new ActionEvent(
-                                    this, 5, lastSearch + " " + classesSortField.getText() + " " + showInfoCheckBox.isSelected()
+                                    this, 5,
+                                    Base64.getEncoder().encodeToString(lastSearch.getBytes(StandardCharsets.UTF_8)) + " " +
+                                            classesSortField.getText() + " " + showInfoCheckBox.isSelected()
                             );
                             searchClassesActionListener.actionPerformed(event);
                         } catch (Throwable t) {
@@ -577,6 +575,13 @@ public class BytecodeDecompilerView {
 
         bytecodeDecompilerPanel.setVisible(true);
 
+    }
+
+    public static String getStyledRegexTooltip() {
+        return styleTooltip() + "Search for classes using regular expressions.<br/>" +
+                "Look for specific classes or packages using '.*SomeClass.*' or '.*some.package.*'<br/>" +
+                "Don't forget to escape dollar signs '$' of inner classes to '\\$'.<br/>" +
+                "For negation use the negative lookahead '^(?!.*unwanted).*$' syntax." + "</div><html>";
     }
 
     private void handleClassInfoSwitching(boolean reload) {

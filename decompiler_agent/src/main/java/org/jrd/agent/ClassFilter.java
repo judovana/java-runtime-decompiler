@@ -9,7 +9,7 @@ public class ClassFilter {
     private final Pattern nameFilter;
     private final String bodySubstring;
 
-    public ClassFilter(Optional<String> bodySubstring, Optional<String> nameFilter) {
+    public ClassFilter(Optional<String> nameFilter, Optional<String> bodySubstring) {
         this.nameFilter = Pattern.compile(nameFilter.orElseGet(() -> ".*"));
         this.bodySubstring = bodySubstring.orElseGet(() -> "");
     }
@@ -25,7 +25,8 @@ public class ClassFilter {
         if (substringAndRegex.length == 1) {
             return Optional.of(new ClassFilter(Optional.of(substringAndRegex[0]), Optional.empty()));
         }
-        return Optional.of(new ClassFilter(Optional.of(substringAndRegex[0]), Optional.of(substringAndRegex[1])));
+        return Optional
+                .of(new ClassFilter(Optional.of(substringAndRegex[0]), Optional.of(AgentActionWorker.base64toSring(substringAndRegex[1]))));
     }
 
     public boolean match(InstrumentationProvider instrumentationProvider, Class loadedClass, String classLoader) {

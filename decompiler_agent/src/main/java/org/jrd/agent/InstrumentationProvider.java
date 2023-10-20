@@ -148,10 +148,10 @@ public class InstrumentationProvider {
     }
 
     public int cleanOverrides(String pattern) {
-        List<String> removed = transformer.cleanOverrides(Pattern.compile(pattern));
+        List<String[]> removed = transformer.cleanOverrides(pattern);
         try {
             instrumentation.retransformClasses(removed.stream().map(a -> {
-                return this.findClass(a, null);
+                return this.findClass(a[0], a[1]);
             }).toArray(Class[]::new));
         } catch (RuntimeException | UnmodifiableClassException e) {
             AgentLogger.getLogger().log(e);
