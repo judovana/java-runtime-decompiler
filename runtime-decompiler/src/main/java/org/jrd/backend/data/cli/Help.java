@@ -33,6 +33,7 @@ public final class Help {
     public static final String BASE64_FORMAT = BASE64 + BASE_SHARED_FORMAT;
     public static final String BYTES_FORMAT = BYTES + BASE_SHARED_FORMAT;
     public static final String DEPS_FORMAT = DEPS + BASE_SHARED_FORMAT;
+    public static final String CLASSLOADER_SET_FORMAT = CLASSLOADER_SET + " <classloader identification>";
     public static final String LIST_JVMS_FORMAT = LIST_JVMS;
     public static final String LIST_AGENTS_FORMAT = LIST_AGENTS;
     public static final String LIST_OVERRIDES_FORMAT = LIST_OVERRIDES + " <PUC>";
@@ -69,6 +70,8 @@ public final class Help {
     private static final String BASE64_TEXT = "Print Base64 encoded binary form of requested classes of a process.";
     private static final String BYTES_TEXT = "Print binary form of requested classes of a process";
     private static final String DEPS_TEXT = "Print all deps of the selected class(es).";
+    private static final String CLASSLOADER_SET_TEXT = "In jvm, there may be multiple classes of each FQN. Each " +
+            "of them loaded by different classlaoder. This regex allows you to specify classloader(s) you operate on";
     private static final String LIST_JVMS_TEXT = "List all local Java processes and their PIDs.";
     private static final String LIST_AGENTS_TEXT =
             "JRD keeps record off all local agents, dropping them once inaccessible." + "Use this to list known agents.\nYou can append " +
@@ -174,6 +177,7 @@ public final class Help {
         ALL_OPTIONS.put(VERSION_FORMAT, VERSION_TEXT);
         ALL_OPTIONS.put(CONFIG_FORMAT, CONFIG_TEXT);
         ALL_OPTIONS.put(HEX_FORMAT, HEX_TEXT);
+        ALL_OPTIONS.put(CLASSLOADER_SET_FORMAT, CLASSLOADER_SET_TEXT);
         ALL_OPTIONS.put(LIST_JVMS_FORMAT, LIST_JVMS_TEXT);
         ALL_OPTIONS.put(LIST_PLUGINS_FORMAT, LIST_PLUGINS_TEXT);
         ALL_OPTIONS.put(LIST_AGENTS_FORMAT, LIST_AGENTS_TEXT);

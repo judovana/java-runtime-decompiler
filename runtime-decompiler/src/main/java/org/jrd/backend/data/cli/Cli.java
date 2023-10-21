@@ -47,6 +47,9 @@ public class Cli {
     private boolean isHex;
     private boolean isRevert;
     private boolean isBoot;
+
+    private String classloader;
+
     private AgentConfig currentAgent = AgentConfig.getDefaultSinglePermanentAgent();
 
     public Cli(String[] orig) {
@@ -93,6 +96,9 @@ public class Cli {
                 i++;
             } else if (cleanedArg.equals(AGENT)) {
                 i = readAgentParams(originalArgs, agentArgs, i);
+            } else if (cleanedArg.equals(CLASSLOADER_SET)) {
+                classloader = originalArgs[i + 1];
+                i++;
             } else {
                 args.add(arg);
             }

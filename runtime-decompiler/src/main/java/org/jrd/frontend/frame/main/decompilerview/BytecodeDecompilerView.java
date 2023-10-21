@@ -91,6 +91,9 @@ public class BytecodeDecompilerView {
     private JButton searchInClassesButton;
     private JCheckBox showInfoCheckBox;
     private JTextField classCount;
+    private JTextField classloaderRestriction;
+    private JCheckBox classloaderAuto = new JCheckBox("auto", true);
+    private JButton cleanClassloader = new JButton("!");
     private JTextField classesSortField;
     private JCheckBox metadata = new JCheckBox("metada?");
     private final Color classesSortFieldColor;
@@ -169,6 +172,10 @@ public class BytecodeDecompilerView {
 
         classesPanel = new JPanel(new BorderLayout());
 
+        classloaderRestriction = new JTextField("unknown");
+        classloaderRestriction.setToolTipText(
+                getStyledRegexTooltip() + "<br>unknown is unhappy keyword for null " + "classloader<br>It simply takes first found thing."
+        );
         classesSortField = new JTextField(".*");
         classesSortFieldColor = classesSortField.getForeground();
         classesSortField.setToolTipText(getStyledRegexTooltip());
@@ -215,9 +222,9 @@ public class BytecodeDecompilerView {
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (SwingUtilities.isLeftMouseButton(e)) {
-                    final String name = filteredClassesJList.getSelectedValue().getName();
-                    if (name != null || filteredClassesJList.getSelectedIndex() != -1) {
-                        bytesWorker(name);
+                    final ClassInfo clazz = filteredClassesJList.getSelectedValue();
+                    if (clazz != null || filteredClassesJList.getSelectedIndex() != -1) {
+                        bytesWorker(clazz);
                     }
                 } else if (SwingUtilities.isRightMouseButton(e)) {
                     new ClassListPopupMenu<>(filteredClassesJList, originallySelected, doShowClassInfo(), getDependenciesReader())
@@ -253,12 +260,13 @@ public class BytecodeDecompilerView {
             @Override
             public void keyReleased(KeyEvent e) {
                 if (CLASS_LIST_REGISTERED_KEY_CODES.contains(e.getKeyCode())) {
-                    final String name = filteredClassesJList.getSelectedValue().getName();
-                    if (name != null || filteredClassesJList.getSelectedIndex() != -1) {
-                        bytesWorker(name);
+                    final ClassInfo clazz = filteredClassesJList.getSelectedValue();
+                    if (clazz != null || filteredClassesJList.getSelectedIndex() != -1) {
+                        bytesWorker(clazz);
                     }
                 } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
                     filteredClassesJList.clearSelection();
+                    unselectClassloader();
                 }
             }
         });
@@ -466,6 +474,31 @@ public class BytecodeDecompilerView {
         JPanel bottomControls = new JPanel(new BorderLayout());
         bottomControls.add(metadata, BorderLayout.WEST);
         bottomControls.add(classesSortField, BorderLayout.CENTER);
+        JPanel classloaderPanel = new JPanel(new BorderLayout());
+        classloaderPanel.add(classloaderAuto, BorderLayout.WEST);
+        classloaderPanel.add(classloaderRestriction, BorderLayout.CENTER);
+        classloaderPanel.add(cleanClassloader, BorderLayout.EAST);
+        bottomControls.add(classloaderPanel, BorderLayout.SOUTH);
+
+        cleanClassloader.addActionListener(a -> {
+            unselectAndResetClassloader();
+        });
+        classloaderRestriction.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent documentEvent) {
+                classloaderAuto.setSelected(false);
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent documentEvent) {
+                classloaderAuto.setSelected(false);
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent documentEvent) {
+                classloaderAuto.setSelected(false);
+            }
+        });
 
         classesToolBar.add(topControls, BorderLayout.NORTH);
         classesToolBar.add(bottomControls, BorderLayout.SOUTH);
@@ -575,6 +608,23 @@ public class BytecodeDecompilerView {
 
         bytecodeDecompilerPanel.setVisible(true);
 
+    }
+
+    private void unselectAndResetClassloader() {
+        boolean was = classloaderAuto.isSelected();
+        classloaderRestriction.setText("unknown");
+        classloaderAuto.setSelected(was);
+    }
+
+    private void unselectClassloader() {
+        selectClassloader("unknown");
+    }
+
+    private void selectClassloader(String loader) {
+        if (classloaderAuto.isSelected()) {
+            classloaderRestriction.setText(loader.replace("$", "\\$"));
+            classloaderAuto.setSelected(true);
+        }
     }
 
     public static String getStyledRegexTooltip() {
@@ -949,12 +999,14 @@ public class BytecodeDecompilerView {
         }.execute();
     }
 
-    private void bytesWorker(String name) {
+    private void bytesWorker(ClassInfo clazz) {
+        //FIXME, ClassInfo must go to the Override dialog:(
+        selectClassloader(clazz.getClassLoader());
         new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() throws Exception {
                 try {
-                    ActionEvent event = new ActionEvent(this, 1, name);
+                    ActionEvent event = new ActionEvent(this, 1, clazz.getName());
                     boolean r = bytesActionListener.actionPerformed(event);
                     if (r) {
                         setMaintitle();
