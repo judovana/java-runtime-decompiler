@@ -33,7 +33,7 @@ public class JavacCompileAction extends AbstractCompileAndRunAction implements C
     }
 
     @Override
-    public Collection<IdentifiedBytecode> compile(final List<String> scripts, final PluginManager pluginManager) {
+    public Collection<IdentifiedBytecode> compile(final List<String> scripts, final PluginManager pluginManager, String classloader) {
         final ClassesProvider classesProvider;
         if (classesAndMethodsProvider == null) {
             classesProvider = new NullClassesProvider();
@@ -68,14 +68,14 @@ public class JavacCompileAction extends AbstractCompileAndRunAction implements C
                 }
                 identifiedSources[i] = new IdentifiedSource(new ClassIdentifier(fqn), file);
             }
-            qc.run(null, false, identifiedSources);
+            qc.run(null, false, classloader, identifiedSources);
             result = qc.waitResult();
             if (result != null && result.size() > 0) {
                 if (save != null) {
                     CanCompile.save(result, save.getSaveDirectory());
                 }
                 if (upload != null && upload.isUploadEnabled()) {
-                    CanCompile.upload(result, upload);
+                    CanCompile.upload(result, upload, classloader);
                     upload.resetUpload();
                 }
                 if (execute != null) {

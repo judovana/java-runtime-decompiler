@@ -32,7 +32,8 @@ class CompileActionListener implements ActionListener {
             Logger.getLogger().log(Logger.Level.ALL, "Byteman typecheck  called");
             BytemanCompileAction btmcheck = new BytemanCompileAction("Byteman typecheck  called", null, null);
             Collection<IdentifiedBytecode> l = btmcheck.compile(
-                    Collections.singletonList(mBytecodeDecompilerView.getBytemanScript().getText()), Model.getModel().getPluginManager()
+                    Collections.singletonList(mBytecodeDecompilerView.getBytemanScript().getText()), Model.getModel().getPluginManager(),
+                    mBytecodeDecompilerView.getLastClassloader()
             );
             if (l == null || l.size() == 0 || new ArrayList<IdentifiedBytecode>(l).get(0).getFile().length == 0) {
                 Logger.getLogger().log(Logger.Level.ALL, "Faield");
@@ -56,25 +57,25 @@ class CompileActionListener implements ActionListener {
             );
         } else if (mBytecodeDecompilerView.isDecompiledBytecodeBufferVisible()) {
             mBytecodeDecompilerView.getCompileAction().run(
-                    mBytecodeDecompilerView.getPluginComboBox(), false,
+                    mBytecodeDecompilerView.getPluginComboBox(), false, mBytecodeDecompilerView.getLastClassloader(),
                     new IdentifiedSource(
-                            new ClassIdentifier(mBytecodeDecompilerView.getLastDecompiledClass()),
+                            new ClassIdentifier(mBytecodeDecompilerView.getLastDecompiledClass().getName()),
                             mBytecodeDecompilerView.getBytecodeBuffer().getTextAsBytes()
                     )
             );
         } else if (mBytecodeDecompilerView.isAdditionalDecompiledBytecodeBufferVisible()) {
             mBytecodeDecompilerView.getCompileAction().run(
-                    mBytecodeDecompilerView.getPluginComboBox(), false,
+                    mBytecodeDecompilerView.getPluginComboBox(), false, mBytecodeDecompilerView.getLastClassloader(),
                     new IdentifiedSource(
-                            new ClassIdentifier(mBytecodeDecompilerView.getLastDecompiledClass()),
+                            new ClassIdentifier(mBytecodeDecompilerView.getLastDecompiledClass().getName()),
                             mBytecodeDecompilerView.getAdditionalBytecodeBuffer().getTextAsBytes()
                     )
             );
         } else if (mBytecodeDecompilerView.isAdditionalSrcBufferVisible()) {
             mBytecodeDecompilerView.getCompileAction().run(
-                    mBytecodeDecompilerView.getPluginComboBox(), false,
+                    mBytecodeDecompilerView.getPluginComboBox(), false, mBytecodeDecompilerView.getLastClassloader(),
                     new IdentifiedSource(
-                            new ClassIdentifier(mBytecodeDecompilerView.getLastDecompiledClass()),
+                            new ClassIdentifier(mBytecodeDecompilerView.getLastDecompiledClass().getName()),
                             mBytecodeDecompilerView.getAdditionalSrcBuffer().getTextAsBytes()
                     )
             );

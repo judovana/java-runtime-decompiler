@@ -120,7 +120,7 @@ public final class ImageButtonFactory {
     }
 
     public static JButton createInitButton() {
-        return createButton("init_24dp.png", "Init", "Initialize class");
+        return createButton("init_24dp.png", "Init", "Initialize class, add classes, add jar");
     }
 
     public static JButton createAddButton() {

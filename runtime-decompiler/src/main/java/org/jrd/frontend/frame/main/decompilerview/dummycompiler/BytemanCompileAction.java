@@ -60,7 +60,7 @@ public class BytemanCompileAction extends AbstractCompileAction implements CanCo
     }
 
     @Override
-    public Collection<IdentifiedBytecode> compile(List<String> scripts, PluginManager pluginManager) {
+    public Collection<IdentifiedBytecode> compile(List<String> scripts, PluginManager pluginManager, String classloader) {
         String script = scripts.stream().collect(Collectors.joining("\n\n"));
         RuleCheck check = new RuleCheck();
         if (Logger.getLogger().isVerbose()) {

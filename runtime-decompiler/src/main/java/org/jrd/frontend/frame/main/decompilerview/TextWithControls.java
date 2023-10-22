@@ -100,6 +100,9 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
     private AbstractCompileAction lastCompileAndRun;
     private String execute = "start";
     private File save;
+    //currently standalone dialog supports only additions
+    private final boolean overvriteEnabled = false;
+    private String classloader = null;
     private boolean addToRunningVm = false;
     private boolean useBootForBytemanAndUpload = false;
 
@@ -639,6 +642,31 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
             });
             addToSeelctedVm.setSelected(addToRunningVm);
             advanced.add(addToSeelctedVm);
+            if (overvriteEnabled) {
+                JMenuItem classloaderSelect = new JMenuItem("classloader (regex) to unknown (keep, unless " + "you know what yo are doing");
+                if (classloader != null) {
+                    classloaderSelect.setText("classloader to upload to - " + classloader);
+                }
+                classloaderSelect.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent actionEvent) {
+                        if (classloader != null) {
+                            classloaderSelect
+                                    .setText("classloader (regex) to upload to `unknown` (keep, unless " + "you know what yo are doing");
+                            classloader = null;
+                            repaintMenu(menu);
+                        } else {
+                            String nwcl = JOptionPane.showInputDialog(setMethod, "set cllassloader regex", classloader);
+                            if (nwcl != null && nwcl.trim().length() > 0) {
+                                classloader = nwcl;
+                                classloaderSelect.setText("classloader to upload to - " + classloader);
+                                repaintMenu(menu);
+                            }
+                        }
+                    }
+                });
+                advanced.add(classloaderSelect);
+            }
         }
         menu.add(advanced);
     }
@@ -928,7 +956,7 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
                             pluginManager.initializeWrapper(compiler.getWrapper());
                         }
                         List<String> toCompile = getCaredFiles();
-                        Collection<IdentifiedBytecode> l = compiler.compile(toCompile, pluginManager);
+                        Collection<IdentifiedBytecode> l = compiler.compile(toCompile, pluginManager, classloader);
                         if (l == null || l.size() == 0 || new ArrayList<IdentifiedBytecode>(l).get(0).getFile().length == 0) {
                             repaintButton(Color.RED);
                         } else {
