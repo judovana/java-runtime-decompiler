@@ -1,5 +1,6 @@
 package org.jrd.frontend.frame.main.decompilerview;
 
+import org.jrd.backend.core.ClassInfo;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
@@ -27,7 +28,7 @@ public class QuickCompiler {
         this.pluginManager = pluginManager;
     }
 
-    public void upload(String clazz, byte[] body) {
+    public void upload(String clazz, String classloader, byte[] body) {
         CommonUtils.uploadByGui(modelProvider.getVmInfo(), modelProvider.getVmManager(), new CommonUtils.StatusKeeper() {
             @Override
             public void setText(String s) {
@@ -39,15 +40,15 @@ public class QuickCompiler {
                 Logger.getLogger().log(ex);
                 GlobalConsole.getConsole().addMessage(Level.WARNING, ex.toString());
             }
-        }, clazz, body);
+        }, clazz, classloader, body);
     }
 
-    public void run(DecompilerWrapper wrapper, boolean upload, IdentifiedSource... srcs) {
+    public void run(DecompilerWrapper wrapper, boolean upload, String classloader, IdentifiedSource... srcs) {
         PluginManager.BundledCompilerStatus internalCompiler = pluginManager.getBundledCompilerStatus(wrapper);
         GlobalConsole.getConsole().addMessage(Level.ALL, internalCompiler.getStatus());
         OverwriteClassDialog.CompilationWithResult compiler = new OverwriteClassDialog.CompilationWithResult(
                 OverwriteClassDialog.getClasspathlessCompiler(wrapper, internalCompiler.isEmbedded(), Logger.getLogger().isVerbose()),
-                modelProvider.getClassesProvider(), GlobalConsole.getConsole(), srcs
+                modelProvider.getClassesProvider(), GlobalConsole.getConsole(), classloader, srcs
         ) {
 
             @Override
@@ -58,7 +59,7 @@ public class QuickCompiler {
                     for (IdentifiedBytecode bin : this.getResult()) {
                         if (upload) {
                             GlobalConsole.getConsole().addMessage(Level.ALL, "Uploading: " + bin.getClassIdentifier().getFullName());
-                            upload(bin.getClassIdentifier().getFullName(), bin.getFile());
+                            upload(bin.getClassIdentifier().getFullName(), this.getUploadClassloader(), bin.getFile());
                         } else {
                             GlobalConsole.getConsole().addMessage(Level.ALL, "Compiled " + bin.getClassIdentifier().getFullName());
                         }

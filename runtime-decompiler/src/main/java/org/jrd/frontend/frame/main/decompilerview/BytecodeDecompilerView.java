@@ -11,6 +11,7 @@ import org.jrd.backend.data.cli.InMemoryJar;
 import org.jrd.backend.data.cli.Lib;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.frontend.frame.main.MainFrameView;
+import org.jrd.frontend.frame.main.OverridesManager;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.providers.ClasspathProvider;
 import org.jrd.frontend.frame.main.decompilerview.dummycompiler.templates.BytemanSkeletonTemplateMenuItem;
 import org.jrd.frontend.frame.main.popup.ClassListPopupMenu;
@@ -137,7 +138,7 @@ public class BytecodeDecompilerView {
     private DependenciesReader dependenciesReader;
 
     private ClassInfo[] loadedClasses;
-    private String lastDecompiledClass = "";
+    private ClassInfo lastDecompiledClass = new ClassInfo("", "unknown", "unknown");
     private String lastFqn = "java.lang.Override";
     private String lastAddedFqn = "fully.qualified.name";
     private File lastAddedFile = new File(".");
@@ -380,7 +381,7 @@ public class BytecodeDecompilerView {
         diffButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                new DiffPopup(toLines(buffers.getComponents()), Optional.of(lastDecompiledClass), false).show(diffButton, 0, 0);
+                new DiffPopup(toLines(buffers.getComponents()), Optional.of(lastDecompiledClass.getName()), false).show(diffButton, 0, 0);
             }
 
             private LinesProvider[] toLines(Component[] knownLinesProvidingComponents) {
@@ -508,8 +509,7 @@ public class BytecodeDecompilerView {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 if (filteredClassesJList.getSelectedIndex() != -1) {
-                    ActionEvent event = new ActionEvent(this, 1, filteredClassesJList.getSelectedValue().getName());
-                    boolean r = bytesActionListener.actionPerformed(event);
+                    boolean r = bytesActionListener.actionPerformed(filteredClassesJList.getSelectedValue());
                     if (r) {
                         setMaintitle();
                     }
@@ -622,7 +622,7 @@ public class BytecodeDecompilerView {
 
     private void selectClassloader(String loader) {
         if (classloaderAuto.isSelected()) {
-            classloaderRestriction.setText(loader.replace("$", "\\$"));
+            classloaderRestriction.setText(OverridesManager.adaptLoaderRegex(loader));
             classloaderAuto.setSelected(true);
         }
     }
@@ -821,7 +821,7 @@ public class BytecodeDecompilerView {
      * @param decompiledClass String of source code of decompiler class
      */
     public void reloadTextField(
-            String name, String decompiledClass, byte[] source, String additionalDecompiledClass, byte[] additionalSource,
+            ClassInfo name, String decompiledClass, byte[] source, String additionalDecompiledClass, byte[] additionalSource,
             VmInfo.Type vmInfoType, BytemanCompanion bytemanCompanion
     ) {
         SwingUtilities.invokeLater(new Runnable() {
@@ -835,18 +835,18 @@ public class BytecodeDecompilerView {
     }
 
     private void setDecompiledClass(
-            String name, String data, byte[] source, String additionalData, byte[] additionalSource, VmInfo.Type vmInfoType,
+            ClassInfo name, String data, byte[] source, String additionalData, byte[] additionalSource, VmInfo.Type vmInfoType,
             BytemanCompanion bytemanCompanion
     ) {
-        String additionalSrcClass = Config.getConfig().getAdditionalSourcePathString(name);
+        String additionalSrcClass = Config.getConfig().getAdditionalSourcePathString(name.getName());
         additionalSrcBuffer.resetSrcArea(additionalSrcClass);
         if (vmInfoType != VmInfo.Type.FS) {
             if (vmInfoType == VmInfo.Type.LOCAL) {
-                setByteman(name);
+                setByteman(name.getName());
                 buffers.add(bytemanScript);
             } else if (vmInfoType == VmInfo.Type.REMOTE) {
                 if (bytemanCompanion != null) {
-                    setByteman(name);
+                    setByteman(name.getName());
                     buffers.add(bytemanScript);
                 } else {
                     buffers.remove(bytemanScript);
@@ -1006,8 +1006,7 @@ public class BytecodeDecompilerView {
             @Override
             protected Void doInBackground() throws Exception {
                 try {
-                    ActionEvent event = new ActionEvent(this, 1, clazz.getName());
-                    boolean r = bytesActionListener.actionPerformed(event);
+                    boolean r = bytesActionListener.actionPerformed(clazz);
                     if (r) {
                         setMaintitle();
                     }
@@ -1031,8 +1030,12 @@ public class BytecodeDecompilerView {
         return bytecodeBuffer;
     }
 
-    String getLastDecompiledClass() {
+    ClassInfo getLastDecompiledClass() {
         return lastDecompiledClass;
+    }
+
+    ClassInfo getLastDecompiledClassName() {
+        return getLastDecompiledClassName();
     }
 
     JTabbedPane getBuffers() {
@@ -1165,5 +1168,9 @@ public class BytecodeDecompilerView {
 
     public ClasspathProvider getClasspathProvider() {
         return classpathProvider;
+    }
+
+    public String getLastClassloader() {
+        return classloaderRestriction.getText();
     }
 }

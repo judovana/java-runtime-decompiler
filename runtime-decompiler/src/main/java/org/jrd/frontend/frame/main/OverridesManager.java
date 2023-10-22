@@ -48,7 +48,7 @@ public final class OverridesManager {
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() >= 2) {
                     if (activeOverrides.getSelectedValue() != null) {
-                        removalRegex.setText(activeOverrides.getSelectedValue().replace("$", "\\$"));
+                        removalRegex.setText(adaptLoaderRegex(activeOverrides.getSelectedValue()));
                     } else {
                         removalRegex.setText(".*");
                     }
@@ -112,6 +112,10 @@ public final class OverridesManager {
         window.add(southPanel, BorderLayout.SOUTH);
         window.pack();
         ScreenFinder.centerWindowToCurrentScreen(window);
+    }
+
+    public static String adaptLoaderRegex(String loader) {
+        return loader.replace("$", "\\$");
     }
 
     public void hide() {

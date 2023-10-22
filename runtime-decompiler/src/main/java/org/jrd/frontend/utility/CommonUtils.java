@@ -4,6 +4,7 @@ import io.github.mkoncek.classpathless.api.ClassIdentifier;
 import io.github.mkoncek.classpathless.api.IdentifiedSource;
 import org.jrd.backend.communication.TopLevelErrorCandidate;
 import org.jrd.backend.core.AgentRequestAction;
+import org.jrd.backend.core.ClassInfo;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
@@ -61,11 +62,13 @@ public final class CommonUtils {
         return r;
     }
 
-    public static boolean uploadByGui(VmInfo vmInfo, VmManager vmManager, StatusKeeper status, String clazz, byte[] content) {
+    public static
+            boolean
+            uploadByGui(VmInfo vmInfo, VmManager vmManager, StatusKeeper status, String clazz, String classloader, byte[] content) {
         String ss = "Error to upload: ";
         boolean r = true;
         try {
-            String response = uploadBytecode(clazz, vmManager, vmInfo, content);
+            String response = uploadBytecode(clazz, classloader, vmManager, vmInfo, content);
             if (new TopLevelErrorCandidate(response).isError()) {
                 throw new Exception("Agent returned error: " + response);
             }
@@ -91,7 +94,7 @@ public final class CommonUtils {
         throw new RuntimeException("Unknown name target " + selectedIndex);
     }
 
-    public static String uploadBytecode(String clazz, VmManager vmManager, VmInfo vmInfo, byte[] bytes) {
+    public static String uploadBytecode(String clazz, String classloader, VmManager vmManager, VmInfo vmInfo, byte[] bytes) {
         final String body = DecompilationController.bytesToBase64(bytes);
         AgentRequestAction request = DecompilationController.createRequest(vmInfo, AgentRequestAction.RequestAction.OVERWRITE, clazz, body);
         return DecompilationController.submitRequest(vmManager, request);

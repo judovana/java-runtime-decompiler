@@ -27,11 +27,11 @@ public interface CanCompile {
         }
     }
 
-    static void upload(Collection<IdentifiedBytecode> result, UploadProvider up) throws IOException {
+    static void upload(Collection<IdentifiedBytecode> result, UploadProvider up, String classloader) throws IOException {
         Lib.addByteClassesViaJar(up.getTarget().getVmInfo(), new ArrayList<>(result), up.isBoot(), up.getTarget().getVmManager());
     }
 
-    Collection<IdentifiedBytecode> compile(List<String> s, PluginManager pluginManager);
+    Collection<IdentifiedBytecode> compile(List<String> s, PluginManager pluginManager, String classloader);
 
     DecompilerWrapper getWrapper();
 

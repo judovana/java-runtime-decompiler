@@ -56,7 +56,8 @@ class CompileAndUploadActionListener implements ActionListener {
                     }
             );
             Collection<IdentifiedBytecode> l = btmcheck.compile(
-                    Collections.singletonList(mBytecodeDecompilerView.getBytemanScript().getText()), Model.getModel().getPluginManager()
+                    Collections.singletonList(mBytecodeDecompilerView.getBytemanScript().getText()), Model.getModel().getPluginManager(),
+                    mBytecodeDecompilerView.getLastClassloader()
             );
             if (l == null || l.size() == 0 || new ArrayList<IdentifiedBytecode>(l).get(0).getFile().length == 0) {
                 Logger.getLogger().log(Logger.Level.ALL, "Faield");
@@ -65,32 +66,36 @@ class CompileAndUploadActionListener implements ActionListener {
             }
             Logger.getLogger().log(Logger.Level.ALL, "Byteman inject finished");
         } else if (mBytecodeDecompilerView.isAdditionalBinaryBufferVisible()) {
-            mBytecodeDecompilerView.getCompileAction()
-                    .upload(mBytecodeDecompilerView.getLastDecompiledClass(), mBytecodeDecompilerView.getAdditionalBinary().get());
+            mBytecodeDecompilerView.getCompileAction().upload(
+                    mBytecodeDecompilerView.getLastDecompiledClass().getName(), mBytecodeDecompilerView.getLastClassloader(),
+                    mBytecodeDecompilerView.getAdditionalBinary().get()
+            );
         } else if (mBytecodeDecompilerView.isBinaryBufferVisible()) {
-            mBytecodeDecompilerView.getCompileAction()
-                    .upload(mBytecodeDecompilerView.getLastDecompiledClass(), mBytecodeDecompilerView.getBinary().get());
+            mBytecodeDecompilerView.getCompileAction().upload(
+                    mBytecodeDecompilerView.getLastDecompiledClass().getName(), mBytecodeDecompilerView.getLastClassloader(),
+                    mBytecodeDecompilerView.getBinary().get()
+            );
         } else if (mBytecodeDecompilerView.isDecompiledBytecodeBufferVisible()) {
             mBytecodeDecompilerView.getCompileAction().run(
-                    mBytecodeDecompilerView.getPluginComboBox(), true,
+                    mBytecodeDecompilerView.getPluginComboBox(), true, mBytecodeDecompilerView.getLastClassloader(),
                     new IdentifiedSource(
-                            new ClassIdentifier(mBytecodeDecompilerView.getLastDecompiledClass()),
+                            new ClassIdentifier(mBytecodeDecompilerView.getLastDecompiledClass().getName()),
                             mBytecodeDecompilerView.getBytecodeBuffer().getTextAsBytes()
                     )
             );
         } else if (mBytecodeDecompilerView.isAdditionalDecompiledBytecodeBufferVisible()) {
             mBytecodeDecompilerView.getCompileAction().run(
-                    mBytecodeDecompilerView.getPluginComboBox(), true,
+                    mBytecodeDecompilerView.getPluginComboBox(), true, mBytecodeDecompilerView.getLastClassloader(),
                     new IdentifiedSource(
-                            new ClassIdentifier(mBytecodeDecompilerView.getLastDecompiledClass()),
+                            new ClassIdentifier(mBytecodeDecompilerView.getLastDecompiledClass().getName()),
                             mBytecodeDecompilerView.getAdditionalBytecodeBuffer().getTextAsBytes()
                     )
             );
         } else if (mBytecodeDecompilerView.isAdditionalSrcBufferVisible()) {
             mBytecodeDecompilerView.getCompileAction().run(
-                    mBytecodeDecompilerView.getPluginComboBox(), true,
+                    mBytecodeDecompilerView.getPluginComboBox(), true, mBytecodeDecompilerView.getLastClassloader(),
                     new IdentifiedSource(
-                            new ClassIdentifier(mBytecodeDecompilerView.getLastDecompiledClass()),
+                            new ClassIdentifier(mBytecodeDecompilerView.getLastDecompiledClass().getName()),
                             mBytecodeDecompilerView.getAdditionalSrcBuffer().getTextAsBytes()
                     )
             );

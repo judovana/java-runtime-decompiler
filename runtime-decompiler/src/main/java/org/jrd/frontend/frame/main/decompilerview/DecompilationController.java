@@ -330,7 +330,8 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
     private void cleanup(boolean halt) {
         mainFrameView.switchPanel(false);
         mainFrameView.getBytecodeDecompilerView().reloadClassList(new ClassInfo[0]);
-        mainFrameView.getBytecodeDecompilerView().reloadTextField("", "", new byte[16], "", new byte[16], null, null);
+        mainFrameView.getBytecodeDecompilerView()
+                .reloadTextField(new ClassInfo("", "", ""), "", new byte[16], "", new byte[16], null, null);
         if (halt) {
             haltAgent();
         }
@@ -419,8 +420,8 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         }
     }
 
-    private boolean loadClassBytecode(String name) {
-        AgentRequestAction request = createRequest(RequestAction.BYTES, name);
+    private boolean loadClassBytecode(ClassInfo name) {
+        AgentRequestAction request = createRequest(RequestAction.BYTES, name.getName());
         String response = submitRequest(request);
         String decompiledClass = "";
         if (new TopLevelErrorCandidate(response).isError()) {
@@ -433,17 +434,17 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         String bytesInString = vmStatus.getLoadedClassBytes();
         byte[] bytes = Base64.getDecoder().decode(bytesInString);
         try {
-            decompiledClass =
-                    getPluginManager().decompile(bytecodeDecompilerView.getSelectedDecompiler(), name, bytes, null, vmInfo, getVmManager());
+            decompiledClass = getPluginManager()
+                    .decompile(bytecodeDecompilerView.getSelectedDecompiler(), name.getName(), bytes, null, vmInfo, getVmManager());
         } catch (Exception e) {
             Logger.getLogger().log(Logger.Level.ALL, e);
         }
-        byte[] additionalBytes = Config.getConfig().getAdditionalClassPathBytes(name);
+        byte[] additionalBytes = Config.getConfig().getAdditionalClassPathBytes(name.getName());
         String additionalDecompiled = "";
         if (additionalBytes != null && additionalBytes.length > 0) {
             try {
                 additionalDecompiled = getPluginManager()
-                        .decompile(bytecodeDecompilerView.getSelectedDecompiler(), name, additionalBytes, null, null, null);
+                        .decompile(bytecodeDecompilerView.getSelectedDecompiler(), name.getName(), additionalBytes, null, null, null);
             } catch (Exception e) {
                 Logger.getLogger().log(Logger.Level.ALL, e);
             }
@@ -793,11 +794,11 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
 
     public class BytesActionListener {
 
-        public boolean actionPerformed(ActionEvent e) {
+        public boolean actionPerformed(ClassInfo e) {
             boolean r = false;
             DecompilationController.this.showLoadingDialog(a -> DecompilationController.this.hideLoadingDialog(), "Loading bytecode");
             try {
-                r = DecompilationController.this.loadClassBytecode(e.getActionCommand());
+                r = DecompilationController.this.loadClassBytecode(e);
             } finally {
                 DecompilationController.this.hideLoadingDialog();
             }
