@@ -661,6 +661,10 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         return Base64.getEncoder().encodeToString(bytes);
     }
 
+    public static String stringToBase64(String s) {
+        return bytesToBase64(s.getBytes(StandardCharsets.UTF_8));
+    }
+
     private void haltAgent() {
         if (vmInfo == null || vmInfo.getType() == VmInfo.Type.REMOTE || vmInfo.getType() == VmInfo.Type.FS) {
             return;

@@ -95,8 +95,18 @@ public final class CommonUtils {
     }
 
     public static String uploadBytecode(String clazz, String classloader, VmManager vmManager, VmInfo vmInfo, byte[] bytes) {
-        final String body = DecompilationController.bytesToBase64(bytes);
-        AgentRequestAction request = DecompilationController.createRequest(vmInfo, AgentRequestAction.RequestAction.OVERWRITE, clazz, body);
+        String[] body;
+        if (classloader == null){
+            body = new String[]{
+                    clazz,
+                    DecompilationController.bytesToBase64(bytes)};
+        } else {
+            body = new String[]{
+                    clazz,
+                    DecompilationController.bytesToBase64(bytes),
+                    DecompilationController.stringToBase64(classloader)};
+        }
+        AgentRequestAction request = DecompilationController.createRequest(vmInfo, AgentRequestAction.RequestAction.OVERWRITE, body);
         return DecompilationController.submitRequest(vmManager, request);
     }
 
