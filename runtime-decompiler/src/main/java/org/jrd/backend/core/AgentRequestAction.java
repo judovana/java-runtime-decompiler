@@ -92,12 +92,22 @@ public class AgentRequestAction {
     public static final String CLASS_NAME_PARAM = "class--name-param";
 
     public static final String CLASS_TO_OVERWRITE_BODY = "body-to-overwrite";
+    public static final String CLASS_LOADER = "class-loader";
 
     public static
             AgentRequestAction
             create(VmInfo vmInfo, String hostname, int listenPort, RequestAction action, String name, String base64body) {
         AgentRequestAction req = create(vmInfo, hostname, listenPort, action, name);
         req.setParameter(CLASS_TO_OVERWRITE_BODY, base64body);
+        return req;
+    }
+
+    public static AgentRequestAction create(
+            VmInfo vmInfo, String hostname, int listenPort, RequestAction action, String name, String base64body, String base64classloader
+    ) {
+        AgentRequestAction req = create(vmInfo, hostname, listenPort, action, name);
+        req.setParameter(CLASS_TO_OVERWRITE_BODY, base64body);
+        req.setParameter(CLASS_LOADER, base64classloader);
         return req;
     }
 

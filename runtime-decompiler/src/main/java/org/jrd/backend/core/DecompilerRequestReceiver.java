@@ -16,6 +16,7 @@ import org.jrd.backend.decompiling.PluginManager;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -67,7 +68,8 @@ public class DecompilerRequestReceiver {
             case OVERWRITE:
                 String classNameForOverwrite = request.getParameter(AgentRequestAction.CLASS_NAME_PARAM);
                 String classFutureBody = request.getParameter(AgentRequestAction.CLASS_TO_OVERWRITE_BODY);
-                response = getOverwriteAction(action, hostname, port, vmId, vmPid, classNameForOverwrite, classFutureBody);
+                String classloader = request.getParameter(AgentRequestAction.CLASS_LOADER);
+                response = getOverwriteAction(action, hostname, port, vmId, vmPid, classNameForOverwrite, classFutureBody, classloader);
                 break;
             case REMOVE_OVERRIDES:
                 String patern = request.getParameter(AgentRequestAction.CLASS_NAME_PARAM);
@@ -82,16 +84,23 @@ public class DecompilerRequestReceiver {
                 break;
             case BYTES:
                 String className = request.getParameter(AgentRequestAction.CLASS_NAME_PARAM);
-                response = getByteCodeAction(hostname, port, vmId, vmPid, className);
+                String bytesClassloader = request.getParameter(AgentRequestAction.CLASS_LOADER);
+                response = getByteCodeAction(hostname, port, vmId, vmPid, className, bytesClassloader);
                 break;
             case OVERRIDES:
             case CLASSES:
             case CLASSES_WITH_INFO:
-                response = getListAction(hostname, port, vmId, vmPid, action);
+                String listingClassloader = request.getParameter(AgentRequestAction.CLASS_LOADER);
+                if (listingClassloader == null) {
+                    response = getListAction(hostname, port, vmId, vmPid, action);
+                } else {
+                    response = getListActionLoader(hostname, port, vmId, vmPid, action, listingClassloader);
+                }
                 break;
             case SEARCH_CLASSES:
                 String substringAndRegex = request.getParameter(AgentRequestAction.CLASS_NAME_PARAM);
-                response = getListAction(hostname, port, vmId, vmPid, action, substringAndRegex);
+                String searchClassloader = request.getParameter(AgentRequestAction.CLASS_LOADER);
+                response = getListActionSearch(hostname, port, vmId, vmPid, action, substringAndRegex, searchClassloader);
                 break;
             case HALT:
                 response = getHaltAction(hostname, port, vmId, vmPid);
@@ -103,6 +112,51 @@ public class DecompilerRequestReceiver {
         }
         return response;
 
+    }
+
+    private String getListActionSearch(
+            String hostname, int port, String vmId, int vmPid, RequestAction action, String substringAndRegex, String classloader
+    ) {
+        try {
+            ResponseWithPort reply = getResponse(
+                    hostname, port, vmId, vmPid,
+                    action.toString() + (classloader == null ? "" : (" " + classloader)) + "\n" + substringAndRegex
+            );
+            ClassInfo[] arrayOfClasses = parseClasses(reply.response);
+            Arrays.sort(arrayOfClasses, new ClassesComparator());
+
+            VmDecompilerStatus status = vmManager.getVmInfoByID(vmId).getVmDecompilerStatus();
+            status.setHostname(hostname);
+            status.setListenPort(reply.port);
+            status.setVmId(vmId);
+            status.setLoadedClasses(arrayOfClasses);
+
+            vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
+        } catch (Exception ex) {
+            Logger.getLogger().log(Logger.Level.ALL, ex);
+            return TopLevelErrorCandidate.toError(ex);
+        }
+        return OK_RESPONSE;
+    }
+
+    private String getListActionLoader(String hostname, int port, String vmId, int vmPid, RequestAction action, String listingClassloader) {
+        try {
+            ResponseWithPort reply = getResponse(hostname, port, vmId, vmPid, action.toString() + " " + listingClassloader);
+            ClassInfo[] arrayOfClasses = parseClasses(reply.response);
+            Arrays.sort(arrayOfClasses, new ClassesComparator());
+
+            VmDecompilerStatus status = vmManager.getVmInfoByID(vmId).getVmDecompilerStatus();
+            status.setHostname(hostname);
+            status.setListenPort(reply.port);
+            status.setVmId(vmId);
+            status.setLoadedClasses(arrayOfClasses);
+
+            vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
+        } catch (Exception ex) {
+            Logger.getLogger().log(Logger.Level.ALL, ex);
+            return TopLevelErrorCandidate.toError(ex);
+        }
+        return OK_RESPONSE;
     }
 
     private int tryParseInt(String intStr, String msg) {
@@ -180,10 +234,14 @@ public class DecompilerRequestReceiver {
     }
 
     private String getOverwriteAction(
-            RequestAction action, String hostname, int listenPort, String vmId, int vmPid, String className, String newBody
+            RequestAction action, String hostname, int listenPort, String vmId, int vmPid, String className, String newBody,
+            String classloader
     ) {
         try {
-            ResponseWithPort reply = getResponse(hostname, listenPort, vmId, vmPid, action + "\n" + className + "\n" + newBody);
+            ResponseWithPort reply = getResponse(
+                    hostname, listenPort, vmId, vmPid,
+                    action + "\n" + className + "\n" + newBody + (classloader == null ? "" : (" " + classloader))
+            );
             VmDecompilerStatus status = vmManager.getVmInfoByID(vmId).getVmDecompilerStatus();
             status.setHostname(hostname);
             status.setListenPort(reply.port);
@@ -236,9 +294,12 @@ public class DecompilerRequestReceiver {
         return OK_RESPONSE;
     }
 
-    private String getByteCodeAction(String hostname, int listenPort, String vmId, int vmPid, String className) {
+    private String getByteCodeAction(String hostname, int listenPort, String vmId, int vmPid, String className, String classloader) {
         try {
-            ResponseWithPort reply = getResponse(hostname, listenPort, vmId, vmPid, RequestAction.BYTES + "\n" + className);
+            ResponseWithPort reply = getResponse(
+                    hostname, listenPort, vmId, vmPid,
+                    RequestAction.BYTES + (classloader == null ? "" : (" " + classloader)) + "\n" + className
+            );
             VmDecompilerStatus status = vmManager.getVmInfoByID(vmId).getVmDecompilerStatus();
             status.setHostname(hostname);
             status.setListenPort(reply.port);
@@ -252,16 +313,9 @@ public class DecompilerRequestReceiver {
         return OK_RESPONSE;
     }
 
-    private String getListAction(String hostname, int listenPort, String vmId, int vmPid, RequestAction type, String... params) {
+    private String getListAction(String hostname, int listenPort, String vmId, int vmPid, RequestAction type) {
         try {
-            ResponseWithPort reply;
-            if (params.length == 0) {
-                reply = getResponse(hostname, listenPort, vmId, vmPid, type.toString());
-            } else {
-                reply = getResponse(
-                        hostname, listenPort, vmId, vmPid, type.toString() + "\n" + Arrays.stream(params).collect(Collectors.joining("\n"))
-                );
-            }
+            ResponseWithPort reply = getResponse(hostname, listenPort, vmId, vmPid, type.toString());
             ClassInfo[] arrayOfClasses = parseClasses(reply.response);
             Arrays.sort(arrayOfClasses, new ClassesComparator());
 
