@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.jar.JarFile;
-import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 
 /**
@@ -91,7 +90,7 @@ public class InstrumentationProvider {
             }
         } else {
             for (Class clazz : classes) {
-                if (clazz.getName().equals(className) && AgentLogger.classLoaderId(clazz.getClassLoader()).equals(classLoader)) {
+                if (clazz.getName().equals(className) && AgentLogger.classLoaderId(clazz.getClassLoader()).matches(classLoader)) {
                     return clazz;
                 }
             }

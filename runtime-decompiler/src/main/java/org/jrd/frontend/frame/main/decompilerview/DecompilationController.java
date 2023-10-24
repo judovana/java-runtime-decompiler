@@ -720,7 +720,11 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
             case ADD_JAR:
             case OVERWRITE:
                 try {
-                    request = AgentRequestAction.create(vmInfo, hostname, listenPort, action, commands[0], commands[1]);
+                    if (commands.length == 2) {
+                        request = AgentRequestAction.create(vmInfo, hostname, listenPort, action, commands[0], commands[1]);
+                    } else {
+                        request = AgentRequestAction.create(vmInfo, hostname, listenPort, action, commands[0], commands[1], commands[2]);
+                    }
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }

@@ -48,7 +48,7 @@ public final class OverridesManager {
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() >= 2) {
                     if (activeOverrides.getSelectedValue() != null) {
-                        removalRegex.setText(adaptLoaderRegex(activeOverrides.getSelectedValue()));
+                        removalRegex.setText(activeOverrides.getSelectedValue());
                     } else {
                         removalRegex.setText(".*");
                     }
