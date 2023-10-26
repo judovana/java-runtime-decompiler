@@ -96,7 +96,8 @@ public class BytecodeDecompilerView {
     private JCheckBox classloaderAuto = new JCheckBox("auto", true);
     private JButton cleanClassloader = new JButton("!");
     private JTextField classesSortField;
-    private JCheckBox metadata = new JCheckBox("metada?");
+    private JCheckBox metadata = new JCheckBox("metadata?");
+    private JCheckBox restrictLaoder = new JCheckBox("restrict loader?");
     private final Color classesSortFieldColor;
     private JPanel classesPanel;
     private JScrollPane classesScrollPane;
@@ -126,7 +127,7 @@ public class BytecodeDecompilerView {
     private TextWithControls bytemanScript;
 
     private DecompilationController.BytesActionListener bytesActionListener;
-    private ActionListener classesActionListener;
+    private DecompilationController.LoadClassNames classesActionListener;
     private ActionListener searchClassesActionListener;
     private ActionListener initActionListener;
     private ActionListener addActionListener;
@@ -474,6 +475,7 @@ public class BytecodeDecompilerView {
 
         JPanel bottomControls = new JPanel(new BorderLayout());
         bottomControls.add(metadata, BorderLayout.WEST);
+        bottomControls.add(restrictLaoder, BorderLayout.EAST);
         bottomControls.add(classesSortField, BorderLayout.CENTER);
         JPanel classloaderPanel = new JPanel(new BorderLayout());
         classloaderPanel.add(classloaderAuto, BorderLayout.WEST);
@@ -586,6 +588,11 @@ public class BytecodeDecompilerView {
         buffers.add(additionalBinary);
         buffers.add(additionalSrcBuffer);
         buffers.add(bytemanScript);
+        buffers.setToolTipTextAt(0, styleTooltip() + "decompiled binary from VM");
+        buffers.setToolTipTextAt(1, styleTooltip() + "binary from VM");
+        buffers.setToolTipTextAt(2, styleTooltip() + "decompiled from additional class-path");
+        buffers.setToolTipTextAt(3, styleTooltip() + "binary from additional class-path");
+        buffers.setToolTipTextAt(4, styleTooltip() + "source from additional source-path");
 
         buffersPanel = new JPanel(new BorderLayout());
         buffersPanel.setBorder(new EtchedBorder());
@@ -920,7 +927,7 @@ public class BytecodeDecompilerView {
         searchClassesActionListener = o;
     }
 
-    public void setClassesActionListener(ActionListener listener) {
+    public void setClassesActionListener(DecompilationController.LoadClassNames listener) {
         classesActionListener = listener;
     }
 
@@ -990,7 +997,7 @@ public class BytecodeDecompilerView {
             protected Void doInBackground() throws Exception {
                 try {
                     ActionEvent event = new ActionEvent(this, 2, null);
-                    classesActionListener.actionPerformed(event);
+                    classesActionListener.loadClassNames(classloaderRestriction.getText(), restrictLaoder.isSelected());
                 } catch (Throwable t) {
                     Logger.getLogger().log(Logger.Level.ALL, t);
                 }

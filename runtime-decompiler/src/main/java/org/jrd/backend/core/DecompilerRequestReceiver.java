@@ -16,8 +16,6 @@ import org.jrd.backend.decompiling.PluginManager;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * This class manages the requests that are put in queue by the controller.

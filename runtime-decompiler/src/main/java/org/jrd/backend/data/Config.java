@@ -509,7 +509,7 @@ public final class Config {
     }
 
     private byte[] getFileFromAdditionalPath(FsAgent fs, String fqn) {
-        String base64 = fs.submitRequest(AgentRequestAction.RequestAction.BYTES + " " + fqn);
+        String base64 = fs.submitRequest(AgentRequestAction.RequestAction.BYTES + "\n" + fqn);
         ErrorCandidate errorCandidate = new ErrorCandidate(base64);
         if (errorCandidate.isError()) {
             throw new RuntimeException(errorCandidate.getErrorMessage());
