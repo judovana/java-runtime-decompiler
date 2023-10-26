@@ -97,17 +97,17 @@ public class Transformer implements ClassFileTransformer {
         List<String[]> removed = new ArrayList<>();
 
         Pattern fqn = Pattern.compile(".*");
-        Pattern loader = Pattern.compile(".*");
+        String loader = ".*";
 
         if (patterns.contains(":")) {
             fqn = Pattern.compile(patterns.split(":")[0]);
-            loader = Pattern.compile(patterns.replace(fqn.toString() + ":", ""));
+            loader = patterns.replace(fqn.toString() + ":", "");
         } else {
             fqn = Pattern.compile(patterns);
         }
 
         for (String[] fqnAndLoader : fqns) {
-            if (fqn.matcher(fqnAndLoader[0]).matches() && loader.matcher(fqnAndLoader[1]).matches()) {
+            if (fqn.matcher(fqnAndLoader[0]).matches() && (fqnAndLoader[1].equals(loader) || fqnAndLoader[1].matches(loader))) {
                 String cl = ClassClassLoaderMap.unknownToNullClasslaoder(fqnAndLoader[1]);
                 removeOverride(fqnAndLoader[0], cl);
                 removed.add(new String[]{fqnAndLoader[0], cl});

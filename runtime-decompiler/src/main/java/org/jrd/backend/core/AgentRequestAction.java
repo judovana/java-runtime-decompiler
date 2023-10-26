@@ -96,24 +96,41 @@ public class AgentRequestAction {
 
     public static
             AgentRequestAction
-            create(VmInfo vmInfo, String hostname, int listenPort, RequestAction action, String name, String base64body) {
-        AgentRequestAction req = create(vmInfo, hostname, listenPort, action, name);
+            createFromNameAndBody(VmInfo vmInfo, String hostname, int listenPort, RequestAction action, String name, String base64body) {
+        AgentRequestAction req = createFromName(vmInfo, hostname, listenPort, action, name);
         req.setParameter(CLASS_TO_OVERWRITE_BODY, base64body);
         return req;
     }
 
-    public static AgentRequestAction create(
+    public static AgentRequestAction createFromNameAndBodyAndLoader(
             VmInfo vmInfo, String hostname, int listenPort, RequestAction action, String name, String base64body, String base64classloader
     ) {
-        AgentRequestAction req = create(vmInfo, hostname, listenPort, action, name);
+        AgentRequestAction req = createFromName(vmInfo, hostname, listenPort, action, name);
         req.setParameter(CLASS_TO_OVERWRITE_BODY, base64body);
         req.setParameter(CLASS_LOADER, base64classloader);
         return req;
     }
 
-    public static AgentRequestAction create(VmInfo vmInfo, String hostname, int listenPort, RequestAction action, String name) {
+    public static
+            AgentRequestAction
+            createForLoader(VmInfo vmInfo, String hostname, int listenPort, RequestAction action, String classloader) {
+        AgentRequestAction req = create(vmInfo, hostname, listenPort, action);
+        req.setParameter(CLASS_LOADER, classloader);
+        return req;
+    }
+
+    public static AgentRequestAction createFromName(VmInfo vmInfo, String hostname, int listenPort, RequestAction action, String name) {
         AgentRequestAction req = create(vmInfo, hostname, listenPort, action);
         req.setParameter(CLASS_NAME_PARAM, name);
+        return req;
+    }
+
+    public static
+            AgentRequestAction
+            createFromNameAndLoader(VmInfo vmInfo, String hostname, int listenPort, RequestAction action, String name, String classloader) {
+        AgentRequestAction req = create(vmInfo, hostname, listenPort, action);
+        req.setParameter(CLASS_NAME_PARAM, name);
+        req.setParameter(CLASS_LOADER, classloader);
         return req;
     }
 

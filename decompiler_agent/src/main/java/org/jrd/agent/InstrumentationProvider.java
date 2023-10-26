@@ -90,7 +90,8 @@ public class InstrumentationProvider {
             }
         } else {
             for (Class clazz : classes) {
-                if (clazz.getName().equals(className) && AgentLogger.classLoaderId(clazz.getClassLoader()).matches(classLoader)) {
+                if (clazz.getName().equals(className) && (AgentLogger.classLoaderId(clazz.getClassLoader()).equals(classLoader) ||
+                        AgentLogger.classLoaderId(clazz.getClassLoader()).matches(classLoader))) {
                     return clazz;
                 }
             }

@@ -95,7 +95,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         bytecodeDecompilerView.setInitActionListener(e -> initClass(e.getActionCommand()));
         bytecodeDecompilerView.setAddActionListener(e -> addClass(e.getActionCommand()));
         bytecodeDecompilerView.setJarActionListener(e -> addJar(e.getActionCommand()));
-        bytecodeDecompilerView.setClassesActionListener(e -> loadClassNames());
+        bytecodeDecompilerView.setClassesActionListener(new LoadClassNames());
         bytecodeDecompilerView.setSearchInActionListener(e -> searchInClasses(e.getActionCommand()));
         bytecodeDecompilerView.setBytesActionListener(new BytesActionListener());
         bytecodeDecompilerView.setOverwriteActionListener(new ClassOverwriter(this));
@@ -278,7 +278,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         if (selectedVmInfo != null) {
             new Thread(() -> {
                 this.vmInfo = selectedVmInfo;
-                loadClassNames();
+                new LoadClassNames().loadClassNames(null, false);
             }).start();
         }
     }
@@ -355,7 +355,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         String response = submitRequest(request);
         hideLoadingDialog();
         if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
-            loadClassNames();
+            new LoadClassNames().loadClassNames(null, false);
         }
         if (new TopLevelErrorCandidate(response).isError()) {
             JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), response + "\n" + CLASSES_NOPE, "Error", JOptionPane.ERROR_MESSAGE);
@@ -369,7 +369,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         String response = submitRequest(request);
         hideLoadingDialog();
         if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
-            loadClassNames();
+            new LoadClassNames().loadClassNames(null, false);
         }
         if (new TopLevelErrorCandidate(response).isError()) {
             JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), response + "\n" + CLASSES_NOPE, "Error", JOptionPane.ERROR_MESSAGE);
@@ -383,27 +383,36 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         String response = submitRequest(request);
         hideLoadingDialog();
         if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
-            loadClassNames();
+            new LoadClassNames().loadClassNames(null, false);
         }
         if (new TopLevelErrorCandidate(response).isError()) {
             JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), response + "\n" + CLASSES_NOPE, "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    /**
-     * Sends request for classes. If "ok" response is received updates classes
-     * list. If "error" response is received shows an error dialog.
-     */
-    private void loadClassNames() {
-        showLoadingDialog("Loading classes");
-        AgentRequestAction request = createRequest(RequestAction.CLASSES_WITH_INFO, "");
-        String response = submitRequest(request);
-        if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
-            bytecodeDecompilerView.reloadClassList(vmInfo.getVmDecompilerStatus().getLoadedClasses());
-        }
-        hideLoadingDialog();
-        if (new TopLevelErrorCandidate(response).isError()) {
-            JOptionPane.showMessageDialog(mainFrameView.getMainFrame(), response + "\n" + CLASSES_NOPE, "Error", JOptionPane.ERROR_MESSAGE);
+    public class LoadClassNames {
+        /**
+         * Sends request for classes. If "ok" response is received updates classes
+         * list. If "error" response is received shows an error dialog.
+         */
+        public void loadClassNames(String classloader, boolean useLoader) {
+            showLoadingDialog("Loading classes");
+            AgentRequestAction request;
+            if (useLoader && classloader != null) {
+                request = createRequest(RequestAction.CLASSES_WITH_INFO, stringToBase64(classloader));
+            } else {
+                request = createRequest(RequestAction.CLASSES_WITH_INFO);
+            }
+            String response = submitRequest(request);
+            if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
+                bytecodeDecompilerView.reloadClassList(vmInfo.getVmDecompilerStatus().getLoadedClasses());
+            }
+            hideLoadingDialog();
+            if (new TopLevelErrorCandidate(response).isError()) {
+                JOptionPane.showMessageDialog(
+                        mainFrameView.getMainFrame(), response + "\n" + CLASSES_NOPE, "Error", JOptionPane.ERROR_MESSAGE
+                );
+            }
         }
     }
 
@@ -421,7 +430,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
     }
 
     private boolean loadClassBytecode(ClassInfo name) {
-        AgentRequestAction request = createRequest(RequestAction.BYTES, name.getName());
+        AgentRequestAction request = createRequest(RequestAction.BYTES, name.getName(), stringToBase64(name.getClassLoader()));
         String response = submitRequest(request);
         String decompiledClass = "";
         if (new TopLevelErrorCandidate(response).isError()) {
@@ -704,26 +713,38 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
 
         switch (action) {
             case VERSION:
-            case CLASSES:
             case OVERRIDES:
-            case CLASSES_WITH_INFO:
             case HALT:
                 request = AgentRequestAction.create(vmInfo, hostname, listenPort, action);
+                break;
+            case CLASSES:
+            case CLASSES_WITH_INFO:
+                if (commands.length == 0) {
+                    request = AgentRequestAction.create(vmInfo, hostname, listenPort, action);
+                } else {
+                    request = AgentRequestAction.createForLoader(vmInfo, hostname, listenPort, action, commands[0]);
+                }
                 break;
             case SEARCH_CLASSES:
             case REMOVE_OVERRIDES:
             case INIT_CLASS:
             case BYTES:
-                request = AgentRequestAction.create(vmInfo, hostname, listenPort, action, commands[0]);
+                if (commands.length == 1) {
+                    request = AgentRequestAction.createFromName(vmInfo, hostname, listenPort, action, commands[0]);
+                } else {
+                    request = AgentRequestAction.createFromNameAndLoader(vmInfo, hostname, listenPort, action, commands[0], commands[1]);
+                }
                 break;
             case ADD_CLASS:
             case ADD_JAR:
             case OVERWRITE:
                 try {
                     if (commands.length == 2) {
-                        request = AgentRequestAction.create(vmInfo, hostname, listenPort, action, commands[0], commands[1]);
+                        request = AgentRequestAction.createFromNameAndBody(vmInfo, hostname, listenPort, action, commands[0], commands[1]);
                     } else {
-                        request = AgentRequestAction.create(vmInfo, hostname, listenPort, action, commands[0], commands[1], commands[2]);
+                        request = AgentRequestAction.createFromNameAndBodyAndLoader(
+                                vmInfo, hostname, listenPort, action, commands[0], commands[1], commands[2]
+                        );
                     }
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);

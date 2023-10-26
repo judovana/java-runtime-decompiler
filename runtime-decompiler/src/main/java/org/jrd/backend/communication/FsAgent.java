@@ -115,15 +115,16 @@ public final class FsAgent implements DelegatingJrdAgent {
     @SuppressWarnings("ReturnCount") // pretty returns
     @Override
     public String submitRequest(final String request) {
-        String[] q = request.split("\\s+");
+        String[] q1 = request.split("\n");
+        String[] q2 = q1[0].split("\\s+");
         try {
-            switch (AgentRequestAction.RequestAction.fromString(q[0])) {
+            switch (AgentRequestAction.RequestAction.fromString(q2[0])) {
                 case OVERRIDES:
                     return String.join(";", getOverrides());
                 case REMOVE_OVERRIDES:
-                    int removed = cleanOverrides(Pattern.compile(q[1]));
+                    int removed = cleanOverrides(Pattern.compile(q1[1]));
                     if (removed == 0) {
-                        throw new RuntimeException("Nothing removed by " + q[1] + " in " + originals.size() + " items");
+                        throw new RuntimeException("Nothing removed by " + q2[1] + " in " + originals.size() + " " + "items");
                     }
                     return Communicate.NO_VALLUE_DONE_RESULT;
                 case CLASSES:
@@ -131,15 +132,16 @@ public final class FsAgent implements DelegatingJrdAgent {
                 case CLASSES_WITH_INFO:
                     return readClasses(true);
                 case BYTES:
-                    String classNameForBytes = q[1];
+                    String classNameForBytes = q1[1];
                     return sendByteCode(classNameForBytes);
                 case OVERWRITE:
-                    String classNameForOverwrite = q[1];
+                    String classNameForOverwrite = q1[1];
                     if (!originals.containsKey(classNameForOverwrite)) {
                         Logger.getLogger().log("backuping original bytecode of " + classNameForOverwrite);
                         originals.put(classNameForOverwrite, sendByteCode(classNameForOverwrite));
                     }
-                    String futureBody = q[2];
+
+                    String futureBody = q1[2].split("\\s+")[0];
                     uploadByteCode(classNameForOverwrite, futureBody);
                     return Communicate.NO_VALUE_OK_RESULT;
                 case ADD_CLASS:
@@ -152,7 +154,7 @@ public final class FsAgent implements DelegatingJrdAgent {
                 case HALT:
                     return Communicate.NO_VALUE_OK_RESULT;
                 default:
-                    throw new RuntimeException("Unknown command: " + q[0]);
+                    throw new RuntimeException("Unknown command: " + request);
             }
         } catch (Exception ex) {
             Logger.getLogger().log(ex);
