@@ -51,6 +51,14 @@ public class ClassClassLoaderMap {
         }
     }
 
+    public byte[] getStrict(String classname, String classlaoder) {
+        Map<String, byte[]> classes = map.get(classname);
+        if (classes == null || classes.isEmpty()) {
+            return null;
+        }
+        return classes.get(classlaoder);
+    }
+
     public void put(String nameWithoutSlashes, byte[] classfileBuffer, String loader) {
         Map<String, byte[]> classes = map.get(nameWithoutSlashes);
         if (classes == null) {

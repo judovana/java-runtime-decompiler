@@ -29,7 +29,7 @@ public class Transformer implements ClassFileTransformer {
             //some parts of instrumentation works on p/k/g/class some on p.l.g.class, lets unify that
             String nameWithoutSlashes = clazz.getName().replace("/", ".");
             synchronized (this) {
-                b = overrides.get(nameWithoutSlashes, AgentLogger.classLoaderId(loader));
+                b = overrides.getStrict(nameWithoutSlashes, AgentLogger.classLoaderId(loader));
             }
             if (b != null) {
                 results.put(nameWithoutSlashes, b, AgentLogger.classLoaderId(loader));
