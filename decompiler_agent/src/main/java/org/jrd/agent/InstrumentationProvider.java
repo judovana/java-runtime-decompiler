@@ -37,11 +37,11 @@ public class InstrumentationProvider {
         Class clazz = findClass(cname, classloader);
         transformer.allowToSaveBytecode();
         try {
-            transformer.setOverride(clazz.getName(), nwBody, classloader);
+            transformer.setOverride(clazz.getName(), nwBody, AgentLogger.classLoaderId(clazz.getClassLoader()));
             try {
                 instrumentation.retransformClasses(clazz);
             } catch (Throwable ex) {
-                transformer.removeOverride(clazz.getName(), classloader);
+                transformer.removeOverride(clazz.getName(), AgentLogger.classLoaderId(clazz.getClassLoader()));
                 throw ex;
             }
         } finally {
@@ -82,7 +82,7 @@ public class InstrumentationProvider {
 
     private Class findClass(String className, String classLoader) {
         Class[] classes = instrumentation.getAllLoadedClasses();
-        if (classLoader == null) {
+        if (classLoader == null || classLoader.equals("unknown")) {
             for (Class clazz : classes) {
                 if (clazz.getName().equals(className)) {
                     return clazz;
