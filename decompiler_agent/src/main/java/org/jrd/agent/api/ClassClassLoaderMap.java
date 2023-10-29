@@ -20,6 +20,10 @@ public class ClassClassLoaderMap {
 
     public void remove(String clazz, String classloader) {
         Map<String, byte[]> submap = map.get(clazz);
+        if (submap == null) {
+            //FIXME is this correct?
+            return;
+        }
         submap.remove(classloader);
         if (submap.isEmpty()) {
             map.remove(clazz);

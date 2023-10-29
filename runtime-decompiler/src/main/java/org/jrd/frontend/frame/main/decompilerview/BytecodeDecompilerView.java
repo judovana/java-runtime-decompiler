@@ -26,12 +26,15 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JList;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
+import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
@@ -71,7 +74,9 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -484,7 +489,7 @@ public class BytecodeDecompilerView {
         bottomControls.add(classloaderPanel, BorderLayout.SOUTH);
 
         cleanClassloader.addActionListener(a -> {
-            unselectAndResetClassloader();
+            selectClassLoader();
         });
         classloaderRestriction.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -617,9 +622,41 @@ public class BytecodeDecompilerView {
 
     }
 
+    private void selectClassLoader() {
+        JPopupMenu loaders = new JPopupMenu();
+        JMenuItem reset = new JMenuItem("reset to any");
+        reset.addActionListener(a -> unselectAndResetClassloader());
+        loaders.add(reset);
+        ListModel<ClassInfo> model = filteredClassesJList.getModel();
+        Map<String, Integer> usedLoaders = new HashMap<>();
+        for (int x = 0; x < model.getSize(); x++) {
+            ClassInfo ci = model.getElementAt(x);
+            Integer occurences = usedLoaders.get(ci.getClassLoader());
+            if (occurences == null) {
+                usedLoaders.put(ci.getClassLoader(), 1);
+            } else {
+                occurences = occurences.intValue() + 1;
+                usedLoaders.put(ci.getClassLoader(), occurences);
+            }
+        }
+        for (Map.Entry<String, Integer> loader : usedLoaders.entrySet()) {
+            JMenuItem item = new JMenuItem(loader.getKey() + " (" + loader.getValue() + ")");
+            item.addActionListener(a -> selectAndSaveClassloader(OverridesManager.adaptLoaderRegex(loader.getKey())));
+            loaders.add(item);
+        }
+        SwingUtilities.invokeLater(() -> {
+            loaders.show(cleanClassloader, cleanClassloader.getWidth(), cleanClassloader.getHeight());
+            loaders.requestFocusInWindow();
+        });
+    }
+
     private void unselectAndResetClassloader() {
+        selectAndSaveClassloader("unknown");
+    }
+
+    private void selectAndSaveClassloader(String s) {
         boolean was = classloaderAuto.isSelected();
-        classloaderRestriction.setText("unknown");
+        classloaderRestriction.setText(s);
         classloaderAuto.setSelected(was);
     }
 
