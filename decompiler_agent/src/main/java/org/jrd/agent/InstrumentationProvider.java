@@ -114,9 +114,19 @@ public class InstrumentationProvider {
             String className = loadedClass.getName();
             boolean found = false;
             if (filter.isPresent()) {
+                //FIXME adapt to various classlaoders as below
                 found = filter.get().match(this, loadedClass, classlaoder);
             } else {
-                found = true;
+                if (classlaoder == null) {
+                    found = true;
+                } else {
+                    if (classlaoder.equals("unknown")) {
+                        found = loadedClass.getClassLoader() == null;
+                    } else {
+                        found = loadedClass.getClassLoader() != null && (loadedClass.getClassLoader().toString().equals(classlaoder) ||
+                                loadedClass.getClassLoader().toString().matches(classlaoder));
+                    }
+                }
             }
             if (found) {
                 if (doGetInfo) {
