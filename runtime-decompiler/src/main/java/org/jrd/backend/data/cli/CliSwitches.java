@@ -14,6 +14,7 @@ public final class CliSwitches {
     public static final String SAVE_AS = "-saveas";
     public static final String SAVE_LIKE = "-savelike";
     public static final String CLASSLOADER_SET = "-classloader";
+    public static final String LIST_CLASSLOADERS = "-listclassloaders";
     public static final String LIST_JVMS = "-listjvms";
     public static final String LIST_OVERRIDES = "-listoverrides";
     public static final String REMOVE_OVERRIDES = "-removeoverrides";
