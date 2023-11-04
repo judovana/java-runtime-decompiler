@@ -282,7 +282,8 @@ public class AgentActionWorker extends Thread {
         }
         final boolean finalDoGetInfo = doGetInfo;
         final Optional<ClassFilter> finalFilter = filter;
-        final String finalClassloader = classloader;
+        //really? always ecode? Only if filter is present?
+        final String finalClassloader = classloader == null ? null : base64toSring(classloader);
         getList(out, "SEARCH_CLASSES", new ListInjector<String>() {
             @Override
             public void inject(BlockingQueue<String> target) throws InterruptedException {

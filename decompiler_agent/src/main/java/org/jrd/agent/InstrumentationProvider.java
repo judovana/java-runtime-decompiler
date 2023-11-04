@@ -114,19 +114,12 @@ public class InstrumentationProvider {
             String className = loadedClass.getName();
             boolean found = false;
             if (filter.isPresent()) {
-                //FIXME adapt to various classlaoders as below
-                found = filter.get().match(this, loadedClass, classlaoder);
-            } else {
-                if (classlaoder == null) {
-                    found = true;
-                } else {
-                    if (classlaoder.equals("unknown")) {
-                        found = loadedClass.getClassLoader() == null;
-                    } else {
-                        found = loadedClass.getClassLoader() != null && (loadedClass.getClassLoader().toString().equals(classlaoder) ||
-                                loadedClass.getClassLoader().toString().matches(classlaoder));
-                    }
+                found = classloaderMatches(classlaoder, loadedClass);
+                if (found) {
+                    found = filter.get().match(this, loadedClass, classlaoder);
                 }
+            } else {
+                found = classloaderMatches(classlaoder, loadedClass);
             }
             if (found) {
                 if (doGetInfo) {
@@ -148,6 +141,21 @@ public class InstrumentationProvider {
             }
         }
         queue.put("---END---");
+    }
+
+    private static boolean classloaderMatches(String classlaoder, Class loadedClass) {
+        boolean found;
+        if (classlaoder == null) {
+            found = true;
+        } else {
+            if (classlaoder.equals("unknown")) {
+                found = loadedClass.getClassLoader() == null;
+            } else {
+                found = loadedClass.getClassLoader() != null && (loadedClass.getClassLoader().toString().equals(classlaoder) ||
+                        loadedClass.getClassLoader().toString().matches(classlaoder));
+            }
+        }
+        return found;
     }
 
     public void getOverrides(BlockingQueue<String> queue) throws InterruptedException {
