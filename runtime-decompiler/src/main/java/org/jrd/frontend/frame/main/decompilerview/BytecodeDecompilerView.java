@@ -89,6 +89,8 @@ import java.util.regex.Pattern;
 public class BytecodeDecompilerView {
 
     public static final String BYTEMAN_SCRIPT_TITLE = "Byteman script";
+    public static final String SEARCH_TEXT = "Search case-sensitive substring in currently displayed list of classes\n" +
+            "This runs on ascii/utf view of binaries in VM.. Takes time!\n" + "To search in decompiled code, use CLI and grep.";
     private JPanel bytecodeDecompilerPanel;
     private JSplitPane splitPane;
     private JPanel classes;
@@ -285,16 +287,11 @@ public class BytecodeDecompilerView {
         initClassButton.addActionListener(new InitAddClassJar(this));
 
         searchInClassesButton = new JButton("?");
+        searchInClassesButton.setToolTipText(styleTooltip() + SEARCH_TEXT);
         searchInClassesButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                String substring = JOptionPane.showInputDialog(
-                        mainFrameReference.getMainFrame(),
-                        "Search case-sensitive substring in currently displayed list of classes\n" +
-                                "This runs on ascii/utf view of binaries in VM.. Takes time!\n" +
-                                "To search in decompiled code, use CLI and grep.",
-                        lastSearch
-                );
+                String substring = JOptionPane.showInputDialog(mainFrameReference.getMainFrame(), SEARCH_TEXT, lastSearch);
                 if (substring == null || substring.isEmpty()) {
                     JOptionPane.showMessageDialog(
                             mainFrameReference.getMainFrame(), "Please enter valid substring", "Error", JOptionPane.ERROR_MESSAGE
@@ -318,10 +315,14 @@ public class BytecodeDecompilerView {
                     @Override
                     protected Void doInBackground() throws Exception {
                         try {
+                            String loaderRestriction = "";
+                            if (restrictLaoder.isSelected()) {
+                                loaderRestriction = " " + DecompilationController.stringToBase64(classloaderRestriction.getText());
+                            }
                             ActionEvent event = new ActionEvent(
                                     this, 5,
                                     Base64.getEncoder().encodeToString(lastSearch.getBytes(StandardCharsets.UTF_8)) + " " +
-                                            classesSortField.getText() + " " + showInfoCheckBox.isSelected()
+                                            classesSortField.getText() + " " + "true" + loaderRestriction
                             );
                             searchClassesActionListener.actionPerformed(event);
                         } catch (Throwable t) {
@@ -625,7 +626,10 @@ public class BytecodeDecompilerView {
     private void selectClassLoader() {
         JPopupMenu loaders = new JPopupMenu();
         JMenuItem reset = new JMenuItem("reset to any");
-        reset.addActionListener(a -> unselectAndResetClassloader());
+        reset.addActionListener(a -> {
+            unselectAndResetClassloader();
+            restrictLaoder.setSelected(false);
+        });
         loaders.add(reset);
         ListModel<ClassInfo> model = filteredClassesJList.getModel();
         Map<String, Integer> usedLoaders = new HashMap<>();
