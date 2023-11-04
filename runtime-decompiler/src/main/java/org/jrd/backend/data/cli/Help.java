@@ -37,6 +37,7 @@ public final class Help {
     public static final String LIST_JVMS_FORMAT = LIST_JVMS;
     public static final String LIST_AGENTS_FORMAT = LIST_AGENTS;
     public static final String LIST_OVERRIDES_FORMAT = LIST_OVERRIDES + " <PUC>";
+    public static final String LIST_CLASSLOADERS_FORMAT = LIST_CLASSLOADERS + " <PUC> [classRegex]";
     public static final String REMOVE_OVERRIDES_FORMAT = REMOVE_OVERRIDES + " <PUC> removalRegex";
     public static final String LIST_PLUGINS_FORMAT = LIST_PLUGINS;
     public static final String LIST_CLASSES_FORMAT = LIST_CLASSES + BASE_SHARED_OPTIONAL_FORMAT;
@@ -81,6 +82,7 @@ public final class Help {
     private static final String REMOVE_OVERRIDES_TEXT = "remove all matching overwrittes of classes";
     private static final String LIST_CLASSESBYTECODEVERSIONS_TEXT = "list all classes with bytecode version (slow!)";
     private static final String LIST_CLASSESDETAILSVERSIONS_TEXT = "list all classes with details and bytecode version (slow!)";
+    private static final String LIST_CLASSLOADERS_TEXT = "list and count all classloaders visible by agent";
     private static final String LIST_CLASSES_TEXT = "List all loaded classes of a process, optionally filtering them.\n" + "Only '" +
             SAVE_LIKE + " " + Saving.EXACT + "' or '" + SAVE_LIKE + " " + Saving.DEFAULT + "' are allowed as saving modifiers.";
     private static final String SEARCH_TEXT = "Will search ascii/utf8 substring in regex-subset binaries in remote vm.\n" +
@@ -184,6 +186,7 @@ public final class Help {
         ALL_OPTIONS.put(LIST_OVERRIDES_FORMAT, LIST_OVERRIDES_TEXT);
         ALL_OPTIONS.put(REMOVE_OVERRIDES_FORMAT, REMOVE_OVERRIDES_TEXT);
         ALL_OPTIONS.put(LIST_CLASSES_FORMAT, LIST_CLASSES_TEXT);
+        ALL_OPTIONS.put(LIST_CLASSLOADERS_FORMAT, LIST_CLASSLOADERS_TEXT);
         ALL_OPTIONS.put(LIST_CLASSESDETAILS_FORMAT, LIST_CLASSESDETAILS_TEXT);
         ALL_OPTIONS.put(LIST_CLASSESBYTECODEVERSIONS_FORMAT, LIST_CLASSESBYTECODEVERSIONS_TEXT);
         ALL_OPTIONS.put(LIST_CLASSESDETAILSVERSIONS_FORMAT, LIST_CLASSESDETAILSVERSIONS_TEXT);
@@ -224,7 +227,7 @@ public final class Help {
     }
 
     private static final String[] UNSAVABLE_OPTIONS = new String[]{HELP, H, COMPLETION, REVERT, HEX, BOOT_CLASS_LOADER, SYSTEM_CLASS_LOADER,
-            OVERWRITE, INIT, REMOVE_OVERRIDES, ADD_CLASS, ADD_CLASSES, ADD_JAR, LIST_OVERRIDES_FORMAT};
+            OVERWRITE, INIT, REMOVE_OVERRIDES, ADD_CLASS, ADD_CLASSES, ADD_JAR, LIST_OVERRIDES, LIST_CLASSLOADERS};
     private static final String[] SAVABLE_OPTIONS = new String[]{LIST_CLASSES, LIST_CLASSESDETAILS, BYTES, BASE64, DEPS, COMPILE, DECOMPILE,
             PATCH, API, LIST_JVMS, LIST_PLUGINS, LIST_CLASSESBYTECODEVERSIONS, LIST_CLASSESDETAILSBYTECODEVERSIONS, SEARCH};
 
