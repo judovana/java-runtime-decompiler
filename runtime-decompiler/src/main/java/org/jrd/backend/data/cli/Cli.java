@@ -255,6 +255,10 @@ public class Cli {
                     VmInfo vmInfo8 = new Api(filteredArgs, saving, getVmManager(), getPluginManager()).api();
                     operatedOn.add(vmInfo8);
                     break;
+                case LIST_CLASSLOADERS:
+                    VmInfo vmInfo9 = new Classes(filteredArgs, getVmManager(), false, null).countLoaders();
+                    operatedOn.add(vmInfo9);
+                    break;
                 case COMPLETION:
                     printCompletion(filteredArgs);
                     break;

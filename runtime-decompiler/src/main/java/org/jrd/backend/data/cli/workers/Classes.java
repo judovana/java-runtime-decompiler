@@ -14,7 +14,10 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -47,8 +50,27 @@ public class Classes {
         if (filteredArgs.size() < 2) {
             throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.LIST_CLASSES_FORMAT + "'.");
         }
+        VmInfo vmInfo = getVmInfo();
+        List<Pattern> classRegexes = getPatterns();
+        listClassesFromVmInfo(vmInfo, classRegexes, details, bytecodeVersion, search);
+        return vmInfo;
+    }
 
-        VmInfo vmInfo = CliUtils.getVmInfo(filteredArgs.get(1), vmManager);
+    private VmInfo getVmInfo() {
+        return CliUtils.getVmInfo(filteredArgs.get(1), vmManager);
+    }
+
+    public VmInfo countLoaders() throws IOException {
+        if (filteredArgs.size() < 2) {
+            throw new IllegalArgumentException("Incorrect argument count! Please use '" + Help.LIST_CLASSLOADERS_FORMAT + "'.");
+        }
+        VmInfo vmInfo = getVmInfo();
+        List<Pattern> classRegexes = getPatterns();
+        countLoadersFromClassesFromVmInfo(vmInfo, classRegexes);
+        return vmInfo;
+    }
+
+    private List<Pattern> getPatterns() {
         List<Pattern> classRegexes = new ArrayList<>(filteredArgs.size() - 1);
 
         if (filteredArgs.size() == 2) {
@@ -58,8 +80,39 @@ public class Classes {
                 classRegexes.add(Pattern.compile(filteredArgs.get(i)));
             }
         }
-        listClassesFromVmInfo(vmInfo, classRegexes, details, bytecodeVersion, search);
-        return vmInfo;
+        return classRegexes;
+    }
+
+    private void countLoadersFromClassesFromVmInfo(VmInfo vmInfo, List<Pattern> filter) throws IOException {
+        List<ClassInfo> model = Lib.obtainFilteredClasses(vmInfo, vmManager, filter, true, Optional.empty());
+        Map<String, Integer> usedLoaders = new HashMap<>();
+        for (int x = 0; x < model.size(); x++) {
+            ClassInfo ci = model.get(x);
+            Integer occurences = usedLoaders.get(ci.getClassLoader());
+            if (occurences == null) {
+                usedLoaders.put(ci.getClassLoader(), 1);
+            } else {
+                occurences = occurences.intValue() + 1;
+                usedLoaders.put(ci.getClassLoader(), occurences);
+            }
+        }
+        List<Map.Entry<String, Integer>> sorted = getSortedEntries(usedLoaders);
+        for (Map.Entry<String, Integer> loader : sorted) {
+            String s = loader.getKey() + " (" + loader.getValue() + ")";
+            System.out.println(s);
+        }
+
+    }
+
+    public static List<Map.Entry<String, Integer>> getSortedEntries(Map<String, Integer> usedLoaders) {
+        List<Map.Entry<String, Integer>> sorted = new ArrayList<>(usedLoaders.entrySet());
+        sorted.sort(new Comparator<Map.Entry<String, Integer>>() {
+            @Override
+            public int compare(Map.Entry<String, Integer> first, Map.Entry<String, Integer> second) {
+                return first.getValue() - second.getValue();
+            }
+        });
+        return sorted;
     }
 
     private void listClassesFromVmInfo(
