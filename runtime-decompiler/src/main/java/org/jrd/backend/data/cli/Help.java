@@ -21,6 +21,7 @@ import static org.jrd.backend.data.cli.CliSwitches.*;
 /**
  * Class for relaying help texts to the user.
  */
+@SuppressWarnings("ExecutableStatementCount") //big setters
 public final class Help {
 
     public static final String HELP_FORMAT = HELP + ", " + H;

@@ -101,8 +101,16 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
     private String execute = "start";
     private File save;
     //currently standalone dialog supports only additions
+    //and additions do not support classlaoder selection (obviously)
+    //the classlaoder now remain thus unused
+    @SuppressFBWarnings(
+            value = "SS_SHOULD_BE_STATIC",
+            justification = "is really per instance, however will ahve sense, only if standalone dialog will support overwrite, which is unlikely"
+    )
     private final boolean overvriteEnabled = false;
-    private String classloader = null;
+    //field to hots the target classlaoder if it willbe ever supported
+    //it is now null, what is waht the only ussage in compiler.compile(toCompile, pluginManager, classloader); needs
+    private String classloader;
     private boolean addToRunningVm = false;
     private boolean useBootForBytemanAndUpload = false;
 
@@ -643,32 +651,35 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
             addToSeelctedVm.setSelected(addToRunningVm);
             advanced.add(addToSeelctedVm);
             if (overvriteEnabled) {
-                JMenuItem classloaderSelect = new JMenuItem("classloader (regex) to unknown (keep, unless " + "you know what yo are doing");
-                if (classloader != null) {
-                    classloaderSelect.setText("classloader to upload to - " + classloader);
-                }
-                classloaderSelect.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent actionEvent) {
-                        if (classloader != null) {
-                            classloaderSelect
-                                    .setText("classloader (regex) to upload to `unknown` (keep, unless " + "you know what yo are doing");
-                            classloader = null;
-                            repaintMenu(menu);
-                        } else {
-                            String nwcl = JOptionPane.showInputDialog(setMethod, "set cllassloader regex", classloader);
-                            if (nwcl != null && nwcl.trim().length() > 0) {
-                                classloader = nwcl;
-                                classloaderSelect.setText("classloader to upload to - " + classloader);
-                                repaintMenu(menu);
-                            }
-                        }
-                    }
-                });
-                advanced.add(classloaderSelect);
+                addOverwriteItems(menu, advanced, setMethod);
             }
         }
         menu.add(advanced);
+    }
+
+    private void addOverwriteItems(JPopupMenu menu, JMenu advanced, JMenuItem setMethod) {
+        JMenuItem classloaderSelect = new JMenuItem("classloader (regex) to unknown (keep, unless " + "you know what yo are doing");
+        if (classloader != null) {
+            classloaderSelect.setText("classloader to upload to - " + classloader);
+        }
+        classloaderSelect.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                if (classloader != null) {
+                    classloaderSelect.setText("classloader (regex) to upload to `unknown` (keep, unless " + "you know what yo are doing");
+                    classloader = null;
+                    repaintMenu(menu);
+                } else {
+                    String nwcl = JOptionPane.showInputDialog(setMethod, "set cllassloader regex", classloader);
+                    if (nwcl != null && nwcl.trim().length() > 0) {
+                        classloader = nwcl;
+                        classloaderSelect.setText("classloader to upload to - " + classloader);
+                        repaintMenu(menu);
+                    }
+                }
+            }
+        });
+        advanced.add(classloaderSelect);
     }
 
     private static void repaintMenu(JPopupMenu menu) {

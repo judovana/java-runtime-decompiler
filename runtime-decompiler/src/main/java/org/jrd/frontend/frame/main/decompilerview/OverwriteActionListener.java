@@ -1,5 +1,7 @@
 package org.jrd.frontend.frame.main.decompilerview;
 
+import org.jrd.backend.core.ClassInfo;
+
 import javax.swing.JOptionPane;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -17,27 +19,30 @@ class OverwriteActionListener implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
         int tab = getTab();
-        if (
+        final ClassInfo futureName = bytecodeDecompilerView.getLastDecompiledClass();
+        if (futureName == null) {
+            JOptionPane.showMessageDialog(bytecodeDecompilerView.getBuffers(), "No  Class selected?");
+        } else if (
             isAnyPrimaryTabSelected()) {
             worker.overwriteClass(
-                    bytecodeDecompilerView.getSelectedDecompiler(), bytecodeDecompilerView.getLastDecompiledClass(),
-                    bytecodeDecompilerView.getBytecodeBuffer().getText(), bytecodeDecompilerView.getBinary().get(), tab
+                    bytecodeDecompilerView.getSelectedDecompiler(), futureName, bytecodeDecompilerView.getBytecodeBuffer().getText(),
+                    bytecodeDecompilerView.getBinary().get(), tab
             );
         } else if (
             isSecondaryTabSelected()) {
             worker.overwriteClass(
-                    bytecodeDecompilerView.getSelectedDecompiler(), bytecodeDecompilerView.getLastDecompiledClass(),
+                    bytecodeDecompilerView.getSelectedDecompiler(), futureName,
                     bytecodeDecompilerView.getAdditionalBytecodeBuffer().getText(), bytecodeDecompilerView.getAdditionalBinary().get(), tab
             );
         } else if (bytecodeDecompilerView.isAdditionalSrcBufferVisible()) {
             worker.overwriteClass(
-                    bytecodeDecompilerView.getSelectedDecompiler(), bytecodeDecompilerView.getLastDecompiledClass(),
-                    bytecodeDecompilerView.getAdditionalSrcBuffer().getText(), new byte[0], tab
+                    bytecodeDecompilerView.getSelectedDecompiler(), futureName, bytecodeDecompilerView.getAdditionalSrcBuffer().getText(),
+                    new byte[0], tab
             );
         } else if (bytecodeDecompilerView.isBytemanBufferVisible()) {
             worker.overwriteClass(
-                    bytecodeDecompilerView.getSelectedDecompiler(), bytecodeDecompilerView.getLastDecompiledClass(),
-                    bytecodeDecompilerView.getBytemanScript().getText(), new byte[0], tab
+                    bytecodeDecompilerView.getSelectedDecompiler(), futureName, bytecodeDecompilerView.getBytemanScript().getText(),
+                    new byte[0], tab
             );
         } else {
             JOptionPane.showMessageDialog(

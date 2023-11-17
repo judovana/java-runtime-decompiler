@@ -201,6 +201,7 @@ public class AgentActionWorker extends Thread {
         });
     }
 
+    @SuppressWarnings("CyclomaticComplexity") // refactorable
     private void getAllFilteredClasses(BufferedReader in, BufferedWriter out) throws IOException {
         final String line = in.readLine();
         //it can be  jsut  - "" - jsut nothing
@@ -221,7 +222,7 @@ public class AgentActionWorker extends Thread {
         if (line == null || line.trim().isEmpty()) {
             filter = ClassFilter.create(line);
         } else if (line.contains(" true") || line
-                .contains("true ") || line.contains(" false") || line.contains("false ") || line.equals("true") || line.equals("false")) {
+                .contains("true ") || line.contains(" false") || line.contains("false ") || "true".equals(line) || "false".equals(line)) {
             String[] parts = line.split("\\s+");
             switch (parts.length) {
                 case 1:
@@ -432,15 +433,15 @@ public class AgentActionWorker extends Thread {
         private final String line;
         private final String classloader;
 
-        public StringAndClassLoader(String origLine) {
+        StringAndClassLoader(String origLine) {
             String[] lines = origLine.split("\\s");
-            String line = lines[0];
-            String classloader = null;
+            String lline = lines[0];
+            String lclassloader = null;
             if (lines.length > 1) {
-                classloader = decryptClassloader(lines[1]);
+                lclassloader = decryptClassloader(lines[1]);
             }
-            this.line = line;
-            this.classloader = classloader;
+            this.line = lline;
+            this.classloader = lclassloader;
         }
 
         public String getLine() {

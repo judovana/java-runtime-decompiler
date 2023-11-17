@@ -231,6 +231,7 @@ public class DecompilerRequestReceiver {
         return new ResponseWithPort(reply, actualListenPort);
     }
 
+    @SuppressWarnings("ParameterNumber") //unrefactorable
     private String getOverwriteAction(
             RequestAction action, String hostname, int listenPort, String vmId, int vmPid, String className, String newBody,
             String classloader

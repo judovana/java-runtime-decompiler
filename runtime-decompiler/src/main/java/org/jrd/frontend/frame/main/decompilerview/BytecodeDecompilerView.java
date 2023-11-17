@@ -232,7 +232,7 @@ public class BytecodeDecompilerView {
             public void mouseReleased(MouseEvent e) {
                 if (SwingUtilities.isLeftMouseButton(e)) {
                     final ClassInfo clazz = filteredClassesJList.getSelectedValue();
-                    if (clazz != null || filteredClassesJList.getSelectedIndex() != -1) {
+                    if (clazz != null && filteredClassesJList.getSelectedIndex() != -1) {
                         bytesWorker(clazz);
                     }
                 } else if (SwingUtilities.isRightMouseButton(e)) {
@@ -1037,7 +1037,7 @@ public class BytecodeDecompilerView {
             @Override
             protected Void doInBackground() throws Exception {
                 try {
-                    ActionEvent event = new ActionEvent(this, 2, null);
+                    //this was ActionEvent of id 2
                     classesActionListener.loadClassNames(classloaderRestriction.getText(), restrictLaoder.isSelected());
                 } catch (Throwable t) {
                     Logger.getLogger().log(Logger.Level.ALL, t);
@@ -1080,10 +1080,6 @@ public class BytecodeDecompilerView {
 
     ClassInfo getLastDecompiledClass() {
         return lastDecompiledClass;
-    }
-
-    ClassInfo getLastDecompiledClassName() {
-        return getLastDecompiledClassName();
     }
 
     JTabbedPane getBuffers() {

@@ -16,7 +16,7 @@ class ClassOverwriter {
 
     void overwriteClass(DecompilerWrapper selectedDecompiler, ClassInfo name, String buffer, byte[] binBuffer, int tab) {
         if (name == null) {
-
+            throw new RuntimeException("null name, in overwriteClass");
         } else if (name.getName() == null || name.getName().trim().isEmpty()) {
             name = new ClassInfo("???", name.getLocation(), name.getClassLoader());
         }
