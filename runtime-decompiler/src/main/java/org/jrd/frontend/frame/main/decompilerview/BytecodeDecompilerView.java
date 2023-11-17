@@ -9,6 +9,7 @@ import org.jrd.backend.data.DependenciesReader;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.cli.InMemoryJar;
 import org.jrd.backend.data.cli.Lib;
+import org.jrd.backend.data.cli.workers.Classes;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.frontend.frame.main.MainFrameView;
 import org.jrd.frontend.frame.main.OverridesManager;
@@ -74,6 +75,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -643,7 +645,9 @@ public class BytecodeDecompilerView {
                 usedLoaders.put(ci.getClassLoader(), occurences);
             }
         }
-        for (Map.Entry<String, Integer> loader : usedLoaders.entrySet()) {
+        List<Map.Entry<String, Integer>> sorted = Classes.getSortedEntries(usedLoaders);
+        Collections.reverse(sorted);
+        for (Map.Entry<String, Integer> loader : sorted) {
             JMenuItem item = new JMenuItem(loader.getKey() + " (" + loader.getValue() + ")");
             item.addActionListener(a -> selectAndSaveClassloader(OverridesManager.adaptLoaderRegex(loader.getKey())));
             loaders.add(item);
