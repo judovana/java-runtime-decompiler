@@ -88,7 +88,7 @@ public class KnownAgent {
 
     private String getCompaion() {
         if (bytemanCompanion == null) {
-            return "no companion";
+            return " no companion";
         } else {
             return ", companionBytemanPort=" + bytemanCompanion.getBytemanPort() + ", " + "afterBytemanCompanion=" +
                     bytemanCompanion.getPostBytemanAgentPort() + ')';
