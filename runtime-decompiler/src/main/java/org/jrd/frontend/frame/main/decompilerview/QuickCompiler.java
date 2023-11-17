@@ -1,6 +1,5 @@
 package org.jrd.frontend.frame.main.decompilerview;
 
-import org.jrd.backend.core.ClassInfo;
 import org.jrd.backend.core.Logger;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;

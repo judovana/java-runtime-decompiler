@@ -82,7 +82,7 @@ public class InstrumentationProvider {
 
     private Class findClass(String className, String classLoader) {
         Class[] classes = instrumentation.getAllLoadedClasses();
-        if (classLoader == null || classLoader.equals("unknown")) {
+        if (classLoader == null || "unknown".equals(classLoader)) {
             for (Class clazz : classes) {
                 if (clazz.getName().equals(className)) {
                     return clazz;
@@ -148,7 +148,7 @@ public class InstrumentationProvider {
         if (classlaoder == null) {
             found = true;
         } else {
-            if (classlaoder.equals("unknown")) {
+            if ("unknown".equals(classlaoder)) {
                 found = loadedClass.getClassLoader() == null;
             } else {
                 found = loadedClass.getClassLoader() != null && (loadedClass.getClassLoader().toString().equals(classlaoder) ||
