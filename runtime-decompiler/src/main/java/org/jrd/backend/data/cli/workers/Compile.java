@@ -104,7 +104,7 @@ public class Compile {
                     }
                     if (detectedByteCode == null) {
                         try {
-                            String randomClass = Lib.obtainClasses(args.getClassesProvider().getVmInfo(), vmManager)[0];
+                            String randomClass = Lib.obtainClasses(args.getClassesProvider().getVmInfo(), vmManager, Optional.empty())[0];
                             detectedByteCode =
                                     Lib.getDefaultRemoteBytecodelevel(args.getClassesProvider().getVmInfo(), vmManager, randomClass);
                         } catch (Exception ex) {
