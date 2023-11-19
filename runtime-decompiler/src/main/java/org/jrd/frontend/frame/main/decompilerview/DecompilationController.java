@@ -60,6 +60,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -443,8 +444,10 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         String bytesInString = vmStatus.getLoadedClassBytes();
         byte[] bytes = Base64.getDecoder().decode(bytesInString);
         try {
-            decompiledClass = getPluginManager()
-                    .decompile(bytecodeDecompilerView.getSelectedDecompiler(), name.getName(), bytes, null, vmInfo, getVmManager());
+            decompiledClass = getPluginManager().decompile(
+                    bytecodeDecompilerView.getSelectedDecompiler(), name.getName(), bytes, null, vmInfo, getVmManager(),
+                    Optional.ofNullable(name.getClassLoader())
+            );
         } catch (Exception e) {
             Logger.getLogger().log(Logger.Level.ALL, e);
         }
@@ -452,8 +455,10 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         String additionalDecompiled = "";
         if (additionalBytes != null && additionalBytes.length > 0) {
             try {
-                additionalDecompiled = getPluginManager()
-                        .decompile(bytecodeDecompilerView.getSelectedDecompiler(), name.getName(), additionalBytes, null, null, null);
+                additionalDecompiled = getPluginManager().decompile(
+                        bytecodeDecompilerView.getSelectedDecompiler(), name.getName(), additionalBytes, null, null, null,
+                        Optional.ofNullable(name.getClassLoader())
+                );
             } catch (Exception e) {
                 Logger.getLogger().log(Logger.Level.ALL, e);
             }

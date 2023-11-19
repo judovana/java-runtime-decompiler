@@ -53,7 +53,7 @@ public class RuntimeCompilerConnector {
             for (ClassIdentifier clazz : classIdentifiers) {
                 VmDecompilerStatus result;
                 try {
-                    result = Lib.obtainClass(vmInfo, clazz.getFullName(), vmManager);
+                    result = Lib.obtainClass(vmInfo, clazz.getFullName(), vmManager, Optional.empty());
                 } catch (Exception ex) {
                     Logger.getLogger().log(Logger.Level.DEBUG, ex);
                     Logger.getLogger().log(Logger.Level.DEBUG, "Attempting to init the class and load again");
@@ -66,13 +66,13 @@ public class RuntimeCompilerConnector {
                     //if we are using host classes, the class may still by on host
                     if (Config.getConfig().doUseHostSystemClasses()) {
                         try {
-                            result = Lib.obtainClass(vmInfo, clazz.getFullName(), vmManager);
+                            result = Lib.obtainClass(vmInfo, clazz.getFullName(), vmManager, Optional.empty());
                         } catch (Exception consumedExceptionOnUseHostClasses) {
                             Logger.getLogger().log(consumedExceptionOnUseHostClasses);
                             continue;
                         }
                     } else {
-                        result = Lib.obtainClass(vmInfo, clazz.getFullName(), vmManager);
+                        result = Lib.obtainClass(vmInfo, clazz.getFullName(), vmManager, Optional.empty());
                     }
                 }
                 byte[] ba = Base64.getDecoder().decode(result.getLoadedClassBytes());

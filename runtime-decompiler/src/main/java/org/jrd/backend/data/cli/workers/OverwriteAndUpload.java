@@ -15,6 +15,7 @@ import org.jrd.frontend.frame.overwrite.FileToClassValidator;
 
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
 
 public class OverwriteAndUpload {
 
@@ -22,12 +23,14 @@ public class OverwriteAndUpload {
     private final VmManager vmManager;
     private final boolean isBoot;
     private final boolean isHex;
+    private final String classloader;
 
-    public OverwriteAndUpload(List<String> filteredArgs, VmManager vmManager, boolean isBoot, boolean isHex) {
+    public OverwriteAndUpload(List<String> filteredArgs, VmManager vmManager, boolean isBoot, boolean isHex, String classloader) {
         this.filteredArgs = filteredArgs;
         this.vmManager = vmManager;
         this.isBoot = isBoot;
         this.isHex = isHex;
+        this.classloader = classloader;
     }
 
     //fixme, refactor, jar do not belongs here
@@ -97,7 +100,7 @@ public class OverwriteAndUpload {
         String response;
         switch (add) {
             case OVERWRITE_CLASS:
-                response = Lib.uploadClass(vmInfo, className, clazz, vmManager);
+                response = Lib.uploadClass(vmInfo, className, clazz, vmManager, Optional.ofNullable(classloader));
                 break;
             case ADD_CLASS:
                 response = Lib.addClass(vmInfo, className, clazz, vmManager);

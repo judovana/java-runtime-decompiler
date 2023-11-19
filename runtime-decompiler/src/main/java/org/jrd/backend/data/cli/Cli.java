@@ -220,26 +220,28 @@ public class Cli {
                     operatedOn.add(vmInfo4);
                     break;
                 case COMPILE:
-                    new Compile(isHex, isVerbose, filteredArgs, saving, getVmManager(), getPluginManager()).compileWrapper(operatedOn);
+                    new Compile(isHex, isVerbose, filteredArgs, saving, getVmManager(), getPluginManager(), classloader)
+                            .compileWrapper(operatedOn);
                     break;
                 case PATCH:
-                    VmInfo patchVmInfo =
-                            new Patch(isHex, isVerbose, filteredArgs, isRevert, getVmManager(), getPluginManager(), isBoot, saving).patch();
+                    VmInfo patchVmInfo = new Patch(
+                            isHex, isVerbose, filteredArgs, isRevert, getVmManager(), getPluginManager(), isBoot, saving, classloader
+                    ).patch();
                     operatedOn.add(patchVmInfo);
                     break;
                 case OVERWRITE:
-                    VmInfo vmInfo5 =
-                            new OverwriteAndUpload(filteredArgs, getVmManager(), isBoot, isHex).overwrite(ReceivedType.OVERWRITE_CLASS);
+                    VmInfo vmInfo5 = new OverwriteAndUpload(filteredArgs, getVmManager(), isBoot, isHex, classloader)
+                            .overwrite(ReceivedType.OVERWRITE_CLASS);
                     operatedOn.add(vmInfo5);
                     break;
                 case ADD_CLASS:
-                    VmInfo vmInfoAddClass =
-                            new OverwriteAndUpload(filteredArgs, getVmManager(), isBoot, isHex).overwrite(ReceivedType.ADD_CLASS);
+                    VmInfo vmInfoAddClass = new OverwriteAndUpload(filteredArgs, getVmManager(), isBoot, isHex, classloader)
+                            .overwrite(ReceivedType.ADD_CLASS);
                     operatedOn.add(vmInfoAddClass);
                     break;
                 case ADD_JAR:
-                    VmInfo vmInfoAddJar =
-                            new OverwriteAndUpload(filteredArgs, getVmManager(), isBoot, isHex).overwrite(ReceivedType.ADD_JAR);
+                    VmInfo vmInfoAddJar = new OverwriteAndUpload(filteredArgs, getVmManager(), isBoot, isHex, classloader)
+                            .overwrite(ReceivedType.ADD_JAR);
                     operatedOn.add(vmInfoAddJar);
                     break;
                 case ADD_CLASSES:

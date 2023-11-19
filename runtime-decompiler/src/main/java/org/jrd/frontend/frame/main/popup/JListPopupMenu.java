@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -38,11 +39,14 @@ import java.util.stream.IntStream;
 public class JListPopupMenu<T> extends JPopupMenu {
 
     Map<String, CheckboxGetterPair<T>> checkboxes = new LinkedHashMap<>();
-    boolean showCheckBoxes;
+    final boolean showCheckBoxes;
+    final Optional<String> classloader;
 
-    public JListPopupMenu(JList<T> parentJList, boolean showCheckboxes, DependenciesReader dependenciesReader) {
+    public JListPopupMenu(
+            JList<T> parentJList, boolean showCheckboxes, DependenciesReader dependenciesReader, Optional<String> classloader
+    ) {
         this.showCheckBoxes = showCheckboxes;
-
+        this.classloader = classloader;
         add(createCopyItem("Copy selected", parentJList.getSelectedValuesList()));
         add(createCopyItem("Copy all", allItems(parentJList.getModel())));
 
@@ -146,7 +150,7 @@ public class JListPopupMenu<T> extends JPopupMenu {
                     classes.addAll(mParentJList.stream().map(JListPopupMenu.this::stringsFromValue).collect(Collectors.toList()));
                     for (String clazz : classes) {
                         VmDecompilerStatus result =
-                                Lib.obtainClass(mDependenciesReader.getVmInfo(), clazz, mDependenciesReader.getVmManager());
+                                Lib.obtainClass(mDependenciesReader.getVmInfo(), clazz, mDependenciesReader.getVmManager(), classloader);
                         Collection<String> deps1 = mDependenciesReader.resolve(clazz, result.getLoadedClassBytes());
                         allDeps.addAll(deps1);
                     }

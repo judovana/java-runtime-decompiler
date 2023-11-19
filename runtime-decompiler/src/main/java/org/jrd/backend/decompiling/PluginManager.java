@@ -40,6 +40,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
@@ -153,7 +154,8 @@ public class PluginManager {
      */
     @SuppressWarnings({"CyclomaticComplexity", "LineLength", "TodoComment"}) // TODO: fix this
     public synchronized String decompile(
-            DecompilerWrapper wrapper, String name, byte[] bytecode, String[] options, VmInfo vmInfo, VmManager vmManager
+            DecompilerWrapper wrapper, String name, byte[] bytecode, String[] options, VmInfo vmInfo, VmManager vmManager,
+            Optional<String> classloader
     ) throws Exception {
         if (wrapper == null) {
             return "No valid decompiler selected. Unable to decompile. \n " +
@@ -188,22 +190,35 @@ public class PluginManager {
                             return new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager);
                         }
                     }, null);
-                    VmDecompilerStatus result = Lib.obtainClass(dr.getVmInfo(), name, dr.getVmManager());
+                    VmDecompilerStatus result = Lib.obtainClass(dr.getVmInfo(), name, dr.getVmManager(), classloader);
                     Collection<String> deps1 = dr.resolve(name, result.getLoadedClassBytes());
                     Set<String> inners = io.github.mkoncek.classpathless.util.BytecodeExtractor
                             .extractNestedClasses(bytecode, new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager));
                     Set<String> setdeps = new HashSet<>(deps1.size() + inners.size());
-                    //setdeps.addAll(inners); //should be in all deps
                     setdeps.addAll(deps1);
                     for (String clazz : setdeps) {
-                        addAndInitDepndenceClass(vmInfo, vmManager, otherClasses, clazz);
+                        addAndInitDepndenceClass(vmInfo, vmManager, otherClasses, clazz, classloader);
                     }
                 } else if (dd == Config.DepndenceNumbers.ALL_INNERS) {
                     Set<String> inners = io.github.mkoncek.classpathless.util.BytecodeExtractor
                             .extractNestedClasses(bytecode, new RuntimeCompilerConnector.JrdClassesProvider(vmInfo, vmManager));
                     for (String clazz : inners) {
-                        otherClasses
-                                .put(clazz, Base64.getDecoder().decode(Lib.obtainClass(vmInfo, clazz, vmManager).getLoadedClassBytes()));
+                        String bytecodeInners = null;
+                        if (classloader.isPresent()) {
+                            try {
+                                bytecodeInners = Lib.obtainClass(vmInfo, clazz, vmManager, classloader).getLoadedClassBytes();
+                            } catch (Exception ex) {
+                                Logger.getLogger().log(ex);
+                            }
+                        }
+                        try {
+                            if (bytecode == null) {
+                                bytecodeInners = Lib.obtainClass(vmInfo, clazz, vmManager, Optional.empty()).getLoadedClassBytes();
+                            }
+                            otherClasses.put(clazz, Base64.getDecoder().decode(bytecodeInners));
+                        } catch (Exception ex) {
+                            Logger.getLogger().log(ex);
+                        }
                     }
                 } else {
                     //just the one class, no additon to inners
@@ -223,7 +238,9 @@ public class PluginManager {
         }
     }
 
-    private void addAndInitDepndenceClass(VmInfo vmInfo, VmManager vmManager, Map<String, byte[]> otherClasses, String clazz) {
+    private void addAndInitDepndenceClass(
+            VmInfo vmInfo, VmManager vmManager, Map<String, byte[]> otherClasses, String clazz, Optional<String> classloader
+    ) {
         if (!(isLambdaForm(clazz) || isArrayForm(clazz) || isUndecompilableLambda(clazz))) {
             try {
                 try {
@@ -232,7 +249,18 @@ public class PluginManager {
                 } catch (Exception eex) {
                     Logger.getLogger().log(eex);
                 }
-                otherClasses.put(clazz, Base64.getDecoder().decode(Lib.obtainClass(vmInfo, clazz, vmManager).getLoadedClassBytes()));
+                String bytecode = null;
+                if (classloader.isPresent()) {
+                    try {
+                        bytecode = Lib.obtainClass(vmInfo, clazz, vmManager, classloader).getLoadedClassBytes();
+                    } catch (Exception ex) {
+                        Logger.getLogger().log(ex);
+                    }
+                }
+                if (bytecode == null) {
+                    bytecode = Lib.obtainClass(vmInfo, clazz, vmManager, Optional.empty()).getLoadedClassBytes();
+                }
+                otherClasses.put(clazz, Base64.getDecoder().decode(bytecode));
             } catch (Exception ex) {
                 Logger.getLogger().log(ex);
             }

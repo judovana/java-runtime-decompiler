@@ -238,8 +238,10 @@ public class BytecodeDecompilerView {
                         bytesWorker(clazz);
                     }
                 } else if (SwingUtilities.isRightMouseButton(e)) {
-                    new ClassListPopupMenu<>(filteredClassesJList, originallySelected, doShowClassInfo(), getDependenciesReader())
-                            .addItem("name(s)", ClassInfo::getName, true).addItem("location(s)", ClassInfo::getLocation, false)
+                    new ClassListPopupMenu<>(
+                            filteredClassesJList, originallySelected, doShowClassInfo(), getDependenciesReader(),
+                            isLastClassloader() ? Optional.of(getLastClassloader()) : Optional.empty()
+                    ).addItem("name(s)", ClassInfo::getName, true).addItem("location(s)", ClassInfo::getLocation, false)
                             .addItem("class loader(s)", ClassInfo::getClassLoader, false).show(filteredClassesJList, e.getX(), e.getY());
                 }
             }
@@ -1220,5 +1222,9 @@ public class BytecodeDecompilerView {
 
     public String getLastClassloader() {
         return classloaderRestriction.getText();
+    }
+
+    public boolean isLastClassloader() {
+        return restrictLaoder.isSelected();
     }
 }

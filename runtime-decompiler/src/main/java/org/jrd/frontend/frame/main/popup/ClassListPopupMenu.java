@@ -6,11 +6,14 @@ import javax.swing.JList;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
+import java.util.Optional;
 
 public class ClassListPopupMenu<T> extends JListPopupMenu<T> {
 
-    public ClassListPopupMenu(JList<T> parentJList, int originallySelected, boolean showCheckboxes, DependenciesReader dr) {
-        super(parentJList, showCheckboxes, dr);
+    public ClassListPopupMenu(
+            JList<T> parentJList, int originallySelected, boolean showCheckboxes, DependenciesReader dr, Optional<String> classloader
+    ) {
+        super(parentJList, showCheckboxes, dr, classloader);
 
         addPopupMenuListener(new PopupMenuListener() {
             @Override
