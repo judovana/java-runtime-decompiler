@@ -27,12 +27,14 @@ public class Classes {
     private final VmManager vmManager;
     private final boolean hex;
     private final Saving saving;
+    private final String classloader;
 
-    public Classes(List<String> filteredArgs, VmManager vmManager, boolean hex, Saving saving) {
+    public Classes(List<String> filteredArgs, VmManager vmManager, boolean hex, Saving saving, String classloader) {
         this.filteredArgs = filteredArgs;
         this.vmManager = vmManager;
         this.hex = hex;
         this.saving = saving;
+        this.classloader = classloader;
     }
 
     public VmInfo searchClasses() throws IOException {
@@ -84,7 +86,8 @@ public class Classes {
     }
 
     private void countLoadersFromClassesFromVmInfo(VmInfo vmInfo, List<Pattern> filter) throws IOException {
-        List<ClassInfo> model = Lib.obtainFilteredClasses(vmInfo, vmManager, filter, true, Optional.empty());
+        List<ClassInfo> model =
+                Lib.obtainFilteredClasses(vmInfo, vmManager, filter, true, Optional.empty(), Optional.ofNullable(classloader));
         Map<String, Integer> usedLoaders = new HashMap<>();
         for (int x = 0; x < model.size(); x++) {
             ClassInfo ci = model.get(x);
@@ -118,7 +121,7 @@ public class Classes {
     private void listClassesFromVmInfo(
             VmInfo vmInfo, List<Pattern> filter, boolean details, boolean bytecodeVersion, Optional<String> search
     ) throws IOException {
-        List<ClassInfo> classes = Lib.obtainFilteredClasses(vmInfo, vmManager, filter, details, search);
+        List<ClassInfo> classes = Lib.obtainFilteredClasses(vmInfo, vmManager, filter, details, search, Optional.ofNullable(classloader));
         if (saving.shouldSave()) {
             if (saving.getLike().equals(Saving.DEFAULT) || saving.getLike().equals(Saving.EXACT)) {
                 try (

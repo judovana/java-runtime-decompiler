@@ -25,13 +25,21 @@ public class Decompile {
     private final VmManager vmManager;
     private final PluginManager pluginManager;
     private final boolean isHex;
+    //I'm not sure if it is necessary to use classlaoder already for listing
+    //and then use toSet instead of toList
+    //or only for decompilation
+    //unsure issue - will decompiler load dependent classes if they are from different CL?
+    private final String classloader;
 
-    public Decompile(boolean isHex, List<String> filteredArgs, Saving saving, VmManager vmManager, PluginManager pluginManager) {
+    public Decompile(
+            boolean isHex, List<String> filteredArgs, Saving saving, VmManager vmManager, PluginManager pluginManager, String classloader
+    ) {
         this.filteredArgs = filteredArgs;
         this.saving = saving;
         this.vmManager = vmManager;
         this.pluginManager = pluginManager;
         this.isHex = isHex;
+        this.classloader = classloader;
     }
 
     public VmInfo decompile() throws Exception {
@@ -46,9 +54,9 @@ public class Decompile {
 
         for (int i = 3; i < filteredArgs.size(); i++) {
             String clazzRegex = filteredArgs.get(i);
-            List<String> classes =
-                    Lib.obtainFilteredClasses(vmInfo, vmManager, Arrays.asList(Pattern.compile(clazzRegex)), false, Optional.empty())
-                            .stream().map(a -> a.getName()).collect(Collectors.toList());
+            List<String> classes = Lib.obtainFilteredClasses(
+                    vmInfo, vmManager, Arrays.asList(Pattern.compile(clazzRegex)), false, Optional.empty(), Optional.ofNullable(classloader)
+            ).stream().map(a -> a.getName()).collect(Collectors.toList());
 
             for (String clazz : classes) {
                 classCount++;

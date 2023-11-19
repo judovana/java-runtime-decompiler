@@ -35,13 +35,17 @@ public class PrintBytes {
     private final VmManager vmManager;
     private final PluginManager pluginManager;
     private final boolean isHex;
+    private final String classloader;
 
-    public PrintBytes(boolean isHex, List<String> filteredArgs, Saving saving, VmManager vmManager, PluginManager pluginManager) {
+    public PrintBytes(
+            boolean isHex, List<String> filteredArgs, Saving saving, VmManager vmManager, PluginManager pluginManager, String classloader
+    ) {
         this.filteredArgs = filteredArgs;
         this.saving = saving;
         this.vmManager = vmManager;
         this.pluginManager = pluginManager;
         this.isHex = isHex;
+        this.classloader = classloader;
     }
 
     public VmInfo printBytes(String operation) throws Exception {
@@ -63,9 +67,9 @@ public class PrintBytes {
 
         for (int i = 2; i < filteredArgs.size(); i++) {
             String clazzRegex = filteredArgs.get(i);
-            List<String> classes =
-                    Lib.obtainFilteredClasses(vmInfo, vmManager, Arrays.asList(Pattern.compile(clazzRegex)), false, Optional.empty())
-                            .stream().map(a -> a.getName()).collect(Collectors.toList());
+            List<String> classes = Lib.obtainFilteredClasses(
+                    vmInfo, vmManager, Arrays.asList(Pattern.compile(clazzRegex)), false, Optional.empty(), Optional.ofNullable(classloader)
+            ).stream().map(a -> a.getName()).collect(Collectors.toList());
 
             for (String clazz : classes) {
                 classCount++;

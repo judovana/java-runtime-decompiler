@@ -184,33 +184,39 @@ public class Cli {
                     operatedOn.add(vmInfo00);
                     break;
                 case SEARCH:
-                    VmInfo vmInfoSearch = new Classes(filteredArgs, getVmManager(), isHex, saving).searchClasses();
+                    VmInfo vmInfoSearch = new Classes(filteredArgs, getVmManager(), isHex, saving, classloader).searchClasses();
                     operatedOn.add(vmInfoSearch);
                     break;
                 case LIST_CLASSES:
-                    VmInfo vmInfo1 = new Classes(filteredArgs, getVmManager(), isHex, saving).listClasses(false, false, Optional.empty());
+                    VmInfo vmInfo1 = new Classes(filteredArgs, getVmManager(), isHex, saving, classloader)
+                            .listClasses(false, false, Optional.empty());
                     operatedOn.add(vmInfo1);
                     break;
                 case LIST_CLASSESDETAILS:
-                    VmInfo vmInfo2 = new Classes(filteredArgs, getVmManager(), isHex, saving).listClasses(true, false, Optional.empty());
+                    VmInfo vmInfo2 = new Classes(filteredArgs, getVmManager(), isHex, saving, classloader)
+                            .listClasses(true, false, Optional.empty());
                     operatedOn.add(vmInfo2);
                     break;
                 case LIST_CLASSESBYTECODEVERSIONS:
-                    VmInfo vmInfo11 = new Classes(filteredArgs, getVmManager(), isHex, saving).listClasses(false, true, Optional.empty());
+                    VmInfo vmInfo11 = new Classes(filteredArgs, getVmManager(), isHex, saving, classloader)
+                            .listClasses(false, true, Optional.empty());
                     operatedOn.add(vmInfo11);
                     break;
                 case LIST_CLASSESDETAILSBYTECODEVERSIONS:
-                    VmInfo vmInfo21 = new Classes(filteredArgs, getVmManager(), isHex, saving).listClasses(true, true, Optional.empty());
+                    VmInfo vmInfo21 =
+                            new Classes(filteredArgs, getVmManager(), isHex, saving, classloader).listClasses(true, true, Optional.empty());
                     operatedOn.add(vmInfo21);
                     break;
                 case BYTES:
                 case BASE64:
                 case DEPS:
-                    VmInfo vmInfo3 = new PrintBytes(isHex, filteredArgs, saving, getVmManager(), getPluginManager()).printBytes(operation);
+                    VmInfo vmInfo3 = new PrintBytes(isHex, filteredArgs, saving, getVmManager(), getPluginManager(), classloader)
+                            .printBytes(operation);
                     operatedOn.add(vmInfo3);
                     break;
                 case DECOMPILE:
-                    VmInfo vmInfo4 = new Decompile(isHex, filteredArgs, saving, getVmManager(), getPluginManager()).decompile();
+                    VmInfo vmInfo4 =
+                            new Decompile(isHex, filteredArgs, saving, getVmManager(), getPluginManager(), classloader).decompile();
                     operatedOn.add(vmInfo4);
                     break;
                 case COMPILE:
@@ -256,7 +262,7 @@ public class Cli {
                     operatedOn.add(vmInfo8);
                     break;
                 case LIST_CLASSLOADERS:
-                    VmInfo vmInfo9 = new Classes(filteredArgs, getVmManager(), false, null).countLoaders();
+                    VmInfo vmInfo9 = new Classes(filteredArgs, getVmManager(), false, null, classloader).countLoaders();
                     operatedOn.add(vmInfo9);
                     break;
                 case COMPLETION:
