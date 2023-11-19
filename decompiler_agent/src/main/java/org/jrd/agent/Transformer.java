@@ -8,7 +8,6 @@ import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * This class represent our transformer for retrieving bytecode.
@@ -96,18 +95,19 @@ public class Transformer implements ClassFileTransformer {
         List<String[]> fqns = getOverriddenFqnPairs();
         List<String[]> removed = new ArrayList<>();
 
-        Pattern fqn = Pattern.compile(".*");
+        String fqn = ".*";
         String loader = ".*";
 
         if (patterns.contains(":")) {
-            fqn = Pattern.compile(patterns.split(":")[0]);
+            fqn = patterns.split(":")[0];
             loader = patterns.replace(fqn.toString() + ":", "");
         } else {
-            fqn = Pattern.compile(patterns);
+            fqn = patterns;
         }
 
         for (String[] fqnAndLoader : fqns) {
-            if (fqn.matcher(fqnAndLoader[0]).matches() && (fqnAndLoader[1].equals(loader) || fqnAndLoader[1].matches(loader))) {
+            if ((fqnAndLoader[0].equals(fqn) || fqnAndLoader[0].matches(fqn)) &&
+                    (fqnAndLoader[1].equals(loader) || fqnAndLoader[1].matches(loader))) {
                 String cl = ClassClassLoaderMap.unknownToNullClasslaoder(fqnAndLoader[1]);
                 removeOverride(fqnAndLoader[0], cl);
                 removed.add(new String[]{fqnAndLoader[0], cl});
