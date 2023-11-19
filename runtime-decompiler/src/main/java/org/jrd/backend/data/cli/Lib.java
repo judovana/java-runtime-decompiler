@@ -187,8 +187,8 @@ public final class Lib {
         return filteredClasses;
     }
 
-    public static int[] getByteCodeVersions(ClassInfo clazz, VmInfo vmInfo, VmManager vmManager) {
-        VmDecompilerStatus result = obtainClass(vmInfo, clazz.getName(), vmManager);
+    public static int[] getByteCodeVersions(ClassInfo clazz, VmInfo vmInfo, VmManager vmManager, Optional<String> classloader) {
+        VmDecompilerStatus result = obtainClass(vmInfo, clazz.getName(), vmManager, classloader);
         byte[] source = Base64.getDecoder().decode(result.getLoadedClassBytes());
         int bytecodeVersion = Lib.getByteCodeVersion(source);
         int buildJavaPerVersion = Lib.getJavaFromBytelevel(bytecodeVersion);
@@ -254,9 +254,9 @@ public final class Lib {
         }
     }
 
-    public static void removeOverrides(VmInfo vmInfo, VmManager manager, String regex) {
+    public static void removeOverrides(VmInfo vmInfo, VmManager manager, String fqnAndLoader) {
         AgentRequestAction.RequestAction requestType = AgentRequestAction.RequestAction.REMOVE_OVERRIDES;
-        AgentRequestAction request = DecompilationController.createRequest(vmInfo, requestType, regex);
+        AgentRequestAction request = DecompilationController.createRequest(vmInfo, requestType, fqnAndLoader);
         String response = DecompilationController.submitRequest(manager, request);
         if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
             return;
@@ -303,8 +303,14 @@ public final class Lib {
         }
     }
 
-    public static VmDecompilerStatus obtainClass(VmInfo vmInfo, String clazz, VmManager manager) {
-        AgentRequestAction request = DecompilationController.createRequest(vmInfo, AgentRequestAction.RequestAction.BYTES, clazz);
+    public static VmDecompilerStatus obtainClass(VmInfo vmInfo, String clazz, VmManager manager, Optional<String> classlaoder) {
+        AgentRequestAction request;
+        if (classlaoder.isPresent()) {
+            request = DecompilationController
+                    .createRequest(vmInfo, AgentRequestAction.RequestAction.BYTES, clazz, optionalLoaderToParam(classlaoder));
+        } else {
+            request = DecompilationController.createRequest(vmInfo, AgentRequestAction.RequestAction.BYTES, clazz);
+        }
         String response = DecompilationController.submitRequest(manager, request);
         if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
             return vmInfo.getVmDecompilerStatus();
@@ -345,27 +351,35 @@ public final class Lib {
     }
 
     public static String decompileBytesByDecompilerName(
-            String base64Bytes, String pluginName, String className, VmInfo vmInfo, VmManager vmManager, PluginManager pluginManager
+            String base64Bytes, String pluginName, String className, VmInfo vmInfo, VmManager vmManager, PluginManager pluginManager,
+            Optional<String> classloader
     ) throws Exception {
         byte[] bytes = Base64.getDecoder().decode(base64Bytes);
-        return decompileBytesByDecompilerName(bytes, pluginName, className, vmInfo, vmManager, pluginManager);
+        return decompileBytesByDecompilerName(bytes, pluginName, className, vmInfo, vmManager, pluginManager, classloader);
     }
 
     public static String decompileBytesByDecompilerName(
-            byte[] bytes, String pluginName, String className, VmInfo vmInfo, VmManager vmManager, PluginManager pluginManager
+            byte[] bytes, String pluginName, String className, VmInfo vmInfo, VmManager vmManager, PluginManager pluginManager,
+            Optional<String> classloader
     ) throws Exception {
         PluginWithOptions pwo = Lib.getDecompilerFromString(pluginName, pluginManager);
-        String decompilationResult = pluginManager.decompile(pwo.getDecompiler(), className, bytes, pwo.getOptions(), vmInfo, vmManager);
+        String decompilationResult =
+                pluginManager.decompile(pwo.getDecompiler(), className, bytes, pwo.getOptions(), vmInfo, vmManager, classloader);
         return decompilationResult;
     }
 
-    public static String uploadClass(VmInfo vmInfo, String className, byte[] bytes, VmManager vmManager) {
-        return uploadClass(vmInfo, className, Base64.getEncoder().encodeToString(bytes), vmManager);
-    }
-
-    public static String uploadClass(VmInfo vmInfo, String className, String clazzBytesInBase64, VmManager vmManager) {
-        AgentRequestAction request =
-                DecompilationController.createRequest(vmInfo, AgentRequestAction.RequestAction.OVERWRITE, className, clazzBytesInBase64);
+    public static
+            String
+            uploadClass(VmInfo vmInfo, String className, String clazzBytesInBase64, VmManager vmManager, Optional<String> classloader) {
+        AgentRequestAction request;
+        if (classloader.isPresent()) {
+            request = DecompilationController.createRequest(
+                    vmInfo, AgentRequestAction.RequestAction.OVERWRITE, className, clazzBytesInBase64, optionalLoaderToParam(classloader)
+            );
+        } else {
+            request = DecompilationController
+                    .createRequest(vmInfo, AgentRequestAction.RequestAction.OVERWRITE, className, clazzBytesInBase64);
+        }
         String response = DecompilationController.submitRequest(vmManager, request);
         return response;
     }
@@ -539,22 +553,36 @@ public final class Lib {
         );
     }
 
-    public static Integer getDefaultRemoteBytecodelevelCatched(VmInfo vmInfo, VmManager vmManager) {
+    /**
+     * This takes classloader parameter onloy for very extreme cases, when there is more instances of object!
+     */
+    public static Integer getDefaultRemoteBytecodelevelCatched(VmInfo vmInfo, VmManager vmManager, Optional<String> classloader) {
         try {
-            return getDefaultRemoteBytecodelevel(vmInfo, vmManager);
+            return getDefaultRemoteBytecodelevel(vmInfo, vmManager, classloader);
         } catch (Exception ex) {
             Logger.getLogger().log(ex);
             return null;
         }
     }
 
-    public static Integer getDefaultRemoteBytecodelevel(VmInfo vmInfo, VmManager vmManager) {
-        String className = java.lang.Object.class.getName();
-        return getDefaultRemoteBytecodelevel(vmInfo, vmManager, className);
+    public static Integer getDefaultRemoteBytecodelevelCatched(VmInfo vmInfo, VmManager vmManager) {
+        return getDefaultRemoteBytecodelevelCatched(vmInfo, vmManager, Optional.empty());
     }
 
-    public static Integer getDefaultRemoteBytecodelevel(VmInfo vmInfo, VmManager vmManager, String className) {
-        String base64Bytes = Lib.obtainClass(vmInfo, className, vmManager).getLoadedClassBytes();
+    /**
+     *  This takes classloader parameter onloy for very extreme cases, when there is more instances of object!
+     */
+    public static Integer getDefaultRemoteBytecodelevel(VmInfo vmInfo, VmManager vmManager, Optional<String> classloader) {
+        String className = java.lang.Object.class.getName();
+        return getRemoteBytecodelevel(vmInfo, vmManager, className, classloader);
+    }
+
+    public static Integer getDefaultRemoteBytecodelevel(VmInfo vmInfo, VmManager vmManager) {
+        return getDefaultRemoteBytecodelevel(vmInfo, vmManager, Optional.empty());
+    }
+
+    public static Integer getRemoteBytecodelevel(VmInfo vmInfo, VmManager vmManager, String className, Optional<String> classloader) {
+        String base64Bytes = Lib.obtainClass(vmInfo, className, vmManager, classloader).getLoadedClassBytes();
         ErrorCandidate errorCandidateRemote = new ErrorCandidate(base64Bytes);
         if (errorCandidateRemote.isError()) {
             throw new RuntimeException(className + " not found on local nor remote paths/vm"); //not probable, see the init check above

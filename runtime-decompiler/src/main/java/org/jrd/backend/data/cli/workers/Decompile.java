@@ -60,7 +60,7 @@ public class Decompile {
 
             for (String clazz : classes) {
                 classCount++;
-                VmDecompilerStatus result = Lib.obtainClass(vmInfo, clazz, vmManager);
+                VmDecompilerStatus result = Lib.obtainClass(vmInfo, clazz, vmManager, Optional.ofNullable(classloader));
                 byte[] bytes = Base64.getDecoder().decode(result.getLoadedClassBytes());
 
                 if (new File(plugin).exists() && plugin.toLowerCase().endsWith(".json")) {
@@ -70,8 +70,9 @@ public class Decompile {
                 PluginWithOptions pwo = Lib.getDecompilerFromString(plugin, pluginManager);
 
                 if (pwo.getDecompiler() != null) {
-                    String decompilationResult =
-                            pluginManager.decompile(pwo.getDecompiler(), clazz, bytes, pwo.getOptions(), vmInfo, vmManager);
+                    String decompilationResult = pluginManager.decompile(
+                            pwo.getDecompiler(), clazz, bytes, pwo.getOptions(), vmInfo, vmManager, Optional.ofNullable(classloader)
+                    );
 
                     if (!new Shared(isHex, saving).outOrSave(clazz, ".java", decompilationResult)) {
                         failCount++;

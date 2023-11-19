@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import io.github.mkoncek.classpathless.api.ClassIdentifier;
@@ -53,10 +54,11 @@ public class Patch {
     private final boolean isRevert;
     private final boolean isBoot;
     private final Saving saving;
+    private final String classloader;
 
     public Patch(
             boolean isHex, boolean isVerbose, List<String> filteredArgs, boolean isRevert, VmManager vmManager, PluginManager pluginManager,
-            boolean isBoot, Saving saving
+            boolean isBoot, Saving saving, String classloader
     ) {
         this.filteredArgs = filteredArgs;
         this.isRevert = isRevert;
@@ -66,6 +68,7 @@ public class Patch {
         this.isVerbose = isVerbose;
         this.isBoot = isBoot;
         this.saving = saving;
+        this.classloader = classloader;
     }
 
     /* FIXME refactor
@@ -173,7 +176,7 @@ public class Patch {
                 ErrorCandidate errorCandidateLocal = new ErrorCandidate(base64Bytes);
                 if (errorCandidateLocal.isError()) {
                     //not found on additional cp/sp: getting from puc
-                    base64Bytes = Lib.obtainClass(vmInfo, className, vmManager).getLoadedClassBytes();
+                    base64Bytes = Lib.obtainClass(vmInfo, className, vmManager, Optional.ofNullable(classloader)).getLoadedClassBytes();
                     ErrorCandidate errorCandidateRemote = new ErrorCandidate(base64Bytes);
                     if (errorCandidateRemote.isError()) {
                         throw new RuntimeException(className + " not found on local nor remote paths/vm"); //not probable, see the init check above
@@ -196,7 +199,8 @@ public class Patch {
                     } else {
                         //we are done also here, it was found on SRC path (and is base64 as it is found by agent)
                         //but wee need to find how it was compiled
-                        String remoteImpl = Lib.obtainClass(vmInfo, className, vmManager).getLoadedClassBytes();
+                        String remoteImpl =
+                                Lib.obtainClass(vmInfo, className, vmManager, Optional.ofNullable(classloader)).getLoadedClassBytes();
                         ErrorCandidate errorCandidateRemote = new ErrorCandidate(remoteImpl);
                         if (errorCandidateRemote.isError()) {
                             throw new RuntimeException(className + " not found on local nor remote paths/vm"); //not probable, see the init check above
@@ -370,7 +374,7 @@ public class Patch {
                     }
                 } else {
                     System.out.println("Overwriting class: " + className);
-                    reply = Lib.uploadClass(vmInfo, className, toUpload.getValue(), vmManager);
+                    reply = Lib.uploadClass(vmInfo, className, toUpload.getValue(), vmManager, Optional.ofNullable(classloader));
                 }
                 ErrorCandidate ec = new ErrorCandidate(reply);
                 if (ec.isError() || reply.startsWith("error ")/*fix me, why the or is needed?*/) {
@@ -407,6 +411,8 @@ public class Patch {
     }
 
     private String decompileBytesByDecompilerName(String base64Bytes, String pluginName, String className, VmInfo vmInfo) throws Exception {
-        return Lib.decompileBytesByDecompilerName(base64Bytes, pluginName, className, vmInfo, vmManager, pluginManager);
+        return Lib.decompileBytesByDecompilerName(
+                base64Bytes, pluginName, className, vmInfo, vmManager, pluginManager, Optional.ofNullable(classloader)
+        );
     }
 }

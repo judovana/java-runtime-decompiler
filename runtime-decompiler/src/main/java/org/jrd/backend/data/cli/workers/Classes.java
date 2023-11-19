@@ -129,7 +129,7 @@ public class Classes {
                                 new PrintWriter(new OutputStreamWriter(new FileOutputStream(saving.getAs()), StandardCharsets.UTF_8))
                 ) {
                     for (ClassInfo clazz : classes) {
-                        String bytecodes = getBytecodesString(vmInfo, details, bytecodeVersion, clazz, false);
+                        String bytecodes = getBytecodesString(vmManager, vmInfo, details, bytecodeVersion, clazz, false, classloader);
                         pw.println(clazz.toPrint(details) + bytecodes);
                     }
                 }
@@ -140,17 +140,20 @@ public class Classes {
             }
         } else {
             for (ClassInfo clazz : classes) {
-                String bytecodes = getBytecodesString(vmInfo, details, bytecodeVersion, clazz, false);
+                String bytecodes = getBytecodesString(vmManager, vmInfo, details, bytecodeVersion, clazz, false, classloader);
                 System.out.println(clazz.toPrint(details) + bytecodes);
             }
         }
     }
 
-    private String getBytecodesString(VmInfo vmInfo, boolean details, boolean bytecodeVersion, ClassInfo clazz, boolean doThrow) {
+    private static String getBytecodesString(
+            VmManager vmManager, VmInfo vmInfo, boolean details, boolean bytecodeVersion, ClassInfo clazz, boolean doThrow,
+            String classloader
+    ) {
         String bytecodes = "";
         if (bytecodeVersion) {
             try {
-                int[] versions = Lib.getByteCodeVersions(clazz, vmInfo, vmManager);
+                int[] versions = Lib.getByteCodeVersions(clazz, vmInfo, vmManager, Optional.ofNullable(classloader));
                 //double space metters
                 bytecodes = "  JDK " + versions[1] + " (bytecode: " + versions[0] + ")";
             } catch (Exception ex) {

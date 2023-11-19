@@ -73,7 +73,7 @@ public class PrintBytes {
 
             for (String clazz : classes) {
                 classCount++;
-                VmDecompilerStatus result = Lib.obtainClass(vmInfo, clazz, vmManager);
+                VmDecompilerStatus result = Lib.obtainClass(vmInfo, clazz, vmManager, Optional.ofNullable(classloader));
                 byte[] bytes;
                 if (operation.equals(BYTES)) {
                     bytes = Base64.getDecoder().decode(result.getLoadedClassBytes());

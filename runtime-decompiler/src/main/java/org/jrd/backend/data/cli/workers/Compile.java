@@ -39,9 +39,11 @@ public class Compile {
     private final PluginManager pluginManager;
     private final boolean isHex;
     private final boolean isVerbose;
+    private final String classloader;
 
     public Compile(
-            boolean isHex, boolean isVerbose, List<String> filteredArgs, Saving saving, VmManager vmManager, PluginManager pluginManager
+            boolean isHex, boolean isVerbose, List<String> filteredArgs, Saving saving, VmManager vmManager, PluginManager pluginManager,
+            String classloader
     ) {
         this.filteredArgs = filteredArgs;
         this.saving = saving;
@@ -49,6 +51,7 @@ public class Compile {
         this.pluginManager = pluginManager;
         this.isHex = isHex;
         this.isVerbose = isVerbose;
+        this.classloader = classloader;
     }
 
     public void compileWrapper(List<VmInfo> operatedOn) throws Exception {
@@ -81,7 +84,7 @@ public class Compile {
                 //FIRST try to find the class in target vm if enabled
                 if (shouldUpload) {
                     try {
-                        int[] versions = Lib.getByteCodeVersions(new ClassInfo(fqn), targetVm, vmManager);
+                        int[] versions = Lib.getByteCodeVersions(new ClassInfo(fqn), targetVm, vmManager, Optional.ofNullable(classloader));
                         detectedByteCode = versions[1];
                         Logger.getLogger().log(Logger.Level.ALL, fqn + " - detected bytecode in target VM: " + detectedByteCode);
                     } catch (Exception ex) {
@@ -91,7 +94,9 @@ public class Compile {
                 if (detectedByteCode == null) {
                     //FALLBACK try to find the class in target vm in source
                     try {
-                        int[] versions = Lib.getByteCodeVersions(new ClassInfo(fqn), args.getClassesProvider().getVmInfo(), vmManager);
+                        int[] versions = Lib.getByteCodeVersions(
+                                new ClassInfo(fqn), args.getClassesProvider().getVmInfo(), vmManager, Optional.ofNullable(classloader)
+                        );
                         detectedByteCode = versions[1]; /**/
                         Logger.getLogger().log(Logger.Level.ALL, fqn + " - detected bytecode in source VM: " + detectedByteCode);
                     } catch (Exception ex) {
@@ -104,9 +109,11 @@ public class Compile {
                     }
                     if (detectedByteCode == null) {
                         try {
-                            String randomClass = Lib.obtainClasses(args.getClassesProvider().getVmInfo(), vmManager, Optional.empty())[0];
-                            detectedByteCode =
-                                    Lib.getDefaultRemoteBytecodelevel(args.getClassesProvider().getVmInfo(), vmManager, randomClass);
+                            String randomClass = Lib
+                                    .obtainClasses(args.getClassesProvider().getVmInfo(), vmManager, Optional.ofNullable(classloader))[0];
+                            detectedByteCode = Lib.getRemoteBytecodelevel(
+                                    args.getClassesProvider().getVmInfo(), vmManager, randomClass, Optional.ofNullable(classloader)
+                            );
                         } catch (Exception ex) {
                             Logger.getLogger().log(ex);
                         }
@@ -143,7 +150,10 @@ public class Compile {
                 String className = bytecode.getClassIdentifier().getFullName();
                 Logger.getLogger().log("Uploading class '" + className + "'.");
 
-                String response = Lib.uploadClass(targetVm, className, Base64.getEncoder().encodeToString(bytecode.getFile()), vmManager);
+                String response = Lib.uploadClass(
+                        targetVm, className, Base64.getEncoder().encodeToString(bytecode.getFile()), vmManager,
+                        Optional.ofNullable(classloader)
+                );
 
                 if (DecompilerRequestReceiver.OK_RESPONSE.equals(response)) {
                     Logger.getLogger().log(Logger.Level.ALL, "Successfully uploaded class '" + className + "'.");
