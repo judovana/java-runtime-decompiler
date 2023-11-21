@@ -98,7 +98,6 @@ public class Cli {
                 i = readAgentParams(originalArgs, agentArgs, i);
             } else if (cleanedArg.equals(CLASSLOADER_SET)) {
                 classloader = originalArgs[i + 1];
-                System.out.println("todo classlaoder not yet implemented in cli" + classloader); //TODO
                 i++;
             } else {
                 args.add(arg);
