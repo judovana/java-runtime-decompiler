@@ -643,10 +643,8 @@ public class MainFrameView {
                 ActionEvent event = new ActionEvent(localVmList, 0, null);
                 vmChangingListener.actionPerformed(event);
             } else if (SwingUtilities.isRightMouseButton(mouseEvent)) {
-                new JListPopupMenu<>(
-                        localVmList, true, bytecodeDecompilerView.getDependenciesReader(),
-                        bytecodeDecompilerView.isLastClassloader() ? Optional.of(bytecodeDecompilerView.getLastClassloader()) : Optional.empty()
-                ).addItem("name(s)", VmInfo::getVmName, true).addItem("PID(s)", vmInfo -> String.valueOf(vmInfo.getVmPid()), false)
+                new JListPopupMenu<>(localVmList, true, bytecodeDecompilerView.getDependenciesReader(), getLoaderForPopup())
+                        .addItem("name(s)", VmInfo::getVmName, true).addItem("PID(s)", vmInfo -> String.valueOf(vmInfo.getVmPid()), false)
                         .addItem("PORT(s)", vmInfo -> {
                             if (vmInfo.getVmDecompilerStatus() != null) {
                                 return String.valueOf(vmInfo.getVmDecompilerStatus().getListenPort());
@@ -667,6 +665,14 @@ public class MainFrameView {
                             }
                         }, false).show(localVmList, mouseEvent.getX(), mouseEvent.getY());
             }
+        }
+    }
+
+    private Optional<String> getLoaderForPopup() {
+        if (bytecodeDecompilerView.isLastClassloader()) {
+            return Optional.of(bytecodeDecompilerView.getLastClassloader());
+        } else {
+            return Optional.empty();
         }
     }
 
