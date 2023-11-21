@@ -645,8 +645,7 @@ public class MainFrameView {
             } else if (SwingUtilities.isRightMouseButton(mouseEvent)) {
                 new JListPopupMenu<>(
                         localVmList, true, bytecodeDecompilerView.getDependenciesReader(),
-                        bytecodeDecompilerView.isLastClassloader() ? Optional.of(bytecodeDecompilerView.getLastClassloader())
-                                : Optional.empty()
+                        bytecodeDecompilerView.isLastClassloader() ? Optional.of(bytecodeDecompilerView.getLastClassloader()) : Optional.empty()
                 ).addItem("name(s)", VmInfo::getVmName, true).addItem("PID(s)", vmInfo -> String.valueOf(vmInfo.getVmPid()), false)
                         .addItem("PORT(s)", vmInfo -> {
                             if (vmInfo.getVmDecompilerStatus() != null) {
