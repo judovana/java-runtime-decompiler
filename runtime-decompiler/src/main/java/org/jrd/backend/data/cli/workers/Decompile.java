@@ -1,5 +1,6 @@
 package org.jrd.backend.data.cli.workers;
 
+import org.jrd.backend.core.ClassInfo;
 import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
@@ -16,7 +17,6 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class Decompile {
 
@@ -54,13 +54,14 @@ public class Decompile {
 
         for (int i = 3; i < filteredArgs.size(); i++) {
             String clazzRegex = filteredArgs.get(i);
-            List<String> classes = Lib.obtainFilteredClasses(
-                    vmInfo, vmManager, Arrays.asList(Pattern.compile(clazzRegex)), false, Optional.empty(), Optional.ofNullable(classloader)
-            ).stream().map(a -> a.getName()).collect(Collectors.toList());
+            List<ClassInfo> classes = Lib.obtainFilteredClasses(
+                    vmInfo, vmManager, Arrays.asList(Pattern.compile(clazzRegex)), true, Optional.empty(), Optional.ofNullable(classloader)
+            );
 
-            for (String clazz : classes) {
+            for (ClassInfo clazz : classes) {
                 classCount++;
-                VmDecompilerStatus result = Lib.obtainClass(vmInfo, clazz, vmManager, Optional.ofNullable(classloader));
+                VmDecompilerStatus result =
+                        Lib.obtainClass(vmInfo, clazz.getName(), vmManager, Optional.ofNullable(clazz.getClassLoader()));
                 byte[] bytes = Base64.getDecoder().decode(result.getLoadedClassBytes());
 
                 if (new File(plugin).exists() && plugin.toLowerCase().endsWith(".json")) {
@@ -71,10 +72,11 @@ public class Decompile {
 
                 if (pwo.getDecompiler() != null) {
                     String decompilationResult = pluginManager.decompile(
-                            pwo.getDecompiler(), clazz, bytes, pwo.getOptions(), vmInfo, vmManager, Optional.ofNullable(classloader)
+                            pwo.getDecompiler(), clazz.getName(), bytes, pwo.getOptions(), vmInfo, vmManager,
+                            Optional.ofNullable(clazz.getClassLoader())
                     );
 
-                    if (!new Shared(isHex, saving).outOrSave(clazz, ".java", decompilationResult)) {
+                    if (!new Shared(isHex, saving).outOrSave(clazz.getName(), ".java", decompilationResult)) {
                         failCount++;
                     }
                 }

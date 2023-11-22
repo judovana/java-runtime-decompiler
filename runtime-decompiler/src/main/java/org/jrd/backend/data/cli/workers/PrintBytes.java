@@ -1,6 +1,7 @@
 package org.jrd.backend.data.cli.workers;
 
 import org.jrd.backend.communication.RuntimeCompilerConnector;
+import org.jrd.backend.core.ClassInfo;
 import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.data.DependenciesReader;
 import org.jrd.backend.data.VmInfo;
@@ -67,13 +68,14 @@ public class PrintBytes {
 
         for (int i = 2; i < filteredArgs.size(); i++) {
             String clazzRegex = filteredArgs.get(i);
-            List<String> classes = Lib.obtainFilteredClasses(
-                    vmInfo, vmManager, Arrays.asList(Pattern.compile(clazzRegex)), false, Optional.empty(), Optional.ofNullable(classloader)
-            ).stream().map(a -> a.getName()).collect(Collectors.toList());
+            List<ClassInfo> classes = Lib.obtainFilteredClasses(
+                    vmInfo, vmManager, Arrays.asList(Pattern.compile(clazzRegex)), true, Optional.empty(), Optional.ofNullable(classloader)
+            );
 
-            for (String clazz : classes) {
+            for (ClassInfo clazz : classes) {
                 classCount++;
-                VmDecompilerStatus result = Lib.obtainClass(vmInfo, clazz, vmManager, Optional.ofNullable(classloader));
+                VmDecompilerStatus result =
+                        Lib.obtainClass(vmInfo, clazz.getName(), vmManager, Optional.ofNullable(clazz.getClassLoader()));
                 byte[] bytes;
                 if (operation.equals(BYTES)) {
                     bytes = Base64.getDecoder().decode(result.getLoadedClassBytes());
@@ -94,13 +96,13 @@ public class PrintBytes {
                             return args.getClassesProvider();
                         }
                     }, new LoadingDialogProvider() {
-                    }).resolve(clazz, result.getLoadedClassBytes());
+                    }).resolve(clazz.getName(), result.getLoadedClassBytes());
                     bytes = deps.stream().collect(Collectors.joining("\n")).getBytes(StandardCharsets.UTF_8);
                 } else {
                     bytes = result.getLoadedClassBytes().getBytes(StandardCharsets.UTF_8);
                 }
 
-                if (!new Shared(isHex, saving).outOrSave(clazz, ".class", bytes, operation.equals(BYTES))) {
+                if (!new Shared(isHex, saving).outOrSave(clazz.getName(), ".class", bytes, operation.equals(BYTES))) {
                     failCount++;
                 }
             }
