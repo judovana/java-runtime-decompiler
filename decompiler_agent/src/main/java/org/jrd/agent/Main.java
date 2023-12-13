@@ -6,6 +6,9 @@ import org.jrd.agent.api.Variables;
 import java.lang.instrument.Instrumentation;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * This class contains agent's premain and agentmain methods.
@@ -25,6 +28,8 @@ public final class Main {
     private static final String LONELINESS_VAL_F = "FORCING";
     private static final String LONELINESS_VAL_AF = "AF";
     private static int confirmedAttaches = 0;
+
+    private static final Map<String, Pattern> COMPILED_LOADERS_PATTERNS = new HashMap();
 
     private Main() {
     }
@@ -132,6 +137,41 @@ public final class Main {
             System.err.println("Added JRD agent: " + loneliness);
         }
         return loneliness;
+    }
+
+    public static boolean equalsOrMatching(ClassLoader candidate, String requested) {
+        return equalsOrMatching(AgentLogger.classLoaderId(candidate), requested);
+    }
+
+    public static boolean equalsOrMatching(String candidate, String requested) {
+        //nullchecks
+        if (requested == null || requested.trim().isEmpty()) {
+            return true;
+        }
+        //equals
+        if (candidate.equals(requested)) {
+            return true;
+        }
+        //mapchecks
+        Pattern compiledClassloader = null;
+        if (COMPILED_LOADERS_PATTERNS.containsKey(requested)) {
+            //null means, it attempted to compile but failed
+            compiledClassloader = COMPILED_LOADERS_PATTERNS.get(requested);
+        } else {
+            //compile and save to map
+            try {
+                compiledClassloader = Pattern.compile(requested);
+            } catch (Exception ex) {
+                //can not compile, that is possible and acceptable
+            }
+            COMPILED_LOADERS_PATTERNS.put(requested, compiledClassloader);
+        }
+        //match
+        if (compiledClassloader == null) {
+            return false;
+        } else {
+            return compiledClassloader.matcher(candidate).matches();
+        }
     }
 
 }

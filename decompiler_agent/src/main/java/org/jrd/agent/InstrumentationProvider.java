@@ -90,8 +90,7 @@ public class InstrumentationProvider {
             }
         } else {
             for (Class clazz : classes) {
-                if (clazz.getName().equals(className) && (AgentLogger.classLoaderId(clazz.getClassLoader()).equals(classLoader) ||
-                        AgentLogger.classLoaderId(clazz.getClassLoader()).matches(classLoader))) {
+                if (clazz.getName().equals(className) && Main.equalsOrMatching(clazz.getClassLoader(), classLoader)) {
                     return clazz;
                 }
             }
@@ -151,8 +150,7 @@ public class InstrumentationProvider {
             if ("unknown".equals(classlaoder)) {
                 found = loadedClass.getClassLoader() == null;
             } else {
-                found = loadedClass.getClassLoader() != null && (loadedClass.getClassLoader().toString().equals(classlaoder) ||
-                        loadedClass.getClassLoader().toString().matches(classlaoder));
+                found = loadedClass.getClassLoader() != null && Main.equalsOrMatching(loadedClass.getClassLoader(), classlaoder);
             }
         }
         return found;

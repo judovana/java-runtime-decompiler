@@ -106,8 +106,7 @@ public class Transformer implements ClassFileTransformer {
         }
 
         for (String[] fqnAndLoader : fqns) {
-            if ((fqnAndLoader[0].equals(fqn) || fqnAndLoader[0].matches(fqn)) &&
-                    (fqnAndLoader[1].equals(loader) || fqnAndLoader[1].matches(loader))) {
+            if (Main.equalsOrMatching(fqnAndLoader[0], fqn) && Main.equalsOrMatching(fqnAndLoader[1], loader)) {
                 String cl = ClassClassLoaderMap.unknownToNullClasslaoder(fqnAndLoader[1]);
                 removeOverride(fqnAndLoader[0], cl);
                 removed.add(new String[]{fqnAndLoader[0], cl});
