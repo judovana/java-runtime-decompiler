@@ -123,14 +123,33 @@ public class InstrumentationProvider {
             if (found) {
                 if (doGetInfo) {
                     String location;
+                    String module;
+                    String moduleloader;
                     try {
                         location = loadedClass.getProtectionDomain().getCodeSource().getLocation().getPath();
                     } catch (Exception ex) {
                         location = "unknown";
                     }
+                    try {
+                        module = AgentLogger.moduleId(loadedClass.getModule());
+                    } catch (Exception ex) {
+                        module = "unknown";
+                    }
+                    try {
+                        if (loadedClass.getModule()!=null) {
+                            moduleloader = AgentLogger.classLoaderId(loadedClass.getModule().getClassLoader());
+                        } else {
+                            moduleloader = "unknown";
+                        }
+                    } catch (Exception ex) {
+                        moduleloader = "unknown";
+                    }
                     String classLoader;
                     classLoader = AgentLogger.classLoaderId(loadedClass.getClassLoader());
-                    queue.put(className + INFO_DELIMITER + location + INFO_DELIMITER + classLoader);
+                    queue.put(
+                            className + INFO_DELIMITER + location + INFO_DELIMITER + classLoader + INFO_DELIMITER + module +
+                                    INFO_DELIMITER + moduleloader
+                    );
                 } else {
                     queue.put(className);
                 }

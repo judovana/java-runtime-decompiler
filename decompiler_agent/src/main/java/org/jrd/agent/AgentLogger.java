@@ -39,4 +39,12 @@ public class AgentLogger {
             return cl.toString();
         }
     }
+
+    public static String moduleId(Module cl) {
+        if (cl == null) {
+            return "unknown";
+        } else {
+            return cl.getName();
+        }
+    }
 }

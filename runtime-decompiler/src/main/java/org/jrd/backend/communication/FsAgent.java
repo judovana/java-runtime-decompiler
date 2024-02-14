@@ -291,8 +291,12 @@ public final class FsAgent implements DelegatingJrdAgent {
         if (s.endsWith(".class")) {
             if (details) {
                 classes.add(
-                        new ClassInfo(toClass(s.substring(root.length() + 1)), detailsPath, "class order in realvm may differ")
-                                .toAgentLikeAnswer()
+                        new ClassInfo(
+                                toClass(s.substring(root.length() + 1)),
+                                detailsPath,
+                                "class order in realvm may differ",
+                                "unknown",
+                                "unknown").toAgentLikeAnswer()
                 );
             } else {
                 classes.add(toClass(s.substring(root.length() + 1)));
