@@ -332,7 +332,7 @@ public class DecompilationController implements ModelProvider, LoadingDialogProv
         mainFrameView.switchPanel(false);
         mainFrameView.getBytecodeDecompilerView().reloadClassList(new ClassInfo[0]);
         mainFrameView.getBytecodeDecompilerView()
-                .reloadTextField(new ClassInfo("", "", ""), "", new byte[16], "", new byte[16], null, null);
+                .reloadTextField(new ClassInfo("", "", "", "", ""), "", new byte[16], "", new byte[16], null, null);
         if (halt) {
             haltAgent();
         }

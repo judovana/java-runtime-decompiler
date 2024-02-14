@@ -168,13 +168,13 @@ public final class Lib {
                         .collect(Collectors.toList());
             } else {
                 allClasses = Arrays.stream(searchClasses(vmInfo, vmManager, ecodedSearch, filter.get(0).pattern(), classloader))
-                        .map(a -> new ClassInfo(a, null, null)).collect(Collectors.toList());
+                        .map(a -> new ClassInfo(a, null, null, null, null)).collect(Collectors.toList());
             }
         } else {
             if (details) {
                 allClasses = Arrays.stream(obtainClassesDetails(vmInfo, vmManager, classloader)).collect(Collectors.toList());
             } else {
-                allClasses = Arrays.stream(obtainClasses(vmInfo, vmManager, classloader)).map(a -> new ClassInfo(a, null, null))
+                allClasses = Arrays.stream(obtainClasses(vmInfo, vmManager, classloader)).map(a -> new ClassInfo(a, null, null, null, null))
                         .collect(Collectors.toList());
             }
         }

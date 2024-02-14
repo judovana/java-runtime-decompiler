@@ -18,7 +18,7 @@ class ClassOverwriter {
         if (name == null) {
             throw new RuntimeException("null name, in overwriteClass");
         } else if (name.getName() == null || name.getName().trim().isEmpty()) {
-            name = new ClassInfo("???", name.getLocation(), name.getClassLoader());
+            name = new ClassInfo("???", name.getLocation(), name.getClassLoader(), "???", "???");
         }
 
         final OverwriteClassDialog overwriteClassDialog = new OverwriteClassDialog(

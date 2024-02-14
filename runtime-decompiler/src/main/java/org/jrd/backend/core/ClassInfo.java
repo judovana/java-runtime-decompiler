@@ -7,15 +7,18 @@ public class ClassInfo {
     private String name;
     private String location;
     private String classLoader;
+    private String module;
+    private String moduleLoader;
 
     private static final String INFO_DELIMITER_STRING = "|";
     private static final Pattern INFO_DELIMITER_PATTERN = Pattern.compile("\\" + INFO_DELIMITER_STRING);
 
-    public ClassInfo(String name, String location, String classLoader) {
+    public ClassInfo(String name, String location, String classLoader, String module, String moduleLoader) {
         this.name = name;
         this.location = location;
         this.classLoader = classLoader;
-
+        this.module = module;
+        this.moduleLoader = moduleLoader;
     }
 
     public ClassInfo(String classString) {
@@ -32,6 +35,16 @@ public class ClassInfo {
             this.classLoader = splitClassString[2];
         } else { // backwards compatibility
             this.classLoader = "unknown";
+        }
+        if (splitClassString.length >= 4 && !splitClassString[3].trim().isEmpty()) {
+            this.module = splitClassString[3];
+        } else { // backwards compatibility
+            this.module = "unknown";
+        }
+        if (splitClassString.length >= 5 && !splitClassString[4].trim().isEmpty()) {
+            this.moduleLoader = splitClassString[4];
+        } else { // backwards compatibility
+            this.moduleLoader = "unknown";
         }
     }
 
@@ -57,6 +70,14 @@ public class ClassInfo {
 
     public String getClassLoader() {
         return classLoader;
+    }
+
+    public String getModule() {
+        return module;
+    }
+
+    public String getModuleLoader() {
+        return moduleLoader;
     }
 
     public String getSearchableString(boolean isLocationVisible) {

@@ -18,17 +18,23 @@ public class ClassListRenderer extends JPanel implements ListCellRenderer<ClassI
     JLabel name;
     JLabel location;
     JLabel classLoader;
+    JLabel module;
+    JLabel moduleLoader;
     boolean doShowInfo;
 
     public ClassListRenderer() {
         name = new JLabel();
         location = new JLabel();
         classLoader = new JLabel();
+        module = new JLabel();
+        moduleLoader = new JLabel();
 
         Font infoFont = location.getFont().deriveFont(10.0F);
 
         location.setFont(infoFont);
         classLoader.setFont(infoFont);
+        module.setFont(infoFont);
+        moduleLoader.setFont(infoFont);
 
         this.setLayout(new GridBagLayout());
 
@@ -51,6 +57,14 @@ public class ClassListRenderer extends JPanel implements ListCellRenderer<ClassI
         gbc.gridy = 2;
         this.add(classLoader, gbc);
 
+        gbc.weighty = 0.5;
+        gbc.gridy = 3;
+        this.add(module, gbc);
+
+        gbc.weighty = 0.5;
+        gbc.gridy = 4;
+        this.add(moduleLoader, gbc);
+
         this.setBorder(new EtchedBorder(EtchedBorder.LOWERED));
     }
 
@@ -63,15 +77,18 @@ public class ClassListRenderer extends JPanel implements ListCellRenderer<ClassI
         if (doShowInfo) {
             location.setText("Location: " + classInfo.getLocation() + " "); // trailing space to prevent font cutoff
             location.setVisible(true);
-
             classLoader.setText("Class loader: " + classInfo.getClassLoader() + " ");
             classLoader.setVisible(true);
-
+            module.setText("Module: " + classInfo.getModule() + " ");
+            module.setVisible(true);
+            moduleLoader.setText("Module loader: " + classInfo.getModuleLoader() + " ");
+            moduleLoader.setVisible(true);
             this.setPreferredSize(null);
         } else {
             location.setVisible(false);
             classLoader.setVisible(false);
-
+            module.setVisible(false);
+            moduleLoader.setVisible(false);
             this.setPreferredSize(null);
         }
 

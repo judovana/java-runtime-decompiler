@@ -148,7 +148,7 @@ public class BytecodeDecompilerView {
     private DependenciesReader dependenciesReader;
 
     private ClassInfo[] loadedClasses;
-    private ClassInfo lastDecompiledClass = new ClassInfo("", "unknown", "unknown");
+    private ClassInfo lastDecompiledClass = new ClassInfo("", "unknown", "unknown", "unknown", "unknown");
     private String lastFqn = "java.lang.Override";
     private String lastAddedFqn = "fully.qualified.name";
     private File lastAddedFile = new File(".");
