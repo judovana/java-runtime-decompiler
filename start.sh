@@ -42,7 +42,7 @@ function findLib(){
   echo $result
 }
 
-TOOLS="$javac_home"/lib/tools.jar  #jsut jdk8 and down
+TOOLS="$javac_home"/lib/tools.jar  #just jdk8 and down
 
 readonly RSYNTAXTEXTAREA=$(findLib "com/fifesoft/rsyntaxtextarea" "rsyntaxtextarea-.*\.jar" )
 readonly GSON=$(findLib "com/google/code/gson/gson" "gson-.*\.jar")
