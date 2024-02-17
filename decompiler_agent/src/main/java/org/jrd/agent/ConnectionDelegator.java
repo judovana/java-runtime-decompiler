@@ -46,7 +46,7 @@ public final class ConnectionDelegator extends Thread {
             initServerSocket.bind(new InetSocketAddress(hostname, port));
         } catch (IOException e) {
             try {
-                Main.deregister(loneliness);
+                Main.deregister(loneliness, port + "");
             } finally {
                 AgentLogger.getLogger().log(new RuntimeException("Exception occurred when opening the socket: ", e));
                 throw e;
