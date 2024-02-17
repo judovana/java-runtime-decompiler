@@ -127,21 +127,21 @@ public class InstrumentationProvider {
                     String moduleloader;
                     try {
                         location = loadedClass.getProtectionDomain().getCodeSource().getLocation().getPath();
-                    } catch (Exception ex) {
+                    } catch (Throwable ex) {
                         location = "unknown";
                     }
                     try {
                         module = AgentLogger.moduleId(loadedClass.getModule());
-                    } catch (Exception ex) {
+                    } catch (Throwable ex) {
                         module = "unknown";
                     }
                     try {
-                        if (loadedClass.getModule()!=null) {
+                        if (loadedClass.getModule() != null) {
                             moduleloader = AgentLogger.classLoaderId(loadedClass.getModule().getClassLoader());
                         } else {
                             moduleloader = "unknown";
                         }
-                    } catch (Exception ex) {
+                    } catch (Throwable ex) {
                         moduleloader = "unknown";
                     }
                     String classLoader;
