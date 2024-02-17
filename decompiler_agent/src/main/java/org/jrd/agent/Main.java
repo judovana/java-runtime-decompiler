@@ -41,7 +41,7 @@ public final class Main {
      * @param agentArgs arguments with parameters for listener
      * @param inst      instance of instrumentation of given VM
      */
-    public static void premain(String agentArgs, Instrumentation inst) throws Exception {
+    public static void premain(final String agentArgs, Instrumentation inst) throws Exception {
         String hostname = null;
         Integer port = null;
         final String loneliness;
@@ -58,7 +58,7 @@ public final class Main {
         InstrumentationProvider p = AccessController.doPrivileged(new PrivilegedAction<InstrumentationProvider>() {
             @Override
             public InstrumentationProvider run() {
-                InstrumentationProvider p = new InstrumentationProvider(inst, transformer, lonelinessCopy);
+                InstrumentationProvider p = new InstrumentationProvider(inst, transformer, lonelinessCopy, agentArgs);
                 return p;
             }
         });
@@ -95,17 +95,17 @@ public final class Main {
         premain(args, inst);
     }
 
-    public static void deregister(String loneliness) {
+    public static void deregister(String loneliness, String port) {
         if (loneliness.equals(LONELINESS_VAL_S)) {
             confirmedAttaches--;
-            System.err.println("Removed JRD agent: " + loneliness);
+            System.err.println("Removed JRD agent: " + loneliness + "/" + port);
         } else if (loneliness.equals(LONELINESS_VAL_A)) {
-            System.err.println("Removed JRD agent: " + loneliness);
+            System.err.println("Removed JRD agent: " + loneliness + "/" + port);
         } else if (loneliness.equals(LONELINESS_VAL_F)) {
             confirmedAttaches--;
-            System.err.println("Removed JRD agent: " + loneliness);
+            System.err.println("Removed JRD agent: " + loneliness + "/" + port);
         } else if (loneliness.equals(LONELINESS_VAL_AF)) {
-            System.err.println("Removed JRD agent: " + loneliness);
+            System.err.println("Removed JRD agent: " + loneliness + "/" + port);
         }
     }
 
@@ -123,18 +123,18 @@ public final class Main {
             if (confirmedAttaches != 0) {
                 throw new RuntimeException("Main : attempting to load JRD agent more than once in mode: " + loneliness);
             }
-            System.err.println("Added JRD agent: " + loneliness);
+            System.err.println("Added JRD agent: " + loneliness + "/" + agentArgs);
             confirmedAttaches++;
         } else if (loneliness.equals(LONELINESS_VAL_A)) {
             if (confirmedAttaches != 0) {
                 throw new RuntimeException("Main : attempting to load JRD agent more than once in mode: " + loneliness);
             }
-            System.err.println("Added JRD agent: " + loneliness);
+            System.err.println("Added JRD agent: " + loneliness + "/" + agentArgs);
         } else if (loneliness.equals(LONELINESS_VAL_F)) {
             confirmedAttaches++;
-            System.err.println("Added JRD agent: " + loneliness);
+            System.err.println("Added JRD agent: " + loneliness + "/" + agentArgs);
         } else if (loneliness.equals(LONELINESS_VAL_AF)) {
-            System.err.println("Added JRD agent: " + loneliness);
+            System.err.println("Added JRD agent: " + loneliness + "/" + agentArgs);
         }
         return loneliness;
     }
