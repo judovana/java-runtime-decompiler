@@ -856,6 +856,20 @@ public class BytecodeDecompilerView {
                 return true;
             }
         }
+        if (clazz.getModule() != null) {
+            Matcher m = p.matcher(clazz.getModule());
+            if (m.matches()) {
+                filtered.add(clazz);
+                return true;
+            }
+        }
+        if (clazz.getModuleLoader() != null) {
+            Matcher m = p.matcher(clazz.getModuleLoader());
+            if (m.matches()) {
+                filtered.add(clazz);
+                return true;
+            }
+        }
         return false;
     }
 
