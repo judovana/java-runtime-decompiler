@@ -18,6 +18,7 @@ public class CompilationSettingsPanel extends JPanel implements ChangeReporter {
     private JCheckBox useHostSystemClassesCheckBox;
     private JCheckBox useHostJavaLangObjectCheckBox;
     private JLabel compilerArgsLabel;
+    private JLabel compilerArgsLabelNit;
     private JTextField compilerArgsTextField;
     private JCheckBox overwriteSourceTargetOnRuntime;
 
@@ -39,6 +40,12 @@ public class CompilationSettingsPanel extends JPanel implements ChangeReporter {
                         " With false on FS, you have to provide also system classes to cp!"
         );
         compilerArgsLabel = new JLabel("Compiler arguments");
+        compilerArgsLabelNit = new JLabel(
+                "<html>Note, that --patch-module as is, have no sense in filesystem less environment" +
+                        " ` --patch-module module=file(:file)*\n` .<br>" +
+                        "So we are parsing it and reusing in a bit 'our' way. You can use:<br>" +
+                        " <b>--patch-module <module>=pkgOrClassFqn(:pkgOrClassFqn)* </b>instead."
+        );
         compilerArgsTextField = new JTextField(initialCompilerArgs);
         compilerArgsTextField.setToolTipText(
                 BytecodeDecompilerView.styleTooltip() +
@@ -73,8 +80,14 @@ public class CompilationSettingsPanel extends JPanel implements ChangeReporter {
         gbc.gridx = 0;
         gbc.gridy = 4;
         this.add(compilerArgsTextField, gbc);
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.weightx = 1;
+        gbc.weighty = 1;
         gbc.gridx = 0;
         gbc.gridy = 5;
+        this.add(compilerArgsLabelNit, gbc);
+        gbc.gridx = 0;
+        gbc.gridy = 6;
         overwriteSourceTargetOnRuntime = new JCheckBox("Overwrite source/target per class");
         overwriteSourceTargetOnRuntime.setToolTipText(
                 BytecodeDecompilerView.styleTooltip() + "If selected, source target will be always set<br>" +
