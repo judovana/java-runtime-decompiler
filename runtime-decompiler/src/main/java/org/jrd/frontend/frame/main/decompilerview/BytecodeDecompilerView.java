@@ -242,7 +242,8 @@ public class BytecodeDecompilerView {
                             filteredClassesJList, originallySelected, doShowClassInfo(), getDependenciesReader(),
                             isLastClassloader() ? Optional.of(getLastClassloader()) : Optional.empty()
                     ).addItem("name(s)", ClassInfo::getName, true).addItem("location(s)", ClassInfo::getLocation, false)
-                            .addItem("class loader(s)", ClassInfo::getClassLoader, false).show(filteredClassesJList, e.getX(), e.getY());
+                            .addItem("class loader(s)", ClassInfo::getClassLoader, false).addItem("module(s)", ClassInfo::getModule, false)
+                            .addItem("module loader(s)", ClassInfo::getModuleLoader, false).show(filteredClassesJList, e.getX(), e.getY());
                 }
             }
 
