@@ -22,7 +22,7 @@
         <jrd.jdk.arg4>jdk.jdeps/com.sun.tools.javap=ALL-UNNAMED</jrd.jdk.arg4>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
-        <cplc.version>2.2</cplc.version>
+        <cplc.version>2.3-SNAPSHOT</cplc.version>
         <btm.version>4.0.15</btm.version>
     </properties>
     <repositories>

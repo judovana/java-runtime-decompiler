@@ -42,9 +42,9 @@ public class CompilationSettingsPanel extends JPanel implements ChangeReporter {
         compilerArgsLabel = new JLabel("Compiler arguments");
         compilerArgsLabelNit = new JLabel(
                 "<html>Note, that --patch-module as is, have no sense in filesystem less environment" +
-                        " ` --patch-module module=file(:file)*\n` .<br>" +
+                        " ` --patch-module module=dirOrJar(:dirOrJar)*\n` .<br>" +
                         "So we are parsing it and reusing in a bit 'our' way. You can use:<br>" +
-                        " <b>--patch-module <module>=pkgOrClassFqn(:pkgOrClassFqn)* </b>instead."
+                        " <b>--patch-module <module>=p.k.g(:p.k.g)* </b>instead."
         );
         compilerArgsTextField = new JTextField(initialCompilerArgs);
         compilerArgsTextField.setToolTipText(
