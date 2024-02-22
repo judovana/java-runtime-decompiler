@@ -1,6 +1,6 @@
 # java-runtime-(de)compiler - talk for Brno CZ java user group
 
-see jrd.markdown for nonformated slides
+see [jrd.markdown](https://github.com/judovana/java-runtime-decompiler/blob/brnoCzJug022024/jrd.markdown) for non ammended slides
 
 presentation runs in https://github.com/tisnik/vim-weakpoint vim plugin
 
