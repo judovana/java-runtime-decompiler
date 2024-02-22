@@ -1,8 +1,0 @@
-{
-  "Name": "Cfr",
-  "WrapperURL": "file://${XDG_CONFIG_HOME}/plugins/CfrDecompilerWrapper.java",
-  "DependencyURL": [
-    "file://${HOME}/.m2/repository/org/benf/cfr/0.151/cfr-0.151.jar"
-  ],
-  "DecompilerDownloadURL": "https://www.benf.org/other/cfr/faq.html"
-}

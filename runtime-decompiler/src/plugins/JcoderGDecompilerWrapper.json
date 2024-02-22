@@ -1,8 +1,0 @@
-{
-  "Name": "jcoderG",
-  "WrapperURL": "file://${XDG_CONFIG_HOME}/plugins/JcoderGDecompilerWrapper.java",
-  "DependencyURL": [
-    "file://${HOME}/.m2/repository/org/openjdk/asmtools/8.0.b09-ea/asmtools-8.0.b09-ea.jar"
-  ],
-  "DecompilerDownloadURL": "https://github.com/openjdk/asmtools"
-}

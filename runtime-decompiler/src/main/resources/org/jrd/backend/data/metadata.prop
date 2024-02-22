@@ -1,4 +1,0 @@
-groupId=${project.groupId}
-name=${project.parent.name}
-timestamp=${timestamp}
-version=${project.version}

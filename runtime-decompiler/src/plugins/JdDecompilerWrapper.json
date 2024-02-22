@@ -1,8 +1,0 @@
-{
-  "Name": "JD",
-  "WrapperURL": "file://${XDG_CONFIG_HOME}/plugins/JdDecompilerWrapper.java",
-  "DependencyURL": [
-    "file://${HOME}/.m2/repository/org/jd/jd-core/1.1.3/jd-core-1.1.3.jar"
-  ],
-  "DecompilerDownloadURL": "https://github.com/java-decompiler/jd-core/"
-}
