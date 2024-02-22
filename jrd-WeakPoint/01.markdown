@@ -1,0 +1,30 @@
+# java-runtime-(de)compiler
+
+https://github.com/judovana/java-runtime-decompiler
+
+	* why? Because we can!
+		* binary blob reproducers
+			* obfuscated
+			* debuginfo
+		* swap lines
+		* oversee instrumetnations
+	* what!
+	* how? This talk!
+		* standard APIS only
+
+Jiri Vanek
+Red Hat
+
+
+
+
+
+
+
+
+
+
+
+
+
+

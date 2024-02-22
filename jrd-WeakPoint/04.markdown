@@ -1,0 +1,30 @@
+# How - Agent attach II
+```
+public static void premain(String agentArgs, Instrumentation inst); 
+```
+	* Is  the launched start point after agent is loaded, and instrumentation is what matters
+	* For example you can open ServerSocket to receive commands
+	* Agents can not be unloaded. Can be just turned off in best effort
+	* And you can register transformer!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,30 @@
+# Demo II
+.
+	* self modifications
+		* classes
+		* classloaders I
+		* desompilers/disassemblers/hex
+			* –-patch-module
+			* (keyword based) code completion
+			* inner classes
+			* additional sources/binaries/diffs
+		* back compile/assemble
+		* real changes
+		* bytecode level
+	* java.lang.Override
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

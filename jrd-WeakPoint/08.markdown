@@ -1,0 +1,30 @@
+# How - Trasnformer api
+```
+byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer)
+Byte[] -> byte[] //… can not be more simple
+```
+	* asm ow2	
+	* If the class was never used, it will not be reachable from there
+	* Calling Class.forName on it will then do the job
+...
+	* So what actually JRD simply does, is **Map<classname,Map<classloader,body[]>** where overrides are stored, ad transform returns  hit front hat map if found
+	* Similarly, if we require class, to send to client, we record it in this method
+	* You have to return the “modified” bytecode everytime class redefiniton happens (which is pretty often)
+	* Depends on VM, but on hotspot, one of the few places where it will not be picked up is during loop in method
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

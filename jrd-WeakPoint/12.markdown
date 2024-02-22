@@ -1,0 +1,30 @@
+# More hardcore ways to overcome hotswap limitations
+.
+	* Class Redefinition - hotswap - limits
+		* No new methods, no new fields, no renaming…
+		* Generally you can only change content of methods bodies (including new variables)
+		* DCEVM JDK based on Phd these is removing those limits with (huge) cost of performance
+		* Take ages after JDK (jdk 17 not yet properly out, last udpate December 2022)
+	* Jetbrains took it recently over
+	* Jrebel JVMTI hacks
+	* Tricks
+		* In agent predefined map of objects to store fields/methods
+		* Bytemen do it behind the doors
+		* JRD offer sclumsy appi for it
+		* Add a new class with reimplementation and call it where needed
+		* inst.appendToSystem/BootClassLoader
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

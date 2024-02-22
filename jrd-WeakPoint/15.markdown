@@ -1,0 +1,30 @@
+# Enjoy!
+....
+	https://github.com/judovana/java-runtime-decompiler
+	https://github.com/mkoncek/classpathless-compiler
+	https://byteman.jboss.org/
+	https://dcevm.github.io/
+	https://docs.oracle.com/javase/8/docs/jdk/api/attach/spec/com/sun/tools/attach/VirtualMachine.html
+	https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/Instrumentation.html
+	https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/ClassFileTransformer.html
+....
+	https://github.com/tisnik/vim-weakpoint
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

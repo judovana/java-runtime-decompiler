@@ -1,0 +1,30 @@
+# CPLC I
+.
+	* java compiler api is terrible
+```
+public interface ClassesProvider {
+    Collection<IdentifiedBytecode> getClass(ClassIdentifier... names);
+    List<String> getClassPathListing();
+}
+```
+```
+public interface ClasspathlessCompiler {
+   Collection<IdentifiedBytecode> compileClass(ClassesProvider classesProvider,
+            Optional<MessagesListener> messagesListener, IdentifiedSource... javaSourceFiles);
+   ....
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+

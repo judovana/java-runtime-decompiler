@@ -1,0 +1,30 @@
+# How - Agent attach I
+
+https://docs.oracle.com/javase/8/docs/jdk/api/attach/spec/com/sun/tools/attach/VirtualMachine.html
+
+```
+VirtualMachine vm = VirtualMachine.attach(Integer.toString(pid));
+vm.loadAgent(agentJar,”param1:value1,param:value2,…valueN”);
+vm.detach();
+```
+	* Agent is just bunch of classes which does nothing. No logic, no communication
+		* unless  you write that
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,30 @@
+# Demo V
+
+	* cli
+	* adding classes
+		* ServerImplNw
+	* patch
+		* not as simple
+		* split?
+		* full java files?
+		* full binary classes?
+	* Future - debugger attach
+		* source-codeless IDE
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

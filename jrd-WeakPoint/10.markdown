@@ -1,0 +1,30 @@
+# Demo IV
+
+	* byteman
+		* second agent!
+		* silent non sucess
+	* chaining of agents
+	* code coverage instrumentation
+	* multiple class defintions classloaders II
+		* no change in gui
+	* modules
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

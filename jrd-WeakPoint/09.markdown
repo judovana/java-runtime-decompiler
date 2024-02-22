@@ -1,0 +1,30 @@
+# How - chaining of agents/transformers
+.
+	* agents are modyfying and non modyfying
+	* agents are processed in order of attach
+	* modyfing (with Transformer) agents processed in order of reistered Transformer
+	* original class definition (immutable) -> byte[] ->
+		* Transformer1 -> byte[] ->
+		* Transformer.. -> byte[] ->
+		* TransformerN.. -> byte[] ->
+		* final class definition usage
+	*the full chain is always called. 
+		* if you unregister, changes are gone
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

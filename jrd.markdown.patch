@@ -1,0 +1,26 @@
+--- /dev/null
++++ es.ServerImplNw
+@@ -0,0 +1,11 @@
++package es;
++
++public class ServerImplNw implements IServer {
++
++  public void send(String s) {
++      System.out.println("Story sending: " + new java.util.Date() + " " + s);
++  }
++  public void recieve(String s) {
++      System.out.println("Story received: " + new java.util.Date() + " " + s);
++  }
++}
+
+--- es.ServerFactory
++++ es.ServerFactory
+@@ -12,6 +12,6 @@
+ 
+ public class ServerFactory {
+     public static IServer createServer() {
+-        return new ServerImpl();
++        return new ServerImplNw();
+     }
+ }
+

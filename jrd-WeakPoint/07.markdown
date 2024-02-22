@@ -1,0 +1,30 @@
+# Demo III
+.
+	* self modifications
+	* Class Redefinition - hotswap - limits
+		* No new methods, no new fields, no renaming, no signatures…
+			* even non used BYTECODE fieLds limits
+			* bytecode level!
+		* Generally you can only change content of methods bodies (including new variables)
+			* byteman and JRD apis
+			* not add jar/classes
+			* dcevm/jrebel
+	* global counter
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

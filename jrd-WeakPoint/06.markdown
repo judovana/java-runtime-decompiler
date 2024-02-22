@@ -1,0 +1,30 @@
+# How - Transformers
+
+https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/Instrumentation.html
+https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/ClassFileTransformer.html
+
+```
+Transformer transformer = new Transformer();
+inst.addTransformer(transformer, true);
+//repeat(work-earn-spend)until die
+instrumentation.removeTransformer(transformer);
+```
+	* Classes can NEVER EVER be unloaded
+		* Depends on JVM?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

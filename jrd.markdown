@@ -1,14 +1,3 @@
-# java-runtime-(de)compiler - talk for Brno CZ java user group
-
-see jrd.markdown for nonformated slides
-
-presentation runs in https://github.com/tisnik/vim-weakpoint vim plugin
-
-jrd-WeakPoint are generated slkides by vim-weakpoint:
-```
-lua ~/.vim/bundle/vim-weakpoint/WeekPointSplitter.lua  ./jrd.markdown  -deduct -height 30 -vim
-```
-
 # java-runtime-(de)compiler
 
 https://github.com/judovana/java-runtime-decompiler

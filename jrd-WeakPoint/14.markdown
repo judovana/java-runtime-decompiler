@@ -1,0 +1,30 @@
+# CPLC II
+.
+	* init of classes
+		* in case of jrd easy to get dependences from bytecode
+		* for eg sources based compiler no op
+	* the default implementations is classical class-path based javac
+	* sources based plugins and many others
+		* JEP 458: Launch Multi-File Source-Code Programs
+		* (class-path based compiling classloader)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
