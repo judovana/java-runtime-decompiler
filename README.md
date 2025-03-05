@@ -11,6 +11,8 @@
 ## Configuring decompiler agent
 In order to start using Java-Runtime-Decompiler, you will need to select the Decompiler Agent's path in *Configure → Agent Path*.
 The Decompiler Agent is a built-in project and can usually be found at `./decompiler_agent/target/decompiler-agent-*.jar`. The image should have agent preset.
+### Local file system
+All what can be done to running vm, can be done also to lcoal classpath. For local jars/dirs with classes, you of course do not need agent.
 
 ## Configuring external decompilers
 Internal *javap* and *javap -v* decompiling tools are available by default. In image, we try to keep as many decompilers as possible bundled.
