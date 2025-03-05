@@ -8,6 +8,8 @@
   * runtime hotpatching
   * verifying what is actually running in your vm
   * for testig, submit missbehaving or reach unreachable code
+  * the only known JASM IDE
+  * the only known byteman IDE
 ## Configuring decompiler agent
 In order to start using Java-Runtime-Decompiler, you will need to select the Decompiler Agent's path in *Configure → Agent Path*.
 The Decompiler Agent is a built-in project and can usually be found at `./decompiler_agent/target/decompiler-agent-*.jar`. The image should have agent preset.
