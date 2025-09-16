@@ -9,6 +9,7 @@ public final class CliSwitches {
     public static final String VERBOSE = "-verbose";
     public static final String CONFIG = "-config";
     public static final String HEX = "-hex";
+    public static final String FS = "-fs";
     public static final String SYSTEM_CLASS_LOADER = "SYSTEM";
     public static final String BOOT_CLASS_LOADER = "BOOT";
     public static final String SAVE_AS = "-saveas";

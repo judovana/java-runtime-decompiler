@@ -41,10 +41,25 @@ import static org.jrd.backend.data.cli.CliSwitches.*;
 
 public class Cli {
 
+    public enum EdType {
+        HEX,
+        FS
+    }
+
+    public static class EdTypeWithData {
+        private final EdType type;
+        private final String additionalData;
+
+        public EdTypeWithData(EdType type, String additionalData) {
+            this.type = type;
+            this.additionalData = additionalData;
+        }
+    }
+
     private final List<String> filteredArgs;
     private Saving saving;
     private boolean isVerbose;
-    private boolean isHex;
+    private EdTypeWithData secondaryLunchType;
     private boolean isRevert;
     private boolean isBoot;
 
@@ -65,10 +80,14 @@ public class Cli {
     }
 
     public boolean isHex() {
-        return isHex;
+        return secondaryLunchType != null && secondaryLunchType.type == EdType.HEX;
     }
 
-    @SuppressWarnings("ModifiedControlVariable") // shifting arguments when parsing
+    public boolean isFs() {
+        return secondaryLunchType != null && secondaryLunchType.type == EdType.FS;
+    }
+
+    @SuppressWarnings({"CyclomaticComplexity", "ModifiedControlVariable" /*shifting arguments when parsing*/})
     private List<String> prefilterArgs(String[] originalArgs) {
         List<String> args = new ArrayList<>(originalArgs.length);
         String saveAs = null;
@@ -85,7 +104,10 @@ public class Cli {
             } else if (cleanedArg.equals(BOOT_CLASS_LOADER)) {
                 isBoot = true;
             } else if (cleanedArg.equals(HEX)) {
-                isHex = true;
+                secondaryLunchType = new EdTypeWithData(EdType.HEX, "");
+            } else if (cleanedArg.equals(FS)) {
+                checkArgForFs(originalArgs, i);
+                secondaryLunchType = new EdTypeWithData(EdType.FS, originalArgs[i + 1]);
             } else if (cleanedArg.equals(REVERT)) {
                 isRevert = true;
             } else if (cleanedArg.equals(SAVE_AS)) {
@@ -109,6 +131,12 @@ public class Cli {
             throw new RuntimeException("It is not allowed to set " + AGENT + " in gui mode");
         }
         return args;
+    }
+
+    private static void checkArgForFs(String[] originalArgs, int i) {
+        if (i == originalArgs.length - 1) {
+            throw new RuntimeException("CP expected behind " + FS);
+        }
     }
 
     @SuppressWarnings("indentation") //conflict of checkstyle and formatter plugins
@@ -183,63 +211,63 @@ public class Cli {
                     operatedOn.add(vmInfo00);
                     break;
                 case SEARCH:
-                    VmInfo vmInfoSearch = new Classes(filteredArgs, getVmManager(), isHex, saving, classloader).searchClasses();
+                    VmInfo vmInfoSearch = new Classes(filteredArgs, getVmManager(), isHex(), saving, classloader).searchClasses();
                     operatedOn.add(vmInfoSearch);
                     break;
                 case LIST_CLASSES:
-                    VmInfo vmInfo1 = new Classes(filteredArgs, getVmManager(), isHex, saving, classloader)
+                    VmInfo vmInfo1 = new Classes(filteredArgs, getVmManager(), isHex(), saving, classloader)
                             .listClasses(false, false, Optional.empty());
                     operatedOn.add(vmInfo1);
                     break;
                 case LIST_CLASSESDETAILS:
-                    VmInfo vmInfo2 = new Classes(filteredArgs, getVmManager(), isHex, saving, classloader)
+                    VmInfo vmInfo2 = new Classes(filteredArgs, getVmManager(), isHex(), saving, classloader)
                             .listClasses(true, false, Optional.empty());
                     operatedOn.add(vmInfo2);
                     break;
                 case LIST_CLASSESBYTECODEVERSIONS:
-                    VmInfo vmInfo11 = new Classes(filteredArgs, getVmManager(), isHex, saving, classloader)
+                    VmInfo vmInfo11 = new Classes(filteredArgs, getVmManager(), isHex(), saving, classloader)
                             .listClasses(false, true, Optional.empty());
                     operatedOn.add(vmInfo11);
                     break;
                 case LIST_CLASSESDETAILSBYTECODEVERSIONS:
-                    VmInfo vmInfo21 =
-                            new Classes(filteredArgs, getVmManager(), isHex, saving, classloader).listClasses(true, true, Optional.empty());
+                    VmInfo vmInfo21 = new Classes(filteredArgs, getVmManager(), isHex(), saving, classloader)
+                            .listClasses(true, true, Optional.empty());
                     operatedOn.add(vmInfo21);
                     break;
                 case BYTES:
                 case BASE64:
                 case DEPS:
-                    VmInfo vmInfo3 = new PrintBytes(isHex, filteredArgs, saving, getVmManager(), getPluginManager(), classloader)
+                    VmInfo vmInfo3 = new PrintBytes(isHex(), filteredArgs, saving, getVmManager(), getPluginManager(), classloader)
                             .printBytes(operation);
                     operatedOn.add(vmInfo3);
                     break;
                 case DECOMPILE:
                     VmInfo vmInfo4 =
-                            new Decompile(isHex, filteredArgs, saving, getVmManager(), getPluginManager(), classloader).decompile();
+                            new Decompile(isHex(), filteredArgs, saving, getVmManager(), getPluginManager(), classloader).decompile();
                     operatedOn.add(vmInfo4);
                     break;
                 case COMPILE:
-                    new Compile(isHex, isVerbose, filteredArgs, saving, getVmManager(), getPluginManager(), classloader)
+                    new Compile(isHex(), isVerbose, filteredArgs, saving, getVmManager(), getPluginManager(), classloader)
                             .compileWrapper(operatedOn);
                     break;
                 case PATCH:
                     VmInfo patchVmInfo = new Patch(
-                            isHex, isVerbose, filteredArgs, isRevert, getVmManager(), getPluginManager(), isBoot, saving, classloader
+                            isHex(), isVerbose, filteredArgs, isRevert, getVmManager(), getPluginManager(), isBoot, saving, classloader
                     ).patch();
                     operatedOn.add(patchVmInfo);
                     break;
                 case OVERWRITE:
-                    VmInfo vmInfo5 = new OverwriteAndUpload(filteredArgs, getVmManager(), isBoot, isHex, classloader)
+                    VmInfo vmInfo5 = new OverwriteAndUpload(filteredArgs, getVmManager(), isBoot, isHex(), classloader)
                             .overwrite(ReceivedType.OVERWRITE_CLASS);
                     operatedOn.add(vmInfo5);
                     break;
                 case ADD_CLASS:
-                    VmInfo vmInfoAddClass = new OverwriteAndUpload(filteredArgs, getVmManager(), isBoot, isHex, classloader)
+                    VmInfo vmInfoAddClass = new OverwriteAndUpload(filteredArgs, getVmManager(), isBoot, isHex(), classloader)
                             .overwrite(ReceivedType.ADD_CLASS);
                     operatedOn.add(vmInfoAddClass);
                     break;
                 case ADD_JAR:
-                    VmInfo vmInfoAddJar = new OverwriteAndUpload(filteredArgs, getVmManager(), isBoot, isHex, classloader)
+                    VmInfo vmInfoAddJar = new OverwriteAndUpload(filteredArgs, getVmManager(), isBoot, isHex(), classloader)
                             .overwrite(ReceivedType.ADD_JAR);
                     operatedOn.add(vmInfoAddJar);
                     break;

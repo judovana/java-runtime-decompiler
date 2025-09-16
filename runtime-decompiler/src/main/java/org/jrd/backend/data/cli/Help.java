@@ -28,6 +28,7 @@ public final class Help {
     public static final String VERBOSE_FORMAT = VERBOSE;
     public static final String VERSION_FORMAT = VERSION;
     public static final String HEX_FORMAT = HEX;
+    public static final String FS_FORMAT = FS + " <class:path>";
     public static final String CONFIG_FORMAT = CONFIG;
     public static final String BASE_SHARED_FORMAT = " <PUC> <CLASS REGEX>...";
     public static final String BASE_SHARED_OPTIONAL_FORMAT = " <PUC> [<CLASS REGEX>...]";
@@ -69,6 +70,7 @@ public final class Help {
     private static final String VERSION_TEXT = "Print version project name, version and build timestamp.";
     private static final String CONFIG_TEXT = "Print path to main config file. In verbose mode prints file itself..";
     private static final String HEX_TEXT = "Switch all binary operations to work in hex-readbale format (including patching...)";
+    private static final String FS_TEXT = "Open jrd in local filesystem  with the set classpath";
     private static final String BASE64_TEXT = "Print Base64 encoded binary form of requested classes of a process.";
     private static final String BYTES_TEXT = "Print binary form of requested classes of a process";
     private static final String DEPS_TEXT = "Print all deps of the selected class(es).";
@@ -180,6 +182,7 @@ public final class Help {
         ALL_OPTIONS.put(VERSION_FORMAT, VERSION_TEXT);
         ALL_OPTIONS.put(CONFIG_FORMAT, CONFIG_TEXT);
         ALL_OPTIONS.put(HEX_FORMAT, HEX_TEXT);
+        ALL_OPTIONS.put(FS_FORMAT, FS_TEXT);
         ALL_OPTIONS.put(CLASSLOADER_SET_FORMAT, CLASSLOADER_SET_TEXT);
         ALL_OPTIONS.put(LIST_JVMS_FORMAT, LIST_JVMS_TEXT);
         ALL_OPTIONS.put(LIST_PLUGINS_FORMAT, LIST_PLUGINS_TEXT);
