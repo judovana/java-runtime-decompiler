@@ -18,10 +18,16 @@ public class Main {
             setLookAndFeel();
             if (!cli.getFilteredArgs().isEmpty()) {
                 Help.printHelpText();
-                StandaloneHex hexview = new StandaloneHex(
-                        cli.getFilteredArgs(), cli.isHex(), new ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider()
-                );
-                hexview.setVisible(true);
+                if (!cli.isFs()) {
+                    StandaloneHex hexview = new StandaloneHex(
+                            cli.getFilteredArgs(), cli.isHex(), new ClassesAndMethodsProvider.SettingsClassesAndMethodsProvider()
+                    );
+                    hexview.setVisible(true);
+                } else {
+                    MainFrameView mainView = new MainFrameView(cli.getFilteredArgs().get(0));
+                    DecompilationController dec = new DecompilationController(mainView, cli.shouldBeVerbose());
+                    mainView.getBytecodeDecompilerView().setCompletionHelper(dec);
+                }
             } else {
                 if (cli.isHex() && cli.getFilteredArgs().isEmpty()) {
                     Help.printHelpText();
@@ -30,7 +36,7 @@ public class Main {
                     );
                     hexview.setVisible(true);
                 } else {
-                    MainFrameView mainView = new MainFrameView();
+                    MainFrameView mainView = new MainFrameView(null);
                     DecompilationController dec = new DecompilationController(mainView, cli.shouldBeVerbose());
                     mainView.getBytecodeDecompilerView().setCompletionHelper(dec);
                 }

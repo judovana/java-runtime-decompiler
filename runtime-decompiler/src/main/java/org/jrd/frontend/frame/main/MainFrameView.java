@@ -4,8 +4,10 @@ import org.jrd.backend.core.Logger;
 import org.jrd.backend.core.VmDecompilerStatus;
 import org.jrd.backend.data.Directories;
 import org.jrd.backend.data.MetadataProperties;
+import org.jrd.backend.data.Model;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.frontend.frame.about.AboutView;
+import org.jrd.frontend.frame.filesystem.NewFsVmController;
 import org.jrd.frontend.frame.hex.StandaloneHex;
 import org.jrd.frontend.frame.license.LicenseView;
 import org.jrd.frontend.frame.main.decompilerview.BytecodeDecompilerView;
@@ -51,6 +53,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -239,7 +242,7 @@ public class MainFrameView {
         mainFrame.setIconImages(images);
     }
 
-    public MainFrameView() {
+    public MainFrameView(String defaultFs) {
 
         // mainFrame, mainPanel, westPanel, localVmPanel. localVmList, localVmScrollPane, localVmLabelPanel
         localVmList = new UndraggableJList();
@@ -391,6 +394,15 @@ public class MainFrameView {
         tabbedPane.add(remoteVmPanel);
         tabbedPane.add(fsVmPanel);
         tabbedPane.setPreferredSize(new Dimension(400, 0));
+        if (defaultFs != null && !defaultFs.trim().isEmpty()) {
+            try {
+                List<File> r = NewFsVmController.cpToFiles(defaultFs);
+                Model.getModel().getVmManager().createFsVM(r, "cmdLine", false);
+            } catch (NewFsVmController.InvalidClasspathException e) {
+                JOptionPane.showMessageDialog(tabbedPane, e.getMessage(), "Unable to create FS VM", JOptionPane.WARNING_MESSAGE);
+            }
+            tabbedPane.setSelectedIndex(2);
+        }
         //westPanel End
 
         // centerPanel, welcomePanel
