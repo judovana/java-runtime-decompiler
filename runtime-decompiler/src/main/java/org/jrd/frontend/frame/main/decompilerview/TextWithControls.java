@@ -54,6 +54,7 @@ import org.jrd.backend.core.Logger;
 import org.jrd.backend.data.Config;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
+import org.jrd.backend.data.cli.FontChangeListener;
 import org.jrd.backend.decompiling.DecompilerWrapper;
 import org.jrd.backend.decompiling.PluginManager;
 import org.jrd.frontend.frame.hex.FeatureFullHex;
@@ -87,7 +88,7 @@ import org.kcc.wordsets.ConnectedKeywords;
 import org.kcc.wordsets.JrdApiKeywords;
 
 @SuppressWarnings("LineLength") // un-refactorable
-public class TextWithControls extends JPanel implements LinesProvider, ClasspathProvider, ExecuteMethodProvider, SaveProvider, UploadProvider {
+public class TextWithControls extends JPanel implements LinesProvider, ClasspathProvider, ExecuteMethodProvider, SaveProvider, UploadProvider, FontChangeListener {
 
     private final RSyntaxTextArea bytecodeSyntaxTextArea;
     private final SearchControlsPanel bytecodeSearchControls;
@@ -131,6 +132,8 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
     }
 
     public TextWithControls(String title, String codeSelect, CodeCompletionType cct, ClassesAndMethodsProvider classesAndMethodsProvider) {
+        //FIXME unregister
+        Config.getConfig().registerFontListener(this);
         this.cct = cct;
         this.classesAndMethodsProvider = classesAndMethodsProvider;
         HexWithControls.initTabLayers(this, title);
@@ -370,6 +373,16 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
             //belive or not, rsyntax are can throw exception form here, and asnothing expects that, it may be fatal
             ex.printStackTrace();
         }
+    }
+
+    @Override
+    public void adjustFont(float value) {
+        if (value > 0) {
+            bytecodeSyntaxTextArea.setFont(bytecodeSyntaxTextArea.getFont().deriveFont(value));
+        } else {
+            bytecodeSyntaxTextArea.setFont(new RSyntaxTextAreaWithCompletion().getFont());
+        }
+        bytecodeSyntaxTextArea.repaint();
     }
 
     public enum CodeCompletionType {
