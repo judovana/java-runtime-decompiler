@@ -154,5 +154,6 @@ public class SettingsView extends JDialog {
         } catch (IOException e) {
             Logger.getLogger().log(Logger.Level.ALL, e);
         }
+        config.setFonts();
     }
 }

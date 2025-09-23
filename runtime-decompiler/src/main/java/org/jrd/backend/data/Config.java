@@ -5,6 +5,7 @@ import org.jrd.backend.communication.ErrorCandidate;
 import org.jrd.backend.communication.FsAgent;
 import org.jrd.backend.core.AgentRequestAction;
 import org.jrd.backend.core.Logger;
+import org.jrd.backend.data.cli.FontChangeListener;
 import org.jrd.backend.decompiling.ExpandableUrl;
 import org.jrd.frontend.utility.AgentApiGenerator;
 
@@ -40,6 +41,8 @@ public final class Config {
     private final Gson gson;
     private Map<String, Object> configMap;
 
+    private final List<FontChangeListener> rTextAreas = new ArrayList();
+
     private static final String CONFIG_PATH = Directories.getConfigDirectory() + File.separator + "config.json";
     public static final String AGENT_PATH_OVERWRITE_PROPERTY = "org.jrd.agent.jar";
     private static final String AGENT_PATH_KEY = "AGENT_PATH";
@@ -62,6 +65,7 @@ public final class Config {
     private Optional<Integer> sourceTargetValue;
     private FsAgent additionalClassPathAgent;
     private FsAgent additionalSourcePathAgent;
+
 
     public enum DepndenceNumbers {
         ENFORCE_ONE("This will pass only selected class to decompiler. Fastest, worst results, may have its weird usecase"),
@@ -604,6 +608,20 @@ public final class Config {
         static VminfoWithDuplicatedBytemanCompanion base64Deserialize(String base64Representation)
                 throws IOException, ClassNotFoundException {
             return (VminfoWithDuplicatedBytemanCompanion) Config.base64Deserialize(base64Representation);
+        }
+    }
+
+    public void registerFontListener(FontChangeListener fl) {
+        rTextAreas.add(fl);
+    }
+
+    public void unregisterFontListener(FontChangeListener fl) {
+        rTextAreas.remove(fl);
+    }
+
+    public void setFonts() {
+        for(FontChangeListener fl: rTextAreas) {
+            fl.adjustFont(getFontSizeOverride());
         }
     }
 }
