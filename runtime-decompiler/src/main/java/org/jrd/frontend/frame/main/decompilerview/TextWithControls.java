@@ -51,6 +51,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jrd.backend.completion.ClassesAndMethodsProvider;
 import org.jrd.backend.completion.JrdCompletionSettings;
 import org.jrd.backend.core.Logger;
+import org.jrd.backend.data.Config;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
 import org.jrd.backend.decompiling.DecompilerWrapper;
@@ -238,6 +239,9 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
 
     private RSyntaxTextArea createSrcTextArea() {
         final RSyntaxTextArea rst = new RSyntaxTextAreaWithCompletion();
+        if (Config.getConfig().getFontSizeOverride() > 0) {
+            rst.setFont(rst.getFont().deriveFont(Config.getConfig().getFontSizeOverride()));
+        }
         rst.addKeyListener(new MainRsyntaxKeyListener(rst));
         rst.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
         rst.setCodeFoldingEnabled(true);

@@ -91,7 +91,7 @@ public class SettingsView extends JDialog {
         nestedJarsSettingsPanel.setMinimumSize(new Dimension(200, 200));
         miscSettingsPanel = new MiscellaneousSettingsPanel(
                 config.doUseJavapSignatures(), config.doDepndenceNumbers(), config.getAdditionalCP(), config.getAdditionalSP(),
-                config.doAutocompletion(), config.getAdditionalAgentAction(), mainFrameView
+                config.doAutocompletion(), config.getAdditionalAgentAction(), (int)(config.getFontSizeOverride()), mainFrameView
         );
 
         for (
@@ -148,7 +148,7 @@ public class SettingsView extends JDialog {
         config.setAdditionalCP(miscSettingsPanel.getAdditioalCP());
         config.setAdditionalSP(miscSettingsPanel.getAdditionalSP());
         config.setAdditionalAgentAction(miscSettingsPanel.getAdditionalAgentAction());
-
+        config.setFontSizeOverride(miscSettingsPanel.getFontSizeOverride());
         try {
             config.saveConfigFile();
         } catch (IOException e) {

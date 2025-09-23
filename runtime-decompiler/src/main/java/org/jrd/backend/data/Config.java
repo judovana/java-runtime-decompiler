@@ -57,6 +57,7 @@ public final class Config {
     private static final String ADDITIONAL_SOURCE_PATH = "ADDITIONAL_SOURCE_PATH";
     private static final String ADDITIONAL_CLASS_PATH = "ADDITIONAL_CLASS_PATH";
     private static final String LOOK_AND_FEEL_KEY = "LOOK_AND_FEEL";
+    private static final String FONT_SIZE_KEY = "FONT_SIZE";
     //this is not persistent, is used for transfering detected value to compiler with other settings
     private Optional<Integer> sourceTargetValue;
     private FsAgent additionalClassPathAgent;
@@ -266,6 +267,13 @@ public final class Config {
         }
 
         return Collections.unmodifiableList(savedExtensions);
+    }
+    public float getFontSizeOverride() {
+        return ((Number)(configMap.getOrDefault(FONT_SIZE_KEY, 0))).floatValue();
+    }
+
+    public void setFontSizeOverride(int size) {
+        configMap.put(FONT_SIZE_KEY, size);
     }
 
     public String getCompilerArgsString() {
