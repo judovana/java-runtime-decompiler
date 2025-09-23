@@ -282,6 +282,9 @@ public final class Help {
                     indent(1) + launcher(false) + "[" + HEX + "]" + " [file, file...]" +
                             " launches standalone hex (or text) editor/diff. Mighty diff. " + HEX + " suggests, how to open `file, file...`"
             );
+            System.out.println(
+                    indent(1) + launcher(false) + "[" + FS + "]" + " <class:path> will launch temporary filesystem based decompiler"
+            );
         }
 
         void printOptionsHeading();
