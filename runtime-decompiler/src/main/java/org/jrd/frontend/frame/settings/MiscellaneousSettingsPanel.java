@@ -39,6 +39,8 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
     private final JComboBox<String> lookAndFeel;
     private final JTextField srcPath;
     private final JTextField classPath;
+    private final JLabel fontSizeOverrideLabel = new JLabel("Set to non-zero to overwrite default font size in src editors");
+    private final JTextField fontSizeOverride = new JTextField("0");
     ButtonGroup additionalAgentPlace = new ButtonGroup();
     JRadioButton nothing = new JRadioButton("do nothing");
     JRadioButton add = new JRadioButton("add them to remote vms");
@@ -47,7 +49,7 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
 
     public MiscellaneousSettingsPanel(
             boolean initialUseJavapSignatures, Config.DepndenceNumbers initialConfigNumbers, String cp, String sp,
-            boolean detectAutocompletion, Config.AdditionalAgentAction additionalAgentAction, final JFrame parent
+            boolean detectAutocompletion, Config.AdditionalAgentAction additionalAgentAction, int fontSizeOverride, final JFrame parent
     ) {
         miscSettingsLabel = new JLabel("Miscellaneous settings");
         this.setName(miscSettingsLabel.getText());
@@ -69,6 +71,8 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
             }
         }
         lookAndFeel.addActionListener(new ChangeLafListener(parent));
+
+        this.fontSizeOverride.setText(String.valueOf(fontSizeOverride));
 
         initMainPanel(initialConfigNumbers, additionalAgentAction);
 
@@ -178,6 +182,12 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
         gbc.gridwidth = 1;
         gbc.gridy = 10;
         mainPanel.add(lookAndFeel, gbc);
+        gbc.gridwidth = 1;
+        gbc.gridy = 11;
+        mainPanel.add(fontSizeOverrideLabel, gbc);
+        gbc.gridwidth = 1;
+        gbc.gridy = 12;
+        mainPanel.add(fontSizeOverride, gbc);
     }
 
     public boolean shouldUseJavapSignatures() {
@@ -202,6 +212,7 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
         ChangeReporter.addCheckboxListener(listener, addAndSave);
         ChangeReporter.addCheckboxListener(listener, nothing);
         ChangeReporter.addCheckboxListener(listener, ask);
+        ChangeReporter.addTextChangeListener(listener, fontSizeOverride);
     }
 
     public String getAdditioalCP() {
@@ -210,6 +221,17 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
 
     public String getAdditionalSP() {
         return srcPath.getText();
+    }
+
+    public int getFontSizeOverride() {
+        try {
+            return Integer.valueOf(fontSizeOverride.getText());
+        }catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Number expected: " + ex.toString());
+            fontSizeOverride.setText("0");
+            return 0;
+        }
     }
 
     public Config.AdditionalAgentAction getAdditionalAgentAction() {
