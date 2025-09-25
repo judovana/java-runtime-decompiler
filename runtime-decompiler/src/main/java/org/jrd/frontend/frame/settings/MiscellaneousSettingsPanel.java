@@ -226,7 +226,7 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
     public int getFontSizeOverride() {
         try {
             return Integer.valueOf(fontSizeOverride.getText());
-        }catch (Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(this, "Number expected: " + ex.toString());
             fontSizeOverride.setText("0");

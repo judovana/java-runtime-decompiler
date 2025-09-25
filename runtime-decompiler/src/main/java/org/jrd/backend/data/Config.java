@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.lang.ref.WeakReference;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -41,7 +42,7 @@ public final class Config {
     private final Gson gson;
     private Map<String, Object> configMap;
 
-    private final List<FontChangeListener> rTextAreas = new ArrayList();
+    private final List<WeakReference<FontChangeListener>> rTextAreas = new ArrayList<>();
 
     private static final String CONFIG_PATH = Directories.getConfigDirectory() + File.separator + "config.json";
     public static final String AGENT_PATH_OVERWRITE_PROPERTY = "org.jrd.agent.jar";
@@ -65,7 +66,6 @@ public final class Config {
     private Optional<Integer> sourceTargetValue;
     private FsAgent additionalClassPathAgent;
     private FsAgent additionalSourcePathAgent;
-
 
     public enum DepndenceNumbers {
         ENFORCE_ONE("This will pass only selected class to decompiler. Fastest, worst results, may have its weird usecase"),
@@ -272,8 +272,9 @@ public final class Config {
 
         return Collections.unmodifiableList(savedExtensions);
     }
+
     public float getFontSizeOverride() {
-        return ((Number)(configMap.getOrDefault(FONT_SIZE_KEY, 0))).floatValue();
+        return ((Number) (configMap.getOrDefault(FONT_SIZE_KEY, 0))).floatValue();
     }
 
     public void setFontSizeOverride(int size) {
@@ -612,16 +613,15 @@ public final class Config {
     }
 
     public void registerFontListener(FontChangeListener fl) {
-        rTextAreas.add(fl);
-    }
-
-    public void unregisterFontListener(FontChangeListener fl) {
-        rTextAreas.remove(fl);
+        rTextAreas.add(new WeakReference<>(fl));
     }
 
     public void setFonts() {
-        for(FontChangeListener fl: rTextAreas) {
-            fl.adjustFont(getFontSizeOverride());
+        for (WeakReference<FontChangeListener> flw : rTextAreas) {
+            FontChangeListener fl = flw.get();
+            if (fl != null) {
+                fl.adjustFont(getFontSizeOverride());
+            }
         }
     }
 }
