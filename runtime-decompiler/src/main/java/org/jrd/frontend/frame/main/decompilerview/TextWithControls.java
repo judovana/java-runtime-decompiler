@@ -132,7 +132,6 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
     }
 
     public TextWithControls(String title, String codeSelect, CodeCompletionType cct, ClassesAndMethodsProvider classesAndMethodsProvider) {
-        //FIXME unregister
         Config.getConfig().registerFontListener(this);
         this.cct = cct;
         this.classesAndMethodsProvider = classesAndMethodsProvider;
