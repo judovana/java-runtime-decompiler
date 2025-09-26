@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class Transformer implements ClassFileTransformer {
 
-    private boolean allowToSaveBytecode = false;
+    private volatile boolean allowToSaveBytecode = false;
     private ClassClassLoaderMap results = new ClassClassLoaderMap();
     private ClassClassLoaderMap overrides = new ClassClassLoaderMap();
 

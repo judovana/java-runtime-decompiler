@@ -15,8 +15,8 @@ public class Variables {
      * We have to have all internal classes initialized so any later classes can use them without a manual init.
      */
     public static void init() {
-        FakeVariableException.init();
-        NoSuchFakeVariableException.init();
+        FakeVariableException.fakeVariableExceptionInit();
+        NoSuchFakeVariableException.noSuchFakeVariableExceptionInit();
         FakeVariableAlreadyDeclaredException.init();
         Global.init();
         Local.init();
@@ -47,7 +47,7 @@ public class Variables {
             super(ex);
         }
 
-        public static void init() {
+        public static void fakeVariableExceptionInit() {
         }
 
     }
@@ -61,7 +61,7 @@ public class Variables {
             super(s);
         }
 
-        public static void init() {
+        public static void noSuchFakeVariableExceptionInit() {
         }
     }
 

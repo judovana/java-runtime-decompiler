@@ -328,7 +328,7 @@ public final class Help {
         void printNotes();
     }
 
-    private static class CliHelpFormatter implements HelpFormatter {
+    private static final class CliHelpFormatter implements HelpFormatter {
 
         @Override
         public void printTitle() {
@@ -404,7 +404,7 @@ public final class Help {
         }
     }
 
-    private static class ManPageFormatter implements HelpFormatter {
+    private static final class ManPageFormatter implements HelpFormatter {
 
         String formatWrap(char formatChar, String string) {
             return "\\f" + formatChar + string + "\\fR";
