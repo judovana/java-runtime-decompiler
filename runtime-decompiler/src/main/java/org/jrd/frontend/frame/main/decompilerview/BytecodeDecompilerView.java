@@ -84,6 +84,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 /**
  * Class that creates GUI for attached VM.
  */
@@ -1018,6 +1020,7 @@ public class BytecodeDecompilerView {
         bytemanScript.setClassesAndMethodsProvider(completionHelper);
     }
 
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "intentional")
     public ClassesAndMethodsProvider getCompletionHelper() {
         return completionHelper;
     }
@@ -1231,6 +1234,7 @@ public class BytecodeDecompilerView {
         return (DecompilerWrapper) pluginComboBox.getSelectedItem();
     }
 
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "intentional")
     public ClasspathProvider getClasspathProvider() {
         return classpathProvider;
     }

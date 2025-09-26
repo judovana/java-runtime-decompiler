@@ -242,6 +242,7 @@ public class MainFrameView {
         mainFrame.setIconImages(images);
     }
 
+    @SuppressFBWarnings(value = "CT_CONSTRUCTOR_THROW", justification = "be aware, this constrctor throws")
     public MainFrameView(String defaultFs) {
 
         // mainFrame, mainPanel, westPanel, localVmPanel. localVmList, localVmScrollPane, localVmLabelPanel

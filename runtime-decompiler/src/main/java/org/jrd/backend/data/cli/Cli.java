@@ -39,6 +39,8 @@ import java.util.stream.Collectors;
 
 import static org.jrd.backend.data.cli.CliSwitches.*;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public class Cli {
 
     public enum EdType {
@@ -67,6 +69,7 @@ public class Cli {
 
     private AgentConfig currentAgent = AgentConfig.getDefaultSinglePermanentAgent();
 
+    @SuppressFBWarnings(value = "CT_CONSTRUCTOR_THROW", justification = "be aware, this constrctor throws")
     public Cli(String[] orig) {
         this.filteredArgs = prefilterArgs(orig);
     }

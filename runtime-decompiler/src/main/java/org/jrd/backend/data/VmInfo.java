@@ -4,8 +4,6 @@ import com.sun.tools.attach.AgentInitializationException;
 import com.sun.tools.attach.AgentLoadException;
 import com.sun.tools.attach.AttachNotSupportedException;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 import org.jboss.byteman.agent.install.Install;
 import org.jrd.backend.communication.CallDecompilerAgent;
 import org.jrd.backend.core.Logger;
@@ -151,10 +149,6 @@ public class VmInfo implements Serializable {
         this.type = local;
     }
 
-    @SuppressFBWarnings(
-            value = "NP_LOAD_OF_KNOWN_NULL_VALUE",
-            justification = "Classpath is only used for FS VMs, in other cases getCp() does not get called"
-    )
     public void setCp(List<File> cp) {
         if (cp == null) {
             this.cp = null;
