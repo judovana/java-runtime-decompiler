@@ -91,7 +91,7 @@ public class HexEditorRowHeader extends JList<String> implements TableModelListe
         }
     }
 
-    private static class RowHeaderListModel extends AbstractListModel<String> {
+    private static final class RowHeaderListModel extends AbstractListModel<String> {
         private static final long serialVersionUID = 1L;
         private int size;
 

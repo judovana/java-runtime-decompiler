@@ -140,7 +140,7 @@ public class JListPopupMenu<T> extends JPopupMenu {
             new ClassResolutionInBackground().execute();
         }
 
-        private class ClassResolutionInBackground extends SwingWorker<String, Void> {
+        private final class ClassResolutionInBackground extends SwingWorker<String, Void> {
             @Override
             protected String doInBackground() throws Exception {
                 final StringBuilder r = new StringBuilder("");

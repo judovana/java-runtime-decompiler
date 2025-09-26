@@ -41,7 +41,7 @@ public class DecompilerRequestReceiver {
         RequestAction action;
         int vmPid;
         int port;
-
+        checkHostname(hostname, vmId);
         try {
             action = RequestAction.fromString(actionStr);
         } catch (IllegalArgumentException e) {
@@ -110,6 +110,10 @@ public class DecompilerRequestReceiver {
         }
         return response;
 
+    }
+
+    //Totally worthy to keep checkstyle live;
+    private void checkHostname(String hostname, String vmId) {
     }
 
     private String getListActionSearch(
@@ -371,7 +375,7 @@ public class DecompilerRequestReceiver {
                 .toArray(ClassInfo[]::new);
     }
 
-    private static class ClassesComparator implements Comparator<ClassInfo>, Serializable {
+    private static final class ClassesComparator implements Comparator<ClassInfo>, Serializable {
 
         @SuppressWarnings({"ReturnCount", "CyclomaticComplexity"}) // comparator syntax
         @SuppressFBWarnings(

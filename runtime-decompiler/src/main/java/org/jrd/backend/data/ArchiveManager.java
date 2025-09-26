@@ -20,7 +20,7 @@ import java.util.zip.ZipOutputStream;
 
 public class ArchiveManager {
 
-    private static class ArchiveManagerHolder {
+    private static final class ArchiveManagerHolder {
         private static final ArchiveManager INSTANCE = new ArchiveManager();
     }
 
@@ -315,7 +315,7 @@ public class ArchiveManager {
         return wasDeleted;
     }
 
-    private static class ArchivePathManager {
+    private static final class ArchivePathManager {
         private String clazz = "";
         private boolean found = false;
         private boolean extracted = false;
