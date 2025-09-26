@@ -16,6 +16,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Objects;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public class KnownAgent {
 
     private final int port;
@@ -30,6 +32,7 @@ public class KnownAgent {
     @SuppressWarnings("ExplicitInitialization") //the null have its meaning here
     private Long deadSince = null;
 
+    @SuppressFBWarnings(value = "CT_CONSTRUCTOR_THROW", justification = "be aware, this constrctor throws")
     KnownAgent(InstallDecompilerAgentImpl install, AgentLiveliness ttl) {
         this.pid = Integer.parseInt(install.getPid());
         this.port = install.getPort();

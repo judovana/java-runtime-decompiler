@@ -11,8 +11,6 @@ import org.jrd.frontend.utility.AgentApiGenerator;
 import java.io.PrintStream;
 import java.util.List;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 public class Api {
 
     private final List<String> filteredArgs;
@@ -27,7 +25,6 @@ public class Api {
         this.pluginManager = pluginManager;
     }
 
-    @SuppressFBWarnings(value = "OS_OPEN_STREAM", justification = "The stream is clsoed as conditionally as is created")
     public VmInfo api() throws Exception {
         PrintStream out = System.out;
         try {

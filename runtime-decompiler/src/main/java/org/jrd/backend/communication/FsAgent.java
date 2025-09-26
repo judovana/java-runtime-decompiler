@@ -158,7 +158,7 @@ public final class FsAgent implements DelegatingJrdAgent {
             }
         } catch (Exception ex) {
             Logger.getLogger().log(ex);
-            return ErrorCandidate.toError(ex);
+            return ErrorCandidate.errorCandidateToError(ex);
         }
     }
 

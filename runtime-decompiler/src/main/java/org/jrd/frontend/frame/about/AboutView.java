@@ -15,8 +15,11 @@ import java.awt.Font;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public class AboutView extends JDialog {
 
+    @SuppressFBWarnings(value = "CT_CONSTRUCTOR_THROW", justification = "be aware, this constrctor throws")
     public AboutView(JFrame mainFrameView, boolean showVersion) {
         JLabel label = new JLabel();
         Font font = label.getFont();
