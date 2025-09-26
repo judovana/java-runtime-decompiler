@@ -17,6 +17,8 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.UUID;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 /**
  * This class is used for creating/removing/updating information about available Java Virtual Machines.
  */
@@ -27,6 +29,7 @@ public class VmManager {
     private Set<ActionListener> actionListeners = new HashSet<>();
     boolean changed;
 
+    @SuppressFBWarnings(value = "CT_CONSTRUCTOR_THROW", justification = "be aware, this constrctor throws")
     public VmManager() {
         this.vmInfoSet = new HashSet<>();
         updateLocalVMs();

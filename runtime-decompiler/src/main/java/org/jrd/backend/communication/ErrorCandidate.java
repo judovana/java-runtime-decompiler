@@ -29,12 +29,12 @@ public class ErrorCandidate {
         }
     }
 
-    public static String toError(String message) {
+    public static String errorCandidateToError(String message) {
         return ERROR_ID + " " + message;
     }
 
-    public static String toError(Exception ex) {
-        return toError(ex.toString());
+    public static String errorCandidateToError(Exception ex) {
+        return errorCandidateToError(ex.toString());
     }
 
     /**

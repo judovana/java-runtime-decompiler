@@ -1,6 +1,5 @@
 package org.jrd.backend.data.cli.workers;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jrd.backend.data.cli.CliUtils;
 import org.jrd.backend.data.cli.utils.Saving;
 import org.jrd.backend.decompiling.DecompilerWrapper;
@@ -24,7 +23,6 @@ public class ListPlugins {
         this.pluginManager = pluginManager;
     }
 
-    @SuppressFBWarnings(value = "OS_OPEN_STREAM", justification = "The stream is clsoed as conditionally as is created")
     public void listPlugins() throws IOException {
         if (filteredArgs.size() != 1) {
             throw new RuntimeException(LIST_PLUGINS + " does not expect arguments.");

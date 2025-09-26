@@ -30,6 +30,8 @@ import java.awt.event.ActionListener;
 import java.util.Arrays;
 import java.util.Enumeration;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter {
 
     private final JLabel miscSettingsLabel;
@@ -47,6 +49,7 @@ public class MiscellaneousSettingsPanel extends JPanel implements ChangeReporter
     JRadioButton ask = new JRadioButton("ask");
     JRadioButton addAndSave = new JRadioButton("add them to remote vms and save");
 
+    @SuppressFBWarnings(value = "CT_CONSTRUCTOR_THROW", justification = "be aware, this constrctor throws")
     public MiscellaneousSettingsPanel(
             boolean initialUseJavapSignatures, Config.DepndenceNumbers initialConfigNumbers, String cp, String sp,
             boolean detectAutocompletion, Config.AdditionalAgentAction additionalAgentAction, int fontSizeOverride, final JFrame parent

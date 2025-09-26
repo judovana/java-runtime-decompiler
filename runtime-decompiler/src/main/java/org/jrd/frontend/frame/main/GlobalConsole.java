@@ -32,7 +32,7 @@ import org.jrd.frontend.frame.main.decompilerview.TextWithControls;
 import org.jrd.frontend.frame.overwrite.OverwriteClassDialog;
 import org.jrd.frontend.utility.ScreenFinder;
 
-public class GlobalConsole implements MessagesListener, OverwriteClassDialog.TextLog {
+public final class GlobalConsole implements MessagesListener, OverwriteClassDialog.TextLog {
 
     public static final String CPLC_DUPLICATED_CODE_VERBOSITY_CONSTANT = "io.github.mkoncek.cplc.log-to-provider";
     public static final String CPLC_IL = "IGNORE_LAMBDAS";
@@ -50,7 +50,7 @@ public class GlobalConsole implements MessagesListener, OverwriteClassDialog.Tex
     private final JDialog frame;
     private boolean first = true;
 
-    public GlobalConsole() {
+    private GlobalConsole() {
         JButton tmpClean;
         TextWithControls tmpLog;
         JDialog tmpFrame;

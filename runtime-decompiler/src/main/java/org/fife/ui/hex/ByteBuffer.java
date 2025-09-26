@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public class ByteBuffer {
     private byte[] buffer;
 
@@ -19,10 +21,12 @@ public class ByteBuffer {
         this.buffer = new byte[size];
     }
 
+    @SuppressFBWarnings(value = "CT_CONSTRUCTOR_THROW", justification = "be aware, this constrctor throws")
     public ByteBuffer(final String file) throws IOException {
         this(new File(file));
     }
 
+    @SuppressFBWarnings(value = "CT_CONSTRUCTOR_THROW", justification = "be aware, this constrctor throws")
     public ByteBuffer(final File file) throws IOException {
         final int size = (int) file.length();
         if (size < 0) {
@@ -43,6 +47,7 @@ public class ByteBuffer {
         }
     }
 
+    @SuppressFBWarnings(value = "CT_CONSTRUCTOR_THROW", justification = "be aware, this constrctor throws")
     public ByteBuffer(final InputStream in) throws IOException {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         this.buffer = new byte[4096];
