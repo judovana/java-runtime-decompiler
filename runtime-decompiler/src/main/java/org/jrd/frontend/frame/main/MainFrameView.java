@@ -206,7 +206,7 @@ public class MainFrameView {
     /**
      * Custom JList that disables selection with mouse drag.
      */
-    private static class UndraggableJList extends JList<VmInfo> {
+    private static final class UndraggableJList extends JList<VmInfo> {
         @Override
         protected void processMouseMotionEvent(MouseEvent e) {
             if (MouseEvent.MOUSE_DRAGGED != e.getID()) {
@@ -648,7 +648,7 @@ public class MainFrameView {
         this.tabbedPane.setSelectedComponent(remoteVmPanel);
     }
 
-    private class LocalVmListMouseListener extends MouseAdapter {
+    private final class LocalVmListMouseListener extends MouseAdapter {
         @Override
         public void mouseClicked(MouseEvent mouseEvent) {
             if (SwingUtilities.isLeftMouseButton(mouseEvent)) {

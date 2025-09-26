@@ -6,7 +6,7 @@ import java.util.List;
 
 public class ArchiveManagerOptions {
 
-    private static class ArchiveManagerOptionsHolder {
+    private static final class ArchiveManagerOptionsHolder {
         private static final ArchiveManagerOptions INSTANCE = new ArchiveManagerOptions();
     }
 

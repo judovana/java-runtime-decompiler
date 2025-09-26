@@ -444,7 +444,7 @@ public class HexTable extends JTable {
         }
     }
 
-    private static class EditorDocumentFilter extends DocumentFilter {
+    private static final class EditorDocumentFilter extends DocumentFilter {
         private boolean ensureByteRepresented(final String str) {
             try {
                 final int i = Integer.parseInt(str, 16);

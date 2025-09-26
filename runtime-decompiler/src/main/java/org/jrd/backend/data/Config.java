@@ -103,7 +103,7 @@ public final class Config {
         return getConfig().doDepndenceNumbers();
     }
 
-    private static class ConfigHolder {
+    private static final class ConfigHolder {
         private static final Config INSTANCE = new Config();
     }
 

@@ -390,7 +390,7 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
         STANDALONE
     }
 
-    private class RSyntaxTextAreaWithCompletion extends RSyntaxTextArea {
+    private final class RSyntaxTextAreaWithCompletion extends RSyntaxTextArea {
         @Override
         public void setText(String t) {
             super.setText(t);
@@ -562,7 +562,7 @@ public class TextWithControls extends JPanel implements LinesProvider, Classpath
             return templatesMenu;
         }
 
-        private class CodeCompletionMenuActionListener implements ActionListener {
+        private final class CodeCompletionMenuActionListener implements ActionListener {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 SwingUtilities.invokeLater(new Runnable() {
