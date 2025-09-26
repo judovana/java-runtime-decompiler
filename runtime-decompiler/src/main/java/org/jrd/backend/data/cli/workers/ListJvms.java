@@ -1,6 +1,5 @@
 package org.jrd.backend.data.cli.workers;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jrd.backend.data.VmInfo;
 import org.jrd.backend.data.VmManager;
 import org.jrd.backend.data.cli.utils.Saving;
@@ -23,7 +22,6 @@ public class ListJvms {
         this.vmManager = vmManager;
     }
 
-    @SuppressFBWarnings(value = "OS_OPEN_STREAM", justification = "The stream is clsoed as conditionally as is created")
     public void listJvms() throws IOException {
         if (filteredArgs.size() != 1) {
             throw new RuntimeException(LIST_JVMS + " does not expect arguments.");

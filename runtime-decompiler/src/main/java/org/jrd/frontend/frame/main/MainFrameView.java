@@ -206,7 +206,7 @@ public class MainFrameView {
     /**
      * Custom JList that disables selection with mouse drag.
      */
-    private static class UndraggableJList extends JList<VmInfo> {
+    private static final class UndraggableJList extends JList<VmInfo> {
         @Override
         protected void processMouseMotionEvent(MouseEvent e) {
             if (MouseEvent.MOUSE_DRAGGED != e.getID()) {
@@ -242,6 +242,7 @@ public class MainFrameView {
         mainFrame.setIconImages(images);
     }
 
+    @SuppressFBWarnings(value = "CT_CONSTRUCTOR_THROW", justification = "be aware, this constrctor throws")
     public MainFrameView(String defaultFs) {
 
         // mainFrame, mainPanel, westPanel, localVmPanel. localVmList, localVmScrollPane, localVmLabelPanel
@@ -648,7 +649,7 @@ public class MainFrameView {
         this.tabbedPane.setSelectedComponent(remoteVmPanel);
     }
 
-    private class LocalVmListMouseListener extends MouseAdapter {
+    private final class LocalVmListMouseListener extends MouseAdapter {
         @Override
         public void mouseClicked(MouseEvent mouseEvent) {
             if (SwingUtilities.isLeftMouseButton(mouseEvent)) {

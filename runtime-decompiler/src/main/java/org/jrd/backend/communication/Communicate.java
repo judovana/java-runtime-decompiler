@@ -91,7 +91,7 @@ public class Communicate {
             String message = "Agent returned null response.";
 
             Logger.getLogger().log(Logger.Level.ALL, new RuntimeException(message));
-            return ErrorCandidate.toError(message);
+            return ErrorCandidate.errorCandidateToError(message);
         }
 
         return line.trim();
@@ -110,7 +110,7 @@ public class Communicate {
             initLine = trimReadLine();
         } catch (IOException ex) {
             Logger.getLogger().log(Logger.Level.DEBUG, ex);
-            return ErrorCandidate.toError(ex);
+            return ErrorCandidate.errorCandidateToError(ex);
         }
 
         // parse body based on header
@@ -140,7 +140,7 @@ public class Communicate {
                     return bytes;
                 } catch (IOException ex) {
                     Logger.getLogger().log(Logger.Level.ALL, ex);
-                    return ErrorCandidate.toError(ex);
+                    return ErrorCandidate.errorCandidateToError(ex);
                 }
             case SEARCH_CLASSES:
             case OVERRIDES:
@@ -165,7 +165,7 @@ public class Communicate {
             default:
                 String message = "Unknown agent response header: '" + initLine + "'.";
                 Logger.getLogger().log(Logger.Level.ALL, message);
-                return ErrorCandidate.toError(message);
+                return ErrorCandidate.errorCandidateToError(message);
         }
     }
 
