@@ -25,7 +25,7 @@ public class JcoderGDecompilerWrapper {
             SingleDualOutputStreamOutput decodeLog = new StderrLog();
             org.openjdk.asmtools.jdec.Main jdec = new org.openjdk.asmtools.jdec.Main(decodedFiles, decodeLog, originalFiles);
             jdec.setVerboseFlag(true);
-            jdec.setPrintDetails();
+            jdec.setPrintDetails(true);
             int r = jdec.decode();
             return decodedFiles.getOutputs().get(0).getBody();
         } catch (Exception e) {

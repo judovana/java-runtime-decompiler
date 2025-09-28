@@ -2,7 +2,7 @@
   "Name": "jasm",
   "WrapperURL": "file://${XDG_CONFIG_HOME}/plugins/JasmDecompilerWrapper.java",
   "DependencyURL": [
-    "file://${HOME}/.m2/repository/org/openjdk/asmtools/8.0.b09-ea/asmtools-8.0.b09-ea.jar"
+    "file://${HOME}/.m2/repository/org/openjdk/asmtools/9.0.b12-ea/asmtools-9.0.b12-ea.jar"
   ],
   "DecompilerDownloadURL": "https://github.com/openjdk/asmtools"
 }
