@@ -244,10 +244,15 @@
                     <version>1.0-SNAPSHOT</version>
                     <scope>provided</scope>
                 </dependency>
+                <!--
+                jcommander is needed only by procyon, and procyon seems to be dead
+                udpate of jcomander means udpate of procyon or local patching.
+                Not hard, but probably useless
+                -->
                 <dependency>
-                    <groupId>org.jcommander</groupId>
+                    <groupId>com.beust</groupId>
                     <artifactId>jcommander</artifactId>
-                    <version>2.0</version>
+                    <version>1.78</version>
                 </dependency>
 
                 <dependency>
@@ -257,10 +262,15 @@
                     <scope>provided</scope>
                 </dependency>
 
+                <!--
+                Asm tools are very often outdated in maven
+                git clone https://github.com/openjdk/asmtools, checkout  waht version is needed
+                cd maven/ ;  sh mvngen.sh  ;  mvn clean install
+                -->
                 <dependency>
                     <groupId>org.openjdk</groupId>
                     <artifactId>asmtools</artifactId>
-                    <version>8.0.b09-ea</version>
+                    <version>9.0.b12-ea</version>
                     <scope>provided</scope>
                 </dependency>
 
@@ -278,6 +288,15 @@
                     <scope>provided</scope>
                 </dependency>
 
+                <!--bintray repos seems to die
+                use git clone  https://github.com/java-decompiler/jd-core  ; git checkout v1.1.3  (do  not work with main)
+                and built by direct javac:(
+                rm -rf build ; mkdir build
+                /usr/lib/jvm/java-1.8.0-openjdk/bin/javac -g `find src/main/java/   -type f ` -d build
+                rm -rf  ~/.m2/repository/org/jd/jd-core/1.1.3/
+                mkdir -p  ~/.m2/repository/org/jd/jd-core/1.1.3/
+                /usr/lib/jvm/java-21-openjdk/bin/jar -cf  ~/.m2/repository/org/jd/jd-core/1.1.3/jd-core-1.1.3.jar -C build org
+                -->
                 <dependency>
                     <groupId>org.jd</groupId>
                     <artifactId>jd-core</artifactId>
