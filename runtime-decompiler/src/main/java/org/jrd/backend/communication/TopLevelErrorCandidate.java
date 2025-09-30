@@ -7,12 +7,12 @@ public class TopLevelErrorCandidate extends ErrorCandidate {
         super(line);
     }
 
-    public static String toError(String message) {
+    public static String topLevelErrorCandidateToError(String message) {
         return ERROR_RESPONSE + " " + message;
     }
 
-    public static String toError(Exception ex) {
-        return toError(ex.toString());
+    public static String topLevelErrorCandidateToError(Exception ex) {
+        return topLevelErrorCandidateToError(ex.toString());
     }
 
     @Override

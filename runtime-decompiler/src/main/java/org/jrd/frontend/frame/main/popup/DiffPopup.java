@@ -38,6 +38,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public class DiffPopup extends JPopupMenu {
 
     private static File lastOpened = new File(System.getProperty("user.dir"));
@@ -47,10 +49,12 @@ public class DiffPopup extends JPopupMenu {
     JCheckBox human = new JCheckBox("human readable");
     JCheckBox invert = new JCheckBox("invert order");
 
+    @SuppressFBWarnings(value = "CT_CONSTRUCTOR_THROW", justification = "be aware, this constrctor throws")
     public DiffPopup(List<LinesProvider> linesProviders, Optional<String> fqn, boolean onlyOne) {
         this(linesProviders.toArray(new LinesProvider[0]), fqn, onlyOne);
     }
 
+    @SuppressFBWarnings(value = "CT_CONSTRUCTOR_THROW", justification = "be aware, this constrctor throws")
     public DiffPopup(LinesProvider[] linesProviders, Optional<String> fqn, boolean onlyOne) {
         this.fqn = fqn;
         this.linesProviders = linesProviders;

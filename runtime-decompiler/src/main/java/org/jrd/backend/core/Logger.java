@@ -24,7 +24,7 @@ public class Logger {
         return isVerbose;
     }
 
-    private static class LoggerHolder {
+    private static final class LoggerHolder {
         // https://en.wikipedia.org/wiki/Initialization_on_demand_holder_idiom
         // https://en.wikipedia.org/wiki/Double-checked_locking#Usage_in_Java
         private static final Logger INSTANCE = new Logger();

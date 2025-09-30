@@ -158,7 +158,7 @@ public final class FsAgent implements DelegatingJrdAgent {
             }
         } catch (Exception ex) {
             Logger.getLogger().log(ex);
-            return ErrorCandidate.toError(ex);
+            return ErrorCandidate.errorCandidateToError(ex);
         }
     }
 
@@ -346,7 +346,7 @@ public final class FsAgent implements DelegatingJrdAgent {
         }
     }
 
-    private static class ReadingCpOperator implements CpOperator<String> {
+    private static final class ReadingCpOperator implements CpOperator<String> {
         @Override
         public String onDirEntry(File dir, File clazz) throws IOException {
             byte[] bytes = Files.readAllBytes(clazz.toPath());

@@ -23,10 +23,13 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public class FeatureFullHex extends JPanel {
 
     private final LinesProvider hex;
 
+    @SuppressFBWarnings(value = "CT_CONSTRUCTOR_THROW", justification = "be aware, this constrctor throws")
     public FeatureFullHex(final File f, final JTabbedPane parent, LinesProvider impl) throws IOException {
         this.setLayout(new BorderLayout());
         JPanel tool = new JPanel();

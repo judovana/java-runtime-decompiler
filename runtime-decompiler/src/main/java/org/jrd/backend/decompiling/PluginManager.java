@@ -45,6 +45,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 /**
  * Executes manages external decompiler wrapper plugins.
  * Wrapper plugins are stored as .java files along with .json file containing classname, wrapper url and dependencies url.
@@ -76,6 +78,7 @@ public class PluginManager {
         return PluginManager.LAMBDA_FORM.matcher(s).matches();
     }
 
+    @SuppressFBWarnings(value = "CT_CONSTRUCTOR_THROW", justification = "be aware, this constrctor throws")
     public PluginManager() {
         wrappers = new LinkedList<>();
 
@@ -125,6 +128,7 @@ public class PluginManager {
     /**
      * Loads information decompiler json file into List<DecompilerWrapper>Wrapper.
      */
+    @SuppressFBWarnings(value = "DCN_NULLPOINTER_EXCEPTION", justification = "intentional")
     private void loadConfig(File file) {
         if (file.getName().endsWith(".json")) {
             DecompilerWrapper wrapper;

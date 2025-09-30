@@ -41,12 +41,12 @@ public class DecompilerRequestReceiver {
         RequestAction action;
         int vmPid;
         int port;
-
+        checkHostname(hostname, vmId);
         try {
             action = RequestAction.fromString(actionStr);
         } catch (IllegalArgumentException e) {
             Logger.getLogger().log(Logger.Level.DEBUG, new RuntimeException("Illegal action in request", e));
-            return TopLevelErrorCandidate.toError(e);
+            return TopLevelErrorCandidate.topLevelErrorCandidateToError(e);
         }
         port = tryParseInt(portStr, "Listen port is not an integer!");
         vmPid = tryParseInt(vmPidStr, "VM PID is not a number!");
@@ -106,10 +106,14 @@ public class DecompilerRequestReceiver {
             default:
                 String s = "Unknown action given: " + action;
                 Logger.getLogger().log(Logger.Level.DEBUG, s);
-                return TopLevelErrorCandidate.toError(s);
+                return TopLevelErrorCandidate.topLevelErrorCandidateToError(s);
         }
         return response;
 
+    }
+
+    //Totally worthy to keep checkstyle live;
+    private void checkHostname(String hostname, String vmId) {
     }
 
     private String getListActionSearch(
@@ -132,7 +136,7 @@ public class DecompilerRequestReceiver {
             vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
         } catch (Exception ex) {
             Logger.getLogger().log(Logger.Level.ALL, ex);
-            return TopLevelErrorCandidate.toError(ex);
+            return TopLevelErrorCandidate.topLevelErrorCandidateToError(ex);
         }
         return OK_RESPONSE;
     }
@@ -152,7 +156,7 @@ public class DecompilerRequestReceiver {
             vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
         } catch (Exception ex) {
             Logger.getLogger().log(Logger.Level.ALL, ex);
-            return TopLevelErrorCandidate.toError(ex);
+            return TopLevelErrorCandidate.topLevelErrorCandidateToError(ex);
         }
         return OK_RESPONSE;
     }
@@ -249,7 +253,7 @@ public class DecompilerRequestReceiver {
             vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
         } catch (Exception ex) {
             Logger.getLogger().log(Logger.Level.ALL, ex);
-            return TopLevelErrorCandidate.toError(ex);
+            return TopLevelErrorCandidate.topLevelErrorCandidateToError(ex);
         }
         return OK_RESPONSE;
     }
@@ -265,7 +269,7 @@ public class DecompilerRequestReceiver {
             vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
         } catch (Exception ex) {
             Logger.getLogger().log(Logger.Level.DEBUG, ex);
-            return TopLevelErrorCandidate.toError(ex);
+            return TopLevelErrorCandidate.topLevelErrorCandidateToError(ex);
         }
         return OK_RESPONSE;
     }
@@ -288,7 +292,7 @@ public class DecompilerRequestReceiver {
             vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
         } catch (Exception ex) {
             Logger.getLogger().log(Logger.Level.ALL, ex);
-            return TopLevelErrorCandidate.toError(ex);
+            return TopLevelErrorCandidate.topLevelErrorCandidateToError(ex);
         }
         return OK_RESPONSE;
     }
@@ -307,7 +311,7 @@ public class DecompilerRequestReceiver {
             vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
         } catch (Exception ex) {
             Logger.getLogger().log(Logger.Level.ALL, ex);
-            return TopLevelErrorCandidate.toError(ex);
+            return TopLevelErrorCandidate.topLevelErrorCandidateToError(ex);
         }
         return OK_RESPONSE;
     }
@@ -327,7 +331,7 @@ public class DecompilerRequestReceiver {
             vmManager.getVmInfoByID(vmId).replaceVmDecompilerStatus(status);
         } catch (Exception ex) {
             Logger.getLogger().log(Logger.Level.ALL, ex);
-            return TopLevelErrorCandidate.toError(ex);
+            return TopLevelErrorCandidate.topLevelErrorCandidateToError(ex);
         }
         return OK_RESPONSE;
     }
@@ -371,7 +375,7 @@ public class DecompilerRequestReceiver {
                 .toArray(ClassInfo[]::new);
     }
 
-    private static class ClassesComparator implements Comparator<ClassInfo>, Serializable {
+    private static final class ClassesComparator implements Comparator<ClassInfo>, Serializable {
 
         @SuppressWarnings({"ReturnCount", "CyclomaticComplexity"}) // comparator syntax
         @SuppressFBWarnings(

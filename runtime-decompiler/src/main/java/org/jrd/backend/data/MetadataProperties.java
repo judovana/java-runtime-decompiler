@@ -20,7 +20,7 @@ public final class MetadataProperties {
     private static final String TIMESTAMP_KEY = "timestamp";
     private static final String NAME_KEY = "name";
 
-    private static class PropertiesHolder {
+    private static final class PropertiesHolder {
         private static final MetadataProperties INSTANCE = new MetadataProperties();
     }
 

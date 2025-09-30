@@ -42,8 +42,6 @@ public final class Main {
      * @param inst      instance of instrumentation of given VM
      */
     public static void premain(final String agentArgs, Instrumentation inst) throws Exception {
-        String hostname = null;
-        Integer port = null;
         final String loneliness;
         // guard against the agent being loaded twice
         synchronized (Main.class) {
@@ -62,6 +60,8 @@ public final class Main {
                 return p;
             }
         });
+        String hostname = null;
+        Integer port = null;
         if (agentArgs != null) {
             String[] argsArray = agentArgs.split(",");
             for (String arg : argsArray) {
