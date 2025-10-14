@@ -26,7 +26,7 @@ Additionally, external decompilers are supported and can be configured in *Confi
 
 Currently supported decompilers are:
 * [Fernflower](https://github.com/JetBrains/intellij-community/tree/master/plugins/java-decompiler/engine)
-* [Procyon](https://bitbucket.org/mstrobel/procyon/downloads/)
+* [Procyon](https://github.com/mstrobel/procyon)
 * [CFR](https://github.com/leibnitz27/cfr/)
 * [JD](https://github.com/java-decompiler/jd-core/)
 
@@ -36,7 +36,7 @@ Assemblers/Disassemblers
 * [jasm7](https://github.com/openjdk/asmtools) (jdk 11 and down, with known, broken lambdas)
 * [jcoder7](https://github.com/openjdk/asmtools) (jdk 11 and down)
 * [javap](https://github.com/openjdk/jdk) (disassemble only)
-* [Procyon disassembler](https://bitbucket.org/mstrobel/procyon/downloads/)(disassemble only)
+* [Procyon disassembler](https://github.com/mstrobel/procyon)(disassemble only)
 
 Assemblers/Disassemblers with additional info
 * [jasmG](https://github.com/openjdk/asmtools) (jdk 17 and up, with lambdas fixed, with -g switch)

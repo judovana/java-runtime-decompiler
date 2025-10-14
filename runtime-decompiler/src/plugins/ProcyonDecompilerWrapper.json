@@ -7,5 +7,5 @@
     "file://${HOME}/.m2/repository/com/github/mstrobel/procyon-decompiler/1.0-SNAPSHOT/procyon-decompiler-1.0-SNAPSHOT.jar",
     "file://${HOME}/.m2/repository/com/beust/jcommander/1.78/jcommander-1.78.jar"
   ],
-  "DecompilerDownloadURL": "https://github.com/mstrobel/procyon/git "
+  "DecompilerDownloadURL": "https://github.com/mstrobel/procyon/"
 }
