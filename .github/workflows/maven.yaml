@@ -28,8 +28,10 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: ${{ matrix.java-version }}
-          distribution: 'adopt'
-          cache: maven
+          distribution: 'temurin'
+
+      - name: java version
+        run: java -version
 
       - name: clone and build procyon devel we depeond on Linux
         if: matrix.os == 'ubuntu-latest'
