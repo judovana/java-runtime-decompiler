@@ -40,7 +40,7 @@ jobs:
           git clone https://github.com/mstrobel/procyon.git
           cd procyon
           git checkout develop
-          sed  "s/6.9/7.3/g" -i gradle/wrapper/gradle-wrapper.properties
+          sed  "s/6.9/9.1.0/g" -i gradle/wrapper/gradle-wrapper.properties
           sed  "s/.*<tt>.*//g" -i Procyon.Reflection/src/main/java/com/strobel/reflection/emit/CodeStream.java
           ./gradlew install
         shell: bash
