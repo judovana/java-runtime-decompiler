@@ -30,6 +30,18 @@ if [ -z "$jdVersion" ] ; then
   jdVersion=1.1.3
 fi
 jdName=jd-core
+if [ -z "$jasmVersionCheckout" -o -z "$jasmVersionName" ] ; then
+  #TODO align with pom.xml?
+  jasmVersionCheckout=master
+  jasmVersionName=9.0.b12-ea #not needed?
+fi
+jasmName=asmtools
+if [ -z "$jasmLegacyVersionCheckout" -o -z "$jasmLegacyVersionName" ] ; then
+  #TODO align with pom.xml?
+  jasmLegacyVersionCheckout=at7
+  jasmLegacyVersionName=7.0.b10-ea  #not needed?
+fi
+jasmnLegacyName=asmtools-core
 
 function setup() {
     mkdir -p ${targetDir}
@@ -120,12 +132,28 @@ function installJd() {
 }
 
 function buildJasm() {
-  echo "todo"
+    pushd ${targetDir}
+      if [ ! -e ${jasmName} ] ; then
+        git clone https://github.com/openjdk/$jasmName
+      else
+        # to avoid version clash
+        rm -rf ${jasmName}/maven/target
+      fi
+      pushd $jasmName
+        git checkout  $jasmVersionCheckout 
+        cd maven/
+        bash mvngen.sh
+        mvn clean package -DskipTests
+      popd
+    popd
 }
 
 function installJasm() {
-  echo "todo"
+  pushd ${targetDir}/$jasmName/maven/
+    mvn install -DskipTests
+  popd
 }
+
 
 function cleanAll() {
   echo "todo"
@@ -140,5 +168,8 @@ if [ ! "x$JUST_LIB" == "xtrue" ] ; then
   #if jd...?
   buildJd
   installJd
+  #if jasm?
+  buildJasm
+  installJasm
 fi
 
