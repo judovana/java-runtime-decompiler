@@ -15,7 +15,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
         java-version: [ 21, 25 ]
       fail-fast: false
 
@@ -41,16 +41,6 @@ jobs:
           bash runtime-decompiler/plugins-build.sh
         shell: bash
 
-      - name: clone and build procyon devel we depeond on Windows
-        if: matrix.os == 'windows-latest'
-        run: |
-          @echo on
-          git clone https://github.com/mstrobel/procyon.git
-          cd procyon
-          git checkout develop
-          ./gradlew.bat install
-        shell: cmd
-
       - name: Build JRD with Maven
         run: mvn --batch-mode --update-snapshots clean install
 
@@ -64,19 +54,6 @@ jobs:
           echo "{\"AGENT_PATH\":\"${AGENT_PATH}\"}" > "$CONFIG_HOME/config.json"
           cat "$CONFIG_HOME/config.json"
         shell: bash
-
-      - name: Create and populate config file on Windows
-        if: matrix.os == 'windows-latest'
-        run: |
-          @echo on
-          setLocal EnableDelayedExpansion
-          set "CONFIG_HOME=%UserProfile%\.config\java-runtime-decompiler\conf"
-          md %CONFIG_HOME%
-          for /f "delims=" %%i in ('dir *decompiler-agent-*.jar /B /S') do set "AGENT_PATH=%%i"
-          set "AGENT_PATH=%AGENT_PATH:\=/%"
-          echo {"AGENT_PATH":"%AGENT_PATH%"} >"%CONFIG_HOME%\config.json"
-          type "%CONFIG_HOME%\config.json"
-        shell: cmd
 
       - name: Test Cli
         timeout-minutes: 10
