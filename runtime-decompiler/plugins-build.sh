@@ -20,11 +20,13 @@ set -ex
 targetDir="${PLUGINS_SCRIPT_DIR}/target"
 mavenDir="$HOME/.m2/repository"
 if [ -z "$procyonVersion" ] ; then
+  #TODO align with pom.xml? See jcommander...
   #procyonVersion=0.6.0
   procyonVersion=1.0-SNAPSHOT #TODO, move to 0.6.0?
 fi
 procyonName=procyon
 if [ -z "$jdVersion" ] ; then
+  #TODO align with pom.xml? See jcommander...
   jdVersion=1.1.3
 fi
 jdName=jd-core
@@ -43,39 +45,39 @@ function buildProcyon() {
       rm -rf procyon/build/
     fi
     pushd ${procyonName}
-    git checkout develop
-    mkdir -p build/Procyon.CompilerTools/{libs,classes}
-    mkdir -p build/Procyon.Core/{libs,classes}
-    mkdir -p build/Procyon.Decompiler/{libs,classes}
-    mkdir -p build/Procyon.Expressions/{libs,classes}
-    mkdir -p build/Procyon.Reflection/{libs,classes}
-    javac $sourceVersion -d build/Procyon.Core/classes/ ` find Procyon.Core/src/main/java -type f | grep    "\.java"`
-    javac $sourceVersion -d build/Procyon.Reflection/classes/        -cp build/Procyon.Core/classes/ ` find Procyon.Reflection/src/main/java -type f | grep    "\.java"`
-    javac $sourceVersion -d build/Procyon.Expressions/classes/     -cp build/Procyon.Core/classes/:build/Procyon.Reflection/classes/ ` find Procyon.Expressions/src/main/java -type f | grep    "\.java"`
-    javac $sourceVersion -d build/Procyon.CompilerTools/classes/ -cp build/Procyon.Core/classes/ ` find Procyon.CompilerTools/src/main/java -type f | grep    "\.java"`
-    # pack the jars
-    for x in Procyon.CompilerTools Procyon.Core Procyon.Reflection Procyon.Expressions ; do
-        pushd build/$x/classes/
-            local project=`echo $x | sed -e "s/Procyon.//"    | sed -e 's/\(.*\)/\L\1/'`
-            jar -cf ../../../build/$x/libs/${procyonName}-$project-${procyonVersion}.jar com
-        popd
-    done
-    if [ -z "$JCOMMANDER" ] ; then
-      echo "no JCOMMANDER set. Using default"
-      echo "to get the default jcommander, run  mvn dependency:resolve || echo 'is ok to fail for this case'"
-      local jcomName=`cat ${PLUGINS_SCRIPT_DIR}/pom.xml | grep  "jcommander</artifactId>" | sed "s/.*<artifactId>//" | sed "s/<.*//"`
-      local jcomVer=`cat ${PLUGINS_SCRIPT_DIR}/pom.xml | grep  "jcommander</artifactId>" -A 1 | tail -n 1 | sed "s/.*<version>//" | sed "s/<.*//"`
-      JCOMMANDER="$mavenDir/com/beust/${jcomName}/${jcomVer}/jcommander-${jcomVer}.jar"
-    fi
-    # create main/launcher jar to be used
-    mkdir build/launcher-minimal
-    mkdir build/launcher-minimal/classes
-    javac $sourceVersion -cp    build/Procyon.Core/classes/:build/Procyon.CompilerTools/classes/:$JCOMMANDER    -d build/launcher-minimal/classes ` find Procyon.Decompiler/src/main/java -type f | grep    "\.java"`
-    # pack the minimal jar
-    pushd build/launcher-minimal/classes/
-        jar -cf ../../../build/Procyon.Decompiler/libs/${procyonName}-decompiler-${procyonVersion}.jar com
+      git checkout develop
+      mkdir -p build/Procyon.CompilerTools/{libs,classes}
+      mkdir -p build/Procyon.Core/{libs,classes}
+      mkdir -p build/Procyon.Decompiler/{libs,classes}
+      mkdir -p build/Procyon.Expressions/{libs,classes}
+      mkdir -p build/Procyon.Reflection/{libs,classes}
+      javac $sourceVersion -d build/Procyon.Core/classes/ ` find Procyon.Core/src/main/java -type f | grep    "\.java"`
+      javac $sourceVersion -d build/Procyon.Reflection/classes/        -cp build/Procyon.Core/classes/ ` find Procyon.Reflection/src/main/java -type f | grep    "\.java"`
+      javac $sourceVersion -d build/Procyon.Expressions/classes/     -cp build/Procyon.Core/classes/:build/Procyon.Reflection/classes/ ` find Procyon.Expressions/src/main/java -type f | grep    "\.java"`
+      javac $sourceVersion -d build/Procyon.CompilerTools/classes/ -cp build/Procyon.Core/classes/ ` find Procyon.CompilerTools/src/main/java -type f | grep    "\.java"`
+      # pack the jars
+      for x in Procyon.CompilerTools Procyon.Core Procyon.Reflection Procyon.Expressions ; do
+          pushd build/$x/classes/
+              local project=`echo $x | sed -e "s/Procyon.//"    | sed -e 's/\(.*\)/\L\1/'`
+              jar -cf ../../../build/$x/libs/${procyonName}-$project-${procyonVersion}.jar com
+          popd
+      done
+      if [ -z "$JCOMMANDER" ] ; then
+        echo "no JCOMMANDER set. Using default"
+        echo "to get the default jcommander, run  mvn dependency:resolve || echo 'is ok to fail for this case'"
+        local jcomName=`cat ${PLUGINS_SCRIPT_DIR}/pom.xml | grep  "jcommander</artifactId>" | sed "s/.*<artifactId>//" | sed "s/<.*//"`
+        local jcomVer=`cat ${PLUGINS_SCRIPT_DIR}/pom.xml | grep  "jcommander</artifactId>" -A 1 | tail -n 1 | sed "s/.*<version>//" | sed "s/<.*//"`
+        JCOMMANDER="$mavenDir/com/beust/${jcomName}/${jcomVer}/jcommander-${jcomVer}.jar"
+      fi
+      # create main/launcher jar to be used
+      mkdir build/launcher-minimal
+      mkdir build/launcher-minimal/classes
+      javac $sourceVersion -cp    build/Procyon.Core/classes/:build/Procyon.CompilerTools/classes/:$JCOMMANDER    -d build/launcher-minimal/classes ` find Procyon.Decompiler/src/main/java -type f | grep    "\.java"`
+      # pack the minimal jar
+      pushd build/launcher-minimal/classes/
+          jar -cf ../../../build/Procyon.Decompiler/libs/${procyonName}-decompiler-${procyonVersion}.jar com
+      popd
     popd
-  popd
   popd
 }
 
