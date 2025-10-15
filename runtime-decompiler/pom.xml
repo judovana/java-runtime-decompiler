@@ -221,7 +221,7 @@
 
             <dependencies>
                 <!-- procyon 0.6 was not yet released
-                use  runtime-decompiler/plugins.sh or:
+                use  runtime-decompiler/plugins-build.sh or:
                 git clone  git@github.com:mstrobel/procyon.git
                 JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk ./gradlew  install
                 to push it to local repos.
@@ -290,13 +290,14 @@
                 </dependency>
 
                 <!--bintray repos seems to die
+                use  runtime-decompiler/plugins-build.sh or:
                 use git clone  https://github.com/java-decompiler/jd-core  ; git checkout v1.1.3  (do  not work with main)
                 and built by direct javac:(
                 rm -rf build ; mkdir build
-                /usr/lib/jvm/java-1.8.0-openjdk/bin/javac -g `find src/main/java/   -type f ` -d build
+                javac -source 8 -target 8  -g `find src/main/java/   -type f ` -d build
                 rm -rf  ~/.m2/repository/org/jd/jd-core/1.1.3/
                 mkdir -p  ~/.m2/repository/org/jd/jd-core/1.1.3/
-                /usr/lib/jvm/java-21-openjdk/bin/jar -cf  ~/.m2/repository/org/jd/jd-core/1.1.3/jd-core-1.1.3.jar -C build org
+                jar -cf  ~/.m2/repository/org/jd/jd-core/1.1.3/jd-core-1.1.3.jar -C build org
                 -->
                 <dependency>
                     <groupId>org.jd</groupId>
