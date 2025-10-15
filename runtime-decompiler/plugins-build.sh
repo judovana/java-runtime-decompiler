@@ -18,17 +18,23 @@ readonly PLUGINS_SCRIPT_DIR="$( cd -P "$( dirname "$SCRIPT_SOURCE" )" && pwd )"
 set -ex
 
 targetDir="${PLUGINS_SCRIPT_DIR}/target"
+mavenDir="$HOME/.m2/repository"
 if [ -z "$procyonVersion" ] ; then
   #procyonVersion=0.6.0
-  procyonVersion=1.0-SNAPSHOT
+  procyonVersion=1.0-SNAPSHOT #TODO, move to 0.6.0?
 fi
 procyonName=procyon
+if [ -z "$jdVersion" ] ; then
+  jdVersion=1.1.3
+fi
+jdName=jd-core
 
 function setup() {
     mkdir -p ${targetDir}
 }
 
 function buildProcyon() {
+  local sourceVersion="-source 8 -target 8"
   pushd ${targetDir}
     if [ ! -e ${procyonName} ] ; then
       git clone https://github.com/mstrobel/procyon.git
@@ -36,17 +42,17 @@ function buildProcyon() {
       # to avoid version clash
       rm -rf procyon/build/
     fi
-    cd ${procyonName}
+    pushd ${procyonName}
     git checkout develop
     mkdir -p build/Procyon.CompilerTools/{libs,classes}
     mkdir -p build/Procyon.Core/{libs,classes}
     mkdir -p build/Procyon.Decompiler/{libs,classes}
     mkdir -p build/Procyon.Expressions/{libs,classes}
     mkdir -p build/Procyon.Reflection/{libs,classes}
-    javac -d build/Procyon.Core/classes/ ` find Procyon.Core/src/main/java -type f | grep    "\.java"`
-    javac -d build/Procyon.Reflection/classes/        -cp build/Procyon.Core/classes/ ` find Procyon.Reflection/src/main/java -type f | grep    "\.java"`
-    javac -d build/Procyon.Expressions/classes/     -cp build/Procyon.Core/classes/:build/Procyon.Reflection/classes/ ` find Procyon.Expressions/src/main/java -type f | grep    "\.java"`
-    javac -d build/Procyon.CompilerTools/classes/ -cp build/Procyon.Core/classes/ ` find Procyon.CompilerTools/src/main/java -type f | grep    "\.java"`
+    javac $sourceVersion -d build/Procyon.Core/classes/ ` find Procyon.Core/src/main/java -type f | grep    "\.java"`
+    javac $sourceVersion -d build/Procyon.Reflection/classes/        -cp build/Procyon.Core/classes/ ` find Procyon.Reflection/src/main/java -type f | grep    "\.java"`
+    javac $sourceVersion -d build/Procyon.Expressions/classes/     -cp build/Procyon.Core/classes/:build/Procyon.Reflection/classes/ ` find Procyon.Expressions/src/main/java -type f | grep    "\.java"`
+    javac $sourceVersion -d build/Procyon.CompilerTools/classes/ -cp build/Procyon.Core/classes/ ` find Procyon.CompilerTools/src/main/java -type f | grep    "\.java"`
     # pack the jars
     for x in Procyon.CompilerTools Procyon.Core Procyon.Reflection Procyon.Expressions ; do
         pushd build/$x/classes/
@@ -59,16 +65,17 @@ function buildProcyon() {
       echo "to get the default jcommander, run  mvn dependency:resolve || echo 'is ok to fail for this case'"
       local jcomName=`cat ${PLUGINS_SCRIPT_DIR}/pom.xml | grep  "jcommander</artifactId>" | sed "s/.*<artifactId>//" | sed "s/<.*//"`
       local jcomVer=`cat ${PLUGINS_SCRIPT_DIR}/pom.xml | grep  "jcommander</artifactId>" -A 1 | tail -n 1 | sed "s/.*<version>//" | sed "s/<.*//"`
-      JCOMMANDER="$HOME/.m2/repository/com/beust/${jcomName}/${jcomVer}/jcommander-${jcomVer}.jar"
+      JCOMMANDER="$mavenDir/com/beust/${jcomName}/${jcomVer}/jcommander-${jcomVer}.jar"
     fi
     # create main/launcher jar to be used
     mkdir build/launcher-minimal
     mkdir build/launcher-minimal/classes
-    javac -source 8 -target 8 -cp    build/Procyon.Core/classes/:build/Procyon.CompilerTools/classes/:$JCOMMANDER    -d build/launcher-minimal/classes ` find Procyon.Decompiler/src/main/java -type f | grep    "\.java"`
+    javac $sourceVersion -cp    build/Procyon.Core/classes/:build/Procyon.CompilerTools/classes/:$JCOMMANDER    -d build/launcher-minimal/classes ` find Procyon.Decompiler/src/main/java -type f | grep    "\.java"`
     # pack the minimal jar
     pushd build/launcher-minimal/classes/
         jar -cf ../../../build/Procyon.Decompiler/libs/${procyonName}-decompiler-${procyonVersion}.jar com
     popd
+  popd
   popd
 }
 
@@ -78,18 +85,36 @@ function installProcyon() {
     echo $jar
     local name=`basename $jar`
     local pureName=`basename $jar | sed "s/-$procyonVersion.*//"`
-    local dest="$HOME/.m2/repository/com/github/mstrobel/$pureName/$procyonVersion/"
+    local dest="$mavenDir/com/github/mstrobel/$pureName/$procyonVersion/"
     mkdir -p "$dest"
     cp -v "$jar" "$dest"
   done 
 }
 
 function buildJd() {
-  echo "todo"
+  local sourceVersion="-source 8 -target 8"
+  pushd ${targetDir}
+    if [ ! -e ${jdName} ] ; then
+      git clone  https://github.com/java-decompiler/$jdName
+    else
+      # to avoid version clash
+      rm -rf ${jdName}/build/
+    fi
+    pushd $jdName
+      git checkout "v$jdVersion"
+      rm -rf build
+      mkdir build
+      javac $sourceVersion -g `find src/main/java/   -type f ` -d build
+      jar -cf $jdName-$jdVersion.jar -C build org
+    popd
+  popd
 }
 
 function installJd() {
-  echo "todo"
+  local mavenTarget="$mavenDir/org/jd/$jdName/$jdVersion/"
+  rm -rf   $mavenTarget
+  mkdir -p $mavenTarget
+  cp  ${targetDir}/${jdName}/$jdName-$jdVersion.jar $mavenTarget
 }
 
 function buildJasm() {
@@ -110,5 +135,8 @@ if [ ! "x$JUST_LIB" == "xtrue" ] ; then
   #if procyon...?
   buildProcyon
   installProcyon
+  #if jd...?
+  buildJd
+  installJd
 fi
 
