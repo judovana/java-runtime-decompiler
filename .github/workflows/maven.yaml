@@ -80,4 +80,6 @@ jobs:
 
       - name: Test Cli
         timeout-minutes: 10
-        run: mvn --batch-mode test -Dtest=*CliTest -DfailIfNoTests=false "-Dsurefire.reportFormat=plain"
+        run: |
+          git checkout runtime-decompiler/src/main/java/org/kcc/wordsets/JrdApiKeywords.java  # this was broken by previous mvn run
+          cd runtime-decompiler && mvn --batch-mode test -Dtest=*CliTest -DfailIfNoTests=false "-Dsurefire.reportFormat=plain"
