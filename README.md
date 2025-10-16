@@ -169,4 +169,8 @@ Then, in images/target/runtime-decompiler... `./start.sh` in a *Linux terminal* 
    to disregard SSL certificates when building.
 * `mvn clean install` results in `TEST FAILURE`
 
-   **Temporary solution**: Use `mvn clean install -DskipTests` to not run test classes when building.
+   **Fix the tests**: Although it is tricky to adjust IDE to use freshly built agent. In worts Use `mvn clean install -DskipTests` to not run test classes when building.
+
+* `mvn clean install` results in `OOM error`
+
+   **Temporary solution**: run just subset of tests. Eg: `mvn clean install -Dtest="**/*CliTest.java"` . Note, that the OOM is probably bug in JRD, as even some `JAVA_TOOL_OPTIONS="-Xmx50G"` of ram had not fixed it.
