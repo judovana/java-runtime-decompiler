@@ -37,12 +37,16 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           set -x
-          mvn dependency:resolve || echo "this is expected to fail, hoefully all necessary parts for plugins build were downloaded"
+          git checkout runtime-decompiler/src/main/java/org/kcc/wordsets/JrdApiKeywords.java
+          mvn -batch-mode dependency:resolve || echo "this is expected to fail, hoefully all necessary parts for plugins build were downloaded"
           bash runtime-decompiler/plugins-build.sh
         shell: bash
 
       - name: Build JRD with Maven
-        run: mvn --batch-mode --update-snapshots clean install
+        run: |
+          set -x
+          git checkout runtime-decompiler/src/main/java/org/kcc/wordsets/JrdApiKeywords.java
+          mvn --batch-mode --update-snapshots clean install -DskipTests
 
       - name: Create and populate config file on Linux
         if: matrix.os == 'ubuntu-latest'
@@ -58,5 +62,13 @@ jobs:
       - name: Test Cli
         timeout-minutes: 10
         run: |
-          git checkout runtime-decompiler/src/main/java/org/kcc/wordsets/JrdApiKeywords.java  # this was broken by previous mvn run
-          cd runtime-decompiler && mvn --batch-mode test -Dtest=*CliTest -DfailIfNoTests=false "-Dsurefire.reportFormat=plain"
+          set -e
+          cd runtime-decompiler 
+          for x in `find -type f  | grep src/test/java | sed "s;.*/;;"` ; do
+            git checkout ../runtime-decompiler/src/main/java/org/kcc/wordsets/JrdApiKeywords.java ;
+            echo started $x
+            mvn --batch-mode test -Dtest="**/*$x" -DfailIfNoTests=false "-Dsurefire.reportFormat=plain"
+            echo finished $x ;
+          done
+          git checkout ../runtime-decompiler/src/main/java/org/kcc/wordsets/JrdApiKeywords.java  # this was broken by previous mvn run
+          mvn --batch-mode test -Dtest=*CliTest -DfailIfNoTests=false "-Dsurefire.reportFormat=plain" # run the most important one more times to keep report
