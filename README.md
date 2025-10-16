@@ -174,4 +174,11 @@ Then, in images/target/runtime-decompiler... `./start.sh` in a *Linux terminal* 
 
 * `mvn clean install` results in `OOM error`
 
-   **Temporary solution**: run just subset of tests. Eg: `mvn clean install -Dtest="**/*CliTest.java"` . Note, that the OOM is probably bug in JRD, as even some `JAVA_TOOL_OPTIONS="-Xmx50G"` of ram had not fixed it.
+   **Temporary solution 1**: run just subset of tests. Eg: `mvn clean install -Dtest="**/*CliTest.java"` . Note, that the OOM is probably bug in JRD, as even some `JAVA_TOOL_OPTIONS="-Xmx50G"` of ram had not fixed it.
+   **Temporary solution 2**: run them in loop, one by one. in `runtime-decompiler` :
+  ```
+  for x in `find -type f  | grep src/test/java | sed "s;.*/;;"` ; do
+    git checkout ../runtime-decompiler/src/main/java/org/kcc/wordsets/JrdApiKeywords.java ; # individual runs are cripling it
+    echo $x ;
+    mvn test -Dtest="**/*$x" ; done
+  ```
