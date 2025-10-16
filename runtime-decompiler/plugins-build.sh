@@ -48,7 +48,7 @@ function setup() {
 }
 
 function buildProcyon() {
-  local sourceVersion="-source 8 -target 8"
+  local sourceVersion="-source 8 -target 8 -g"
   pushd ${targetDir}
     if [ ! -e ${procyonName} ] ; then
       git clone https://github.com/mstrobel/procyon.git
@@ -106,7 +106,7 @@ function installProcyon() {
 }
 
 function buildJd() {
-  local sourceVersion="-source 8 -target 8"
+  local sourceVersion="-source 8 -target 8 -g"
   pushd ${targetDir}
     if [ ! -e ${jdName} ] ; then
       git clone  https://github.com/java-decompiler/$jdName
@@ -118,7 +118,7 @@ function buildJd() {
       git checkout "v$jdVersion"
       rm -rf build
       mkdir build
-      javac $sourceVersion -g `find src/main/java/   -type f ` -d build
+      javac $sourceVersion `find src/main/java/   -type f ` -d build
       jar -cf $jdName-$jdVersion.jar -C build org
     popd
   popd
