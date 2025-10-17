@@ -196,6 +196,6 @@ The build keeps formatting the file despite itbeing excluded
     mvn test -Dtest="**/*$x" ; done
   ```
 
-* bad version? clean .m2? in images/build.log
+* `bad version? clean .m?` in images/build.log
 
-  Clean ~/m2 cahe. Just nitpicked directories are better then all, but all will do.
+  Clean `~/m2` cahe. Just nitpicked directories are better then all, but all will do.
