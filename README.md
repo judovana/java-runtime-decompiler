@@ -170,6 +170,11 @@ Note, that tests requires valid DISPLAY, to have some top level components (like
 Then, in images/target/runtime-decompiler... `./start.sh` in a *Linux terminal* or `start.bat` in a *Windows CMD* to start the application. The usage of top level start.sh/bat is only for development purposes.
 
 #### Known issues
+* `[ERROR] src/main/java/org/kcc/wordsets/JrdApiKeywords.java:[45] (sizes) LineLength: Line is longer than 160 characters (found 13,128).`
+The build keeps formatting the file despite itbeing excluded
+
+   `git checkout  runtime-decompiler/src/main/java/org/kcc/wordsets/JrdApiKeywords.java`
+
 * `mvn clean install` results in `BUILD FAILURE` with the error
 `java.lang.RuntimeException: Unexpected error: java.security.InvalidAlgorithmParameterException: the trustAnchors parameter must be non-empty`
 (spotted on Windows)
@@ -190,3 +195,7 @@ Then, in images/target/runtime-decompiler... `./start.sh` in a *Linux terminal* 
     echo $x ;
     mvn test -Dtest="**/*$x" ; done
   ```
+
+* bad version? clean .m2? in images/build.log
+
+  Clean ~/m2 cahe. Just nitpicked directories are better then all, but all will do.
