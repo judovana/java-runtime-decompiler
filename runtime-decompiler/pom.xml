@@ -249,6 +249,7 @@
                 jcommander is needed only by procyon, and procyon seems to be dead
                 udpate of jcomander means udpate of procyon or local patching.
                 Not hard, but probably useless
+                Unluckily alo CPLC (class path less compiler) is using jcommander, and is on 1.82; Thus we are using 1.82 agaisnt procyon everywhere. SHould be ok while we ar eon 1.X
                 -->
                 <dependency>
                     <groupId>com.beust</groupId>
