@@ -21,13 +21,15 @@ if [ "x$PLUGINS" = "x" ] ; then
 fi
 
 if  [ "x$VERIFY_CP" = "xTRUE"  -a "x$PLUGINS" = "xTRUE" ] ;  then
-  find "$HOME/.m2/repository" -type d | grep -e com/github/mstrobel/ -e org/jboss/windup/decompiler/fernflower -e  openjdk/asmtools -e benf/cfr
+for x in com/github/mstrobel/ org/jboss/windup/decompiler/fernflower  openjdk/asmtools/ asmtools/asmtools-core/  benf/cfr  org/jd/jd-core/ ; do
+  find "$HOME/.m2/repository" -type d | grep -e $x
   if [ $? -eq 0 ] ; then
-    echo "decompilers found in maven repo"
+    echo "$x decompilers found in maven repo"
   else
-    echo "no decompilers found! run 'mvn clean install -PdownloadPlugins' to obtain decompilers from maven repos or use VERIFY_CP/PLUGINS"
+    echo "$x no decompilers found! run 'mvn clean install -PdownloadPlugins' and run 'plugins-build.sh' to obtain decompilers from maven repos or use VERIFY_CP/PLUGINS"
     exit 1
   fi
+done
 fi
 
 FROM_CP=`mktemp`
