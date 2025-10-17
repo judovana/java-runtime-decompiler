@@ -319,17 +319,6 @@
                 <jrd.jdk.arg3></jrd.jdk.arg3>
                 <jrd.jdk.arg4></jrd.jdk.arg4>
             </properties>
-            <dependencies>
-<!--for jdk8 we needs tools.jar, for jdk11 we must not hav it,
-    surprisingly, by not having it declared, makes it work for both jdk8 and jdk11 -->
-<!--                <dependency>
-                    <groupId>com.sun</groupId>
-                    <artifactId>tools</artifactId>
-                    <version>1.7.0</version>
-                    <scope>system</scope>
-                    <systemPath>${java.home}/../lib/tools.jar</systemPath>
-                </dependency>-->
-            </dependencies>
         </profile>
     </profiles>
 </project>
