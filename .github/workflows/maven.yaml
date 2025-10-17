@@ -72,3 +72,10 @@ jobs:
           done
           git checkout ../runtime-decompiler/src/main/java/org/kcc/wordsets/JrdApiKeywords.java  # this was broken by previous mvn run
           mvn --batch-mode test -Dtest=*CliTest -DfailIfNoTests=false "-Dsurefire.reportFormat=plain" # run the most important one more times to keep report
+
+      - name: try image
+        timeout-minutes: 10
+        run: |
+          set -e
+          git checkout  runtime-decompiler/src/main/java/org/kcc/wordsets/JrdApiKeywords.java && mvn clean install  -DskipTests -Pimages -Plegacy 
+
