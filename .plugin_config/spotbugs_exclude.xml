@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <FindBugsFilter>
+    <!-- This usage of static field is intentional, and most importantly, it passes in -Plegacy (jdk8 bytecode), but fails in newer -->
+         <Match>
+            <Method name="~.*SetLast.*" />
+            <Bug pattern="ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD" />
+        </Match>
     <!-- May expose internal representation by returning reference to mutable object -->
         <!-- Swing components -->
         <Match>
