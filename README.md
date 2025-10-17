@@ -23,6 +23,9 @@ Internal *javap* and *javap -v* decompiling tools are available by default. In i
 Additionally, external decompilers are supported and can be configured in *Configure → Plugins*:
 * You can download them using the links below and set them up yourself using the *New* button.
 * You can use `mvn clean install -PdownloadPlugins` from a terminal in the project's directory and import the necessary files using the *Import* button.
+* You can use `sh runtime-decompiler/plugins-build.sh` to build plugins whic are not in maven repos, or are outdated in them
+ * thee is small chicken-egg problem, so you may need to call it few times in loops
+ * consult `-PdownloadPlugins`, `plugins-build.sh` and `.github/workflows/maven.yaml`
 
 Currently supported decompilers are:
 * [Fernflower](https://github.com/JetBrains/intellij-community/tree/master/plugins/java-decompiler/engine)
@@ -138,11 +141,15 @@ $ git clone https://github.com/pmikova/java-runtime-decompiler.git
 $ cd java-runtime-decompiler
 $ mvn clean install  # builds the runtime decpompiler and agent, downloads also plugins
 $ mvn clean install -PdownloadPlugins # builds the decompiler and downloads the decompiler plugins for future use, if not already downloaded
+$ sh runtime-decompiler/plugins-build.sh` # to build plugins whic are not in maven repos, or are outdated in them
 $ mvn clean install -Pimages # on Linux, bundles the plugins and JRD into a standalone portable image. Make some basic verifications
 $ mvn clean install -Plegacy # take care to build agent in oldest resonable way
 
 # $PLUGINS and $VERIFY_CP variables may help to solve some weird image building issues.
 ```
+
+Note, that  `plugins-build.sh` and`-PdownloadPlugins` are lsightly looped together and you may need to run them both in cycles. Conslut `.github/workflows/maven.yaml` for details
+
 usually the development command is:
 ```
 $ mvn clean install -Dcheckstyle.skip -Dspotbugs.skip=true 
@@ -153,8 +160,9 @@ usually the release command is:
 ```
 $ mvn clean install -DskipTests -Pimages -Plegacy
 ```
-if the development command was never run, then  plugins profile must be included
+if the development command was never run, then  plugins profile must be included and `plugins-build.sh` run.
 ```
+$ sh runtime-decompiler/plugins-build.sh
 $ mvn clean install -DskipTests -Pimages -Plegacy -PdownloadPlugins
 ```
 Note, that tests requires valid DISPLAY, to have some top level components (like HexEditor) pass
